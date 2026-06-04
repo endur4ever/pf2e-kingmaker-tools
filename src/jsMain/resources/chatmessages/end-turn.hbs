@@ -5,3 +5,25 @@
     <li>{{localizeKM "chatMessages.endTurn.resetSolutions"}}</li>
     <li>{{localizeKM "chatMessages.endTurn.moveValues"}}</li>
 </ul>
+{{#if clockEvents.length}}
+<hr>
+<h3>{{localizeKM "kingdom.clocks.title"}}</h3>
+<ul>
+    {{#each clockEvents}}
+    <li>
+        {{#if (eq type "ADVANCED")}}
+            {{localizeKM "kingdom.chat.clockAdvanced" label=label old=oldTurns remaining=newTurns}}
+        {{/if}}
+        {{#if (eq type "EXPIRED")}}
+            {{localizeKM "kingdom.chat.clockExpired" label=label message=message}}
+        {{/if}}
+        {{#if (eq type "TRIGGERED")}}
+            {{localizeKM "kingdom.chat.clockTriggered" label=label}}
+        {{/if}}
+        {{#if (eq type "PAUSED")}}
+            {{localizeKM "kingdom.chat.clockPaused" label=label}}
+        {{/if}}
+    </li>
+    {{/each}}
+</ul>
+{{/if}}

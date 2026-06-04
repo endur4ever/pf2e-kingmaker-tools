@@ -281,6 +281,54 @@
             <p>{{localizeKM "kingdom.continuousTraitHelp"}}</p>
             {{> kingdom-events ongoingEvents=ongoingEvents isGM=isGM}}
         </section>
+        <section class="km-kingdom-sheet-section" {{#if (ne currentNavEntry 'clock')}}hidden{{/if}}>
+            <h2 id="{{actorUuid}}-km-turn-clock">{{localizeKM "kingdom.clocks.title"}}</h2>
+            {{#if campaignClocks.hasActiveClocks}}
+                <p class="km-clock-summary">
+                    🕐 {{localizeKM "kingdom.clocks.summary" active=campaignClocks.activeClockCount expiring=campaignClocks.expiringClockCount}}
+                </p>
+            {{/if}}
+            {{#if isGM}}
+                <p class="km-turn-buttons">
+                    <button type="button" data-action="open-clock-dialog">{{localizeKM "kingdom.clocks.manage"}}</button>
+                </p>
+            {{/if}}
+            {{#if campaignClocks.campaignClocks.length}}
+                {{#each campaignClocks.campaignClocks}}
+                    <div class="km-clock-card {{#if isExpired}}km-clock-expired{{/if}}">
+                        <div class="km-clock-header">
+                            <span class="km-clock-label">{{label}}</span>
+                            {{#if active}}
+                                <span class="km-clock-remaining">{{remainingTurns}}/{{maxTurns}}</span>
+                            {{else}}
+                                <span class="km-clock-inactive">Inactive</span>
+                            {{/if}}
+                        </div>
+                        <div class="km-clock-progress-bar">
+                            <div class="km-clock-progress-fill
+                                        {{#if isExpiring}}km-clock-urgent{{/if}}
+                                        {{#if isExpired}}km-clock-expired-fill{{/if}}"
+                                 style="width: {{progressPercent}}%;">
+                            </div>
+                        </div>
+                        {{#if isExpiring}}
+                            <p class="km-clock-warning">{{localizeKM "kingdom.clocks.expiring"}}</p>
+                        {{/if}}
+                        {{#if isExpired}}
+                            <p class="km-clock-warning">
+                                {{#if paused}}
+                                    {{localizeKM "kingdom.clocks.paused"}}
+                                {{else}}
+                                    {{localizeKM "kingdom.clocks.expired"}}
+                                {{/if}}
+                            </p>
+                        {{/if}}
+                    </div>
+                {{/each}}
+            {{else}}
+                <p>{{localizeKM "kingdom.clocks.noClocks"}}</p>
+            {{/if}}
+        </section>
         <section class="km-kingdom-sheet-section">
             <h2 id="{{actorUuid}}-km-turn-xp">{{localizeKM "applications.xp"}}</h2>
             <p>{{localizeKM "kingdom.resolvedEventXp"}}:</p>

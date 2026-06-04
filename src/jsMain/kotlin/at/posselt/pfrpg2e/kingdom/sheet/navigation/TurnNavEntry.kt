@@ -13,6 +13,7 @@ enum class TurnNavEntry : ValueEnum, Translatable {
     CIVIC,
     ARMY,
     EVENT,
+    CLOCK,
     XP,
     END;
 

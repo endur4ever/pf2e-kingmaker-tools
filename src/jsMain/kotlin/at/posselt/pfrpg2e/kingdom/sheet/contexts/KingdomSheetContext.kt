@@ -92,4 +92,5 @@ external interface KingdomSheetContext : ValidatedHandlebarsContext {
     val canFeast: Boolean
     val rosterContext: RosterContext
     val showDetailedMatrix: Boolean
+    val campaignClocks: CampaignClockContext
 }

@@ -23,6 +23,7 @@ import at.posselt.pfrpg2e.kingdom.data.ChosenFeature
 import at.posselt.pfrpg2e.kingdom.data.MilestoneChoice
 import at.posselt.pfrpg2e.kingdom.data.RawAbilityBoostChoices
 import at.posselt.pfrpg2e.kingdom.data.RawAbilityScores
+import at.posselt.pfrpg2e.kingdom.data.RawHexContent
 import at.posselt.pfrpg2e.kingdom.data.RawQuest
 import at.posselt.pfrpg2e.kingdom.data.RawBonusFeat
 import at.posselt.pfrpg2e.kingdom.data.RawCharacter
@@ -44,6 +45,7 @@ import at.posselt.pfrpg2e.kingdom.data.RawWorkSites
 import at.posselt.pfrpg2e.kingdom.data.RuinThresholdIncreases
 import at.posselt.pfrpg2e.kingdom.data.getBoosts
 import at.posselt.pfrpg2e.kingdom.data.parse
+import at.posselt.pfrpg2e.campaign.CampaignClock
 import at.posselt.pfrpg2e.kingdom.modifiers.Modifier
 import at.posselt.pfrpg2e.kingdom.modifiers.evaluation.evaluateGlobalBonuses
 import at.posselt.pfrpg2e.kingdom.modifiers.evaluation.includeCapital
@@ -155,6 +157,7 @@ external interface KingdomData {
     var commodities: RawCurrentCommodities
     var ruin: RawRuin
     var activeSettlement: String?
+    var hexContents: Array<RawHexContent>?
     var turnsWithoutCultEvent: Int // set via button
     var turnsWithoutEvent: Int // set via button
     var notes: RawNotes
@@ -188,6 +191,7 @@ external interface KingdomData {
     var milestones: Array<MilestoneChoice>
     var companions: Array<RawCharacter>?
     var structureBlacklist: Array<String>
+    var campaignClocks: Array<CampaignClock>
 }
 
 fun RawLeaderKingdomSkills.hasSkill(leader: Leader, skill: KingdomSkill) =

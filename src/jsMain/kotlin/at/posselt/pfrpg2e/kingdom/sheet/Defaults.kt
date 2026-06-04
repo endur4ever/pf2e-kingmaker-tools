@@ -24,6 +24,7 @@ import at.posselt.pfrpg2e.kingdom.data.RawRuinValues
 import at.posselt.pfrpg2e.kingdom.data.RawSkillRanks
 import at.posselt.pfrpg2e.kingdom.data.RawWorkSite
 import at.posselt.pfrpg2e.kingdom.data.RawQuest
+import at.posselt.pfrpg2e.kingdom.data.RawHexContent
 import at.posselt.pfrpg2e.kingdom.data.RawWorkSites
 import at.posselt.pfrpg2e.kingdom.disabledActivityIds
 import at.posselt.pfrpg2e.kingdom.initialMilestoneChoices
@@ -239,6 +240,7 @@ fun createKingdomDefaults(name: String) =
             ),
         ),
         activeSettlement = null,
+        hexContents = emptyArray<RawHexContent>(),
         quests = emptyArray(),
         councilCooldowns = RawCouncilCooldowns(
             audit = 0,
@@ -367,4 +369,5 @@ fun createKingdomDefaults(name: String) =
         ongoingEvents = emptyArray(),
         companions = emptyArray(),
         structureBlacklist = emptyArray(),
+        campaignClocks = emptyArray(),
     )

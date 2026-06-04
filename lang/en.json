@@ -293,6 +293,9 @@
       "resetMeals": "Reset Meals",
       "favoriteMeals": "Favorite Meals",
       "favoriteMeal": "Favorite Meal",
+      "favoriteMealLearned": "<b>{actorName}</b> has learned <b>{recipeName}</b> as a favorite meal!",
+      "favoriteMealChanged": "<b>{actorName}</b> has changed their favorite meal to <b>{recipeName}</b>!",
+      "favoriteMealFixed": "Fixed",
       "activities": "Activities",
       "recipes": "Recipes",
       "regions": "Regions",
@@ -344,6 +347,8 @@
       "travelingHelp": "If checked, time passed is accounted as travel time for Fatigue automation",
       "dropActorAbove": "Drop Actor from Above",
       "activityRequiresCompanion": "Requires {companion} to be in camp",
+      "learnTarget": "Activity to learn",
+      "learnTargetOption": "{activity} (from {companion})",
       "dropActorFromSidebar": "Drop Actor from Sidebar",
       "watchSlot": "Watch Slot",
       "dropActorOnWatch": "Drop actor here to assign to watch",
@@ -454,9 +459,45 @@
       "civic": "Civic",
       "army": "Army",
       "event": "Event",
+      "clock": "Campaign",
       "xp": "XP",
       "end": "End"
     },
+    "kingdom.clocks.title": "Campaign Clocks",
+    "kingdom.clocks.noClocks": "No campaign clocks active",
+    "kingdom.clocks.remaining": "{remaining} / {max} turns",
+    "kingdom.clocks.expiring": "Expiring next turn!",
+    "kingdom.clocks.expired": "Expired",
+    "kingdom.clocks.paused": "Paused at expiry",
+    "kingdom.clocks.manage": "Manage Clocks",
+    "kingdom.clocks.add": "Add Clock",
+    "kingdom.clocks.edit": "Edit",
+    "kingdom.clocks.delete": "Delete",
+    "kingdom.clocks.pauseOnExpiry": "Pause on expiry (soft-pause)",
+    "kingdom.clocks.turnsRemaining": "Turns remaining",
+    "kingdom.clocks.maxTurns": "Total turns",
+    "kingdom.clocks.expiryMessage": "On expiry",
+    "kingdom.clocks.expiryConsequenceUnrest": "Unrest on expiry",
+    "kingdom.chat.clockAdvanced": "{label}: {old} → {remaining} turns remaining",
+    "kingdom.chat.clockExpired": "{label}: EXPIRED — {message}",
+    "kingdom.chat.clockTriggered": "{label}: Consequence triggered",
+    "kingdom.chat.clockPaused": "{label}: Paused at 0 — awaiting GM resolution",
+    "kingdom.clocks.summary": "{active} active · {expiring} expiring next turn",
+    "kingdom.manageCampaignClocks": "Manage Campaign Clocks",
+    "kingdom.addCampaignClock": "Add Campaign Clock",
+    "kingdom.editCampaignClock": "Edit Campaign Clock",
+    "kingdom.maxTurns": "Total Turns",
+    "kingdom.turnsRemaining": "Turns Remaining",
+    "kingdom.pauseOnExpiry": "Pause on Expiry",
+    "kingdom.expiryMessage": "Expiry Message",
+    "kingdom.expiryConsequenceUnrest": "Unrest on Expiry",
+    "chatMessages.clockTick.title": "Campaign Clocks",
+    "chatMessages.clockTick.advanced": "Advanced",
+    "chatMessages.clockTick.expired": "Expired",
+    "chatMessages.clockTick.unrest": "Unrest",
+    "chatMessages.clockTick.triggered": "Consequence Triggered",
+    "chatMessages.clockTick.paused": "Paused at expiry",
+    "chatMessages.clockTick.totalUnrest": "Total Unrest Change",
     "kingdomMainNav": {
       "turn": "Turn",
       "kingdom": "Kingdom",
@@ -1790,7 +1831,11 @@
         "name": "Giant Scrambled Egg"
       },
       "grilled-silver-eel": {
-        "name": "Grilled Silver Eel"
+        "name": "Grilled Silver Eel",
+        "freeAction": {
+          "name": "Silver Eel's Swiftness",
+          "description": "As a free action, you can move up to 5 additional feet until the end of the current turn. This has no effect on your Speed."
+        }
       },
       "haggis": {
         "name": "Haggis"
@@ -1823,13 +1868,21 @@
         "name": "Rice-N-Nut Pudding"
       },
       "seasoned-wings-and-thighs": {
-        "name": "Seasoned Wings And Thighs"
+        "name": "Seasoned Wings And Thighs",
+        "reaction": {
+          "name": "Ignite Magic",
+          "description": "When an ally within 30 feet critically fails a spell attack roll or a save against an ally's spell, you can use your reaction to cause the magic to flare. The target takes 2d6 fire damage."
+        }
       },
       "shepherds-pie": {
         "name": "Shepherd's Pie"
       },
       "succulent-sausages": {
-        "name": "Succulent Sausages"
+        "name": "Succulent Sausages",
+        "reaction": {
+          "name": "Careful Casting",
+          "description": "When you would lose a spell because you were disrupted, you can use your reaction to attempt a DC 15 flat check. On a success, you don't lose the spell."
+        }
       },
       "sweet-pancakes": {
         "name": "Sweet Pancakes"

@@ -1,5 +1,8 @@
 package at.posselt.pfrpg2e.kingdom
 
+import at.posselt.pfrpg2e.campaign.CampaignClock
+import at.posselt.pfrpg2e.campaign.CampaignClockManager
+import at.posselt.pfrpg2e.campaign.ClockTickEvent
 import at.posselt.pfrpg2e.data.kingdom.structures.CommodityStorage
 import at.posselt.pfrpg2e.kingdom.data.RawCurrentCommodities
 import at.posselt.pfrpg2e.kingdom.RawModifier
@@ -34,6 +37,7 @@ data class TickResult(
 	val councilCooldowns: RawCouncilCooldowns?,
 	val modifiers: Array<RawModifier>,
 	val changes: List<TickChange>,
+	val clockEvents: Array<ClockTickEvent> = emptyArray(),
 )
 
 /**
@@ -46,6 +50,7 @@ data class TickResult(
  * - Merges commodities with storage limits
  * - Counts down council cooldowns
  * - Ticks down modifier durations and expires finished modifiers
+ * - Ticks campaign clocks
  *
  * Day-scale concerns (weather, companion travel) are NOT handled here; they tick
  * daily off the world clock — see [DailyTickEngine] and `registerDailyTickHooks`.
@@ -65,6 +70,7 @@ object TurnTickingEngine {
 	 * @param storage Commodity storage capacity (used to cap end-turn merge).
 	 * @param councilCooldowns Nullable council cooldown state.
 	 * @param modifiers Current array of active modifiers (may carry turn durations).
+	 * @param campaignClocks Array of campaign clocks to tick.
 	 * @return [TickResult] with all post-tick values and a list of changes.
 	 */
 	fun tick(
@@ -76,6 +82,7 @@ object TurnTickingEngine {
 		storage: CommodityStorage,
 		councilCooldowns: RawCouncilCooldowns?,
 		modifiers: Array<RawModifier>,
+		campaignClocks: Array<CampaignClock> = emptyArray(),
 	): TickResult {
 		val changes = mutableListOf<TickChange>()
 
@@ -189,6 +196,9 @@ object TurnTickingEngine {
 			changes += TickChange("modifiers", "expired", null, expiredCount)
 		}
 
+		// 9) Tick campaign clocks
+		val clockResult = CampaignClockManager.tickAll(campaignClocks)
+
 		return TickResult(
 			supernaturalSolutions = 0,
 			creativeSolutions = 0,
@@ -200,6 +210,7 @@ object TurnTickingEngine {
 			councilCooldowns = newCooldowns,
 			modifiers = newModifiers,
 			changes = changes,
+			clockEvents = clockResult.events,
 		)
 	}
 }

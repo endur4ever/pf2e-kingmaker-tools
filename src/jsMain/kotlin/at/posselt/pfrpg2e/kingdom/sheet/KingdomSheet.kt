@@ -40,6 +40,10 @@ import at.posselt.pfrpg2e.kingdom.SettlementTerrain
 import at.posselt.pfrpg2e.kingdom.armies.setupArmies
 import at.posselt.pfrpg2e.kingdom.armies.updateArmyConsumption
 import at.posselt.pfrpg2e.kingdom.TurnTickingEngine
+import at.posselt.pfrpg2e.campaign.CampaignClockManager
+import at.posselt.pfrpg2e.kingdom.dialogs.CampaignClockDialog
+import at.posselt.pfrpg2e.kingdom.sheet.contexts.CampaignClockContext
+import at.posselt.pfrpg2e.kingdom.sheet.contexts.toDashboardContext
 import at.posselt.pfrpg2e.kingdom.createModifiers
 import at.posselt.pfrpg2e.kingdom.createSimpleContext
 import at.posselt.pfrpg2e.kingdom.data.RawBonusFeat
@@ -83,6 +87,7 @@ import at.posselt.pfrpg2e.kingdom.dialogs.kingdomSizeHelp
 import at.posselt.pfrpg2e.kingdom.dialogs.newSettlementChoices
 import at.posselt.pfrpg2e.kingdom.dialogs.settlementSizeHelp
 import at.posselt.pfrpg2e.kingdom.dialogs.structureXpDialog
+import at.posselt.pfrpg2e.kingdom.dialogs.HexContentManager
 import at.posselt.pfrpg2e.kingdom.dialogs.RosterAddDialog
 import at.posselt.pfrpg2e.kingdom.dialogs.RosterEditDialog
 import at.posselt.pfrpg2e.kingdom.data.RawCharacter
@@ -221,6 +226,7 @@ class KingdomSheet(
         MenuControl(label = t("kingdom.governments"), action = "configure-governments", gmOnly = true),
         MenuControl(label = t("kingdom.heartlands"), action = "configure-heartlands", gmOnly = true),
         MenuControl(label = t("kingdom.milestones"), action = "configure-milestones", gmOnly = true),
+        MenuControl(label = t("kingdom.hex-content"), action = "open-hex-content-manager", gmOnly = true),
         MenuControl(label = t("applications.settings"), action = "settings", gmOnly = true),
         MenuControl(label = t("applications.quickstart"), action = "quickstart", gmOnly = true),
         MenuControl(label = t("applications.help"), action = "help"),
@@ -489,6 +495,21 @@ class KingdomSheet(
                 }
             }
 
+            "open-hex-content-manager" -> buildPromise {
+                HexContentManager(
+                    actor = actor,
+                    onEdit = { tileId ->
+                        // For now, we just log it or do nothing. 
+                        // Real implementation will launch HexContentEdit dialog
+                        console.log("Editing hex: $tileId")
+                    },
+                    onAdd = { tileId ->
+                         // Real implementation will launch HexContentAdd dialog
+                         console.log("Adding to hex: $tileId")
+                    }
+                ).launch()
+            }
+
             "add-companion" -> buildPromise {
                 RosterAddDialog { character ->
                     val current = getKingdom()
@@ -616,6 +637,7 @@ class KingdomSheet(
             "configure-governments" -> GovernmentManagement(kingdomActor = actor).launch()
             "configure-heartlands" -> HeartlandManagement(kingdomActor = actor).launch()
             "configure-feats" -> FeatManagement(kingdomActor = actor).launch()
+            "open-clock-dialog" -> CampaignClockDialog(kingdomActor = actor).launch()
             "structures-import" -> buildPromise { importStructures() }
 
             "create-settlement" -> {
@@ -1244,9 +1266,32 @@ class KingdomSheet(
                     kingdom.councilCooldowns = tickResult.councilCooldowns
                     kingdom.modifiers = tickResult.modifiers
 
+                    // Tick campaign clocks
+                    val clockResult = CampaignClockManager.tickAll(kingdom.campaignClocks)
+                    kingdom.campaignClocks = clockResult.updatedClocks
+                    if (clockResult.totalUnrestChange > 0) {
+                        kingdom.unrest = kingdom.unrest + clockResult.totalUnrestChange
+                    }
+
                     actor.setKingdom(kingdom)
+
+                    // Post clock tick events to chat
+                    if (clockResult.events.isNotEmpty()) {
+                        val clockContext = js("{}")
+                        clockContext.events = clockResult.events
+                        clockContext.totalUnrestChange = clockResult.totalUnrestChange
+                        postChatTemplate(
+                            templatePath = "chatmessages/clock-tick.hbs",
+                            templateContext = clockContext,
+                        )
+                    }
+                    val endTurnContext = js("{}")
+                    endTurnContext.clockEvents = clockResult.events
+                    postChatTemplate(
+                        templatePath = "chatmessages/end-turn.hbs",
+                        templateContext = endTurnContext,
+                    )
                 }
-                postChatTemplate(templatePath = "chatmessages/end-turn.hbs")
             }
 
             "settlement-size-info" -> buildPromise {
@@ -1889,6 +1934,7 @@ class KingdomSheet(
                 character
             }.toTypedArray().toRosterContext(isGM),
             showDetailedMatrix = showDetailedMatrix,
+            campaignClocks = kingdom.campaignClocks.toDashboardContext(isGM),
         )
     }
 

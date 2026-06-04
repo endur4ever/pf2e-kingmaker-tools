@@ -1,0 +1,86 @@
+<aside class="km-kingdom-sheet-sidebar km-kingdom-sheet-sidebar-clocks"
+       {{#if (ne currentNavEntry 'clock')}}hidden{{/if}}>
+    <div>
+        <h3>{{localizeKM "kingdom.clocks.title"}}</h3>
+        {{#if isGM}}
+            <button type="button" data-action="open-clock-dialog">
+                {{localizeKM "kingdom.clocks.manage"}}
+            </button>
+        {{/if}}
+        {{#if campaignClocks.campaignClocks.length}}
+            {{#each campaignClocks.campaignClocks}}
+                <div class="km-clock-card {{#if isExpired}}km-clock-expired{{/if}}">
+                    <div class="km-clock-header">
+                        <span class="km-clock-label">{{label}}</span>
+                        {{#if active}}
+                            <span class="km-clock-remaining">{{remainingTurns}}/{{maxTurns}}</span>
+                        {{else}}
+                            <span class="km-clock-inactive">Inactive</span>
+                        {{/if}}
+                    </div>
+                    <div class="km-clock-progress-bar">
+                        <div class="km-clock-progress-fill
+                                    {{#if isExpiring}}km-clock-urgent{{/if}}
+                                    {{#if isExpired}}km-clock-expired-fill{{/if}}"
+                             style="width: {{progressPercent}}%;">
+                        </div>
+                    </div>
+                    {{#if isExpiring}}
+                        <p class="km-clock-warning">{{localizeKM "kingdom.clocks.expiring"}}</p>
+                    {{/if}}
+                    {{#if isExpired}}
+                        <p class="km-clock-warning">
+                            {{#if paused}}
+                                {{localizeKM "kingdom.clocks.paused"}}
+                            {{else}}
+                                {{localizeKM "kingdom.clocks.expired"}}
+                            {{/if}}
+                        </p>
+                    {{/if}}
+                </div>
+            {{/each}}
+        {{else}}
+            <p>{{localizeKM "kingdom.clocks.noClocks"}}</p>
+        {{/if}}
+    </div>
+</aside>
+<div class="km-kingdom-sheet-content km-kingdom-sheet-content-clocks" {{#if (ne currentNavEntry 'clock')}}hidden{{/if}}>
+    <section class="km-kingdom-sheet-section">
+        <h2>{{localizeKM "kingdom.clocks.title"}}</h2>
+        {{#if campaignClocks.hasActiveClocks}}
+            <p class="km-clock-summary">
+                🕐 {{localizeKM "kingdom.clocks.summary" active=campaignClocks.activeClockCount expiring=campaignClocks.expiringClockCount}}
+            </p>
+        {{/if}}
+        {{#if campaignClocks.campaignClocks.length}}
+            {{#each campaignClocks.campaignClocks}}
+                <div class="km-clock-detail-card {{#if isExpired}}km-clock-expired{{/if}}">
+                    <h4>{{label}}</h4>
+                    {{#if description}}<p>{{description}}</p>{{/if}}
+                    <div class="km-clock-progress-bar">
+                        <div class="km-clock-progress-fill
+                                    {{#if isExpiring}}km-clock-urgent{{/if}}
+                                    {{#if isExpired}}km-clock-expired-fill{{/if}}"
+                             style="width: {{progressPercent}}%;">
+                        </div>
+                    </div>
+                    <p>{{localizeKM "kingdom.clocks.remaining" remaining=remainingTurns max=maxTurns}}</p>
+                    {{#if isExpiring}}
+                        <p class="km-clock-warning">{{localizeKM "kingdom.clocks.expiring"}}</p>
+                    {{/if}}
+                    {{#if isExpired}}
+                        <p class="km-clock-warning">
+                            {{#if paused}}
+                                {{localizeKM "kingdom.clocks.paused"}}
+                            {{else}}
+                                {{localizeKM "kingdom.clocks.expired"}}
+                            {{/if}}
+                        </p>
+                    {{/if}}
+                </div>
+            {{/each}}
+        {{else}}
+            <p>{{localizeKM "kingdom.clocks.noClocks"}}</p>
+        {{/if}}
+    </section>
+</div>

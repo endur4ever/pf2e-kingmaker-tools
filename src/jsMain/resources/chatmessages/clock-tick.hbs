@@ -1,0 +1,29 @@
+<h2>{{localizeKM "chatMessages.clockTick.title"}}</h2>
+{{#if events.length}}
+<ul>
+    {{#each events}}
+    <li>
+        <strong>{{label}}</strong>:
+        {{#if (eq type "ADVANCED")}}
+            {{localizeKM "chatMessages.clockTick.advanced"}} ({{oldTurns}} &rarr; {{newTurns}})
+        {{/if}}
+        {{#if (eq type "EXPIRED")}}
+            {{localizeKM "chatMessages.clockTick.expired"}}
+            {{#if message}}: {{message}}{{/if}}
+            {{#if (gt unrestChange 0)}}
+                <br/><em>{{localizeKM "chatMessages.clockTick.unrest"}}: +{{unrestChange}}</em>
+            {{/if}}
+        {{/if}}
+        {{#if (eq type "TRIGGERED")}}
+            {{localizeKM "chatMessages.clockTick.triggered"}}
+        {{/if}}
+        {{#if (eq type "PAUSED")}}
+            {{localizeKM "chatMessages.clockTick.paused"}}
+        {{/if}}
+    </li>
+    {{/each}}
+</ul>
+{{#if (gt totalUnrestChange 0)}}
+<p><strong>{{localizeKM "chatMessages.clockTick.totalUnrest"}}: +{{totalUnrestChange}}</strong></p>
+{{/if}}
+{{/if}}
