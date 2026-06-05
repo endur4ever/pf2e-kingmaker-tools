@@ -1,0 +1,25 @@
+<div class="km-encounter-resolution-card">
+  <h3>{{localizeKM "camping.encounterCardTitle"}}</h3>
+  <div class="km-card-row">
+    <strong>{{localizeKM "camping.watcher"}}:</strong> <span>{{watcherName}}</span>
+  </div>
+  <div class="km-card-row">
+    <strong>{{localizeKM "camping.perceptionCheck"}}:</strong> <span>{{rollTotal}} vs {{localizeKM "camping.stealthDc"}} {{stealthDc}} (<b>{{degree}}</b>)</span>
+  </div>
+  <hr/>
+  <div class="km-card-row">
+    <strong>{{localizeKM "camping.startDistance"}}:</strong> <span>{{distance}} ft</span>
+  </div>
+  <div class="km-card-row">
+    <strong>{{localizeKM "camping.ambusherState"}}:</strong> <span>{{ambusherState}}</span>
+  </div>
+  {{#if appliedConditions}}
+  <div class="km-card-row">
+    <strong>{{localizeKM "camping.conditionsApplied"}}:</strong> <span>{{appliedConditions}}</span>
+  </div>
+  {{/if}}
+  <hr/>
+  <div class="km-notes">
+    <p>{{{gmNotes}}}</p>
+  </div>
+</div>
