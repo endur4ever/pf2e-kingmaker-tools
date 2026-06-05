@@ -1,0 +1,68 @@
+<div class="km-hex-content-manager">
+    {{#if isEditing}}
+        <div class="km-hex-content-form">
+            <h3>{{t "kingdom.hexContent.editContent"}}</h3>
+            {{#each formRows}}
+                {{{this}}}
+            {{/each}}
+            <div class="km-form-actions">
+                <button type="button" class="km-btn km-btn-save" data-action="save">{{t "kingdom.hexContent.save"}}</button>
+                <button type="button" class="km-btn" data-action="cancel-edit">{{t "kingdom.hexContent.cancel"}}</button>
+            </div>
+        </div>
+    {{else if isAdding}}
+        <div class="km-hex-content-form">
+            <h3>{{t "kingdom.hexContent.addContent"}}</h3>
+            {{#each formRows}}
+                {{{this}}}
+            {{/each}}
+            <div class="km-form-actions">
+                <button type="button" class="km-btn km-btn-save" data-action="save">{{t "kingdom.hexContent.save"}}</button>
+                <button type="button" class="km-btn" data-action="cancel-edit">{{t "kingdom.hexContent.cancel"}}</button>
+            </div>
+        </div>
+    {{else}}
+        <div class="km-hex-content-toolbar">
+            <button type="button" class="km-btn km-btn-primary" data-action="add-new">{{t "kingdom.hexContent.addNew"}}</button>
+        </div>
+        <div class="km-hex-content-list">
+            {{#if entries.length}}
+                <table class="km-table">
+                    <thead>
+                        <tr>
+                            <th>{{t "kingdom.hexContent.hexKey"}}</th>
+                            <th>{{t "kingdom.hexContent.type"}}</th>
+                            <th>{{t "kingdom.hexContent.name"}}</th>
+                            <th>{{t "kingdom.hexContent.visibility"}}</th>
+                            <th>{{t "kingdom.hexContent.actions"}}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#each entries}}
+                            <tr data-content-id="{{this.id}}">
+                                <td>{{this.hexKey}}</td>
+                                <td>{{this.typeName}}</td>
+                                <td>{{this.name}}</td>
+                                <td>
+                                    <span class="km-badge km-badge-{{this.visibility}}">{{this.visibilityName}}</span>
+                                </td>
+                                <td class="km-actions">
+                                    <button type="button" class="km-btn km-btn-sm" data-action="edit" data-content-id="{{this.id}}">{{t "kingdom.hexContent.edit"}}</button>
+                                    {{#if (eq this.visibility "hidden")}}
+                                        <button type="button" class="km-btn km-btn-sm km-btn-reveal" data-action="reveal" data-content-id="{{this.id}}">{{t "kingdom.hexContent.reveal"}}</button>
+                                    {{else}}
+                                        <button type="button" class="km-btn km-btn-sm" data-action="hide" data-content-id="{{this.id}}">{{t "kingdom.hexContent.hide"}}</button>
+                                    {{/if}}
+                                    <button type="button" class="km-btn km-btn-sm km-btn-clear" data-action="clear" data-content-id="{{this.id}}">{{t "kingdom.hexContent.clear"}}</button>
+                                    <button type="button" class="km-btn km-btn-sm km-btn-danger" data-action="delete" data-content-id="{{this.id}}">{{t "kingdom.hexContent.delete"}}</button>
+                                </td>
+                            </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+            {{else}}
+                <p class="km-empty">{{t "kingdom.hexContent.noContent"}}</p>
+            {{/if}}
+        </div>
+    {{/if}}
+</div>

@@ -93,4 +93,13 @@ external interface KingdomSheetContext : ValidatedHandlebarsContext {
     val rosterContext: RosterContext
     val showDetailedMatrix: Boolean
     val campaignClocks: CampaignClockContext
+    val generatedQuestCount: Int
+    val activeEventCount: Int
+    val questTimerChanges: Array<QuestTimerChangeContext>
+}
+
+@JsPlainObject
+external interface QuestTimerChangeContext {
+    val questName: String
+    val changeLabel: String
 }

@@ -529,16 +529,16 @@ class KingdomSheet(
             }
 
             "open-hex-content-manager" -> buildPromise {
+                val game = this@KingdomSheet.game
                 HexContentManager(
                     actor = actor,
-                    onEdit = { tileId ->
-                        // For now, we just log it or do nothing. 
-                        // Real implementation will launch HexContentEdit dialog
-                        console.log("Editing hex: $tileId")
-                    },
-                    onAdd = { tileId ->
-                         // Real implementation will launch HexContentAdd dialog
-                         console.log("Adding to hex: $tileId")
+                    onContentChanged = {
+                        buildPromise {
+                            at.posselt.pfrpg2e.kingdom.map.syncHexContentMarkers(
+                                game,
+                                actor
+                            )
+                        }
                     }
                 ).launch()
             }

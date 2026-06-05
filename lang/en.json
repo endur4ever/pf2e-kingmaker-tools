@@ -6083,7 +6083,51 @@
           "makeVisible": "Reveal to Players",
           "makeHidden": "Hide from Players"
         }
+      },
+      "hexContent": {
+        "managerTitle": "Hex Content Manager",
+        "addNew": "Add Content to Hex",
+        "addContent": "Add Hex Content",
+        "editContent": "Edit Hex Content",
+        "addToHex": "Add Content to Hex",
+        "editForHex": "Edit Content for Hex",
+        "hexKey": "Hex Key",
+        "type": "Type",
+        "name": "Name",
+        "visibility": "Visibility",
+        "gmNotes": "GM Notes",
+        "playerText": "Player Text",
+        "suppressesEncounters": "Suppresses Random Encounters",
+        "travelModifier": "Travel Modifier",
+        "linkedQuestId": "Linked Quest ID",
+        "linkedUuid": "Linked UUID",
+        "icon": "Custom Icon (FontAwesome class)",
+        "actions": "Actions",
+        "edit": "Edit",
+        "delete": "Delete",
+        "reveal": "Reveal",
+        "hide": "Hide",
+        "clear": "Clear",
+        "save": "Save",
+        "cancel": "Cancel",
+        "noContent": "No hex content yet. Click \"Add Content to Hex\" to get started."
       }
+    },
+    "hexContentType": {
+      "landmark": "Landmark",
+      "refuge": "Refuge",
+      "worksite": "Worksite",
+      "resource": "Resource",
+      "ruin": "Ruin",
+      "merchant": "Merchant",
+      "trainer": "Trainer",
+      "enemyArmy": "Enemy Army",
+      "custom": "Custom"
+    },
+    "hexContentVisibility": {
+      "hidden": "Hidden",
+      "discovered": "Discovered",
+      "cleared": "Cleared"
     }
   }
 }

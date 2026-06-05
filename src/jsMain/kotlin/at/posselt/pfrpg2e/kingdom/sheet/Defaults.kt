@@ -370,4 +370,10 @@ fun createKingdomDefaults(name: String) =
         companions = emptyArray(),
         structureBlacklist = emptyArray(),
         campaignClocks = emptyArray(),
+        questTemplates = emptyArray(),
+        campaignQuests = emptyArray(),
+        kingdomEventTemplates = emptyArray(),
+        campaignKingdomEvents = emptyArray(),
+        eventGenerationLogs = emptyArray(),
+        questGeneratorSettings = js("({ defaultVisibilityToPlayers: false, maxActiveGeneratedQuests: 10, autoAdvanceQuestTimersOnTurn: true })"),
     )

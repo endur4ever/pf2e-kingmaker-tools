@@ -25,11 +25,14 @@ import at.posselt.pfrpg2e.combat.registerCombatTrackHooks
 import at.posselt.pfrpg2e.combat.registerCombatXpHooks
 import at.posselt.pfrpg2e.firstrun.showFirstRunMessage
 import at.posselt.pfrpg2e.kingdom.KingdomActor
+import at.posselt.pfrpg2e.kingdom.getKingdomActors
 import at.posselt.pfrpg2e.kingdom.armies.createArmyCompendiumEntries
 import at.posselt.pfrpg2e.kingdom.armies.registerArmyConsumptionHooks
 import at.posselt.pfrpg2e.kingdom.bindChatButtons
 import at.posselt.pfrpg2e.kingdom.registerContextMenus
 import at.posselt.pfrpg2e.kingdom.map.registerHexGridSync
+import at.posselt.pfrpg2e.kingdom.map.registerHexContentSync
+import at.posselt.pfrpg2e.kingdom.map.syncHexContentMarkers
 import at.posselt.pfrpg2e.kingdom.map.syncHexDrawingsToNativeState
 import at.posselt.pfrpg2e.kingdom.map.syncSettlementMarkers
 import at.posselt.pfrpg2e.kingdom.map.syncZoneLabels
@@ -227,9 +230,13 @@ fun main() {
                 validateStructures(game)
                 registerCampingTokenMove(game)
                 registerHexGridSync(game)
+                registerHexContentSync(game)
                 syncHexDrawingsToNativeState(game)
                 syncSettlementMarkers(game)
                 syncZoneLabels(game)
+                game.getKingdomActors().firstOrNull()?.let { actor ->
+                    at.posselt.pfrpg2e.kingdom.map.syncHexContentMarkers(game, actor)
+                }
             }
         }
 
