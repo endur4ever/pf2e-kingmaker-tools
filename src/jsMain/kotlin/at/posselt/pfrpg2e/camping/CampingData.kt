@@ -146,6 +146,8 @@ external interface CampingData {
     var forcedMarchActive: Boolean
     var secondsSpentForcedMarching: Int
     var hexSizeInMiles: Int
+    var travelStartHex: String?
+    var travelEndHex: String?
 
     /**
      * Companion-specific activity IDs that the party has learned via the
@@ -336,6 +338,8 @@ fun getDefaultCamping(game: Game): CampingData {
         travelModeActive = false,
         secondsSpentForcedMarching = 0,
         hexSizeInMiles = 12,
+        travelStartHex = null,
+        travelEndHex = null,
         learnedCompanionActivities = emptyArray(),
         watchSlots = emptyArray(),
         downtimeHoursSpent = recordOf(),

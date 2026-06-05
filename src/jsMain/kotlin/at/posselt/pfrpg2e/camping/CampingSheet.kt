@@ -81,6 +81,15 @@ import org.w3c.dom.get
 import org.w3c.dom.pointerevents.PointerEvent
 import kotlin.js.Promise
 import kotlin.math.max
+import com.foundryvtt.kingmaker.kingmaker
+import com.foundryvtt.kingmaker.KingmakerHex
+import com.foundryvtt.core.grid.GridHex
+import at.posselt.pfrpg2e.data.hex.HexContent
+import at.posselt.pfrpg2e.data.hex.HexContentType
+import at.posselt.pfrpg2e.data.hex.HexContentVisibility
+import at.posselt.pfrpg2e.data.regions.Terrain
+import at.posselt.pfrpg2e.kingdom.getKingdom
+import at.posselt.pfrpg2e.kingdom.getKingdomActors
 
 
 @JsPlainObject
@@ -174,6 +183,16 @@ external interface RecipeContext {
 
 @Suppress("unused")
 @JsPlainObject
+external interface TravelRouteUiContext {
+    val totalCost: Double
+    val totalDistance: Int
+    val estimatedDuration: String
+    val path: Array<String>
+    val modifiers: Array<String>
+}
+
+@Suppress("unused")
+@JsPlainObject
 external interface CampingSheetContext : ValidatedHandlebarsContext {
     var actors: Array<CampingSheetActor>
     var prepareCamp: CampingSheetActivity?
@@ -210,6 +229,10 @@ external interface CampingSheetContext : ValidatedHandlebarsContext {
     var availableFood: FoodCost
     var canRollEncounter: Boolean
     var sheetBackground: String
+    var travelStartHexSelect: FormElementContext?
+    var travelEndHexSelect: FormElementContext?
+    var travelRoute: TravelRouteUiContext?
+    var travelPathError: String?
 }
 
 @JsPlainObject
@@ -233,6 +256,8 @@ external interface CampingSheetFormData {
     val travelModeActive: Boolean
     val forcedMarchActive: Boolean
     val numberOfWatches: Int?
+    val travelStartHex: String?
+    val travelEndHex: String?
 }
 
 private fun isNightMode(
@@ -1222,6 +1247,184 @@ class CampingSheet(
         val currentTerrain = currentRegion?.terrain ?: "plains"
         val background = game.settings.pfrpg2eKingdomCampingWeather
             .resolveCampingBackground(currentTerrain, time.isDay())
+
+        val defaultTerrainModifiers = mapOf(
+            Terrain.PLAINS to 0.0,
+            Terrain.FOREST to 1.0,
+            Terrain.HILLS to 1.0,
+            Terrain.MOUNTAIN to 2.0,
+            Terrain.SWAMP to 2.0,
+            Terrain.DESERT to 1.0,
+            Terrain.URBAN to 0.0,
+            Terrain.AQUATIC to 1.0,
+            Terrain.DUNGEON to 0.0
+        )
+
+        val defaultInfrastructureModifiers = mapOf(
+            "road" to -1.0,
+            "river" to 1.0
+        )
+
+        val weatherType = try {
+            game.settings.pfrpg2eKingdomCampingWeather.getCurrentWeatherType()
+        } catch (e: Throwable) {
+            "sunny"
+        }
+        val weatherModifier = when (weatherType.lowercase()) {
+            "rainy" -> 1.5
+            "snowy" -> 2.0
+            "cold" -> 1.5
+            else -> 1.0
+        }
+
+        val travelSpeed = try {
+            actor.system.movement.speeds.travel.value.toDouble()
+        } catch (e: Throwable) {
+            24.0
+        }
+        val partySpeedMultiplier = travelSpeed / 24.0
+
+        val rawHexContents = game.getKingdomActors().firstOrNull()?.getKingdom()?.hexContents ?: emptyArray()
+        val hexContentsMap = rawHexContents.associate { raw ->
+            raw.hexKey to HexContent(
+                id = raw.id,
+                hexKey = raw.hexKey,
+                type = HexContentType.fromString(raw.type) ?: HexContentType.LANDMARK,
+                name = raw.name,
+                visibility = HexContentVisibility.fromString(raw.visibility) ?: HexContentVisibility.HIDDEN,
+                gmNotes = raw.gmNotes,
+                playerText = raw.playerText,
+                suppressesEncounters = raw.suppressesEncounters,
+                travelModifier = raw.travelModifier,
+                linkedQuestId = raw.linkedQuestId,
+                linkedUuid = raw.linkedUuid,
+                icon = raw.icon
+            )
+        }
+
+        val hexKeys = getHexKeys()
+        val hexKeyOptions = hexKeys.map { key ->
+            SelectOption(value = key, label = key)
+        }
+        val travelStartHexSelect = Select(
+            label = t("camping.startHex"),
+            name = "travelStartHex",
+            value = camping.travelStartHex,
+            options = listOf(SelectOption(label = "—", value = "")) + hexKeyOptions,
+            stacked = false,
+            required = false,
+        ).toContext()
+
+        val travelEndHexSelect = Select(
+            label = t("camping.endHex"),
+            name = "travelEndHex",
+            value = camping.travelEndHex,
+            options = listOf(SelectOption(label = "—", value = "")) + hexKeyOptions,
+            stacked = false,
+            required = false,
+        ).toContext()
+
+        val startHex = camping.travelStartHex
+        val endHex = camping.travelEndHex
+        var travelRouteContext: TravelRouteUiContext? = null
+        var travelPathError: String? = null
+
+        if (startHex != null && endHex != null && startHex.isNotEmpty() && endHex.isNotEmpty()) {
+            val service = TravelService(
+                hexContents = hexContentsMap,
+                terrainModifiers = defaultTerrainModifiers,
+                infrastructureModifiers = defaultInfrastructureModifiers,
+                weatherModifier = weatherModifier
+            )
+            val path = findOptimalPath(startHex, endHex) { hexKey ->
+                var hexCost = 1.0
+                val rawContent = rawHexContents.find { it.hexKey == hexKey }
+                rawContent?.travelModifier?.let { hexCost += it.toDouble() }
+                
+                val hexObj = com.foundryvtt.kingmaker.kingmaker.region.hexes.find { it.key.toString() == hexKey }
+                val terrainName = hexObj?.zone?.terrain
+                val terrain = terrainName?.let { fromCamelCase<Terrain>(it) }
+                if (terrain != null) {
+                    hexCost += defaultTerrainModifiers[terrain] ?: 0.0
+                }
+                
+                val hexState = com.foundryvtt.kingmaker.kingmaker.state.hexes[hexKey]
+                val features = hexState?.features?.mapNotNull { it.type } ?: emptyList()
+                val hasBridge = features.contains("bridge")
+                features.forEach { featureType ->
+                    if (featureType == "river") {
+                        if (!hasBridge) {
+                            hexCost += defaultInfrastructureModifiers["river"] ?: 1.0
+                        }
+                    } else if (featureType == "road") {
+                        hexCost += defaultInfrastructureModifiers["road"] ?: -1.0
+                    } else if (featureType != "bridge") {
+                        hexCost += defaultInfrastructureModifiers[featureType] ?: 0.0
+                    }
+                }
+                hexCost
+            }
+            if (path.isNotEmpty()) {
+                val route = service.calculateRoute(
+                    path = path,
+                    partySpeedMultiplier = partySpeedMultiplier
+                )
+                
+                val routeModifiersList = mutableListOf<String>()
+                if (weatherModifier != 1.0) {
+                    routeModifiersList.add(t("camping.weatherModifierLabel", recordOf("value" to weatherModifier.toString())))
+                }
+                if (partySpeedMultiplier != 1.0) {
+                    val speedPct = (partySpeedMultiplier * 100).toInt()
+                    routeModifiersList.add(t("camping.partySpeedModifierLabel", recordOf("value" to "$speedPct%")))
+                }
+                
+                val terrainCounts = mutableMapOf<Terrain, Int>()
+                var riverCrossings = 0
+                var roadCount = 0
+                for (hexKey in path) {
+                    val hexObj = com.foundryvtt.kingmaker.kingmaker.region.hexes.find { it.key.toString() == hexKey }
+                    val terrainName = hexObj?.zone?.terrain
+                    val terrain = terrainName?.let { fromCamelCase<Terrain>(it) }
+                    if (terrain != null && terrain != Terrain.PLAINS) {
+                        terrainCounts[terrain] = (terrainCounts[terrain] ?: 0) + 1
+                    }
+                    
+                    val hexState = com.foundryvtt.kingmaker.kingmaker.state.hexes[hexKey]
+                    val features = hexState?.features?.mapNotNull { it.type } ?: emptyList()
+                    val hasBridge = features.contains("bridge")
+                    if (features.contains("river") && !hasBridge) {
+                        riverCrossings++
+                    }
+                    if (features.contains("road")) {
+                        roadCount++
+                    }
+                }
+                
+                terrainCounts.forEach { (t, c) ->
+                    routeModifiersList.add(t("camping.terrainModifierCount", recordOf(
+                        "terrain" to t(t.i18nKey),
+                        "count" to c.toString()
+                    )))
+                }
+                if (roadCount > 0) {
+                    routeModifiersList.add(t("camping.roadCount", recordOf("count" to roadCount.toString())))
+                }
+                if (riverCrossings > 0) {
+                    routeModifiersList.add(t("camping.riverCount", recordOf("count" to riverCrossings.toString())))
+                }
+                
+                travelRouteContext = TravelRouteUiContext(
+                    totalCost = route.totalCost,
+                    totalDistance = path.size,
+                    estimatedDuration = formatSeconds(route.estimatedDurationSeconds.toInt()),
+                    path = route.path.toTypedArray(),
+                    modifiers = routeModifiersList.toTypedArray()
+                )
+            } else {
+                travelPathError = t("camping.noPathFound")
+            }
+        }
         CampingSheetContext(
             canRollEncounter = currentRegion?.rollTableUuid != null,
             availableFood = availableFood,
@@ -1338,7 +1541,11 @@ class CampingSheet(
             ).toContext(),
             forcedMarchDays = forcedMarchDays(),
             forcedMarchMaxDays = forcedMarchMaxDays(),
-            sheetBackground = background
+            sheetBackground = background,
+            travelStartHexSelect = travelStartHexSelect,
+            travelEndHexSelect = travelEndHexSelect,
+            travelRoute = travelRouteContext,
+            travelPathError = travelPathError
         )
     }
 
@@ -1384,6 +1591,8 @@ class CampingSheet(
             if (!value.forcedMarchActive) {
                 camping.secondsSpentForcedMarching = 0
             }
+            camping.travelStartHex = value.travelStartHex
+            camping.travelEndHex = value.travelEndHex
             ensureWatchSlots(camping, value.numberOfWatches)
             actor.setCamping(camping)
         }
@@ -1407,6 +1616,78 @@ class CampingSheet(
             )
             it.dataTransfer!!.setData("text/plain", JSON.stringify(data))
         }
+    }
+
+    private fun getHexKeys(): List<String> {
+        val region = kotlin.js.js("kingmaker.region.hexes") ?: return emptyList()
+        val keys = mutableListOf<String>()
+        val len = region.length as? Int ?: return emptyList()
+        for (i in 0 until len) {
+            val hex = region[i]
+            val key = hex?.key?.toString()
+            if (key != null) {
+                keys.add(key)
+            }
+        }
+        return keys.sorted()
+    }
+
+    private fun findOptimalPath(startKey: String, endKey: String, getHexCost: (String) -> Double): List<String> {
+        val hexesContents = try {
+            com.foundryvtt.kingmaker.kingmaker.region.hexes.contents
+        } catch (e: Throwable) {
+            emptyArray()
+        }
+        val hexMap = hexesContents.associateBy { it.key.toString() }
+        if (hexMap[startKey] == null || hexMap[endKey] == null) return emptyList()
+
+        val distances = mutableMapOf<String, Double>()
+        val previous = mutableMapOf<String, String>()
+        val queue = mutableSetOf<String>()
+
+        for (k in hexMap.keys) {
+            distances[k] = Double.MAX_VALUE
+            queue.add(k)
+        }
+        distances[startKey] = 0.0
+
+        while (queue.isNotEmpty()) {
+            val u = queue.minByOrNull { distances[it] ?: Double.MAX_VALUE } ?: break
+            if (distances[u] == Double.MAX_VALUE) break
+            if (u == endKey) break
+
+            queue.remove(u)
+
+            val uHex = hexMap[u] ?: continue
+            val neighbors = try {
+                uHex.getNeighbors()
+            } catch (e: Throwable) {
+                emptyArray()
+            }
+
+            for (neighbor in neighbors) {
+                val neighborHexObj = hexesContents.find { it.offset.i == neighbor.offset.i && it.offset.j == neighbor.offset.j }
+                val v = neighborHexObj?.key?.toString() ?: continue
+                if (v !in queue) continue
+
+                val cost = getHexCost(v)
+                val alt = distances[u]!! + cost
+                if (alt < distances[v]!!) {
+                    distances[v] = alt
+                    previous[v] = u
+                }
+            }
+        }
+
+        if (distances[endKey] == Double.MAX_VALUE) return emptyList()
+
+        val path = mutableListOf<String>()
+        var curr: String? = endKey
+        while (curr != null) {
+            path.add(0, curr)
+            curr = previous[curr]
+        }
+        return path
     }
 }
 

@@ -1069,3 +1069,106 @@ ul.km-camping-actors {
     color: #f59e0b;
     background-color: rgba(245, 158, 11, 0.15);
 }
+
+.km-route-planner {
+    margin: 10px 20px;
+    background: rgba(0, 0, 0, 0.75);
+    border: 1px solid var(--secondary-km);
+    border-radius: 5px;
+    padding: 8px 12px;
+    color: white;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+
+    summary {
+        font-weight: bold;
+        font-size: 1.1em;
+        cursor: pointer;
+        outline: none;
+        user-select: none;
+        color: var(--secondary-km);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+
+        &:hover {
+            color: #AFF1DA;
+        }
+    }
+
+    .km-route-planner-content {
+        margin-top: 8px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+
+        .km-row {
+            display: flex;
+            flex-direction: row;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .km-form-group {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            flex: 1;
+
+            label {
+                font-weight: bold;
+                min-width: 80px;
+            }
+
+            select {
+                background: rgba(20, 20, 20, 0.9);
+                color: white;
+                border: 1px solid #555;
+                border-radius: 3px;
+                padding: 2px 5px;
+                height: 26px;
+                flex: 1;
+            }
+        }
+    }
+
+    .km-route-details {
+        margin-top: 10px;
+        padding-top: 8px;
+        border-top: 1px dashed rgba(255, 255, 255, 0.2);
+
+        .km-route-summary {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-around;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 6px;
+            border-radius: 4px;
+            margin-bottom: 6px;
+            font-size: 1.05em;
+        }
+
+        .km-route-modifiers {
+            font-size: 0.9em;
+            opacity: 0.9;
+            
+            ul {
+                margin: 4px 0 0 15px;
+                padding: 0;
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                gap: 4px;
+
+                li {
+                    list-style-type: disc;
+                }
+            }
+        }
+    }
+
+    .km-route-error {
+        color: #ff8f8f;
+        font-weight: bold;
+        text-align: center;
+        margin-top: 5px;
+    }
+}

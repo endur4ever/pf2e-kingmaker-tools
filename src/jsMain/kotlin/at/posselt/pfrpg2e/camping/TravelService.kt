@@ -82,7 +82,7 @@ class TravelService(
         return TravelRoute(
             startHex = path.firstOrNull() ?: "",
             endHex = path.lastOrNull() ?: "",
-            path = path.toTypedArray(),
+            path = path.toList(),
             totalCost = finalCost,
             estimatedDurationSeconds = (finallyTime(finalCost)).toLong()
         )
