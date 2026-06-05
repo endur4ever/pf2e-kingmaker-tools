@@ -14,6 +14,7 @@ import at.posselt.pfrpg2e.kingdom.KingdomData
 import at.posselt.pfrpg2e.kingdom.RawOngoingKingdomEvent
 import at.posselt.pfrpg2e.kingdom.getEvents
 import at.posselt.pfrpg2e.kingdom.getKingdom
+import at.posselt.pfrpg2e.kingdom.setKingdom
 import at.posselt.pfrpg2e.kingdom.sheet.executeResourceButton
 import at.posselt.pfrpg2e.utils.buildPromise
 import at.posselt.pfrpg2e.utils.formatAsModifier
@@ -66,6 +67,7 @@ external interface AddEventContext {
 external interface AddEventsContext : ValidatedHandlebarsContext {
     var events: Array<AddEventContext>
     var search: FormElementContext
+    val isGM: Boolean
 }
 
 @JsPlainObject
@@ -127,13 +129,23 @@ class AddEvent(
                 buildPromise {
                     val id = target.dataset["id"] as String
                     val isSettlementEvent = target.dataset["settlementEvent"] == "true"
-                    val event = createOngoingEvent(
+                    val evt = createOngoingEvent(
                         id = id,
                         isSettlementEvent = isSettlementEvent,
                         settlements = settlements,
                     )
-                    onSave(event)
+                    onSave(evt)
                     close()
+                }
+            }
+            "generate-quest-from-event" -> {
+                val eventId = target.dataset["id"] as String
+                buildPromise {
+                    at.posselt.pfrpg2e.kingdom.dialogs.generateQuestFromEvent(
+                        game = game,
+                        kingdomActor = kingdomActor,
+                        eventId = eventId,
+                    )
                 }
             }
         }
@@ -198,6 +210,7 @@ class AddEvent(
             partId = parent.partId,
             events = events,
             isFormValid = isFormValid,
+            isGM = game.user.isGM,
             search = SearchInput(
                 name = "search",
                 label = t("kingdom.filter"),
@@ -233,5 +246,55 @@ class AddEvent(
     override fun onParsedSubmit(value: AddEventsData): Promise<Void> = buildPromise {
         search = value.search
         undefined
+    }
+}
+
+suspend fun generateQuestFromEvent(
+    game: Game,
+    kingdomActor: KingdomActor,
+    eventId: String,
+) {
+    val kingdom = kingdomActor.getKingdom() ?: return
+    val events = kingdom.getEvents(applyBlacklist = true)
+    val event = events.find { it.id == eventId } ?: return
+    val kingdomLevel = kingdom.level
+    val template = at.posselt.pfrpg2e.questevent.KingdomEventTemplate(
+        id = event.id,
+        name = event.name,
+        description = event.description,
+        traits = event.traits.mapNotNull { at.posselt.pfrpg2e.data.events.KingdomEventTrait.fromString(it) }.map { it.value },
+    )
+    val result = at.posselt.pfrpg2e.questevent.QuestGenerator.generateFromEvent(
+        event = template,
+        kingdomLevel = kingdomLevel,
+        currentQuests = emptyList(),
+    )
+    if (result != null && result.isEligible) {
+        val now = js("new Date().toISOString()")
+        val quest = at.posselt.pfrpg2e.questevent.CampaignQuest(
+            id = "cq-${js("Date.now()")}",
+            templateId = result.preview.id,
+            name = result.preview.name,
+            type = result.preview.type,
+            description = result.preview.description,
+            gmNotes = result.preview.gmNotes,
+            recommendedLevel = result.preview.recommendedLevel,
+            objectives = result.preview.objectives,
+            rewards = result.preview.rewards,
+            status = at.posselt.pfrpg2e.questevent.QuestStatus.ACTIVE,
+            turnsRemaining = null,
+            visibleToPlayers = false,
+            generatedByEvent = true,
+            sourceEventId = result.sourceEventId,
+            sourceEventName = result.sourceEventName,
+            createdAt = now.unsafeCast<String>(),
+            campaignId = "default",
+        )
+        // Add campaign quest to kingdom data
+        val currentQuests = kingdom.campaignQuests ?: emptyArray<dynamic>()
+        val newQuests = currentQuests.toMutableList()
+        newQuests.add(quest)
+        kingdom.campaignQuests = newQuests.toTypedArray()
+        kingdomActor.setKingdom(kingdom)
     }
 }

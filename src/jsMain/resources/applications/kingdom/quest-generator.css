@@ -1,0 +1,88 @@
+/* Quest Generator styles */
+.km-qg-event-picker {
+  margin-bottom: 1em;
+}
+
+.km-qg-events-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.km-qg-events-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.25em 0;
+}
+
+.km-qg-event-name {
+  font-weight: bold;
+  flex: 1;
+}
+
+.km-qg-trait {
+  font-size: 0.8em;
+  background: var(--color-bg-alt, #333);
+  border-radius: 3px;
+  padding: 0.1em 0.4em;
+}
+
+.km-qg-preview {
+  border: 1px solid var(--color-border, #555);
+  border-radius: 4px;
+  padding: 1em;
+  margin: 1em 0;
+  background: var(--color-bg-alt, #2a2a2a);
+}
+
+.km-qg-preview-header {
+  margin-bottom: 0.5em;
+}
+
+.km-qg-badge {
+  display: inline-block;
+  background: #4a6741;
+  color: #fff;
+  font-size: 0.75em;
+  font-weight: bold;
+  padding: 0.2em 0.6em;
+  border-radius: 3px;
+  text-transform: uppercase;
+}
+
+.km-qg-rewards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5em;
+}
+
+.km-qg-visibility {
+  margin: 1em 0;
+}
+
+.km-quest-generator-panel {
+  margin-top: 1em;
+  padding: 0.75em;
+  border-top: 1px solid var(--color-border, #555);
+}
+
+.km-quest-generator-count {
+  font-size: 0.85em;
+  font-weight: normal;
+  margin-left: 0.5em;
+}
+
+.km-quest-generated-badge {
+  display: inline-block;
+  background: #4a6741;
+  color: #fff;
+  font-size: 0.7em;
+  padding: 0.15em 0.5em;
+  border-radius: 3px;
+  margin-bottom: 0.25em;
+}
+
+.km-open-generator-btn {
+  margin-top: 0.5em;
+}

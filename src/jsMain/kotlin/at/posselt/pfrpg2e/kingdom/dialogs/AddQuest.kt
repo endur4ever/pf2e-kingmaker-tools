@@ -68,6 +68,9 @@ external interface AddQuestData {
     val ore: Int
     val luxuries: Int
     val flavorTextCompleted: String
+    val generatedFromEvent: Boolean
+    val sourceEventId: String?
+    val sourceEventName: String?
 }
 
 @JsPlainObject
@@ -101,6 +104,9 @@ class AddQuest(
             ore = q.rewards.ore ?: 0,
             luxuries = q.rewards.luxuries ?: 0,
             flavorTextCompleted = q.flavorTextCompleted,
+            generatedFromEvent = false,
+            sourceEventId = null,
+            sourceEventName = null,
         )
     } ?: AddQuestData(
         title = "",
@@ -117,6 +123,9 @@ class AddQuest(
         ore = 0,
         luxuries = 0,
         flavorTextCompleted = "",
+        generatedFromEvent = false,
+        sourceEventId = null,
+        sourceEventName = null,
     )
 
     init {

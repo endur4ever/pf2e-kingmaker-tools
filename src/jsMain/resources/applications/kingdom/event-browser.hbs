@@ -12,6 +12,13 @@
                                 data-action="add-event">
                             {{localizeKM "applications.add"}}
                         </button>
+                        {{#if ../isGM}}
+                        <button data-id="{{id}}"
+                                type="button"
+                                data-action="generate-quest-from-event">
+                            {{localizeKM "kingdom.questGenerator.generateFromEvent"}}
+                        </button>
+                        {{/if}}
                     </summary>
                     <div class="km-add-event-description">
                         <ul class="km-event-traits">

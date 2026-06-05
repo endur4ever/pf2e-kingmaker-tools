@@ -65,6 +65,8 @@ import at.posselt.pfrpg2e.kingdom.dialogs.ActivityManagement
 import at.posselt.pfrpg2e.kingdom.dialogs.AddEvent
 import at.posselt.pfrpg2e.kingdom.dialogs.AddModifier
 import at.posselt.pfrpg2e.kingdom.dialogs.AddQuest
+import at.posselt.pfrpg2e.questevent.GenerateQuestDialog
+import at.posselt.pfrpg2e.questevent.QuestGeneratorSettings
 import at.posselt.pfrpg2e.kingdom.dialogs.CharterManagement
 import at.posselt.pfrpg2e.kingdom.dialogs.CheckType
 import at.posselt.pfrpg2e.kingdom.dialogs.FeatManagement
@@ -146,6 +148,9 @@ import at.posselt.pfrpg2e.kingdom.structures.levelUpTo
 import at.posselt.pfrpg2e.kingdom.vacancies
 import at.posselt.pfrpg2e.settings.pfrpg2eKingdomCampingWeather
 import at.posselt.pfrpg2e.takeIfInstance
+import at.posselt.pfrpg2e.app.jsonFilePicker
+import at.posselt.pfrpg2e.kingdom.sheet.KingdomJournalExporter
+import at.posselt.pfrpg2e.kingdom.sheet.ObsidianImporter
 import at.posselt.pfrpg2e.utils.TableAndDraw
 import at.posselt.pfrpg2e.utils.buildPromise
 import at.posselt.pfrpg2e.utils.d20Check
@@ -228,6 +233,9 @@ class KingdomSheet(
         MenuControl(label = t("kingdom.milestones"), action = "configure-milestones", gmOnly = true),
         MenuControl(label = t("kingdom.hex-content"), action = "open-hex-content-manager", gmOnly = true),
         MenuControl(label = t("applications.settings"), action = "settings", gmOnly = true),
+        MenuControl(label = t("kingdom.exportToJournal"), action = "export-to-journal", gmOnly = true),
+        MenuControl(label = t("kingdom.importFromObsidian"), action = "import-from-obsidian", gmOnly = true),
+        MenuControl(label = t("kingdom.openObsidian"), action = "open-obsidian", gmOnly = true),
         MenuControl(label = t("applications.quickstart"), action = "quickstart", gmOnly = true),
         MenuControl(label = t("applications.help"), action = "help"),
     ),
@@ -424,6 +432,31 @@ class KingdomSheet(
                     current.quests = quests + quest
                     actor.setKingdom(current)
                 }.launch()
+            }
+
+            "open-quest-generator" -> buildPromise {
+                val kingdom = getKingdom()
+                val settings = if (kingdom.questGeneratorSettings != null) {
+                    val s = kingdom.questGeneratorSettings.asDynamic()
+                    QuestGeneratorSettings(
+                        defaultVisibilityToPlayers = s.defaultVisibilityToPlayers as? Boolean ?: false,
+                        maxActiveGeneratedQuests = s.maxActiveGeneratedQuests as? Int ?: 10,
+                        autoAdvanceQuestTimersOnTurn = s.autoAdvanceQuestTimersOnTurn as? Boolean ?: true,
+                    )
+                } else {
+                    QuestGeneratorSettings()
+                }
+                GenerateQuestDialog(
+                    game = game,
+                    kingdomActor = actor,
+                    settings = settings,
+                    onGenerate = { quest ->
+                        val current = getKingdom()
+                        val campaignQuests = current.campaignQuests ?: emptyArray<Any>()
+                        current.campaignQuests = campaignQuests + quest
+                        actor.setKingdom(current)
+                    },
+                ).launch()
             }
 
             "edit-quest" -> buildPromise {
@@ -811,6 +844,44 @@ class KingdomSheet(
 
             "help" -> buildPromise {
                 openJournal("Compendium.pf2e-kingmaker-tools.kingmaker-tools-journals.JournalEntry.iAQCUYEAq4Dy8uCY.JournalEntryPage.ty6BS5eSI7ScfVBk")
+            }
+
+            "export-to-journal" -> buildPromise {
+                try {
+                    val folder = KingdomJournalExporter.export(game, actor, getKingdom())
+                    ui.notifications.info(t("kingdom.obsidianExportSuccess", recordOf("folder" to folder)))
+                } catch (e: Throwable) {
+                    ui.notifications.error("Export failed: ${e.message}")
+                }
+            }
+
+            "import-from-obsidian" -> buildPromise {
+                try {
+                    val markdown = jsonFilePicker(
+                        title = t("kingdom.importFromObsidian"),
+                        label = "Obsidian Note (.md)",
+                        accept = listOf(".md"),
+                        help = "Select a Markdown file exported from Obsidian to import notes, companions, or quests."
+                    )
+                    val result = ObsidianImporter.importMarkdown(actor, markdown, game)
+                    if (result.startsWith("Missing") || result.startsWith("Unsupported") || result.startsWith("No kingdom")) {
+                        ui.notifications.error(result)
+                    } else {
+                        ui.notifications.info(t("kingdom.obsidianImportSuccess", recordOf("details" to result)))
+                        render()
+                    }
+                } catch (e: Throwable) {
+                    ui.notifications.error("Import failed: ${e.message}")
+                }
+            }
+
+            "open-obsidian" -> {
+                val vaultName = game.settings.pfrpg2eKingdomCampingWeather.getObsidianVaultName()
+                if (vaultName.isBlank()) {
+                    ui.notifications.error("Please configure your Obsidian Vault Name in settings first!")
+                } else {
+                    js("window.open('obsidian://open?vault=' + encodeURIComponent(vaultName), '_blank')")
+                }
             }
 
             "gain-xp" -> buildPromise {
@@ -1255,6 +1326,8 @@ class KingdomSheet(
                         storage = storage,
                         councilCooldowns = kingdom.councilCooldowns,
                         modifiers = kingdom.modifiers,
+                        campaignQuests = kingdom.campaignQuests ?: emptyArray(),
+                        kingdomLevel = kingdom.level,
                     )
                     kingdom.supernaturalSolutions = tickResult.supernaturalSolutions
                     kingdom.creativeSolutions = tickResult.creativeSolutions
@@ -1265,6 +1338,7 @@ class KingdomSheet(
                     kingdom.commodities = tickResult.commodities
                     kingdom.councilCooldowns = tickResult.councilCooldowns
                     kingdom.modifiers = tickResult.modifiers
+                    kingdom.campaignQuests = tickResult.campaignQuests
 
                     // Tick campaign clocks
                     val clockResult = CampaignClockManager.tickAll(kingdom.campaignClocks)
@@ -1776,6 +1850,15 @@ class KingdomSheet(
             isGM = isGM,
             settlements = settlements
         )
+        val campaignQuests = kingdom.campaignQuests ?: emptyArray<Any>()
+        val generatedQuestCount = campaignQuests.filter {
+            (it.asDynamic().status as? String) == "active" && (it.asDynamic().generatedByEvent as? Boolean) == true
+        }.size
+        val campaignKingdomEvents = kingdom.campaignKingdomEvents ?: emptyArray<Any>()
+        val activeEventCount = campaignKingdomEvents.filter {
+            (it.asDynamic().status as? String) == "active"
+        }.size
+        val questTimerChanges = emptyArray<Any>()
         val activeLeaderContext = Select.fromEnum<Leader>(
             name = "activeLeader",
             label = t("kingdom.activeLeader"),
@@ -1935,6 +2018,9 @@ class KingdomSheet(
             }.toTypedArray().toRosterContext(isGM),
             showDetailedMatrix = showDetailedMatrix,
             campaignClocks = kingdom.campaignClocks.toDashboardContext(isGM),
+            generatedQuestCount = generatedQuestCount,
+            activeEventCount = activeEventCount,
+            questTimerChanges = emptyArray(),
         )
     }
 

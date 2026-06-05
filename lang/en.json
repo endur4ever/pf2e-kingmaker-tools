@@ -77,7 +77,13 @@
       "schemaVersionHelp": "All data migrations greater than this version are run at page load. Do not edit unless you know what you are doing!",
       "kingdomActiveLeader": "Actively Filtered Kingdom Leader",
       "enablePartyActorIcons": "Enable Party Actor Icons",
-      "enablePartyActorIconsHelp": "If enabled, shows icons next to the party actor. Disable if you only use macros."
+      "enablePartyActorIconsHelp": "If enabled, shows icons next to the party actor. Disable if you only use macros.",
+      "obsidianVaultName": "Obsidian Vault Name",
+      "obsidianVaultNameHelp": "The name of your Obsidian vault. If provided, displays an 'Open Obsidian' button in the Kingdom sheet header.",
+      "obsidianJournalFolder": "Obsidian Export Folder",
+      "obsidianJournalFolderHelp": "The name of the Journal Folder where exported Kingdom summaries will be stored.",
+      "obsidianOverwrite": "Overwrite Kingdom Summary",
+      "obsidianOverwriteHelp": "If enabled, overwrites the single 'Kingdom Summary' journal entry on each export. If disabled, creates a historical entry per turn (e.g. 'Kingdom Summary - Turn X')."
     },
     "applications": {
       "apply": "Apply",
@@ -90,6 +96,7 @@
       "edit": "Edit",
       "add": "Add",
       "delete": "Delete",
+      "actions": "Actions",
       "enable": "Enable",
       "title": "Title",
       "name": "Name",
@@ -280,6 +287,7 @@
       "wrongItemAddedToActor": "Unsupported Item dragged onto camping actors",
       "onlyCharactersConsumeMeals": "Only Characters can consume meals",
       "onlyCharactersCanPerformActivities": "Only Characters can perform camping activities",
+      "downtimeBudgetExhausted": "Actor has exhausted their 8-hour downtime budget",
       "noRecipeChosen": "Discover Special Meal: No recipe chosen!",
       "reuseCampsite": "Reusing a previous campsite",
       "prepareNewCampsite": "Preparing a new campsite",
@@ -396,7 +404,8 @@
       "structures": "Structures",
       "storage": "Storage",
       "notes": "Notes",
-      "bonuses": "Bonuses"
+      "bonuses": "Bonuses",
+      "population": "Population"
     },
     "structureBrowserNav": {
       "buildable": "Buildable",
@@ -515,6 +524,12 @@
       "success": "Placed block onto scene {sceneName}!"
     },
     "kingdom": {
+      "exportToJournal": "Export to Journal",
+      "importFromObsidian": "Import from Obsidian",
+      "openObsidian": "Open Obsidian",
+      "obsidianImportSuccess": "Successfully imported Obsidian data: {details}",
+      "obsidianImportError": "Error importing Obsidian data: {error}",
+      "obsidianExportSuccess": "Successfully exported Kingdom summary to Journal folder: {folder}!",
       "companionArrival": "<b>{name}</b> has arrived at Hex <b>{x}, {y}</b>!",
       "quests": {
         "addQuest": "Add Quest",
@@ -934,6 +949,17 @@
       "blocksWithMaximum": "Occupied Blocks (Maximum: {count})",
       "surplus": "Surplus",
       "population": "Population",
+      "populationRoster": {
+        "title": "Population Roster",
+        "addNpc": "Add NPC",
+        "editNpc": "Edit NPC",
+        "name": "Name",
+        "namePlaceholder": "Enter NPC name...",
+        "occupation": "Occupation",
+        "notes": "Notes",
+        "notesPlaceholder": "Optional notes about this NPC...",
+        "empty": "No NPCs in this settlement yet. Add one to populate it!"
+      },
       "consumption": "Consumption",
       "maxItemBonus": "Max. Item Bonus",
       "influence": "Influence",
@@ -6022,6 +6048,40 @@
           "criticalFailure": {
             "msg": "<p>After sending representatives, the immigrant decides not to build a home in your settlement after all, disappointing the local aristocracy. @gain1Unrest</p>"
           }
+        }
+      },
+      "questGenerator": {
+        "title": "Quest Generator",
+        "generateFromEvent": "Generate Quest",
+        "generatedBadge": "Generated",
+        "generatedFrom": "From: {eventName}",
+        "generate": "Generate",
+        "cancel": "Cancel",
+        "commit": "Add Quest",
+        "open": "Open Quest Generator",
+        "activeCount": "{count} Active",
+        "noEvents": "No kingdom events available to generate quests from.",
+        "preview": {
+          "event": "Select Event",
+          "type": "Type",
+          "urgency": "Urgency",
+          "recommendedLevel": "Recommended Level",
+          "objectives": "Objectives",
+          "rewards": "Rewards"
+        },
+        "settings": {
+          "title": "Quest Generator Settings",
+          "defaultVisibility": "Default Visibility",
+          "defaultVisibility.gmOnly": "GM Only",
+          "defaultVisibility.players": "Visible to Players",
+          "maxActiveQuests": "Max Active Generated Quests",
+          "autoAdvanceTimers": "Auto-Advance Quest Timers"
+        },
+        "regenerate": "Regenerate",
+        "filterGenerated": "Generated Quests",
+        "visibility": {
+          "makeVisible": "Reveal to Players",
+          "makeHidden": "Hide from Players"
         }
       }
     }

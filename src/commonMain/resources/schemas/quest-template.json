@@ -1,0 +1,128 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://posselt.at/pf2e-kingmaker-tools/schemas/quest-template.json",
+  "title": "QuestTemplate",
+  "description": "A campaign-scoped quest template that the QuestGenerator uses to produce quests from kingdom events.",
+  "$ref": "#/$defs/QuestTemplate",
+  "$defs": {
+    "QuestType": {
+      "type": "string",
+      "enum": [
+        "combat",
+        "exploration",
+        "roleplay",
+        "political",
+        "crafting",
+        "travel"
+      ]
+    },
+    "QuestObjective": {
+      "type": "object",
+      "required": [
+        "id",
+        "description"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "completed": {
+          "type": "boolean"
+        },
+        "optional": {
+          "type": "boolean"
+        }
+      }
+    },
+    "QuestRewards": {
+      "type": "object",
+      "properties": {
+        "xp": {
+          "type": "integer"
+        },
+        "rp": {
+          "type": "integer"
+        },
+        "fame": {
+          "type": "integer"
+        },
+        "commodities": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer"
+          }
+        },
+        "unrestReduction": {
+          "type": "integer"
+        },
+        "structureAccessGranted": {
+          "type": ["string", "null"]
+        },
+        "customReward": {
+          "type": ["string", "null"]
+        }
+      }
+    },
+    "QuestTemplate": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "type",
+        "description",
+        "recommendedLevel",
+        "objectives",
+        "rewards"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/$defs/QuestType"
+        },
+        "description": {
+          "type": "string"
+        },
+        "gmNotes": {
+          "type": ["string", "null"]
+        },
+        "recommendedLevel": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20
+        },
+        "objectives": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/QuestObjective"
+          }
+        },
+        "rewards": {
+          "$ref": "#/$defs/QuestRewards"
+        },
+        "sourceEventTraits": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "isDefaultVisibleToPlayers": {
+          "type": "boolean"
+        },
+        "createdAt": {
+          "type": ["string", "null"]
+        },
+        "updatedAt": {
+          "type": ["string", "null"]
+        }
+      }
+    }
+  }
+}

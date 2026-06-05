@@ -18,6 +18,9 @@
                 <div class="km-quest-card km-quest-active" data-id="{{id}}">
                     <div class="km-quest-card-header">
                         <div class="km-quest-title">{{title}}</div>
+                        {{#if generatedByEvent}}
+                        <span class="km-quest-generated-badge">{{localizeKM "kingdom.questGenerator.generatedBadge"}}</span>
+                        {{/if}}
                         <div class="km-quest-badge km-quest-type-{{type}}">
                             {{#if (eq type "explore_hex")}}<i class="fa-solid fa-compass"></i>{{/if}}
                             {{#if (eq type "claim_hex")}}<i class="fa-solid fa-flag"></i>{{/if}}

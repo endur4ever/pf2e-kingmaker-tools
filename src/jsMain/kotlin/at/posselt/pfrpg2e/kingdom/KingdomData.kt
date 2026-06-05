@@ -192,6 +192,12 @@ external interface KingdomData {
     var companions: Array<RawCharacter>?
     var structureBlacklist: Array<String>
     var campaignClocks: Array<CampaignClock>
+    var questTemplates: Array<dynamic>
+    var campaignQuests: Array<dynamic>
+    var kingdomEventTemplates: Array<dynamic>
+    var campaignKingdomEvents: Array<dynamic>
+    var eventGenerationLogs: Array<dynamic>
+    var questGeneratorSettings: dynamic
 }
 
 fun RawLeaderKingdomSkills.hasSkill(leader: Leader, skill: KingdomSkill) =

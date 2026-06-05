@@ -38,6 +38,7 @@ data class TickResult(
 	val modifiers: Array<RawModifier>,
 	val changes: List<TickChange>,
 	val clockEvents: Array<ClockTickEvent> = emptyArray(),
+	val campaignQuests: Array<dynamic> = emptyArray(),
 )
 
 /**
@@ -83,6 +84,8 @@ object TurnTickingEngine {
 		councilCooldowns: RawCouncilCooldowns?,
 		modifiers: Array<RawModifier>,
 		campaignClocks: Array<CampaignClock> = emptyArray(),
+		campaignQuests: Array<dynamic> = emptyArray(),
+		kingdomLevel: Int = 1,
 	): TickResult {
 		val changes = mutableListOf<TickChange>()
 
@@ -199,6 +202,10 @@ object TurnTickingEngine {
 		// 9) Tick campaign clocks
 		val clockResult = CampaignClockManager.tickAll(campaignClocks)
 
+		// 10) Tick quest timers
+		val (updatedQuests, questChanges) = tickQuests(campaignQuests, kingdomLevel)
+		changes += questChanges
+
 		return TickResult(
 			supernaturalSolutions = 0,
 			creativeSolutions = 0,
@@ -211,6 +218,41 @@ object TurnTickingEngine {
 			modifiers = newModifiers,
 			changes = changes,
 			clockEvents = clockResult.events,
+			campaignQuests = updatedQuests,
 		)
+	}
+
+	/**
+	 * Advance quest timers for generated quests.
+	 * Decrements turnsRemaining on ACTIVE generated quests; marks as FAILED at 0.
+	 * Returns the updated quest array and any TickChange entries produced.
+	 */
+	fun tickQuests(
+		quests: Array<dynamic>,
+		kingdomLevel: Int,
+	): Pair<Array<dynamic>, List<TickChange>> {
+		val changes = mutableListOf<TickChange>()
+		val updated = quests.map { quest ->
+			val status = quest.status as? String
+			val generated = quest.generatedByEvent as? Boolean ?: false
+			val turns = quest.turnsRemaining as? Int
+			if (status == "active" && generated && turns != null && turns > 0) {
+				val newTurns = turns - 1
+				if (newTurns <= 0) {
+					changes += TickChange("quest", "status", "active", "failed")
+					changes += TickChange("quest", "turnsRemaining", turns, 0)
+					quest.asDynamic().status = "failed"
+					quest.asDynamic().turnsRemaining = 0
+					quest
+				} else {
+					changes += TickChange("quest", "turnsRemaining", turns, newTurns)
+					quest.asDynamic().turnsRemaining = newTurns
+					quest
+				}
+			} else {
+				quest
+			}
+		}.toTypedArray()
+		return Pair(updated, changes)
 	}
 }
