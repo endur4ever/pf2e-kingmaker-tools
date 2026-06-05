@@ -28,6 +28,11 @@
             </div>
         {{/if}}
     </div>
+    {{#if learnTarget}}
+        <div class="km-camping-tile-learn">
+            {{> formElement learnTarget }}
+        </div>
+    {{/if}}
     {{#if requiresCheck}}
         <div class="km-camping-tile-check">
             {{> formElement skills }}

@@ -1,11 +1,14 @@
 package at.posselt.pfrpg2e.kingdom.modifiers.evaluation
 
 import at.posselt.pfrpg2e.data.kingdom.settlements.Block
+import at.posselt.pfrpg2e.data.kingdom.settlements.NpcEntry
+import at.posselt.pfrpg2e.data.kingdom.settlements.PopulationRoster
 import at.posselt.pfrpg2e.data.kingdom.settlements.Settlement
 import at.posselt.pfrpg2e.data.kingdom.settlements.SettlementLayoutType
 import at.posselt.pfrpg2e.data.kingdom.settlements.SettlementType
 import at.posselt.pfrpg2e.data.kingdom.settlements.findSettlementMaxItemBonusLevel
 import at.posselt.pfrpg2e.data.kingdom.settlements.findSettlementSize
+import at.posselt.pfrpg2e.data.kingdom.settlements.generateInitialPopulation
 import at.posselt.pfrpg2e.data.kingdom.structures.AvailableItemBonuses
 import at.posselt.pfrpg2e.data.kingdom.structures.CommodityStorage
 import at.posselt.pfrpg2e.data.kingdom.structures.GroupedStructureBonus
@@ -180,6 +183,7 @@ data class SettlementData(
     val waterBorders: Int,
     val id: String,
     val layoutType: SettlementLayoutType,
+    val populationRoster: PopulationRoster = PopulationRoster(),
 )
 
 fun evaluateSettlement(
@@ -225,7 +229,7 @@ fun evaluateSettlement(
         .flatMap { it.unlockActivities }
         .toSet()
     val hasBridge = constructedStructures.any { it.isBridge }
-    return Settlement(
+    val settlement = Settlement(
         id = data.id,
         name = data.name,
         waterBorders = data.waterBorders,
@@ -253,5 +257,11 @@ fun evaluateSettlement(
         maximumCivicRdLimit = structures.maxOfOrNull { it.maximumCivicRdLimit } ?: 0,
         settlementActions = structures.maxOfOrNull { it.increaseMinimumSettlementActions } ?: 0,
         blocks = blocks,
+        populationRoster = data.populationRoster,
     )
+    return if (settlement.populationRoster.npcs.isEmpty()) {
+        settlement.copy(populationRoster = settlement.generateInitialPopulation())
+    } else {
+        settlement
+    }
 }

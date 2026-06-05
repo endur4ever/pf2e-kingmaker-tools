@@ -12,4 +12,18 @@ external interface RawSettlement {
     var secondaryTerritory: Boolean
     var manualSettlementLevel: Boolean?
     var waterBorders: Int
+    var populationRoster: RawPopulationRoster?
+}
+
+@JsPlainObject
+external interface RawPopulationRoster {
+    var npcs: Array<RawNpcEntry>?
+}
+
+@JsPlainObject
+external interface RawNpcEntry {
+    var id: String
+    var name: String
+    var occupation: String
+    var notes: String?
 }

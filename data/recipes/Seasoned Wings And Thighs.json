@@ -21,14 +21,24 @@
       },
       {
         "uuid": "Compendium.pf2e-kingmaker-tools.kingmaker-tools-meal-effects.Item.JqKhpMXiQCEsDSCw",
-        "removeWhenPreparingCampsite": false
+        "removeWhenPreparingCampsite": false,
+        "grantsReaction": {
+          "type": "reaction",
+          "name": "recipes.seasoned-wings-and-thighs.reaction.name",
+          "description": "recipes.seasoned-wings-and-thighs.reaction.description"
+        }
       }
     ]
   },
   "success": {
     "effects": [
       {
-        "uuid": "Compendium.pf2e-kingmaker-tools.kingmaker-tools-meal-effects.Item.JqKhpMXiQCEsDSCw"
+        "uuid": "Compendium.pf2e-kingmaker-tools.kingmaker-tools-meal-effects.Item.JqKhpMXiQCEsDSCw",
+        "grantsReaction": {
+          "type": "reaction",
+          "name": "recipes.seasoned-wings-and-thighs.reaction.name",
+          "description": "recipes.seasoned-wings-and-thighs.reaction.description"
+        }
       }
     ]
   },

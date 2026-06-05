@@ -4,6 +4,8 @@ import at.posselt.pfrpg2e.Config
 import at.posselt.pfrpg2e.actor.isKingmakerInstalled
 import at.posselt.pfrpg2e.data.ValueEnum
 import at.posselt.pfrpg2e.data.kingdom.settlements.Block
+import at.posselt.pfrpg2e.data.kingdom.settlements.NpcEntry
+import at.posselt.pfrpg2e.data.kingdom.settlements.PopulationRoster
 import at.posselt.pfrpg2e.data.kingdom.settlements.Settlement
 import at.posselt.pfrpg2e.data.kingdom.settlements.SettlementLayoutType
 import at.posselt.pfrpg2e.data.kingdom.settlements.SettlementLevelUpType
@@ -102,6 +104,18 @@ fun Scene.parseSettlement(
         blocks.filter { it.isOccupied }.size
     ) else rawSettlement.lots
     val structures = getStructures()
+    val populationRoster = rawSettlement.populationRoster?.let { raw ->
+        PopulationRoster(
+            npcs = raw.npcs?.map { npc ->
+                NpcEntry(
+                    id = npc.id,
+                    name = npc.name,
+                    occupation = npc.occupation,
+                    notes = npc.notes,
+                )
+            }?.toList() ?: emptyList()
+        )
+    } ?: PopulationRoster()
     return evaluateSettlement(
         data = SettlementData(
             id = rawSettlement.sceneId,
@@ -113,6 +127,7 @@ fun Scene.parseSettlement(
                 ?: SettlementLayoutType.RIGID,
             isSecondaryTerritory = rawSettlement.secondaryTerritory,
             waterBorders = rawSettlement.waterBorders,
+            populationRoster = populationRoster,
         ),
         structures = structures,
         allStructuresStack = allStructuresStack,

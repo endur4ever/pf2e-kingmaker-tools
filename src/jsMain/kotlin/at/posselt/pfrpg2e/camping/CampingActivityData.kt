@@ -82,6 +82,9 @@ fun CampingActivityData.isHiddenByLock(lockedActivityIds: Set<String>): Boolean 
 fun CampingActivityData.isCookMeal() =
     id == cookMealId
 
+fun CampingActivityData.isLearnFromCompanion() =
+    id == learnFromACompanionId
+
 fun CampingActivityData.isPrepareCampsite() =
     id == prepareCampsiteId
 

@@ -309,6 +309,25 @@ object Pfrpg2eKingdomCampingWeatherSettings {
     fun getCurrentWeatherFx(): String =
         game.settings.getString("currentWeatherFx")
 
+    suspend fun setObsidianVaultName(value: String) =
+        game.settings.setString("obsidianVaultName", value)
+
+    fun getObsidianVaultName(): String =
+        game.settings.getNullableString("obsidianVaultName") ?: ""
+
+    suspend fun setObsidianJournalFolder(value: String) =
+        game.settings.setString("obsidianJournalFolder", value)
+
+    fun getObsidianJournalFolder(): String =
+        game.settings.getNullableString("obsidianJournalFolder") ?: "Kingdom Export"
+
+    suspend fun setObsidianOverwrite(value: Boolean) =
+        game.settings.setBoolean("obsidianOverwrite", value)
+
+    fun getObsidianOverwrite(): Boolean =
+        try { game.settings.getBoolean("obsidianOverwrite") } catch (_: Throwable) { true }
+
+
     suspend fun setCurrentWeatherType(value: String) =
         game.settings.setString("currentWeatherType", value)
 
@@ -430,6 +449,24 @@ object Pfrpg2eKingdomCampingWeatherSettings {
             hint = t("settings.enableTokenMappingHelp"),
             default = true,
             requiresReload = true,
+        )
+        game.settings.registerScalar<String>(
+            key = "obsidianVaultName",
+            name = t("settings.obsidianVaultName"),
+            hint = t("settings.obsidianVaultNameHelp"),
+            default = "",
+        )
+        game.settings.registerScalar<String>(
+            key = "obsidianJournalFolder",
+            name = t("settings.obsidianJournalFolder"),
+            hint = t("settings.obsidianJournalFolderHelp"),
+            default = "Kingdom Export",
+        )
+        game.settings.registerScalar<Boolean>(
+            key = "obsidianOverwrite",
+            name = t("settings.obsidianOverwrite"),
+            hint = t("settings.obsidianOverwriteHelp"),
+            default = true,
         )
     }
 }

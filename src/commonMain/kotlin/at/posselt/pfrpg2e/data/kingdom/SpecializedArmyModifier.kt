@@ -17,7 +17,7 @@ data class SpecializedArmyModifier(
 
 val specializedArmyModifierData = listOf(
 	SpecializedArmyModifier(armyName = "Sootscale Warriors", scouting = null, standardDc = 2, ac = 1, highSave = 2, lowSave = -1, routThreshold = 1),
-	SpecializedArmyModifier(armyName = "Skirmisher", standardDc = -2, ac = 2, highSave = 2, lowSave = 2),
+	SpecializedArmyModifier(armyName = "Skirmishers", standardDc = -2, ac = 2, highSave = 2, lowSave = 2),
 	SpecializedArmyModifier(armyName = "Lizardfolk Defenders", scouting = 2, standardDc = 2, ac = 1, highSave = 1),
 	SpecializedArmyModifier(armyName = "Greengripe Bombardiers", scouting = -2, standardDc = 5, ac = -2, highSave = -2, attack = 1),
 	SpecializedArmyModifier(armyName = "Nomen Scouts", scouting = 2, standardDc = 2, highSave = 1, routThreshold = -4),

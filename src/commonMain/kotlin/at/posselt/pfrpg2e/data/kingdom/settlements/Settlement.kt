@@ -16,6 +16,65 @@ data class Block(
     val isOccupied = occupiedLots > 0
 }
 
+data class NpcEntry(
+    val id: String,
+    val name: String,
+    val occupation: String,
+    val notes: String? = null,
+)
+
+data class PopulationRoster(
+    val npcs: List<NpcEntry> = emptyList(),
+)
+
+/**
+ * Common occupations for generated NPCs in a Stolen Lands settlement.
+ */
+val npcOccupations = listOf(
+    "Farmer", "Blacksmith", "Innkeeper", "Merchant", "Fisher",
+    "Carpenter", "Tanner", "Miller", "Baker", "Butcher",
+    "Healer", "Guard", "Tailor", "Brewer", "Herbalist",
+    "Ranger", "Soldier", "Scribe", "Priest", "Teamster",
+    "Potter", "Weaver", "Mason", "Fletcher", "Cobbler",
+    "Barber", "Courier", "Lamplighter", "Tavern Keeper", "Rat Catcher",
+    "Soapmaker", "Tinker", "Woodcutter", "Shepherd", "Beekeeper",
+    "Jeweler", "Painter", "Ropewright", "Cartwright", "Miner",
+)
+
+/**
+ * Deterministically seed an initial population of named NPCs for this settlement.
+ *
+ * Uses [size.populationNumber] to decide how many NPCs to create (a sampled
+ * subset, not one per resident — roughly sqrt(population) * 1.5, capped at a
+ * reasonable maximum).  The RNG is seeded from [id] so the same settlement
+ * always produces the same roster.
+ *
+ * @return A new [PopulationRoster] with generated NPCs.
+ */
+fun Settlement.generateInitialPopulation(): PopulationRoster {
+    if (populationRoster.npcs.isNotEmpty()) return populationRoster
+
+    val totalPop = size.populationNumber
+    // Scale: sqrt * 1.5 gives ~30 for a village of 400, ~67 for a town of 2000,
+    // ~237 for a city of 25000.  Cap at 200 so very large settlements don't flood.
+    val count = minOf(200, maxOf(5, (kotlin.math.sqrt(totalPop.toDouble()) * 1.5).toInt()))
+
+    val seed = id.fold(0L) { acc, c -> acc * 31 + c.code }
+    val rng = SeededRng(seed)
+    val gen = NpcNameGenerator(seed)
+
+    val npcs = List(count) { index ->
+        val name = gen.generate()
+        val occupation = npcOccupations[rng.nextInt(npcOccupations.size)]
+        NpcEntry(
+            id = "npc-${id}-$index",
+            name = name.fullName,
+            occupation = occupation,
+        )
+    }
+    return PopulationRoster(npcs = npcs)
+}
+
 data class Settlement(
     val id: String,
     val name: String,
@@ -50,6 +109,7 @@ data class Settlement(
     val lotsBorderingWater: Int = 0,
     val edges: SettlementEdges = SettlementEdges(),
     val urbanGrid: UrbanGrid = UrbanGrid(),
+    val populationRoster: PopulationRoster = PopulationRoster(),
 ) {
     private val totalConsumption = size.consumption - consumptionReduction
     val isOvercrowded = occupiedBlocks > residentialLots

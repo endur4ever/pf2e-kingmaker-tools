@@ -128,7 +128,7 @@ class ArmyTacticMigrationTest {
         // enginesofwar, burningweaponry, explosivedefeat, swampdwellers, amphibious,
         // chorusofcroaks, swampcharge, brave, selfsufficient, trample, accustomedtopanic,
         // hurlnets, waterretreat, waterstride, furiouscharge, reactiverally, revelinbattle, warmongers
-        assertEquals(39, armyTacticData.size, "Should have 39 army tactics from workbook")
+        assertEquals(40, armyTacticData.size, "Should have 40 army tactics from workbook")
     }
 
     @Test
@@ -678,13 +678,13 @@ class ArmyTemplateSpotCheckTest {
 
     @Test
     fun totalArmyTemplateCountIsTen() {
-        assertEquals(10, armyTemplateData.size, "Should have 10 army templates (4 basic + 6 unique)")
+        assertEquals(11, armyTemplateData.size, "Should have 11 army templates (4 basic + 7 unique)")
     }
 
     @Test
     fun sixUniqueArmiesExist() {
         val unique = armyTemplateData.filter { it.type == ArmyType.UNIQUE }
-        assertEquals(6, unique.size, "Should have 6 unique army templates")
+        assertEquals(7, unique.size, "Should have 7 unique army templates")
     }
 }
 

@@ -292,6 +292,9 @@ suspend fun syncHexDrawingsToNativeState(game: Game) {
     // Roads are global (they connect adjacent hexes), so they're synced once over the whole
     // hex set rather than per-hex.
     syncRoadDrawings(activeScene, hexes, kingdomActor.uuid, activeDrawings)
+
+    // Sync hex content markers
+    syncHexContentMarkers(game, kingdomActor)
 }
 
 /**

@@ -45,6 +45,15 @@ object CampingActivityScheduler {
         countActivitiesForActor(activities, actorUuid) >= MAX_ACTIVITIES_PER_PC
 
     /**
+     * Check whether the actor has exhausted their downtime budget via [CampingData.downtimeHoursSpent].
+     *
+     * This is the authoritative check for whether an actor can be assigned *any* more activity
+     * (rolled or no-roll). When remaining hours are 0, no further assignments are allowed.
+     */
+    fun isOverDowntimeHoursBudget(camping: CampingData, actorUuid: String): Boolean =
+        camping.downtimeHoursRemaining(actorUuid) <= 0
+
+    /**
      * Check whether a different PC is currently attempting the same activity.
      *
      * Only unresolved attempts (no [CampingActivityWithId.result] yet) count as "at the same

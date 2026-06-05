@@ -46,4 +46,86 @@
         padding: 1em;
         position: relative;
     }
+
+    .km-population-roster {
+        .km-population-header {
+            display: flex;
+            align-items: center;
+            gap: .5em;
+            color: var(--secondary-km, #ee9b3a);
+            margin-bottom: .5em;
+
+            h3 {
+                margin: 0;
+                font-size: var(--font-size-16);
+            }
+
+            .km-header-right-align {
+                margin-left: auto;
+            }
+        }
+
+        .km-population-table {
+            width: 100%;
+            border-collapse: collapse;
+
+            th {
+                text-align: left;
+                padding: .4em .6em;
+                border-bottom: 1px solid rgba(120, 120, 120, 0.3);
+                color: #9a9a9a;
+                font-size: var(--font-size-12);
+                font-weight: 600;
+            }
+
+            td {
+                padding: .4em .6em;
+                border-bottom: 1px solid rgba(120, 120, 120, 0.15);
+                color: #e0e0e0;
+                font-size: var(--font-size-13);
+            }
+
+            .km-population-actions {
+                display: flex;
+                gap: .4em;
+                white-space: nowrap;
+
+                button {
+                    background: none;
+                    border: 1px solid rgba(120, 120, 120, 0.25);
+                    border-radius: 4px;
+                    padding: .2em .5em;
+                    color: #9a9a9a;
+                    cursor: pointer;
+
+                    &:hover {
+                        color: #e0e0e0;
+                        border-color: rgba(120, 120, 120, 0.5);
+                    }
+                }
+            }
+        }
+
+        .km-empty-population {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2em;
+            color: #777;
+            text-align: center;
+            border: 2px dashed rgba(120, 120, 120, 0.15);
+            border-radius: 8px;
+
+            i {
+                font-size: 2em;
+                margin-bottom: .5em;
+                opacity: 0.5;
+            }
+
+            p {
+                margin: 0;
+            }
+        }
+    }
 }

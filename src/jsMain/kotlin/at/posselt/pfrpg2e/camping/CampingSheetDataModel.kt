@@ -20,6 +20,11 @@ class CampingSheetDataModel(
             int("numberOfWatches", nullable = true)
             schema("activities") {
                 stringRecord("selectedSkill")
+                stringRecord("learnTarget") {
+                    string(nullable = true) {
+
+                    }
+                }
                 stringRecord("degreeOfSuccess") {
                     string(nullable = true) {
 

@@ -288,7 +288,7 @@ Each weather event needs:
 ### Additional Weather Rules (not in table)
 - **Precipitation**: Flat check DC 20 (summer), 15 (spring/autumn), 8 (winter). Light rain/snow: 4h to fatigued, -1 visual Perception.
 - **Temperature**: Mild Cold flat check DC 18 (Kuthona/Calistril) or DC 16 (Abadius). 4h to fatigued.
-- **Weather event XP**: Characters gain XP for experiencing weather events (unless sheltered).
+- **Weather event XP**: Characters gain XP for experiencing weather events (unless sheltered). XP values equal those for overcoming simple hazards per the PF2e core rules.
 
 ---
 

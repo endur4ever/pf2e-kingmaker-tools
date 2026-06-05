@@ -31,8 +31,8 @@ class SpecializedArmyModifierDataTest {
 
     @Test
     fun skirmisherEntryExists() {
-        val modifier = specializedArmyModifierData.find { it.armyName == "Skirmisher" }
-        assertNotNull(modifier, "Skirmisher modifier should exist")
+        val modifier = specializedArmyModifierData.find { it.armyName == "Skirmishers" }
+        assertNotNull(modifier, "Skirmishers modifier should exist")
         assertEquals(-2, modifier.standardDc)
         assertEquals(2, modifier.ac)
         assertEquals(2, modifier.highSave)

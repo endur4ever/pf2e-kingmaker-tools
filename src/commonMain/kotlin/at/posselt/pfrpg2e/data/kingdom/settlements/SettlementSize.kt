@@ -10,7 +10,41 @@ data class SettlementSize(
     val influence: Int,
     val levelFrom: Int,
     val levelTo: Int? = null,
-)
+) {
+    /**
+     * A representative numeric population derived from the [population] string.
+     *
+     * Parses ranges like "401-2000" (returns the midpoint) and open-ended
+     * strings like "<401" or "25001+" (returns the boundary value).
+     * This is used to determine how many named NPCs to seed.
+     */
+    val populationNumber: Int
+        get() {
+            val s = population.replace(",", "").trim()
+            // range "401-2000" or "2001-25000"
+            val rangeMatch = Regex("""(\d+)\s*[-–]\s*(\d+)""").find(s)
+            if (rangeMatch != null) {
+                val (lo, hi) = rangeMatch.destructured
+                return (lo.toInt() + hi.toInt()) / 2
+            }
+            // "<401" → use the upper bound
+            val lessMatch = Regex("""<\s*(\d+)""").find(s)
+            if (lessMatch != null) {
+                return lessMatch.groupValues[1].toInt()
+            }
+            // "25001+" → use the lower bound
+            val plusMatch = Regex("""(\d+)\+""").find(s)
+            if (plusMatch != null) {
+                return plusMatch.groupValues[1].toInt()
+            }
+            // fallback: grab the first number we see
+            val anyNum = Regex("""(\d+)""").find(s)
+            if (anyNum != null) {
+                return anyNum.groupValues[1].toInt()
+            }
+            return 200 // sensible default
+        }
+}
 
 val settlementSizeData = listOf(
     SettlementSize(

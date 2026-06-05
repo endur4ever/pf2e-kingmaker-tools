@@ -87,13 +87,13 @@ class CampaignClockIntegrationTest {
         // Simulate a kingdom data object before migration
         val kingdom = js("{}")
         // campaignClocks is null before migration
-        assertEquals(null, kingdom.asDynamic().campaignClocks)
+        assertTrue(kingdom.campaignClocks === undefined)
 
         // After migration: set to empty array
-        kingdom.asDynamic().campaignClocks = emptyArray<Any>()
+        kingdom.campaignClocks = emptyArray<Any>()
 
         // Verify it's now an empty array, not null
-        assertNotNull(kingdom.asDynamic().campaignClocks)
-        assertEquals(0, (kingdom.asDynamic().campaignClocks as Array<*>).size)
+        assertTrue(kingdom.campaignClocks !== undefined)
+        assertEquals(0, kingdom.campaignClocks.length)
     }
 }

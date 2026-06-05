@@ -159,6 +159,9 @@
         "removeWhenPreparingCampsite": {
           "type": "boolean"
         },
+        "removeAfterRest": {
+          "type": "boolean"
+        },
         "changeRestDurationSeconds": {
           "type": "number"
         },
@@ -209,6 +212,58 @@
         },
         "damageFormula": {
           "type": "string"
+        },
+        "grantsFreeAction": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "freeAction",
+                "singleAction",
+                "reaction"
+              ]
+            },
+            "name": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "durationSeconds": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "type",
+            "name"
+          ]
+        },
+        "grantsReaction": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "freeAction",
+                "singleAction",
+                "reaction"
+              ]
+            },
+            "name": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "durationSeconds": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "type",
+            "name"
+          ]
         }
       },
       "required": [

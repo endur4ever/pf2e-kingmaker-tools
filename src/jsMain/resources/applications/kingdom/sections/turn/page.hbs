@@ -281,6 +281,15 @@
             <p>{{localizeKM "kingdom.continuousTraitHelp"}}</p>
             {{> kingdom-events ongoingEvents=ongoingEvents isGM=isGM}}
         </section>
+        <section class="km-kingdom-sheet-section" {{#unless questTimerChanges.length}}hidden{{/unless}}>
+            <h2>{{localizeKM "kingdom.questGenerator.title"}}</h2>
+            {{#each questTimerChanges}}
+            <div class="km-quest-timer-change">
+                <span class="km-quest-timer-name">{{questName}}</span>:
+                <span class="km-quest-timer-value">{{changeLabel}}</span>
+            </div>
+            {{/each}}
+        </section>
         <section class="km-kingdom-sheet-section" {{#if (ne currentNavEntry 'clock')}}hidden{{/if}}>
             <h2 id="{{actorUuid}}-km-turn-clock">{{localizeKM "kingdom.clocks.title"}}</h2>
             {{#if campaignClocks.hasActiveClocks}}

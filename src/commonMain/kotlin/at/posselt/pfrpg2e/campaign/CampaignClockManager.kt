@@ -15,7 +15,7 @@ object CampaignClockManager {
         var totalUnrest = 0
 
         val updated = clocks.map { clock ->
-            if (!clock.active || clock.expired) return@map clock
+            if (!clock.active || (clock.expired && !clock.pauseOnExpiry)) return@map clock
 
             if (clock.turnsRemaining == 0 && clock.pauseOnExpiry) {
                 // Decision 3: soft-pause — do not tick

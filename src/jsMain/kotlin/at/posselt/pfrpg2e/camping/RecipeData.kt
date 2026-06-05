@@ -19,6 +19,26 @@ external interface ReduceConditions {
 fun ReduceConditions.reducesAnyCondition() =
     listOfNotNull(drained, enfeebled, clumsy, stupefied).any { it > 0 }
 
+enum class ActionType : ValueEnum, Translatable {
+    FREE_ACTION,
+    SINGLE_ACTION,
+    REACTION;
+
+    override val value: String
+        get() = toCamelCase()
+
+    override val i18nKey: String
+        get() = "actionType.$value"
+}
+
+@JsPlainObject
+external interface GrantedAction {
+    val type: String // ActionType value
+    val name: String
+    val description: String?
+    val durationSeconds: Int?
+}
+
 @JsPlainObject
 external interface MealEffect {
     val uuid: String
@@ -32,6 +52,8 @@ external interface MealEffect {
     val changeFatigueDurationSeconds: Int?
     val healMode: String? // afterConsumption, afterRest, afterConsumptionAndRest
     val reduceConditions: ReduceConditions?
+    val grantsFreeAction: GrantedAction?
+    val grantsReaction: GrantedAction?
 }
 
 

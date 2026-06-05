@@ -238,10 +238,11 @@ class WaterAdjacencyTest {
             .flatMap { it.blockIds.split(",") }
             .map { it.trim() }
             .sorted()
-        // Blocks 1-9 should all appear at least once
-        val expectedBlocks = (1..9).map { it.toString() }
+        // Blocks 1-4 and 6-9 should all appear at least once (block 5 is center and cannot touch water)
+        val expectedBlocks = listOf("1", "2", "3", "4", "6", "7", "8", "9")
         expectedBlocks.forEach { block ->
             assertTrue(allBlocks.contains(block), "Block $block should appear in at least one face's blockIds")
         }
+        assertFalse(allBlocks.contains("5"), "Block 5 is the center block and should not appear in any face's blockIds")
     }
 }

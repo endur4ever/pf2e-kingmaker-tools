@@ -24,6 +24,7 @@ class ActorMealPropertyBuilder(basePath: String, updates: Record<String, Any?>, 
     val actorUuid = PropertyUpdateBuilder<String>(propertyName, updates, "actorUuid")
     val favoriteMeal = PropertyUpdateBuilder<String?>(propertyName, updates, "favoriteMeal")
     val chosenMeal = PropertyUpdateBuilder<String>(propertyName, updates, "chosenMeal")
+    val fixedFavoriteMeal = PropertyUpdateBuilder<Boolean?>(propertyName, updates, "fixedFavoriteMeal")
 
     operator fun invoke(action: ActorMealPropertyBuilder.() -> Unit) = action()
 }
@@ -37,6 +38,7 @@ class CookingPropertyBuilder(basePath: String, updates: Record<String, Any?>, pr
     val homebrewMeals = PropertyUpdateBuilder<Array<RecipeData>>(propertyName, updates, "homebrewMeals")
     val results = CookingResultPropertyBuilder(propertyName, updates, "results")
     val minimumSubsistence = PropertyUpdateBuilder<Int>(propertyName, updates, "minimumSubsistence")
+    val favoriteMealProgress = PropertyUpdateBuilder<Record<String, Record<String, FavoriteMealProgression>>?>(propertyName, updates, "favoriteMealProgress")
 
     operator fun invoke(action: CookingPropertyBuilder.() -> Unit) = action()
 }
@@ -79,7 +81,7 @@ class RestSettingsPropertyBuilder(basePath: String, updates: Record<String, Any?
 class CampingUpdateBuilder(val updates: Record<String, Any?>, basePath: String = "") {
     val actorUuids = PropertyUpdateBuilder<Array<String>>(basePath, updates, "actorUuids")
     val campingActivities =
-        RecordPropertyUpdateBuilder<Record<String, CampingActivity>>(basePath, updates, "campingActivities")
+        RecordPropertyUpdateBuilder<CampingActivity>(basePath, updates, "campingActivities")
     val cooking = CookingPropertyBuilder(basePath, updates, "cooking")
     val currentRegion = PropertyUpdateBuilder<String>(basePath, updates, "currentRegion")
     val homebrewCampingActivities =
@@ -112,6 +114,7 @@ class CampingUpdateBuilder(val updates: Record<String, Any?>, basePath: String =
     val restingTrack = RestingTrackPropertyBuilder(basePath, updates, "restingTrack")
     val regionSettings = RegionSettingsPropertyBuilder(basePath, updates, "regionSettings")
     val restSettings = RestSettingsPropertyBuilder(basePath, updates, "restSettings")
+    val downtimeHoursSpent = PropertyUpdateBuilder<Record<String, Int>?>(basePath, updates, "downtimeHoursSpent")
 }
 
 fun buildCampingUpdate(

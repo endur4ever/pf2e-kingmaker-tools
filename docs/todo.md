@@ -10,10 +10,10 @@ Done add camp Precipitation Check, Tempature, Weather events rolls, with tool ti
     Tempature check out the 10-13 on page 518 of the core rulebook for pf2e, Mild cold by attempting a DC 18 flat check during winter. if success they are fatigued after 4 hours rather then 8.
     Random weather events DC 17 to get a weather event Random weather event table on page 122 of kingmaker companion guide or maybe on internet
 
-TODO implement the favorite meals mechanic ref kingmaker companion guide. pg 113
+DONE implement the favorite meals mechanic ref kingmaker companion guide. pg 113
 TODO activities that dont have a roll like enhance weapons doesnt have a way to subtract the 8h in camping. fix this
 TODO each settlement needs to have a living breathing population. There is a population number, We need to get names for each person starting off
 TODO should we think about having obsidian tie into this module research if this is possible or a good idea for foundry
 TODO same as obsidian look at integration with world anvil
-
+TODO I want you to make hermes profiles for each of the kingmaker companions. Look at obsidian and notebooklm and online to get an idea of their soul.md
 

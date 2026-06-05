@@ -746,6 +746,23 @@ ul.km-camping-actors {
                 }
             }
 
+            .km-camping-tile-learn {
+                display: flex;
+                border-bottom: 1px solid;
+
+                select {
+                    border-radius: 0;
+                    border-style: none;
+                    outline: none;
+                    box-shadow: none;
+                    font-size: 1em;
+                    height: calc(2em + 1px);
+                    width: 150px;
+                    text-overflow: ellipsis;
+                    overflow: hidden;
+                }
+            }
+
             .km-camping-tile-result {
                 border-radius: 0 0 5px 5px;
 
@@ -829,7 +846,8 @@ ul.km-camping-actors {
     .km-recipe-requirements,
     .km-camping-eating-total,
     .km-recipe-actors li,
-    .km-camping-tile-check {
+    .km-camping-tile-check,
+    .km-camping-tile-learn {
         background: var(--background);
     }
 
@@ -846,6 +864,7 @@ ul.km-camping-actors {
     button.km-camping-action,
     .km-camping-tile-check,
     .km-camping-tile-result,
+    .km-camping-tile-learn,
     .km-recipe-cost,
     .km-recipe-meta,
     .km-recipe-requirements,

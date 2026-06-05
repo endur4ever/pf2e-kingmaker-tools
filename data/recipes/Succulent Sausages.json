@@ -25,7 +25,12 @@
     "effects": [
       {
         "uuid": "Compendium.pf2e-kingmaker-tools.kingmaker-tools-meal-effects.Item.G0qnixpCakGeHTp1",
-        "removeAfterRest": true
+        "removeAfterRest": true,
+        "grantsReaction": {
+          "type": "reaction",
+          "name": "recipes.succulent-sausages.reaction.name",
+          "description": "recipes.succulent-sausages.reaction.description"
+        }
       }
     ]
   },
@@ -41,7 +46,12 @@
     "effects": [
       {
         "uuid": "Compendium.pf2e-kingmaker-tools.kingmaker-tools-meal-effects.Item.jseoPPvbPg4Vr7MI",
-        "removeWhenPreparingCampsite": false
+        "removeWhenPreparingCampsite": false,
+        "grantsReaction": {
+          "type": "reaction",
+          "name": "recipes.succulent-sausages.reaction.name",
+          "description": "recipes.succulent-sausages.reaction.description"
+        }
       }
     ]
   }

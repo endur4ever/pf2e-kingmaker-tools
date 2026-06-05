@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://posselt.at/pf2e-kingmaker-tools/schemas/settlement.json",
+  "title": "Settlement",
+  "description": "A kingdom settlement",
+  "$ref": "#/$defs/Settlement",
+  "$defs": {
+    "Settlement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sceneId",
+        "lots",
+        "level",
+        "type",
+        "layoutType",
+        "secondaryTerritory",
+        "waterBorders"
+      ],
+      "properties": {
+        "sceneId": {
+          "type": "string"
+        },
+        "lots": {
+          "type": "number"
+        },
+        "level": {
+          "type": "number"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "capital",
+            "settlement"
+          ]
+        },
+        "layoutType": {
+          "type": "string",
+          "enum": [
+            "rigid",
+            "freeForm"
+          ]
+        },
+        "secondaryTerritory": {
+          "type": "boolean"
+        },
+        "manualSettlementLevel": {
+          "type": "boolean"
+        },
+        "waterBorders": {
+          "type": "number"
+        },
+        "populationRoster": {
+          "$ref": "#/$defs/PopulationRoster"
+        }
+      }
+    },
+    "PopulationRoster": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "npcs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/NpcEntry"
+          }
+        }
+      }
+    },
+    "NpcEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "occupation"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "occupation": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

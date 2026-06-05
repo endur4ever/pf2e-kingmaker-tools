@@ -52,6 +52,7 @@ import at.posselt.pfrpg2e.utils.t
 import at.posselt.pfrpg2e.utils.toDateInputString
 import at.posselt.pfrpg2e.utils.toMap
 import at.posselt.pfrpg2e.utils.toMutableRecord
+import js.objects.recordOf
 import com.foundryvtt.core.Game
 import com.foundryvtt.core.applications.api.ApplicationRenderOptions
 import com.foundryvtt.core.applications.api.HandlebarsRenderOptions
@@ -71,7 +72,6 @@ import js.array.component2
 import js.core.Void
 import js.objects.Object
 import js.objects.ReadonlyRecord
-import js.objects.recordOf
 import kotlinx.coroutines.await
 import kotlinx.datetime.LocalTime
 import kotlinx.js.JsPlainObject
@@ -113,6 +113,9 @@ external interface CampingSheetActivity {
     val requiresCheck: Boolean
     val secret: Boolean
     val skills: FormElementContext?
+    // Only populated for the "Learn from a Companion" activity: a dropdown of
+    // companion activities (whose companion is present) the player can learn.
+    val learnTarget: FormElementContext?
     val disabled: Boolean
     val disabledReason: String?
 }
@@ -213,6 +216,7 @@ external interface CampingSheetContext : ValidatedHandlebarsContext {
 external interface CampingSheetActivitiesFormData {
     val degreeOfSuccess: ReadonlyRecord<String, String?>?
     val selectedSkill: ReadonlyRecord<String, String?>?
+    val learnTarget: ReadonlyRecord<String, String?>?
 }
 
 @JsPlainObject
@@ -822,19 +826,27 @@ class CampingSheet(
                             .filterNot { it.validateOnly }
                             .firstOrNull()
                         val existing = camping.campingActivities[activityId]
-                        if (existing == null) {
-                            camping.campingActivities[activity.id] = CampingActivity(
-                                actorUuid = actorUuid,
-                                selectedSkill = skill?.attribute?.value,
-                            )
-                        } else {
-                            // Assigning a character is a fresh attempt: drop the previous roll
-                            // result so downtime hours are only consumed once it is re-rolled.
-                            existing.actorUuid = actorUuid
-                            existing.selectedSkill = skill?.attribute?.value
-                            existing.result = null
+                        actor.typedCampingUpdate { current ->
+                            if (existing == null) {
+                                campingActivities[activityId] = CampingActivity(
+                                    actorUuid = actorUuid,
+                                    selectedSkill = skill?.attribute?.value,
+                                )
+                            } else {
+                                campingActivities[activityId] = CampingActivity(
+                                    actorUuid = actorUuid,
+                                    selectedSkill = skill?.attribute?.value,
+                                )
+                            }
+                            if (!activity.requiresACheck()) {
+                                val spent = current.downtimeHoursSpent ?: recordOf()
+                                val key = actorUuid.replace('.', '_')
+                                val newSpent = recordOf<String, Int>()
+                                js.objects.Object.keys(spent).forEach { k -> newSpent[k] = spent[k]!! }
+                                newSpent[key] = (newSpent[key] ?: 0) + CampingActivityScheduler.DOWNTIME_HOURS_PER_ACTIVITY
+                                downtimeHoursSpent.set(newSpent)
+                            }
                         }
-                        actor.setCamping(camping)
                     }
                 }
             }
@@ -890,7 +902,7 @@ class CampingSheet(
     private suspend fun addItemToActor(documentRef: DocumentRef<*>, actor: PF2EActor) {
         val document = documentRef.getDocument()
         if (allowedDnDItems.any { it.isInstance(document) }) {
-            actor.addToInventory(document.toObject())
+            actor.addToInventory(document.toObject()).await()
         } else {
             ui.notifications.error(t("camping.wrongItemAddedToActor"))
         }
@@ -1069,6 +1081,8 @@ class CampingSheet(
             }
             .toMap()
         val groupActivities = camping.groupActivities().sortedBy { it.data.id }
+        console.log("KM_DEBUG: All activities in groupActivities:", groupActivities.map { it.data.id }.joinToString(","))
+        console.log("KM_DEBUG: All activities in getAllActivities():", camping.getAllActivities().map { it.id }.joinToString(","))
         val section = fromCamelCase<CampingSheetSection>(camping.section) ?: CampingSheetSection.PREPARE_CAMPSITE
         val prepareCampSection = section == CampingSheetSection.PREPARE_CAMPSITE
         val campingActivitiesSection = section == CampingSheetSection.CAMPING_ACTIVITIES
@@ -1116,14 +1130,43 @@ class CampingSheet(
                     || eatingSection
                     || setWatchesSection
                     || camping.alwaysPerformActivityIds.contains(data.id)
+            if (data.id == "learn-from-a-companion") {
+                console.log(
+                    "KM_DEBUG: learn-from-a-companion details:",
+                    "hidden:", hidden,
+                    "isHiddenByLock:", data.isHiddenByLock(camping.lockedActivities.toSet()),
+                    "prepareCampSection:", prepareCampSection,
+                    "isPrepareCamp:", groupedActivity.isPrepareCamp(),
+                    "campingActivitiesSection:", campingActivitiesSection,
+                    "eatingSection:", eatingSection,
+                    "setWatchesSection:", setWatchesSection,
+                    "lockedActivities:", camping.lockedActivities.joinToString(",")
+                )
+            }
+            if (!hidden) {
+                console.log("KM_DEBUG: Activity visible:", data.id)
+            }
             val isCompanionPresent = data.isRequiredCompanionPresent(
                 actorNames = actorsByUuid.values.map { it.name }.toSet()
             )
-            val disabled = !hidden && data.requiredCompanion != null && !isCompanionPresent
-            val disabledReason = if (disabled) {
+            val isLearned = data.id in camping.learnedCompanionActivities
+            val companionDisabled = !hidden && data.requiredCompanion != null && !isCompanionPresent && !isLearned
+            val budgetDisabled = !hidden && actor != null && !data.isPrepareCampsite() && camping.downtimeHoursRemaining(actor.uuid) <= 0
+            val disabled = companionDisabled || budgetDisabled
+            val disabledReason = if (companionDisabled) {
                 t(
                     "camping.activityRequiresCompanion",
                     recordOf("companion" to data.requiredCompanion)
+                )
+            } else if (budgetDisabled) {
+                t("camping.downtimeBudgetExhausted")
+            } else null
+            val learnTarget = if (data.isLearnFromCompanion()) {
+                getLearnTargetSelect(
+                    activityId = data.id,
+                    camping = camping,
+                    presentActorNames = actorsByUuid.values.map { it.name }.toSet(),
+                    selected = groupedActivity.result.learnTargetActivityId,
                 )
             } else null
             CampingSheetActivity(
@@ -1134,6 +1177,7 @@ class CampingSheet(
                 hidden = hidden,
                 requiresCheck = requiresCheck,
                 skills = skills,
+                learnTarget = learnTarget,
                 disabled = disabled,
                 disabledReason = disabledReason,
                 actor = actor?.let { act ->
@@ -1320,6 +1364,7 @@ class CampingSheet(
                         actorUuid = data.actorUuid,
                         result = value.activities.degreeOfSuccess?.get(id),
                         selectedSkill = value.activities.selectedSkill?.get(id),
+                        learnTargetActivityId = value.activities.learnTarget?.get(id),
                     )
                 }.toMutableRecord()
             val cookingResultsByRecipe = camping.cooking.results.toMap()
@@ -1438,6 +1483,48 @@ private fun getActivitySkills(
             value = groupedActivity.result.selectedSkill,
         ).toContext()
     }
+}
+
+/**
+ * Builds the "Learn from a Companion" dropdown: every companion activity whose required
+ * companion is currently in camp and that has not already been learned. Picking one and
+ * succeeding on the activity adds it to [CampingData.learnedCompanionActivities].
+ */
+private fun getLearnTargetSelect(
+    activityId: String,
+    camping: CampingData,
+    presentActorNames: Set<String>,
+    selected: String?,
+): FormElementContext {
+    val learned = camping.learnedCompanionActivities.toSet()
+    val options = camping.getAllActivities()
+        .filter { activity ->
+            activity.requiredCompanion != null
+                    && activity.id !in learned
+                    && activity.isRequiredCompanionPresent(presentActorNames)
+        }
+        .map { activity ->
+            SelectOption(
+                label = t(
+                    "camping.learnTargetOption",
+                    recordOf(
+                        "activity" to activity.name,
+                        "companion" to (activity.requiredCompanion ?: ""),
+                    ),
+                ),
+                value = activity.id,
+            )
+        }
+        .sortedBy { it.label }
+    return Select(
+        label = t("camping.learnTarget"),
+        name = "activities.learnTarget.$activityId",
+        hideLabel = true,
+        options = options,
+        required = false,
+        value = selected,
+        elementClasses = listOf("km-learn-target"),
+    ).toContext()
 }
 
 suspend fun openOrCreateCampingSheet(game: Game, dispatcher: ActionDispatcher, actor: CampingActor) {

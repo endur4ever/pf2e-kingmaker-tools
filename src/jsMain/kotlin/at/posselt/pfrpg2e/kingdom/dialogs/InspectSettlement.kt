@@ -12,6 +12,7 @@ import at.posselt.pfrpg2e.app.forms.Select
 import at.posselt.pfrpg2e.data.ValueEnum
 import at.posselt.pfrpg2e.data.kingdom.settlements.SettlementLayoutType
 import at.posselt.pfrpg2e.data.kingdom.settlements.SettlementType
+import at.posselt.pfrpg2e.data.kingdom.settlements.npcOccupations
 import at.posselt.pfrpg2e.data.kingdom.structures.CommodityStorage
 import at.posselt.pfrpg2e.data.kingdom.structures.calculateAvailableItems
 import at.posselt.pfrpg2e.fromCamelCase
@@ -20,6 +21,9 @@ import at.posselt.pfrpg2e.kingdom.data.ChosenFeat
 import at.posselt.pfrpg2e.kingdom.getAllActivities
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.NavEntryContext
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.createTabs
+import at.posselt.pfrpg2e.kingdom.structures.RawNpcEntry
+import at.posselt.pfrpg2e.kingdom.structures.RawPopulationRoster
+import at.posselt.pfrpg2e.utils.launch
 import at.posselt.pfrpg2e.kingdom.structures.RawSettlement
 import at.posselt.pfrpg2e.kingdom.structures.isStructure
 import at.posselt.pfrpg2e.kingdom.structures.parseSettlement
@@ -96,6 +100,7 @@ external interface InspectSettlementContext : ValidatedHandlebarsContext {
     val tabs: Array<NavEntryContext>
     val storage: Array<LabelValueContext>
     val settlementActions: Int
+    val populationNpcs: Array<RawNpcEntry>
 }
 
 @JsPlainObject
@@ -133,7 +138,8 @@ enum class SettlementNav : Translatable, ValueEnum {
     STRUCTURES,
     STORAGE,
     NOTES,
-    BONUSES;
+    BONUSES,
+    POPULATION;
 
     companion object {
         fun fromString(value: String) = fromCamelCase<SettlementNav>(value)
@@ -202,6 +208,7 @@ class InspectSettlement(
         manualSettlementLevel = settlement.manualSettlementLevel,
         waterBorders = settlement.waterBorders,
         layoutType = settlement.layoutType,
+        populationRoster = settlement.populationRoster ?: RawPopulationRoster(),
     )
 
     override fun _onClickAction(event: PointerEvent, target: HTMLElement) {
@@ -219,6 +226,60 @@ class InspectSettlement(
                 if (isValid()) {
                     close().await()
                     afterSubmit(current)
+                }
+                undefined
+            }
+
+            "add-npc" -> buildPromise {
+                PopulationAddDialog(
+                    occupations = npcOccupations.toTypedArray(),
+                    onAdd = { npc ->
+                        val roster = current.populationRoster ?: RawPopulationRoster()
+                        val existingNpcs = roster.npcs?.toMutableList() ?: mutableListOf()
+                        existingNpcs.add(npc)
+                        current.populationRoster = RawPopulationRoster(npcs = existingNpcs.toTypedArray())
+                        render()
+                    },
+                ).launch()
+                undefined
+            }
+
+            "edit-npc" -> buildPromise {
+                val index = target.dataset["index"]?.toIntOrNull()
+                if (index != null) {
+                    val roster = current.populationRoster ?: RawPopulationRoster()
+                    val npcs = roster.npcs ?: emptyArray()
+                    if (index in npcs.indices) {
+                        val existing = npcs[index]
+                        PopulationEditDialog(
+                            occupations = npcOccupations.toTypedArray(),
+                            existing = existing,
+                            onSave = { updated ->
+                                val existingNpcs = (roster.npcs?.toMutableList() ?: mutableListOf())
+                                existingNpcs[index] = updated
+                                current.populationRoster = RawPopulationRoster(npcs = existingNpcs.toTypedArray())
+                                render()
+                            },
+                            onDelete = {
+                                val existingNpcs = (roster.npcs?.toMutableList() ?: mutableListOf())
+                                existingNpcs.removeAt(index)
+                                current.populationRoster = RawPopulationRoster(npcs = existingNpcs.toTypedArray())
+                                render()
+                            },
+                        ).launch()
+                    }
+                }
+                undefined
+            }
+
+            "delete-npc" -> buildPromise {
+                val index = target.dataset["index"]?.toIntOrNull()
+                if (index != null) {
+                    val roster = current.populationRoster ?: RawPopulationRoster()
+                    val existingNpcs = (roster.npcs?.toMutableList() ?: mutableListOf())
+                    existingNpcs.removeAt(index)
+                    current.populationRoster = RawPopulationRoster(npcs = existingNpcs.toTypedArray())
+                    render()
                 }
                 undefined
             }
@@ -404,6 +465,7 @@ class InspectSettlement(
                     }
                 }
                 .toTypedArray(),
+            populationNpcs = current.populationRoster?.npcs ?: emptyArray(),
         )
     }
 

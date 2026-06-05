@@ -1,0 +1,34 @@
+<div class="km-population-dialog km-population-edit-dialog">
+    <div class="km-form-group">
+        <label for="npcName">{{localizeKM "kingdom.population.name"}}</label>
+        <input type="text" name="npcName" value="{{npcName}}" />
+    </div>
+
+    <div class="km-form-group">
+        <label for="npcOccupation">{{localizeKM "kingdom.population.occupation"}}</label>
+        <select name="npcOccupation">
+            {{#each occupations}}
+            <option value="{{this}}" {{#if (eq this ../occupation)}}selected{{/if}}>{{this}}</option>
+            {{/each}}
+        </select>
+    </div>
+
+    <div class="km-form-group">
+        <label for="npcNotes">{{localizeKM "kingdom.population.notes"}}</label>
+        <textarea name="npcNotes" rows="3" placeholder="{{localizeKM 'kingdom.population.notesPlaceholder'}}">{{notes}}</textarea>
+    </div>
+
+    <hr>
+
+    <div class="km-population-dialog-actions">
+        <button type="button" data-action="save" class="km-primary-btn">
+            <i class="fa-solid fa-check"></i> {{localizeKM "applications.save"}}
+        </button>
+        <button type="button" data-action="delete" class="km-danger-btn">
+            <i class="fa-solid fa-trash"></i> {{localizeKM "applications.delete"}}
+        </button>
+        <button type="button" data-action="cancel" class="km-secondary-btn">
+            <i class="fa-solid fa-times"></i> {{localizeKM "applications.cancel"}}
+        </button>
+    </div>
+</div>

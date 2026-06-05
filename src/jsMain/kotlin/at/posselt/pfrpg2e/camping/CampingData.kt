@@ -46,6 +46,7 @@ external interface ActorMeal {
     var actorUuid: String
     var favoriteMeal: String?
     var chosenMeal: String
+    var fixedFavoriteMeal: Boolean?
 }
 
 @JsPlainObject
@@ -61,6 +62,13 @@ external interface Cooking {
     var homebrewMeals: Array<RecipeData>
     var results: Record<String, CookingResult>
     var minimumSubsistence: Int
+    var favoriteMealProgress: Record<String, Record<String, FavoriteMealProgression>>?
+}
+
+@JsPlainObject
+external interface FavoriteMealProgression {
+    var successCount: Int
+    var criticalSuccessCount: Int
 }
 
 @JsPlainObject
@@ -68,6 +76,9 @@ external interface CampingActivity {
     var actorUuid: String?
     var result: String?
     var selectedSkill: String?
+    // Only set on the "Learn from a Companion" activity: the id of the companion
+    // activity the player chose to learn from the dropdown.
+    var learnTargetActivityId: String?
 }
 
 @JsPlainObject
@@ -76,6 +87,7 @@ external interface CampingActivityWithId {
     val actorUuid: String?
     val result: String?
     val selectedSkill: String?
+    val learnTargetActivityId: String?
 }
 
 fun ReadonlyRecord<String, CampingActivity>.toCampingActivitiesWithId() =
@@ -86,6 +98,7 @@ fun ReadonlyRecord<String, CampingActivity>.toCampingActivitiesWithId() =
                 actorUuid = data.actorUuid,
                 result = data.result,
                 selectedSkill = data.selectedSkill,
+                learnTargetActivityId = data.learnTargetActivityId,
             )
         }.toTypedArray()
 
@@ -133,6 +146,13 @@ external interface CampingData {
     var forcedMarchActive: Boolean
     var secondsSpentForcedMarching: Int
     var hexSizeInMiles: Int
+
+    /**
+     * Companion-specific activity IDs that the party has learned via the
+     * "Learn from a Companion" activity. When an activity's required companion
+     * is absent, it is still available if its id is in this list.
+     */
+    var learnedCompanionActivities: Array<String>
 
     /**
      * One entry per watch slot; each entry is the list of actor UUIDs assigned to that watch.
@@ -225,6 +245,7 @@ fun CampingActivityWithId.checkPerformed() =
 
 const val prepareCampsiteId = "prepare-campsite"
 const val cookMealId = "cook-meal"
+const val learnFromACompanionId = "learn-from-a-companion"
 
 /** Default number of watch slots shown when first opening the Set Watches section. */
 const val defaultNumberOfWatches = 3
@@ -315,6 +336,7 @@ fun getDefaultCamping(game: Game): CampingData {
         travelModeActive = false,
         secondsSpentForcedMarching = 0,
         hexSizeInMiles = 12,
+        learnedCompanionActivities = emptyArray(),
         watchSlots = emptyArray(),
         downtimeHoursSpent = recordOf(),
         regionSettings = RegionSettings(
