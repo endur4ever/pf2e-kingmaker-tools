@@ -15,6 +15,9 @@ import at.posselt.pfrpg2e.kingdom.label
 import at.posselt.pfrpg2e.kingdom.parse
 import at.posselt.pfrpg2e.kingdom.skillRanks
 import at.posselt.pfrpg2e.utils.t
+import at.posselt.pfrpg2e.utils.getAppFlag
+import at.posselt.pfrpg2e.kingdom.KingdomActor
+import at.posselt.pfrpg2e.kingdom.ActivityCapCalculator
 import com.foundryvtt.core.applications.ux.TextEditor.enrichHtml
 import js.array.toTypedArray
 import js.objects.Object
@@ -61,6 +64,16 @@ external interface ActivitiesContext {
     val civic: Array<ActivityContext>
     val army: Array<ActivityContext>
     val upkeep: Array<ActivityContext>
+    val leadershipPerformed: Int
+    val leadershipCap: Int
+    val civicPerformed: Int
+    val civicCap: Int
+    val regionPerformed: Int
+    val regionCap: Int
+    val armyPerformed: Int
+    val armyCap: Int
+    val commercePerformed: Int
+    val commerceCap: Int
 }
 
 private suspend fun toActivityContext(
@@ -180,6 +193,7 @@ suspend fun activitiesToActivityContext(
 }
 
 suspend fun toActivitiesContext(
+    actor: KingdomActor,
     activities: List<RawActivity>,
     activityBlacklist: Set<String>,
     unlockedActivities: Set<String>,
@@ -255,6 +269,23 @@ suspend fun toActivitiesContext(
         chosenFeats,
         activeLeader,
     )
+
+    val turnWizardState = actor.getAppFlag<KingdomActor, dynamic>("turn-wizard-state")
+    val performedCounts = mutableMapOf<String, Int>()
+    if (turnWizardState != null && turnWizardState.activitiesPerformed != null) {
+        val keys = js("Object.keys")(turnWizardState.activitiesPerformed).unsafeCast<Array<String>>()
+        for (key in keys) {
+            performedCounts[key] = turnWizardState.activitiesPerformed[key].unsafeCast<Int>()
+        }
+    }
+
+    val capsResult = ActivityCapCalculator.calculate(kingdom, performedCounts)
+    val leadershipCap = capsResult.caps.find { it.phase == "leadership" }
+    val civicCap = capsResult.caps.find { it.phase == "civic" }
+    val regionCap = capsResult.caps.find { it.phase == "region" }
+    val armyCap = capsResult.caps.find { it.phase == "army" }
+    val commerceCap = capsResult.caps.find { it.phase == "commerce" }
+
     ActivitiesContext(
         upkeep = upkeep,
         commerce = commerce,
@@ -262,5 +293,15 @@ suspend fun toActivitiesContext(
         region = region,
         civic = civic,
         army = army,
+        leadershipPerformed = leadershipCap?.current ?: 0,
+        leadershipCap = leadershipCap?.maximum ?: 2,
+        civicPerformed = civicCap?.current ?: 0,
+        civicCap = civicCap?.maximum ?: 0,
+        regionPerformed = regionCap?.current ?: 0,
+        regionCap = regionCap?.maximum ?: 0,
+        armyPerformed = armyCap?.current ?: 0,
+        armyCap = armyCap?.maximum ?: 0,
+        commercePerformed = commerceCap?.current ?: 0,
+        commerceCap = commerceCap?.maximum ?: 1,
     )
 }

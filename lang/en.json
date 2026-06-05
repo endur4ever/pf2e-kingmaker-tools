@@ -537,6 +537,47 @@
       "success": "Placed block onto scene {sceneName}!"
     },
     "kingdom": {
+      "turnWizard": {
+        "title": "Kingdom Turn Assistant",
+        "openButton": "Turn Assistant",
+        "checklistTitle": "Pre-Turn Checklist",
+        "checklist": {
+          "gainFame": "Gain 1 Fame point",
+          "adjustUnrest": "Adjust Unrest",
+          "collectResources": "Collect Resource Dice",
+          "payConsumption": "Pay Consumption",
+          "checkEvents": "Check Ongoing Events"
+        },
+        "stateTitle": "Kingdom State",
+        "state": {
+          "rp": "Resource Points",
+          "commodities": "Commodities",
+          "consumption": "Consumption",
+          "unrest": "Unrest",
+          "ruin": "Ruin",
+          "modifiers": "Active Modifiers"
+        },
+        "capsTitle": "Activity Caps",
+        "caps": {
+          "leadership": "Leadership: {current}/{max}",
+          "civic": "Civic: {current}/{max}",
+          "region": "Region: {current}/{max}",
+          "army": "Army: {current}/{max}",
+          "commerce": "Commerce: {current}/{max}"
+        },
+        "previewTitle": "End-Turn Preview",
+        "preview": {
+          "empty": "No recorded activities this turn",
+          "changeRp": "RP: {old} → {new}",
+          "changeFame": "Fame: {old} → {new}",
+          "changeConsumption": "Consumption: {old} → {new}",
+          "expiredModifiers": "{count} modifier(s) expired"
+        },
+        "commit": "Complete Turn",
+        "cancel": "Cancel",
+        "previewButton": "Preview Turn",
+        "journalSummary": "Turn summary written to journal"
+      },
       "exportToJournal": "Export to Journal",
       "importFromObsidian": "Import from Obsidian",
       "openObsidian": "Open Obsidian",

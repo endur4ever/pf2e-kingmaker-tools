@@ -63,14 +63,52 @@ fun registerI18NextHelper(handlebars: Handlebars, i18Next: I18Next) {
     }
 }
 
-fun t(key: String, value: AnyObject) =
-    i18next.t(key, value)
+fun t(key: String, value: AnyObject): String {
+    val isAvailable = try {
+        js("typeof i18next !== 'undefined' && i18next && typeof i18next.t === 'function'").unsafeCast<Boolean>()
+    } catch (e: Throwable) {
+        false
+    }
+    if (isAvailable) {
+        try {
+            return i18next.t(key, value)
+        } catch (ignored: Throwable) {}
+    }
+    val details = try {
+        js("Object.entries(value).map(function(pair) { return pair[0] + '=' + pair[1]; }).join(', ')").unsafeCast<String>()
+    } catch (ignored: Throwable) {
+        ""
+    }
+    return "$key ($details)"
+}
 
-fun t(key: String) =
-    i18next.t(key)
+fun t(key: String): String {
+    val isAvailable = try {
+        js("typeof i18next !== 'undefined' && i18next && typeof i18next.t === 'function'").unsafeCast<Boolean>()
+    } catch (e: Throwable) {
+        false
+    }
+    if (isAvailable) {
+        try {
+            return i18next.t(key)
+        } catch (ignored: Throwable) {}
+    }
+    return key
+}
 
-fun t(translatable: Translatable) =
-    i18next.t(translatable.i18nKey)
+fun t(translatable: Translatable): String {
+    val isAvailable = try {
+        js("typeof i18next !== 'undefined' && i18next && typeof i18next.t === 'function'").unsafeCast<Boolean>()
+    } catch (e: Throwable) {
+        false
+    }
+    if (isAvailable) {
+        try {
+            return i18next.t(translatable.i18nKey)
+        } catch (ignored: Throwable) {}
+    }
+    return translatable.i18nKey
+}
 
 fun unfuckFoundryTranslations(obj: ReadonlyRecord<String, Any>): ReadonlyRecord<String, Any> {
     return obj.asSequence()

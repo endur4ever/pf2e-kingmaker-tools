@@ -1,10 +1,18 @@
 <h2>{{localizeKM "chatMessages.endTurn.title"}}</h2>
+{{#if changes.length}}
+<ul>
+    {{#each changes}}
+    <li>{{this}}</li>
+    {{/each}}
+</ul>
+{{else}}
 <ul>
     <li>{{localizeKM "chatMessages.endTurn.resetRP"}}</li>
     <li>{{localizeKM "chatMessages.endTurn.reduceMods"}}</li>
     <li>{{localizeKM "chatMessages.endTurn.resetSolutions"}}</li>
     <li>{{localizeKM "chatMessages.endTurn.moveValues"}}</li>
 </ul>
+{{/if}}
 {{#if clockEvents.length}}
 <hr>
 <h3>{{localizeKM "kingdom.clocks.title"}}</h3>

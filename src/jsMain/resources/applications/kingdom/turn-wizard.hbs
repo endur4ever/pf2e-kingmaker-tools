@@ -1,0 +1,104 @@
+<div class="km-turn-wizard-dialog">
+  <header class="km-turn-wizard-header">
+    <h2>{{localizeKM "kingdom.turnWizard.title"}}: {{kingdomName}}</h2>
+  </header>
+
+  {{!-- Checklist Section --}}
+  <fieldset class="km-turn-wizard-section">
+    <legend>{{localizeKM "kingdom.turnWizard.checklistTitle"}}</legend>
+    <ul class="km-checklist-list" style="list-style: none; padding-left: 0;">
+      {{#each checklist}}
+      <li class="km-checklist-item {{#if highlight}}km-highlight{{/if}}" style="margin-bottom: 8px; padding: 4px; border-radius: 4px; {{#if highlight}}background-color: rgba(255, 0, 0, 0.1); border: 1px solid rgba(255, 0, 0, 0.3);{{/if}}">
+        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+          <input type="checkbox" class="km-checklist-toggle" data-id="{{id}}" {{#if checked}}checked{{/if}} />
+          <span style="{{#if highlight}}font-weight: bold;{{/if}}">{{label}}</span>
+        </label>
+      </li>
+      {{/each}}
+    </ul>
+  </fieldset>
+
+  {{!-- Kingdom State Section --}}
+  <fieldset class="km-turn-wizard-section" style="margin-top: 16px;">
+    <legend>{{localizeKM "kingdom.turnWizard.stateTitle"}}</legend>
+    <div class="km-state-grid" style="display: grid; grid-template-columns: 1fr; gap: 8px;">
+      <div class="km-state-row" style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 4px;">
+        <span class="km-state-label" style="font-weight: bold;">{{localizeKM "kingdom.turnWizard.state.rp"}}:</span>
+        <span class="km-state-value">{{kingdomState.rpNow}} ({{localizeKM "kingdom.turn.next"}}: {{kingdomState.rpNext}})</span>
+      </div>
+      <div class="km-state-row" style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 4px;">
+        <span class="km-state-label" style="font-weight: bold;">{{localizeKM "kingdom.turnWizard.state.consumption"}}:</span>
+        <span class="km-state-value">{{kingdomState.consumption}}</span>
+      </div>
+      <div class="km-state-row" style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 4px;">
+        <span class="km-state-label" style="font-weight: bold;">{{localizeKM "kingdom.turnWizard.state.unrest"}}:</span>
+        <span class="km-state-value">{{kingdomState.unrest}}</span>
+      </div>
+      <div class="km-state-row" style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 4px;">
+        <span class="km-state-label" style="font-weight: bold;">{{localizeKM "kingdom.turnWizard.state.commodities"}}:</span>
+        <span class="km-state-value" style="font-size: 0.9em; text-align: right;">
+          Food: {{kingdomState.foodNow}}/{{kingdomState.foodCap}}<br/>
+          Lumber: {{kingdomState.lumberNow}}/{{kingdomState.lumberCap}}<br/>
+          Luxuries: {{kingdomState.luxuriesNow}}/{{kingdomState.luxuriesCap}}<br/>
+          Ore: {{kingdomState.oreNow}}/{{kingdomState.oreCap}}<br/>
+          Stone: {{kingdomState.stoneNow}}/{{kingdomState.stoneCap}}
+        </span>
+      </div>
+      {{#if kingdomState.ruin.length}}
+      <div class="km-state-row" style="display: flex; flex-direction: column; gap: 4px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 4px;">
+        <span class="km-state-label" style="font-weight: bold;">{{localizeKM "kingdom.turnWizard.state.ruin"}}:</span>
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; font-size: 0.9em;">
+          {{#each kingdomState.ruin}}
+          <div>{{label}}: {{value.value}}/{{thresholdValue}} ({{localizeKM "kingdom.penalty"}}: {{penalty.value}})</div>
+          {{/each}}
+        </div>
+      </div>
+      {{/if}}
+      <div class="km-state-row" style="display: flex; justify-content: space-between; padding-bottom: 4px;">
+        <span class="km-state-label" style="font-weight: bold;">{{localizeKM "kingdom.turnWizard.state.modifiers"}}:</span>
+        <span class="km-state-value">{{kingdomState.activeModifiers}}</span>
+      </div>
+    </div>
+  </fieldset>
+
+  {{!-- Activity Caps Section --}}
+  <fieldset class="km-turn-wizard-section" style="margin-top: 16px;">
+    <legend>{{localizeKM "kingdom.turnWizard.capsTitle"}}</legend>
+    <ul class="km-caps-list" style="list-style: none; padding-left: 0; display: grid; grid-template-columns: 1fr; gap: 8px;">
+      {{#each activityCaps}}
+      <li class="km-cap-item {{#if isOverCap}}km-over-cap{{/if}}" style="display: flex; justify-content: space-between; align-items: center; padding: 4px; border-radius: 4px; {{#if isOverCap}}background-color: rgba(255,0,0,0.15); border: 1px solid rgba(255,0,0,0.4);{{/if}}">
+        <span class="km-cap-label" style="font-weight: bold; {{#if isOverCap}}color: #ff5555;{{/if}}">{{phaseLabel}}:</span>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span class="km-cap-value">{{current}} / {{maximum}}</span>
+          {{#if isOverCap}}
+          <span class="km-cap-warning" style="color: #ff5555; font-size: 0.9em; font-weight: bold;"><i class="fas fa-exclamation-triangle"></i> Over Cap</span>
+          {{/if}}
+        </div>
+      </li>
+      {{/each}}
+    </ul>
+  </fieldset>
+
+  {{!-- End-Turn Preview Section --}}
+  {{#if showPreview}}
+  <fieldset class="km-turn-wizard-section" style="margin-top: 16px; background-color: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; padding: 8px;">
+    <legend>{{localizeKM "kingdom.turnWizard.previewTitle"}}</legend>
+    {{#if previewChanges.length}}
+    <ul class="km-preview-list" style="padding-left: 20px; margin: 4px 0;">
+      {{#each previewChanges}}
+      <li style="margin-bottom: 4px;">{{displayText}}</li>
+      {{/each}}
+    </ul>
+    {{else}}
+    <p style="margin: 4px 0; font-style: italic; color: #aaaaaa;">{{localizeKM "kingdom.turnWizard.preview.empty"}}</p>
+    {{/if}}
+  </fieldset>
+  {{/if}}
+
+  {{!-- Footer Buttons --}}
+  <footer class="sheet-footer km-turn-wizard-footer" style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 8px;">
+    <button type="button" data-action="preview-turn" style="cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 6px 12px;"><i class="fas fa-eye"></i> {{localizeKM "kingdom.turnWizard.previewButton"}}</button>
+    <button type="button" data-action="commit-turn" {{#unless canCommit}}disabled{{/unless}} class="km-commit-btn" style="cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 6px 12px; font-weight: bold; background-color: #3f603f; color: white; border: 1px solid #2f452f; border-radius: 4px; {{#unless canCommit}}opacity: 0.5; cursor: not-allowed;{{/unless}}"><i class="fas fa-check"></i> {{localizeKM "kingdom.turnWizard.commit"}}</button>
+    <button type="button" data-action="cancel" style="cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 6px 12px;"><i class="fas fa-times"></i> {{localizeKM "kingdom.turnWizard.cancel"}}</button>
+  </footer>
+</div>

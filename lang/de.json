@@ -528,6 +528,47 @@
       "success": "Placed block onto scene {sceneName}!"
     },
     "kingdom": {
+      "turnWizard": {
+        "title": "Königreichsrunden-Assistent",
+        "openButton": "Runden-Assistent",
+        "checklistTitle": "Vorrunden-Checkliste",
+        "checklist": {
+          "gainFame": "1 Ruhmpunkt erhalten",
+          "adjustUnrest": "Unruhe anpassen",
+          "collectResources": "Ressourcenwürfel sammeln",
+          "payConsumption": "Verbrauch bezahlen",
+          "checkEvents": "Laufende Ereignisse prüfen"
+        },
+        "stateTitle": "Königreichsstatus",
+        "state": {
+          "rp": "Ressourcenpunkte (RP)",
+          "commodities": "Waren",
+          "consumption": "Verbrauch",
+          "unrest": "Unruhe",
+          "ruin": "Ruin",
+          "modifiers": "Aktive Modifikatoren"
+        },
+        "capsTitle": "Aktivitäten-Limits",
+        "caps": {
+          "leadership": "Führung: {current}/{max}",
+          "civic": "Städtisch: {current}/{max}",
+          "region": "Region: {current}/{max}",
+          "army": "Armee: {current}/{max}",
+          "commerce": "Handel: {current}/{max}"
+        },
+        "previewTitle": "Rundenende-Vorschau",
+        "preview": {
+          "empty": "Keine Aktivitäten in dieser Runde aufgezeichnet",
+          "changeRp": "RP: {old} → {new}",
+          "changeFame": "Ruhm: {old} → {new}",
+          "changeConsumption": "Verbrauch: {old} → {new}",
+          "expiredModifiers": "{count} Modifikator(en) abgelaufen"
+        },
+        "commit": "Runde beenden",
+        "cancel": "Abbrechen",
+        "previewButton": "Vorschau",
+        "journalSummary": "Rundenübersicht ins Tagebuch geschrieben"
+      },
       "companionArrival": "<b>{name}</b> has arrived at Hex <b>{x}, {y}</b>!",
       "quests": {
         "addQuest": "Add Quest",

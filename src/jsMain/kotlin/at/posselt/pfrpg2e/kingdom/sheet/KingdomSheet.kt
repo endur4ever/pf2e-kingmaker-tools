@@ -92,6 +92,8 @@ import at.posselt.pfrpg2e.kingdom.dialogs.structureXpDialog
 import at.posselt.pfrpg2e.kingdom.dialogs.HexContentManager
 import at.posselt.pfrpg2e.kingdom.dialogs.RosterAddDialog
 import at.posselt.pfrpg2e.kingdom.dialogs.RosterEditDialog
+import at.posselt.pfrpg2e.kingdom.dialogs.TurnWizardApplication
+import at.posselt.pfrpg2e.kingdom.dialogs.performEndTurn
 import at.posselt.pfrpg2e.kingdom.data.RawCharacter
 import at.posselt.pfrpg2e.kingdom.getActiveLeader
 import at.posselt.pfrpg2e.kingdom.getActivity
@@ -1311,61 +1313,12 @@ class KingdomSheet(
 
             "end-turn" -> buildPromise {
                 actor.getKingdom()?.let { kingdom ->
-                    val realm = game.getRealmData(actor, kingdom)
-                    val settlements = kingdom.getAllSettlements(game)
-                    val storage = calculateStorage(realm = realm, settlements = settlements.allSettlements)
-
-                    // Kingdom-turn (monthly) ticking. Day-scale ticks (weather,
-                    // companion travel) run off the world clock — see registerDailyTickHooks.
-                    val tickResult = TurnTickingEngine.tick(
-                        fame = kingdom.fame,
-                        resourcePoints = kingdom.resourcePoints,
-                        resourceDice = kingdom.resourceDice,
-                        consumption = kingdom.consumption,
-                        commodities = kingdom.commodities,
-                        storage = storage,
-                        councilCooldowns = kingdom.councilCooldowns,
-                        modifiers = kingdom.modifiers,
-                        campaignQuests = kingdom.campaignQuests ?: emptyArray(),
-                        kingdomLevel = kingdom.level,
-                    )
-                    kingdom.supernaturalSolutions = tickResult.supernaturalSolutions
-                    kingdom.creativeSolutions = tickResult.creativeSolutions
-                    kingdom.fame = tickResult.fame
-                    kingdom.resourcePoints = tickResult.resourcePoints
-                    kingdom.resourceDice = tickResult.resourceDice
-                    kingdom.consumption = tickResult.consumption
-                    kingdom.commodities = tickResult.commodities
-                    kingdom.councilCooldowns = tickResult.councilCooldowns
-                    kingdom.modifiers = tickResult.modifiers
-                    kingdom.campaignQuests = tickResult.campaignQuests
-
-                    // Tick campaign clocks
-                    val clockResult = CampaignClockManager.tickAll(kingdom.campaignClocks)
-                    kingdom.campaignClocks = clockResult.updatedClocks
-                    if (clockResult.totalUnrestChange > 0) {
-                        kingdom.unrest = kingdom.unrest + clockResult.totalUnrestChange
-                    }
-
-                    actor.setKingdom(kingdom)
-
-                    // Post clock tick events to chat
-                    if (clockResult.events.isNotEmpty()) {
-                        val clockContext = js("{}")
-                        clockContext.events = clockResult.events
-                        clockContext.totalUnrestChange = clockResult.totalUnrestChange
-                        postChatTemplate(
-                            templatePath = "chatmessages/clock-tick.hbs",
-                            templateContext = clockContext,
-                        )
-                    }
-                    val endTurnContext = js("{}")
-                    endTurnContext.clockEvents = clockResult.events
-                    postChatTemplate(
-                        templatePath = "chatmessages/end-turn.hbs",
-                        templateContext = endTurnContext,
-                    )
+                    performEndTurn(game, actor, kingdom)
                 }
+            }
+
+            "open-turn-wizard" -> buildPromise {
+                TurnWizardApplication(actor).render(true)
             }
 
             "settlement-size-info" -> buildPromise {
@@ -1794,6 +1747,7 @@ class KingdomSheet(
         }
         kingdom.structureBlacklist = effectiveStructureBlacklist.toTypedArray()
         val activities = toActivitiesContext(
+            actor = actor,
             activities = kingdom.getAllActivities(),
             activityBlacklist = effectiveBlacklist.toSet(),
             unlockedActivities = globalBonuses.unlockedActivities,
