@@ -97,6 +97,45 @@
                 {{/each}}
                 </tbody>
             </table>
+            <div class="km-unlocked-access-section" style="margin-top: 15px;">
+                <h3>{{localizeKM "kingdom.settlementUnlockedAccess"}}</h3>
+                <table class="km-unlocked-access-table">
+                    <tbody>
+                        <tr>
+                            <th>{{localizeKM "kingdom.settlementItemPurchaseLevel"}}</th>
+                            <td>Level {{itemPurchaseLevel}}</td>
+                        </tr>
+                        <tr>
+                            <th>{{localizeKM "kingdom.settlementTrainers"}}</th>
+                            <td>
+                                {{#if trainers.length}}
+                                    <ul>
+                                        {{#each trainers}}
+                                            <li>{{this}}</li>
+                                        {{/each}}
+                                    </ul>
+                                {{else}}
+                                    {{localizeKM "kingdom.settlementNone"}}
+                                {{/if}}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>{{localizeKM "kingdom.settlementCraftingAccess"}}</th>
+                            <td>
+                                {{#if craftingAccess.length}}
+                                    <ul>
+                                        {{#each craftingAccess}}
+                                            <li>{{this}}</li>
+                                        {{/each}}
+                                    </ul>
+                                {{else}}
+                                    {{localizeKM "kingdom.settlementNone"}}
+                                {{/if}}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
         <div {{#unless (eq currentTab 'bonuses')}}hidden{{/unless}}>
             <ul>
