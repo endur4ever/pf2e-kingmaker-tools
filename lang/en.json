@@ -6166,8 +6166,8 @@
         "settings": {
           "title": "Quest Generator Settings",
           "defaultVisibility": "Default Visibility",
-          "defaultVisibility.gmOnly": "GM Only",
-          "defaultVisibility.players": "Visible to Players",
+          "defaultVisibilityGmOnly": "GM Only",
+          "defaultVisibilityPlayers": "Visible to Players",
           "maxActiveQuests": "Max Active Generated Quests",
           "autoAdvanceTimers": "Auto-Advance Quest Timers"
         },
