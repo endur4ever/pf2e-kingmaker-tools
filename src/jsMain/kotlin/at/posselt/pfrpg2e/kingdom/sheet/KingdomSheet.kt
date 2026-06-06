@@ -442,7 +442,7 @@ class KingdomSheet(
             "open-quest-generator" -> buildPromise {
                 val kingdom = getKingdom()
                 val settings = if (kingdom.questGeneratorSettings != null) {
-                    val s = kingdom.questGeneratorSettings.asDynamic()
+                    val s = kingdom.questGeneratorSettings
                     QuestGeneratorSettings(
                         defaultVisibilityToPlayers = s.defaultVisibilityToPlayers as? Boolean ?: false,
                         maxActiveGeneratedQuests = s.maxActiveGeneratedQuests as? Int ?: 10,
