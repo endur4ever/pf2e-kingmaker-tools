@@ -65,7 +65,7 @@ fun registerI18NextHelper(handlebars: Handlebars, i18Next: I18Next) {
 
 fun t(key: String, value: AnyObject): String {
     val isAvailable = try {
-        js("typeof i18next !== 'undefined' && i18next && typeof i18next.t === 'function'").unsafeCast<Boolean>()
+        i18n.asDynamic().isInitialized.unsafeCast<Boolean>() == true
     } catch (e: Throwable) {
         false
     }
@@ -84,7 +84,7 @@ fun t(key: String, value: AnyObject): String {
 
 fun t(key: String): String {
     val isAvailable = try {
-        js("typeof i18next !== 'undefined' && i18next && typeof i18next.t === 'function'").unsafeCast<Boolean>()
+        i18n.asDynamic().isInitialized.unsafeCast<Boolean>() == true
     } catch (e: Throwable) {
         false
     }
@@ -98,7 +98,7 @@ fun t(key: String): String {
 
 fun t(translatable: Translatable): String {
     val isAvailable = try {
-        js("typeof i18next !== 'undefined' && i18next && typeof i18next.t === 'function'").unsafeCast<Boolean>()
+        i18n.asDynamic().isInitialized.unsafeCast<Boolean>() == true
     } catch (e: Throwable) {
         false
     }
@@ -122,7 +122,7 @@ fun unfuckFoundryTranslations(obj: ReadonlyRecord<String, Any>): ReadonlyRecord<
         .toRecord()
 }
 
-suspend fun initLocalization() {
+fun initLocalization() {
     val lang = game.i18n.lang
     val trans = (game.i18n.translations[Config.moduleId] ?: englishTranslations[Config.moduleId])
         .unsafeCast<ReadonlyRecord<String, Any>>()
@@ -141,7 +141,6 @@ suspend fun initLocalization() {
     i18n
         .use(ICU::class.js)
         .init(options)
-        .await()
     registerI18NextHelper(window.Handlebars, i18n)
     window.Handlebars.registerHelper("add", { a: Int, b: Int -> a + b })
     window.Handlebars.registerHelper("json", { obj: Any -> JSON.stringify(obj) })

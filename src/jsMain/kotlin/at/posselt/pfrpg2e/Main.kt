@@ -98,20 +98,18 @@ fun main() {
         }
 
         TypedHooks.onI18NInit {
-            buildPromise {
-                initLocalization()
-                game.settings.pfrpg2eKingdomCampingWeather.register()
-                registerContextMenus()
-                registerTokenMappings(game)
-                registerWeatherHooks(game)
-                registerCombatTrackHooks(game)
-                registerMealDiffingHooks()
-                registerArmyConsumptionHooks(game)
-                registerIcons(actionDispatcher)
-                registerCombatXpHooks(game)
-                registerFatiguedHooks(game)
-                registerDailyTickHooks(game)
-            }
+            initLocalization()
+            game.settings.pfrpg2eKingdomCampingWeather.register()
+            registerContextMenus()
+            registerTokenMappings(game)
+            registerWeatherHooks(game)
+            registerCombatTrackHooks(game)
+            registerMealDiffingHooks()
+            registerArmyConsumptionHooks(game)
+            registerIcons(actionDispatcher)
+            registerCombatXpHooks(game)
+            registerFatiguedHooks(game)
+            registerDailyTickHooks(game)
         }
 
         bindChatButtons(game)
