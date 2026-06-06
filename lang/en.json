@@ -1269,6 +1269,68 @@
         "criticalFailure": "Suffer Critical Failure Effect",
         "learn": "Learn {recipeName}",
         "learned": "Learned {recipeName}"
+      },
+      "questGenerator": {
+        "title": "Quest Generator",
+        "generateFromEvent": "Generate Quest",
+        "generatedBadge": "Generated",
+        "generatedFrom": "From: {eventName}",
+        "generate": "Generate",
+        "cancel": "Cancel",
+        "commit": "Add Quest",
+        "open": "Open Quest Generator",
+        "activeCount": "{count} Active",
+        "noEvents": "No kingdom events available to generate quests from.",
+        "preview": {
+          "event": "Select Event",
+          "type": "Type",
+          "urgency": "Urgency",
+          "recommendedLevel": "Recommended Level",
+          "objectives": "Objectives",
+          "rewards": "Rewards"
+        },
+        "settings": {
+          "title": "Quest Generator Settings",
+          "defaultVisibility": "Default Visibility",
+          "defaultVisibilityGmOnly": "GM Only",
+          "defaultVisibilityPlayers": "Visible to Players",
+          "maxActiveQuests": "Max Active Generated Quests",
+          "autoAdvanceTimers": "Auto-Advance Quest Timers"
+        },
+        "regenerate": "Regenerate",
+        "filterGenerated": "Generated Quests",
+        "visibility": {
+          "makeVisible": "Reveal to Players",
+          "makeHidden": "Hide from Players"
+        }
+      },
+      "hexContent": {
+        "managerTitle": "Hex Content Manager",
+        "addNew": "Add Content to Hex",
+        "addContent": "Add Hex Content",
+        "editContent": "Edit Hex Content",
+        "addToHex": "Add Content to Hex",
+        "editForHex": "Edit Content for Hex",
+        "hexKey": "Hex Key",
+        "type": "Type",
+        "name": "Name",
+        "visibility": "Visibility",
+        "gmNotes": "GM Notes",
+        "playerText": "Player Text",
+        "suppressesEncounters": "Suppresses Random Encounters",
+        "travelModifier": "Travel Modifier",
+        "linkedQuestId": "Linked Quest ID",
+        "linkedUuid": "Linked UUID",
+        "icon": "Custom Icon (FontAwesome class)",
+        "actions": "Actions",
+        "edit": "Edit",
+        "delete": "Delete",
+        "reveal": "Reveal",
+        "hide": "Hide",
+        "clear": "Clear",
+        "save": "Save",
+        "cancel": "Cancel",
+        "noContent": "No hex content yet. Click \"Add Content to Hex\" to get started."
       }
     },
     "displayBars": {
@@ -6149,68 +6211,6 @@
             "msg": "<p>After sending representatives, the immigrant decides not to build a home in your settlement after all, disappointing the local aristocracy. @gain1Unrest</p>"
           }
         }
-      },
-      "questGenerator": {
-        "title": "Quest Generator",
-        "generateFromEvent": "Generate Quest",
-        "generatedBadge": "Generated",
-        "generatedFrom": "From: {eventName}",
-        "generate": "Generate",
-        "cancel": "Cancel",
-        "commit": "Add Quest",
-        "open": "Open Quest Generator",
-        "activeCount": "{count} Active",
-        "noEvents": "No kingdom events available to generate quests from.",
-        "preview": {
-          "event": "Select Event",
-          "type": "Type",
-          "urgency": "Urgency",
-          "recommendedLevel": "Recommended Level",
-          "objectives": "Objectives",
-          "rewards": "Rewards"
-        },
-        "settings": {
-          "title": "Quest Generator Settings",
-          "defaultVisibility": "Default Visibility",
-          "defaultVisibilityGmOnly": "GM Only",
-          "defaultVisibilityPlayers": "Visible to Players",
-          "maxActiveQuests": "Max Active Generated Quests",
-          "autoAdvanceTimers": "Auto-Advance Quest Timers"
-        },
-        "regenerate": "Regenerate",
-        "filterGenerated": "Generated Quests",
-        "visibility": {
-          "makeVisible": "Reveal to Players",
-          "makeHidden": "Hide from Players"
-        }
-      },
-      "hexContent": {
-        "managerTitle": "Hex Content Manager",
-        "addNew": "Add Content to Hex",
-        "addContent": "Add Hex Content",
-        "editContent": "Edit Hex Content",
-        "addToHex": "Add Content to Hex",
-        "editForHex": "Edit Content for Hex",
-        "hexKey": "Hex Key",
-        "type": "Type",
-        "name": "Name",
-        "visibility": "Visibility",
-        "gmNotes": "GM Notes",
-        "playerText": "Player Text",
-        "suppressesEncounters": "Suppresses Random Encounters",
-        "travelModifier": "Travel Modifier",
-        "linkedQuestId": "Linked Quest ID",
-        "linkedUuid": "Linked UUID",
-        "icon": "Custom Icon (FontAwesome class)",
-        "actions": "Actions",
-        "edit": "Edit",
-        "delete": "Delete",
-        "reveal": "Reveal",
-        "hide": "Hide",
-        "clear": "Clear",
-        "save": "Save",
-        "cancel": "Cancel",
-        "noContent": "No hex content yet. Click \"Add Content to Hex\" to get started."
       }
     },
     "hexContentType": {

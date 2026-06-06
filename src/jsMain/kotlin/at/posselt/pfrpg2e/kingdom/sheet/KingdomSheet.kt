@@ -1639,9 +1639,9 @@ class KingdomSheet(
             })""")
         } + campaignQuestsList
 
-        val activeQuests = allQuests.filter { (it.asDynamic().status as? String) == "active" }.toTypedArray()
+        val activeQuests = allQuests.filter { (it.status as? String) == "active" }.toTypedArray()
         val completedQuests = allQuests.filter { 
-            val s = it.asDynamic().status as? String
+            val s = it.status as? String
             s == "completed" || s == "failed"
         }.toTypedArray()
         val allFeatures = kingdom.getExplodedFeatures()
