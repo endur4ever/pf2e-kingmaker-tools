@@ -304,6 +304,8 @@ class KingdomSheetDataModel(
                     string("img", nullable = true)
                 }
             }
+            string("homebrewProfileName", nullable = true)
+            boolean("homebrewProfileActive")
         }
     }
 }
