@@ -3,6 +3,9 @@ package at.posselt.pfrpg2e.questevent
 import at.posselt.pfrpg2e.app.FormApp
 import at.posselt.pfrpg2e.app.HandlebarsRenderContext
 import at.posselt.pfrpg2e.app.ValidatedHandlebarsContext
+import at.posselt.pfrpg2e.kingdom.KingdomActor
+import at.posselt.pfrpg2e.kingdom.getKingdom
+import at.posselt.pfrpg2e.kingdom.getEvents
 import at.posselt.pfrpg2e.utils.buildPromise
 import at.posselt.pfrpg2e.utils.t
 import com.foundryvtt.core.AnyObject
@@ -100,7 +103,7 @@ class GenerateQuestDataModel(
 
 class GenerateQuestDialog(
     private val game: dynamic,
-    private val kingdomActor: dynamic,
+    private val kingdomActor: KingdomActor,
     private val settings: QuestGeneratorSettings = QuestGeneratorSettings(),
     private val onGenerate: suspend (quest: CampaignQuest) -> Unit,
 ) : FormApp<QuestGeneratorContext, GenerateQuestData>(
