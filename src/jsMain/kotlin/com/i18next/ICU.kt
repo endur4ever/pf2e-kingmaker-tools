@@ -1,5 +1,4 @@
-package com.i18next
+package com.i18n
 
-@JsNonModule
 @JsModule("i18next-icu")
 external class ICU

@@ -16,11 +16,11 @@ import at.posselt.pfrpg2e.localization.Translatable
 import com.foundryvtt.core.AnyObject
 import com.foundryvtt.core.game
 import com.foundryvtt.core.ui
-import com.i18next.I18Next
-import com.i18next.I18NextInitOptions
-import com.i18next.I18NextInterpolationOptions
-import com.i18next.ICU
-import com.i18next.i18next
+import com.i18n.I18Next
+import com.i18n.I18NextInitOptions
+import com.i18n.I18NextInterpolationOptions
+import com.i18n.ICU
+import com.i18n.i18n
 import js.array.component1
 import js.array.component2
 import js.objects.Object
@@ -71,7 +71,7 @@ fun t(key: String, value: AnyObject): String {
     }
     if (isAvailable) {
         try {
-            return i18next.t(key, value)
+            return i18n.t(key, value)
         } catch (ignored: Throwable) {}
     }
     val details = try {
@@ -90,7 +90,7 @@ fun t(key: String): String {
     }
     if (isAvailable) {
         try {
-            return i18next.t(key)
+            return i18n.t(key)
         } catch (ignored: Throwable) {}
     }
     return key
@@ -104,7 +104,7 @@ fun t(translatable: Translatable): String {
     }
     if (isAvailable) {
         try {
-            return i18next.t(translatable.i18nKey)
+            return i18n.t(translatable.i18nKey)
         } catch (ignored: Throwable) {}
     }
     return translatable.i18nKey
@@ -138,11 +138,11 @@ suspend fun initLocalization() {
             escapeValue = false,
         ),
     )
-    i18next
+    i18n
         .use(ICU::class.js)
         .init(options)
         .await()
-    registerI18NextHelper(window.Handlebars, i18next)
+    registerI18NextHelper(window.Handlebars, i18n)
     window.Handlebars.registerHelper("add", { a: Int, b: Int -> a + b })
     window.Handlebars.registerHelper("json", { obj: Any -> JSON.stringify(obj) })
     val events = translateKingdomEvents()

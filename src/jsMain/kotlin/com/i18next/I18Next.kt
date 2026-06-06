@@ -1,4 +1,4 @@
-package com.i18next
+package com.i18n
 
 import com.foundryvtt.core.AnyObject
 import kotlinx.js.JsPlainObject
@@ -35,6 +35,5 @@ external interface I18Next {
     fun exists(key: String): Boolean
 }
 
-@JsNonModule
 @JsModule("i18next")
-external val i18next: I18Next
+external val i18n: I18Next
