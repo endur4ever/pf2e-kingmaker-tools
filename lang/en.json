@@ -597,7 +597,13 @@
           "build_structure": "Build Structure",
           "clear_hex": "Clear Hex",
           "assign_leader": "Assign Leader",
-          "other": "Other"
+          "other": "Other",
+          "combat": "Combat",
+          "exploration": "Exploration",
+          "roleplay": "Roleplay",
+          "political": "Political",
+          "crafting": "Crafting",
+          "travel": "Travel"
         },
         "target": "Target",
         "rewards": "Bounty Rewards",

@@ -21,6 +21,11 @@
                         {{#if generatedByEvent}}
                         <span class="km-quest-generated-badge">{{localizeKM "kingdom.questGenerator.generatedBadge"}}</span>
                         {{/if}}
+                        {{#if turnsRemaining}}
+                        <span class="km-quest-timer-badge" style="background: #a67c1e; color: #fff; font-size: 0.75em; padding: 0.15em 0.5em; border-radius: 3px; display: inline-block; margin-bottom: 0.25em;">
+                            <i class="fa-solid fa-hourglass-half"></i> {{turnsRemaining}} {{localizeKM "turns"}}
+                        </span>
+                        {{/if}}
                         <div class="km-quest-badge km-quest-type-{{type}}">
                             {{#if (eq type "explore_hex")}}<i class="fa-solid fa-compass"></i>{{/if}}
                             {{#if (eq type "claim_hex")}}<i class="fa-solid fa-flag"></i>{{/if}}
@@ -28,6 +33,12 @@
                             {{#if (eq type "clear_hex")}}<i class="fa-solid fa-shield-halved"></i>{{/if}}
                             {{#if (eq type "assign_leader")}}<i class="fa-solid fa-user-tie"></i>{{/if}}
                             {{#if (eq type "other")}}<i class="fa-solid fa-circle-question"></i>{{/if}}
+                            {{#if (eq type "combat")}}<i class="fa-solid fa-hand-fist"></i>{{/if}}
+                            {{#if (eq type "exploration")}}<i class="fa-solid fa-compass"></i>{{/if}}
+                            {{#if (eq type "roleplay")}}<i class="fa-solid fa-comments"></i>{{/if}}
+                            {{#if (eq type "political")}}<i class="fa-solid fa-landmark"></i>{{/if}}
+                            {{#if (eq type "crafting")}}<i class="fa-solid fa-wrench"></i>{{/if}}
+                            {{#if (eq type "travel")}}<i class="fa-solid fa-route"></i>{{/if}}
                             {{localizeKM (concat "kingdom.quests.type." type)}}
                         </div>
                     </div>
@@ -46,7 +57,7 @@
                     </div>
 
                     <div class="km-quest-description">
-                        {{description}}
+                        {{{description}}}
                     </div>
 
                     <div class="km-quest-rewards-container">
@@ -140,10 +151,17 @@
             {{#if completedQuests.length}}
             <div class="km-quests-list">
                 {{#each completedQuests}}
-                <div class="km-quest-row km-quest-completed" data-id="{{id}}">
+                <div class="km-quest-row km-quest-{{status}}" data-id="{{id}}">
                     <div class="km-quest-row-main">
                         <div class="km-quest-row-header">
-                            <span class="km-quest-row-title"><i class="fa-solid fa-circle-check km-check-icon"></i> {{title}}</span>
+                            <span class="km-quest-row-title">
+                                {{#if (eq status "failed")}}
+                                    <i class="fa-solid fa-circle-xmark km-fail-icon" style="color: var(--color-level-error, #ff4a4a); margin-right: 5px;"></i>
+                                {{else}}
+                                    <i class="fa-solid fa-circle-check km-check-icon" style="color: #4a6741; margin-right: 5px;"></i>
+                                {{/if}}
+                                {{title}}
+                            </span>
                             <span class="km-quest-row-meta">
                                 {{#if giver}}• {{localizeKM 'kingdom.quests.fields.giver'}}: <b>{{giver}}</b>{{/if}}
                                 {{#if target}}• {{localizeKM 'kingdom.quests.fields.target'}}: <b>{{target}}</b>{{/if}}

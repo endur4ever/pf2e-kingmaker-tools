@@ -1581,9 +1581,69 @@ class KingdomSheet(
     ): Promise<KingdomSheetContext> = buildPromise {
         val parent = super._preparePartContext(partId, context, options).await()
         val kingdom = getKingdom()
-        val quests = kingdom.quests ?: emptyArray()
-        val activeQuests = quests.filter { it.status == "active" }.toTypedArray()
-        val completedQuests = quests.filter { it.status == "completed" }.toTypedArray()
+        
+        // Merge manual quests and generated campaign quests
+        val manualQuests = kingdom.quests ?: emptyArray()
+        val campaignQuestsList = (kingdom.campaignQuests ?: emptyArray<Any>()).map { cq ->
+            val d = cq.asDynamic()
+            val status = d.status as? String ?: "active"
+            val rewardsDyn = d.rewards
+            val commodities = rewardsDyn.commodities
+            
+            val mappedRewards = js("({})")
+            mappedRewards.rp = rewardsDyn.rp ?: 0
+            mappedRewards.xp = rewardsDyn.xp ?: 0
+            mappedRewards.unrest = rewardsDyn.unrestReduction ?: 0
+            mappedRewards.food = if (commodities != null) commodities["food"] ?: 0 else 0
+            mappedRewards.lumber = if (commodities != null) commodities["lumber"] ?: 0 else 0
+            mappedRewards.stone = if (commodities != null) commodities["stone"] ?: 0 else 0
+            mappedRewards.ore = if (commodities != null) commodities["ore"] ?: 0 else 0
+            mappedRewards.luxuries = if (commodities != null) commodities["luxuries"] ?: 0 else 0
+            
+            val mappedType = d.type
+            val typeStr = if (mappedType != null && js("typeof mappedType === 'object'") as Boolean) {
+                mappedType.value as? String ?: "other"
+            } else {
+                mappedType as? String ?: "other"
+            }
+            
+            js("""({
+                id: d.id,
+                title: d.name,
+                description: d.description,
+                giver: d.sourceEventName || "",
+                status: status,
+                type: typeStr,
+                target: null,
+                rewards: mappedRewards,
+                flavorTextCompleted: "",
+                generatedByEvent: true,
+                turnsRemaining: d.turnsRemaining
+            })""")
+        }
+        
+        val allQuests = manualQuests.map { q ->
+            val d = q.asDynamic()
+            js("""({
+                id: d.id,
+                title: d.title,
+                description: d.description,
+                giver: d.giver,
+                status: d.status,
+                type: d.type,
+                target: d.target,
+                rewards: d.rewards,
+                flavorTextCompleted: d.flavorTextCompleted,
+                generatedByEvent: false,
+                turnsRemaining: null
+            })""")
+        } + campaignQuestsList
+
+        val activeQuests = allQuests.filter { (it.asDynamic().status as? String) == "active" }.toTypedArray()
+        val completedQuests = allQuests.filter { 
+            val s = it.asDynamic().status as? String
+            s == "completed" || s == "failed"
+        }.toTypedArray()
         val allFeatures = kingdom.getExplodedFeatures()
         val chosenFeatures = kingdom.getChosenFeatures(allFeatures)
         val vacancies = kingdom.vacancies(
