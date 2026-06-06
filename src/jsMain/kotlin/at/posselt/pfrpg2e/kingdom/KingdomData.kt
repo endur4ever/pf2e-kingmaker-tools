@@ -46,6 +46,7 @@ import at.posselt.pfrpg2e.kingdom.data.RuinThresholdIncreases
 import at.posselt.pfrpg2e.kingdom.data.getBoosts
 import at.posselt.pfrpg2e.kingdom.data.parse
 import at.posselt.pfrpg2e.campaign.CampaignClock
+import at.posselt.pfrpg2e.companion.CompanionPersonalQuest
 import at.posselt.pfrpg2e.kingdom.modifiers.Modifier
 import at.posselt.pfrpg2e.kingdom.modifiers.evaluation.evaluateGlobalBonuses
 import at.posselt.pfrpg2e.kingdom.modifiers.evaluation.includeCapital
@@ -198,6 +199,8 @@ external interface KingdomData {
     var campaignKingdomEvents: Array<dynamic>
     var eventGenerationLogs: Array<dynamic>
     var questGeneratorSettings: dynamic
+    /** Personal quests tied to individual companions (roadmap #7). */
+    var companionPersonalQuests: Array<CompanionPersonalQuest>?
 }
 
 fun RawLeaderKingdomSkills.hasSkill(leader: Leader, skill: KingdomSkill) =

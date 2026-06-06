@@ -119,6 +119,19 @@
             {{/if}}
         </section>
 
+        {{#if personalQuests.length}}
+        <section class="km-quests-section km-personal-quests-section">
+            <h2 class="km-quests-header">
+                <span><i class="fa-solid fa-heart"></i> {{localizeKM "kingdom.companion.personalQuests"}}</span>
+            </h2>
+            <div class="km-quests-list">
+                {{#each personalQuests}}
+                {{> companionQuestRow this}}
+                {{/each}}
+            </div>
+        </section>
+        {{/if}}
+
         <section class="km-quests-section km-completed-section">
             <h2 class="km-quests-header">
                 <span><i class="fa-solid fa-book-open"></i> {{localizeKM "kingdom.quests.completedQuests"}}</span>

@@ -2,6 +2,8 @@ package at.posselt.pfrpg2e.kingdom.dialogs
 
 import at.posselt.pfrpg2e.app.HandlebarsRenderContext
 import at.posselt.pfrpg2e.app.forms.SimpleApp
+import at.posselt.pfrpg2e.companion.clampInfluence
+import at.posselt.pfrpg2e.companion.normalizeDiscoveryStatus
 import at.posselt.pfrpg2e.kingdom.data.RawCharacter
 import at.posselt.pfrpg2e.utils.buildPromise
 import at.posselt.pfrpg2e.utils.fromUuidOfTypes
@@ -27,6 +29,8 @@ external interface RosterAddContext : HandlebarsRenderContext {
     val isNpc: Boolean
     val speed: Int
     val plotHook: String
+    val influence: Int
+    val discoveryStatus: String
 }
 
 class RosterAddDialog(
@@ -53,6 +57,12 @@ class RosterAddDialog(
                     val plotHook = element.querySelector("textarea[name='companionPlotHook']")
                         ?.let { it as? org.w3c.dom.HTMLTextAreaElement }
                         ?.value ?: ""
+                    val influence = element.querySelector("input[name='companionInfluence']")
+                        ?.let { it as? org.w3c.dom.HTMLInputElement }
+                        ?.value?.toIntOrNull() ?: 0
+                    val discoveryStatus = element.querySelector("select[name='companionDiscovery']")
+                        ?.let { it as? org.w3c.dom.HTMLSelectElement }
+                        ?.value
 
                     val actorUuid = element.querySelector("input[name='linkedActorUuid']")
                         ?.let { it as? org.w3c.dom.HTMLInputElement }
@@ -67,6 +77,8 @@ class RosterAddDialog(
                         it.plotHook = plotHook
                         it.role = if (isNpc) "npc" else "companion"
                         it.img = img
+                        it.influence = clampInfluence(influence)
+                        it.discoveryStatus = normalizeDiscoveryStatus(discoveryStatus)
                     }
                     onAdd(character)
                     close()
@@ -79,12 +91,10 @@ class RosterAddDialog(
                 val searchInput = element.querySelector("input[name='actorSearch']")
                     ?.let { it as? org.w3c.dom.HTMLInputElement }
                 val query = searchInput?.value?.takeIf { it.isNotBlank() } ?: return@buildPromise
-                // Search PF2ECharacter and PF2ENpc actors by name
                 val actors = game.actors.filter { actor ->
                     (actor is PF2ECharacter || actor is PF2ENpc) &&
                         actor.name.contains(query, ignoreCase = true)
                 }
-                // Populate dropdown with results
                 val dropdown = element.querySelector(".km-roster-search-results")
                     ?.let { it as? HTMLElement }
                 if (dropdown != null) {
@@ -98,7 +108,6 @@ class RosterAddDialog(
                 val uuidInput = element.querySelector("select[name='searchResults']")
                     ?.let { it as? org.w3c.dom.HTMLSelectElement }
                 val uuid = uuidInput?.value?.takeIf { it.isNotBlank() } ?: return@buildPromise
-                // Populate the hidden actorUuid field
                 val hiddenField = element.querySelector("input[name='linkedActorUuid']")
                     ?.let { it as? org.w3c.dom.HTMLInputElement }
                 if (hiddenField != null) {
@@ -126,6 +135,8 @@ class RosterAddDialog(
             isNpc = false,
             speed = 0,
             plotHook = "",
+            influence = 0,
+            discoveryStatus = "unknown",
         )
     }
 }
@@ -145,6 +156,9 @@ external interface RosterEditContext : HandlebarsRenderContext {
     val destinationX: Int?
     val destinationY: Int?
     val eta: Int?
+    val influence: Int
+    val campAvailable: Boolean
+    val discoveryStatus: String
 }
 
 class RosterEditDialog(
@@ -181,8 +195,6 @@ class RosterEditDialog(
                     ?.let { it as? org.w3c.dom.HTMLInputElement }
                     ?.checked ?: existing.active
 
-                // Number fields: when the input is present we honor its value
-                // (empty string -> null, i.e. cleared); when absent we keep existing.
                 val destinationXField = element.querySelector("input[name='companionDestinationX']")
                     ?.let { it as? org.w3c.dom.HTMLInputElement }
                 val destinationX = if (destinationXField != null) destinationXField.value.toIntOrNull() else existing.destinationX
@@ -195,10 +207,22 @@ class RosterEditDialog(
                     ?.let { it as? org.w3c.dom.HTMLInputElement }
                 val eta = if (etaField != null) etaField.value.toIntOrNull() else existing.eta
 
-                // A companion with a remaining ETA (>= 1 day) is en route. Derive this from
-                // the ETA so there is no separate "traveling" toggle to forget — setting a
-                // destination + ETA is all it takes to send them on their way.
+                // A companion with a remaining ETA (>= 1 day) is en route.
                 val traveling = eta != null && eta >= 1
+
+                // Companion-relationship fields: honor the form input when present, otherwise preserve.
+                // personalQuestIds is never edited here, always preserved.
+                val campAvailableField = element.querySelector("input[name='companionCampAvailable']")
+                    ?.let { it as? org.w3c.dom.HTMLInputElement }
+                val campAvailable = campAvailableField?.checked ?: existing.campAvailable
+
+                val discoveryStatus = element.querySelector("select[name='companionDiscovery']")
+                    ?.let { it as? org.w3c.dom.HTMLSelectElement }
+                    ?.value?.let { normalizeDiscoveryStatus(it) } ?: existing.discoveryStatus
+
+                val influence = element.querySelector("input[name='companionInfluence']")
+                    ?.let { it as? org.w3c.dom.HTMLInputElement }
+                    ?.value?.toIntOrNull()?.let { clampInfluence(it) } ?: existing.influence
 
                 val updated = RawCharacter(
                     name = name,
@@ -213,6 +237,10 @@ class RosterEditDialog(
                     it.destinationY = destinationY
                     it.eta = eta
                     it.img = existing.img
+                    it.influence = influence
+                    it.campAvailable = campAvailable
+                    it.discoveryStatus = discoveryStatus
+                    it.personalQuestIds = existing.personalQuestIds
                 }
                 onSave(index, updated)
                 close()
@@ -245,6 +273,9 @@ class RosterEditDialog(
             destinationX = existing.destinationX,
             destinationY = existing.destinationY,
             eta = existing.eta,
+            influence = clampInfluence(existing.influence),
+            campAvailable = existing.campAvailable,
+            discoveryStatus = normalizeDiscoveryStatus(existing.discoveryStatus),
         )
     }
 }

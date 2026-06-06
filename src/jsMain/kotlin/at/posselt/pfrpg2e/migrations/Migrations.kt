@@ -24,6 +24,7 @@ import at.posselt.pfrpg2e.migrations.migrations.Migration29
 import at.posselt.pfrpg2e.migrations.migrations.Migration30
 import at.posselt.pfrpg2e.migrations.migrations.Migration31
 import at.posselt.pfrpg2e.migrations.migrations.Migration32
+import at.posselt.pfrpg2e.migrations.migrations.Migration33
 import at.posselt.pfrpg2e.settings.pfrpg2eKingdomCampingWeather
 import at.posselt.pfrpg2e.utils.isFirstGM
 import at.posselt.pfrpg2e.utils.openJournal
@@ -70,6 +71,7 @@ private val migrations = listOf(
     Migration30(),
     Migration31(),
     Migration32(),
+    Migration33(),
 )
 
 private val latestMigrationVersion = migrations.maxOfOrNull { it.version }!!

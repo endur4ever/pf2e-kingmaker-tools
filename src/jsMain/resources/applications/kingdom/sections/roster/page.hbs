@@ -29,6 +29,32 @@
                             </span>
                         </div>
 
+                        <div class="km-roster-relationship">
+                            <div class="km-roster-influence" title="{{localizeKM 'kingdom.companion.influence'}}: {{this.influence}}/12">
+                                <div class="km-roster-influence-bar">
+                                    <div class="km-roster-influence-fill" style="width: {{this.influencePercent}}%"></div>
+                                </div>
+                            </div>
+                            <div class="km-roster-badges">
+                                <span class="km-roster-camp-badge {{#if this.campAvailable}}km-camp-available{{else}}km-camp-unavailable{{/if}}"
+                                      title="{{#if this.campAvailable}}{{localizeKM 'kingdom.companion.inCamp'}}{{else}}{{localizeKM 'kingdom.companion.notInCamp'}}{{/if}}">
+                                    <i class="fa-solid {{#if this.campAvailable}}fa-campground{{else}}fa-person-walking-arrow-right{{/if}}"></i>
+                                </span>
+                                <span class="km-roster-discovery-icon" data-status="{{this.discoveryStatus}}" title="{{this.discoveryStatusLabel}}">
+                                    {{#if (eq this.discoveryStatus "unknown")}}<i class="fa-solid fa-circle-question"></i>{{/if}}
+                                    {{#if (eq this.discoveryStatus "introduced")}}<i class="fa-solid fa-handshake-simple"></i>{{/if}}
+                                    {{#if (eq this.discoveryStatus "established")}}<i class="fa-solid fa-handshake"></i>{{/if}}
+                                    {{#if (eq this.discoveryStatus "trusted")}}<i class="fa-solid fa-heart"></i>{{/if}}
+                                    {{#if (eq this.discoveryStatus "bonded")}}<i class="fa-solid fa-heart-circle-check"></i>{{/if}}
+                                </span>
+                                {{#if this.hasPersonalQuests}}
+                                <span class="km-roster-quest-badge" title="{{localizeKM 'kingdom.companion.personalQuests'}}">
+                                    <i class="fa-solid fa-scroll"></i> {{this.personalQuestCount}}
+                                </span>
+                                {{/if}}
+                            </div>
+                        </div>
+
                         <div class="km-roster-fields">
                             <div class="km-roster-field">
                                 <label>{{localizeKM "kingdom.roster.speed"}}</label>
@@ -73,8 +99,19 @@
                         </div>
                         {{/if}}
 
+                        {{#unless ../rosterContext.isGM}}
+                        <div class="km-roster-actions">
+                            <button type="button" class="km-roster-action-btn km-profile-btn" data-action="open-companion-profile" data-index="{{@index}}" title="{{localizeKM 'kingdom.companion.openProfile'}}">
+                                <i class="fa-solid fa-address-card"></i> {{localizeKM "kingdom.companion.openProfile"}}
+                            </button>
+                        </div>
+                        {{/unless}}
+
                         {{#if ../rosterContext.isGM}}
                         <div class="km-roster-actions">
+                            <button type="button" class="km-roster-action-btn km-profile-btn" data-action="open-companion-profile" data-index="{{@index}}" title="{{localizeKM 'kingdom.companion.openProfile'}}">
+                                <i class="fa-solid fa-address-card"></i> {{localizeKM "kingdom.companion.openProfile"}}
+                            </button>
                             <button type="button" class="km-roster-action-btn km-edit-btn" data-action="edit-companion" data-index="{{@index}}" title="{{localizeKM 'kingdom.roster.edit'}}">
                                 <i class="fa-solid fa-pen"></i> {{localizeKM "kingdom.roster.edit"}}
                             </button>

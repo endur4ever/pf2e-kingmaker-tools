@@ -734,6 +734,46 @@
         "invalidSpeed": "Speed must be a positive number.",
         "confirmDelete": "Are you sure you want to remove {name} from the roster?"
       },
+      "companion": {
+        "profile": "Companion Profile",
+        "influence": "Influence",
+        "campAvailable": "Available at Camp",
+        "discoveryStatus": "Discovery Status",
+        "discovery": {
+          "unknown": "Unknown",
+          "introduced": "Introduced",
+          "established": "Established",
+          "trusted": "Trusted",
+          "bonded": "Bonded"
+        },
+        "personalQuests": "Personal Quests",
+        "addPersonalQuest": "Add Personal Quest",
+        "editPersonalQuest": "Edit Personal Quest",
+        "noPersonalQuests": "No personal quests yet.",
+        "openProfile": "Profile",
+        "inCamp": "In Camp",
+        "notInCamp": "Away",
+        "questHook": "Quest Hook",
+        "gmOnly": "GM Only",
+        "cannotDeleteHasQuests": "This companion has active personal quests. Resolve or abandon them before removing the companion.",
+        "quest": {
+          "title": "Title",
+          "description": "Description",
+          "turns": "Turns Remaining (blank = no deadline)",
+          "turnsRemaining": "Turns Remaining",
+          "influenceReward": "Influence Reward",
+          "visibleToPlayers": "Visible to Players",
+          "complete": "Complete Quest",
+          "reveal": "Reveal to Players",
+          "hide": "Hide from Players",
+          "status": {
+            "active": "Active",
+            "completed": "Completed",
+            "failed": "Failed",
+            "abandoned": "Abandoned"
+          }
+        }
+      },
       "reduceDCToBuildLumberStructures": "Reduce DC for building Structures made out of Lumber by 2",
       "expandMagicUse": "Expand Magic Use",
       "expandMagicUseHelp": "When enabled, you can use Magic for the following activities: Celebrate Holiday, Craft Luxuries, Create a Masterpiece, and Rest and Relax",

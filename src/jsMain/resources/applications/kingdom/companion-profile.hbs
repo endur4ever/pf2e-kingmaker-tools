@@ -1,0 +1,83 @@
+<div class="km-companion-profile">
+    <header class="km-cp-header">
+        {{#if img}}
+        <div class="km-cp-portrait"><img src="{{img}}" alt="{{companionName}}" /></div>
+        {{/if}}
+        <div class="km-cp-heading">
+            <h1>{{companionName}}</h1>
+            <div class="km-cp-tags">
+                <span class="km-cp-role {{#if (eq roleLabel "NPC")}}km-role-npc{{else}}km-role-companion{{/if}}">{{roleLabel}}</span>
+                <span class="km-cp-discovery" data-status="{{discoveryStatus}}">{{discoveryStatusLabel}}</span>
+            </div>
+        </div>
+    </header>
+
+    <section class="km-cp-influence">
+        <div class="km-cp-influence-label">
+            <span>{{localizeKM "kingdom.companion.influence"}}</span>
+            <span class="km-cp-influence-value">{{influence}} / {{maxInfluence}}</span>
+        </div>
+        <div class="km-cp-influence-bar">
+            <div class="km-cp-influence-fill" style="width: {{influencePercent}}%"></div>
+        </div>
+        {{#if isGM}}
+        <div class="km-cp-influence-controls">
+            <button type="button" data-action="influence-decrease" title="-1"><i class="fa-solid fa-minus"></i></button>
+            <button type="button" data-action="influence-increase" title="+1"><i class="fa-solid fa-plus"></i></button>
+        </div>
+        {{/if}}
+    </section>
+
+    <section class="km-cp-status-row">
+        <div class="km-cp-camp">
+            <label>{{localizeKM "kingdom.companion.campAvailable"}}</label>
+            <span class="km-cp-badge {{#if campAvailable}}km-camp-available{{else}}km-camp-unavailable{{/if}}">
+                {{#if campAvailable}}{{localizeKM "kingdom.companion.inCamp"}}{{else}}{{localizeKM "kingdom.companion.notInCamp"}}{{/if}}
+            </span>
+            {{#if isGM}}
+            <button type="button" class="km-cp-toggle" data-action="toggle-camp-available">
+                <i class="fa-solid fa-right-left"></i>
+            </button>
+            {{/if}}
+        </div>
+
+        {{#if isGM}}
+        <div class="km-cp-discovery-control">
+            <label for="discoveryStatus">{{localizeKM "kingdom.companion.discoveryStatus"}}</label>
+            <select name="discoveryStatus">
+                {{#each discoveryStages}}
+                <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+                {{/each}}
+            </select>
+            <button type="button" data-action="set-discovery">{{localizeKM "applications.save"}}</button>
+        </div>
+        {{/if}}
+    </section>
+
+    {{#if plotHook}}
+    <section class="km-cp-plot-hook">
+        <label>{{localizeKM "kingdom.roster.plotHook"}}</label>
+        <p>{{plotHook}}</p>
+    </section>
+    {{/if}}
+
+    <section class="km-cp-quests">
+        <h2 class="km-cp-quests-header">
+            <span><i class="fa-solid fa-scroll"></i> {{localizeKM "kingdom.companion.personalQuests"}}</span>
+            {{#if isGM}}
+            <button type="button" class="km-cp-add-quest" data-action="add-personal-quest">
+                <i class="fa-solid fa-plus"></i> {{localizeKM "kingdom.companion.addPersonalQuest"}}
+            </button>
+            {{/if}}
+        </h2>
+        {{#if personalQuests.length}}
+        <div class="km-cp-quest-list">
+            {{#each personalQuests}}
+            {{> companionQuestCard this}}
+            {{/each}}
+        </div>
+        {{else}}
+        <p class="km-cp-empty">{{localizeKM "kingdom.companion.noPersonalQuests"}}</p>
+        {{/if}}
+    </section>
+</div>

@@ -96,6 +96,7 @@ external interface KingdomSheetContext : ValidatedHandlebarsContext {
     val generatedQuestCount: Int
     val activeEventCount: Int
     val questTimerChanges: Array<QuestTimerChangeContext>
+    val personalQuests: Array<CompanionQuestRowContext>
 }
 
 @JsPlainObject

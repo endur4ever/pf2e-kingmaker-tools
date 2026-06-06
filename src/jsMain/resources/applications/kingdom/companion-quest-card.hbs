@@ -1,0 +1,40 @@
+<div class="km-cp-quest-card km-quest-status-{{status}}">
+    <div class="km-cpq-main">
+        <span class="km-cpq-title">{{title}}</span>
+        <span class="km-cpq-status km-status-{{status}}">{{statusLabel}}</span>
+    </div>
+    {{#if description}}<p class="km-cpq-desc">{{description}}</p>{{/if}}
+    {{#if questHook}}
+    <p class="km-cpq-hook"><i class="fa-solid fa-bookmark"></i> {{questHook}}</p>
+    {{/if}}
+    <div class="km-cpq-meta">
+        {{#if hasDeadline}}
+        <span class="km-cpq-turns"><i class="fa-solid fa-hourglass-half"></i> {{localizeKM "kingdom.companion.quest.turnsRemaining"}}: {{turnsRemaining}}</span>
+        {{/if}}
+        {{#if influenceReward}}
+        <span class="km-cpq-reward"><i class="fa-solid fa-heart"></i> +{{influenceReward}}</span>
+        {{/if}}
+        {{#unless visibleToPlayers}}
+        <span class="km-cpq-hidden"><i class="fa-solid fa-eye-slash"></i> {{localizeKM "kingdom.companion.gmOnly"}}</span>
+        {{/unless}}
+    </div>
+    {{#if isGM}}
+    <div class="km-cpq-actions">
+        <button type="button" data-action="toggle-quest-visibility" data-quest-id="{{id}}"
+                title="{{#if visibleToPlayers}}{{localizeKM 'kingdom.companion.quest.hide'}}{{else}}{{localizeKM 'kingdom.companion.quest.reveal'}}{{/if}}">
+            <i class="fa-solid {{#if visibleToPlayers}}fa-eye{{else}}fa-eye-slash{{/if}}"></i>
+        </button>
+        {{#if isActive}}
+        <button type="button" data-action="complete-quest" data-quest-id="{{id}}" title="{{localizeKM 'kingdom.companion.quest.complete'}}">
+            <i class="fa-solid fa-check"></i>
+        </button>
+        {{/if}}
+        <button type="button" data-action="edit-personal-quest" data-quest-id="{{id}}" title="{{localizeKM 'kingdom.roster.edit'}}">
+            <i class="fa-solid fa-pen"></i>
+        </button>
+        <button type="button" class="km-danger" data-action="delete-quest" data-quest-id="{{id}}" title="{{localizeKM 'kingdom.roster.delete'}}">
+            <i class="fa-solid fa-trash"></i>
+        </button>
+    </div>
+    {{/if}}
+</div>

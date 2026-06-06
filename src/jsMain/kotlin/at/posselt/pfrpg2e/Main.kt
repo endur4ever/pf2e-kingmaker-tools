@@ -142,6 +142,8 @@ fun main() {
                     "foodCost" to "components/food-cost/food-cost.hbs",
                     "skillPickerInput" to "components/skill-picker/skill-picker-input.hbs",
                     "activityEffectsInput" to "components/activity-effects/activity-effects-input.hbs",
+                    "companionQuestCard" to "applications/kingdom/companion-quest-card.hbs",
+                    "companionQuestRow" to "applications/kingdom/companion-quest-row.hbs",
                 )
             )
         }

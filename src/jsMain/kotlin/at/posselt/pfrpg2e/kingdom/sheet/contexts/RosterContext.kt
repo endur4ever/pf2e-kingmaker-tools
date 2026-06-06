@@ -1,6 +1,9 @@
 package at.posselt.pfrpg2e.kingdom.sheet.contexts
 
-import at.posselt.pfrpg2e.app.forms.FormElementContext
+import at.posselt.pfrpg2e.companion.CompanionPersonalQuest
+import at.posselt.pfrpg2e.companion.clampInfluence
+import at.posselt.pfrpg2e.companion.influenceBarPercent
+import at.posselt.pfrpg2e.companion.normalizeDiscoveryStatus
 import at.posselt.pfrpg2e.kingdom.data.RawCharacter
 import kotlinx.js.JsPlainObject
 
@@ -19,6 +22,13 @@ external interface RosterActorContext {
     val plotHook: String?
     val actorUuid: String?
     val img: String?
+    val influence: Int
+    val influencePercent: Int
+    val campAvailable: Boolean
+    val discoveryStatus: String
+    val discoveryStatusLabel: String
+    val personalQuestCount: Int
+    val hasPersonalQuests: Boolean
 }
 
 @JsPlainObject
@@ -27,9 +37,25 @@ external interface RosterContext {
     val isGM: Boolean
 }
 
-fun Array<RawCharacter>.toRosterContext(isGM: Boolean): RosterContext =
+/**
+ * Builds the roster context. Pure (no Foundry i18n) so it stays unit-testable; callers from the app
+ * pass [localize] = the real localizer, tests use the identity default. [personalQuests] is the full
+ * companionPersonalQuests array used to compute per-companion active-quest counts.
+ */
+fun Array<RawCharacter>.toRosterContext(
+    isGM: Boolean,
+    personalQuests: Array<CompanionPersonalQuest> = emptyArray(),
+    localize: (String) -> String = { it },
+): RosterContext =
     RosterContext(
-        items = mapIndexed { index, character ->
+        items = map { character ->
+            val status = normalizeDiscoveryStatus(character.discoveryStatus)
+            val key = character.actorUuid ?: character.name
+            val ids = character.personalQuestIds.toSet()
+            val activeCount = personalQuests.count {
+                (it.id in ids || it.companionId == key) && it.status == "active"
+            }
+            val influence = clampInfluence(character.influence)
             RosterActorContext(
                 name = character.name,
                 role = character.role,
@@ -48,6 +74,13 @@ fun Array<RawCharacter>.toRosterContext(isGM: Boolean): RosterContext =
                 plotHook = character.plotHook,
                 actorUuid = character.actorUuid,
                 img = character.img,
+                influence = influence,
+                influencePercent = influenceBarPercent(influence),
+                campAvailable = character.campAvailable,
+                discoveryStatus = status,
+                discoveryStatusLabel = localize("kingdom.companion.discovery.$status"),
+                personalQuestCount = activeCount,
+                hasPersonalQuests = activeCount > 0,
             )
         }.toTypedArray(),
         isGM = isGM,

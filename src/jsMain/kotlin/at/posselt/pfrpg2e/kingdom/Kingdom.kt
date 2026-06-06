@@ -17,15 +17,6 @@ fun KingdomActor.getKingdom(): KingdomData? =
 
 suspend fun KingdomActor.setKingdom(data: KingdomData) {
     setAppFlag("kingdom-sheet", data)
-    data.companions?.forEach { companion ->
-        val uuid = companion.actorUuid
-        if (uuid != null) {
-            val companionActor = game.actors.get(uuid)
-            if (companionActor != null) {
-                companionActor.setAppFlag("companion-data", companion)
-            }
-        }
-    }
 }
 
 suspend fun KingdomActor.clearKingdom() {

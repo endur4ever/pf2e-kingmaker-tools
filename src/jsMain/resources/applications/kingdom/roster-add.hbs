@@ -24,6 +24,22 @@
             <label for="companionPlotHook">{{localizeKM "kingdom.roster.plotHook"}}</label>
             <textarea name="companionPlotHook" rows="3">{{plotHook}}</textarea>
         </div>
+
+        <div class="km-form-group">
+            <label for="companionInfluence">{{localizeKM "kingdom.companion.influence"}}</label>
+            <input type="number" name="companionInfluence" value="{{influence}}" min="0" max="12" />
+        </div>
+
+        <div class="km-form-group">
+            <label for="companionDiscovery">{{localizeKM "kingdom.companion.discoveryStatus"}}</label>
+            <select name="companionDiscovery">
+                <option value="unknown" {{#if (eq discoveryStatus "unknown")}}selected{{/if}}>{{localizeKM "kingdom.companion.discovery.unknown"}}</option>
+                <option value="introduced" {{#if (eq discoveryStatus "introduced")}}selected{{/if}}>{{localizeKM "kingdom.companion.discovery.introduced"}}</option>
+                <option value="established" {{#if (eq discoveryStatus "established")}}selected{{/if}}>{{localizeKM "kingdom.companion.discovery.established"}}</option>
+                <option value="trusted" {{#if (eq discoveryStatus "trusted")}}selected{{/if}}>{{localizeKM "kingdom.companion.discovery.trusted"}}</option>
+                <option value="bonded" {{#if (eq discoveryStatus "bonded")}}selected{{/if}}>{{localizeKM "kingdom.companion.discovery.bonded"}}</option>
+            </select>
+        </div>
     </div>
 
     <hr>

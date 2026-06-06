@@ -30,6 +30,14 @@ external interface RawCharacter {
     var role: String
     /** Optional portrait/image path */
     var img: String?
+    /** Companion relationship influence (0-12 Influence Points, PF2e Influence subsystem). Default 0. */
+    var influence: Int
+    /** Whether this companion is available for camp activities (not traveling, not busy). Default true. */
+    var campAvailable: Boolean
+    /** Discovery/relationship stage: "unknown" | "introduced" | "established" | "trusted" | "bonded". Default "unknown". */
+    var discoveryStatus: String
+    /** IDs of personal quests linked to this companion. */
+    var personalQuestIds: Array<String>
 }
 
 /**
@@ -39,5 +47,5 @@ fun RawCharacter(
     name: String,
     actorUuid: String? = null,
 ): RawCharacter =
-    js("{ name: name, actorUuid: actorUuid, speed: 0, traveling: false, active: true, role: 'companion', plotHook: '' }")
+    js("{ name: name, actorUuid: actorUuid, speed: 0, traveling: false, active: true, role: 'companion', plotHook: '', influence: 0, campAvailable: true, discoveryStatus: 'unknown', personalQuestIds: [] }")
         .unsafeCast<RawCharacter>()

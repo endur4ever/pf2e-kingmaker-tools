@@ -54,6 +54,33 @@
 
     <hr>
 
+    <div class="km-roster-dialog-section">
+        <h3><i class="fa-solid fa-heart"></i> {{localizeKM "kingdom.companion.profile"}}</h3>
+
+        <div class="km-form-group">
+            <label for="companionInfluence">{{localizeKM "kingdom.companion.influence"}}</label>
+            <input type="number" name="companionInfluence" value="{{influence}}" min="0" max="12" />
+        </div>
+
+        <div class="km-form-group">
+            <label for="companionCampAvailable">{{localizeKM "kingdom.companion.campAvailable"}}</label>
+            <input type="checkbox" name="companionCampAvailable" {{#if campAvailable}}checked{{/if}} />
+        </div>
+
+        <div class="km-form-group">
+            <label for="companionDiscovery">{{localizeKM "kingdom.companion.discoveryStatus"}}</label>
+            <select name="companionDiscovery">
+                <option value="unknown" {{#if (eq discoveryStatus "unknown")}}selected{{/if}}>{{localizeKM "kingdom.companion.discovery.unknown"}}</option>
+                <option value="introduced" {{#if (eq discoveryStatus "introduced")}}selected{{/if}}>{{localizeKM "kingdom.companion.discovery.introduced"}}</option>
+                <option value="established" {{#if (eq discoveryStatus "established")}}selected{{/if}}>{{localizeKM "kingdom.companion.discovery.established"}}</option>
+                <option value="trusted" {{#if (eq discoveryStatus "trusted")}}selected{{/if}}>{{localizeKM "kingdom.companion.discovery.trusted"}}</option>
+                <option value="bonded" {{#if (eq discoveryStatus "bonded")}}selected{{/if}}>{{localizeKM "kingdom.companion.discovery.bonded"}}</option>
+            </select>
+        </div>
+    </div>
+
+    <hr>
+
     <div class="km-roster-dialog-actions">
         <button type="button" data-action="save" class="km-primary-btn">
             <i class="fa-solid fa-check"></i> {{localizeKM "applications.save"}}

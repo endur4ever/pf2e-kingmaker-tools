@@ -1,0 +1,142 @@
+/* Companion relationship & personal-quest manager (roadmap #7) */
+
+/* ---- Roster card: influence bar + relationship badges ---- */
+.km-roster-relationship {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 6px 0;
+}
+
+.km-roster-influence-bar {
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+}
+
+.km-roster-influence-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #8a6d3b, #c9a227 55%, #e9c46a);
+    transition: width 200ms ease-out;
+}
+
+.km-roster-badges {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.km-roster-camp-badge,
+.km-roster-discovery-icon,
+.km-roster-quest-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 0.75rem;
+    padding: 1px 6px;
+    border-radius: 999px;
+    line-height: 1.4;
+}
+
+.km-roster-camp-badge.km-camp-available { color: #2e7d32; background: rgba(46, 125, 50, 0.12); }
+.km-roster-camp-badge.km-camp-unavailable { color: #9e9e9e; background: rgba(0, 0, 0, 0.08); }
+.km-roster-discovery-icon { color: #6d4c8a; background: rgba(109, 76, 138, 0.12); }
+.km-roster-discovery-icon[data-status="bonded"] { color: #b3306b; }
+.km-roster-discovery-icon[data-status="trusted"] { color: #c0392b; }
+.km-roster-quest-badge { color: #8a6d3b; background: rgba(201, 162, 39, 0.15); font-weight: 600; }
+
+.km-roster-action-btn.km-profile-btn { color: #6d4c8a; }
+
+/* ---- Companion profile dialog ---- */
+.km-companion-profile { display: flex; flex-direction: column; gap: 14px; padding: 4px; }
+
+.km-cp-header { display: flex; gap: 12px; align-items: center; }
+.km-cp-portrait img {
+    width: 64px;
+    height: 64px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 2px solid rgba(0, 0, 0, 0.2);
+}
+.km-cp-heading h1 { margin: 0; font-size: 1.3rem; }
+.km-cp-tags { display: flex; gap: 8px; margin-top: 4px; }
+.km-cp-role, .km-cp-discovery {
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.08);
+}
+.km-cp-role.km-role-npc { background: rgba(120, 90, 40, 0.18); }
+.km-cp-discovery { background: rgba(109, 76, 138, 0.15); color: #6d4c8a; }
+
+.km-cp-influence { display: flex; flex-direction: column; gap: 4px; }
+.km-cp-influence-label { display: flex; justify-content: space-between; font-weight: 600; }
+.km-cp-influence-value { font-variant-numeric: tabular-nums; }
+.km-cp-influence-bar {
+    height: 10px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+}
+.km-cp-influence-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #8a6d3b, #c9a227 55%, #e9c46a);
+    transition: width 200ms ease-out;
+}
+.km-cp-influence-controls { display: flex; gap: 6px; justify-content: flex-end; }
+
+.km-cp-status-row { display: flex; gap: 16px; flex-wrap: wrap; align-items: end; }
+.km-cp-camp, .km-cp-discovery-control { display: flex; align-items: center; gap: 8px; }
+.km-cp-discovery-control select { min-width: 120px; }
+.km-cp-badge { font-size: 0.8rem; padding: 2px 8px; border-radius: 999px; }
+.km-cp-badge.km-camp-available { color: #2e7d32; background: rgba(46, 125, 50, 0.12); }
+.km-cp-badge.km-camp-unavailable { color: #9e9e9e; background: rgba(0, 0, 0, 0.08); }
+
+.km-cp-plot-hook { background: rgba(0, 0, 0, 0.04); border-left: 3px solid #c9a227; padding: 6px 10px; border-radius: 4px; }
+.km-cp-plot-hook label { font-weight: 600; display: block; }
+.km-cp-plot-hook p { margin: 4px 0 0; }
+
+.km-cp-quests-header { display: flex; justify-content: space-between; align-items: center; margin: 0 0 6px; }
+.km-cp-quest-list { display: flex; flex-direction: column; gap: 8px; }
+.km-cp-empty { color: #888; font-style: italic; }
+
+/* ---- Personal quest cards & rows ---- */
+.km-cp-quest-card {
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-left: 4px solid #c9a227;
+    border-radius: 6px;
+    padding: 8px 10px;
+    background: rgba(255, 255, 255, 0.5);
+}
+.km-cp-quest-card.km-quest-status-completed { border-left-color: #2e7d32; opacity: 0.85; }
+.km-cp-quest-card.km-quest-status-failed { border-left-color: #c0392b; }
+.km-cp-quest-card.km-quest-status-abandoned { border-left-color: #9e9e9e; opacity: 0.7; }
+.km-cpq-main { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.km-cpq-title { font-weight: 600; }
+.km-cpq-status { font-size: 0.72rem; padding: 1px 7px; border-radius: 999px; background: rgba(0, 0, 0, 0.08); }
+.km-cpq-desc { margin: 4px 0; font-size: 0.9rem; }
+.km-cpq-hook { margin: 4px 0; font-size: 0.85rem; color: #6d4c8a; }
+.km-cpq-meta { display: flex; gap: 10px; flex-wrap: wrap; font-size: 0.78rem; color: #555; }
+.km-cpq-reward { color: #b3306b; }
+.km-cpq-hidden { color: #9e9e9e; }
+.km-cpq-actions { display: flex; gap: 4px; justify-content: flex-end; margin-top: 6px; }
+.km-cpq-actions .km-danger { color: #c0392b; }
+
+.km-personal-quests-section .km-personal-quest-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 10px;
+    border-left: 3px solid #c9a227;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.03);
+}
+.km-personal-quest-row .km-pqr-title { font-weight: 600; flex: 1; }
+.km-personal-quest-row .km-pqr-companion { color: #6d4c8a; font-size: 0.85rem; }
+.km-personal-quest-row .km-pqr-reward { color: #b3306b; font-size: 0.8rem; }
+.km-personal-quest-row .km-pqr-actions { display: flex; gap: 6px; align-items: center; }
+.km-personal-quest-row.km-quest-status-completed { opacity: 0.8; border-left-color: #2e7d32; }

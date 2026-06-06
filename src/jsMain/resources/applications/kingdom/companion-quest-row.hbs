@@ -1,0 +1,25 @@
+<div class="km-personal-quest-row km-quest-status-{{status}}">
+    <span class="km-pqr-companion"><i class="fa-solid fa-user"></i> {{companionName}}</span>
+    <span class="km-pqr-title">{{title}}</span>
+    <span class="km-pqr-status km-status-{{status}}">{{statusLabel}}</span>
+    {{#if hasDeadline}}
+    <span class="km-pqr-turns"><i class="fa-solid fa-hourglass-half"></i> {{turnsRemaining}}</span>
+    {{/if}}
+    {{#if influenceReward}}
+    <span class="km-pqr-reward"><i class="fa-solid fa-heart"></i> +{{influenceReward}}</span>
+    {{/if}}
+    {{#if isGM}}
+    <span class="km-pqr-actions">
+        {{#if visibleToPlayers}}
+        <i class="fa-solid fa-eye" title="{{localizeKM 'kingdom.companion.quest.visibleToPlayers'}}"></i>
+        {{else}}
+        <i class="fa-solid fa-eye-slash" title="{{localizeKM 'kingdom.companion.gmOnly'}}"></i>
+        {{/if}}
+        {{#if (gte companionIndex 0)}}
+        <button type="button" data-action="open-companion-profile" data-index="{{companionIndex}}" title="{{localizeKM 'kingdom.companion.openProfile'}}">
+            <i class="fa-solid fa-address-card"></i>
+        </button>
+        {{/if}}
+    </span>
+    {{/if}}
+</div>

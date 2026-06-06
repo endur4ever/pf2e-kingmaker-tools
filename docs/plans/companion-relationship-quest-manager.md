@@ -640,17 +640,19 @@ Use this checklist after implementation to verify the feature works in Foundry V
 
 5. **Discovery "once per session" enforcement**: The plan specifies that discovery attempts are "once per camp session" but doesn't implement a session-tracking mechanism. The UI button is simply disabled after one click per dialog open. A more robust implementation would track this in the data model (e.g., `lastDiscoveryAttemptTurn: Int`), but this is deferred as YAGNI.
 
-### Open Questions for Gregory
+### Resolved Decisions (2026-06-05 — Gregory + NotebookLM Kingmaker AP) — IMPLEMENTED
 
-1. **Camping sheet kingdom data access**: Does the camping sheet currently have access to `KingdomData`? If not, should we pass the kingdom actor UUID to the camping sheet, or use a different mechanism for the `campAvailable` check?
+1. **Camping sheet kingdom data access** — RESOLVED (code): camping sheet already reads kingdom via `game.getKingdomActors().firstOrNull()?.getKingdom()`. Implemented: `campAvailable == false` companions are OR'd into the existing `companionDisabled` gate in `CampingSheet.kt` (null/undefined = available, backward compat).
 
-2. **Influence cap**: Should influence be capped at 100, or can it go higher? Should there be a per-companion maximum based on discovery status (e.g., max 20 at "introduced", max 40 at "established", etc.)?
+2. **Influence scale** — RESOLVED: PF2e Influence subsystem (used by the Kingmaker Companion Guide). Influence is **0–12 Influence Points**, NOT 0–100. Thresholds 1/2/4/6/8/12; max 12 (Nok-Nok), most companions 8, Octavia 6. Implemented: `MAX_COMPANION_INFLUENCE = 12`, `clampInfluence`, bar fill = `influence/12`. discoveryStatus 5-stage maps to thresholds (unknown 0 / introduced 2 / established 4 / trusted 6 / bonded 8).
 
-3. **Personal quest rewards**: Should personal quest rewards auto-apply on completion (e.g., influence gain applied to companion), or should the GM manually apply them? Auto-apply is more convenient but reduces GM control.
+3. **Personal quest rewards** — RESOLVED: **auto-apply on completion**, clamped [0,12] (`complete-quest` action in `CompanionProfileDialog`).
 
-4. **Companion deletion behavior**: When a companion is deleted from the roster, what happens to their personal quests? Options: (a) cascade delete, (b) orphan them but keep in data, (c) block deletion if quests exist. Recommended: (c) with a confirmation dialog.
+4. **Companion deletion** — RESOLVED: **block deletion** while any active personal quest exists (`companionHasActivePersonalQuests` guard in `delete-companion` + `RosterEditDialog.onDelete`, warns via notification).
 
-5. **Player-facing companion profile**: Should players be able to view a read-only version of their companion's profile (showing influence, discovery status, visible quests)? Or is the profile GM-only? Recommended: GM-only for now, player view as a future additive feature.
+5. **Player-facing profile** — RESOLVED: **read-only player view**. `isGM` in `CompanionProfileContext`/`buildCompanionProfileContext` hides GM controls, hidden quests, and quest hooks; roster shows a player Profile button.
+
+**Note:** Migration is **Migration33** (not 27 — 27 is now the hexContents migration after later commits). Dialogs are `AddPersonalQuest` (FormApp, reuses `components/forms/application-form.hbs`) and `CompanionProfileDialog` (SimpleApp + `companion-profile.hbs`). All 7 CQ-style test classes pass under jsTest.
 
 ---
 

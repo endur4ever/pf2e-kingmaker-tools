@@ -136,6 +136,9 @@ import at.posselt.pfrpg2e.kingdom.sheet.contexts.skillChecks
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.toActivitiesContext
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.toContext
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.toRosterContext
+import at.posselt.pfrpg2e.kingdom.sheet.contexts.buildCompanionQuestRows
+import at.posselt.pfrpg2e.kingdom.sheet.contexts.companionHasActivePersonalQuests
+import at.posselt.pfrpg2e.companion.CompanionProfileDialog
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.toSettlementDetailsMatrixRows
 import at.posselt.pfrpg2e.kingdom.sheet.navigation.MainNavEntry
 import at.posselt.pfrpg2e.kingdom.sheet.navigation.TurnNavEntry
@@ -553,6 +556,13 @@ class KingdomSheet(
                 }.launch()
             }
 
+            "open-companion-profile" -> buildPromise {
+                val index = target.dataset["index"]?.toIntOrNull()
+                if (index != null && index >= 0) {
+                    CompanionProfileDialog(actor, index).launch()
+                }
+            }
+
             "edit-companion" -> buildPromise {
                 val index = target.dataset["index"]?.toIntOrNull()
                 if (index != null) {
@@ -572,8 +582,12 @@ class KingdomSheet(
                             },
                             onDelete = { idx ->
                                 val current = getKingdom()
-                                current.companions = (current.companions ?: emptyArray()).filterIndexed { i, _ -> i != idx }.toTypedArray()
-                                actor.setKingdom(current)
+                                if (current.companionHasActivePersonalQuests(idx)) {
+                                    ui.notifications.warn(t("kingdom.companion.cannotDeleteHasQuests"))
+                                } else {
+                                    current.companions = (current.companions ?: emptyArray()).filterIndexed { i, _ -> i != idx }.toTypedArray()
+                                    actor.setKingdom(current)
+                                }
                             },
                         ).launch()
                     }
@@ -584,8 +598,12 @@ class KingdomSheet(
                 val index = target.dataset["index"]?.toIntOrNull()
                 if (index != null) {
                     val kingdom = getKingdom()
-                    kingdom.companions = (kingdom.companions ?: emptyArray()).filterIndexed { i, _ -> i != index }.toTypedArray()
-                    actor.setKingdom(kingdom)
+                    if (kingdom.companionHasActivePersonalQuests(index)) {
+                        ui.notifications.warn(t("kingdom.companion.cannotDeleteHasQuests"))
+                    } else {
+                        kingdom.companions = (kingdom.companions ?: emptyArray()).filterIndexed { i, _ -> i != index }.toTypedArray()
+                        actor.setKingdom(kingdom)
+                    }
                 }
             }
 
@@ -1969,12 +1987,20 @@ class KingdomSheet(
                     }
                 }
                 character
-            }.toTypedArray().toRosterContext(isGM),
+            }.toTypedArray().toRosterContext(
+                isGM = isGM,
+                personalQuests = kingdom.companionPersonalQuests ?: emptyArray(),
+            ) { t(it) },
             showDetailedMatrix = showDetailedMatrix,
             campaignClocks = kingdom.campaignClocks.toDashboardContext(isGM),
             generatedQuestCount = generatedQuestCount,
             activeEventCount = activeEventCount,
             questTimerChanges = emptyArray(),
+            personalQuests = buildCompanionQuestRows(
+                quests = kingdom.companionPersonalQuests ?: emptyArray(),
+                companions = kingdom.companions ?: emptyArray(),
+                isGM = isGM,
+            ) { t(it) },
         )
     }
 

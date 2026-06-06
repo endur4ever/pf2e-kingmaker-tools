@@ -1137,6 +1137,13 @@ class CampingSheet(
                     .map { it.uuid to recipe }
             }
             .toMap()
+        // Companions physically in camp but flagged unavailable (campAvailable == false) gate their
+        // required activities even when present (roadmap #7). Null/undefined = available (backward compat).
+        val unavailableCompanionNames = (game.getKingdomActors().firstOrNull()?.getKingdom()
+            ?.companions ?: emptyArray())
+            .filter { it.asDynamic().campAvailable == false }
+            .map { it.name.lowercase() }
+            .toSet()
         val activities = groupActivities.mapIndexed { _, groupedActivity ->
             val (data, result) = groupedActivity
             val actor = result.actorUuid?.let { actorsByUuid[it] }?.unsafeCast<PF2ECreature>()
@@ -1175,7 +1182,9 @@ class CampingSheet(
                 actorNames = actorsByUuid.values.map { it.name }.toSet()
             )
             val isLearned = data.id in camping.learnedCompanionActivities
-            val companionDisabled = !hidden && data.requiredCompanion != null && !isCompanionPresent && !isLearned
+            val requiredCompanionUnavailable = data.requiredCompanion?.lowercase() in unavailableCompanionNames
+            val companionDisabled = !hidden && data.requiredCompanion != null && !isLearned &&
+                    (!isCompanionPresent || requiredCompanionUnavailable)
             val budgetDisabled = !hidden && actor != null && !data.isPrepareCampsite() && camping.downtimeHoursRemaining(actor.uuid) <= 0
             val disabled = companionDisabled || budgetDisabled
             val disabledReason = if (companionDisabled) {
