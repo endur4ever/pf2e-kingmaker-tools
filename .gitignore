@@ -54,3 +54,15 @@ bin/
 .DS_Store
 .kotlin
 .idea
+
+### Local agent / tooling / scratch (not part of the module) ###
+.claude/
+.gemini/
+graphify-out/
+/.hermes-notebooklm-gap-query.txt
+/CLAUDE.md
+/GEMINI.md
+/build_check.sh
+/test.txt
+/tmp.json
+*.bak
