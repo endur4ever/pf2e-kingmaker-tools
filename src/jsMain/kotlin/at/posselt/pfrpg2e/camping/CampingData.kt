@@ -170,6 +170,31 @@ external interface CampingData {
      * Nullable for backwards compatibility with camping data saved before this field existed.
      */
     var downtimeHoursSpent: Record<String, Int>?
+
+    // ── Roadmap #11: random encounter & rumor curator ──
+    // All nullable for backwards compatibility (read via the *OrDefault helpers
+    // in EncounterCuratorData.kt); no data-touching migration required.
+
+    /** Relative per-category weights controlling encounter frequency. */
+    var categoryWeights: RawCategoryWeights?
+
+    /** Category-level proxy roll table; falls back to [proxyRandomEncounterTableUuid] when null. */
+    var encounterCategoryProxyTableUuid: String?
+
+    /** Suppress Combat encounters in claimed+cleared hexes when enabled. */
+    var filterByHexState: Boolean?
+
+    /** Rumors accumulated this camping session. */
+    var rumors: Array<RawRumor>?
+
+    /** Active merchant stock surfaced by Merchant-category encounters. */
+    var merchantStock: Array<RawMerchantStock>?
+
+    /** Transient: the category rolled for the current (un-committed) encounter preview. */
+    var lastEncounterCategory: String?
+
+    /** Transient: the result text rolled for the current (un-committed) encounter preview. */
+    var lastEncounterResult: String?
 }
 
 /**

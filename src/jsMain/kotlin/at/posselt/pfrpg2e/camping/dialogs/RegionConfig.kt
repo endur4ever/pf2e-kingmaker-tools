@@ -27,6 +27,7 @@ import com.foundryvtt.core.documents.PlaylistSound
 import com.foundryvtt.core.game
 import kotlinx.coroutines.await
 import kotlinx.js.JsPlainObject
+import js.objects.Record
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.get
 import org.w3c.dom.pointerevents.PointerEvent
@@ -48,6 +49,16 @@ external interface RegionSetting {
     var terrain: String
     var rollTableUuid: String?
     var combatTrack: Track?
+
+    /**
+     * Roadmap #11: per-category encounter roll table UUIDs keyed by
+     * [at.posselt.pfrpg2e.camping.EncounterCategory.value]. Nullable for
+     * backwards compatibility; read via `categoryRollTableUuidMap()`.
+     */
+    var categoryRollTableUuids: Record<String, String?>?
+
+    /** Roadmap #11: suppress encounters in claimed+cleared hexes for this region. */
+    var suppressEncountersOnClearedHex: Boolean?
 }
 
 @JsPlainObject

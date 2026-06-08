@@ -204,6 +204,9 @@ external interface KingdomData {
     var companionPersonalQuests: Array<CompanionPersonalQuest>?
     /** Party-member influence keyed by actor UUID. Membership is read live from the party actor. */
     var partyInfluence: Array<RawPartyMemberInfluence>?
+
+    /** Roadmap #11: quest IDs created by converting curated rumors into quests. Nullable for back-compat. */
+    var rumorGeneratedQuestIds: Array<String>?
 }
 
 fun RawLeaderKingdomSkills.hasSkill(leader: Leader, skill: KingdomSkill) =
