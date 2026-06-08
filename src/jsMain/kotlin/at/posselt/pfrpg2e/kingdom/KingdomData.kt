@@ -235,6 +235,8 @@ external interface KingdomData {
     /** Pacing tracking: last observed unrest + consecutive turns it hasn't changed. */
     var pacingLastUnrest: Int?
     var pacingTurnsSinceUnrestChange: Int?
+    /** Pacing tracking: last reported level-mismatch severity, so it fires only on change. */
+    var pacingLastLevelMismatch: String?
 }
 
 fun RawLeaderKingdomSkills.hasSkill(leader: Leader, skill: KingdomSkill) =

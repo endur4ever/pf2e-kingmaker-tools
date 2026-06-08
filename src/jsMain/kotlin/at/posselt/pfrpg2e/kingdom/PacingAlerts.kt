@@ -96,6 +96,36 @@ fun trackTurnGap(turnsSinceLastEvent: Int, maxTurnGap: Int, turn: Int): RawPacin
     return evaluateTurnGap(turnsSinceLastEvent, maxTurnGap, turn)
 }
 
+/** Result of evaluating the kingdom-vs-party level mismatch one turn. */
+data class LevelMismatchTrack(
+    /** Current mismatch severity to persist (null when within range). */
+    val severity: String?,
+    /** Non-null only when the mismatch newly appears or escalates — fire-once. */
+    val alert: RawPacingAlert?,
+)
+
+/**
+ * Compare the kingdom level to the party's level and fire only when the mismatch
+ * *changes* — newly appears, or escalates (warning → critical) — so a persistent
+ * gap doesn't re-warn every turn. [previousSeverity] is the last persisted state;
+ * when the gap closes the returned severity is null so a later recurrence fires again.
+ */
+fun trackLevelMismatch(
+    kingdomLevel: Int,
+    partyLevel: Int,
+    range: Int,
+    previousSeverity: String?,
+    turn: Int,
+): LevelMismatchTrack {
+    val alert = evaluateLevelMismatch(kingdomLevel, partyLevel, range, turn)
+    val currentSeverity = alert?.severity
+    val shouldFire = alert != null && currentSeverity != previousSeverity
+    return LevelMismatchTrack(
+        severity = currentSeverity,
+        alert = if (shouldFire) alert else null,
+    )
+}
+
 /** Snapshot of the metrics the pacing system evaluates each turn. */
 data class PacingMetrics(
     val kingdomLevel: Int,

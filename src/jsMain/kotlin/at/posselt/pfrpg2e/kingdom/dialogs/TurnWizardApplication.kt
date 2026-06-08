@@ -13,9 +13,13 @@ import at.posselt.pfrpg2e.kingdom.setKingdom
 import at.posselt.pfrpg2e.kingdom.getAllSettlements
 import at.posselt.pfrpg2e.kingdom.parseRuins
 import at.posselt.pfrpg2e.kingdom.trackUnrestStagnation
+import at.posselt.pfrpg2e.kingdom.trackLevelMismatch
 import at.posselt.pfrpg2e.kingdom.pacingMaxTurnGap
+import at.posselt.pfrpg2e.kingdom.pacingLevelMismatchRange
 import at.posselt.pfrpg2e.kingdom.postPacingAlertChat
 import at.posselt.pfrpg2e.kingdom.data.ChosenFeature
+import at.posselt.pfrpg2e.kingdom.data.RawPacingAlert
+import at.posselt.pfrpg2e.actor.partyMembers
 import at.posselt.pfrpg2e.kingdom.resources.calculateStorage
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.TurnWizardContext
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.ChecklistItemContext
@@ -125,19 +129,38 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
         kingdom.unrest = kingdom.unrest + clockResult.totalUnrestChange
     }
 
-    // Balance & pacing alerts (roadmap #13): track unrest stagnation, fire once on threshold crossing
-    val pacingTrack = trackUnrestStagnation(
+    // Balance & pacing alerts (roadmap #13): fire-once advisories, accumulated then posted to chat below.
+    val firedPacingAlerts = mutableListOf<RawPacingAlert>()
+
+    // Unrest stagnation — warns when unrest hasn't moved for too many turns.
+    val stagnationTrack = trackUnrestStagnation(
         previousUnrest = kingdom.pacingLastUnrest,
         currentUnrest = kingdom.unrest,
         previousCount = kingdom.pacingTurnsSinceUnrestChange,
         maxTurnGap = kingdom.settings.pacingMaxTurnGap(),
         turn = (kingdom.pacingTurnsSinceUnrestChange ?: 0) + 1,
     )
-    kingdom.pacingTurnsSinceUnrestChange = pacingTrack.turnsSinceUnrestChange
+    kingdom.pacingTurnsSinceUnrestChange = stagnationTrack.turnsSinceUnrestChange
     kingdom.pacingLastUnrest = kingdom.unrest
-    val pacingAlert = pacingTrack.alert
-    if (pacingAlert != null) {
-        kingdom.pacingAlerts = (kingdom.pacingAlerts ?: emptyArray()) + pacingAlert
+    stagnationTrack.alert?.let { firedPacingAlerts.add(it) }
+
+    // Level mismatch — kingdom level should track the party's average character level.
+    val partyLevels = actor.partyMembers().map { it.system.details.level.value }
+    if (partyLevels.isNotEmpty()) {
+        val avgPartyLevel = partyLevels.sum() / partyLevels.size
+        val levelTrack = trackLevelMismatch(
+            kingdomLevel = kingdom.level,
+            partyLevel = avgPartyLevel,
+            range = kingdom.settings.pacingLevelMismatchRange(),
+            previousSeverity = kingdom.pacingLastLevelMismatch,
+            turn = kingdom.level,
+        )
+        kingdom.pacingLastLevelMismatch = levelTrack.severity
+        levelTrack.alert?.let { firedPacingAlerts.add(it) }
+    }
+
+    if (firedPacingAlerts.isNotEmpty()) {
+        kingdom.pacingAlerts = (kingdom.pacingAlerts ?: emptyArray()) + firedPacingAlerts.toTypedArray()
     }
 
     actor.setKingdom(kingdom)
@@ -153,8 +176,8 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
         )
     }
 
-    // Post pacing alert to chat when one fires
-    pacingAlert?.let { alert -> postPacingAlertChat(alert) }
+    // Post any pacing advisories that fired this turn to chat
+    firedPacingAlerts.forEach { alert -> postPacingAlertChat(alert) }
 
     val endTurnContext = js("{}")
     endTurnContext.clockEvents = clockResult.events

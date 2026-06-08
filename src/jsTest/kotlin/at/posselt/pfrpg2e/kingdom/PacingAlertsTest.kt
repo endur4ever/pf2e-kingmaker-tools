@@ -115,6 +115,46 @@ class PacingAlertsTest {
     }
 
     @Test
+    fun levelMismatchTrackerFiresWhenMismatchAppears() {
+        val track = trackLevelMismatch(
+            kingdomLevel = 9, partyLevel = 5, range = 2, previousSeverity = null, turn = 9,
+        )
+        assertNotNull(track.alert)
+        assertEquals(PacingAlertSeverity.WARNING.value, track.alert.severity)
+        assertEquals(PacingAlertSeverity.WARNING.value, track.severity)
+    }
+
+    @Test
+    fun levelMismatchTrackerFiresOnEscalation() {
+        val track = trackLevelMismatch(
+            kingdomLevel = 12, partyLevel = 5, range = 2,
+            previousSeverity = PacingAlertSeverity.WARNING.value, turn = 12,
+        )
+        assertNotNull(track.alert)
+        assertEquals(PacingAlertSeverity.CRITICAL.value, track.alert.severity)
+    }
+
+    @Test
+    fun levelMismatchTrackerSilentWhenSeverityUnchanged() {
+        val track = trackLevelMismatch(
+            kingdomLevel = 9, partyLevel = 5, range = 2,
+            previousSeverity = PacingAlertSeverity.WARNING.value, turn = 9,
+        )
+        assertNull(track.alert)                                   // no re-warn
+        assertEquals(PacingAlertSeverity.WARNING.value, track.severity)  // state preserved
+    }
+
+    @Test
+    fun levelMismatchTrackerClearsWhenBackInRange() {
+        val track = trackLevelMismatch(
+            kingdomLevel = 6, partyLevel = 5, range = 2,
+            previousSeverity = PacingAlertSeverity.WARNING.value, turn = 6,
+        )
+        assertNull(track.alert)
+        assertNull(track.severity)   // cleared so a later recurrence fires again
+    }
+
+    @Test
     fun turnGapTrackerFiresOnlyAtExactCrossings() {
         // below threshold: silent
         assertNull(trackTurnGap(turnsSinceLastEvent = 9, maxTurnGap = 10, turn = 1))
