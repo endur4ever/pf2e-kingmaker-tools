@@ -1639,6 +1639,7 @@ class KingdomSheet(
                 title: d.name,
                 description: d.description,
                 giver: d.sourceEventName || "",
+                sourceEventName: d.sourceEventName || null,
                 status: status,
                 type: typeStr,
                 target: null,

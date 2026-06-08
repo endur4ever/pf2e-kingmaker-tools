@@ -99,6 +99,11 @@ class RegionSettingsDataModel(
                         string("playlistUuid", nullable = true)
                         string("trackUuid", nullable = true)
                     }
+                    schema("categoryRollTableUuids") {
+                        string("combat", nullable = true)
+                        string("rumor", nullable = true)
+                        string("merchant", nullable = true)
+                    }
                     string("terrain")
                 }
             }
@@ -176,6 +181,9 @@ class RegionConfig(
                 TableHead(t("camping.zoneDc"), arrayOf("number-select-heading")),
                 TableHead(t("camping.encounterDc"), arrayOf("number-select-heading")),
                 TableHead(t("camping.rollTable")),
+                TableHead(t("camping.encounterCategoryTable.combat"), arrayOf("category-table-heading")),
+                TableHead(t("camping.encounterCategoryTable.rumor"), arrayOf("category-table-heading")),
+                TableHead(t("camping.encounterCategoryTable.merchant"), arrayOf("category-table-heading")),
                 TableHead(t("camping.combatPlaylist")),
                 TableHead(t("camping.combatTrack")),
                 TableHead(t("applications.delete"), arrayOf("small-heading"))
@@ -224,6 +232,30 @@ class RegionConfig(
                         options = rollTableOptions,
                     ).toContext(),
                     Select(
+                        name = "regions.$index.categoryRollTableUuids.combat",
+                        label = t("camping.encounterCategoryTable.combat"),
+                        value = row.categoryRollTableUuids?.get("combat"),
+                        required = false,
+                        hideLabel = true,
+                        options = rollTableOptions,
+                    ).toContext(),
+                    Select(
+                        name = "regions.$index.categoryRollTableUuids.rumor",
+                        label = t("camping.encounterCategoryTable.rumor"),
+                        value = row.categoryRollTableUuids?.get("rumor"),
+                        required = false,
+                        hideLabel = true,
+                        options = rollTableOptions,
+                    ).toContext(),
+                    Select(
+                        name = "regions.$index.categoryRollTableUuids.merchant",
+                        label = t("camping.encounterCategoryTable.merchant"),
+                        value = row.categoryRollTableUuids?.get("merchant"),
+                        required = false,
+                        hideLabel = true,
+                        options = rollTableOptions,
+                    ).toContext(),
+                    Select(
                         name = "regions.$index.combatTrack.playlistUuid",
                         label = t("camping.combatPlaylist"),
                         value = row.combatTrack?.playlistUuid,
@@ -249,6 +281,12 @@ class RegionConfig(
         value.regions.forEach {
             if (it.combatTrack?.playlistUuid == null) {
                 it.combatTrack = null
+            }
+            if (it.categoryRollTableUuids?.get("combat") == null
+                && it.categoryRollTableUuids?.get("rumor") == null
+                && it.categoryRollTableUuids?.get("merchant") == null
+            ) {
+                it.categoryRollTableUuids = null
             }
         }
         currentSettings = value

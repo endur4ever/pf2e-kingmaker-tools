@@ -445,6 +445,11 @@
       "encounterRumorHeading": "Rumor",
       "encounterQuestHook": "Quest hook",
       "encounterCurator": "Encounter Curator",
+      "encounterCategoryTable": {
+        "combat": "Combat Table",
+        "rumor": "Rumor Table",
+        "merchant": "Merchant Table"
+      },
       "encounterCuratorRouting": "Category Routing",
       "encounterCuratorWeights": "Category Weights",
       "encounterCategoryProxyTable": "Category Proxy Roll Table",

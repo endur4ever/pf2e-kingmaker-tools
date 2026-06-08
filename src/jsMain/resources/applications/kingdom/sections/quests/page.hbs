@@ -19,7 +19,12 @@
                     <div class="km-quest-card-header">
                         <div class="km-quest-title">{{title}}</div>
                         {{#if generatedByEvent}}
-                        <span class="km-quest-generated-badge">{{localizeKM "kingdom.questGenerator.generatedBadge"}}</span>
+                        <span class="km-quest-generated-badge">
+                            {{localizeKM "kingdom.questGenerator.generatedBadge"}}
+                            {{#if sourceEventName}}
+                            &mdash; {{sourceEventName}}
+                            {{/if}}
+                        </span>
                         {{/if}}
                         {{#if turnsRemaining}}
                         <span class="km-quest-timer-badge" style="background: #a67c1e; color: #fff; font-size: 0.75em; padding: 0.15em 0.5em; border-radius: 3px; display: inline-block; margin-bottom: 0.25em;">

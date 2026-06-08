@@ -17,7 +17,7 @@ import at.posselt.pfrpg2e.utils.fromUuidTypeSafe
 import at.posselt.pfrpg2e.utils.getPF2EWorldTime
 import at.posselt.pfrpg2e.utils.isDay
 import at.posselt.pfrpg2e.utils.buildPromise
-import at.posselt.pfrpg2e.utils.postChatMessage
+import at.posselt.pfrpg2e.utils.postChatTemplate
 import at.posselt.pfrpg2e.utils.rollWithDraw
 import at.posselt.pfrpg2e.utils.t
 import com.foundryvtt.core.Game
@@ -88,7 +88,18 @@ suspend fun rollCuratedEncounter(game: Game, actor: CampingActor): Boolean {
         regionName = region.name,
         resultText = resultText,
         rumor = rumor,
-        onAccept = { buildPromise { postChatMessage(resultText) } },
+        onAccept = { buildPromise {
+            postChatTemplate(
+                "chatmessages/curated-rumor.hbs",
+                recordOf(
+                    "category" to category.value,
+                    "iconClass" to category.iconClass,
+                    "regionName" to region.name,
+                    "resultText" to resultText,
+                    "isRumor" to (category == EncounterCategory.RUMOR),
+                ),
+            )
+        } },
         onReroll = { buildPromise { rollCuratedEncounter(game, actor) } },
         onReject = {},
         onConvertToQuest = { hook -> buildPromise { convertRumorToQuest(game, hook) } },
