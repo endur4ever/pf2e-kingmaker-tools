@@ -91,3 +91,41 @@ class CuratorValueModelsTest {
         assertTrue(q.sourceEventTraits.isEmpty())
     }
 }
+
+class CategoryRoutingTest {
+    // default weights: combat=30, rp=15, rumor=15, merchant=10, disease=5, faction=10, weather=10, lore=5 (total 100)
+    private val w = CategoryWeights()
+
+    @Test
+    fun rollZeroPicksFirstWeightedCategory() {
+        assertEquals(EncounterCategory.COMBAT, w.pickCategory(0.0))
+    }
+
+    @Test
+    fun rollLandsInCorrectBucket() {
+        assertEquals(EncounterCategory.COMBAT, w.pickCategory(0.29))   // [0,30)
+        assertEquals(EncounterCategory.RP, w.pickCategory(0.40))       // [30,45)
+        assertEquals(EncounterCategory.RUMOR, w.pickCategory(0.50))    // [45,60)
+        assertEquals(EncounterCategory.LORE, w.pickCategory(0.99))     // last bucket
+    }
+
+    @Test
+    fun zeroWeightCategoriesAreNeverPicked() {
+        val onlyRp = CategoryWeights(combat = 0, rp = 100, rumor = 0, merchant = 0, disease = 0, faction = 0, weather = 0, lore = 0)
+        assertEquals(EncounterCategory.RP, onlyRp.pickCategory(0.0))
+        assertEquals(EncounterCategory.RP, onlyRp.pickCategory(0.999))
+    }
+
+    @Test
+    fun allZeroWeightsFallBackToCombat() {
+        assertEquals(EncounterCategory.COMBAT, CategoryWeights(0, 0, 0, 0, 0, 0, 0, 0).pickCategory(0.5))
+    }
+
+    @Test
+    fun combatSuppressedOnlyWhenAllConditionsMet() {
+        assertTrue(shouldSuppressEncounter(EncounterCategory.COMBAT, regionSuppressesClearedHex = true, hexClaimedAndCleared = true))
+        assertFalse(shouldSuppressEncounter(EncounterCategory.COMBAT, regionSuppressesClearedHex = true, hexClaimedAndCleared = false))
+        assertFalse(shouldSuppressEncounter(EncounterCategory.COMBAT, regionSuppressesClearedHex = false, hexClaimedAndCleared = true))
+        assertFalse(shouldSuppressEncounter(EncounterCategory.RUMOR, regionSuppressesClearedHex = true, hexClaimedAndCleared = true))
+    }
+}

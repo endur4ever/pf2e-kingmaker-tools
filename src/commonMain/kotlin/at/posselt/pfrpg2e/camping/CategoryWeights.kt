@@ -32,4 +32,33 @@ data class CategoryWeights(
         val t = total.toDouble().coerceAtLeast(1.0)
         return EncounterCategory.entries.associateWith { weightFor(it) / t }
     }
+
+    /**
+     * Select a category for a uniform [roll] in `[0, 1)`, walking the weighted
+     * cumulative distribution in enum order. Categories with weight 0 are never
+     * selected. Falls back to COMBAT when all weights are 0.
+     */
+    fun pickCategory(roll: Double): EncounterCategory {
+        if (total <= 0) return EncounterCategory.COMBAT
+        val r = roll.coerceIn(0.0, 1.0) * total
+        var cumulative = 0
+        for (c in EncounterCategory.entries) {
+            cumulative += weightFor(c)
+            if (r < cumulative) return c
+        }
+        return EncounterCategory.entries.last { weightFor(it) > 0 }
+    }
 }
+
+/**
+ * Roadmap #11: a Combat encounter is suppressed when the region opts into hex
+ * filtering and the party is in a claimed + cleared hex. Non-combat categories
+ * (rumors, merchants, lore, …) are never suppressed.
+ */
+fun shouldSuppressEncounter(
+    category: EncounterCategory,
+    regionSuppressesClearedHex: Boolean,
+    hexClaimedAndCleared: Boolean,
+): Boolean = category == EncounterCategory.COMBAT &&
+    regionSuppressesClearedHex &&
+    hexClaimedAndCleared
