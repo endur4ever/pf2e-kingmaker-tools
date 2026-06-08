@@ -24,7 +24,7 @@ fun validateStructures(game: Game) {
             }
         if (actorsAndErrors.isNotEmpty()) {
             val actorNames = actorsAndErrors.joinToString(", ") { it.first.name }
-            ui.notifications.error(t("kingom.structuresFailedToValidate", recordOf("actorNames" to actorNames)))
+            ui.notifications.error(t("kingdom.structuresFailedToValidate", recordOf("actorNames" to actorNames)))
             actorsAndErrors.forEach { (actor, error) ->
                 console.error("Actor: ${actor.name}", error.message)
             }
