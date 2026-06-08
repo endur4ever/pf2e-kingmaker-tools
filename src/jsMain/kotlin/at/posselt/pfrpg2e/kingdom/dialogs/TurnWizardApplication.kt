@@ -97,6 +97,9 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
         modifiers = kingdom.modifiers,
         campaignQuests = kingdom.campaignQuests ?: emptyArray(),
         kingdomLevel = kingdom.level,
+        warThreats = kingdom.warThreats ?: emptyArray(),
+        armyDeployments = kingdom.armyDeployments ?: emptyArray(),
+        warPressure = kingdom.warPressure,
     )
     kingdom.supernaturalSolutions = tickResult.supernaturalSolutions
     kingdom.creativeSolutions = tickResult.creativeSolutions
@@ -108,6 +111,9 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
     kingdom.councilCooldowns = tickResult.councilCooldowns
     kingdom.modifiers = tickResult.modifiers
     kingdom.campaignQuests = tickResult.campaignQuests
+    kingdom.warThreats = tickResult.warThreats
+    kingdom.armyDeployments = tickResult.armyDeployments
+    kingdom.warPressure = tickResult.warPressure
 
     // Tick campaign clocks
     val clockResult = CampaignClockManager.tickAll(kingdom.campaignClocks)
