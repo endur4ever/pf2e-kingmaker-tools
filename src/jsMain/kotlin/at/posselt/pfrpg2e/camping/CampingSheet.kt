@@ -21,6 +21,7 @@ import at.posselt.pfrpg2e.app.forms.SelectOption
 import at.posselt.pfrpg2e.app.forms.toOption
 import at.posselt.pfrpg2e.calculateHexplorationActivities
 import at.posselt.pfrpg2e.camping.dialogs.CampingSettingsApplication
+import at.posselt.pfrpg2e.camping.dialogs.CategoryWeightSettingsApplication
 import at.posselt.pfrpg2e.camping.dialogs.ConfirmWatchApplication
 import at.posselt.pfrpg2e.camping.dialogs.FavoriteMealsApplication
 import at.posselt.pfrpg2e.camping.dialogs.ManageActivitiesApplication
@@ -313,6 +314,7 @@ class CampingSheet(
         MenuControl(label = t("camping.activities"), action = "configure-activities", gmOnly = true),
         MenuControl(label = t("camping.recipes"), action = "configure-recipes", gmOnly = true),
         MenuControl(label = t("camping.regions"), action = "configure-regions", gmOnly = true),
+        MenuControl(label = t("camping.encounterCurator"), action = "open-encounter-curator", gmOnly = true),
         MenuControl(label = t("applications.settings"), action = "settings", gmOnly = true),
         MenuControl(label = t("applications.quickstart"), action = "quickstart", gmOnly = true),
         MenuControl(label = t("applications.help"), action = "help"),
@@ -430,6 +432,7 @@ class CampingSheet(
             }
 
             "settings" -> CampingSettingsApplication(game, actor).launch()
+            "open-encounter-curator" -> CategoryWeightSettingsApplication(game, actor).launch()
             "rest" -> buildPromise {
                 beginRest(actor, dispatcher)
             }

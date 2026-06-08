@@ -443,7 +443,14 @@
       "encounterConvertQuest": "Convert to Quest",
       "encounterNoResult": "No result rolled.",
       "encounterRumorHeading": "Rumor",
-      "encounterQuestHook": "Quest hook"
+      "encounterQuestHook": "Quest hook",
+      "encounterCurator": "Encounter Curator",
+      "encounterCuratorRouting": "Category Routing",
+      "encounterCuratorWeights": "Category Weights",
+      "encounterCategoryProxyTable": "Category Proxy Roll Table",
+      "encounterCategoryProxyTableHelp": "Roll table whose results name an encounter category (Combat, Rumor, Merchant, …). When set, random encounters route through the GM curator preview instead of the legacy creature roll.",
+      "filterByHexState": "Suppress Combat in Cleared Hexes",
+      "filterByHexStateHelp": "When enabled, Combat-category encounters are suppressed while the party is in a claimed and cleared hex (per-region opt-in still applies)."
     },
     "settlementNav": {
       "status": "Status",
