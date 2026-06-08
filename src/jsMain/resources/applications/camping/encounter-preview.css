@@ -1,0 +1,84 @@
+.km-encounter-preview {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 0.25rem;
+}
+
+.km-encounter-preview-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 4px;
+    color: #fff;
+    font-weight: 600;
+}
+
+.km-encounter-preview-header .km-encounter-region {
+    margin-left: auto;
+    font-weight: 400;
+    opacity: 0.9;
+}
+
+/* 8 category badge color variants */
+.km-category-combat { background: #7a2222; }
+.km-category-rp { background: #2f5e8a; }
+.km-category-rumor { background: #6a4a8a; }
+.km-category-merchant { background: #8a6a1f; }
+.km-category-disease { background: #4a6a2f; }
+.km-category-faction { background: #2f6a6a; }
+.km-category-weather { background: #455a72; }
+.km-category-lore { background: #5a4632; }
+
+.km-encounter-preview-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.km-encounter-result {
+    padding: 0.5rem;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 4px;
+}
+
+.km-encounter-empty {
+    font-style: italic;
+    opacity: 0.7;
+}
+
+.km-encounter-rumor {
+    padding: 0.5rem 0.75rem;
+    border-left: 3px solid #6a4a8a;
+    background: rgba(106, 74, 138, 0.08);
+}
+
+.km-encounter-rumor h3 {
+    margin: 0 0 0.25rem;
+    font-size: var(--font-size-14);
+}
+
+.km-encounter-quest-hook {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin-top: 0.25rem;
+    font-size: var(--font-size-12);
+    color: #8a6a1f;
+    font-weight: 600;
+}
+
+.km-encounter-preview-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.km-encounter-preview-actions button {
+    flex: 1 1 auto;
+}
+
+.km-encounter-preview-actions .km-encounter-accept {
+    font-weight: 600;
+}

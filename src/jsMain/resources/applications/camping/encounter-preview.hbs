@@ -1,0 +1,39 @@
+<div class="km-encounter-preview">
+    <header class="km-encounter-preview-header km-category-{{categoryValue}}">
+        <i class="{{categoryIcon}}"></i>
+        <span class="km-encounter-category-label">{{categoryLabel}}</span>
+        <span class="km-encounter-region">{{regionName}}</span>
+    </header>
+    <section class="km-encounter-preview-body">
+        {{#if hasResult}}
+            <div class="km-encounter-result">{{{resultText}}}</div>
+        {{else}}
+            <div class="km-encounter-result km-encounter-empty">{{localizeKM "camping.encounterNoResult"}}</div>
+        {{/if}}
+        {{#if hasRumor}}
+            <div class="km-encounter-rumor">
+                <h3><i class="fa-solid fa-scroll"></i> {{localizeKM "camping.encounterRumorHeading"}}</h3>
+                <p class="km-encounter-rumor-text">{{rumorText}}</p>
+                {{#if isQuestHook}}
+                    <span class="km-encounter-quest-hook"><i class="fa-solid fa-star"></i> {{localizeKM "camping.encounterQuestHook"}}</span>
+                {{/if}}
+            </div>
+        {{/if}}
+    </section>
+    <footer class="km-encounter-preview-actions">
+        <button type="button" data-action="km-accept" class="km-encounter-accept">
+            <i class="fa-solid fa-check"></i> {{acceptLabel}}
+        </button>
+        <button type="button" data-action="km-reroll">
+            <i class="fa-solid fa-dice"></i> {{rerollLabel}}
+        </button>
+        <button type="button" data-action="km-reject">
+            <i class="fa-solid fa-xmark"></i> {{rejectLabel}}
+        </button>
+        {{#if isQuestHook}}
+            <button type="button" data-action="km-convert-quest" class="km-encounter-convert">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> {{convertLabel}}
+            </button>
+        {{/if}}
+    </footer>
+</div>

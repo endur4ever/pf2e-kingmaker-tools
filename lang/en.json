@@ -426,7 +426,24 @@
         "thunderstorm": "Thunderstorm",
         "tornado": "Tornado"
       },
-      "encounterPreview": "Encounter Preview"
+      "encounterPreview": "Encounter Preview",
+      "encounterCategory": {
+        "combat": "Combat",
+        "rp": "Roleplay",
+        "rumor": "Rumor",
+        "merchant": "Merchant",
+        "disease": "Disease",
+        "faction": "Faction",
+        "weather": "Weather",
+        "lore": "Lore"
+      },
+      "encounterAccept": "Accept",
+      "encounterReroll": "Reroll",
+      "encounterReject": "Reject",
+      "encounterConvertQuest": "Convert to Quest",
+      "encounterNoResult": "No result rolled.",
+      "encounterRumorHeading": "Rumor",
+      "encounterQuestHook": "Quest hook"
     },
     "settlementNav": {
       "status": "Status",

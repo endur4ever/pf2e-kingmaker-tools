@@ -1,4 +1,5 @@
 @import "./applications/camping/camping.css";
+@import "./applications/camping/encounter-preview.css";
 @import "./components/forms/form.css";
 @import "./components/tabs/tabs.css";
 @import "./components/food-cost/food-cost.css";
