@@ -155,6 +155,46 @@ class PacingAlertsTest {
     }
 
     @Test
+    fun lootImbalanceOnlyFlagsAccessAboveLevel() {
+        // item access at or below party level + range: fine
+        assertNull(evaluateLootImbalance(itemAccessLevel = 6, partyLevel = 5, range = 2, turn = 1))
+        // access far below level is NOT flagged (one-directional)
+        assertNull(evaluateLootImbalance(itemAccessLevel = 1, partyLevel = 10, range = 2, turn = 1))
+        // access well above level: warning, then critical past 2x
+        assertEquals(
+            PacingAlertSeverity.WARNING.value,
+            evaluateLootImbalance(itemAccessLevel = 9, partyLevel = 5, range = 2, turn = 1)!!.severity,
+        )
+        assertEquals(
+            PacingAlertSeverity.CRITICAL.value,
+            evaluateLootImbalance(itemAccessLevel = 12, partyLevel = 5, range = 2, turn = 1)!!.severity,
+        )
+    }
+
+    @Test
+    fun lootImbalanceTrackerFiresOncePerSeverityChange() {
+        val appear = trackLootImbalance(
+            itemAccessLevel = 9, partyLevel = 5, range = 2, previousSeverity = null, turn = 1,
+        )
+        assertNotNull(appear.alert)
+        assertEquals(PacingAlertType.LOOT_IMBALANCE.value, appear.alert.type)
+
+        val unchanged = trackLootImbalance(
+            itemAccessLevel = 9, partyLevel = 5, range = 2,
+            previousSeverity = PacingAlertSeverity.WARNING.value, turn = 1,
+        )
+        assertNull(unchanged.alert)
+        assertEquals(PacingAlertSeverity.WARNING.value, unchanged.severity)
+
+        val cleared = trackLootImbalance(
+            itemAccessLevel = 6, partyLevel = 5, range = 2,
+            previousSeverity = PacingAlertSeverity.WARNING.value, turn = 1,
+        )
+        assertNull(cleared.alert)
+        assertNull(cleared.severity)
+    }
+
+    @Test
     fun turnGapTrackerFiresOnlyAtExactCrossings() {
         // below threshold: silent
         assertNull(trackTurnGap(turnsSinceLastEvent = 9, maxTurnGap = 10, turn = 1))

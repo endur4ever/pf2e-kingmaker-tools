@@ -14,8 +14,10 @@ import at.posselt.pfrpg2e.kingdom.getAllSettlements
 import at.posselt.pfrpg2e.kingdom.parseRuins
 import at.posselt.pfrpg2e.kingdom.trackUnrestStagnation
 import at.posselt.pfrpg2e.kingdom.trackLevelMismatch
+import at.posselt.pfrpg2e.kingdom.trackLootImbalance
 import at.posselt.pfrpg2e.kingdom.pacingMaxTurnGap
 import at.posselt.pfrpg2e.kingdom.pacingLevelMismatchRange
+import at.posselt.pfrpg2e.kingdom.pacingLootImbalanceEnabled
 import at.posselt.pfrpg2e.kingdom.postPacingAlertChat
 import at.posselt.pfrpg2e.kingdom.data.ChosenFeature
 import at.posselt.pfrpg2e.kingdom.data.RawPacingAlert
@@ -144,7 +146,7 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
     kingdom.pacingLastUnrest = kingdom.unrest
     stagnationTrack.alert?.let { firedPacingAlerts.add(it) }
 
-    // Level mismatch — kingdom level should track the party's average character level.
+    // Level mismatch + loot imbalance — both compared against the party's average level.
     val partyLevels = actor.partyMembers().map { it.system.details.level.value }
     if (partyLevels.isNotEmpty()) {
         val avgPartyLevel = partyLevels.sum() / partyLevels.size
@@ -157,6 +159,22 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
         )
         kingdom.pacingLastLevelMismatch = levelTrack.severity
         levelTrack.alert?.let { firedPacingAlerts.add(it) }
+
+        // Loot imbalance — highest settlement item-purchase level vs party level.
+        if (kingdom.settings.pacingLootImbalanceEnabled()) {
+            val maxItemAccess = settlements.allSettlements.maxOfOrNull { it.itemPurchaseLevel }
+            if (maxItemAccess != null) {
+                val lootTrack = trackLootImbalance(
+                    itemAccessLevel = maxItemAccess,
+                    partyLevel = avgPartyLevel,
+                    range = kingdom.settings.pacingLevelMismatchRange(),
+                    previousSeverity = kingdom.pacingLastLootImbalance,
+                    turn = maxItemAccess,
+                )
+                kingdom.pacingLastLootImbalance = lootTrack.severity
+                lootTrack.alert?.let { firedPacingAlerts.add(it) }
+            }
+        }
     }
 
     if (firedPacingAlerts.isNotEmpty()) {

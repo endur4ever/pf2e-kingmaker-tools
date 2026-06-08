@@ -96,13 +96,23 @@ fun trackTurnGap(turnsSinceLastEvent: Int, maxTurnGap: Int, turn: Int): RawPacin
     return evaluateTurnGap(turnsSinceLastEvent, maxTurnGap, turn)
 }
 
-/** Result of evaluating the kingdom-vs-party level mismatch one turn. */
-data class LevelMismatchTrack(
-    /** Current mismatch severity to persist (null when within range). */
+/** Result of evaluating a persistent (state-based) pacing condition one turn. */
+data class PacingStateTrack(
+    /** Current severity to persist (null when the condition is clear). */
     val severity: String?,
-    /** Non-null only when the mismatch newly appears or escalates — fire-once. */
+    /** Non-null only when the condition newly appears or escalates — fire-once. */
     val alert: RawPacingAlert?,
 )
+
+/** Fire a state-based [evaluated] alert only when its severity changes from [previousSeverity]. */
+private fun trackSeverityChange(evaluated: RawPacingAlert?, previousSeverity: String?): PacingStateTrack {
+    val currentSeverity = evaluated?.severity
+    val shouldFire = evaluated != null && currentSeverity != previousSeverity
+    return PacingStateTrack(
+        severity = currentSeverity,
+        alert = if (shouldFire) evaluated else null,
+    )
+}
 
 /**
  * Compare the kingdom level to the party's level and fire only when the mismatch
@@ -116,15 +126,26 @@ fun trackLevelMismatch(
     range: Int,
     previousSeverity: String?,
     turn: Int,
-): LevelMismatchTrack {
-    val alert = evaluateLevelMismatch(kingdomLevel, partyLevel, range, turn)
-    val currentSeverity = alert?.severity
-    val shouldFire = alert != null && currentSeverity != previousSeverity
-    return LevelMismatchTrack(
-        severity = currentSeverity,
-        alert = if (shouldFire) alert else null,
-    )
+): PacingStateTrack =
+    trackSeverityChange(evaluateLevelMismatch(kingdomLevel, partyLevel, range, turn), previousSeverity)
+
+/** Settlements grant item access far above the party's level — breaks wealth-by-level. */
+fun evaluateLootImbalance(itemAccessLevel: Int, partyLevel: Int, range: Int, turn: Int): RawPacingAlert? {
+    val diff = itemAccessLevel - partyLevel
+    if (diff <= range) return null
+    val severity = if (diff > range * 2) PacingAlertSeverity.CRITICAL else PacingAlertSeverity.WARNING
+    return alert(PacingAlertType.LOOT_IMBALANCE, severity, turn)
 }
+
+/** Like [trackLevelMismatch] but for settlement item access (fires only on severity change). */
+fun trackLootImbalance(
+    itemAccessLevel: Int,
+    partyLevel: Int,
+    range: Int,
+    previousSeverity: String?,
+    turn: Int,
+): PacingStateTrack =
+    trackSeverityChange(evaluateLootImbalance(itemAccessLevel, partyLevel, range, turn), previousSeverity)
 
 /** Snapshot of the metrics the pacing system evaluates each turn. */
 data class PacingMetrics(
