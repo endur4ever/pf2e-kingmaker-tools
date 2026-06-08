@@ -2,6 +2,7 @@
     <div class="km-kingdom-sheet-sub-content km-army-pressure">
         {{#unless armyPressureContext.enabled}}
             <p class="km-army-pressure-disabled">{{localizeKM "armyPressure.disabledHelp"}}</p>
+            {{#if isGM}}<button type="button" data-action="enable-army-board"><i class="fa-solid fa-power-off"></i> {{localizeKM "armyPressure.enable"}}</button>{{/if}}
         {{else}}
             <section class="km-army-pressure-meter">
                 <h2><i class="fa-solid fa-fire"></i> {{localizeKM "armyPressure.title"}}</h2>

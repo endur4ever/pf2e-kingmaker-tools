@@ -140,6 +140,9 @@ import at.posselt.pfrpg2e.kingdom.sheet.contexts.toRosterContext
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.buildPartyInfluenceContext
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.buildArmyPressureContext
 import at.posselt.pfrpg2e.kingdom.buildArmyPressureView
+import at.posselt.pfrpg2e.kingdom.recalculateWarPressure
+import at.posselt.pfrpg2e.kingdom.defaultWarPressure
+import at.posselt.pfrpg2e.kingdom.dialogs.AddWarThreat
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.CompanionRef
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.PartyMemberRef
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.withInfluence
@@ -449,6 +452,58 @@ class KingdomSheet(
                     kingdom.bonusFeats = kingdom.bonusFeats.filter { it.id != featId }.toTypedArray()
                     actor.setKingdom(kingdom)
                 }
+            }
+
+            "enable-army-board" -> buildPromise {
+                val kingdom = getKingdom()
+                kingdom.settings.enableArmyPressureBoard = true
+                if (kingdom.warPressure == null) kingdom.warPressure = defaultWarPressure()
+                actor.setKingdom(kingdom)
+            }
+
+            "add-war-threat" -> AddWarThreat { threat ->
+                buildPromise {
+                    val kingdom = getKingdom()
+                    kingdom.warThreats = (kingdom.warThreats ?: emptyArray()) + threat
+                    kingdom.warPressure = recalculateWarPressure(
+                        kingdom.warThreats ?: emptyArray(),
+                        kingdom.armyDeployments ?: emptyArray(),
+                        kingdom.warPressure,
+                    )
+                    actor.setKingdom(kingdom)
+                }
+            }.launch()
+
+            "edit-war-threat" -> {
+                val threatId = target.dataset["id"]
+                val existingThreat = (getKingdom().warThreats ?: emptyArray()).find { it.id == threatId }
+                if (existingThreat != null) {
+                    AddWarThreat(existing = existingThreat) { updated ->
+                        buildPromise {
+                            val kingdom = getKingdom()
+                            kingdom.warThreats = (kingdom.warThreats ?: emptyArray())
+                                .map { if (it.id == updated.id) updated else it }.toTypedArray()
+                            kingdom.warPressure = recalculateWarPressure(
+                                kingdom.warThreats ?: emptyArray(),
+                                kingdom.armyDeployments ?: emptyArray(),
+                                kingdom.warPressure,
+                            )
+                            actor.setKingdom(kingdom)
+                        }
+                    }.launch()
+                }
+            }
+
+            "delete-war-threat" -> buildPromise {
+                val threatId = target.dataset["id"]
+                val kingdom = getKingdom()
+                kingdom.warThreats = (kingdom.warThreats ?: emptyArray()).filter { it.id != threatId }.toTypedArray()
+                kingdom.warPressure = recalculateWarPressure(
+                    kingdom.warThreats ?: emptyArray(),
+                    kingdom.armyDeployments ?: emptyArray(),
+                    kingdom.warPressure,
+                )
+                actor.setKingdom(kingdom)
             }
 
             "add-quest" -> buildPromise {

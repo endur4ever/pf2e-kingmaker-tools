@@ -6403,7 +6403,15 @@
       "deployArmy": "Deploy Army",
       "armyName": "Army",
       "armyType": "Type",
-      "noDeployments": "No armies deployed."
+      "noDeployments": "No armies deployed.",
+      "enable": "Enable Army & Pressure Board",
+      "editThreat": "Edit Threat",
+      "threatDescription": "Description",
+      "enemyFaction": "Enemy Faction",
+      "maxEscalation": "Max Escalation",
+      "etaHelp": "Turns until arrival (0 = unknown/arrived).",
+      "pauseOnExpiry": "Pause on Escalation",
+      "pauseOnExpiryHelp": "When escalation maxes out, hold for GM confirmation instead of auto-triggering the invasion."
     },
     "warThreatStatus": {
       "active": "Active",
