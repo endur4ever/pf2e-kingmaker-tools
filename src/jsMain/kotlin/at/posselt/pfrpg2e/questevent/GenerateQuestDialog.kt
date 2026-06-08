@@ -11,6 +11,7 @@ import at.posselt.pfrpg2e.utils.t
 import com.foundryvtt.core.AnyObject
 import com.foundryvtt.core.abstract.DataModel
 import com.foundryvtt.core.abstract.DocumentConstructionContext
+import com.foundryvtt.core.applications.api.ApplicationRenderOptions
 import com.foundryvtt.core.applications.api.HandlebarsRenderOptions
 import com.foundryvtt.core.data.dsl.buildSchema
 import js.core.Void
@@ -159,6 +160,17 @@ class GenerateQuestDialog(
         }
     }
 
+    override fun _onRender(context: AnyObject, options: ApplicationRenderOptions) {
+        super._onRender(context, options)
+        // After a Generate click re-renders the dialog, bring the preview into view so
+        // it isn't missed below the event list.
+        if (selectedEventId != null) {
+            element.querySelector(".km-qg-preview")
+                ?.asDynamic()
+                ?.scrollIntoView(js("({ behavior: 'smooth', block: 'start' })"))
+        }
+    }
+
     override fun _preparePartContext(
         partId: String,
         context: HandlebarsRenderContext,
@@ -167,69 +179,81 @@ class GenerateQuestDialog(
         val parent = super._preparePartContext(partId, context, options).await()
 
         val kingdom = kingdomActor.getKingdom()
-        val ongoingEvents = kingdom?.ongoingEvents ?: emptyArray<dynamic>()
-        val allEventTemplates = kingdom?.getEvents(applyBlacklist = true) ?: emptyArray<dynamic>()
-        val events = ongoingEvents.map { ongoing ->
-            val template = allEventTemplates.asSequence().firstOrNull { tpl -> tpl.id == ongoing.id }
+        val kingdomLevel = kingdom?.level ?: 1
+        val ongoingEvents = kingdom?.ongoingEvents ?: emptyArray()
+        val allEventTemplates = kingdom?.getEvents(applyBlacklist = true) ?: emptyArray()
+
+        // The picker lists the kingdom's ongoing events first (most relevant), then the
+        // rest of the event catalog so the generator is usable even before any event is
+        // active. Deduplicated by id, keeping the ongoing entry when both are present.
+        val ongoingEntries = ongoingEvents.map { ongoing ->
+            val template = allEventTemplates.firstOrNull { it.id == ongoing.id }
             SummarizedEventContext(
-                id = ongoing.id.unsafeCast<String>(),
-                name = template?.name?.unsafeCast<String>() ?: ongoing.id.unsafeCast<String>(),
-                traits = template?.traits?.unsafeCast<Array<String>>() ?: emptyArray(),
+                id = ongoing.id,
+                name = template?.name ?: ongoing.id,
+                traits = template?.traits ?: emptyArray(),
             )
-        }.toTypedArray()
+        }
+        val catalogEntries = allEventTemplates
+            .sortedBy { it.name }
+            .map { template ->
+                SummarizedEventContext(
+                    id = template.id,
+                    name = template.name,
+                    traits = template.traits,
+                )
+            }
+        val events = (ongoingEntries + catalogEntries)
+            .distinctBy { it.id }
+            .toTypedArray()
 
         val canGenerate = QuestGenerator.canGenerateMore(emptyList(), settings)
 
-        val preview = if (selectedEventId != null) {
-            var event: dynamic = null
-            for (e in ongoingEvents) {
-                if (e.id == selectedEventId) {
-                    event = e
-                    break
-                }
-            }
-            if (event != null) {
-                val template = allEventTemplates.find { tpl -> tpl.id == event.id }
-                val eventTemplate = KingdomEventTemplate(
-                    id = event.id.unsafeCast<String>(),
-                    name = template?.name?.unsafeCast<String>() ?: event.id.unsafeCast<String>(),
-                    description = template?.description?.unsafeCast<String>() ?: "",
-                    traits = template?.traits?.unsafeCast<Array<String>>()?.toList() ?: emptyList(),
-                )
-                val result = QuestGenerator.generateFromEvent(
-                    event = eventTemplate,
-                    kingdomLevel = 1,
-                    currentQuests = emptyList(),
-                    settings = settings,
-                )
-                result?.preview?.let { tmpl ->
-                    QuestPreviewContext(
-                        name = tmpl.name,
-                        description = tmpl.description,
-                        type = tmpl.type.value,
-                        recommendedLevel = tmpl.recommendedLevel,
-                        objectives = tmpl.objectives.map { obj ->
-                            ObjectiveContext(
-                                id = obj.id,
-                                description = obj.description,
-                                optional = obj.optional,
-                            )
-                        }.toTypedArray(),
-                        rewards = RewardContext(
-                            xp = tmpl.rewards.xp,
-                            rp = tmpl.rewards.rp,
-                            fame = tmpl.rewards.fame,
-                            commodities = tmpl.rewards.commodities.map { (k, v) ->
-                                CommodityRewardContext(type = k, amount = v)
-                            }.toTypedArray(),
-                            unrestReduction = tmpl.rewards.unrestReduction,
-                            customReward = tmpl.rewards.customReward,
-                        ),
-                        isDefaultVisibleToPlayers = tmpl.isDefaultVisibleToPlayers,
+        val selectedTemplate = selectedEventId?.let { id ->
+            allEventTemplates.firstOrNull { it.id == id }
+        }
+        val result = selectedTemplate?.let { template ->
+            QuestGenerator.generateFromEvent(
+                event = KingdomEventTemplate(
+                    id = template.id,
+                    name = template.name,
+                    description = template.description,
+                    traits = template.traits.toList(),
+                ),
+                kingdomLevel = kingdomLevel,
+                currentQuests = emptyList(),
+                settings = settings,
+            )
+        }
+        // Cache the result so the "commit" action can build the CampaignQuest from it.
+        currentPreview = result
+
+        val preview = result?.takeIf { it.isEligible }?.preview?.let { tmpl ->
+            QuestPreviewContext(
+                name = tmpl.name,
+                description = tmpl.description,
+                type = tmpl.type.value,
+                recommendedLevel = tmpl.recommendedLevel,
+                objectives = tmpl.objectives.map { obj ->
+                    ObjectiveContext(
+                        id = obj.id,
+                        description = obj.description,
+                        optional = obj.optional,
                     )
-                }
-            } else null
-        } else null
+                }.toTypedArray(),
+                rewards = RewardContext(
+                    xp = tmpl.rewards.xp,
+                    rp = tmpl.rewards.rp,
+                    fame = tmpl.rewards.fame,
+                    commodities = tmpl.rewards.commodities.map { (k, v) ->
+                        CommodityRewardContext(type = k, amount = v)
+                    }.toTypedArray(),
+                    unrestReduction = tmpl.rewards.unrestReduction,
+                    customReward = tmpl.rewards.customReward,
+                ),
+                isDefaultVisibleToPlayers = tmpl.isDefaultVisibleToPlayers,
+            )
+        }
 
         QuestGeneratorContext(
             partId = parent.partId,
