@@ -8,6 +8,7 @@ import at.posselt.pfrpg2e.kingdom.data.RawFame
 import at.posselt.pfrpg2e.kingdom.data.RawResources
 import at.posselt.pfrpg2e.kingdom.RawCouncilCooldowns
 import at.posselt.pfrpg2e.kingdom.data.RawCurrentCommodities
+import at.posselt.pfrpg2e.kingdom.data.RawWarThreat
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -71,6 +72,40 @@ class TurnTickingEngineTest {
         councilCooldowns = councilCooldowns,
         modifiers = modifiers,
     )
+
+    // ── War threats & pressure (roadmap #12) ───────────────────────────
+
+    @Test
+    fun testWarThreatsAndPressureTickThroughEngine() {
+        val threat = RawWarThreat(
+            id = "w1", name = "Goblin Horde", description = "", enemyFaction = null,
+            escalationLevel = 0, maxEscalation = 3, eta = 1,
+            targetSettlementSceneId = null, targetHexLocation = null,
+            linkedQuestId = null, linkedEventId = null, pauseOnExpiry = false,
+            status = "active", triggeredTurn = null,
+        )
+        val result = TurnTickingEngine.tick(
+            fame = fame(), resourcePoints = resourcePoints(), resourceDice = resourcePoints(),
+            consumption = consumption(), commodities = commodities(), storage = storage(),
+            councilCooldowns = null, modifiers = emptyArray(),
+            warThreats = arrayOf(threat), armyDeployments = emptyArray(),
+            warPressure = null, currentTurn = 2,
+        )
+        // ETA 1 -> 0 and escalation 0 -> 1
+        assertEquals(1, result.warThreats.size)
+        assertEquals(0, result.warThreats[0].eta)
+        assertEquals(1, result.warThreats[0].escalationLevel)
+        // one active threat => 5 pressure
+        assertNotNull(result.warPressure)
+        assertEquals(5, result.warPressure!!.currentPressure)
+    }
+
+    @Test
+    fun testNoWarDataLeavesPressureNull() {
+        val result = tick()
+        assertNull(result.warPressure)
+        assertEquals(0, result.warThreats.size)
+    }
 
     // ── Solution counters ──────────────────────────────────────────────
 

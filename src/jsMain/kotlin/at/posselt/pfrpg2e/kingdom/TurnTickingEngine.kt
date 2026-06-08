@@ -11,6 +11,9 @@ import at.posselt.pfrpg2e.kingdom.data.RawConsumption
 import at.posselt.pfrpg2e.kingdom.RawCouncilCooldowns
 import at.posselt.pfrpg2e.kingdom.data.RawFame
 import at.posselt.pfrpg2e.kingdom.data.RawResources
+import at.posselt.pfrpg2e.kingdom.data.RawArmyDeployment
+import at.posselt.pfrpg2e.kingdom.data.RawWarPressure
+import at.posselt.pfrpg2e.kingdom.data.RawWarThreat
 
 /**
  * Represents the diff of a single tick operation for auditing/logging.
@@ -39,6 +42,9 @@ data class TickResult(
 	val changes: List<TickChange>,
 	val clockEvents: Array<ClockTickEvent> = emptyArray(),
 	val campaignQuests: Array<dynamic> = emptyArray(),
+		val warThreats: Array<RawWarThreat> = emptyArray(),
+		val armyDeployments: Array<RawArmyDeployment> = emptyArray(),
+		val warPressure: RawWarPressure? = null,
 )
 
 /**
@@ -86,6 +92,10 @@ object TurnTickingEngine {
 		campaignClocks: Array<CampaignClock> = emptyArray(),
 		campaignQuests: Array<dynamic> = emptyArray(),
 		kingdomLevel: Int = 1,
+		warThreats: Array<RawWarThreat> = emptyArray(),
+		armyDeployments: Array<RawArmyDeployment> = emptyArray(),
+		warPressure: RawWarPressure? = null,
+		currentTurn: Int = 0,
 	): TickResult {
 		val changes = mutableListOf<TickChange>()
 
@@ -206,6 +216,19 @@ object TurnTickingEngine {
 		val (updatedQuests, questChanges) = tickQuests(campaignQuests, kingdomLevel)
 		changes += questChanges
 
+		// 11) Tick war threats (roadmap #12): ETA countdown, escalation, expiry/soft-pause
+		val tickedThreats = tickWarThreats(warThreats, currentTurn)
+
+		// 12) Recalculate war pressure from active threats minus supporting armies
+		val newWarPressure = if (warThreats.isNotEmpty() || armyDeployments.isNotEmpty() || warPressure != null) {
+			recalculateWarPressure(tickedThreats, armyDeployments, warPressure)
+		} else {
+			warPressure
+		}
+		if (newWarPressure != null && (newWarPressure.lastChange ?: 0) != 0) {
+			changes += TickChange("warPressure", "currentPressure", warPressure?.currentPressure, newWarPressure.currentPressure)
+		}
+
 		return TickResult(
 			supernaturalSolutions = 0,
 			creativeSolutions = 0,
@@ -219,6 +242,9 @@ object TurnTickingEngine {
 			changes = changes,
 			clockEvents = clockResult.events,
 			campaignQuests = updatedQuests,
+			warThreats = tickedThreats,
+			armyDeployments = armyDeployments,
+			warPressure = newWarPressure,
 		)
 	}
 
