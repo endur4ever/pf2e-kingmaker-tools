@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "id": "gregory-fixture",
+  "name": "Gregory Fixture Gear Settings",
+  "description": "Fixture profile used by import/export tests.",
+  "author": "Test Fixture",
+  "isBuiltin": false,
+  "createdAt": "2026-06-07T00:00:00Z",
+  "updatedAt": "2026-06-07T00:00:00Z",
+  "settings": {
+    "kingdom": {
+      "advancement": "xp",
+      "ruinThreshold": 5,
+      "eventDc": 5,
+      "eventDcStep": 0,
+      "leadershipActivityCap": 8,
+      "leadershipActivityCapWithTownhall": 12,
+      "canUpgradeNonCapital": true,
+      "capitalCanGrowOneSizeLarger": true,
+      "noRandomCombatInClaimedHexes": true,
+      "capStructureBonusAtKingdomLevel": true,
+      "settlementInfluenceRadius": 1,
+      "cultOfTheBloomEvents": true
+    },
+    "camping": {
+      "campingActivityCountByPartySize": true,
+      "enableSheltered": false,
+      "enableWeather": false
+    },
+    "hex": {
+      "travelCostRiverNoBridgeAdditional": 1,
+      "pavedStreetsReduceTravelCost": true,
+      "hexMapEnabled": true
+    },
+    "army": {
+      "enableCombatTracks": true
+    },
+    "ui": {
+      "hideBuiltinKingdomSheet": true,
+      "enablePartyActorIcons": true,
+      "enableWeatherSoundFx": true,
+      "enableTokenMapping": true,
+      "disableFirstRunMessage": true
+    }
+  }
+}
