@@ -138,6 +138,8 @@ import at.posselt.pfrpg2e.kingdom.sheet.contexts.toActivitiesContext
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.toContext
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.toRosterContext
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.buildPartyInfluenceContext
+import at.posselt.pfrpg2e.kingdom.sheet.contexts.buildArmyPressureContext
+import at.posselt.pfrpg2e.kingdom.buildArmyPressureView
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.CompanionRef
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.PartyMemberRef
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.withInfluence
@@ -2093,6 +2095,14 @@ class KingdomSheet(
                 },
                 stored = kingdom.partyInfluence ?: emptyArray(),
                 isGM = isGM,
+            ),
+            armyPressureContext = buildArmyPressureContext(
+                buildArmyPressureView(
+                    threats = kingdom.warThreats,
+                    deployments = kingdom.armyDeployments,
+                    pressure = kingdom.warPressure,
+                    settings = kingdom.settings,
+                )
             ),
             showDetailedMatrix = showDetailedMatrix,
             campaignClocks = kingdom.campaignClocks.toDashboardContext(isGM),

@@ -1,0 +1,94 @@
+<div {{#if (ne currentNavEntry 'armyPressure')}}hidden{{/if}} class="km-kingdom-sheet-content">
+    <div class="km-kingdom-sheet-sub-content km-army-pressure">
+        {{#unless armyPressureContext.enabled}}
+            <p class="km-army-pressure-disabled">{{localizeKM "armyPressure.disabledHelp"}}</p>
+        {{else}}
+            <section class="km-army-pressure-meter">
+                <h2><i class="fa-solid fa-fire"></i> {{localizeKM "armyPressure.title"}}</h2>
+                {{#if armyPressureContext.pressure}}
+                    <div class="km-pressure-bar" title="{{armyPressureContext.pressure.currentPressure}}/100">
+                        <div class="km-pressure-fill{{#if armyPressureContext.pressure.atRuinThreshold}} km-pressure-ruin{{else}}{{#if armyPressureContext.pressure.atUnrestThreshold}} km-pressure-unrest{{/if}}{{/if}}"
+                             style="width: {{armyPressureContext.pressure.pressurePercent}}%"></div>
+                    </div>
+                    <div class="km-pressure-stats">
+                        <span>{{localizeKM "armyPressure.current"}}: {{armyPressureContext.pressure.currentPressure}}/100</span>
+                        <span>{{localizeKM "armyPressure.perTurn"}}: {{armyPressureContext.pressure.pressurePerTurn}}</span>
+                        {{#if armyPressureContext.pressure.atUnrestThreshold}}
+                            <span class="km-pressure-warn">+{{armyPressureContext.pressure.unrestModifier}} {{localizeKM "armyPressure.unrest"}}</span>
+                        {{/if}}
+                    </div>
+                {{/if}}
+            </section>
+
+            <section class="km-army-threats">
+                <h3>
+                    <i class="fa-solid fa-skull"></i> {{localizeKM "armyPressure.threats"}}
+                    {{#if isGM}}<button type="button" data-action="add-war-threat"><i class="fa-solid fa-plus"></i> {{localizeKM "armyPressure.addThreat"}}</button>{{/if}}
+                </h3>
+                {{#if armyPressureContext.hasThreats}}
+                    <table class="km-army-table">
+                        <thead><tr>
+                            <th>{{localizeKM "armyPressure.threatName"}}</th>
+                            <th>{{localizeKM "armyPressure.escalation"}}</th>
+                            {{#if armyPressureContext.showThreatDistance}}<th>{{localizeKM "armyPressure.eta"}}</th>{{/if}}
+                            <th>{{localizeKM "armyPressure.target"}}</th>
+                            <th>{{localizeKM "armyPressure.status"}}</th>
+                            {{#if isGM}}<th></th>{{/if}}
+                        </tr></thead>
+                        <tbody>
+                        {{#each armyPressureContext.threats}}
+                            <tr>
+                                <td><strong>{{this.name}}</strong>{{#if this.enemyFaction}} <span class="km-threat-faction">({{this.enemyFaction}})</span>{{/if}}</td>
+                                <td>
+                                    <div class="km-escalation-bar"><div class="km-escalation-fill" style="width: {{this.escalationPercent}}%"></div></div>
+                                    {{this.escalationLevel}}/{{this.maxEscalation}}
+                                </td>
+                                {{#if ../armyPressureContext.showThreatDistance}}<td>{{#if this.eta}}{{this.eta}}{{else}}—{{/if}}</td>{{/if}}
+                                <td>{{#if this.targetHexLocation}}{{this.targetHexLocation}}{{else}}—{{/if}}</td>
+                                <td><span class="km-threat-status km-threat-status-{{this.status}}">{{this.statusLabel}}</span></td>
+                                {{#if ../isGM}}
+                                    <td class="km-army-row-actions">
+                                        <button type="button" data-action="edit-war-threat" data-id="{{this.id}}"><i class="fa-solid fa-pen"></i></button>
+                                        <button type="button" data-action="delete-war-threat" data-id="{{this.id}}"><i class="fa-solid fa-trash"></i></button>
+                                    </td>
+                                {{/if}}
+                            </tr>
+                        {{/each}}
+                        </tbody>
+                    </table>
+                {{else}}
+                    <p class="km-army-empty">{{localizeKM "armyPressure.noThreats"}}</p>
+                {{/if}}
+            </section>
+
+            <section class="km-army-deployments">
+                <h3>
+                    <i class="fa-solid fa-shield-halved"></i> {{localizeKM "armyPressure.deployments"}}
+                    {{#if isGM}}<button type="button" data-action="deploy-army"><i class="fa-solid fa-plus"></i> {{localizeKM "armyPressure.deployArmy"}}</button>{{/if}}
+                </h3>
+                {{#if armyPressureContext.hasDeployments}}
+                    <table class="km-army-table">
+                        <thead><tr>
+                            <th>{{localizeKM "armyPressure.armyName"}}</th>
+                            <th>{{localizeKM "armyPressure.armyType"}}</th>
+                            <th>{{localizeKM "armyPressure.status"}}</th>
+                            {{#if isGM}}<th></th>{{/if}}
+                        </tr></thead>
+                        <tbody>
+                        {{#each armyPressureContext.deployments}}
+                            <tr>
+                                <td>{{this.armyName}}</td>
+                                <td>{{this.armyType}}</td>
+                                <td><span class="km-deployment-status km-deployment-status-{{this.status}}">{{this.statusLabel}}</span></td>
+                                {{#if ../isGM}}<td class="km-army-row-actions"><button type="button" data-action="recall-army" data-id="{{this.id}}"><i class="fa-solid fa-arrow-rotate-left"></i></button></td>{{/if}}
+                            </tr>
+                        {{/each}}
+                        </tbody>
+                    </table>
+                {{else}}
+                    <p class="km-army-empty">{{localizeKM "armyPressure.noDeployments"}}</p>
+                {{/if}}
+            </section>
+        {{/unless}}
+    </div>
+</div>

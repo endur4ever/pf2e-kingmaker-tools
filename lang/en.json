@@ -545,7 +545,8 @@
       "roster": "Roster",
       "party": "Party Influence",
       "sessionPrep": "Session Prep",
-      "campaign": "Campaign"
+      "campaign": "Campaign",
+      "armyPressure": "Army & Pressure"
     },
     "addSettlementBlock": {
       "title": "Add Settlement Block",
@@ -6383,6 +6384,38 @@
       "discovered": "Discovered",
       "cleared": "Cleared"
     },
-    "turns": "Turns"
+    "turns": "Turns",
+    "armyPressure": {
+      "title": "War Pressure",
+      "disabledHelp": "The Army & War Pressure board is disabled. Enable it in kingdom settings to track enemy threats, army deployments, and war pressure.",
+      "current": "Pressure",
+      "perTurn": "Per Turn",
+      "unrest": "Unrest",
+      "threats": "War Threats",
+      "addThreat": "Add Threat",
+      "threatName": "Threat",
+      "escalation": "Escalation",
+      "eta": "ETA",
+      "target": "Target",
+      "status": "Status",
+      "noThreats": "No active threats.",
+      "deployments": "Army Deployments",
+      "deployArmy": "Deploy Army",
+      "armyName": "Army",
+      "armyType": "Type",
+      "noDeployments": "No armies deployed."
+    },
+    "warThreatStatus": {
+      "active": "Active",
+      "defeated": "Defeated",
+      "evaded": "Evaded",
+      "expired": "Invaded"
+    },
+    "armyDeploymentStatus": {
+      "deployed": "Deployed",
+      "battle": "In Battle",
+      "retreated": "Retreated",
+      "destroyed": "Destroyed"
+    }
   }
 }

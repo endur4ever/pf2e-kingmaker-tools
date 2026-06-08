@@ -9,6 +9,7 @@
 @import "./applications/kingdom/event-browser.css";
 @import "./applications/kingdom/check.css";
 @import "./applications/kingdom/kingdom-sheet.css";
+@import "./applications/kingdom/sections/army-pressure/army-pressure.css";
 @import "./applications/kingdom/companion-relationship.css";
 @import "./applications/kingdom/clocks.css";
 @import "./applications/kingdom/structure-browser.css";
