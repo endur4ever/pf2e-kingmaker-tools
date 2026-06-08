@@ -142,6 +142,9 @@ import at.posselt.pfrpg2e.kingdom.sheet.contexts.buildArmyPressureContext
 import at.posselt.pfrpg2e.kingdom.buildArmyPressureView
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.buildPacingAlertContext
 import at.posselt.pfrpg2e.kingdom.buildPacingAlertView
+import at.posselt.pfrpg2e.kingdom.trackTurnGap
+import at.posselt.pfrpg2e.kingdom.pacingMaxTurnGap
+import at.posselt.pfrpg2e.kingdom.postPacingAlertChat
 import at.posselt.pfrpg2e.kingdom.recalculateWarPressure
 import at.posselt.pfrpg2e.kingdom.defaultWarPressure
 import at.posselt.pfrpg2e.kingdom.dialogs.AddWarThreat
@@ -1112,6 +1115,16 @@ class KingdomSheet(
                         postChatMessage(t("kingdom.kingdomEventOccurs"), rollMode = rollMode)
                     } else {
                         kingdom.turnsWithoutEvent += 1
+                        // Pacing advisory (#13): warn once when the event drought crosses the gap
+                        val turnGapAlert = trackTurnGap(
+                            turnsSinceLastEvent = kingdom.turnsWithoutEvent,
+                            maxTurnGap = kingdom.settings.pacingMaxTurnGap(),
+                            turn = kingdom.turnsWithoutEvent,
+                        )
+                        if (turnGapAlert != null) {
+                            kingdom.pacingAlerts = (kingdom.pacingAlerts ?: emptyArray()) + turnGapAlert
+                            postPacingAlertChat(turnGapAlert)
+                        }
                     }
                     actor.setKingdom(kingdom)
                 }

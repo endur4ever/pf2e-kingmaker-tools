@@ -113,4 +113,19 @@ class PacingAlertsTest {
         assertNotNull(track.alert)
         assertEquals(PacingAlertSeverity.CRITICAL.value, track.alert.severity)
     }
+
+    @Test
+    fun turnGapTrackerFiresOnlyAtExactCrossings() {
+        // below threshold: silent
+        assertNull(trackTurnGap(turnsSinceLastEvent = 9, maxTurnGap = 10, turn = 1))
+        // exactly at the gap: fire once
+        val first = trackTurnGap(turnsSinceLastEvent = 10, maxTurnGap = 10, turn = 1)
+        assertNotNull(first)
+        assertEquals(PacingAlertType.TURN_GAP.value, first.type)
+        // one past the gap: silent (no re-warn every check)
+        assertNull(trackTurnGap(turnsSinceLastEvent = 11, maxTurnGap = 10, turn = 1))
+        // double the gap: reminder fires again
+        assertNotNull(trackTurnGap(turnsSinceLastEvent = 20, maxTurnGap = 10, turn = 1))
+        assertNull(trackTurnGap(turnsSinceLastEvent = 21, maxTurnGap = 10, turn = 1))
+    }
 }

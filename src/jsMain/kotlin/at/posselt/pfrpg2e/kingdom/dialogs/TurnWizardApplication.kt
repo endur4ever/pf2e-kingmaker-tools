@@ -14,8 +14,8 @@ import at.posselt.pfrpg2e.kingdom.getAllSettlements
 import at.posselt.pfrpg2e.kingdom.parseRuins
 import at.posselt.pfrpg2e.kingdom.trackUnrestStagnation
 import at.posselt.pfrpg2e.kingdom.pacingMaxTurnGap
+import at.posselt.pfrpg2e.kingdom.postPacingAlertChat
 import at.posselt.pfrpg2e.kingdom.data.ChosenFeature
-import at.posselt.pfrpg2e.kingdom.data.PacingAlertSeverity
 import at.posselt.pfrpg2e.kingdom.resources.calculateStorage
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.TurnWizardContext
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.ChecklistItemContext
@@ -154,16 +154,7 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
     }
 
     // Post pacing alert to chat when one fires
-    pacingAlert?.let { alert ->
-        val pacingContext = js("{}")
-        pacingContext.message = t(alert.message)
-        pacingContext.severity = alert.severity
-        pacingContext.severityLabel = PacingAlertSeverity.fromString(alert.severity)?.let { t(it.i18nKey) } ?: alert.severity
-        postChatTemplate(
-            templatePath = "chatmessages/pacing-alert.hbs",
-            templateContext = pacingContext,
-        )
-    }
+    pacingAlert?.let { alert -> postPacingAlertChat(alert) }
 
     val endTurnContext = js("{}")
     endTurnContext.clockEvents = clockResult.events

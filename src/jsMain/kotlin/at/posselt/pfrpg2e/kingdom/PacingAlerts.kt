@@ -85,6 +85,17 @@ fun trackUnrestStagnation(
     return StagnationTrack(count, alert)
 }
 
+/**
+ * Emit a turn-gap alert only the turn [turnsSinceLastEvent] first reaches the
+ * warning threshold ([maxTurnGap]) and again at 2× for a reminder — so a long
+ * event drought doesn't re-warn on every event check. Returns null otherwise.
+ * Intended to be called at the single site that increments the counter.
+ */
+fun trackTurnGap(turnsSinceLastEvent: Int, maxTurnGap: Int, turn: Int): RawPacingAlert? {
+    if (turnsSinceLastEvent != maxTurnGap && turnsSinceLastEvent != maxTurnGap * 2) return null
+    return evaluateTurnGap(turnsSinceLastEvent, maxTurnGap, turn)
+}
+
 /** Snapshot of the metrics the pacing system evaluates each turn. */
 data class PacingMetrics(
     val kingdomLevel: Int,
