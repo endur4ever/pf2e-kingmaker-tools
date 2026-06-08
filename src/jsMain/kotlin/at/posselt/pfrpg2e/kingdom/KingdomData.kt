@@ -23,6 +23,9 @@ import at.posselt.pfrpg2e.kingdom.data.ChosenFeature
 import at.posselt.pfrpg2e.kingdom.data.MilestoneChoice
 import at.posselt.pfrpg2e.kingdom.data.RawAbilityBoostChoices
 import at.posselt.pfrpg2e.kingdom.data.RawAbilityScores
+import at.posselt.pfrpg2e.kingdom.data.RawArmyDeployment
+import at.posselt.pfrpg2e.kingdom.data.RawWarPressure
+import at.posselt.pfrpg2e.kingdom.data.RawWarThreat
 import at.posselt.pfrpg2e.kingdom.data.RawHexContent
 import at.posselt.pfrpg2e.kingdom.data.RawQuest
 import at.posselt.pfrpg2e.kingdom.data.RawBonusFeat
@@ -103,6 +106,13 @@ external interface KingdomSettings {
     var capStructureBonusAtKingdomLevel: Boolean
     var capitalCanGrowOneSizeLarger: Boolean
     var enableCouncilMissions: Boolean
+
+    // Army & war pressure board (roadmap #12) — nullable for back-compat (read via the
+    // isArmyPressureBoardEnabled()/… helpers in ArmyWarPressure.kt).
+    var enableArmyPressureBoard: Boolean?
+    var autoCalculateWarPressure: Boolean?
+    var showThreatDistance: Boolean?
+    var armyPressureBoardMode: String?
 }
 
 @JsPlainObject
@@ -207,6 +217,11 @@ external interface KingdomData {
 
     /** Roadmap #11: quest IDs created by converting curated rumors into quests. Nullable for back-compat. */
     var rumorGeneratedQuestIds: Array<String>?
+
+    // Army & war pressure board (roadmap #12) — all nullable for back-compat.
+    var warThreats: Array<RawWarThreat>?
+    var armyDeployments: Array<RawArmyDeployment>?
+    var warPressure: RawWarPressure?
 }
 
 fun RawLeaderKingdomSkills.hasSkill(leader: Leader, skill: KingdomSkill) =
