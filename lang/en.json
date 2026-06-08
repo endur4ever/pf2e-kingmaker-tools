@@ -396,6 +396,21 @@
       "autoApplyFatiguedHelp": "Based on weather and meal effects, apply the Fatigued condition to actors in camp after advancing time",
       "fatigueDuration": "Change Fatigued Duration",
       "fatigueDurationHelp": "Increase or decrease duration until character becomes fatigued in seconds. Use negative values to decrease duration and positive to increase",
+      "encounterResolutionTitle": "Resolve Camping Watch Encounter",
+      "selectWatcher": "Select Watcher on Watch",
+      "stealthDc": "Ambusher Stealth DC",
+      "rollModifier": "Watcher Perception Modifier",
+      "dcModifier": "Stealth DC Modifier",
+      "encounterCardTitle": "Camping Watch Encounter Resolution",
+      "watcher": "Watcher on Watch",
+      "perceptionCheck": "Perception Check",
+      "startDistance": "Starting Distance",
+      "ambusherState": "Ambusher State",
+      "conditionsApplied": "Conditions Applied",
+      "conditions": {
+        "prone": "Prone",
+        "unconscious": "Unconscious"
+      },
       "weatherEvent": {
         "fog": "Fog",
         "heavyDownpour": "Heavy Downpour",

@@ -33,21 +33,32 @@ import at.posselt.pfrpg2e.camping.removeMealEffects
 import at.posselt.pfrpg2e.camping.removeProvisions
 import at.posselt.pfrpg2e.camping.rollRandomEncounter
 import at.posselt.pfrpg2e.camping.setCamping
+import at.posselt.pfrpg2e.camping.findCurrentRegion
+import at.posselt.pfrpg2e.camping.EncounterResolverEngine
+import at.posselt.pfrpg2e.camping.dialogs.showEncounterResolutionDialog
+import at.posselt.pfrpg2e.actor.resolveAttribute
 import at.posselt.pfrpg2e.data.actor.Perception
+import at.posselt.pfrpg2e.data.checks.DegreeOfSuccess
+import at.posselt.pfrpg2e.data.checks.RollMode
 import at.posselt.pfrpg2e.fromCamelCase
+import at.posselt.pfrpg2e.fromOrdinal
 import at.posselt.pfrpg2e.utils.awaitAll
 import at.posselt.pfrpg2e.utils.buildPromise
 import at.posselt.pfrpg2e.utils.formatSeconds
 import at.posselt.pfrpg2e.utils.postChatMessage
+import at.posselt.pfrpg2e.utils.postChatTemplate
 import at.posselt.pfrpg2e.utils.t
 import at.posselt.pfrpg2e.utils.typeSafeUpdate
 import at.posselt.pfrpg2e.utils.worldTimeSeconds
 import com.foundryvtt.core.AnyObject
 import com.foundryvtt.core.Game
+import com.foundryvtt.pf2e.actions.CheckDC
 import com.foundryvtt.pf2e.actions.RestForTheNightOptions
 import com.foundryvtt.pf2e.actor.PF2EActor
+import com.foundryvtt.pf2e.actor.PF2ECreature
 import com.foundryvtt.pf2e.actor.PF2ECharacter
 import com.foundryvtt.pf2e.actor.PF2EParty
+import com.foundryvtt.pf2e.actor.StatisticRollParameters
 import com.foundryvtt.pf2e.pf2e
 import js.objects.Object
 import js.objects.recordOf
@@ -274,17 +285,70 @@ private suspend fun beginRest(
         watchDurationSeconds = watchDurationSeconds,
     )
     if (camping.restSettings.disableRandomEncounter == false && randomEncounterAt != null) {
-        askDc(t("camping.enemyStealth"))?.let { dc ->
-            watchers
-                .filterIsInstance<PF2ECharacter>()
-                .randomOrNull()
-                ?.performCampingCheck(
-                    isSecret = true,
-                    isWatch = true,
-                    attribute = Perception,
-                    dc = dc,
-                )
+        val characterWatchers = watchers.filterIsInstance<PF2ECharacter>()
+        val numSlots = max(1, camping.watchSlots.size)
+        val slotDuration = watchDurationSeconds / numSlots
+        val slotIndex = (randomEncounterAt / max(1, slotDuration)).coerceIn(0, numSlots - 1)
+        val slotActorUuids = camping.watchSlots.getOrNull(slotIndex) ?: emptyArray()
+        
+        val defaultWatcher = characterWatchers.find { it.uuid in slotActorUuids }
+            ?: characterWatchers.firstOrNull()
+        val defaultWatcherUuid = defaultWatcher?.uuid ?: ""
+        val defaultDc = camping.findCurrentRegion()?.encounterDc ?: 15
+
+        val formData = showEncounterResolutionDialog(
+            watchers = characterWatchers,
+            defaultWatcherUuid = defaultWatcherUuid,
+            defaultDc = defaultDc
+        ) ?: return
+
+        val selectedWatcher = characterWatchers.find { it.uuid == formData.watcherUuid } ?: defaultWatcher
+        if (selectedWatcher != null) {
+            val totalDc = formData.dc - formData.rollModifier + formData.dcModifier
+            val data = StatisticRollParameters(
+                rollMode = "blindroll",
+                dc = CheckDC(value = totalDc),
+                extraRollOptions = arrayOf("camping", "watch")
+            )
+            val checkRoll = selectedWatcher.unsafeCast<PF2ECreature>().resolveAttribute(Perception)
+                ?.roll(data)
+                ?.await()
+
+            val rollTotal = checkRoll?.total ?: 0
+            val degree = checkRoll?.degreeOfSuccess
+                ?.let { fromOrdinal<DegreeOfSuccess>(it) }
+                ?: DegreeOfSuccess.FAILURE
+
+            val resolution = EncounterResolverEngine.resolve(
+                watcherRoll = rollTotal,
+                stealthDc = totalDc,
+                degree = degree
+            )
+
+            val sleepingActors = characterWatchers.filter { it.uuid != selectedWatcher.uuid }
+            sleepingActors.forEach { actor ->
+                resolution.appliedConditions.forEach { condition ->
+                    actor.increaseCondition(condition)
+                }
+            }
+
+            val rollMode = fromCamelCase<RollMode>(camping.randomEncounterRollMode) ?: RollMode.GMROLL
+            postChatTemplate(
+                templatePath = "chatmessages/encounter-resolution-card.hbs",
+                templateContext = recordOf(
+                    "watcherName" to selectedWatcher.name,
+                    "rollTotal" to rollTotal,
+                    "stealthDc" to totalDc,
+                    "degree" to t(degree),
+                    "distance" to resolution.distanceToEnemy,
+                    "appliedConditions" to resolution.appliedConditions.joinToString(", ") { t("camping.conditions.$it") },
+                    "ambusherState" to resolution.ambusherState,
+                    "gmNotes" to resolution.gmNotes
+                ),
+                rollMode = rollMode
+            )
         }
+
         game.time.advance(randomEncounterAt).await()
         camping.watchSecondsRemaining = watchDurationSeconds - randomEncounterAt
         campingActor.setCamping(camping)
