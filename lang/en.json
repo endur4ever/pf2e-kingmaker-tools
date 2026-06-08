@@ -546,7 +546,8 @@
       "party": "Party Influence",
       "sessionPrep": "Session Prep",
       "campaign": "Campaign",
-      "armyPressure": "Army & Pressure"
+      "armyPressure": "Army & Pressure",
+      "pacing": "Pacing"
     },
     "addSettlementBlock": {
       "title": "Add Settlement Block",
@@ -6438,6 +6439,14 @@
     "pacingAlertSeverity": {
       "warning": "Warning",
       "critical": "Critical"
+    },
+    "pacingAlerts": {
+      "title": "Pacing Advisories",
+      "help": "Advisory only — these flags watch for the campaign drifting off its intended pressure curve. They never change game state; dismiss any you've addressed.",
+      "empty": "No pacing concerns — the campaign looks balanced.",
+      "turnLabel": "Turn",
+      "dismiss": "Dismiss",
+      "clearAll": "Clear All"
     }
   }
 }

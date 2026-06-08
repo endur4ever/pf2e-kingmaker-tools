@@ -1,0 +1,40 @@
+<div {{#if (ne currentNavEntry 'pacing')}}hidden{{/if}} class="km-kingdom-sheet-content">
+    <div class="km-kingdom-sheet-sub-content km-pacing-alerts">
+        <header class="km-pacing-alerts-header">
+            <h2><i class="fa-solid fa-gauge-high"></i> {{localizeKM "pacingAlerts.title"}}</h2>
+            <div class="km-pacing-alerts-summary">
+                {{#if pacingAlertContext.criticalCount}}<span class="km-pacing-pill km-pacing-pill--critical">{{pacingAlertContext.criticalCount}} {{localizeKM "pacingAlertSeverity.critical"}}</span>{{/if}}
+                {{#if pacingAlertContext.warningCount}}<span class="km-pacing-pill km-pacing-pill--warning">{{pacingAlertContext.warningCount}} {{localizeKM "pacingAlertSeverity.warning"}}</span>{{/if}}
+                {{#if pacingAlertContext.hasAlerts}}{{#if isGM}}<button type="button" data-action="clear-pacing-alerts"><i class="fa-solid fa-broom"></i> {{localizeKM "pacingAlerts.clearAll"}}</button>{{/if}}{{/if}}
+            </div>
+        </header>
+
+        <p class="km-pacing-alerts-help">{{localizeKM "pacingAlerts.help"}}</p>
+
+        {{#if pacingAlertContext.hasAlerts}}
+            <ul class="km-pacing-alert-list">
+                {{#each pacingAlertContext.alerts}}
+                    <li class="km-pacing-alert-card km-pacing-alert-card--{{this.severity}}{{#if this.isCritical}} km-pacing-alert-card--critical{{/if}}">
+                        <div class="km-pacing-alert-card__icon">
+                            {{#if this.isCritical}}<i class="fa-solid fa-triangle-exclamation"></i>{{else}}<i class="fa-solid fa-circle-info"></i>{{/if}}
+                        </div>
+                        <div class="km-pacing-alert-card__body">
+                            <div class="km-pacing-alert-card__meta">
+                                <span class="km-pacing-alert-card__severity">{{this.severityLabel}}</span>
+                                <span class="km-pacing-alert-card__turn">{{localizeKM "pacingAlerts.turnLabel"}} {{this.turnCreated}}</span>
+                            </div>
+                            <p class="km-pacing-alert-card__message">{{this.message}}</p>
+                        </div>
+                        {{#if ../isGM}}
+                            <button type="button" class="km-pacing-alert-card__dismiss" data-action="dismiss-pacing-alert" data-id="{{this.id}}" title="{{localizeKM "pacingAlerts.dismiss"}}">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        {{/if}}
+                    </li>
+                {{/each}}
+            </ul>
+        {{else}}
+            <p class="km-pacing-alerts-empty"><i class="fa-solid fa-circle-check"></i> {{localizeKM "pacingAlerts.empty"}}</p>
+        {{/if}}
+    </div>
+</div>

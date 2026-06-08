@@ -140,6 +140,8 @@ import at.posselt.pfrpg2e.kingdom.sheet.contexts.toRosterContext
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.buildPartyInfluenceContext
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.buildArmyPressureContext
 import at.posselt.pfrpg2e.kingdom.buildArmyPressureView
+import at.posselt.pfrpg2e.kingdom.sheet.contexts.buildPacingAlertContext
+import at.posselt.pfrpg2e.kingdom.buildPacingAlertView
 import at.posselt.pfrpg2e.kingdom.recalculateWarPressure
 import at.posselt.pfrpg2e.kingdom.defaultWarPressure
 import at.posselt.pfrpg2e.kingdom.dialogs.AddWarThreat
@@ -503,6 +505,19 @@ class KingdomSheet(
                     kingdom.armyDeployments ?: emptyArray(),
                     kingdom.warPressure,
                 )
+                actor.setKingdom(kingdom)
+            }
+
+            "dismiss-pacing-alert" -> buildPromise {
+                val alertId = target.dataset["id"]
+                val kingdom = getKingdom()
+                kingdom.pacingAlerts = (kingdom.pacingAlerts ?: emptyArray()).filter { it.id != alertId }.toTypedArray()
+                actor.setKingdom(kingdom)
+            }
+
+            "clear-pacing-alerts" -> buildPromise {
+                val kingdom = getKingdom()
+                kingdom.pacingAlerts = emptyArray()
                 actor.setKingdom(kingdom)
             }
 
@@ -2158,6 +2173,9 @@ class KingdomSheet(
                     pressure = kingdom.warPressure,
                     settings = kingdom.settings,
                 )
+            ),
+            pacingAlertContext = buildPacingAlertContext(
+                buildPacingAlertView(kingdom.pacingAlerts)
             ),
             showDetailedMatrix = showDetailedMatrix,
             campaignClocks = kingdom.campaignClocks.toDashboardContext(isGM),
