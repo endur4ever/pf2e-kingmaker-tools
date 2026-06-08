@@ -12,7 +12,10 @@ import at.posselt.pfrpg2e.kingdom.getKingdom
 import at.posselt.pfrpg2e.kingdom.setKingdom
 import at.posselt.pfrpg2e.kingdom.getAllSettlements
 import at.posselt.pfrpg2e.kingdom.parseRuins
+import at.posselt.pfrpg2e.kingdom.trackUnrestStagnation
+import at.posselt.pfrpg2e.kingdom.pacingMaxTurnGap
 import at.posselt.pfrpg2e.kingdom.data.ChosenFeature
+import at.posselt.pfrpg2e.kingdom.data.PacingAlertSeverity
 import at.posselt.pfrpg2e.kingdom.resources.calculateStorage
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.TurnWizardContext
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.ChecklistItemContext
@@ -122,6 +125,21 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
         kingdom.unrest = kingdom.unrest + clockResult.totalUnrestChange
     }
 
+    // Balance & pacing alerts (roadmap #13): track unrest stagnation, fire once on threshold crossing
+    val pacingTrack = trackUnrestStagnation(
+        previousUnrest = kingdom.pacingLastUnrest,
+        currentUnrest = kingdom.unrest,
+        previousCount = kingdom.pacingTurnsSinceUnrestChange,
+        maxTurnGap = kingdom.settings.pacingMaxTurnGap(),
+        turn = (kingdom.pacingTurnsSinceUnrestChange ?: 0) + 1,
+    )
+    kingdom.pacingTurnsSinceUnrestChange = pacingTrack.turnsSinceUnrestChange
+    kingdom.pacingLastUnrest = kingdom.unrest
+    val pacingAlert = pacingTrack.alert
+    if (pacingAlert != null) {
+        kingdom.pacingAlerts = (kingdom.pacingAlerts ?: emptyArray()) + pacingAlert
+    }
+
     actor.setKingdom(kingdom)
 
     // Post clock tick events to chat
@@ -132,6 +150,18 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
         postChatTemplate(
             templatePath = "chatmessages/clock-tick.hbs",
             templateContext = clockContext,
+        )
+    }
+
+    // Post pacing alert to chat when one fires
+    pacingAlert?.let { alert ->
+        val pacingContext = js("{}")
+        pacingContext.message = t(alert.message)
+        pacingContext.severity = alert.severity
+        pacingContext.severityLabel = PacingAlertSeverity.fromString(alert.severity)?.let { t(it.i18nKey) } ?: alert.severity
+        postChatTemplate(
+            templatePath = "chatmessages/pacing-alert.hbs",
+            templateContext = pacingContext,
         )
     }
 

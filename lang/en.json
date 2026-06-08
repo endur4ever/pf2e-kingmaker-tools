@@ -1486,6 +1486,10 @@
         "triggered": "Consequence Triggered",
         "paused": "Paused at expiry",
         "totalUnrest": "Total Unrest Change"
+      },
+      "pacingAlert": {
+        "title": "Pacing Advisory",
+        "hint": "Advisory only — adjust the campaign's pressure curve if this looks off."
       }
     },
     "displayBars": {
@@ -6424,6 +6428,16 @@
       "battle": "In Battle",
       "retreated": "Retreated",
       "destroyed": "Destroyed"
+    },
+    "pacingAlertType": {
+      "levelMismatch": "The party's level has drifted far from the chapter's intended level. Consider adjusting encounter difficulty or rewards.",
+      "stagnation": "Unrest hasn't changed in several turns — the kingdom feels static. Consider introducing an event or complication.",
+      "turnGap": "Many turns have passed without a campaign-altering event. Consider triggering one to keep momentum.",
+      "lootImbalance": "Item access is out of step with the party's level. Consider adjusting available rewards."
+    },
+    "pacingAlertSeverity": {
+      "warning": "Warning",
+      "critical": "Critical"
     }
   }
 }

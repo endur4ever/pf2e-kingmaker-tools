@@ -56,6 +56,35 @@ fun evaluateTurnGap(turnsSinceLastEvent: Int, maxTurnGap: Int, turn: Int): RawPa
     return alert(PacingAlertType.TURN_GAP, PacingAlertSeverity.WARNING, turn)
 }
 
+/** Result of advancing the unrest-stagnation tracker by one turn. */
+data class StagnationTrack(
+    val turnsSinceUnrestChange: Int,
+    val alert: RawPacingAlert?,
+)
+
+/**
+ * Advance the unrest-stagnation tracker by one turn. Emits an alert only when the
+ * counter *first* reaches the warning ([maxTurnGap]) or critical (2×[maxTurnGap])
+ * threshold, so the kingdom doesn't spam a pacing advisory every turn it stays static.
+ * The counter resets to 0 whenever unrest moves.
+ */
+fun trackUnrestStagnation(
+    previousUnrest: Int?,
+    currentUnrest: Int,
+    previousCount: Int?,
+    maxTurnGap: Int,
+    turn: Int,
+): StagnationTrack {
+    val stagnant = previousUnrest != null && previousUnrest == currentUnrest
+    val count = if (stagnant) (previousCount ?: 0) + 1 else 0
+    val alert = if (count == maxTurnGap || count == maxTurnGap * 2) {
+        evaluateStagnation(count, maxTurnGap, turn)
+    } else {
+        null
+    }
+    return StagnationTrack(count, alert)
+}
+
 /** Snapshot of the metrics the pacing system evaluates each turn. */
 data class PacingMetrics(
     val kingdomLevel: Int,

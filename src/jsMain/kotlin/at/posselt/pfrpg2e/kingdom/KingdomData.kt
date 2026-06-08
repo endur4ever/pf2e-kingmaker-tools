@@ -232,6 +232,9 @@ external interface KingdomData {
 
     /** Balance & pacing alerts (roadmap #13) — advisory alert history, nullable for back-compat. */
     var pacingAlerts: Array<RawPacingAlert>?
+    /** Pacing tracking: last observed unrest + consecutive turns it hasn't changed. */
+    var pacingLastUnrest: Int?
+    var pacingTurnsSinceUnrestChange: Int?
 }
 
 fun RawLeaderKingdomSkills.hasSkill(leader: Leader, skill: KingdomSkill) =
