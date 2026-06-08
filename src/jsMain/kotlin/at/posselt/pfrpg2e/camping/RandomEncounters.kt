@@ -4,6 +4,14 @@ import at.posselt.pfrpg2e.camping.dialogs.RegionSetting
 import at.posselt.pfrpg2e.data.checks.DegreeOfSuccess
 import at.posselt.pfrpg2e.data.checks.RollMode
 import at.posselt.pfrpg2e.fromCamelCase
+import at.posselt.pfrpg2e.kingdom.getKingdom
+import at.posselt.pfrpg2e.kingdom.getKingdomActors
+import at.posselt.pfrpg2e.kingdom.setKingdom
+import at.posselt.pfrpg2e.questevent.CampaignQuest
+import at.posselt.pfrpg2e.questevent.QuestRewards
+import at.posselt.pfrpg2e.questevent.QuestStatus
+import at.posselt.pfrpg2e.questevent.QuestType
+import kotlin.js.Date
 import at.posselt.pfrpg2e.utils.d20Check
 import at.posselt.pfrpg2e.utils.fromUuidTypeSafe
 import at.posselt.pfrpg2e.utils.getPF2EWorldTime
@@ -83,9 +91,52 @@ suspend fun rollCuratedEncounter(game: Game, actor: CampingActor): Boolean {
         onAccept = { buildPromise { postChatMessage(resultText) } },
         onReroll = { buildPromise { rollCuratedEncounter(game, actor) } },
         onReject = {},
-        onConvertToQuest = {}, // wired in phase 6
+        onConvertToQuest = { hook -> buildPromise { convertRumorToQuest(game, hook) } },
     ).render(true)
     return true
+}
+
+/**
+ * Roadmap #11: convert a curated rumor with a quest hook into a simple
+ * [CampaignQuest] record on the kingdom (the full quest generator, roadmap #2,
+ * stays out of scope). The quest is flagged generatedByEvent so it shows the
+ * existing "From: …" badge on the quests board, and its id is tracked in
+ * [KingdomData.rumorGeneratedQuestIds].
+ */
+suspend fun convertRumorToQuest(game: Game, rumor: Rumor) {
+    val kingdomActor = game.getKingdomActors().firstOrNull()
+    if (kingdomActor == null) {
+        ui.notifications.error(t("camping.encounterNoKingdom"))
+        return
+    }
+    val kingdom = kingdomActor.getKingdom() ?: return
+    val now = Date().toISOString()
+    val questId = "rumor-${Date().getTime().toLong()}"
+    val quest = CampaignQuest(
+        id = questId,
+        templateId = rumor.questTemplateId,
+        name = rumor.questTemplateName ?: rumor.text.take(60),
+        type = QuestType.EXPLORATION,
+        description = rumor.text,
+        gmNotes = null,
+        recommendedLevel = kingdom.level ?: 1,
+        objectives = emptyList(),
+        rewards = QuestRewards(),
+        status = QuestStatus.ACTIVE,
+        turnsRemaining = null,
+        visibleToPlayers = false,
+        generatedByEvent = true,
+        sourceEventId = null,
+        sourceEventName = t("camping.encounterCuratorRumorSource"),
+        createdAt = now,
+        campaignId = "default",
+    )
+    val quests = (kingdom.campaignQuests ?: emptyArray<dynamic>()).toMutableList()
+    quests.add(quest)
+    kingdom.campaignQuests = quests.toTypedArray()
+    kingdom.rumorGeneratedQuestIds = (kingdom.rumorGeneratedQuestIds ?: emptyArray()) + questId
+    kingdomActor.setKingdom(kingdom)
+    ui.notifications.info(t("camping.encounterRumorConverted"))
 }
 
 private suspend fun rollRandomEncounter(

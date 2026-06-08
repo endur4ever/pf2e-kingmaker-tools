@@ -450,7 +450,10 @@
       "encounterCategoryProxyTable": "Category Proxy Roll Table",
       "encounterCategoryProxyTableHelp": "Roll table whose results name an encounter category (Combat, Rumor, Merchant, …). When set, random encounters route through the GM curator preview instead of the legacy creature roll.",
       "filterByHexState": "Suppress Combat in Cleared Hexes",
-      "filterByHexStateHelp": "When enabled, Combat-category encounters are suppressed while the party is in a claimed and cleared hex (per-region opt-in still applies)."
+      "filterByHexStateHelp": "When enabled, Combat-category encounters are suppressed while the party is in a claimed and cleared hex (per-region opt-in still applies).",
+      "encounterCuratorRumorSource": "Curated Encounter",
+      "encounterNoKingdom": "No kingdom actor found to attach the quest to.",
+      "encounterRumorConverted": "Rumor converted into a kingdom quest."
     },
     "settlementNav": {
       "status": "Status",
