@@ -27,6 +27,7 @@ import at.posselt.pfrpg2e.kingdom.data.RawHexContent
 import at.posselt.pfrpg2e.kingdom.data.RawQuest
 import at.posselt.pfrpg2e.kingdom.data.RawBonusFeat
 import at.posselt.pfrpg2e.kingdom.data.RawCharacter
+import at.posselt.pfrpg2e.kingdom.data.RawPartyMemberInfluence
 import at.posselt.pfrpg2e.kingdom.data.RawCharterChoices
 import at.posselt.pfrpg2e.kingdom.data.RawConsumption
 import at.posselt.pfrpg2e.kingdom.data.RawCurrentCommodities
@@ -191,7 +192,7 @@ external interface KingdomData {
     var initialProficiencies: Array<String?>
     var milestones: Array<MilestoneChoice>
     var companions: Array<RawCharacter>?
-    var structureBlacklist: Array<String>
+    var structureBlacklist: Array<String>?
     var campaignClocks: Array<CampaignClock>
     var questTemplates: Array<dynamic>
     var campaignQuests: Array<dynamic>
@@ -201,6 +202,8 @@ external interface KingdomData {
     var questGeneratorSettings: dynamic
     /** Personal quests tied to individual companions (roadmap #7). */
     var companionPersonalQuests: Array<CompanionPersonalQuest>?
+    /** Party-member influence keyed by actor UUID. Membership is read live from the party actor. */
+    var partyInfluence: Array<RawPartyMemberInfluence>?
 }
 
 fun RawLeaderKingdomSkills.hasSkill(leader: Leader, skill: KingdomSkill) =

@@ -4,7 +4,7 @@
 This plan outlines the implementation of a system to make settlements and their structures more meaningful for players (PCs). Instead of just providing kingdom bonuses, certain buildings will now unlock specific player-facing benefits like character retraining, specialized crafting, and upgraded item purchase availability.
 
 **Feature ID:** #6 in `feature-roadmap.md`
-**Status:** Plan Only
+**Status:** Implemented on branch `kingmaker.6` (commit `002184f2`). Ported onto `kingmaker.5` on 2026-06-06 alongside a `structureBlacklist` crash fix (`Migration34`) so it builds and loads there. **Manual Foundry verification still pending — see §8.**
 
 ## 1. Affected Files
 ### Kotlin Source (Data Models & Logic)
@@ -66,3 +66,46 @@ This plan outlines the implementation of a system to make settlements and their 
 ## 7. Design Decisions Reference
 - Follows decisions from `docs/house-rules.md` regarding Trainer and Crafting structure mappings.
 - Integrates with existing `SettlementType` hierarchy (Town, City, Metropolis).
+
+## 8. Remaining Work — Detailed Testing TODO
+
+> Code is implemented; what's left is **verification**. Do this when you next have Foundry up. The Hermes task `t_1c143642` carries a condensed copy of these steps.
+
+### 8.1 Branch / build context (read first)
+- The feature originated on **`kingmaker.6`** (commit `002184f2`). It was **ported onto `kingmaker.5`** on 2026-06-06 because that's the branch loaded in Foundry. The same `Inspect Settlement` dialog had a latent **`structureBlacklist` undefined crash** (it read `kingdom.structureBlacklist.toSet()` on data that lacked the field); fixed by making the field nullable + guarding both read sites (`InspectSettlement.kt`, `StructureBrowser.kt`) and adding **`Migration34`** to backfill `structureBlacklist = []` on existing kingdoms.
+- If testing on a fresh `kingmaker.6` checkout instead, apply that same crash fix first or `Inspect Settlement` will throw.
+
+### 8.2 Build commands
+```bash
+export JAVA_HOME=/home/grego/.local/jdks/jdk-25.0.3+9
+export CHROME_BIN=$(command -v google-chrome || command -v chromium)
+./gradlew assemble -x kotlinStoreYarnLock          # builds dist/main.js to load in Foundry
+# Unit test (lives in commonTest on kingmaker.6; NOT yet ported to kingmaker.5):
+./gradlew jsBrowserTest --tests '*SettlementBenefitAccessTracker*' -x kotlinStoreYarnLock
+```
+
+### 8.3 Where the UI is
+Kingdom sheet → open a settlement → **Inspect Settlement** → new **"Unlocked Access"** section. It is a **table** with three rows (Item Purchase Level / Trainers / Crafting Access) — **not a dropdown**. Empty rows render "None".
+
+### 8.4 Critical gotcha
+Trainers and crafting are derived from `parsed.constructedStructures`. The structure must be **fully constructed** in that settlement — a structure still *under construction*, or a tile just placed on the scene that hasn't synced into the kingdom's structure list, will **not** appear.
+
+### 8.5 Verification checklist
+- [ ] **Item purchase level by size:** Village **1**, Town **3**, City **9**, Metropolis **15**.
+- [ ] **Upgrade reflows level:** upgrade Town → City, confirm purchase level flips 3 → 9 and downstream available-item levels update.
+- [ ] **Library** → Trainers row reads **"Library: Investigator, Thaumaturge, Psychic"**; Crafting row gains **Tomes**.
+- [ ] **Garrison** → Trainers add **fighter, barbarian, champion, monk**.
+- [ ] **Alchemy Laboratory** → Crafting **alchemical**; Trainers **alchemist, gunslinger, inventor**.
+- [ ] **Smithy** or **Foundry** → Crafting **metallic** (multiple metal structures collapse to one row, names joined by " / ").
+- [ ] **Dedup:** two structures granting the same benefit produce no duplicate entries.
+- [ ] **`-vk` variants** (Vance & Kerenshara) unlock the same benefits as their base structure (id matched after stripping the `-vk` suffix).
+- [ ] **No crash:** Inspect Settlement and Structure Browser open cleanly even on a kingdom that predates `structureBlacklist` (regression guard for the 8.1 fix).
+
+### 8.6 Full structure → benefit reference
+**Trainers:** shrine→cleric/oracle · library→investigator/thaumaturge/psychic · alchemy-laboratory→alchemist/gunslinger/inventor · tavern-*→bard · arcanists-tower→wizard/witch/sorcerer/magus · garrison→fighter/barbarian/champion/monk · sacred-grove→druid/kineticist/summoner/ranger · thieves-guild→rogue · pier→swashbuckler
+
+**Crafting:** smithy|foundry→metallic · stonemason→runes · tannery→leather · arcanists-tower→scrollsWandsStaves · luxury-store→amuletsRings · library→tomes · alchemy-laboratory→alchemical · lumberyard→wooden · specialized-artisan→other
+
+### 8.7 Follow-ups (optional)
+- [ ] Port `SettlementBenefitAccessTrackerTest` (commonTest) onto `kingmaker.5` — its `Settlement(...)` constructor args may need updating for the diverged data model.
+- [ ] Decide whether the "Non-capital upgrades" homebrew toggle should hide benefits for non-capital settlements (plan §6 scenario, not yet implemented).

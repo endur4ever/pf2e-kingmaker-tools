@@ -91,6 +91,7 @@ external interface KingdomSheetContext : ValidatedHandlebarsContext {
     val canLockdown: Boolean
     val canFeast: Boolean
     val rosterContext: RosterContext
+    val partyInfluenceContext: PartyInfluenceContext
     val showDetailedMatrix: Boolean
     val campaignClocks: CampaignClockContext
     val generatedQuestCount: Int

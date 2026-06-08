@@ -1,9 +1,12 @@
 package at.posselt.pfrpg2e.homebrew
 
+import kotlinx.serialization.Serializable
+
 /**
  * Data class representing a homebrew rules profile.
  * Contains metadata and the actual rules overrides.
  */
+@Serializable
 data class HomebrewRulesProfile(
     val id: String,
     val name: String,

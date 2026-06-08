@@ -1,9 +1,12 @@
 package at.posselt.pfrpg2e.homebrew
 
+import kotlinx.serialization.Serializable
+
 /**
  * Data class representing the set of homebrew rule overrides.
  * All fields have RAW default values; the `gregory()` companion method provides the house‑rules preset.
  */
+@Serializable
 data class HomebrewRules(
     val useVanceAndKerenshara: Boolean = false,
     val ruinThreshold: Int = 10,

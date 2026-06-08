@@ -146,8 +146,12 @@ class TurnWizardApplication(
 ) : SimpleApp<TurnWizardContext>(
     title = t("kingdom.turnWizard.title"),
     template = "applications/kingdom/turn-wizard.hbs",
+    classes = setOf("km-scroll-application"),
+    scrollable = setOf(".window-content"),
     id = "kmTurnWizard-${kingdomActor.uuid}",
     width = 600,
+    height = 700,
+    resizable = true,
 ) {
     private var cachedChanges: Array<TickChange> = emptyArray()
 

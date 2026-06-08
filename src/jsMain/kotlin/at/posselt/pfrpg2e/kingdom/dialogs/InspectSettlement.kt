@@ -101,6 +101,9 @@ external interface InspectSettlementContext : ValidatedHandlebarsContext {
     val storage: Array<LabelValueContext>
     val settlementActions: Int
     val populationNpcs: Array<RawNpcEntry>
+    val itemPurchaseLevel: Int
+    val trainers: Array<String>
+    val craftingAccess: Array<String>
 }
 
 @JsPlainObject
@@ -349,7 +352,7 @@ class InspectSettlement(
             value = current.waterBorders,
             hideLabel = true,
         )
-        val blacklist = kingdom.structureBlacklist.toSet()
+        val blacklist = (kingdom.structureBlacklist ?: emptyArray()).toSet()
         val settlementStructures = parsed.constructedStructures
             .filter { it.id !in blacklist }
             .groupBy { it.id }
@@ -409,8 +412,9 @@ class InspectSettlement(
             .filter { it.second > 0 }
             .map { LabelValueContext(label = it.first, value = it.second) }
             .toTypedArray()
+        val basePurchaseLevel = parsed.itemPurchaseLevel
         val availableItems = calculateAvailableItems(
-            settlementLevel = parsed.occupiedBlocks,
+            settlementLevel = basePurchaseLevel,
             preventItemLevelPenalty = parsed.preventItemLevelPenalty,
             magicalItemLevelIncrease = magicItemLevelIncreases,
             bonuses = parsed.availableItems,
@@ -421,6 +425,75 @@ class InspectSettlement(
                 t("kingdom.notAvailable")
             }
         }.toRecord()
+
+        val trainersList = mutableListOf<String>()
+        val baseIds = parsed.constructedStructures.map { it.id.removeSuffix("-vk") }.toSet()
+
+        fun getStructureName(baseId: String): String {
+            return parsed.constructedStructures.find { it.id.removeSuffix("-vk") == baseId }?.name ?: ""
+        }
+
+        if ("shrine" in baseIds) {
+            trainersList.add("${getStructureName("shrine")}: ${t("kingdom.class.cleric")}, ${t("kingdom.class.oracle")}")
+        }
+        if ("library" in baseIds) {
+            trainersList.add("${getStructureName("library")}: ${t("kingdom.class.investigator")}, ${t("kingdom.class.thaumaturge")}, ${t("kingdom.class.psychic")}")
+        }
+        if ("alchemy-laboratory" in baseIds) {
+            trainersList.add("${getStructureName("alchemy-laboratory")}: ${t("kingdom.class.alchemist")}, ${t("kingdom.class.gunslinger")}, ${t("kingdom.class.inventor")}")
+        }
+        val taverns = parsed.constructedStructures.filter { it.id.removeSuffix("-vk").startsWith("tavern-") }
+        if (taverns.isNotEmpty()) {
+            val names = taverns.map { it.name }.distinct().joinToString(" / ")
+            trainersList.add("$names: ${t("kingdom.class.bard")}")
+        }
+        if ("arcanists-tower" in baseIds) {
+            trainersList.add("${getStructureName("arcanists-tower")}: ${t("kingdom.class.wizard")}, ${t("kingdom.class.witch")}, ${t("kingdom.class.sorcerer")}, ${t("kingdom.class.magus")}")
+        }
+        if ("garrison" in baseIds) {
+            trainersList.add("${getStructureName("garrison")}: ${t("kingdom.class.fighter")}, ${t("kingdom.class.barbarian")}, ${t("kingdom.class.champion")}, ${t("kingdom.class.monk")}")
+        }
+        if ("sacred-grove" in baseIds) {
+            trainersList.add("${getStructureName("sacred-grove")}: ${t("kingdom.class.druid")}, ${t("kingdom.class.kineticist")}, ${t("kingdom.class.summoner")}, ${t("kingdom.class.ranger")}")
+        }
+        if ("thieves-guild" in baseIds) {
+            trainersList.add("${getStructureName("thieves-guild")}: ${t("kingdom.class.rogue")}")
+        }
+        if ("pier" in baseIds) {
+            trainersList.add("${getStructureName("pier")}: ${t("kingdom.class.swashbuckler")}")
+        }
+
+        val craftingList = mutableListOf<String>()
+        val metalStructures = parsed.constructedStructures.filter { it.id.removeSuffix("-vk") in setOf("smithy", "foundry") }
+        if (metalStructures.isNotEmpty()) {
+            val names = metalStructures.map { it.name }.distinct().joinToString(" / ")
+            craftingList.add("$names: ${t("kingdom.crafting.metallic")}")
+        }
+        if ("stonemason" in baseIds) {
+            craftingList.add("${getStructureName("stonemason")}: ${t("kingdom.crafting.runes")}")
+        }
+        if ("tannery" in baseIds) {
+            craftingList.add("${getStructureName("tannery")}: ${t("kingdom.crafting.leather")}")
+        }
+        if ("arcanists-tower" in baseIds) {
+            craftingList.add("${getStructureName("arcanists-tower")}: ${t("kingdom.crafting.scrollsWandsStaves")}")
+        }
+        if ("luxury-store" in baseIds) {
+            craftingList.add("${getStructureName("luxury-store")}: ${t("kingdom.crafting.amuletsRings")}")
+        }
+        if ("library" in baseIds) {
+            craftingList.add("${getStructureName("library")}: ${t("kingdom.crafting.tomes")}")
+        }
+        if ("alchemy-laboratory" in baseIds) {
+            craftingList.add("${getStructureName("alchemy-laboratory")}: ${t("kingdom.crafting.alchemical")}")
+        }
+        if ("lumberyard" in baseIds) {
+            craftingList.add("${getStructureName("lumberyard")}: ${t("kingdom.crafting.wooden")}")
+        }
+        if ("specialized-artisan" in baseIds) {
+            craftingList.add("${getStructureName("specialized-artisan")}: ${t("kingdom.crafting.other")}")
+        }
+
         val notes = parsed.notes.toTypedArray()
         InspectSettlementContext(
             partId = parent.partId,
@@ -466,6 +539,9 @@ class InspectSettlement(
                 }
                 .toTypedArray(),
             populationNpcs = current.populationRoster?.npcs ?: emptyArray(),
+            trainers = trainersList.toTypedArray(),
+            craftingAccess = craftingList.toTypedArray(),
+            itemPurchaseLevel = basePurchaseLevel,
         )
     }
 

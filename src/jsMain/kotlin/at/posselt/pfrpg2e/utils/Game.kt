@@ -29,6 +29,9 @@ external interface ToolsMacros {
     val subsistMacro: (Actor?) -> Unit
     val openSheet: (type: String, id: String) -> Unit
     val showAllNpcHpBarsMacro: () -> Unit
+    val manageGearSettingsProfilesMacro: () -> Unit
+    val importGearSettingsProfileMacro: () -> Unit
+    val exportActiveGearSettingsProfileMacro: () -> Unit
     val restMacro: (actorUuid: String) -> Unit
 }
 

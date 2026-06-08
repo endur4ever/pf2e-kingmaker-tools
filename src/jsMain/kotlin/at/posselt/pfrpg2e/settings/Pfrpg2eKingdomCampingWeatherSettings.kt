@@ -5,6 +5,8 @@ import at.posselt.pfrpg2e.data.ValueEnum
 import at.posselt.pfrpg2e.data.checks.RollMode
 import at.posselt.pfrpg2e.data.kingdom.KingdomSizeType
 import at.posselt.pfrpg2e.fromCamelCase
+import at.posselt.pfrpg2e.gearsettings.GearSettingsProfileManagerApplication
+import at.posselt.pfrpg2e.gearsettings.gearSettingsProfileRegistryKey
 import at.posselt.pfrpg2e.localization.Translatable
 import at.posselt.pfrpg2e.toCamelCase
 import at.posselt.pfrpg2e.utils.newInstance
@@ -334,6 +336,102 @@ object Pfrpg2eKingdomCampingWeatherSettings {
     fun getCurrentWeatherType(): String =
         game.settings.getString("currentWeatherType")
 
+    suspend fun setGearSettingsProfileRegistry(value: String) =
+        game.settings.setString(gearSettingsProfileRegistryKey, value)
+
+    fun getGearSettingsProfileRegistry(): String =
+        game.settings.getString(gearSettingsProfileRegistryKey)
+
+    suspend fun setRuinThreshold(value: Int) =
+        game.settings.setInt("ruinThreshold", value)
+
+    fun getRuinThreshold(): Int =
+        game.settings.getInt("ruinThreshold")
+
+    suspend fun setEventDc(value: Int) =
+        game.settings.setInt("eventDc", value)
+
+    fun getEventDc(): Int =
+        game.settings.getInt("eventDc")
+
+    suspend fun setEventDcStep(value: Int) =
+        game.settings.setInt("eventDcStep", value)
+
+    fun getEventDcStep(): Int =
+        game.settings.getInt("eventDcStep")
+
+    suspend fun setLeadershipActivityCap(value: Int) =
+        game.settings.setInt("leadershipActivityCap", value)
+
+    fun getLeadershipActivityCap(): Int =
+        game.settings.getInt("leadershipActivityCap")
+
+    suspend fun setLeadershipActivityCapWithTownhall(value: Int) =
+        game.settings.setInt("leadershipActivityCapWithTownhall", value)
+
+    fun getLeadershipActivityCapWithTownhall(): Int =
+        game.settings.getInt("leadershipActivityCapWithTownhall")
+
+    suspend fun setCanUpgradeNonCapital(value: Boolean) =
+        game.settings.setBoolean("canUpgradeNonCapital", value)
+
+    fun getCanUpgradeNonCapital(): Boolean =
+        game.settings.getBoolean("canUpgradeNonCapital")
+
+    suspend fun setCapitalCanGrowOneSizeLarger(value: Boolean) =
+        game.settings.setBoolean("capitalCanGrowOneSizeLarger", value)
+
+    fun getCapitalCanGrowOneSizeLarger(): Boolean =
+        game.settings.getBoolean("capitalCanGrowOneSizeLarger")
+
+    suspend fun setNoRandomCombatInClaimedHexes(value: Boolean) =
+        game.settings.setBoolean("noRandomCombatInClaimedHexes", value)
+
+    fun getNoRandomCombatInClaimedHexes(): Boolean =
+        game.settings.getBoolean("noRandomCombatInClaimedHexes")
+
+    suspend fun setCapStructureBonusAtKingdomLevel(value: Boolean) =
+        game.settings.setBoolean("capStructureBonusAtKingdomLevel", value)
+
+    fun getCapStructureBonusAtKingdomLevel(): Boolean =
+        game.settings.getBoolean("capStructureBonusAtKingdomLevel")
+
+    suspend fun setSettlementInfluenceRadius(value: Int) =
+        game.settings.setInt("settlementInfluenceRadius", value)
+
+    fun getSettlementInfluenceRadius(): Int =
+        game.settings.getInt("settlementInfluenceRadius")
+
+    suspend fun setCultOfTheBloomEvents(value: Boolean) =
+        game.settings.setBoolean("cultOfTheBloomEvents", value)
+
+    fun getCultOfTheBloomEvents(): Boolean =
+        game.settings.getBoolean("cultOfTheBloomEvents")
+
+    suspend fun setCampingActivityCountByPartySize(value: Boolean) =
+        game.settings.setBoolean("campingActivityCountByPartySize", value)
+
+    fun getCampingActivityCountByPartySize(): Boolean =
+        game.settings.getBoolean("campingActivityCountByPartySize")
+
+    suspend fun setTravelCostRiverNoBridgeAdditional(value: Int) =
+        game.settings.setInt("travelCostRiverNoBridgeAdditional", value)
+
+    fun getTravelCostRiverNoBridgeAdditional(): Int =
+        game.settings.getInt("travelCostRiverNoBridgeAdditional")
+
+    suspend fun setPavedStreetsReduceTravelCost(value: Boolean) =
+        game.settings.setBoolean("pavedStreetsReduceTravelCost", value)
+
+    fun getPavedStreetsReduceTravelCost(): Boolean =
+        game.settings.getBoolean("pavedStreetsReduceTravelCost")
+
+    suspend fun setHexMapEnabled(value: Boolean) =
+        game.settings.setBoolean("hexMapEnabled", value)
+
+    fun getHexMapEnabled(): Boolean =
+        game.settings.getBoolean("hexMapEnabled")
+
     private object nonUserVisibleSettings {
         val booleans = mapOf(
             "enableSheltered" to false,
@@ -449,6 +547,95 @@ object Pfrpg2eKingdomCampingWeatherSettings {
             hint = t("settings.enableTokenMappingHelp"),
             default = true,
             requiresReload = true,
+        )
+        game.settings.registerScalar<String>(
+            key = gearSettingsProfileRegistryKey,
+            name = "Gear Settings Profile Registry",
+            default = "",
+            hidden = true,
+        )
+        game.settings.createMenu(
+            key = "gearSettings.profiles",
+            label = "Manage Profiles",
+            name = "Gear Settings Profiles",
+            hint = "Import, export, and activate gear settings profiles.",
+            restricted = true,
+            app = GearSettingsProfileManagerApplication::class.js,
+        )
+        game.settings.registerInt(
+            key = "ruinThreshold",
+            name = "Ruin Threshold",
+            default = 10,
+        )
+        game.settings.registerInt(
+            key = "eventDc",
+            name = "Event DC",
+            default = 15,
+        )
+        game.settings.registerInt(
+            key = "eventDcStep",
+            name = "Event DC Step",
+            default = 0,
+        )
+        game.settings.registerInt(
+            key = "leadershipActivityCap",
+            name = "Leadership Activity Cap",
+            default = 6,
+        )
+        game.settings.registerInt(
+            key = "leadershipActivityCapWithTownhall",
+            name = "Leadership Activity Cap With Town Hall",
+            default = 8,
+        )
+        game.settings.registerScalar<Boolean>(
+            key = "canUpgradeNonCapital",
+            name = "Can Upgrade Non-Capital Settlements",
+            default = false,
+        )
+        game.settings.registerScalar<Boolean>(
+            key = "capitalCanGrowOneSizeLarger",
+            name = "Capital Can Grow One Size Larger",
+            default = false,
+        )
+        game.settings.registerScalar<Boolean>(
+            key = "noRandomCombatInClaimedHexes",
+            name = "No Random Combat In Claimed Hexes",
+            default = false,
+        )
+        game.settings.registerScalar<Boolean>(
+            key = "capStructureBonusAtKingdomLevel",
+            name = "Cap Structure Bonus At Kingdom Level",
+            default = false,
+        )
+        game.settings.registerInt(
+            key = "settlementInfluenceRadius",
+            name = "Settlement Influence Radius",
+            default = 0,
+        )
+        game.settings.registerScalar<Boolean>(
+            key = "cultOfTheBloomEvents",
+            name = "Cult of the Bloom Events",
+            default = false,
+        )
+        game.settings.registerScalar<Boolean>(
+            key = "campingActivityCountByPartySize",
+            name = "Camping Activity Count By Party Size",
+            default = false,
+        )
+        game.settings.registerInt(
+            key = "travelCostRiverNoBridgeAdditional",
+            name = "River Travel Cost Without Bridge",
+            default = 0,
+        )
+        game.settings.registerScalar<Boolean>(
+            key = "pavedStreetsReduceTravelCost",
+            name = "Paved Streets Reduce Travel Cost",
+            default = false,
+        )
+        game.settings.registerScalar<Boolean>(
+            key = "hexMapEnabled",
+            name = "Hex Map Enabled",
+            default = true,
         )
         game.settings.registerScalar<String>(
             key = "obsidianVaultName",

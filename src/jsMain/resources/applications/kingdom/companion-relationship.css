@@ -140,3 +140,78 @@
 .km-personal-quest-row .km-pqr-reward { color: #b3306b; font-size: 0.8rem; }
 .km-personal-quest-row .km-pqr-actions { display: flex; gap: 6px; align-items: center; }
 .km-personal-quest-row.km-quest-status-completed { opacity: 0.8; border-left-color: #2e7d32; }
+
+/* ---- Party Influence panel: companion/NPC parent -> per-member influence ---- */
+.km-party-board { padding: 8px; }
+.km-party-section .km-party-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 12px;
+}
+.km-party-groups { display: flex; flex-direction: column; gap: 14px; }
+.km-party-group {
+    border: 1px solid rgba(0, 0, 0, 0.18);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.4);
+    overflow: hidden;
+}
+.km-party-group-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background: rgba(138, 109, 59, 0.12);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+}
+.km-party-group-name { font-weight: 700; font-size: 1.05rem; }
+.km-party-role-badge {
+    font-size: 0.72rem;
+    padding: 1px 8px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.12);
+}
+.km-party-portrait img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: none;
+}
+.km-party-member-list { display: flex; flex-direction: column; }
+.km-party-member-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 14px 8px 22px;
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+.km-party-member-row:first-child { border-top: none; }
+.km-party-member-portrait img {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: none;
+}
+.km-party-member-info { flex: 1; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.km-party-member-name { font-weight: 600; }
+.km-party-empty-members {
+    padding: 8px 14px 8px 22px;
+    font-style: italic;
+    opacity: 0.7;
+}
+.km-party-influence-control { display: flex; align-items: center; gap: 8px; }
+.km-party-inf-btn {
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    cursor: pointer;
+    line-height: 1;
+}
+.km-party-inf-value {
+    min-width: 52px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+}

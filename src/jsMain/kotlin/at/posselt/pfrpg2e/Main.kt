@@ -45,6 +45,9 @@ import at.posselt.pfrpg2e.macros.combatTrackMacro
 import at.posselt.pfrpg2e.macros.createFoodMacro
 import at.posselt.pfrpg2e.macros.editRealmTileMacro
 import at.posselt.pfrpg2e.macros.editStructureMacro
+import at.posselt.pfrpg2e.macros.exportActiveGearSettingsProfileMacro
+import at.posselt.pfrpg2e.macros.importGearSettingsProfileMacro
+import at.posselt.pfrpg2e.macros.manageGearSettingsProfilesMacro
 import at.posselt.pfrpg2e.macros.resetHeroPointsMacro
 import at.posselt.pfrpg2e.macros.rollExplorationSkillCheckMacro
 import at.posselt.pfrpg2e.macros.rollPartyCheckMacro
@@ -129,6 +132,7 @@ fun main() {
                     "kingdom-notes" to "applications/kingdom/sections/notes/page.hbs",
                     "kingdom-quests" to "applications/kingdom/sections/quests/page.hbs",
                     "kingdom-roster" to "applications/kingdom/sections/roster/page.hbs",
+                    "kingdom-party" to "applications/kingdom/sections/party/page.hbs",
                     "kingdom-character-sheet" to "applications/kingdom/sections/character-sheet/page.hbs",
                     "kingdom-character-sheet-creation" to "applications/kingdom/sections/character-sheet/creation.hbs",
                     "kingdom-character-sheet-bonus" to "applications/kingdom/sections/character-sheet/bonus.hbs",
@@ -214,6 +218,9 @@ fun main() {
                 subsistMacro = { actor -> buildPromise { subsistMacro(game, actor) } },
                 createFoodMacro = { buildPromise { createFoodMacro(game, actionDispatcher) } },
                 showAllNpcHpBarsMacro = { buildPromise { game.showAllNpcHpBars() }},
+                manageGearSettingsProfilesMacro = { buildPromise { manageGearSettingsProfilesMacro() } },
+                importGearSettingsProfileMacro = { buildPromise { importGearSettingsProfileMacro(game) } },
+                exportActiveGearSettingsProfileMacro = { buildPromise { exportActiveGearSettingsProfileMacro(game) } },
                 restMacro = { actorUuid ->
                     game.getCampingActors()
                         .find { it.uuid == actorUuid }

@@ -5,6 +5,7 @@ import at.posselt.pfrpg2e.actions.ActionMessage
 import at.posselt.pfrpg2e.actions.handlers.OpenKingdomSheetAction
 import at.posselt.pfrpg2e.actor.openActor
 import at.posselt.pfrpg2e.actor.ownershipOwnersOnly
+import at.posselt.pfrpg2e.actor.partyMembers
 import at.posselt.pfrpg2e.app.ActorRef
 import at.posselt.pfrpg2e.app.FormApp
 import at.posselt.pfrpg2e.app.HandlebarsRenderContext
@@ -136,6 +137,10 @@ import at.posselt.pfrpg2e.kingdom.sheet.contexts.skillChecks
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.toActivitiesContext
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.toContext
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.toRosterContext
+import at.posselt.pfrpg2e.kingdom.sheet.contexts.buildPartyInfluenceContext
+import at.posselt.pfrpg2e.kingdom.sheet.contexts.CompanionRef
+import at.posselt.pfrpg2e.kingdom.sheet.contexts.PartyMemberRef
+import at.posselt.pfrpg2e.kingdom.sheet.contexts.withInfluence
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.buildCompanionQuestRows
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.companionHasActivePersonalQuests
 import at.posselt.pfrpg2e.companion.CompanionProfileDialog
@@ -337,6 +342,20 @@ class KingdomSheet(
             "Actor ${actor.name} is not a kingdom actor"
         }
         return kingdom
+    }
+
+    /**
+     * Adjust one party member's influence toward one companion ([companionId], [uuid]) by [delta],
+     * clamped to [0, 12], and persist. Companion roster and party membership are read live; only the
+     * per-pair influence value is stored. GM only.
+     */
+    private suspend fun adjustPartyInfluence(companionId: String?, uuid: String?, delta: Int) {
+        if (companionId.isNullOrBlank() || uuid.isNullOrBlank() || !game.user.isGM) return
+        val kingdom = getKingdom()
+        val current = kingdom.partyInfluence ?: emptyArray()
+        val existing = current.firstOrNull { it.companionId == companionId && it.uuid == uuid }?.influence ?: 0
+        kingdom.partyInfluence = current.withInfluence(companionId, uuid, existing + delta)
+        actor.setKingdom(kingdom)
     }
 
     override fun _onClickAction(event: PointerEvent, target: HTMLElement) {
@@ -561,6 +580,14 @@ class KingdomSheet(
                 if (index != null && index >= 0) {
                     CompanionProfileDialog(actor, index).launch()
                 }
+            }
+
+            "party-influence-increase" -> buildPromise {
+                adjustPartyInfluence(target.dataset["companionId"], target.dataset["uuid"], 1)
+            }
+
+            "party-influence-decrease" -> buildPromise {
+                adjustPartyInfluence(target.dataset["companionId"], target.dataset["uuid"], -1)
             }
 
             "edit-companion" -> buildPromise {
@@ -2051,6 +2078,21 @@ class KingdomSheet(
                 isGM = isGM,
                 personalQuests = kingdom.companionPersonalQuests ?: emptyArray(),
             ) { t(it) },
+            partyInfluenceContext = buildPartyInfluenceContext(
+                companions = (kingdom.companions ?: emptyArray()).map {
+                    CompanionRef(
+                        companionId = it.actorUuid ?: it.name,
+                        name = it.name,
+                        img = it.img,
+                        roleLabel = if (it.role == "npc") "NPC" else "Companion",
+                    )
+                },
+                members = actor.partyMembers().map {
+                    PartyMemberRef(uuid = it.uuid, name = it.name, img = it.img)
+                },
+                stored = kingdom.partyInfluence ?: emptyArray(),
+                isGM = isGM,
+            ),
             showDetailedMatrix = showDetailedMatrix,
             campaignClocks = kingdom.campaignClocks.toDashboardContext(isGM),
             generatedQuestCount = generatedQuestCount,

@@ -13,6 +13,7 @@ enum class MainNavEntry: Translatable, ValueEnum {
     MODIFIERS,
     QUESTS,
     ROSTER,
+    PARTY,
     NOTES,
     CAMPAIGN;
 

@@ -142,7 +142,7 @@ fun Array<RawSettlement>.toContext(
             )
             val itemBonusCap = parsed.size.maxItemBonus
             val availableItems = calculateAvailableItems(
-                settlementLevel = parsed.level,
+                settlementLevel = parsed.itemPurchaseLevel,
                 preventItemLevelPenalty = parsed.preventItemLevelPenalty,
                 magicalItemLevelIncrease = magicItemLevelIncreases,
                 bonuses = parsed.availableItems,
@@ -167,13 +167,13 @@ fun Array<RawSettlement>.toContext(
                 maxItemBonus = itemBonusCap,
                 influence = parsed.size.influence,
                 consumption = parsed.consumption,
-                baseItemLevel = availableItems.other.coerceAtMost(itemBonusCap),
-                alchemicalItemLevel = availableItems.alchemical.coerceAtMost(itemBonusCap),
-                magicItemLevel = availableItems.magical.coerceAtMost(itemBonusCap),
-                arcaneItemLevel = availableItems.arcane.coerceAtMost(itemBonusCap),
-                divineItemLevel = availableItems.divine.coerceAtMost(itemBonusCap),
-                primalItemLevel = availableItems.primal.coerceAtMost(itemBonusCap),
-                luxuryItemLevel = availableItems.luxury.coerceAtMost(itemBonusCap),
+                baseItemLevel = availableItems.other,
+                alchemicalItemLevel = availableItems.alchemical,
+                magicItemLevel = availableItems.magical,
+                arcaneItemLevel = availableItems.arcane,
+                divineItemLevel = availableItems.divine,
+                primalItemLevel = availableItems.primal,
+                luxuryItemLevel = availableItems.luxury,
             )
         }
     }.sortedWith(compareBy<SettlementsContext> { !it.isCapital }.thenBy { it.name })
