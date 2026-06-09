@@ -148,6 +148,12 @@ import at.posselt.pfrpg2e.kingdom.postPacingAlertChat
 import at.posselt.pfrpg2e.kingdom.recalculateWarPressure
 import at.posselt.pfrpg2e.kingdom.defaultWarPressure
 import at.posselt.pfrpg2e.kingdom.dialogs.AddWarThreat
+import at.posselt.pfrpg2e.kingdom.dialogs.DeployArmy
+import at.posselt.pfrpg2e.kingdom.dialogs.DeployableArmyOption
+import at.posselt.pfrpg2e.kingdom.dialogs.DeployThreatOption
+import at.posselt.pfrpg2e.kingdom.data.WarThreatStatus
+import at.posselt.pfrpg2e.data.armies.ArmyType
+import com.foundryvtt.pf2e.actor.PF2EArmy
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.CompanionRef
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.PartyMemberRef
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.withInfluence
@@ -503,6 +509,55 @@ class KingdomSheet(
                 val threatId = target.dataset["id"]
                 val kingdom = getKingdom()
                 kingdom.warThreats = (kingdom.warThreats ?: emptyArray()).filter { it.id != threatId }.toTypedArray()
+                kingdom.warPressure = recalculateWarPressure(
+                    kingdom.warThreats ?: emptyArray(),
+                    kingdom.armyDeployments ?: emptyArray(),
+                    kingdom.warPressure,
+                )
+                actor.setKingdom(kingdom)
+            }
+
+            "deploy-army" -> buildPromise {
+                val kingdom = getKingdom()
+                val armies = game.actors.contents.asSequence()
+                    .filterIsInstance<PF2EArmy>()
+                    .sortedBy { it.name }
+                    .map {
+                        val type = ArmyType.fromString(it.system.traits.type) ?: ArmyType.INFANTRY
+                        DeployableArmyOption(
+                            uuid = it.uuid,
+                            name = it.name,
+                            typeValue = type.value,
+                            typeLabel = t(type),
+                        )
+                    }
+                    .toList()
+                if (armies.isEmpty()) {
+                    ui.notifications.warn(t("armyPressure.noArmiesAvailable"))
+                } else {
+                    val threats = (kingdom.warThreats ?: emptyArray())
+                        .filter { it.status == WarThreatStatus.ACTIVE.value }
+                        .map { DeployThreatOption(it.id, it.name) }
+                    DeployArmy(armies, threats) { deployment ->
+                        buildPromise {
+                            val current = getKingdom()
+                            current.armyDeployments = (current.armyDeployments ?: emptyArray()) + deployment
+                            current.warPressure = recalculateWarPressure(
+                                current.warThreats ?: emptyArray(),
+                                current.armyDeployments ?: emptyArray(),
+                                current.warPressure,
+                            )
+                            actor.setKingdom(current)
+                        }
+                    }.launch()
+                }
+            }
+
+            "recall-army" -> buildPromise {
+                val deploymentId = target.dataset["id"]
+                val kingdom = getKingdom()
+                kingdom.armyDeployments = (kingdom.armyDeployments ?: emptyArray())
+                    .filter { it.id != deploymentId }.toTypedArray()
                 kingdom.warPressure = recalculateWarPressure(
                     kingdom.warThreats ?: emptyArray(),
                     kingdom.armyDeployments ?: emptyArray(),
