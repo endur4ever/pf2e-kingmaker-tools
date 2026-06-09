@@ -16,6 +16,9 @@ import at.posselt.pfrpg2e.data.checks.RollMode
 import at.posselt.pfrpg2e.fromCamelCase
 import at.posselt.pfrpg2e.kingdom.AutomateResources
 import at.posselt.pfrpg2e.kingdom.KingdomSettings
+import at.posselt.pfrpg2e.kingdom.pacingMaxTurnGap
+import at.posselt.pfrpg2e.kingdom.pacingLevelMismatchRange
+import at.posselt.pfrpg2e.kingdom.pacingLootImbalanceEnabled
 import at.posselt.pfrpg2e.kingdom.modifiers.evaluation.UntrainedProficiencyMode
 import at.posselt.pfrpg2e.toCamelCase
 import at.posselt.pfrpg2e.utils.buildPromise
@@ -25,6 +28,8 @@ import com.foundryvtt.core.AnyObject
 import com.foundryvtt.core.Game
 import com.foundryvtt.core.abstract.DataModel
 import com.foundryvtt.core.abstract.DocumentConstructionContext
+import com.foundryvtt.core.utils.MergeOptions
+import com.foundryvtt.core.utils.mergeObject
 import com.foundryvtt.core.applications.api.HandlebarsRenderOptions
 import com.foundryvtt.core.data.dsl.buildSchema
 import com.foundryvtt.core.utils.deepClone
@@ -58,6 +63,13 @@ class KingdomSettingsDataModel(
                 min = 0
             }
             int("increaseScorePicksBy")
+            int("pacingAlertMaxTurnGap") {
+                min = 1
+            }
+            int("pacingAlertLevelMismatchRange") {
+                min = 0
+            }
+            boolean("pacingAlertLootImbalanceEnabled")
             boolean("expandMagicUse")
             boolean("capStructureBonusAtKingdomLevel")
             boolean("includeCapitalItemModifier")
@@ -407,16 +419,48 @@ class KingdomSettingsApplication(
                         ),
                     )
                 ),
+                Section(
+                    legend = t("kingdom.pacingAlertsSettings"),
+                    formRows = listOf(
+                        Select.range(
+                            from = 1,
+                            to = 30,
+                            name = "pacingAlertMaxTurnGap",
+                            label = t("kingdom.pacingMaxTurnGap"),
+                            value = settings.pacingMaxTurnGap(),
+                            help = t("kingdom.pacingMaxTurnGapHelp"),
+                            stacked = false,
+                        ),
+                        Select.range(
+                            from = 0,
+                            to = 10,
+                            name = "pacingAlertLevelMismatchRange",
+                            label = t("kingdom.pacingLevelMismatchRange"),
+                            value = settings.pacingLevelMismatchRange(),
+                            help = t("kingdom.pacingLevelMismatchRangeHelp"),
+                            stacked = false,
+                        ),
+                        CheckboxInput(
+                            name = "pacingAlertLootImbalanceEnabled",
+                            label = t("kingdom.pacingLootImbalanceEnabled"),
+                            value = settings.pacingLootImbalanceEnabled(),
+                            help = t("kingdom.pacingLootImbalanceEnabledHelp"),
+                        ),
+                    ),
+                ),
             ),
         )
     }
 
     override fun onParsedSubmit(value: KingdomSettings): Promise<Void> = buildPromise {
-        settings = KingdomSettings.copy(
-            value,
-            leaderKingdomSkills = settings.leaderKingdomSkills,
-            leaderSkills = settings.leaderSkills,
-        )
+        // Merge the parsed (schema-shaped) form values onto the existing settings so any
+        // KingdomSettings field not represented in the schema (leader skills, army-board
+        // flags, pacing-alert thresholds, …) is preserved rather than wiped on save.
+        settings = mergeObject(
+            settings.unsafeCast<AnyObject>(),
+            value.unsafeCast<AnyObject>(),
+            MergeOptions(inplace = false),
+        ).unsafeCast<KingdomSettings>()
         if (settings.automateResources != AutomateResources.TILE_BASED.value) {
             settings.realmSceneId = null
         }
