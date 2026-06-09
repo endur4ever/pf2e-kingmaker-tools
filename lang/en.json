@@ -447,9 +447,17 @@
       "encounterCurator": "Encounter Curator",
       "encounterCategoryTable": {
         "combat": "Combat Table",
+        "rp": "Roleplay Table",
         "rumor": "Rumor Table",
-        "merchant": "Merchant Table"
+        "merchant": "Merchant Table",
+        "disease": "Disease Table",
+        "faction": "Faction Table",
+        "weather": "Weather Table",
+        "lore": "Lore Table"
       },
+      "regionEncounterTables": "Encounter Tables",
+      "regionSuppressClearedHex": "Suppress Combat in Cleared Hexes",
+      "regionSuppressClearedHexHelp": "When enabled, Combat-category encounters are skipped while the party is in a claimed and cleared hex in this region.",
       "encounterCuratorRouting": "Category Routing",
       "encounterCuratorWeights": "Category Weights",
       "encounterCategoryProxyTable": "Category Proxy Roll Table",
