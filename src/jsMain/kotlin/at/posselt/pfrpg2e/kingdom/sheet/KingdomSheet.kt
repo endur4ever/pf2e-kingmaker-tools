@@ -538,7 +538,7 @@ class KingdomSheet(
                     val threats = (kingdom.warThreats ?: emptyArray())
                         .filter { it.status == WarThreatStatus.ACTIVE.value }
                         .map { DeployThreatOption(it.id, it.name) }
-                    DeployArmy(armies, threats) { deployment ->
+                    DeployArmy(armies, threats, deployedTurn = kingdom.currentTurn ?: 0) { deployment ->
                         buildPromise {
                             val current = getKingdom()
                             current.armyDeployments = (current.armyDeployments ?: emptyArray()) + deployment
@@ -1174,7 +1174,7 @@ class KingdomSheet(
                         val turnGapAlert = trackTurnGap(
                             turnsSinceLastEvent = kingdom.turnsWithoutEvent,
                             maxTurnGap = kingdom.settings.pacingMaxTurnGap(),
-                            turn = kingdom.turnsWithoutEvent,
+                            turn = kingdom.currentTurn ?: 0,
                         )
                         if (turnGapAlert != null) {
                             kingdom.pacingAlerts = (kingdom.pacingAlerts ?: emptyArray()) + turnGapAlert

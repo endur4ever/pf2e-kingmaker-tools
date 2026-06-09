@@ -21,6 +21,7 @@
                         <div class="km-pacing-alert-card__body">
                             <div class="km-pacing-alert-card__meta">
                                 <span class="km-pacing-alert-card__severity">{{this.severityLabel}}</span>
+                                {{#if this.turnCreated}}<span class="km-pacing-alert-card__turn">{{localizeKM "pacingAlerts.turnLabel"}} {{this.turnCreated}}</span>{{/if}}
                             </div>
                             <p class="km-pacing-alert-card__message">{{this.message}}</p>
                         </div>

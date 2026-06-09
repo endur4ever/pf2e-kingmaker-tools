@@ -179,6 +179,8 @@ external interface KingdomData {
     var hexContents: Array<RawHexContent>?
     var turnsWithoutCultEvent: Int // set via button
     var turnsWithoutEvent: Int // set via button
+    /** Monotonic kingdom turn counter, incremented each End Turn. Nullable for back-compat. */
+    var currentTurn: Int?
     var notes: RawNotes
     var homebrewMilestones: Array<RawMilestone>
     var homebrewActivities: Array<RawActivity>

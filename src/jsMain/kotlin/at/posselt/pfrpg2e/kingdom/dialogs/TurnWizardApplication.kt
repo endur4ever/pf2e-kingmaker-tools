@@ -91,6 +91,8 @@ fun TickChange.toDisplayString(): String {
 }
 
 suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData): TickResult {
+    val currentTurn = (kingdom.currentTurn ?: 0) + 1
+    kingdom.currentTurn = currentTurn
     val realm = game.getRealmData(actor, kingdom)
     val settlements = kingdom.getAllSettlements(game)
     val storage = calculateStorage(realm = realm, settlements = settlements.allSettlements)
@@ -109,6 +111,7 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
         warThreats = kingdom.warThreats ?: emptyArray(),
         armyDeployments = kingdom.armyDeployments ?: emptyArray(),
         warPressure = kingdom.warPressure,
+        currentTurn = currentTurn,
     )
     kingdom.supernaturalSolutions = tickResult.supernaturalSolutions
     kingdom.creativeSolutions = tickResult.creativeSolutions
@@ -140,7 +143,7 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
         currentUnrest = kingdom.unrest,
         previousCount = kingdom.pacingTurnsSinceUnrestChange,
         maxTurnGap = kingdom.settings.pacingMaxTurnGap(),
-        turn = (kingdom.pacingTurnsSinceUnrestChange ?: 0) + 1,
+        turn = currentTurn,
     )
     kingdom.pacingTurnsSinceUnrestChange = stagnationTrack.turnsSinceUnrestChange
     kingdom.pacingLastUnrest = kingdom.unrest
@@ -155,7 +158,7 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
             partyLevel = avgPartyLevel,
             range = kingdom.settings.pacingLevelMismatchRange(),
             previousSeverity = kingdom.pacingLastLevelMismatch,
-            turn = kingdom.level,
+            turn = currentTurn,
         )
         kingdom.pacingLastLevelMismatch = levelTrack.severity
         levelTrack.alert?.let { firedPacingAlerts.add(it) }
@@ -169,7 +172,7 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
                     partyLevel = avgPartyLevel,
                     range = kingdom.settings.pacingLevelMismatchRange(),
                     previousSeverity = kingdom.pacingLastLootImbalance,
-                    turn = maxItemAccess,
+                    turn = currentTurn,
                 )
                 kingdom.pacingLastLootImbalance = lootTrack.severity
                 lootTrack.alert?.let { firedPacingAlerts.add(it) }

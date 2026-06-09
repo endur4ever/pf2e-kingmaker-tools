@@ -70,6 +70,7 @@ external interface DeployArmyFormContext : ValidatedHandlebarsContext, SectionsC
 class DeployArmy(
     private val armies: List<DeployableArmyOption>,
     private val threats: List<DeployThreatOption>,
+    private val deployedTurn: Int = 0,
     private val onSave: (RawArmyDeployment) -> Unit,
 ) : FormApp<DeployArmyFormContext, DeployArmyFormData>(
     title = t("armyPressure.deployArmy"),
@@ -139,7 +140,7 @@ class DeployArmy(
                     assignedThreatId = data.assignedThreatId?.ifBlank { null },
                     garrisonedSettlementId = null,
                     status = ArmyDeploymentStatus.DEPLOYED.value,
-                    deployedTurn = 0,
+                    deployedTurn = deployedTurn,
                 )
                 close()
                 onSave(deployment)
