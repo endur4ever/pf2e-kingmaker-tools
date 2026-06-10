@@ -13,6 +13,8 @@ import at.posselt.pfrpg2e.data.ValueEnum
 import at.posselt.pfrpg2e.data.kingdom.settlements.SettlementLayoutType
 import at.posselt.pfrpg2e.data.kingdom.settlements.SettlementType
 import at.posselt.pfrpg2e.data.kingdom.settlements.npcOccupations
+import at.posselt.pfrpg2e.data.kingdom.settlements.growPopulation
+import at.posselt.pfrpg2e.data.kingdom.settlements.recommendedRosterSize
 import at.posselt.pfrpg2e.data.kingdom.structures.CommodityStorage
 import at.posselt.pfrpg2e.data.kingdom.structures.calculateAvailableItems
 import at.posselt.pfrpg2e.fromCamelCase
@@ -250,6 +252,36 @@ class InspectSettlement(
                 if (isValid()) {
                     close().await()
                     afterSubmit(current)
+                }
+                undefined
+            }
+
+            "generate-npcs" -> buildPromise {
+                // Tops the roster up to the recommended size for the settlement's current
+                // population. Only ever adds entries: user edits and deletions stick.
+                val parsed = game.scenes.get(current.sceneId)?.parseSettlement(
+                    rawSettlement = current,
+                    autoCalculateSettlementLevel = autoCalculateSettlementLevel,
+                    allStructuresStack = allStructuresStack,
+                    allowCapitalInvestmentInCapitalWithoutBank = allowCapitalInvestmentInCapitalWithoutBank,
+                    capStructureBonusAtKingdomLevel = capStructureBonusAtKingdomLevel,
+                    kingdomLevel = kingdomLevel,
+                )
+                if (parsed != null) {
+                    val grown = parsed.growPopulation()
+                    if (grown.npcs.size > (current.populationRoster?.npcs?.size ?: 0)) {
+                        val updatedRoster = grown.toRaw()
+                        current.populationRoster = updatedRoster
+                        onRosterChange(updatedRoster)
+                        render()
+                    } else {
+                        ui.notifications.info(
+                            t(
+                                "kingdom.population.rosterAtRecommendedSize",
+                                recordOf("count" to parsed.recommendedRosterSize()),
+                            )
+                        )
+                    }
                 }
                 undefined
             }

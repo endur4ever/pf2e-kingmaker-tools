@@ -53,26 +53,53 @@ val npcOccupations = listOf(
  */
 fun Settlement.generateInitialPopulation(): PopulationRoster {
     if (populationRoster.npcs.isNotEmpty()) return populationRoster
+    return PopulationRoster(npcs = generateNpcBatch(count = recommendedRosterSize(), existing = emptyList()))
+}
 
-    val totalPop = size.populationNumber
-    // Scale: sqrt * 1.5 gives ~30 for a village of 400, ~67 for a town of 2000,
-    // ~237 for a city of 25000.  Cap at 200 so very large settlements don't flood.
-    val count = minOf(200, maxOf(5, (kotlin.math.sqrt(totalPop.toDouble()) * 1.5).toInt()))
+/**
+ * The roster size the generator aims for at this settlement's current population.
+ * Scale: sqrt * 1.5 gives ~30 for a village of 400, ~67 for a town of 2000,
+ * ~237 for a city of 25000.  Cap at 200 so very large settlements don't flood.
+ */
+fun Settlement.recommendedRosterSize(): Int =
+    minOf(200, maxOf(5, (kotlin.math.sqrt(size.populationNumber.toDouble()) * 1.5).toInt()))
 
-    val seed = id.fold(0L) { acc, c -> acc * 31 + c.code }
+/**
+ * Tops the roster up to [recommendedRosterSize] after the settlement's population has
+ * grown. Existing entries — including user-edited and user-added ones — are never
+ * touched, and NPCs the user deleted are not resurrected (the new batch is salted by
+ * the current roster size, so it differs from the names dealt at seeding). Returns the
+ * roster unchanged when it is already at or above the recommended size; regeneration is
+ * never automatic — callers invoke this from an explicit user action.
+ */
+fun Settlement.growPopulation(): PopulationRoster {
+    val target = recommendedRosterSize()
+    val current = populationRoster.npcs
+    if (current.size >= target) return populationRoster
+    return PopulationRoster(npcs = current + generateNpcBatch(count = target - current.size, existing = current))
+}
+
+private fun Settlement.generateNpcBatch(count: Int, existing: List<NpcEntry>): List<NpcEntry> {
+    // Salt with the existing roster size so growth batches differ from the seed batch.
+    val seed = id.fold(0L) { acc, c -> acc * 31 + c.code } + existing.size * 7919L
     val rng = SeededRng(seed)
     val gen = NpcNameGenerator(seed)
-
-    val npcs = List(count) { index ->
-        val name = gen.generate()
-        val occupation = npcOccupations[rng.nextInt(npcOccupations.size)]
+    val existingIds = existing.map { it.id }.toMutableSet()
+    var index = existing.size
+    return List(count) {
+        var npcId = "npc-${id}-$index"
+        while (npcId in existingIds) {
+            index++
+            npcId = "npc-${id}-$index"
+        }
+        existingIds.add(npcId)
+        index++
         NpcEntry(
-            id = "npc-${id}-$index",
-            name = name.fullName,
-            occupation = occupation,
+            id = npcId,
+            name = gen.generate().fullName,
+            occupation = npcOccupations[rng.nextInt(npcOccupations.size)],
         )
     }
-    return PopulationRoster(npcs = npcs)
 }
 
 data class Settlement(

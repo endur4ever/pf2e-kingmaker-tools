@@ -241,4 +241,50 @@ class GenerateInitialPopulationTest {
             assertTrue(parts[1] in allSurnames, "Surname '${parts[1]}' should be in name tables")
         }
     }
+
+    // ── growPopulation (roster top-up after population growth) ─────────
+
+    @Test
+    fun growPopulationTopsUpToTheNewRecommendedSizeWhenPopulationGrows() {
+        val village = createSettlement(id = "grow-1", populationNumber = 400)
+        val seeded = village.generateInitialPopulation()
+
+        // The village grows into a town: same settlement id, bigger population.
+        val town = createSettlement(id = "grow-1", populationNumber = 2000)
+            .copy(populationRoster = seeded)
+        val grown = town.growPopulation()
+
+        assertEquals(town.recommendedRosterSize(), grown.npcs.size)
+        assertTrue(grown.npcs.size > seeded.npcs.size, "Growth should add NPCs")
+        // The original residents are preserved verbatim, in place.
+        assertEquals(seeded.npcs, grown.npcs.take(seeded.npcs.size))
+    }
+
+    @Test
+    fun growPopulationIsANoOpAtOrAboveTheRecommendedSize() {
+        val settlement = createSettlement(id = "grow-2", populationNumber = 400)
+        val seeded = settlement.generateInitialPopulation()
+        val grown = settlement.copy(populationRoster = seeded).growPopulation()
+        assertEquals(seeded, grown)
+    }
+
+    @Test
+    fun growPopulationNeverProducesDuplicateIds() {
+        val settlement = createSettlement(id = "grow-3", populationNumber = 400)
+        val seeded = settlement.generateInitialPopulation()
+        // The user deleted some residents from the middle; topping back up must not
+        // collide with the surviving generated ids.
+        val pruned = PopulationRoster(npcs = seeded.npcs.filterIndexed { i, _ -> i % 3 != 0 })
+        val grown = settlement.copy(populationRoster = pruned).growPopulation()
+        assertEquals(grown.npcs.size, grown.npcs.map { it.id }.distinct().size)
+        assertEquals(settlement.recommendedRosterSize(), grown.npcs.size)
+    }
+
+    @Test
+    fun growPopulationIsDeterministic() {
+        val seeded = createSettlement(id = "grow-4", populationNumber = 400).generateInitialPopulation()
+        val town1 = createSettlement(id = "grow-4", populationNumber = 2000).copy(populationRoster = seeded)
+        val town2 = createSettlement(id = "grow-4", populationNumber = 2000).copy(populationRoster = seeded)
+        assertEquals(town1.growPopulation(), town2.growPopulation())
+    }
 }

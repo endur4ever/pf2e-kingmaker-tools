@@ -1168,7 +1168,10 @@
         "notesPlaceholder": "Optional notes…",
         "addNpc": "Add NPC",
         "editNpc": "Edit NPC",
-        "empty": "No residents recorded yet."
+        "empty": "No residents recorded yet.",
+        "generateNpcs": "Generate NPCs",
+        "generateNpcsHelp": "Top the roster up to the recommended size for the settlement's current population. Only adds new residents — your edits and deletions are kept.",
+        "rosterAtRecommendedSize": "The roster already has at least the recommended {count} residents for this settlement's population."
       },
       "populationRoster": {
         "title": "Population Roster",
