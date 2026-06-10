@@ -285,47 +285,60 @@ private suspend fun beginRest(
         watchDurationSeconds = watchDurationSeconds,
     )
     if (camping.restSettings.disableRandomEncounter == false && randomEncounterAt != null) {
+        val campCharacters = actorsByUuid.values.filterIsInstance<PF2ECharacter>()
         val characterWatchers = watchers.filterIsInstance<PF2ECharacter>()
         val numSlots = max(1, camping.watchSlots.size)
         val slotDuration = watchDurationSeconds / numSlots
         val slotIndex = (randomEncounterAt / max(1, slotDuration)).coerceIn(0, numSlots - 1)
         val slotActorUuids = camping.watchSlots.getOrNull(slotIndex) ?: emptyArray()
-        
-        val defaultWatcher = characterWatchers.find { it.uuid in slotActorUuids }
-            ?: characterWatchers.firstOrNull()
-        val defaultWatcherUuid = defaultWatcher?.uuid ?: ""
+
+        // Everyone assigned to this watch slot rolls Perception. When no watch slots
+        // are configured, fall back to the whole watch rotation.
+        val onWatch = slotActorUuids
+            .mapNotNull { actorsByUuid[it] }
+            .filterIsInstance<PF2ECharacter>()
+            .ifEmpty { characterWatchers }
         val defaultDc = camping.findCurrentRegion()?.encounterDc ?: 15
 
         val formData = showEncounterResolutionDialog(
-            watchers = characterWatchers,
-            defaultWatcherUuid = defaultWatcherUuid,
+            watchers = onWatch,
             defaultDc = defaultDc
         ) ?: return
 
-        val selectedWatcher = characterWatchers.find { it.uuid == formData.watcherUuid } ?: defaultWatcher
-        if (selectedWatcher != null) {
+        if (onWatch.isNotEmpty()) {
             val totalDc = formData.dc - formData.rollModifier + formData.dcModifier
-            val data = StatisticRollParameters(
+            val rollParameters = StatisticRollParameters(
                 rollMode = "blindroll",
                 dc = CheckDC(value = totalDc),
                 extraRollOptions = arrayOf("camping", "watch")
             )
-            val checkRoll = selectedWatcher.unsafeCast<PF2ECreature>().resolveAttribute(Perception)
-                ?.roll(data)
-                ?.await()
 
-            val rollTotal = checkRoll?.total ?: 0
-            val degree = checkRoll?.degreeOfSuccess
-                ?.let { fromOrdinal<DegreeOfSuccess>(it) }
-                ?: DegreeOfSuccess.FAILURE
+            // Each watcher on duty rolls Perception against the ambusher's Stealth DC.
+            val watcherResults = onWatch.map { watcher ->
+                val checkRoll = watcher.unsafeCast<PF2ECreature>().resolveAttribute(Perception)
+                    ?.roll(rollParameters)
+                    ?.await()
+                val rollTotal = checkRoll?.total ?: 0
+                val degree = checkRoll?.degreeOfSuccess
+                    ?.let { fromOrdinal<DegreeOfSuccess>(it) }
+                    ?: DegreeOfSuccess.FAILURE
+                Triple(watcher.name, rollTotal, degree)
+            }
+
+            // The party is alerted by the best detection among the watchers.
+            val best = watcherResults.maxByOrNull { it.third }
+            val degree = best?.third ?: DegreeOfSuccess.FAILURE
+            val bestRollTotal = best?.second ?: 0
 
             val resolution = EncounterResolverEngine.resolve(
-                watcherRoll = rollTotal,
+                watcherRoll = bestRollTotal,
                 stealthDc = totalDc,
                 degree = degree
             )
 
-            val sleepingActors = characterWatchers.filter { it.uuid != selectedWatcher.uuid }
+            // Everyone in camp who is not awake on this watch is exposed in their sleep.
+            val onWatchUuids = onWatch.map { it.uuid }.toSet()
+            val sleepingActors = campCharacters.filter { it.uuid !in onWatchUuids }
             sleepingActors.forEach { actor ->
                 resolution.appliedConditions.forEach { condition ->
                     actor.increaseCondition(condition)
@@ -336,8 +349,13 @@ private suspend fun beginRest(
             postChatTemplate(
                 templatePath = "chatmessages/encounter-resolution-card.hbs",
                 templateContext = recordOf(
-                    "watcherName" to selectedWatcher.name,
-                    "rollTotal" to rollTotal,
+                    "watcherRolls" to watcherResults.map {
+                        recordOf(
+                            "name" to it.first,
+                            "rollTotal" to it.second,
+                            "degree" to t(it.third),
+                        )
+                    }.toTypedArray(),
                     "stealthDc" to totalDc,
                     "degree" to t(degree),
                     "distance" to resolution.distanceToEnemy,

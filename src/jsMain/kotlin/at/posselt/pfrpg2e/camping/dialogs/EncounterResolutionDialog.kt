@@ -3,17 +3,14 @@ package at.posselt.pfrpg2e.camping.dialogs
 import at.posselt.pfrpg2e.app.awaitablePrompt
 import at.posselt.pfrpg2e.app.forms.NumberInput
 import at.posselt.pfrpg2e.app.forms.Select
-import at.posselt.pfrpg2e.app.forms.SelectOption
 import at.posselt.pfrpg2e.app.forms.formContext
 import at.posselt.pfrpg2e.utils.t
 import com.foundryvtt.pf2e.actor.PF2EActor
 import js.objects.recordOf
-import kotlin.js.JsExport
 import kotlinx.js.JsPlainObject
 
 @JsPlainObject
 external interface EncounterResolutionFormData {
-    val watcherUuid: String
     val dc: Int
     val rollModifier: Int
     val dcModifier: Int
@@ -21,7 +18,6 @@ external interface EncounterResolutionFormData {
 
 suspend fun showEncounterResolutionDialog(
     watchers: List<PF2EActor>,
-    defaultWatcherUuid: String,
     defaultDc: Int
 ): EncounterResolutionFormData? =
     try {
@@ -30,17 +26,14 @@ suspend fun showEncounterResolutionDialog(
             templatePath = "components/forms/form.hbs",
             templateContext = recordOf(
                 "formRows" to formContext(
-                    Select(
-                        label = t("camping.selectWatcher"),
-                        name = "watcherUuid",
-                        value = defaultWatcherUuid,
-                        options = watchers.map { SelectOption(it.name, it.uuid) },
-                        stacked = false
-                    ),
                     Select.dc(
                         label = t("camping.stealthDc"),
                         name = "dc",
                         value = defaultDc,
+                        help = t(
+                            "camping.watchersOnDutyHelp",
+                            recordOf("watchers" to watchers.joinToString(", ") { it.name })
+                        ),
                         stacked = false
                     ),
                     NumberInput(
