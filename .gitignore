@@ -8,8 +8,12 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 /dist
-/packs
-packs
+# LevelDB runtime files that should not be tracked
+packs/**/LOCK
+packs/**/LOG
+packs/**/LOG.old
+packs/**/*.log
+packs/**/lost/
 foundry.zip
 .foundry-creds.env
 
