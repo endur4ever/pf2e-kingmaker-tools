@@ -17,8 +17,17 @@ enum class EncounterCategory(val value: String, val iconClass: String) {
     LORE("lore", "fa-solid fa-book");
 
     companion object {
-        fun fromString(value: String): EncounterCategory? =
-            entries.firstOrNull { it.value == value.trim().lowercase() }
+        /**
+         * Resolve a proxy-table result to a category. Exact match first; if that
+         * fails, a lenient whole-token match so rows like "Combat Encounter" or
+         * "Rumor (minor)" still resolve (substrings like "folklore" do not).
+         */
+        fun fromString(value: String): EncounterCategory? {
+            val normalized = value.trim().lowercase()
+            entries.firstOrNull { it.value == normalized }?.let { return it }
+            val tokens = normalized.split(Regex("[^a-z]+")).filter { it.isNotEmpty() }
+            return entries.firstOrNull { it.value in tokens }
+        }
 
         fun allCategories(): List<EncounterCategory> = entries.toList()
     }

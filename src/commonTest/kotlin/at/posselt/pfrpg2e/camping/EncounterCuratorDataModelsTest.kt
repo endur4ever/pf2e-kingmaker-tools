@@ -27,6 +27,15 @@ class EncounterCategoryTest {
     }
 
     @Test
+    fun fromStringResolvesLenientWholeTokenMatch() {
+        assertEquals(EncounterCategory.COMBAT, EncounterCategory.fromString("Combat Encounter"))
+        assertEquals(EncounterCategory.RUMOR, EncounterCategory.fromString("Rumor (minor)"))
+        assertEquals(EncounterCategory.LORE, EncounterCategory.fromString("A bit of Lore"))
+        // substrings must NOT match — only whole tokens
+        assertNull(EncounterCategory.fromString("explore the folklore"))
+    }
+
+    @Test
     fun thereAreEightCategoriesEachWithAnIcon() {
         val all = EncounterCategory.allCategories()
         assertEquals(8, all.size)

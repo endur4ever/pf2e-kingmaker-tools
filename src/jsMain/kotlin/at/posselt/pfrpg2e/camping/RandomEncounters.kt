@@ -12,6 +12,7 @@ import at.posselt.pfrpg2e.questevent.QuestRewards
 import at.posselt.pfrpg2e.questevent.QuestStatus
 import at.posselt.pfrpg2e.questevent.QuestType
 import kotlin.js.Date
+import kotlin.random.Random
 import at.posselt.pfrpg2e.utils.d20Check
 import at.posselt.pfrpg2e.utils.fromUuidTypeSafe
 import at.posselt.pfrpg2e.utils.getPF2EWorldTime
@@ -62,11 +63,24 @@ suspend fun rollCuratedEncounter(game: Game, actor: CampingActor): Boolean {
     val region = camping.findCurrentRegion() ?: camping.regionSettings.regions.firstOrNull() ?: return false
     val rollMode = fromCamelCase<RollMode>(camping.randomEncounterRollMode) ?: RollMode.GMROLL
 
-    val proxyTable = camping.encounterCategoryProxyTableUuid?.let { fromUuidTypeSafe<RollTable>(it) }
-    val categoryName = proxyTable
-        ?.rollWithDraw(rollMode = rollMode, displayChat = false)
-        ?.draw?.results?.get(0)?.text?.trim()
-    val category = categoryName?.let { EncounterCategory.fromString(it) } ?: EncounterCategory.COMBAT
+    // Roadmap #11: the Encounter Curator weight sliders drive category selection.
+    // The category proxy table is only consulted as a fallback when every weight
+    // is zero, so a pure table-driven setup still works.
+    val weights = camping.categoryWeightsOrDefault()
+    val category = if (weights.total > 0) {
+        weights.pickCategory(Random.nextDouble())
+    } else {
+        val proxyTable = camping.encounterCategoryProxyTableUuid?.let { fromUuidTypeSafe<RollTable>(it) }
+        val categoryName = proxyTable
+            ?.rollWithDraw(rollMode = rollMode, displayChat = false)
+            ?.draw?.results?.get(0)?.text?.trim()
+        categoryName?.let { EncounterCategory.fromString(it) } ?: run {
+            if (!categoryName.isNullOrBlank()) {
+                console.warn("Encounter curator: proxy result '$categoryName' matched no category; defaulting to COMBAT")
+            }
+            EncounterCategory.COMBAT
+        }
+    }
 
     val categoryTableUuid = region.categoryRollTableUuidMap()[category.value] ?: region.rollTableUuid
     val categoryTable = categoryTableUuid?.let { fromUuidTypeSafe<RollTable>(it) }
@@ -79,8 +93,10 @@ suspend fun rollCuratedEncounter(game: Game, actor: CampingActor): Boolean {
         .draw.results.get(0)?.text?.trim()
         ?: ""
 
+    // A rumor is always offered as a potential quest hook so the GM can convert it
+    // from the preview dialog (roadmap #11 rumor->quest pipeline).
     val rumor = if (category == EncounterCategory.RUMOR && resultText.isNotBlank()) {
-        Rumor(text = resultText, sourceRegion = region.name)
+        Rumor(text = resultText, sourceRegion = region.name, isQuestHook = true)
     } else null
 
     EncounterPreviewDialog(
