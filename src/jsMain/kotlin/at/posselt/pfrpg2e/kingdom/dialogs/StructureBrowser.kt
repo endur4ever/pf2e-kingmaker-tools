@@ -318,6 +318,12 @@ class StructureBrowser(
                         kingdom = kingdom,
                         capStructureBonusAtKingdomLevel = kingdom.settings.capStructureBonusAtKingdomLevel,
                         kingdomLevel = kingdom.level,
+                        onRosterChange = { roster ->
+                            kingdom.settlements
+                                .find { it.sceneId == id }
+                                ?.populationRoster = roster
+                            actor.setKingdom(kingdom)
+                        },
                     ) { data ->
                         kingdom.settlements = kingdom.settlements
                             .filter { it.sceneId != data.sceneId }

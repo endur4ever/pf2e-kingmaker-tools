@@ -13,6 +13,7 @@ import at.posselt.pfrpg2e.data.kingdom.structures.CommodityStorage
 import at.posselt.pfrpg2e.kingdom.structures.RawNpcEntry
 import at.posselt.pfrpg2e.kingdom.structures.RawPopulationRoster
 import at.posselt.pfrpg2e.kingdom.structures.RawSettlement
+import at.posselt.pfrpg2e.kingdom.structures.toRaw
 import at.posselt.pfrpg2e.migrations.migrations.Migration31
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -395,6 +396,45 @@ class PopulationRosterCrudTest {
         assertEquals(2, newSettlement.populationRoster!!.npcs!!.size,
             "Updated settlement should have 2 NPCs")
         assertEquals(2, newSettlement.lots, "Lots should be updated")
+    }
+}
+
+// ════════════════════════════════════════════════════════════════════
+// toRaw conversion tests — seeded roster → editable raw data
+// ════════════════════════════════════════════════════════════════════
+
+class PopulationRosterToRawTest {
+
+    @Test
+    fun testSeededRosterConvertsToRawEntries() {
+        val settlement = createTestSettlement(id = "toraw-village", populationNumber = 400)
+        val seeded = settlement.generateInitialPopulation()
+        val raw = seeded.toRaw()
+        val rawNpcs = raw.npcs
+        assertNotNull(rawNpcs)
+        assertEquals(seeded.npcs.size, rawNpcs.size, "All seeded NPCs should convert")
+        seeded.npcs.forEachIndexed { index, npc ->
+            assertEquals(npc.id, rawNpcs[index].id)
+            assertEquals(npc.name, rawNpcs[index].name)
+            assertEquals(npc.occupation, rawNpcs[index].occupation)
+            assertEquals(npc.notes, rawNpcs[index].notes)
+        }
+    }
+
+    @Test
+    fun testEmptyRosterConvertsToEmptyRawArray() {
+        val raw = PopulationRoster().toRaw()
+        assertNotNull(raw.npcs)
+        assertEquals(0, raw.npcs!!.size)
+    }
+
+    @Test
+    fun testNotesArePreservedInConversion() {
+        val roster = PopulationRoster(
+            npcs = listOf(NpcEntry(id = "npc-1", name = "Alice", occupation = "Farmer", notes = "A veteran"))
+        )
+        val raw = roster.toRaw()
+        assertEquals("A veteran", raw.npcs!![0].notes)
     }
 }
 

@@ -1,5 +1,6 @@
 package at.posselt.pfrpg2e.kingdom.structures
 
+import at.posselt.pfrpg2e.data.kingdom.settlements.PopulationRoster
 import kotlinx.js.JsPlainObject
 
 @JsPlainObject
@@ -27,3 +28,15 @@ external interface RawNpcEntry {
     var occupation: String
     var notes: String?
 }
+
+fun PopulationRoster.toRaw(): RawPopulationRoster =
+    RawPopulationRoster(
+        npcs = npcs.map { npc ->
+            RawNpcEntry(
+                id = npc.id,
+                name = npc.name,
+                occupation = npc.occupation,
+                notes = npc.notes,
+            )
+        }.toTypedArray()
+    )

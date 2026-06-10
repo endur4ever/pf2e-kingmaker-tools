@@ -27,6 +27,7 @@ import at.posselt.pfrpg2e.utils.launch
 import at.posselt.pfrpg2e.kingdom.structures.RawSettlement
 import at.posselt.pfrpg2e.kingdom.structures.isStructure
 import at.posselt.pfrpg2e.kingdom.structures.parseSettlement
+import at.posselt.pfrpg2e.kingdom.structures.toRaw
 import at.posselt.pfrpg2e.localization.Translatable
 import at.posselt.pfrpg2e.toCamelCase
 import at.posselt.pfrpg2e.utils.buildPromise
@@ -167,6 +168,7 @@ class InspectSettlement(
     private val kingdomLevel: Int,
     settlement: RawSettlement,
     feats: List<ChosenFeat>,
+    private val onRosterChange: suspend (roster: RawPopulationRoster) -> Unit,
     private val afterSubmit: suspend (settlement: RawSettlement) -> Unit
 ) : FormApp<InspectSettlementContext, InspectSettlementData>(
     title = title,
@@ -214,6 +216,25 @@ class InspectSettlement(
         populationRoster = settlement.populationRoster ?: RawPopulationRoster(),
     )
 
+    init {
+        // The seeded starter roster only exists on the evaluated Settlement;
+        // copy it into the editable raw data when the stored roster is empty
+        // so it renders in the population tab and persists on save. Done once
+        // at construction so deleting NPCs in the open dialog doesn't reseed.
+        if (current.populationRoster?.npcs?.isNotEmpty() != true) {
+            game.scenes.get(current.sceneId)?.parseSettlement(
+                rawSettlement = current,
+                autoCalculateSettlementLevel = autoCalculateSettlementLevel,
+                allStructuresStack = allStructuresStack,
+                allowCapitalInvestmentInCapitalWithoutBank = allowCapitalInvestmentInCapitalWithoutBank,
+                capStructureBonusAtKingdomLevel = capStructureBonusAtKingdomLevel,
+                kingdomLevel = kingdomLevel,
+            )?.let { parsed ->
+                current.populationRoster = parsed.populationRoster.toRaw()
+            }
+        }
+    }
+
     override fun _onClickAction(event: PointerEvent, target: HTMLElement) {
         when (target.dataset["action"]) {
             "change-nav" -> {
@@ -240,7 +261,9 @@ class InspectSettlement(
                         val roster = current.populationRoster ?: RawPopulationRoster()
                         val existingNpcs = roster.npcs?.toMutableList() ?: mutableListOf()
                         existingNpcs.add(npc)
-                        current.populationRoster = RawPopulationRoster(npcs = existingNpcs.toTypedArray())
+                        val updatedRoster = RawPopulationRoster(npcs = existingNpcs.toTypedArray())
+                        current.populationRoster = updatedRoster
+                        onRosterChange(updatedRoster)
                         render()
                     },
                 ).launch()
@@ -260,13 +283,17 @@ class InspectSettlement(
                             onSave = { updated ->
                                 val existingNpcs = (roster.npcs?.toMutableList() ?: mutableListOf())
                                 existingNpcs[index] = updated
-                                current.populationRoster = RawPopulationRoster(npcs = existingNpcs.toTypedArray())
+                                val updatedRoster = RawPopulationRoster(npcs = existingNpcs.toTypedArray())
+                                current.populationRoster = updatedRoster
+                                onRosterChange(updatedRoster)
                                 render()
                             },
                             onDelete = {
                                 val existingNpcs = (roster.npcs?.toMutableList() ?: mutableListOf())
                                 existingNpcs.removeAt(index)
-                                current.populationRoster = RawPopulationRoster(npcs = existingNpcs.toTypedArray())
+                                val updatedRoster = RawPopulationRoster(npcs = existingNpcs.toTypedArray())
+                                current.populationRoster = updatedRoster
+                                onRosterChange(updatedRoster)
                                 render()
                             },
                         ).launch()
@@ -281,7 +308,9 @@ class InspectSettlement(
                     val roster = current.populationRoster ?: RawPopulationRoster()
                     val existingNpcs = (roster.npcs?.toMutableList() ?: mutableListOf())
                     existingNpcs.removeAt(index)
-                    current.populationRoster = RawPopulationRoster(npcs = existingNpcs.toTypedArray())
+                    val updatedRoster = RawPopulationRoster(npcs = existingNpcs.toTypedArray())
+                    current.populationRoster = updatedRoster
+                    onRosterChange(updatedRoster)
                     render()
                 }
                 undefined

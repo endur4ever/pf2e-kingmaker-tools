@@ -985,6 +985,13 @@ class KingdomSheet(
                         kingdom = kingdom,
                         capStructureBonusAtKingdomLevel = kingdom.settings.capStructureBonusAtKingdomLevel,
                         kingdomLevel = kingdom.level,
+                        onRosterChange = { roster ->
+                            val updatedKingdom = getKingdom()
+                            updatedKingdom.settlements
+                                .find { it.sceneId == id }
+                                ?.populationRoster = roster
+                            actor.setKingdom(updatedKingdom)
+                        },
                     ) { data ->
                         val kingdom = getKingdom()
                         kingdom.settlements = kingdom.settlements
