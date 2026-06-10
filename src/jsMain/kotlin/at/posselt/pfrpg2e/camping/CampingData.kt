@@ -228,6 +228,45 @@ fun CampingData.spendDowntimeHours(actorUuid: String, hours: Int) {
 }
 
 /**
+ * Refunds [hours] of [actorUuid]'s downtime, clamped so spent hours never go negative.
+ * Only no-check activity un-assignment refunds; rolled hours are never given back
+ * (re-roll costs accumulate by design).
+ */
+fun CampingData.refundDowntimeHours(actorUuid: String, hours: Int) {
+    val spent = downtimeHoursSpent ?: return
+    val key = downtimeHoursKey(actorUuid)
+    spent[key] = ((spent[key] ?: 0) - hours).coerceAtLeast(0)
+    downtimeHoursSpent = spent
+}
+
+/**
+ * Computes the downtime ledger after a no-check activity is dropped on [newActorUuid]:
+ * the new actor is charged [CampingActivityScheduler.DOWNTIME_HOURS_PER_ACTIVITY] and
+ * [previousActorUuid] (when the activity changes hands) is refunded, clamped at 0.
+ * Same-actor reassignment is a no-op. Returns a fresh record so it can be fed to a
+ * partial Foundry update without mutating [spent].
+ */
+fun moveNoCheckDowntimeCharge(
+    spent: Record<String, Int>?,
+    previousActorUuid: String?,
+    newActorUuid: String,
+): Record<String, Int> {
+    val result = recordOf<String, Int>()
+    spent?.let { js.objects.Object.keys(it).forEach { k -> result[k] = it[k]!! } }
+    if (previousActorUuid == newActorUuid) {
+        return result
+    }
+    val chargeKey = downtimeHoursKey(newActorUuid)
+    result[chargeKey] = (result[chargeKey] ?: 0) + CampingActivityScheduler.DOWNTIME_HOURS_PER_ACTIVITY
+    if (previousActorUuid != null) {
+        val refundKey = downtimeHoursKey(previousActorUuid)
+        result[refundKey] = ((result[refundKey] ?: 0) - CampingActivityScheduler.DOWNTIME_HOURS_PER_ACTIVITY)
+            .coerceAtLeast(0)
+    }
+    return result
+}
+
+/**
  * Resets every actor's spent downtime hours to zero for a new camping session. Entries are
  * zeroed in place rather than dropped because Foundry merges flag objects on update (it does
  * not remove keys), so assigning an empty map would leave stale values behind.

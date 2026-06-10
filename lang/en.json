@@ -407,6 +407,7 @@
       "watchersOnDuty": "Watchers on Duty",
       "watchersOnDutyHelp": "Every character on watch rolls Perception against the ambusher's Stealth DC. On watch: {watchers}",
       "outcome": "Detection Outcome",
+      "refundActivityHours": "Unassign and refund this activity's downtime hours",
       "perceptionCheck": "Perception Check",
       "startDistance": "Starting Distance",
       "ambusherState": "Ambusher State",

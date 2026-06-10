@@ -5,8 +5,9 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /**
- * Tests for the persistent per-actor downtime budget on [CampingData]: hours are spent per roll,
- * accumulate, are never refunded by unassigning, and clamp to the 8-hour maximum.
+ * Tests for the persistent per-actor downtime budget on [CampingData]: rolled hours are spent
+ * per roll, accumulate, and are never refunded; no-check activities charge on assignment and
+ * refund when unassigned or when the activity changes hands. Everything clamps to [0, 8] hours.
  */
 class CampingDowntimeHoursTest {
 
@@ -130,6 +131,67 @@ class CampingDowntimeHoursTest {
 
         assertEquals(8, camping.downtimeHoursRemaining("actor-1"))
         assignActivity(camping, "actor-1", activity)
+        assertEquals(8, camping.downtimeHoursRemaining("actor-1"))
+    }
+
+    @Test
+    fun refundRestoresSpentHoursAndClampsAtZero() {
+        val camping = emptyCamping()
+        camping.spendDowntimeHours("actor-1", 2)
+        assertEquals(6, camping.downtimeHoursRemaining("actor-1"))
+        camping.refundDowntimeHours("actor-1", 2)
+        assertEquals(8, camping.downtimeHoursRemaining("actor-1"))
+        // Refunding more than was spent must not push remaining past the maximum.
+        camping.refundDowntimeHours("actor-1", 2)
+        assertEquals(8, camping.downtimeHoursRemaining("actor-1"))
+    }
+
+    @Test
+    fun refundUsesSameSanitizedKeyAsSpendForDottedUuids() {
+        val camping = emptyCamping()
+        val uuid = "Scene.abc123.Token.def456.Actor.ghi789"
+        camping.spendDowntimeHours(uuid, 2)
+        camping.refundDowntimeHours(uuid, 2)
+        assertEquals(8, camping.downtimeHoursRemaining(uuid))
+    }
+
+    @Test
+    fun moveChargeChargesTheNewActorOnFirstAssignment() {
+        val camping = emptyCamping()
+        camping.downtimeHoursSpent = moveNoCheckDowntimeCharge(camping.downtimeHoursSpent, null, "actor-1")
+        assertEquals(6, camping.downtimeHoursRemaining("actor-1"))
+    }
+
+    @Test
+    fun moveChargeMovesHoursWhenTheActivityChangesHands() {
+        val camping = emptyCamping()
+        camping.downtimeHoursSpent = moveNoCheckDowntimeCharge(camping.downtimeHoursSpent, null, "actor-1")
+        camping.downtimeHoursSpent = moveNoCheckDowntimeCharge(camping.downtimeHoursSpent, "actor-1", "actor-2")
+        assertEquals(8, camping.downtimeHoursRemaining("actor-1"))
+        assertEquals(6, camping.downtimeHoursRemaining("actor-2"))
+    }
+
+    @Test
+    fun moveChargeIsANoOpForSameActorReassignment() {
+        val camping = emptyCamping()
+        camping.downtimeHoursSpent = moveNoCheckDowntimeCharge(camping.downtimeHoursSpent, null, "actor-1")
+        camping.downtimeHoursSpent = moveNoCheckDowntimeCharge(camping.downtimeHoursSpent, "actor-1", "actor-1")
+        assertEquals(6, camping.downtimeHoursRemaining("actor-1"))
+    }
+
+    @Test
+    fun clearingANoRollAssignmentRefundsItsTwoHours() {
+        val camping = emptyCamping()
+        camping.campingActivities = js.objects.recordOf()
+        val activity = testActivity("no-roll-activity", requiresCheck = false)
+        assignActivity(camping, "actor-1", activity)
+        assertEquals(6, camping.downtimeHoursRemaining("actor-1"))
+
+        // Mirrors CampingSheet.clearActivity: no-check activities refund on unassign.
+        if (!activity.requiresACheck()) {
+            camping.refundDowntimeHours("actor-1", CampingActivityScheduler.DOWNTIME_HOURS_PER_ACTIVITY)
+        }
+        camping.campingActivities[activity.id]?.actorUuid = null
         assertEquals(8, camping.downtimeHoursRemaining("actor-1"))
     }
 }

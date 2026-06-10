@@ -33,6 +33,18 @@
             {{> formElement learnTarget }}
         </div>
     {{/if}}
+    {{#unless requiresCheck}}
+        {{#if actor}}
+            {{! No-check activities charge their downtime hours on drop; this button (in the
+                slot where rolled activities show the d20) undoes that: unassign + refund. }}
+            <div class="km-camping-tile-check">
+                <button class="km-camping-action km-tile-check" data-action="clear-activity" type="button"
+                        data-id="{{id}}" title="{{localizeKM "camping.refundActivityHours"}}">
+                    <i class="fa-solid fa-rotate-left"></i>
+                </button>
+            </div>
+        {{/if}}
+    {{/unless}}
     {{#if requiresCheck}}
         <div class="km-camping-tile-check">
             {{> formElement skills }}

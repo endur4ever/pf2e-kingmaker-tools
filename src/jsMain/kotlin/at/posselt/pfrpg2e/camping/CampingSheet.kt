@@ -664,7 +664,6 @@ class CampingSheet(
             camping.campingActivities[activityId]?.result = result.toCamelCase()
             if (!activity.isPrepareCampsite()) {
                 camping.spendDowntimeHours(actorUuid, CampingActivityScheduler.DOWNTIME_HOURS_PER_ACTIVITY)
-                console.log("KM_SPEND_0602 spent 2h, remaining", camping.downtimeHoursRemaining(actorUuid), "for", actorUuid)
             }
             actor.setCamping(camping)
 
@@ -853,26 +852,18 @@ class CampingSheet(
                             .findCampingActivitySkills(activity, camping.ignoreSkillRequirements)
                             .filterNot { it.validateOnly }
                             .firstOrNull()
-                        val existing = camping.campingActivities[activityId]
+                        val previousActorUuid = camping.campingActivities[activityId]?.actorUuid
                         actor.typedCampingUpdate { current ->
-                            if (existing == null) {
-                                campingActivities[activityId] = CampingActivity(
-                                    actorUuid = actorUuid,
-                                    selectedSkill = skill?.attribute?.value,
+                            campingActivities[activityId] = CampingActivity(
+                                actorUuid = actorUuid,
+                                selectedSkill = skill?.attribute?.value,
+                            )
+                            // No-check activities have no roll to charge on, so the drop itself
+                            // charges the hours; a reassignment moves the charge to the new actor.
+                            if (!activity.requiresACheck() && previousActorUuid != actorUuid) {
+                                downtimeHoursSpent.set(
+                                    moveNoCheckDowntimeCharge(current.downtimeHoursSpent, previousActorUuid, actorUuid)
                                 )
-                            } else {
-                                campingActivities[activityId] = CampingActivity(
-                                    actorUuid = actorUuid,
-                                    selectedSkill = skill?.attribute?.value,
-                                )
-                            }
-                            if (!activity.requiresACheck()) {
-                                val spent = current.downtimeHoursSpent ?: recordOf()
-                                val key = actorUuid.replace('.', '_')
-                                val newSpent = recordOf<String, Int>()
-                                js.objects.Object.keys(spent).forEach { k -> newSpent[k] = spent[k]!! }
-                                newSpent[key] = (newSpent[key] ?: 0) + CampingActivityScheduler.DOWNTIME_HOURS_PER_ACTIVITY
-                                downtimeHoursSpent.set(newSpent)
                             }
                         }
                     }
@@ -937,9 +928,18 @@ class CampingSheet(
     }
 
     private suspend fun clearActivity(id: String) {
-        actor.getCamping()?.let {
-            it.campingActivities[id]?.actorUuid = null
-            actor.setCamping(it)
+        actor.getCamping()?.let { camping ->
+            // No-check activities charged their hours on drop; unassigning refunds them.
+            // Rolled activities keep their spent hours (re-roll costs accumulate by design).
+            val assignedUuid = camping.campingActivities[id]?.actorUuid
+            if (assignedUuid != null) {
+                val activity = camping.getAllActivities().find { it.id == id }
+                if (activity?.requiresACheck() == false) {
+                    camping.refundDowntimeHours(assignedUuid, CampingActivityScheduler.DOWNTIME_HOURS_PER_ACTIVITY)
+                }
+            }
+            camping.campingActivities[id]?.actorUuid = null
+            actor.setCamping(camping)
         }
     }
 
