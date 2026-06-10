@@ -635,6 +635,7 @@ object Pfrpg2eKingdomCampingWeatherSettings {
         game.settings.registerScalar<Boolean>(
             key = "hexMapEnabled",
             name = "Hex Map Enabled",
+            hint = "Paints kingdom claimed/explored/cleared tints, roads and markers onto the Kingmaker hex map. Turning it off removes all of these overlays from the scene.",
             default = true,
         )
         game.settings.registerScalar<String>(

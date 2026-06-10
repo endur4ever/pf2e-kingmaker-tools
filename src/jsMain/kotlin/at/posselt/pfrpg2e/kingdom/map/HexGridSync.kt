@@ -10,6 +10,7 @@ import at.posselt.pfrpg2e.utils.getRealmTileData
 import at.posselt.pfrpg2e.kingdom.getKingdomActors
 import at.posselt.pfrpg2e.kingdom.getKingdom
 import at.posselt.pfrpg2e.kingdom.isKingdomActor
+import at.posselt.pfrpg2e.settings.pfrpg2eKingdomCampingWeather
 import com.foundryvtt.core.Game
 import com.foundryvtt.core.helpers.TypedHooks
 import com.foundryvtt.core.documents.DrawingDocument
@@ -17,6 +18,7 @@ import com.foundryvtt.core.documents.Scene
 import com.foundryvtt.core.documents.onUpdateActor
 import com.foundryvtt.core.documents.onUpdateScene
 import com.foundryvtt.core.helpers.onCanvasReady
+import com.foundryvtt.core.helpers.onDrawDrawing
 import com.foundryvtt.kingmaker.HexState
 import com.foundryvtt.kingmaker.kingmaker
 import com.foundryvtt.kingmaker.onCloseKingmakerHexEdit
@@ -43,8 +45,42 @@ suspend fun DrawingDocument.unsetZoneLabelData() {
     unsetAppFlag("zoneLabel")
 }
 
+/**
+ * Delete every scene drawing this module owns (claimed/explored/cleared fills, roads, settlement
+ * markers, zone labels, hex-content markers). Used to restore the vanilla Kingmaker hex map — those
+ * overlays sit on top of the native hexes and swallow the click that opens the hex info HUD.
+ */
+suspend fun removeAllHexOverlays(game: Game) {
+    val activeScene = game.scenes.active ?: return
+    val ours = activeScene.drawings.contents.filter {
+        it.getRealmTileData() != null || it.getZoneLabelData() != null
+    }
+    if (ours.isNotEmpty()) {
+        activeScene.deleteDrawingsResilient(ours.map { it._id }.toTypedArray())
+    }
+}
+
 fun registerHexGridSync(game: Game) {
-    console.info("[pf2e-kmt] HexGridSync build: 2026-06-02 hexagons-migrate-v7")
+    // When "Hex Map Enabled" is off, strip any overlays previously drawn (on load and whenever a
+    // scene becomes active) so the native map works exactly like vanilla, then do nothing else.
+    if (!game.settings.pfrpg2eKingdomCampingWeather.getHexMapEnabled()) {
+        buildPromise { removeAllHexOverlays(game) }
+        TypedHooks.onCanvasReady { _ -> buildPromise { removeAllHexOverlays(game) } }
+        return
+    }
+
+    // Overlays opted in: keep them from capturing pointer events so clicks still reach the hex.
+    TypedHooks.onDrawDrawing { drawing ->
+        val doc = drawing.document
+        val isOurs = doc.getRealmTileData() != null || doc.getZoneLabelData() != null
+        if (isOurs) {
+            val pixi = drawing.asDynamic()
+            pixi.eventMode = "none"
+            pixi.interactiveChildren = false
+        }
+        Unit
+    }
+
     TypedHooks.onCloseKingmakerHexEdit { _, _ ->
         buildPromise {
             syncHexDrawingsToNativeState(game)
@@ -113,13 +149,12 @@ private fun findHexOverlay(
     }
 
 suspend fun syncHexDrawingsToNativeState(game: Game) {
+    if (!game.settings.pfrpg2eKingdomCampingWeather.getHexMapEnabled()) return
     val activeScene = game.scenes.active
-    console.info("[pf2e-kmt] ROADDBG entry: activeScene=", activeScene != null, "hexagonal=", activeScene?.grid?.isHexagonal)
     if (activeScene == null) return
     if (!activeScene.grid.isHexagonal) return
 
     val kingdomActor = game.getKingdomActors().firstOrNull()
-    console.info("[pf2e-kmt] ROADDBG kingdomActor found=", kingdomActor != null)
     if (kingdomActor == null) return
     val kingdom = kingdomActor.getKingdom() ?: return
 
@@ -310,18 +345,12 @@ private suspend fun syncRoadDrawings(
     activeDrawings: Array<DrawingDocument>,
 ) {
     val roadKeys = mutableSetOf<String>()
-    val allFeatureTypesSeen = mutableSetOf<String?>()
     for (k in js("Object.keys(hexes)").unsafeCast<Array<String>>()) {
         val hs = hexes[k]
-        hs?.features?.forEach { allFeatureTypesSeen.add(it.type) }
         if (hs != null && shouldHaveRoadDrawing(hs.features?.map { it.type })) {
             roadKeys.add(k)
         }
     }
-    console.info(
-        "[pf2e-kmt] ROADDBG featureTypesSeen=", allFeatureTypesSeen.toTypedArray(),
-        "roadKeys=", roadKeys.toTypedArray(),
-    )
 
     // Build canonical set of road pairs ("a,b" where a < b lexicographically)
     val desiredPairs = mutableSetOf<String>()
@@ -343,8 +372,6 @@ private suspend fun syncRoadDrawings(
             }
         }
     }
-
-    console.info("[pf2e-kmt] ROADDBG desiredPairs=", desiredPairs.toTypedArray())
 
     // Delete stale road drawings (those whose pair key is no longer desired)
     val existingRoadDrawings = activeDrawings.filter { it.getRealmTileData()?.type == ROAD_DRAWING_TYPE }
@@ -420,7 +447,6 @@ private suspend fun syncRoadDrawings(
                     ),
                 ),
             ).unsafeCast<com.foundryvtt.core.AnyObject>()
-            console.info("[pf2e-kmt] ROADDBG creating road drawing for pair=", pairKey)
             activeScene.createDrawingsResilient(
                 arrayOf(drawingData)
             )
@@ -451,6 +477,7 @@ private fun findHexKeyByOffset(
 }
 
 suspend fun syncSettlementMarkers(game: Game) {
+    if (!game.settings.pfrpg2eKingdomCampingWeather.getHexMapEnabled()) return
     val activeScene = game.scenes.active ?: return
     if (!activeScene.grid.isHexagonal) return
 
@@ -543,6 +570,7 @@ suspend fun syncSettlementMarkers(game: Game) {
 }
 
 suspend fun syncZoneLabels(game: Game) {
+    if (!game.settings.pfrpg2eKingdomCampingWeather.getHexMapEnabled()) return
     val activeScene = game.scenes.active ?: return
     if (!activeScene.grid.isHexagonal) return
 

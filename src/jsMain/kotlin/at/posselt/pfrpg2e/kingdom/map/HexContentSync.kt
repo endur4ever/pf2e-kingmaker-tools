@@ -4,6 +4,7 @@ import at.posselt.pfrpg2e.data.hex.HexContentVisibility
 import at.posselt.pfrpg2e.kingdom.KingdomActor
 import at.posselt.pfrpg2e.kingdom.getKingdom
 import at.posselt.pfrpg2e.kingdom.getKingdomActors
+import at.posselt.pfrpg2e.settings.pfrpg2eKingdomCampingWeather
 import at.posselt.pfrpg2e.utils.buildPromise
 import at.posselt.pfrpg2e.utils.createDrawingsResilient
 import at.posselt.pfrpg2e.utils.deleteDrawingsResilient
@@ -38,6 +39,7 @@ private fun findContentMarker(
  * Called after hex content CRUD operations and on scene/actor update hooks.
  */
 suspend fun syncHexContentMarkers(game: Game, kingdomActor: KingdomActor) {
+    if (!game.settings.pfrpg2eKingdomCampingWeather.getHexMapEnabled()) return
     val activeScene = game.scenes.active ?: return
     if (!activeScene.grid.isHexagonal) return
 
