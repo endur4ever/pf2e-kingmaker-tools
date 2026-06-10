@@ -105,6 +105,7 @@ fun registerHexGridSync(game: Game) {
 
     TypedHooks.onCanvasReady { _ ->
         buildPromise {
+            syncHexDrawingsToNativeState(game)
             syncSettlementMarkers(game)
             syncZoneLabels(game)
         }
@@ -336,7 +337,10 @@ suspend fun syncHexDrawingsToNativeState(game: Game) {
  * Roads sync (global, not per-hex). Roads are a per-hex feature on HexState but render as line
  * segments connecting adjacent road hexes, so this is computed once over the whole hex set. We
  * collect all road hexes, derive the canonical set of adjacent road pairs, delete drawings whose
- * pair is no longer desired, and create drawings for newly desired pairs.
+ * pair is no longer desired, and create drawings for newly desired pairs. A road hex with no
+ * road neighbor gets a short stub through its center (keyed "k,k") so the very first road a
+ * user marks is still visible; the stale-deletion pass swaps the stub for real segments as
+ * soon as an adjacent hex gains a road.
  */
 private suspend fun syncRoadDrawings(
     activeScene: Scene,
@@ -371,6 +375,27 @@ private suspend fun syncRoadDrawings(
                 }
             }
         }
+    }
+
+    // Isolated road hexes (no adjacent road hex) would otherwise render nothing at all, which
+    // reads as "roads are broken" right after marking the first hex in the editor. Give each
+    // one a horizontal stub through the hex center instead.
+    val connectedKeys = desiredPairs.flatMap { it.split(",") }.toSet()
+    for (rk in roadKeys) {
+        if (rk in connectedKeys) continue
+        val rkHex = kingmaker.region.hexes.find { it.key.toString() == rk } ?: continue
+        val center = activeScene.grid.getCenterPoint(rkHex.offset)
+        val cx = center.x.unsafeCast<Double>()
+        val cy = center.y.unsafeCast<Double>()
+        val gridDyn = activeScene.grid.asDynamic()
+        val hexWidth = gridDyn.sizeX.unsafeCast<Double?>() ?: gridDyn.size.unsafeCast<Double>()
+        val halfLength = hexWidth * 0.22
+        val stubKey = "$rk,$rk"
+        desiredPairs.add(stubKey)
+        pairToPoints[stubKey] = Pair(
+            recordOf("x" to (cx - halfLength), "y" to cy).asDynamic(),
+            recordOf("x" to (cx + halfLength), "y" to cy).asDynamic(),
+        )
     }
 
     // Delete stale road drawings (those whose pair key is no longer desired)
