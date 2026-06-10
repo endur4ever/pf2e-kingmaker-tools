@@ -15,6 +15,7 @@ enum class MainNavEntry: Translatable, ValueEnum {
     ROSTER,
     PARTY,
     NOTES,
+    SESSION_PREP,
     CAMPAIGN,
     ARMY_PRESSURE,
     PACING;

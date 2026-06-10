@@ -613,6 +613,9 @@
       "obsidianExportSuccess": "Successfully exported Kingdom summary to Journal folder: {folder}!",
       "companionArrival": "<b>{name}</b> has arrived at Hex <b>{x}, {y}</b>!",
       "sessionPrep": {
+        "title": "Session Prep",
+        "help": "A read-only snapshot to prep before play: open quests, deadlines, unresolved events, hex hooks, and companion moments. GM-only sections are hidden from players.",
+        "emptyAll": "Nothing to prepare — the kingdom is quiet for now.",
         "openQuests": "Open Quests",
         "noOpenQuests": "No open quests",
         "activeClocks": "Active Campaign Clocks",

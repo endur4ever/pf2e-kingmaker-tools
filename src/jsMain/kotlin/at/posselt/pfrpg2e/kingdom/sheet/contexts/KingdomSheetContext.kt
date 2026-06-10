@@ -94,6 +94,7 @@ external interface KingdomSheetContext : ValidatedHandlebarsContext {
     val partyInfluenceContext: PartyInfluenceContext
     val armyPressureContext: ArmyPressureContext
     val pacingAlertContext: PacingAlertContext
+    val sessionPrepContext: SessionPrepContext
     val showDetailedMatrix: Boolean
     val campaignClocks: CampaignClockContext
     val generatedQuestCount: Int

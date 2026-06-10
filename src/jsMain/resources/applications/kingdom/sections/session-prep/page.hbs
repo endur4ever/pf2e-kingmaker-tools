@@ -1,0 +1,101 @@
+<div {{#if (ne currentNavEntry 'sessionPrep')}}hidden{{/if}} class="km-kingdom-sheet-content">
+    <div class="km-kingdom-sheet-sub-content km-session-prep">
+        <header class="km-session-prep-header">
+            <h2><i class="fa-solid fa-clipboard-list"></i> {{localizeKM "kingdom.sessionPrep.title"}}</h2>
+            <div class="km-session-prep-actions">
+                <span class="km-session-prep-total">{{sessionPrepContext.totalCount}}</span>
+                <button type="button" class="km-session-prep-generate" disabled title="{{localizeKM "kingdom.sessionPrep.generateNarrativeTooltip"}}">
+                    <i class="fa-solid fa-feather"></i> {{localizeKM "kingdom.sessionPrep.generateNarrative"}}
+                </button>
+            </div>
+        </header>
+
+        <p class="km-session-prep-help">{{localizeKM "kingdom.sessionPrep.help"}}</p>
+
+        {{#unless sessionPrepContext.hasAnything}}
+            <p class="km-session-prep-empty-all"><i class="fa-solid fa-mug-hot"></i> {{localizeKM "kingdom.sessionPrep.emptyAll"}}</p>
+        {{/unless}}
+
+        <section class="km-session-prep-section">
+            <h3><i class="fa-solid fa-scroll"></i> {{localizeKM "kingdom.sessionPrep.openQuests"}} <span class="km-session-prep-count">{{sessionPrepContext.openQuests.length}}</span></h3>
+            {{#if sessionPrepContext.openQuests.length}}
+                <ul class="km-session-prep-list">
+                    {{#each sessionPrepContext.openQuests}}
+                        <li class="km-session-prep-item">
+                            <span class="km-session-prep-item__name">{{this.name}}</span>
+                            {{#if this.hasDetail}}<span class="km-session-prep-item__detail">{{this.detail}}</span>{{/if}}
+                        </li>
+                    {{/each}}
+                </ul>
+            {{else}}
+                <p class="km-session-prep-empty">{{localizeKM "kingdom.sessionPrep.noOpenQuests"}}</p>
+            {{/if}}
+        </section>
+
+        {{#if sessionPrepContext.isGM}}
+            <section class="km-session-prep-section">
+                <h3><i class="fa-solid fa-hourglass-half"></i> {{localizeKM "kingdom.sessionPrep.activeClocks"}} <span class="km-session-prep-count">{{sessionPrepContext.activeClocks.length}}</span></h3>
+                {{#if sessionPrepContext.activeClocks.length}}
+                    <ul class="km-session-prep-list">
+                        {{#each sessionPrepContext.activeClocks}}
+                            <li class="km-session-prep-item">
+                                <span class="km-session-prep-item__name">{{this.name}}</span>
+                                {{#if this.hasTurns}}<span class="km-session-prep-item__turns">{{this.turnsRemaining}} {{localizeKM "kingdom.sessionPrep.turnsRemaining"}}</span>{{/if}}
+                            </li>
+                        {{/each}}
+                    </ul>
+                {{else}}
+                    <p class="km-session-prep-empty">{{localizeKM "kingdom.sessionPrep.noActiveClocks"}}</p>
+                {{/if}}
+            </section>
+
+            <section class="km-session-prep-section">
+                <h3><i class="fa-solid fa-bolt"></i> {{localizeKM "kingdom.sessionPrep.unresolvedEvents"}} <span class="km-session-prep-count">{{sessionPrepContext.unresolvedEvents.length}}</span></h3>
+                {{#if sessionPrepContext.unresolvedEvents.length}}
+                    <ul class="km-session-prep-list">
+                        {{#each sessionPrepContext.unresolvedEvents}}
+                            <li class="km-session-prep-item">
+                                <span class="km-session-prep-item__name">{{this.name}}</span>
+                            </li>
+                        {{/each}}
+                    </ul>
+                {{else}}
+                    <p class="km-session-prep-empty">{{localizeKM "kingdom.sessionPrep.noUnresolvedEvents"}}</p>
+                {{/if}}
+            </section>
+        {{/if}}
+
+        <section class="km-session-prep-section">
+            <h3><i class="fa-solid fa-map-location-dot"></i> {{localizeKM "kingdom.sessionPrep.hexHooks"}} <span class="km-session-prep-count">{{sessionPrepContext.hexHooks.length}}</span></h3>
+            {{#if sessionPrepContext.hexHooks.length}}
+                <ul class="km-session-prep-list">
+                    {{#each sessionPrepContext.hexHooks}}
+                        <li class="km-session-prep-item">
+                            <span class="km-session-prep-item__name">{{this.name}}</span>
+                            {{#if this.hasDetail}}<span class="km-session-prep-item__detail">{{this.detail}}</span>{{/if}}
+                        </li>
+                    {{/each}}
+                </ul>
+            {{else}}
+                <p class="km-session-prep-empty">{{localizeKM "kingdom.sessionPrep.noHexHooks"}}</p>
+            {{/if}}
+        </section>
+
+        <section class="km-session-prep-section">
+            <h3><i class="fa-solid fa-users"></i> {{localizeKM "kingdom.sessionPrep.companionMoments"}} <span class="km-session-prep-count">{{sessionPrepContext.companionMoments.length}}</span></h3>
+            {{#if sessionPrepContext.companionMoments.length}}
+                <ul class="km-session-prep-list">
+                    {{#each sessionPrepContext.companionMoments}}
+                        <li class="km-session-prep-item">
+                            <span class="km-session-prep-item__name">{{this.name}}</span>
+                            {{#if this.hasTurns}}<span class="km-session-prep-item__turns">{{this.turnsRemaining}} {{localizeKM "kingdom.sessionPrep.turnsRemaining"}}</span>{{/if}}
+                            {{#if this.hasDetail}}<span class="km-session-prep-item__detail">{{this.detail}}</span>{{/if}}
+                        </li>
+                    {{/each}}
+                </ul>
+            {{else}}
+                <p class="km-session-prep-empty">{{localizeKM "kingdom.sessionPrep.noCompanionMoments"}}</p>
+            {{/if}}
+        </section>
+    </div>
+</div>

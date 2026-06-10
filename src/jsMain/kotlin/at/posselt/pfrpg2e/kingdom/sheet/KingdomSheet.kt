@@ -142,6 +142,8 @@ import at.posselt.pfrpg2e.kingdom.sheet.contexts.buildArmyPressureContext
 import at.posselt.pfrpg2e.kingdom.buildArmyPressureView
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.buildPacingAlertContext
 import at.posselt.pfrpg2e.kingdom.buildPacingAlertView
+import at.posselt.pfrpg2e.kingdom.sheet.contexts.buildSessionPrepContext
+import at.posselt.pfrpg2e.kingdom.buildSessionPrepView
 import at.posselt.pfrpg2e.kingdom.trackTurnGap
 import at.posselt.pfrpg2e.kingdom.pacingMaxTurnGap
 import at.posselt.pfrpg2e.kingdom.postPacingAlertChat
@@ -246,7 +248,8 @@ class KingdomSheet(
     dataModel = KingdomSheetDataModel::class.js,
     classes = setOf("km-kingdom-sheet"),
     id = "kmKingdomSheet-${actor.uuid}",
-    width = 1000,
+    width = 1200,
+    resizable = true,
     syncedDocument = actor,
     controls = arrayOf(
         MenuControl(label = t("kingdom.showPlayers"), action = "show-players", gmOnly = true),
@@ -2244,6 +2247,16 @@ class KingdomSheet(
             ),
             pacingAlertContext = buildPacingAlertContext(
                 buildPacingAlertView(kingdom.pacingAlerts)
+            ),
+            sessionPrepContext = buildSessionPrepContext(
+                buildSessionPrepView(
+                    quests = kingdom.quests,
+                    clocks = kingdom.campaignClocks,
+                    events = kingdom.campaignKingdomEvents,
+                    hexContents = kingdom.hexContents,
+                    companionQuests = kingdom.companionPersonalQuests,
+                    isGM = isGM,
+                )
             ),
             showDetailedMatrix = showDetailedMatrix,
             campaignClocks = kingdom.campaignClocks.toDashboardContext(isGM),

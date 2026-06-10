@@ -1,0 +1,131 @@
+.km-session-prep {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 0.5rem;
+}
+
+.km-session-prep-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.km-session-prep-header h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+    border: none;
+}
+
+.km-session-prep-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.km-session-prep-total {
+    min-width: 1.75rem;
+    padding: 0.1rem 0.5rem;
+    border-radius: 999px;
+    background: rgba(60, 90, 130, 0.18);
+    color: #2f4a6b;
+    font-weight: 700;
+    text-align: center;
+}
+
+.km-session-prep-generate[disabled] {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.km-session-prep-help {
+    margin: 0;
+    font-size: var(--font-size-12);
+    opacity: 0.8;
+}
+
+.km-session-prep-empty-all {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    font-style: italic;
+    opacity: 0.8;
+}
+
+.km-session-prep-section {
+    border: 1px solid var(--color-border-light-tertiary, rgba(0, 0, 0, 0.1));
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem;
+    background: rgba(0, 0, 0, 0.02);
+}
+
+.km-session-prep-section h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0 0.4rem 0;
+    border: none;
+    font-size: var(--font-size-14);
+}
+
+.km-session-prep-count {
+    min-width: 1.4rem;
+    padding: 0 0.4rem;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.08);
+    font-size: var(--font-size-11);
+    font-weight: 600;
+    text-align: center;
+}
+
+.km-session-prep-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.km-session-prep-item {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    padding: 0.2rem 0.3rem;
+    border-radius: 4px;
+}
+
+.km-session-prep-item:nth-child(odd) {
+    background: rgba(0, 0, 0, 0.03);
+}
+
+.km-session-prep-item__name {
+    font-weight: 600;
+}
+
+.km-session-prep-item__turns {
+    font-size: var(--font-size-11);
+    font-weight: 600;
+    color: #6f561a;
+    background: rgba(138, 106, 31, 0.15);
+    padding: 0 0.4rem;
+    border-radius: 999px;
+}
+
+.km-session-prep-item__detail {
+    font-size: var(--font-size-12);
+    opacity: 0.7;
+}
+
+.km-session-prep-empty {
+    margin: 0;
+    font-size: var(--font-size-12);
+    font-style: italic;
+    opacity: 0.7;
+}

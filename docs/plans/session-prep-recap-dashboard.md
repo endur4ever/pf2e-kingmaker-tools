@@ -1,5 +1,14 @@
 # Session Prep & Recap Dashboard (Roadmap #10)
 
+> **Status: IMPLEMENTED (2026-06-09).** Structured-aggregation phase shipped behind a new `SESSION_PREP` kingdom-sheet tab. Files differ slightly from the original sketch below (the codebase uses a pure view + JsPlainObject context split, mirroring the pacing-alerts section, rather than a single `SessionPrepAggregator`):
+> - Aggregator (pure, tested): `src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/SessionPrepView.kt`
+> - Context: `src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/SessionPrepContext.kt`
+> - Template: `src/jsMain/resources/applications/kingdom/sections/session-prep/page.hbs` (+ `session-prep.css`)
+> - Nav entry: `SESSION_PREP` in `MainNavEntry.kt`; partial registered in `Main.kt`, included in `kingdom-sheet.hbs`
+> - Tests: `src/jsTest/kotlin/at/posselt/pfrpg2e/kingdom/SessionPrepViewTest.kt`
+> - Player-safe filter: implemented — campaign clocks, unresolved events, and hidden hex content are withheld from non-GMs; companion moments collapse to player-visible ones.
+> - Deferred (future additive layer): narrative prose generation (disabled "Generate Narrative" button seam) and journal export.
+
 **Goal**: Provide a GM‑only, read‑only dashboard that aggregates key kingdom data before a session (open quests, active clocks, unresolved events, nearby hex hooks, companion moments). The dashboard will expose structured lists only, with a button to later generate narrative prose (future additive layer).
 
 **Background**
