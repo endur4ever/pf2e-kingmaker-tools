@@ -9,6 +9,7 @@ import at.posselt.pfrpg2e.kingdom.data.RawResources
 import at.posselt.pfrpg2e.kingdom.RawCouncilCooldowns
 import at.posselt.pfrpg2e.kingdom.data.RawCurrentCommodities
 import at.posselt.pfrpg2e.kingdom.data.RawWarThreat
+import at.posselt.pfrpg2e.campaign.jsObject
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -548,5 +549,109 @@ class TurnTickingEngineTest {
         assertEquals(1, result.commodities.now.ore)
         assertEquals(1, result.commodities.now.stone)
         assertEquals(1, result.commodities.now.luxuries)
+    }
+
+    // ── Preview / commit parity ─────────────────────────────────────────
+
+    @Test
+    fun testPreviewAndCommitProduceIdenticalTickResult() {
+        // Simulate a kingdom snapshot with war threats, army deployments,
+        // war pressure, campaign clocks, and all other tick inputs.
+        val threat = RawWarThreat(
+            id = "w1", name = "Goblin Horde", description = "", enemyFaction = null,
+            escalationLevel = 1, maxEscalation = 3, eta = 2,
+            targetSettlementSceneId = null, targetHexLocation = null,
+            linkedQuestId = null, linkedEventId = null, pauseOnExpiry = false,
+            status = "active", triggeredTurn = null,
+        )
+        val clock = jsObject<at.posselt.pfrpg2e.campaign.CampaignClock> {
+            id = "c1"
+            label = "Stag Lord Deadline"
+            turnsRemaining = 3
+            maxTurns = 5
+            description = "The Stag Lord approaches"
+            pauseOnExpiry = false
+            expired = false
+            active = true
+            expiryConsequenceUnrest = 2
+            expiryMessage = "The Stag Lord attacks!"
+        }
+
+        val params = object {
+            val fame = fame(now = 5, next = 3)
+            val resourcePoints = resourcePoints(now = 10, next = 20)
+            val resourceDice = resourcePoints(now = 4, next = 8)
+            val consumption = consumption(now = 2, next = 6, armies = 3)
+            val commodities = commodities(nowFood = 10, nextFood = 5, nowLumber = 8, nextLumber = 4)
+            val storage = storage(food = 20, lumber = 20)
+            val councilCooldowns = cooldowns(audit = 2, scrying = 1, lockdown = 3, feast = 0)
+            val modifiers = arrayOf(modifier(turns = null), modifier(turns = 1), modifier(turns = 3))
+            val campaignClocks = arrayOf(clock)
+            val campaignQuests = emptyArray<dynamic>()
+            val kingdomLevel = 5
+            val warThreats = arrayOf(threat)
+            val armyDeployments = emptyArray<at.posselt.pfrpg2e.kingdom.data.RawArmyDeployment>()
+            val warPressure = null as at.posselt.pfrpg2e.kingdom.data.RawWarPressure?
+            val currentTurn = 4
+        }
+
+        // Call tick with the same parameters twice (preview vs commit)
+        val previewResult = TurnTickingEngine.tick(
+            fame = params.fame,
+            resourcePoints = params.resourcePoints,
+            resourceDice = params.resourceDice,
+            consumption = params.consumption,
+            commodities = params.commodities,
+            storage = params.storage,
+            councilCooldowns = params.councilCooldowns,
+            modifiers = params.modifiers,
+            campaignClocks = params.campaignClocks,
+            campaignQuests = params.campaignQuests,
+            kingdomLevel = params.kingdomLevel,
+            warThreats = params.warThreats,
+            armyDeployments = params.armyDeployments,
+            warPressure = params.warPressure,
+            currentTurn = params.currentTurn,
+        )
+
+        val commitResult = TurnTickingEngine.tick(
+            fame = params.fame,
+            resourcePoints = params.resourcePoints,
+            resourceDice = params.resourceDice,
+            consumption = params.consumption,
+            commodities = params.commodities,
+            storage = params.storage,
+            councilCooldowns = params.councilCooldowns,
+            modifiers = params.modifiers,
+            campaignClocks = params.campaignClocks,
+            campaignQuests = params.campaignQuests,
+            kingdomLevel = params.kingdomLevel,
+            warThreats = params.warThreats,
+            armyDeployments = params.armyDeployments,
+            warPressure = params.warPressure,
+            currentTurn = params.currentTurn,
+        )
+
+        // All fields must match
+        assertEquals(previewResult.supernaturalSolutions, commitResult.supernaturalSolutions)
+        assertEquals(previewResult.creativeSolutions, commitResult.creativeSolutions)
+        assertEquals(previewResult.fame.now, commitResult.fame.now)
+        assertEquals(previewResult.fame.next, commitResult.fame.next)
+        assertEquals(previewResult.resourcePoints.now, commitResult.resourcePoints.now)
+        assertEquals(previewResult.resourcePoints.next, commitResult.resourcePoints.next)
+        assertEquals(previewResult.resourceDice.now, commitResult.resourceDice.now)
+        assertEquals(previewResult.resourceDice.next, commitResult.resourceDice.next)
+        assertEquals(previewResult.consumption.now, commitResult.consumption.now)
+        assertEquals(previewResult.consumption.next, commitResult.consumption.next)
+        assertEquals(previewResult.modifiers.size, commitResult.modifiers.size)
+        assertEquals(previewResult.changes.size, commitResult.changes.size)
+        assertEquals(previewResult.clockEvents.size, commitResult.clockEvents.size)
+        assertEquals(previewResult.updatedClocks.size, commitResult.updatedClocks.size)
+        assertEquals(previewResult.totalUnrestChange, commitResult.totalUnrestChange)
+        assertEquals(previewResult.warThreats.size, commitResult.warThreats.size)
+        assertEquals(previewResult.warThreats[0].eta, commitResult.warThreats[0].eta)
+        assertEquals(previewResult.warThreats[0].escalationLevel, commitResult.warThreats[0].escalationLevel)
+        assertEquals(previewResult.armyDeployments.size, commitResult.armyDeployments.size)
+        assertEquals(previewResult.warPressure?.currentPressure, commitResult.warPressure?.currentPressure)
     }
 }

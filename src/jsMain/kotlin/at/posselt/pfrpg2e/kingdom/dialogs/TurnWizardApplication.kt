@@ -21,6 +21,7 @@ import at.posselt.pfrpg2e.kingdom.pacingLootImbalanceEnabled
 import at.posselt.pfrpg2e.kingdom.postPacingAlertChat
 import at.posselt.pfrpg2e.kingdom.data.ChosenFeature
 import at.posselt.pfrpg2e.kingdom.data.RawPacingAlert
+import at.posselt.pfrpg2e.data.kingdom.structures.CommodityStorage
 import at.posselt.pfrpg2e.actor.partyMembers
 import at.posselt.pfrpg2e.kingdom.resources.calculateStorage
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.TurnWizardContext
@@ -35,7 +36,6 @@ import at.posselt.pfrpg2e.utils.getAppFlag
 import at.posselt.pfrpg2e.utils.setAppFlag
 import at.posselt.pfrpg2e.utils.unsetAppFlag
 import at.posselt.pfrpg2e.utils.buildPromise
-import at.posselt.pfrpg2e.campaign.CampaignClockManager
 import at.posselt.pfrpg2e.utils.postChatTemplate
 import com.foundryvtt.core.Game
 import com.foundryvtt.core.game
@@ -90,14 +90,14 @@ fun TickChange.toDisplayString(): String {
     }
 }
 
-suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData): TickResult {
-    val currentTurn = (kingdom.currentTurn ?: 0) + 1
-    kingdom.currentTurn = currentTurn
-    val realm = game.getRealmData(actor, kingdom)
-    val settlements = kingdom.getAllSettlements(game)
-    val storage = calculateStorage(realm = realm, settlements = settlements.allSettlements)
-
-    val tickResult = TurnTickingEngine.tick(
+/**
+ * Single source of truth for assembling [TurnTickingEngine.tick] arguments from a kingdom
+ * snapshot. Both the End Turn commit path ([performEndTurn]) and the Turn Wizard preview
+ * MUST call this — never tick() directly — so the preview cannot drift from what
+ * committing actually applies. [currentTurn] is the turn being ticked into (previous + 1).
+ */
+fun runKingdomTurnTick(kingdom: KingdomData, storage: CommodityStorage, currentTurn: Int): TickResult =
+    TurnTickingEngine.tick(
         fame = kingdom.fame,
         resourcePoints = kingdom.resourcePoints,
         resourceDice = kingdom.resourceDice,
@@ -106,6 +106,7 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
         storage = storage,
         councilCooldowns = kingdom.councilCooldowns,
         modifiers = kingdom.modifiers,
+        campaignClocks = kingdom.campaignClocks,
         campaignQuests = kingdom.campaignQuests ?: emptyArray(),
         kingdomLevel = kingdom.level,
         warThreats = kingdom.warThreats ?: emptyArray(),
@@ -113,6 +114,15 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
         warPressure = kingdom.warPressure,
         currentTurn = currentTurn,
     )
+
+suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData): TickResult {
+    val currentTurn = (kingdom.currentTurn ?: 0) + 1
+    kingdom.currentTurn = currentTurn
+    val realm = game.getRealmData(actor, kingdom)
+    val settlements = kingdom.getAllSettlements(game)
+    val storage = calculateStorage(realm = realm, settlements = settlements.allSettlements)
+
+    val tickResult = runKingdomTurnTick(kingdom, storage, currentTurn)
     kingdom.supernaturalSolutions = tickResult.supernaturalSolutions
     kingdom.creativeSolutions = tickResult.creativeSolutions
     kingdom.fame = tickResult.fame
@@ -127,11 +137,10 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
     kingdom.armyDeployments = tickResult.armyDeployments
     kingdom.warPressure = tickResult.warPressure
 
-    // Tick campaign clocks
-    val clockResult = CampaignClockManager.tickAll(kingdom.campaignClocks)
-    kingdom.campaignClocks = clockResult.updatedClocks
-    if (clockResult.totalUnrestChange > 0) {
-        kingdom.unrest = kingdom.unrest + clockResult.totalUnrestChange
+    // Apply campaign clock tick results (already included in tickResult)
+    kingdom.campaignClocks = tickResult.updatedClocks
+    if (tickResult.totalUnrestChange > 0) {
+        kingdom.unrest = kingdom.unrest + tickResult.totalUnrestChange
     }
 
     // Balance & pacing alerts (roadmap #13): fire-once advisories, accumulated then posted to chat below.
@@ -187,10 +196,10 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
     actor.setKingdom(kingdom)
 
     // Post clock tick events to chat
-    if (clockResult.events.isNotEmpty()) {
+    if (tickResult.clockEvents.isNotEmpty()) {
         val clockContext = js("{}")
-        clockContext.events = clockResult.events
-        clockContext.totalUnrestChange = clockResult.totalUnrestChange
+        clockContext.events = tickResult.clockEvents
+        clockContext.totalUnrestChange = tickResult.totalUnrestChange
         postChatTemplate(
             templatePath = "chatmessages/clock-tick.hbs",
             templateContext = clockContext,
@@ -201,7 +210,7 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
     firedPacingAlerts.forEach { alert -> postPacingAlertChat(alert) }
 
     val endTurnContext = js("{}")
-    endTurnContext.clockEvents = clockResult.events
+    endTurnContext.clockEvents = tickResult.clockEvents
     endTurnContext.changes = tickResult.changes.map { it.toDisplayString() }.toTypedArray()
     endTurnContext.kingdomName = kingdom.name
     postChatTemplate(
@@ -330,19 +339,8 @@ class TurnWizardApplication(
         val realm = game.getRealmData(kingdomActor, kingdom)
         val settlements = kingdom.getAllSettlements(game)
         val storage = calculateStorage(realm, settlements.allSettlements)
-        val tickResult = TurnTickingEngine.tick(
-            fame = kingdom.fame,
-            resourcePoints = kingdom.resourcePoints,
-            resourceDice = kingdom.resourceDice,
-            consumption = kingdom.consumption,
-            commodities = kingdom.commodities,
-            storage = storage,
-            councilCooldowns = kingdom.councilCooldowns,
-            modifiers = kingdom.modifiers,
-            campaignClocks = kingdom.campaignClocks,
-            campaignQuests = kingdom.campaignQuests ?: emptyArray(),
-            kingdomLevel = kingdom.level,
-        )
+        // Simulate the same upcoming turn End Turn will tick into, without persisting the increment.
+        val tickResult = runKingdomTurnTick(kingdom, storage, (kingdom.currentTurn ?: 0) + 1)
         
         cachedChanges = tickResult.changes.toTypedArray()
         render()

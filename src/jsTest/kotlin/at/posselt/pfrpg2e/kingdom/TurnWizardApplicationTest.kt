@@ -2,14 +2,18 @@ package at.posselt.pfrpg2e.kingdom
 
 import at.posselt.pfrpg2e.kingdom.dialogs.TurnWizardApplication
 import at.posselt.pfrpg2e.kingdom.dialogs.toDisplayString
+import at.posselt.pfrpg2e.kingdom.dialogs.runKingdomTurnTick
 import at.posselt.pfrpg2e.kingdom.data.RawResources
 import at.posselt.pfrpg2e.kingdom.data.RawFame
 import at.posselt.pfrpg2e.kingdom.data.RawConsumption
 import at.posselt.pfrpg2e.kingdom.data.RawCurrentCommodities
 import at.posselt.pfrpg2e.kingdom.data.RawRuin
+import at.posselt.pfrpg2e.kingdom.data.RawWarThreat
+import at.posselt.pfrpg2e.data.kingdom.structures.CommodityStorage
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class TurnWizardApplicationTest {
@@ -73,6 +77,50 @@ class TurnWizardApplicationTest {
             this.asDynamic().modifiers = emptyArray<dynamic>()
             this.asDynamic().settlements = emptyArray<dynamic>()
         }
+    }
+
+    // Guards the preview/commit parity contract: runKingdomTurnTick is the single place
+    // tick() arguments are assembled, so every subsystem must flow through it.
+    @Test
+    fun testRunKingdomTurnTickForwardsEverySubsystemToTheEngine() {
+        val kingdom = createTestKingdom()
+        kingdom.asDynamic().level = 1
+        kingdom.asDynamic().campaignClocks = emptyArray<dynamic>()
+        val nextCommodities = js("{}")
+        nextCommodities.food = 1
+        nextCommodities.lumber = 0
+        nextCommodities.luxuries = 0
+        nextCommodities.ore = 0
+        nextCommodities.stone = 0
+        kingdom.commodities.asDynamic().next = nextCommodities
+        kingdom.consumption.asDynamic().next = 0
+        kingdom.consumption.asDynamic().armies = 0
+        val threat = js("{}").unsafeCast<RawWarThreat>().apply {
+            this.asDynamic().id = "w1"
+            this.asDynamic().name = "Test Threat"
+            this.asDynamic().escalationLevel = 2
+            this.asDynamic().maxEscalation = 3
+            this.asDynamic().eta = 1
+            this.asDynamic().status = "active"
+            this.asDynamic().pauseOnExpiry = false
+        }
+        kingdom.asDynamic().warThreats = arrayOf(threat)
+
+        val result = runKingdomTurnTick(
+            kingdom = kingdom,
+            storage = CommodityStorage(food = 100, lumber = 100, luxuries = 100, ore = 100, stone = 100),
+            currentTurn = 4,
+        )
+
+        // Core snapshot fields went through: fame/RP advance next -> now.
+        assertEquals(3, result.fame.now)
+        assertEquals(12, result.resourcePoints.now)
+        // War data went through: ETA 1 -> 0 escalates 2 -> 3 (max), stamping the passed turn.
+        assertEquals(1, result.warThreats.size)
+        assertEquals(0, result.warThreats[0].eta)
+        assertEquals(3, result.warThreats[0].escalationLevel)
+        assertEquals(4, result.warThreats[0].triggeredTurn)
+        assertNotNull(result.warPressure)
     }
 
     @Test
