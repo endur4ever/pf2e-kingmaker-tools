@@ -17,6 +17,7 @@ import com.foundryvtt.core.abstract.DataModel
 import com.foundryvtt.core.abstract.DocumentConstructionContext
 import com.foundryvtt.core.applications.api.HandlebarsRenderOptions
 import com.foundryvtt.core.data.dsl.buildSchema
+import com.foundryvtt.kingmaker.kingmaker
 import js.core.Void
 import kotlinx.coroutines.await
 import kotlinx.js.JsPlainObject
@@ -27,10 +28,13 @@ import kotlin.js.Promise
 
 // ── Data / Context ──
 
+private data class HexOption(val key: String, val label: String)
+
 @JsPlainObject
 external interface HexContentEntryContext {
     val id: String
     val hexKey: String
+    val hexLabel: String
     val type: String
     val typeName: String
     val name: String
@@ -107,19 +111,22 @@ class HexContentManager(
 
     private fun currentKingdom() = actor.getKingdom()
 
-    private fun getHexKeys(): List<String> {
-        val region = kotlin.js.js("kingmaker.region.hexes") ?: return emptyList()
-        val keys = mutableListOf<String>()
-        val len = region.length as? Int ?: return emptyList()
-        for (i in 0 until len) {
-            val hex = region[i]
-            val key = hex?.key?.toString()
-            if (key != null) {
-                keys.add(key)
-            }
+    // (native key string, human-readable label) for every hex in the region.
+    // The native key is `1000*row + col`; the map labels hexes "row.col", so we
+    // show that coordinate (plus the hex name when it differs, e.g. a journal page).
+    private fun getHexOptions(): List<HexOption> =
+        kingmaker.region.hexes.contents.map { hex ->
+            val key = hex.key
+            val coord = "${key / 1000}.${key % 1000}"
+            val name = hex.name
+            val label = if (name.isBlank() || name == coord) coord else "$coord — $name"
+            HexOption(key = key.toString(), label = label)
         }
-        return keys
-    }
+
+    private fun hexLabelFor(key: String, options: List<HexOption>): String =
+        options.find { it.key == key }?.label
+            ?: key.toIntOrNull()?.let { "${it / 1000}.${it % 1000}" }
+            ?: key
 
     private fun getHexContents(): Array<RawHexContent> {
         val kingdom = currentKingdom() ?: return emptyArray()
@@ -316,12 +323,16 @@ class HexContentManager(
             )
         }
 
-        val hexKeys = getHexKeys()
+        val hexOptions = getHexOptions()
         val existingHexKeys = contents.map { it.hexKey }.toSet()
-        val availableHexKeys = hexKeys.filter { it !in existingHexKeys }
-        val hexKeyOptions = availableHexKeys.map { key ->
-            SelectOption(value = key, label = key)
+        val availableHexOptions = hexOptions.filter { it.key !in existingHexKeys }
+        val hexKeyOptions = availableHexOptions.map { option ->
+            SelectOption(value = option.key, label = option.label)
         }
+        // Pre-select the hex the GM last clicked on the Kingmaker map (if it's
+        // still free), so adding content is a click-then-add flow.
+        val defaultHexKey = at.posselt.pfrpg2e.kingdom.map.lastSelectedHexKey
+            ?.takeIf { sel -> availableHexOptions.any { it.key == sel } }
 
         val entries = contents.map { content ->
             val type = HexContentType.fromString(content.type)
@@ -329,6 +340,7 @@ class HexContentManager(
             HexContentEntryContext(
                 id = content.id,
                 hexKey = content.hexKey,
+                hexLabel = hexLabelFor(content.hexKey, hexOptions),
                 type = content.type,
                 typeName = if (type != null) t("hexContentType.${type.value}") else content.type,
                 name = content.name,
@@ -346,11 +358,16 @@ class HexContentManager(
                     name = "hexKey",
                     label = t("kingdom.hexContent.hexKey"),
                     options = if (editingContent != null) {
-                        listOf(SelectOption(value = editingContent.hexKey, label = editingContent.hexKey)) + hexKeyOptions
+                        listOf(
+                            SelectOption(
+                                value = editingContent.hexKey,
+                                label = hexLabelFor(editingContent.hexKey, hexOptions),
+                            )
+                        ) + hexKeyOptions
                     } else {
                         hexKeyOptions
                     },
-                    value = editingContent?.hexKey,
+                    value = editingContent?.hexKey ?: defaultHexKey,
                     stacked = false,
                 ),
                 Select(

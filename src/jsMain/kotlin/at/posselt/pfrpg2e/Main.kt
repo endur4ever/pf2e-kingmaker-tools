@@ -241,6 +241,7 @@ fun main() {
                 registerCampingTokenMove(game)
                 registerHexGridSync(game)
                 registerHexContentSync(game)
+                at.posselt.pfrpg2e.kingdom.map.registerSelectedHexTracker()
                 syncHexDrawingsToNativeState(game)
                 syncSettlementMarkers(game)
                 syncZoneLabels(game)

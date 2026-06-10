@@ -1,7 +1,7 @@
 <div class="km-hex-content-form">
     <h3>{{localizeKM "kingdom.hexContent.addToHex"}}: {{hexKey}}</h3>
     {{#each formRows}}
-        {{{this}}}
+        {{> formElement this}}
     {{/each}}
     <div class="km-form-actions">
         <button type="button" class="km-btn km-btn-save" data-action="save">{{localizeKM "kingdom.hexContent.save"}}</button>

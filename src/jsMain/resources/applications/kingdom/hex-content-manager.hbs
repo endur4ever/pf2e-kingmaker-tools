@@ -3,7 +3,7 @@
         <div class="km-hex-content-form">
             <h3>{{localizeKM "kingdom.hexContent.editContent"}}</h3>
             {{#each formRows}}
-                {{{this}}}
+                {{> formElement this}}
             {{/each}}
             <div class="km-form-actions">
                 <button type="button" class="km-btn km-btn-save" data-action="save">{{localizeKM "kingdom.hexContent.save"}}</button>
@@ -14,7 +14,7 @@
         <div class="km-hex-content-form">
             <h3>{{localizeKM "kingdom.hexContent.addContent"}}</h3>
             {{#each formRows}}
-                {{{this}}}
+                {{> formElement this}}
             {{/each}}
             <div class="km-form-actions">
                 <button type="button" class="km-btn km-btn-save" data-action="save">{{localizeKM "kingdom.hexContent.save"}}</button>
@@ -40,7 +40,7 @@
                     <tbody>
                         {{#each entries}}
                             <tr data-content-id="{{this.id}}">
-                                <td>{{this.hexKey}}</td>
+                                <td>{{this.hexLabel}}</td>
                                 <td>{{this.typeName}}</td>
                                 <td>{{this.name}}</td>
                                 <td>
