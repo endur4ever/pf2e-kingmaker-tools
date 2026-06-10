@@ -28,6 +28,32 @@ class PacingAlertsTest {
     }
 
     @Test
+    fun chapterTargetLevelDefaultsToTrackingThePartyAndIgnoresZero() {
+        // null / 0 mean "track the party's average level" — only a positive value pins
+        // the advisories to a fixed campaign chapter level.
+        assertNull(defaultSettings().pacingChapterTargetLevel())
+        val zeroed = defaultSettings().apply { pacingAlertChapterTargetLevel = 0 }
+        assertNull(zeroed.pacingChapterTargetLevel())
+        val pinned = defaultSettings().apply { pacingAlertChapterTargetLevel = 7 }
+        assertEquals(7, pinned.pacingChapterTargetLevel())
+    }
+
+    @Test
+    fun lootImbalanceRangeFallsBackToLevelMismatchRange() {
+        // No dedicated threshold set: reuse the level-mismatch tolerance (old behavior).
+        val fallback = defaultSettings().apply { pacingAlertLevelMismatchRange = 3 }
+        assertEquals(3, fallback.pacingLootImbalanceRange())
+        // Dedicated threshold wins when present.
+        val dedicated = defaultSettings().apply {
+            pacingAlertLevelMismatchRange = 3
+            pacingAlertLootImbalanceRange = 5
+        }
+        assertEquals(5, dedicated.pacingLootImbalanceRange())
+        // Neither set: both fall back to the built-in default of 2.
+        assertEquals(2, defaultSettings().pacingLootImbalanceRange())
+    }
+
+    @Test
     fun stagnationThresholds() {
         assertNull(evaluateStagnation(turnsSinceUnrestChange = 5, maxTurnGap = 10, turn = 1))
         assertEquals(PacingAlertSeverity.WARNING.value, evaluateStagnation(10, 10, 1)!!.severity)

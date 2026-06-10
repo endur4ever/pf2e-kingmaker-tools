@@ -18,6 +18,8 @@ import at.posselt.pfrpg2e.kingdom.trackLootImbalance
 import at.posselt.pfrpg2e.kingdom.pacingMaxTurnGap
 import at.posselt.pfrpg2e.kingdom.pacingLevelMismatchRange
 import at.posselt.pfrpg2e.kingdom.pacingLootImbalanceEnabled
+import at.posselt.pfrpg2e.kingdom.pacingLootImbalanceRange
+import at.posselt.pfrpg2e.kingdom.pacingChapterTargetLevel
 import at.posselt.pfrpg2e.kingdom.postPacingAlertChat
 import at.posselt.pfrpg2e.kingdom.data.ChosenFeature
 import at.posselt.pfrpg2e.kingdom.data.RawPacingAlert
@@ -158,13 +160,15 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
     kingdom.pacingLastUnrest = kingdom.unrest
     stagnationTrack.alert?.let { firedPacingAlerts.add(it) }
 
-    // Level mismatch + loot imbalance — both compared against the party's average level.
+    // Level mismatch + loot imbalance — compared against the configured chapter target
+    // level when one is set, otherwise the party's average level.
     val partyLevels = actor.partyMembers().map { it.system.details.level.value }
-    if (partyLevels.isNotEmpty()) {
-        val avgPartyLevel = partyLevels.sum() / partyLevels.size
+    val avgPartyLevel = if (partyLevels.isNotEmpty()) partyLevels.sum() / partyLevels.size else null
+    val targetLevel = kingdom.settings.pacingChapterTargetLevel() ?: avgPartyLevel
+    if (targetLevel != null) {
         val levelTrack = trackLevelMismatch(
             kingdomLevel = kingdom.level,
-            partyLevel = avgPartyLevel,
+            partyLevel = targetLevel,
             range = kingdom.settings.pacingLevelMismatchRange(),
             previousSeverity = kingdom.pacingLastLevelMismatch,
             turn = currentTurn,
@@ -172,14 +176,14 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
         kingdom.pacingLastLevelMismatch = levelTrack.severity
         levelTrack.alert?.let { firedPacingAlerts.add(it) }
 
-        // Loot imbalance — highest settlement item-purchase level vs party level.
+        // Loot imbalance — highest settlement item-purchase level vs the target level.
         if (kingdom.settings.pacingLootImbalanceEnabled()) {
             val maxItemAccess = settlements.allSettlements.maxOfOrNull { it.itemPurchaseLevel }
             if (maxItemAccess != null) {
                 val lootTrack = trackLootImbalance(
                     itemAccessLevel = maxItemAccess,
-                    partyLevel = avgPartyLevel,
-                    range = kingdom.settings.pacingLevelMismatchRange(),
+                    partyLevel = targetLevel,
+                    range = kingdom.settings.pacingLootImbalanceRange(),
                     previousSeverity = kingdom.pacingLastLootImbalance,
                     turn = currentTurn,
                 )

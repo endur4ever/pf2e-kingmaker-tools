@@ -21,6 +21,12 @@ fun KingdomSettings.pacingMaxTurnGap(): Int = pacingAlertMaxTurnGap ?: 10
 fun KingdomSettings.pacingLevelMismatchRange(): Int = pacingAlertLevelMismatchRange ?: 2
 fun KingdomSettings.pacingLootImbalanceEnabled(): Boolean = pacingAlertLootImbalanceEnabled != false
 
+/** A fixed campaign chapter level to pace against, or null to track the party's average. */
+fun KingdomSettings.pacingChapterTargetLevel(): Int? = pacingAlertChapterTargetLevel?.takeIf { it > 0 }
+
+/** Loot-imbalance tolerance; falls back to the level-mismatch range when not set. */
+fun KingdomSettings.pacingLootImbalanceRange(): Int = pacingAlertLootImbalanceRange ?: pacingLevelMismatchRange()
+
 private fun alert(
     type: PacingAlertType,
     severity: PacingAlertSeverity,

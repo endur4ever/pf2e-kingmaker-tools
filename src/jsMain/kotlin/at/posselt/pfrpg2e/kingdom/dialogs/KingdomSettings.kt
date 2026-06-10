@@ -19,6 +19,7 @@ import at.posselt.pfrpg2e.kingdom.KingdomSettings
 import at.posselt.pfrpg2e.kingdom.pacingMaxTurnGap
 import at.posselt.pfrpg2e.kingdom.pacingLevelMismatchRange
 import at.posselt.pfrpg2e.kingdom.pacingLootImbalanceEnabled
+import at.posselt.pfrpg2e.kingdom.pacingLootImbalanceRange
 import at.posselt.pfrpg2e.kingdom.modifiers.evaluation.UntrainedProficiencyMode
 import at.posselt.pfrpg2e.toCamelCase
 import at.posselt.pfrpg2e.utils.buildPromise
@@ -70,6 +71,12 @@ class KingdomSettingsDataModel(
                 min = 0
             }
             boolean("pacingAlertLootImbalanceEnabled")
+            int("pacingAlertChapterTargetLevel") {
+                min = 0
+            }
+            int("pacingAlertLootImbalanceRange") {
+                min = 0
+            }
             boolean("expandMagicUse")
             boolean("capStructureBonusAtKingdomLevel")
             boolean("includeCapitalItemModifier")
@@ -440,11 +447,29 @@ class KingdomSettingsApplication(
                             help = t("kingdom.pacingLevelMismatchRangeHelp"),
                             stacked = false,
                         ),
+                        Select.range(
+                            from = 0,
+                            to = 20,
+                            name = "pacingAlertChapterTargetLevel",
+                            label = t("kingdom.pacingChapterTargetLevel"),
+                            value = settings.pacingAlertChapterTargetLevel ?: 0,
+                            help = t("kingdom.pacingChapterTargetLevelHelp"),
+                            stacked = false,
+                        ),
                         CheckboxInput(
                             name = "pacingAlertLootImbalanceEnabled",
                             label = t("kingdom.pacingLootImbalanceEnabled"),
                             value = settings.pacingLootImbalanceEnabled(),
                             help = t("kingdom.pacingLootImbalanceEnabledHelp"),
+                        ),
+                        Select.range(
+                            from = 0,
+                            to = 10,
+                            name = "pacingAlertLootImbalanceRange",
+                            label = t("kingdom.pacingLootImbalanceRange"),
+                            value = settings.pacingLootImbalanceRange(),
+                            help = t("kingdom.pacingLootImbalanceRangeHelp"),
+                            stacked = false,
                         ),
                     ),
                 ),

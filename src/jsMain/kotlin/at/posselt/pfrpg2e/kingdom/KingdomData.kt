@@ -120,6 +120,11 @@ external interface KingdomSettings {
     var pacingAlertMaxTurnGap: Int?
     var pacingAlertLevelMismatchRange: Int?
     var pacingAlertLootImbalanceEnabled: Boolean?
+    // 0 or null = compare against the party's average level; > 0 = a fixed chapter
+    // target level the campaign is expected to be at.
+    var pacingAlertChapterTargetLevel: Int?
+    // Dedicated loot-imbalance tolerance; null falls back to pacingAlertLevelMismatchRange.
+    var pacingAlertLootImbalanceRange: Int?
 }
 
 @JsPlainObject
