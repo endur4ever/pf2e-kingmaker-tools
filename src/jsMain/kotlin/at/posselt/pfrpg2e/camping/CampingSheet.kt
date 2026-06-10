@@ -128,6 +128,12 @@ external interface CampingSheetActivity {
     val learnTarget: FormElementContext?
     val disabled: Boolean
     val disabledReason: String?
+    // No-check activities only: times performed this session and the hours that cost.
+    val repetitions: Int
+    val repetitionHours: Int
+    // Locks the + (perform again) button when the actor's downtime budget is exhausted;
+    // the rest of the tile stays interactive so repetitions can still be refunded.
+    val repeatDisabled: Boolean
 }
 
 fun CampingSheetActivity.isPrepareCampsite() = id == "prepare-campsite"
@@ -484,6 +490,18 @@ class CampingSheet(
             "clear-activity" -> {
                 buildPromise {
                     target.dataset["id"]?.let { clearActivity(it) }
+                }
+            }
+
+            "repeat-activity" -> {
+                buildPromise {
+                    target.dataset["id"]?.let { repeatActivity(it) }
+                }
+            }
+
+            "remove-activity-repetition" -> {
+                buildPromise {
+                    target.dataset["id"]?.let { removeActivityRepetition(it) }
                 }
             }
 
@@ -852,17 +870,28 @@ class CampingSheet(
                             .findCampingActivitySkills(activity, camping.ignoreSkillRequirements)
                             .filterNot { it.validateOnly }
                             .firstOrNull()
-                        val previousActorUuid = camping.campingActivities[activityId]?.actorUuid
+                        val previous = camping.campingActivities[activityId]
+                        val previousActorUuid = previous?.actorUuid
                         actor.typedCampingUpdate { current ->
                             campingActivities[activityId] = CampingActivity(
                                 actorUuid = actorUuid,
                                 selectedSkill = skill?.attribute?.value,
+                                // Re-dropping the same actor keeps their repetitions; a new
+                                // actor starts over at one.
+                                repetitions = if (previousActorUuid == actorUuid) previous?.repetitions else 1,
                             )
                             // No-check activities have no roll to charge on, so the drop itself
-                            // charges the hours; a reassignment moves the charge to the new actor.
+                            // charges the hours; a reassignment moves the charge to the new actor,
+                            // refunding every repetition the previous actor had accumulated.
                             if (!activity.requiresACheck() && previousActorUuid != actorUuid) {
                                 downtimeHoursSpent.set(
-                                    moveNoCheckDowntimeCharge(current.downtimeHoursSpent, previousActorUuid, actorUuid)
+                                    moveNoCheckDowntimeCharge(
+                                        spent = current.downtimeHoursSpent,
+                                        previousActorUuid = previousActorUuid,
+                                        newActorUuid = actorUuid,
+                                        refundHours = (previous?.repetitionsOrDefault() ?: 0) *
+                                            CampingActivityScheduler.DOWNTIME_HOURS_PER_ACTIVITY,
+                                    )
                                 )
                             }
                         }
@@ -929,18 +958,69 @@ class CampingSheet(
 
     private suspend fun clearActivity(id: String) {
         actor.getCamping()?.let { camping ->
-            // No-check activities charged their hours on drop; unassigning refunds them.
-            // Rolled activities keep their spent hours (re-roll costs accumulate by design).
-            val assignedUuid = camping.campingActivities[id]?.actorUuid
+            // No-check activities charged their hours on drop; unassigning refunds every
+            // repetition. Rolled activities keep their spent hours (re-roll costs
+            // accumulate by design).
+            val campingActivity = camping.campingActivities[id]
+            val assignedUuid = campingActivity?.actorUuid
             if (assignedUuid != null) {
                 val activity = camping.getAllActivities().find { it.id == id }
                 if (activity?.requiresACheck() == false) {
-                    camping.refundDowntimeHours(assignedUuid, CampingActivityScheduler.DOWNTIME_HOURS_PER_ACTIVITY)
+                    camping.refundDowntimeHours(
+                        assignedUuid,
+                        campingActivity.repetitionsOrDefault() * CampingActivityScheduler.DOWNTIME_HOURS_PER_ACTIVITY,
+                    )
                 }
             }
-            camping.campingActivities[id]?.actorUuid = null
+            campingActivity?.actorUuid = null
+            campingActivity?.repetitions = null
             actor.setCamping(camping)
         }
+    }
+
+    /**
+     * Performs an assigned no-check activity one more time, charging another
+     * [CampingActivityScheduler.DOWNTIME_HOURS_PER_ACTIVITY] of the actor's downtime.
+     */
+    private suspend fun repeatActivity(id: String) {
+        val camping = actor.getCamping() ?: return
+        val campingActivity = camping.campingActivities[id] ?: return
+        val assignedUuid = campingActivity.actorUuid ?: return
+        val activity = camping.getAllActivities().find { it.id == id } ?: return
+        if (activity.requiresACheck()) {
+            return
+        }
+        // Players can only repeat while budget remains; the GM may always.
+        if (!game.user.isGM && camping.downtimeHoursRemaining(assignedUuid) <= 0) {
+            ui.notifications.error(t("camping.downtimeBudgetExhausted"))
+            return
+        }
+        campingActivity.repetitions = campingActivity.repetitionsOrDefault() + 1
+        camping.spendDowntimeHours(assignedUuid, CampingActivityScheduler.DOWNTIME_HOURS_PER_ACTIVITY)
+        actor.setCamping(camping)
+    }
+
+    /**
+     * Undoes one repetition of an assigned no-check activity, refunding its hours;
+     * removing the last repetition unassigns the actor entirely.
+     */
+    private suspend fun removeActivityRepetition(id: String) {
+        val camping = actor.getCamping() ?: return
+        val campingActivity = camping.campingActivities[id] ?: return
+        val assignedUuid = campingActivity.actorUuid ?: return
+        val activity = camping.getAllActivities().find { it.id == id }
+        if (activity?.requiresACheck() != false) {
+            return
+        }
+        camping.refundDowntimeHours(assignedUuid, CampingActivityScheduler.DOWNTIME_HOURS_PER_ACTIVITY)
+        val remaining = campingActivity.repetitionsOrDefault() - 1
+        if (remaining <= 0) {
+            campingActivity.actorUuid = null
+            campingActivity.repetitions = null
+        } else {
+            campingActivity.repetitions = remaining
+        }
+        actor.setCamping(camping)
     }
 
     private suspend fun advanceHexplorationActivities(target: HTMLElement) {
@@ -1165,22 +1245,6 @@ class CampingSheet(
                     || eatingSection
                     || setWatchesSection
                     || camping.alwaysPerformActivityIds.contains(data.id)
-            if (data.id == "learn-from-a-companion") {
-                console.log(
-                    "KM_DEBUG: learn-from-a-companion details:",
-                    "hidden:", hidden,
-                    "isHiddenByLock:", data.isHiddenByLock(camping.lockedActivities.toSet()),
-                    "prepareCampSection:", prepareCampSection,
-                    "isPrepareCamp:", groupedActivity.isPrepareCamp(),
-                    "campingActivitiesSection:", campingActivitiesSection,
-                    "eatingSection:", eatingSection,
-                    "setWatchesSection:", setWatchesSection,
-                    "lockedActivities:", camping.lockedActivities.joinToString(",")
-                )
-            }
-            if (!hidden) {
-                console.log("KM_DEBUG: Activity visible:", data.id)
-            }
             val isCompanionPresent = data.isRequiredCompanionPresent(
                 actorNames = actorsByUuid.values.map { it.name }.toSet()
             )
@@ -1188,7 +1252,11 @@ class CampingSheet(
             val requiredCompanionUnavailable = data.requiredCompanion?.lowercase() in unavailableCompanionNames
             val companionDisabled = !hidden && data.requiredCompanion != null && !isLearned &&
                     (!isCompanionPresent || requiredCompanionUnavailable)
-            val budgetDisabled = !hidden && actor != null && !data.isPrepareCampsite() && camping.downtimeHoursRemaining(actor.uuid) <= 0
+            val budgetExhausted = !hidden && actor != null && !data.isPrepareCampsite() && camping.downtimeHoursRemaining(actor.uuid) <= 0
+            // Assigned no-check tiles must stay clickable when the budget runs out —
+            // .disabled sets pointer-events: none, which would lock the player out of
+            // refunding repetitions. Only the tile's + button locks instead.
+            val budgetDisabled = budgetExhausted && requiresCheck
             val disabled = companionDisabled || budgetDisabled
             val disabledReason = if (companionDisabled) {
                 t(
@@ -1206,6 +1274,7 @@ class CampingSheet(
                     selected = groupedActivity.result.learnTargetActivityId,
                 )
             } else null
+            val repetitions = if (!requiresCheck && actor != null) result.repetitionsOrDefault() else 1
             CampingSheetActivity(
                 id = data.id,
                 secret = data.isSecret && !game.user.isGM,
@@ -1217,6 +1286,9 @@ class CampingSheet(
                 learnTarget = learnTarget,
                 disabled = disabled,
                 disabledReason = disabledReason,
+                repetitions = repetitions,
+                repetitionHours = repetitions * CampingActivityScheduler.DOWNTIME_HOURS_PER_ACTIVITY,
+                repeatDisabled = budgetExhausted,
                 actor = actor?.let { act ->
                     val degree = result.result?.let { fromCamelCase<DegreeOfSuccess>(it) }
                     CampingSheetActor(

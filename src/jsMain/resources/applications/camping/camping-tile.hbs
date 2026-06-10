@@ -35,12 +35,20 @@
     {{/if}}
     {{#unless requiresCheck}}
         {{#if actor}}
-            {{! No-check activities charge their downtime hours on drop; this button (in the
-                slot where rolled activities show the d20) undoes that: unassign + refund. }}
-            <div class="km-camping-tile-check">
-                <button class="km-camping-action km-tile-check" data-action="clear-activity" type="button"
-                        data-id="{{id}}" title="{{localizeKM "camping.refundActivityHours"}}">
+            {{! No-check activities charge downtime on drop and can be repeated: + performs
+                it again (2h each), the undo arrow removes one repetition and refunds it
+                (unassigning on the last). Sits in the slot where rolled tiles show the d20. }}
+            <div class="km-camping-tile-check km-no-check-controls">
+                <button class="km-camping-action km-tile-check" data-action="remove-activity-repetition" type="button"
+                        data-id="{{id}}" title="{{localizeKM "camping.removeActivityRepetition"}}">
                     <i class="fa-solid fa-rotate-left"></i>
+                </button>
+                <span class="km-activity-repetitions"
+                      title="{{localizeKM "camping.activityRepetitions"}}">&times;{{repetitions}} ({{repetitionHours}}h)</span>
+                <button class="km-camping-action km-tile-check" data-action="repeat-activity" type="button"
+                        data-id="{{id}}" {{#if repeatDisabled}}disabled{{/if}}
+                        title="{{localizeKM "camping.repeatActivity"}}">
+                    <i class="fa-solid fa-plus"></i>
                 </button>
             </div>
         {{/if}}

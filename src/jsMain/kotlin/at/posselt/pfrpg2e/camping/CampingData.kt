@@ -79,7 +79,13 @@ external interface CampingActivity {
     // Only set on the "Learn from a Companion" activity: the id of the companion
     // activity the player chose to learn from the dropdown.
     var learnTargetActivityId: String?
+    // No-check activities only: how many times the assigned actor performs the
+    // activity this session (each repetition costs downtime hours). Null = 1 for
+    // saves that predate the field.
+    var repetitions: Int?
 }
+
+fun CampingActivity.repetitionsOrDefault(): Int = repetitions ?: 1
 
 @JsPlainObject
 external interface CampingActivityWithId {
@@ -88,7 +94,10 @@ external interface CampingActivityWithId {
     val result: String?
     val selectedSkill: String?
     val learnTargetActivityId: String?
+    val repetitions: Int?
 }
+
+fun CampingActivityWithId.repetitionsOrDefault(): Int = repetitions ?: 1
 
 fun ReadonlyRecord<String, CampingActivity>.toCampingActivitiesWithId() =
     asSequence()
@@ -99,6 +108,7 @@ fun ReadonlyRecord<String, CampingActivity>.toCampingActivitiesWithId() =
                 result = data.result,
                 selectedSkill = data.selectedSkill,
                 learnTargetActivityId = data.learnTargetActivityId,
+                repetitions = data.repetitions,
             )
         }.toTypedArray()
 
@@ -241,15 +251,17 @@ fun CampingData.refundDowntimeHours(actorUuid: String, hours: Int) {
 
 /**
  * Computes the downtime ledger after a no-check activity is dropped on [newActorUuid]:
- * the new actor is charged [CampingActivityScheduler.DOWNTIME_HOURS_PER_ACTIVITY] and
- * [previousActorUuid] (when the activity changes hands) is refunded, clamped at 0.
- * Same-actor reassignment is a no-op. Returns a fresh record so it can be fed to a
- * partial Foundry update without mutating [spent].
+ * the new actor is charged [CampingActivityScheduler.DOWNTIME_HOURS_PER_ACTIVITY] (one
+ * repetition) and [previousActorUuid] (when the activity changes hands) is refunded
+ * [refundHours] — all of their accumulated repetitions — clamped at 0. Same-actor
+ * reassignment is a no-op. Returns a fresh record so it can be fed to a partial Foundry
+ * update without mutating [spent].
  */
 fun moveNoCheckDowntimeCharge(
     spent: Record<String, Int>?,
     previousActorUuid: String?,
     newActorUuid: String,
+    refundHours: Int = CampingActivityScheduler.DOWNTIME_HOURS_PER_ACTIVITY,
 ): Record<String, Int> {
     val result = recordOf<String, Int>()
     spent?.let { js.objects.Object.keys(it).forEach { k -> result[k] = it[k]!! } }
@@ -260,8 +272,7 @@ fun moveNoCheckDowntimeCharge(
     result[chargeKey] = (result[chargeKey] ?: 0) + CampingActivityScheduler.DOWNTIME_HOURS_PER_ACTIVITY
     if (previousActorUuid != null) {
         val refundKey = downtimeHoursKey(previousActorUuid)
-        result[refundKey] = ((result[refundKey] ?: 0) - CampingActivityScheduler.DOWNTIME_HOURS_PER_ACTIVITY)
-            .coerceAtLeast(0)
+        result[refundKey] = ((result[refundKey] ?: 0) - refundHours).coerceAtLeast(0)
     }
     return result
 }

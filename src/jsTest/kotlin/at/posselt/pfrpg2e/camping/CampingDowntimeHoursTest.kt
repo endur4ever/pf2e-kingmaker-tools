@@ -194,4 +194,64 @@ class CampingDowntimeHoursTest {
         camping.campingActivities[activity.id]?.actorUuid = null
         assertEquals(8, camping.downtimeHoursRemaining("actor-1"))
     }
+
+    @Test
+    fun repetitionsDefaultToOneForOlderSaves() {
+        val activity = CampingActivity(actorUuid = "actor-1", selectedSkill = null)
+        assertEquals(1, activity.repetitionsOrDefault())
+        activity.repetitions = 3
+        assertEquals(3, activity.repetitionsOrDefault())
+    }
+
+    @Test
+    fun performingANoRollActivityThreeTimesCostsSixHours() {
+        // Mirrors CampingSheet.repeatActivity: each press adds a repetition and spends 2h.
+        val camping = emptyCamping()
+        val activity = CampingActivity(actorUuid = "actor-1", selectedSkill = null, repetitions = 1)
+        camping.spendDowntimeHours("actor-1", 2) // initial drop
+        repeat(2) {
+            activity.repetitions = activity.repetitionsOrDefault() + 1
+            camping.spendDowntimeHours("actor-1", CampingActivityScheduler.DOWNTIME_HOURS_PER_ACTIVITY)
+        }
+        assertEquals(3, activity.repetitionsOrDefault())
+        assertEquals(2, camping.downtimeHoursRemaining("actor-1"))
+    }
+
+    @Test
+    fun removingARepetitionRefundsItsTwoHours() {
+        // Mirrors CampingSheet.removeActivityRepetition: one step back, one refund;
+        // the last repetition unassigns the actor.
+        val camping = emptyCamping()
+        val activity = CampingActivity(actorUuid = "actor-1", selectedSkill = null, repetitions = 2)
+        camping.spendDowntimeHours("actor-1", 4)
+
+        camping.refundDowntimeHours("actor-1", CampingActivityScheduler.DOWNTIME_HOURS_PER_ACTIVITY)
+        activity.repetitions = activity.repetitionsOrDefault() - 1
+        assertEquals(6, camping.downtimeHoursRemaining("actor-1"))
+        assertEquals(1, activity.repetitionsOrDefault())
+
+        camping.refundDowntimeHours("actor-1", CampingActivityScheduler.DOWNTIME_HOURS_PER_ACTIVITY)
+        if (activity.repetitionsOrDefault() - 1 <= 0) {
+            activity.actorUuid = null
+            activity.repetitions = null
+        }
+        assertEquals(8, camping.downtimeHoursRemaining("actor-1"))
+        assertEquals(null, activity.actorUuid)
+    }
+
+    @Test
+    fun moveChargeRefundsAllRepetitionsWhenChangingHands() {
+        // actor-1 performed the activity three times (6h); handing it to actor-2 refunds
+        // all of it and charges actor-2 a single repetition.
+        val camping = emptyCamping()
+        camping.spendDowntimeHours("actor-1", 6)
+        camping.downtimeHoursSpent = moveNoCheckDowntimeCharge(
+            spent = camping.downtimeHoursSpent,
+            previousActorUuid = "actor-1",
+            newActorUuid = "actor-2",
+            refundHours = 6,
+        )
+        assertEquals(8, camping.downtimeHoursRemaining("actor-1"))
+        assertEquals(6, camping.downtimeHoursRemaining("actor-2"))
+    }
 }

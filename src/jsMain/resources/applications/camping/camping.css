@@ -719,6 +719,18 @@ ul.km-camping-actors {
             .km-camping-tile-check {
                 display: flex;
 
+                &.km-no-check-controls {
+                    align-items: center;
+                    justify-content: space-between;
+
+                    .km-activity-repetitions {
+                        font-size: 12px;
+                        font-weight: 600;
+                        white-space: nowrap;
+                        padding: 0 4px;
+                    }
+                }
+
                 select {
                     border-radius: 0;
                     outline: none;
