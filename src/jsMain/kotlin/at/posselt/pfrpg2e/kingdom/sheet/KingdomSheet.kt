@@ -182,6 +182,7 @@ import at.posselt.pfrpg2e.takeIfInstance
 import at.posselt.pfrpg2e.app.jsonFilePicker
 import at.posselt.pfrpg2e.kingdom.sheet.KingdomJournalExporter
 import at.posselt.pfrpg2e.kingdom.sheet.ObsidianImporter
+import at.posselt.pfrpg2e.kingdom.sheet.WorldAnvilExporter
 import at.posselt.pfrpg2e.utils.TableAndDraw
 import at.posselt.pfrpg2e.utils.buildPromise
 import at.posselt.pfrpg2e.utils.d20Check
@@ -266,6 +267,7 @@ class KingdomSheet(
         MenuControl(label = t("kingdom.hex-content"), action = "open-hex-content-manager", gmOnly = true),
         MenuControl(label = t("applications.settings"), action = "settings", gmOnly = true),
         MenuControl(label = t("kingdom.exportToJournal"), action = "export-to-journal", gmOnly = true),
+        MenuControl(label = t("kingdom.exportToWorldAnvil"), action = "export-to-world-anvil", gmOnly = true),
         MenuControl(label = t("kingdom.importFromObsidian"), action = "import-from-obsidian", gmOnly = true),
         MenuControl(label = t("kingdom.openObsidian"), action = "open-obsidian", gmOnly = true),
         MenuControl(label = t("applications.quickstart"), action = "quickstart", gmOnly = true),
@@ -1042,6 +1044,57 @@ class KingdomSheet(
                     ui.notifications.info(t("kingdom.obsidianExportSuccess", recordOf("folder" to folder)))
                 } catch (e: Throwable) {
                     ui.notifications.error("Export failed: ${e.message}")
+                }
+            }
+            "export-to-world-anvil" -> buildPromise {
+                try {
+                    val result = WorldAnvilExporter.export(game, actor, getKingdom())
+                    ui.notifications.info(result)
+                } catch (e: Throwable) {
+                    ui.notifications.error("World Anvil export failed: ${e.message}")
+                }
+            }
+
+            "export-session-prep-to-journal" -> buildPromise {
+                try {
+                    val kingdom = getKingdom()
+                    val view = buildSessionPrepView(
+                        quests = kingdom.quests,
+                        clocks = kingdom.campaignClocks,
+                        events = kingdom.campaignKingdomEvents,
+                        hexContents = kingdom.hexContents,
+                        companionQuests = kingdom.companionPersonalQuests,
+                        isGM = game.user.isGM,
+                    )
+                    val folder = SessionPrepJournalExporter.export(game, view)
+                    ui.notifications.info(t("kingdom.obsidianExportSuccess", recordOf("folder" to folder)))
+                } catch (e: Throwable) {
+                    ui.notifications.error("Export failed: ${e.message}")
+                }
+            }
+
+            "generate-session-prep-narrative" -> buildPromise {
+                try {
+                    val kingdom = getKingdom()
+                    val view = buildSessionPrepView(
+                        quests = kingdom.quests,
+                        clocks = kingdom.campaignClocks,
+                        events = kingdom.campaignKingdomEvents,
+                        hexContents = kingdom.hexContents,
+                        companionQuests = kingdom.companionPersonalQuests,
+                        isGM = game.user.isGM,
+                    )
+                    val html = SessionPrepNarrativeGenerator.generate(view)
+                    if (html.isBlank()) {
+                        ui.notifications.info(t("kingdom.sessionPrep.narrativeEmpty"))
+                    } else {
+                        SessionPrepNarrativeDialog.launch(
+                            html = html,
+                            game = game,
+                        )
+                    }
+                } catch (e: Throwable) {
+                    ui.notifications.error("Narrative generation failed: ${e.message}")
                 }
             }
 

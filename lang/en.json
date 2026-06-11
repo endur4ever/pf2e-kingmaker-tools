@@ -612,6 +612,8 @@
         "journalSummary": "Turn summary written to journal"
       },
       "exportToJournal": "Export to Journal",
+      "exportToWorldAnvil": "Export for World Anvil",
+      "exportToWorldAnvilTooltip": "Export kingdom data as BBCode/HTML files for manual import into World Anvil",
       "importFromObsidian": "Import from Obsidian",
       "openObsidian": "Open Obsidian",
       "obsidianImportSuccess": "Successfully imported Obsidian data: {details}",
