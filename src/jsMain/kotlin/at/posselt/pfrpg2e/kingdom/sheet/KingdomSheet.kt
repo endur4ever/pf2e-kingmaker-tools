@@ -137,12 +137,15 @@ import at.posselt.pfrpg2e.kingdom.sheet.contexts.skillChecks
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.toActivitiesContext
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.toContext
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.toRosterContext
+import at.posselt.pfrpg2e.kingdom.SessionPrepNarrativeGenerator
+import at.posselt.pfrpg2e.kingdom.sheet.SessionPrepNarrativeDialog
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.buildPartyInfluenceContext
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.buildArmyPressureContext
 import at.posselt.pfrpg2e.kingdom.buildArmyPressureView
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.buildPacingAlertContext
 import at.posselt.pfrpg2e.kingdom.buildPacingAlertView
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.buildSessionPrepContext
+import at.posselt.pfrpg2e.kingdom.SessionPrepView
 import at.posselt.pfrpg2e.kingdom.buildSessionPrepView
 import at.posselt.pfrpg2e.kingdom.trackTurnGap
 import at.posselt.pfrpg2e.kingdom.pacingMaxTurnGap

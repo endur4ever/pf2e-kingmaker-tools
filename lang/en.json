@@ -634,7 +634,10 @@
         "companionMoments": "Companion Moments",
         "noCompanionMoments": "No active companion moments",
         "generateNarrative": "Generate Narrative",
-        "generateNarrativeTooltip": "Coming soon — narrative recap generation"
+        "generateNarrativeTooltip": "Generate a narrative recap of the session prep data",
+        "narrativeEmpty": "No session prep data available to generate a narrative from.",
+        "exportToJournal": "Export to Journal",
+        "exportToJournalTooltip": "Export session prep to a Foundry Journal Entry"
       },
       "quests": {
         "addQuest": "Add Quest",
