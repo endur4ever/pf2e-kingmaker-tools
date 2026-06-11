@@ -724,6 +724,8 @@
       "pacingAlertsSettings": "Pacing Advisories",
       "pacingMaxTurnGap": "Stagnation / Event Gap Threshold",
       "pacingMaxTurnGapHelp": "How many turns of unchanged unrest, or turns without a kingdom event, before a pacing advisory warns you. A reminder repeats at double this value.",
+      "pacingMinUnrestDelta": "Minimum Unrest Delta",
+      "pacingMinUnrestDeltaHelp": "Minimum change in unrest required to reset the stagnation counter. Unrest changes smaller than this count as stagnating. Default: 1 (only unchanged unrest triggers).",
       "pacingLevelMismatchRange": "Level Mismatch Tolerance",
       "pacingLevelMismatchRangeHelp": "How far the kingdom level may drift from the target level before a pacing advisory warns you. Double this difference escalates it to critical.",
       "pacingLootImbalanceEnabled": "Flag Excessive Item Access",

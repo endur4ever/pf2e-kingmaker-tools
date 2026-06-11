@@ -17,6 +17,7 @@ import at.posselt.pfrpg2e.fromCamelCase
 import at.posselt.pfrpg2e.kingdom.AutomateResources
 import at.posselt.pfrpg2e.kingdom.KingdomSettings
 import at.posselt.pfrpg2e.kingdom.pacingMaxTurnGap
+import at.posselt.pfrpg2e.kingdom.pacingMinUnrestDelta
 import at.posselt.pfrpg2e.kingdom.pacingLevelMismatchRange
 import at.posselt.pfrpg2e.kingdom.pacingLootImbalanceEnabled
 import at.posselt.pfrpg2e.kingdom.pacingLootImbalanceRange
@@ -65,6 +66,9 @@ class KingdomSettingsDataModel(
             }
             int("increaseScorePicksBy")
             int("pacingAlertMaxTurnGap") {
+                min = 1
+            }
+            int("pacingAlertMinUnrestDelta") {
                 min = 1
             }
             int("pacingAlertLevelMismatchRange") {
@@ -450,6 +454,15 @@ class KingdomSettingsApplication(
                             label = t("kingdom.pacingMaxTurnGap"),
                             value = settings.pacingMaxTurnGap(),
                             help = t("kingdom.pacingMaxTurnGapHelp"),
+                            stacked = false,
+                        ),
+                        Select.range(
+                            from = 1,
+                            to = 10,
+                            name = "pacingAlertMinUnrestDelta",
+                            label = t("kingdom.pacingMinUnrestDelta"),
+                            value = settings.pacingAlertMinUnrestDelta ?: 1,
+                            help = t("kingdom.pacingMinUnrestDeltaHelp"),
                             stacked = false,
                         ),
                         Select.range(

@@ -16,6 +16,7 @@ import at.posselt.pfrpg2e.kingdom.trackUnrestStagnation
 import at.posselt.pfrpg2e.kingdom.trackLevelMismatch
 import at.posselt.pfrpg2e.kingdom.trackLootImbalance
 import at.posselt.pfrpg2e.kingdom.pacingMaxTurnGap
+import at.posselt.pfrpg2e.kingdom.pacingMinUnrestDelta
 import at.posselt.pfrpg2e.kingdom.pacingLevelMismatchRange
 import at.posselt.pfrpg2e.kingdom.pacingLootImbalanceEnabled
 import at.posselt.pfrpg2e.kingdom.pacingLootImbalanceRange
@@ -166,6 +167,7 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
         currentUnrest = kingdom.unrest,
         previousCount = kingdom.pacingTurnsSinceUnrestChange,
         maxTurnGap = kingdom.settings.pacingMaxTurnGap(),
+        minDelta = kingdom.settings.pacingMinUnrestDelta(),
         turn = currentTurn,
     )
     kingdom.pacingTurnsSinceUnrestChange = stagnationTrack.turnsSinceUnrestChange

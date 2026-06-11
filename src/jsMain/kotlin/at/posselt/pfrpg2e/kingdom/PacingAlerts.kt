@@ -16,7 +16,7 @@ import kotlin.math.abs
 
 // ── KingdomSettings threshold accessors (nullable fields, back-compat) ──
 
-fun KingdomSettings.pacingMinUnrestDelta(): Int = pacingAlertMinUnrestDelta ?: 5
+fun KingdomSettings.pacingMinUnrestDelta(): Int = pacingAlertMinUnrestDelta ?: 1
 fun KingdomSettings.pacingMaxTurnGap(): Int = pacingAlertMaxTurnGap ?: 10
 fun KingdomSettings.pacingLevelMismatchRange(): Int = pacingAlertLevelMismatchRange ?: 2
 fun KingdomSettings.pacingLootImbalanceEnabled(): Boolean = pacingAlertLootImbalanceEnabled != false
@@ -72,16 +72,17 @@ data class StagnationTrack(
  * Advance the unrest-stagnation tracker by one turn. Emits an alert only when the
  * counter *first* reaches the warning ([maxTurnGap]) or critical (2×[maxTurnGap])
  * threshold, so the kingdom doesn't spam a pacing advisory every turn it stays static.
- * The counter resets to 0 whenever unrest moves.
+ * The counter resets to 0 whenever unrest moves by at least [minDelta].
  */
 fun trackUnrestStagnation(
     previousUnrest: Int?,
     currentUnrest: Int,
     previousCount: Int?,
     maxTurnGap: Int,
+    minDelta: Int,
     turn: Int,
 ): StagnationTrack {
-    val stagnant = previousUnrest != null && previousUnrest == currentUnrest
+    val stagnant = previousUnrest != null && abs(currentUnrest - previousUnrest) < minDelta
     val count = if (stagnant) (previousCount ?: 0) + 1 else 0
     val alert = if (count == maxTurnGap || count == maxTurnGap * 2) {
         evaluateStagnation(count, maxTurnGap, turn)

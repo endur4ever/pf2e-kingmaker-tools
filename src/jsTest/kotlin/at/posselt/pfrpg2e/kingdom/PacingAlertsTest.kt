@@ -88,7 +88,7 @@ class PacingAlertsTest {
     @Test
     fun stagnationTrackerResetsWhenUnrestMoves() {
         val track = trackUnrestStagnation(
-            previousUnrest = 4, currentUnrest = 6, previousCount = 9, maxTurnGap = 10, turn = 1,
+            previousUnrest = 4, currentUnrest = 6, previousCount = 9, maxTurnGap = 10, minDelta = 1, turn = 1,
         )
         assertEquals(0, track.turnsSinceUnrestChange)
         assertNull(track.alert)
@@ -97,7 +97,7 @@ class PacingAlertsTest {
     @Test
     fun stagnationTrackerStartsFreshWhenNoPreviousUnrest() {
         val track = trackUnrestStagnation(
-            previousUnrest = null, currentUnrest = 5, previousCount = null, maxTurnGap = 10, turn = 1,
+            previousUnrest = null, currentUnrest = 5, previousCount = null, maxTurnGap = 10, minDelta = 1, turn = 1,
         )
         assertEquals(0, track.turnsSinceUnrestChange)
         assertNull(track.alert)
@@ -106,7 +106,7 @@ class PacingAlertsTest {
     @Test
     fun stagnationTrackerIncrementsWhileUnrestUnchanged() {
         val track = trackUnrestStagnation(
-            previousUnrest = 5, currentUnrest = 5, previousCount = 3, maxTurnGap = 10, turn = 1,
+            previousUnrest = 5, currentUnrest = 5, previousCount = 3, maxTurnGap = 10, minDelta = 1, turn = 1,
         )
         assertEquals(4, track.turnsSinceUnrestChange)
         assertNull(track.alert)   // below threshold, no alert
@@ -116,7 +116,7 @@ class PacingAlertsTest {
     fun stagnationTrackerFiresOnceAtWarningThreshold() {
         // count crosses from 9 -> 10 (== maxTurnGap) -> warning fires
         val crossing = trackUnrestStagnation(
-            previousUnrest = 5, currentUnrest = 5, previousCount = 9, maxTurnGap = 10, turn = 1,
+            previousUnrest = 5, currentUnrest = 5, previousCount = 9, maxTurnGap = 10, minDelta = 1, turn = 1,
         )
         assertEquals(10, crossing.turnsSinceUnrestChange)
         assertNotNull(crossing.alert)
@@ -124,7 +124,7 @@ class PacingAlertsTest {
 
         // next turn 10 -> 11: still stagnant but NO repeat alert (fire once)
         val afterCrossing = trackUnrestStagnation(
-            previousUnrest = 5, currentUnrest = 5, previousCount = 10, maxTurnGap = 10, turn = 1,
+            previousUnrest = 5, currentUnrest = 5, previousCount = 10, maxTurnGap = 10, minDelta = 1, turn = 1,
         )
         assertEquals(11, afterCrossing.turnsSinceUnrestChange)
         assertNull(afterCrossing.alert)
@@ -133,11 +133,45 @@ class PacingAlertsTest {
     @Test
     fun stagnationTrackerEscalatesToCriticalAtDoubleThreshold() {
         val track = trackUnrestStagnation(
-            previousUnrest = 5, currentUnrest = 5, previousCount = 19, maxTurnGap = 10, turn = 1,
+            previousUnrest = 5, currentUnrest = 5, previousCount = 19, maxTurnGap = 10, minDelta = 1, turn = 1,
         )
         assertEquals(20, track.turnsSinceUnrestChange)
         assertNotNull(track.alert)
         assertEquals(PacingAlertSeverity.CRITICAL.value, track.alert.severity)
+    }
+
+    @Test
+    fun stagnationTrackerResetsWhenUnrestChangesByAtLeastMinDelta() {
+        // minDelta = 3, unrest changes by 5 (>= 3) -> not stagnant
+        val track = trackUnrestStagnation(
+            previousUnrest = 4, currentUnrest = 9, previousCount = 7, maxTurnGap = 10, minDelta = 3, turn = 1,
+        )
+        assertEquals(0, track.turnsSinceUnrestChange)
+        assertNull(track.alert)
+    }
+
+    @Test
+    fun stagnationTrackerStagnatesWhenUnrestChangesByLessThanMinDelta() {
+        // minDelta = 5, unrest changes by 3 (< 5) -> stagnant
+        val track = trackUnrestStagnation(
+            previousUnrest = 4, currentUnrest = 7, previousCount = 2, maxTurnGap = 10, minDelta = 5, turn = 1,
+        )
+        assertEquals(3, track.turnsSinceUnrestChange)
+        assertNull(track.alert)
+    }
+
+    @Test
+    fun stagnationTrackerMinDeltaOneRequiresExactEquality() {
+        // minDelta = 1: delta < 1 means delta == 0, so only exact equality is stagnant
+        val stagnant = trackUnrestStagnation(
+            previousUnrest = 5, currentUnrest = 5, previousCount = 0, maxTurnGap = 3, minDelta = 1, turn = 1,
+        )
+        assertEquals(1, stagnant.turnsSinceUnrestChange)
+
+        val moved = trackUnrestStagnation(
+            previousUnrest = 5, currentUnrest = 6, previousCount = 0, maxTurnGap = 3, minDelta = 1, turn = 1,
+        )
+        assertEquals(0, moved.turnsSinceUnrestChange)
     }
 
     @Test
