@@ -151,6 +151,24 @@ object SessionPrepJournalExporter {
             sb.append("</ul>\n")
         }
 
+        // Recent Turns (GM only)
+        if (view.isGM && view.recentTurns.isNotEmpty()) {
+            sb.append("<h2>Recent Turns</h2>\n")
+            sb.append("<ul>\n")
+            for (t in view.recentTurns) {
+                sb.append("  <li><strong>Turn ${t.turn}</strong>")
+                sb.append(" — Fame: ${t.fame}, RP: ${t.resourcePoints}, Consumption: ${t.consumption}, Unrest: ${t.unrest}")
+                if (t.warPressure != null) sb.append(", War Pressure: ${t.warPressure}")
+                if (t.xpAwarded != null) sb.append(", XP: ${t.xpAwarded}")
+                if (!t.clockEvents.isNullOrEmpty()) {
+                    sb.append("<br/><em>Clock events: ${t.clockEvents.joinToString(", ")}</em>")
+                }
+                if (!t.notes.isNullOrBlank()) sb.append("<br/><em>${esc(t.notes)}</em>")
+                sb.append("</li>\n")
+            }
+            sb.append("</ul>\n")
+        }
+
         return sb.toString()
     }
 }

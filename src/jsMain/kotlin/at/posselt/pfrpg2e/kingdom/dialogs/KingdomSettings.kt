@@ -93,6 +93,7 @@ class KingdomSettingsDataModel(
             boolean("capitalCanGrowOneSizeLarger")
             boolean("enableCouncilMissions")
             boolean("enableLeadershipModifiers")
+            boolean("enableRoughTerrainCosts")
             string("recruitableArmiesFolderId", nullable = true)
             string("kingdomCultTable", nullable = true)
             string("kingdomEventsTable", nullable = true)
@@ -165,6 +166,12 @@ class KingdomSettingsApplication(
                             from = 1,
                             to = 10,
                             stacked = false,
+                        ),
+                        CheckboxInput(
+                            name = "autoGainFamePerTurn",
+                            label = t("kingdom.autoGainFamePerTurn"),
+                            value = settings.autoGainFamePerTurn,
+                            help = t("kingdom.autoGainFamePerTurnHelp")
                         ),
                         CheckboxInput(
                             name = "automateStats",
@@ -381,6 +388,12 @@ class KingdomSettingsApplication(
                             label = t("kingdom.enableLeadershipModifiers"),
                             value = settings.enableLeadershipModifiers,
                             help = t("kingdom.enableLeadershipModifiersHelp"),
+                        ),
+                        CheckboxInput(
+                            name = "enableRoughTerrainCosts",
+                            label = t("kingdom.enableRoughTerrainCosts"),
+                            value = settings.enableRoughTerrainCosts == true,
+                            help = t("kingdom.enableRoughTerrainCostsHelp"),
                         ),
                         Menu(
                             label = t("kingdom.configureLeaderSkills"),

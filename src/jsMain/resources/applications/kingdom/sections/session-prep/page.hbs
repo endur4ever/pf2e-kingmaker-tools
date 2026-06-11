@@ -66,6 +66,37 @@
                     <p class="km-session-prep-empty">{{localizeKM "kingdom.sessionPrep.noUnresolvedEvents"}}</p>
                 {{/if}}
             </section>
+
+            <section class="km-session-prep-section">
+                <h3><i class="fa-solid fa-clock-rotate-left"></i> {{localizeKM "kingdom.sessionPrep.recentTurns"}} <span class="km-session-prep-count">{{sessionPrepContext.recentTurns.length}}</span></h3>
+                {{#if sessionPrepContext.recentTurns.length}}
+                    <ul class="km-session-prep-turn-list">
+                        {{#each sessionPrepContext.recentTurns}}
+                            <li class="km-session-prep-turn-item">
+                                <span class="km-session-prep-turn-item__label">{{localizeKM "kingdom.sessionPrep.turnLabel"}} {{this.turn}}</span>
+                                <span class="km-session-prep-turn-item__stats">
+                                    <span class="km-session-prep-turn-stat"><i class="fa-solid fa-star"></i> {{this.fame}}</span>
+                                    <span class="km-session-prep-turn-stat"><i class="fa-solid fa-coins"></i> {{this.resourcePoints}}</span>
+                                    <span class="km-session-prep-turn-stat"><i class="fa-solid fa-utensils"></i> {{this.consumption}}</span>
+                                    <span class="km-session-prep-turn-stat"><i class="fa-solid fa-fire"></i> {{this.unrest}}</span>
+                                    {{#if this.hasWarPressure}}<span class="km-session-prep-turn-stat"><i class="fa-solid fa-shield-halved"></i> {{this.warPressure}}</span>{{/if}}
+                                    {{#if this.hasXpAwarded}}<span class="km-session-prep-turn-stat"><i class="fa-solid fa-arrow-up"></i> {{this.xpAwarded}} XP</span>{{/if}}
+                                </span>
+                                {{#if this.hasClockEvents}}
+                                    <span class="km-session-prep-turn-item__clocks">
+                                        {{#each this.clockEvents}}
+                                            <span class="km-session-prep-turn-clock">{{this}}</span>
+                                        {{/each}}
+                                    </span>
+                                {{/if}}
+                                {{#if this.hasNotes}}<span class="km-session-prep-turn-item__notes">{{this.notes}}</span>{{/if}}
+                            </li>
+                        {{/each}}
+                    </ul>
+                {{else}}
+                    <p class="km-session-prep-empty">{{localizeKM "kingdom.sessionPrep.noRecentTurns"}}</p>
+                {{/if}}
+            </section>
         {{/if}}
 
         <section class="km-session-prep-section">

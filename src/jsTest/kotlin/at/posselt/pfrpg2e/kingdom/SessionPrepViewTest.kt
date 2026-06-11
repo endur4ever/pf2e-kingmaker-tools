@@ -7,6 +7,7 @@ import at.posselt.pfrpg2e.data.hex.HexContentVisibility
 import at.posselt.pfrpg2e.kingdom.data.RawHexContent
 import at.posselt.pfrpg2e.kingdom.data.RawQuest
 import at.posselt.pfrpg2e.kingdom.data.RawQuestRewards
+import at.posselt.pfrpg2e.kingdom.data.RawTurnRecord
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -70,6 +71,30 @@ class SessionPrepViewTest {
             influenceReward = 0,
             turnsRemaining = turnsRemaining,
         )
+
+    private fun turnRecord(
+        turn: Int = 1,
+        timestamp: String = "2026-06-11T10:00:00Z",
+        fame: Int = 0,
+        resourcePoints: Int = 0,
+        consumption: Int = 0,
+        unrest: Int = 0,
+        warPressure: Int? = null,
+        xpAwarded: Int? = null,
+        clockEvents: Array<String>? = null,
+        notes: String? = null,
+    ) = RawTurnRecord(
+        turn = turn,
+        timestamp = timestamp,
+        fame = fame,
+        resourcePoints = resourcePoints,
+        consumption = consumption,
+        unrest = unrest,
+        xpAwarded = xpAwarded,
+        clockEvents = clockEvents,
+        warPressure = warPressure,
+        notes = notes,
+    )
 
     @Test
     fun nullInputsProduceEmptyView() {
@@ -156,5 +181,102 @@ class SessionPrepViewTest {
         // Only player-visible companion moments
         assertEquals(listOf("cq2"), view.companionMoments.map { it.id })
         assertFalse(view.isGM)
+    }
+
+    @Test
+    fun recentTurnsGmFilter() {
+        // When isGM = false, recentTurns should be empty regardless of turnHistory
+        val view = buildSessionPrepView(
+            quests = null,
+            clocks = emptyArray(),
+            events = null,
+            hexContents = null,
+            companionQuests = null,
+            isGM = false,
+            turnHistory = arrayOf(
+                turnRecord(turn = 1, fame = 10),
+                turnRecord(turn = 2, fame = 20),
+            )
+        )
+        assertTrue(view.recentTurns.isEmpty())
+        assertFalse(view.isGM)
+    }
+
+    @Test
+    fun recentTurnsLastTen() {
+        // Should only show last 10 turns even if more provided
+        val twelveTurns = (1..12).map { turnRecord(turn = it, fame = it * 10) }.toTypedArray()
+        val view = buildSessionPrepView(
+            quests = null,
+            clocks = emptyArray(),
+            events = null,
+            hexContents = null,
+            companionQuests = null,
+            isGM = true,
+            turnHistory = twelveTurns
+        )
+        assertEquals(10, view.recentTurns.size)
+        // Should contain turns 3-12 (the last 10)
+        assertEquals(listOf(12, 11, 10, 9, 8, 7, 6, 5, 4, 3), 
+            view.recentTurns.map { it.turn })
+        // Turns 1 and 2 should be dropped
+        assertFalse(view.recentTurns.any { it.turn == 1 || it.turn == 2 })
+    }
+
+    @Test
+    fun recentTurnsOrdering() {
+        // Should be newest first (reverse chronological order)
+        val turnHistory = arrayOf(
+            turnRecord(turn = 1, fame = 10),
+            turnRecord(turn = 2, fame = 20),
+            turnRecord(turn = 3, fame = 30),
+            turnRecord(turn = 4, fame = 40),
+            turnRecord(turn = 5, fame = 50)
+        )
+        val view = buildSessionPrepView(
+            quests = null,
+            clocks = emptyArray(),
+            events = null,
+            hexContents = null,
+            companionQuests = null,
+            isGM = true,
+            turnHistory = turnHistory
+        )
+        assertEquals(5, view.recentTurns.size)
+        // Most recent turn (5) should be first, oldest (1) should be last
+        assertEquals(listOf(5, 4, 3, 2, 1), 
+            view.recentTurns.map { it.turn })
+        assertEquals(listOf(50, 40, 30, 20, 10), 
+            view.recentTurns.map { it.fame })
+    }
+
+    @Test
+    fun recentTurnsEmptyWhenNull() {
+        // Should handle null turnHistory gracefully
+        val view = buildSessionPrepView(
+            quests = null,
+            clocks = emptyArray(),
+            events = null,
+            hexContents = null,
+            companionQuests = null,
+            isGM = true,
+            turnHistory = null
+        )
+        assertTrue(view.recentTurns.isEmpty())
+    }
+
+    @Test
+    fun recentTurnsEmptyWhenEmptyArray() {
+        // Should handle empty turnHistory gracefully
+        val view = buildSessionPrepView(
+            quests = null,
+            clocks = emptyArray(),
+            events = null,
+            hexContents = null,
+            companionQuests = null,
+            isGM = true,
+            turnHistory = emptyArray()
+        )
+        assertTrue(view.recentTurns.isEmpty())
     }
 }

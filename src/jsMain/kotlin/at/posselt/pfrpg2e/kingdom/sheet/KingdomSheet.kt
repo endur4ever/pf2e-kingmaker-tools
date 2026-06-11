@@ -1065,6 +1065,7 @@ class KingdomSheet(
                         hexContents = kingdom.hexContents,
                         companionQuests = kingdom.companionPersonalQuests,
                         isGM = game.user.isGM,
+                        turnHistory = kingdom.turnHistory,
                     )
                     val folder = SessionPrepJournalExporter.export(game, view)
                     ui.notifications.info(t("kingdom.sessionPrep.exportSuccess", recordOf("folder" to folder)))
@@ -1083,6 +1084,7 @@ class KingdomSheet(
                         hexContents = kingdom.hexContents,
                         companionQuests = kingdom.companionPersonalQuests,
                         isGM = game.user.isGM,
+                        turnHistory = kingdom.turnHistory,
                     )
                     val html = SessionPrepNarrativeGenerator.generate(view)
                     if (html.isBlank()) {
@@ -2000,6 +2002,14 @@ class KingdomSheet(
             elementClasses = listOf("km-width-small"),
             labelClasses = listOf("km-slim-inputs"),
         )
+        val bonusResourceDiceInput = NumberInput(
+            name = "bonusResourceDice",
+            value = kingdom.bonusResourceDice,
+            label = t("kingdom.bonusResourceDice"),
+            stacked = false,
+            elementClasses = listOf("km-width-small"),
+            labelClasses = listOf("km-slim-inputs"),
+        )
         val unrestPenalty = calculateUnrestPenalty(kingdom.unrest)
         val feats = kingdom.getFeats()
             .filter { it.id !in kingdom.featBlacklist }
@@ -2257,6 +2267,7 @@ class KingdomSheet(
             consumption = consumption.total,
             automateStats = automateStats,
             resourceDiceIncome = "$resourceDiceNum${realm.sizeInfo.resourceDieSize.value}",
+            bonusResourceDiceInput = bonusResourceDiceInput.toContext(),
             skillChecks = checks,
             automateResources = automateResources,
             useLeadershipModifiers = kingdom.settings.enableLeadershipModifiers,
@@ -2319,6 +2330,7 @@ class KingdomSheet(
                     hexContents = kingdom.hexContents,
                     companionQuests = kingdom.companionPersonalQuests,
                     isGM = isGM,
+                    turnHistory = kingdom.turnHistory,
                 )
             ),
             showDetailedMatrix = showDetailedMatrix,
@@ -2442,6 +2454,7 @@ class KingdomSheet(
             kingdom.size = value.size
             kingdom.resourcePoints = value.resourcePoints
             kingdom.resourceDice = value.resourceDice
+            kingdom.bonusResourceDice = value.bonusResourceDice
             kingdom.activeSettlement = value.activeSettlement
             kingdom.supernaturalSolutions = value.supernaturalSolutions
             kingdom.creativeSolutions = value.creativeSolutions

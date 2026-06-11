@@ -28,6 +28,7 @@ import at.posselt.pfrpg2e.kingdom.structures.RawPopulationRoster
 import at.posselt.pfrpg2e.utils.launch
 import at.posselt.pfrpg2e.kingdom.structures.RawSettlement
 import at.posselt.pfrpg2e.kingdom.structures.isStructure
+import at.posselt.pfrpg2e.kingdom.SettlementTerrain
 import at.posselt.pfrpg2e.kingdom.structures.parseSettlement
 import at.posselt.pfrpg2e.kingdom.structures.toRaw
 import at.posselt.pfrpg2e.localization.Translatable
@@ -81,6 +82,7 @@ external interface InspectSettlementContext : ValidatedHandlebarsContext {
     val manualSettlementLevelInput: FormElementContext
     val waterBordersInput: FormElementContext
     val layoutInput: FormElementContext
+    val terrainInput: FormElementContext
     val level: Int
     val type: String
     val manualSettlementLevel: Boolean
@@ -117,6 +119,7 @@ external interface InspectSettlementData {
     val manualSettlementLevel: Boolean
     val waterBorders: Int
     val layoutType: String
+    val terrain: String?
 }
 
 @JsExport
@@ -130,6 +133,7 @@ class InspectSettlementDataModel(
             int("blocks")
             enum<SettlementType>("type")
             enum<SettlementLayoutType>("layoutType")
+            enum<SettlementTerrain>("terrain", nullable = true)
             boolean("secondaryTerritory")
             boolean("manualSettlementLevel")
             int("waterBorders")
@@ -215,6 +219,7 @@ class InspectSettlement(
         manualSettlementLevel = settlement.manualSettlementLevel,
         waterBorders = settlement.waterBorders,
         layoutType = settlement.layoutType,
+        terrain = settlement.terrain,
         populationRoster = settlement.populationRoster ?: RawPopulationRoster(),
     )
 
@@ -401,6 +406,13 @@ class InspectSettlement(
             value = SettlementLayoutType.fromString(current.layoutType),
             hideLabel = true,
         )
+        val terrainSelect = Select.fromEnum<SettlementTerrain>(
+            name = "terrain",
+            label = t("kingdom.terrain"),
+            value = current.terrain?.let { SettlementTerrain.fromString(it) },
+            hideLabel = true,
+            required = false,
+        )
         val manualSettlementLevelInput = CheckboxInput(
             name = "manualSettlementLevel",
             label = t("kingdom.manualManagement"),
@@ -586,6 +598,7 @@ class InspectSettlement(
             currentTab = currentNav.value,
             storage = storage,
             layoutInput = settlementLayout.toContext(),
+            terrainInput = terrainSelect.toContext(),
             tabs = createTabs<SettlementNav>("change-nav", currentNav)
                 .filter {
                     if (it.link == SettlementNav.BONUSES.value) {
@@ -613,6 +626,7 @@ class InspectSettlement(
         current.manualSettlementLevel = value.manualSettlementLevel
         current.waterBorders = value.waterBorders
         current.layoutType = value.layoutType
+        current.terrain = value.terrain
         undefined
     }
 

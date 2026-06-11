@@ -74,6 +74,12 @@
                 <td>{{> formElement resourcePointsContext.next }}</td>
             </tr>
         </table>
+        {{#if isGM}}
+            <div class="km-bonus-resource-dice">
+                <label>{{localizeKM "kingdom.bonusResourceDice"}}</label>
+                {{> formElement bonusResourceDiceInput }}
+            </div>
+        {{/if}}
         <h3>{{localizeKM "kingdom.commodities"}}</h3>
         <table class="km-unrest-ruin">
             <tr>

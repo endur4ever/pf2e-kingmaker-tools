@@ -63,6 +63,7 @@ class TurnTickingEngineTest {
         storage: CommodityStorage = storage(),
         councilCooldowns: RawCouncilCooldowns? = null,
         modifiers: Array<RawModifier> = emptyArray(),
+        bonusResourceDice: Int = 0,
     ) = TurnTickingEngine.tick(
         fame = fame,
         resourcePoints = resourcePoints,
@@ -72,6 +73,7 @@ class TurnTickingEngineTest {
         storage = storage,
         councilCooldowns = councilCooldowns,
         modifiers = modifiers,
+        bonusResourceDice = bonusResourceDice,
     )
 
     // ── War threats & pressure (roadmap #12) ───────────────────────────
@@ -653,5 +655,171 @@ class TurnTickingEngineTest {
         assertEquals(previewResult.warThreats[0].escalationLevel, commitResult.warThreats[0].escalationLevel)
         assertEquals(previewResult.armyDeployments.size, commitResult.armyDeployments.size)
         assertEquals(previewResult.warPressure?.currentPressure, commitResult.warPressure?.currentPressure)
+    }
+
+    // ── RP-to-XP conversion ────────────────────────────────────────────
+
+    @Test
+    fun testRpToXpConversionBasic() {
+        val result = TurnTickingEngine.tick(
+            fame = fame(), resourcePoints = resourcePoints(), resourceDice = resourcePoints(),
+            consumption = consumption(), commodities = commodities(), storage = storage(),
+            councilCooldowns = null, modifiers = emptyArray(),
+            rpToXpConversionRate = 10, rpNow = 50,
+        )
+        assertEquals(5, result.xpAwarded)
+    }
+
+    @Test
+    fun testRpToXpConversionWithLimit() {
+        val result = TurnTickingEngine.tick(
+            fame = fame(), resourcePoints = resourcePoints(), resourceDice = resourcePoints(),
+            consumption = consumption(), commodities = commodities(), storage = storage(),
+            councilCooldowns = null, modifiers = emptyArray(),
+            rpToXpConversionRate = 10, rpToXpConversionLimit = 30, rpNow = 100,
+        )
+        assertEquals(3, result.xpAwarded)
+    }
+
+    @Test
+    fun testRpToXpConversionDisabledWhenRateIsZero() {
+        val result = TurnTickingEngine.tick(
+            fame = fame(), resourcePoints = resourcePoints(), resourceDice = resourcePoints(),
+            consumption = consumption(), commodities = commodities(), storage = storage(),
+            councilCooldowns = null, modifiers = emptyArray(),
+            rpToXpConversionRate = 0, rpNow = 100,
+        )
+        assertEquals(0, result.xpAwarded)
+    }
+
+    @Test
+    fun testRpToXpConversionNoXpWhenNoRp() {
+        val result = TurnTickingEngine.tick(
+            fame = fame(), resourcePoints = resourcePoints(), resourceDice = resourcePoints(),
+            consumption = consumption(), commodities = commodities(), storage = storage(),
+            councilCooldowns = null, modifiers = emptyArray(),
+            rpToXpConversionRate = 10, rpNow = 0,
+        )
+        assertEquals(0, result.xpAwarded)
+    }
+
+    @Test
+    fun testRpToXpConversionTruncatesFractional() {
+        val result = TurnTickingEngine.tick(
+            fame = fame(), resourcePoints = resourcePoints(), resourceDice = resourcePoints(),
+            consumption = consumption(), commodities = commodities(), storage = storage(),
+            councilCooldowns = null, modifiers = emptyArray(),
+            rpToXpConversionRate = 3, rpNow = 10,
+        )
+        assertEquals(3, result.xpAwarded)
+    }
+
+    @Test
+    fun testRpToXpConversionCreatesChangeEntry() {
+        val result = TurnTickingEngine.tick(
+            fame = fame(), resourcePoints = resourcePoints(), resourceDice = resourcePoints(),
+            consumption = consumption(), commodities = commodities(), storage = storage(),
+            councilCooldowns = null, modifiers = emptyArray(),
+            rpToXpConversionRate = 10, rpNow = 20,
+        )
+        val xpChange = result.changes.find { it.category == "xp" && it.field == "xpAwarded" }
+        assertNotNull(xpChange)
+        assertEquals(2, xpChange.newValue)
+    }
+
+    // ── Auto-gain fame per turn ────────────────────────────────────────
+
+    @Test
+    fun testAutoGainFamePerTurnIncreasesFame() {
+        // fame(now=2, next=3) -> advance makes now=3, then auto-gain makes now=4
+        val result = TurnTickingEngine.tick(
+            fame = fame(now = 2, next = 3), resourcePoints = resourcePoints(),
+            resourceDice = resourcePoints(), consumption = consumption(),
+            commodities = commodities(), storage = storage(),
+            councilCooldowns = null, modifiers = emptyArray(),
+            autoGainFamePerTurn = true, maximumFamePoints = 5,
+        )
+        assertEquals(4, result.fame.now)
+    }
+
+    @Test
+    fun testAutoGainFamePerTurnDoesNotExceedMaximum() {
+        // fame(now=3, next=3) -> advance makes now=3, auto-gain capped at max=3
+        val result = TurnTickingEngine.tick(
+            fame = fame(now = 3, next = 3), resourcePoints = resourcePoints(),
+            resourceDice = resourcePoints(), consumption = consumption(),
+            commodities = commodities(), storage = storage(),
+            councilCooldowns = null, modifiers = emptyArray(),
+            autoGainFamePerTurn = true, maximumFamePoints = 3,
+        )
+        assertEquals(3, result.fame.now)
+    }
+
+    @Test
+    fun testAutoGainFamePerTurnDisabledByDefault() {
+        // fame(now=2, next=3) -> advance makes now=3, no auto-gain
+        val result = TurnTickingEngine.tick(
+            fame = fame(now = 2, next = 3), resourcePoints = resourcePoints(),
+            resourceDice = resourcePoints(), consumption = consumption(),
+            commodities = commodities(), storage = storage(),
+            councilCooldowns = null, modifiers = emptyArray(),
+            maximumFamePoints = 5,
+        )
+        assertEquals(3, result.fame.now)
+    }
+
+    @Test
+    fun testAutoGainFamePerTurnCreatesChangeEntry() {
+        // fame(now=1, next=3) -> advance makes now=3, auto-gain makes now=4
+        val result = TurnTickingEngine.tick(
+            fame = fame(now = 1, next = 3), resourcePoints = resourcePoints(),
+            resourceDice = resourcePoints(), consumption = consumption(),
+            commodities = commodities(), storage = storage(),
+            councilCooldowns = null, modifiers = emptyArray(),
+            autoGainFamePerTurn = true, maximumFamePoints = 5,
+        )
+        val fameChange = result.changes.find { it.category == "fame" && it.field == "autoGain" }
+        assertNotNull(fameChange)
+        assertEquals(3, fameChange.oldValue)
+        assertEquals(4, fameChange.newValue)
+    }
+
+    @Test
+    fun testAutoGainFamePerTurnPreservesFameNextAndType() {
+        // fame(now=1, next=5, type="famous") -> advance makes now=5, next=0
+        // auto-gain: now=5+1=6 but capped at max=5, so now=5
+        val result = TurnTickingEngine.tick(
+            fame = fame(now = 1, next = 5, type = "famous"), resourcePoints = resourcePoints(),
+            resourceDice = resourcePoints(), consumption = consumption(),
+            commodities = commodities(), storage = storage(),
+            councilCooldowns = null, modifiers = emptyArray(),
+            autoGainFamePerTurn = true, maximumFamePoints = 5,
+        )
+        assertEquals(0, result.fame.next)
+        assertEquals("famous", result.fame.type)
+    }
+
+    // ── Bonus resource dice ─────────────────────────────────────────────
+
+    @Test
+    fun testBonusResourceDicePassedThroughToTickResult() {
+        val result = tick(bonusResourceDice = 3)
+        assertEquals(3, result.bonusResourceDice)
+    }
+
+    @Test
+    fun testBonusResourceDiceDefaultIsZero() {
+        val result = tick()
+        assertEquals(0, result.bonusResourceDice)
+    }
+
+    @Test
+    fun testBonusResourceDiceDoesNotAffectResourceDiceNow() {
+        // bonusResourceDice should NOT modify the resourceDice.now/next values
+        val dice = resourcePoints(now = 5, next = 2)
+        val result = tick(resourceDice = dice, bonusResourceDice = 4)
+        assertEquals(2, result.resourceDice.now)  // next -> now
+        assertEquals(0, result.resourceDice.next) // next reset
+        assertEquals(4, result.bonusResourceDice)
     }
 }

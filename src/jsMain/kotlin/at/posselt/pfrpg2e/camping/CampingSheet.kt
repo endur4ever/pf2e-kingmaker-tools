@@ -73,7 +73,10 @@ import js.array.component2
 import js.core.Void
 import js.objects.Object
 import js.objects.ReadonlyRecord
+import kotlinx.coroutines.async
 import kotlinx.coroutines.await
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.datetime.LocalTime
 import kotlinx.js.JsPlainObject
 import org.w3c.dom.HTMLButtonElement
@@ -1111,13 +1114,23 @@ class CampingSheet(
         val cookMealActor = parsedCookingChoices.cook
         val cookingSkillOptions = parsedCookingChoices.skills.map { it.toOption() }
         val knownRecipes = camping.cooking.knownRecipes.toSet()
-        return arrayOf(starving, rations) + camping.getAllRecipes()
+        val specialRecipes = camping.getAllRecipes()
             // The basic meal is cooked via the Cook Meal activity tile (basic cooking roll),
             // so it is omitted from the special-meal recipe list.
             .filter { it.id != "basic-meal" }
             .sortedBy { it.name }
+        // The compendium item is only consulted for a fallback icon, but resolving it
+        // serially per recipe dominated the sheet's render time (one document roundtrip
+        // per recipe). Only icon-less recipes need it, and those resolve concurrently.
+        val fallbackIconsByRecipeId = coroutineScope {
+            specialRecipes
+                .filter { it.icon == null }
+                .map { recipe -> async { recipe.id to itemFromUuid(recipe.uuid)?.img } }
+                .awaitAll()
+                .toMap()
+        }
+        return arrayOf(starving, rations) + specialRecipes
             .map { recipe ->
-                val item = itemFromUuid(recipe.uuid)
                 val cookingCost = buildFoodCost(
                     recipe.cookingCost(),
                     totalAmount = total,
@@ -1129,7 +1142,8 @@ class CampingSheet(
                     targetRecipe = recipe.id,
                     cost = cookingCost,
                     uuid = recipe.uuid,
-                    icon = recipe.icon ?: item?.img ?: "icons/consumables/food/shank-meat-bone-glazed-brown.webp",
+                    icon = recipe.icon ?: fallbackIconsByRecipeId[recipe.id]
+                        ?: "icons/consumables/food/shank-meat-bone-glazed-brown.webp",
                     requiresCheck = true,
                     hidden = section != CampingSheetSection.EATING || cookMealActor == null || recipe.id !in knownRecipes,
                     rations = false,
@@ -1181,7 +1195,16 @@ class CampingSheet(
         val widthWithoutBorder = windowWidth - 2
         val pxTimeOffset = -((dayPercentage * widthWithoutBorder).toInt() - widthWithoutBorder / 2)
         val camping = actor.getCamping() ?: getDefaultCamping(game)
-        val actorsByUuid = getCampingActorsByUuid(camping.actorUuids).associateBy(PF2EActor::uuid)
+        // Parallelize independent suspend lookups: actor UUID resolution and compendium
+        // food-item fetching are completely independent of each other.
+        val (actors, foodItems) = coroutineScope {
+            val actorsDeferred = async { getCampingActorsByUuid(camping.actorUuids) }
+            val foodDeferred = async { getCompendiumFoodItems() }
+            val actors = actorsDeferred.await()
+            val food = foodDeferred.await()
+            actors to food
+        }
+        val actorsByUuid = actors.associateBy(PF2EActor::uuid)
         val charactersByUuid: Map<String, PF2EActor> = actorsByUuid
             .mapNotNull {
                 val value = it.value
@@ -1197,7 +1220,6 @@ class CampingSheet(
         if (setWatchesSection) {
             ensureWatchSlots(camping)
         }
-        val foodItems = getCompendiumFoodItems()
         val totalFood = camping.getTotalCarriedFood(actor, foodItems)
         val availableFood = buildFoodCost(totalFood, items = foodItems)
         val parsedCookingChoices = camping.findCookingChoices(

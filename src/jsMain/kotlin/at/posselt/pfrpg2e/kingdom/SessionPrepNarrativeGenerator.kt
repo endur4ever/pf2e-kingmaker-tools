@@ -85,7 +85,7 @@ object SessionPrepNarrativeGenerator {
         // Companion Moments
         if (view.companionMoments.isNotEmpty()) {
             sb.append("<h2>Companion Moments</h2>\n")
-            sb.append("<p>")
+            sb.append("<p>\n")
             val companionDescriptions = view.companionMoments.joinToString("; ") { moment ->
                 buildString {
                     append(esc(moment.name))
@@ -98,6 +98,22 @@ object SessionPrepNarrativeGenerator {
                 }
             }
             sb.append("Personal companion storylines are active: $companionDescriptions.")
+            sb.append("</p>\n")
+        }
+
+        // Recent Turns (GM only)
+        if (view.isGM && view.recentTurns.isNotEmpty()) {
+            sb.append("<h2>Recent Turns</h2>\n")
+            sb.append("<p>\n")
+            val turnDescriptions = view.recentTurns.joinToString(". ") { t ->
+                buildString {
+                    append("Turn ${t.turn}: Fame ${t.fame}, ${t.resourcePoints} RP, ${t.consumption} consumption, ${t.unrest} unrest")
+                    if (t.warPressure != null) append(", war pressure ${t.warPressure}")
+                    if (t.xpAwarded != null) append(", ${t.xpAwarded} XP awarded")
+                    if (!t.clockEvents.isNullOrEmpty()) append("; clock events: ${t.clockEvents.joinToString(", ")}")
+                }
+            }
+            sb.append("Recent kingdom history: $turnDescriptions.")
             sb.append("</p>\n")
         }
 
@@ -155,6 +171,20 @@ object SessionPrepNarrativeGenerator {
                 val turns = if (m.turnsRemaining != null) " (${m.turnsRemaining} turns remaining)" else ""
                 val detail = if (m.detail.isNotBlank()) " [${m.detail}]" else ""
                 sb.appendLine("- ${m.name}$turns$detail")
+            }
+        }
+
+        if (view.isGM && view.recentTurns.isNotEmpty()) {
+            sb.appendLine()
+            sb.appendLine("**Recent Turns**")
+            for (t in view.recentTurns) {
+                sb.appendLine("- Turn ${t.turn}: Fame ${t.fame}, ${t.resourcePoints} RP, ${t.consumption} consumption, ${t.unrest} unrest${if (t.warPressure != null) ", war pressure ${t.warPressure}" else ""}${if (t.xpAwarded != null) ", ${t.xpAwarded} XP" else ""}")
+                if (!t.clockEvents.isNullOrEmpty()) {
+                    sb.appendLine("  Clock events: ${t.clockEvents.joinToString(", ")}")
+                }
+                if (!t.notes.isNullOrBlank()) {
+                    sb.appendLine("  Notes: ${t.notes}")
+                }
             }
         }
 

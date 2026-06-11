@@ -78,6 +78,7 @@ external interface KingdomSheetContext : ValidatedHandlebarsContext {
     val consumption: Int
     val automateStats: Boolean
     val resourceDiceIncome: String
+    val bonusResourceDiceInput: FormElementContext
     val skillChecks: Array<SkillChecksContext>
     val automateResources: Boolean
     val useLeadershipModifiers: Boolean

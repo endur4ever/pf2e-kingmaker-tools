@@ -84,6 +84,7 @@ fun KingdomData.getResourceDiceAmount(
         kingdomLevel +
         allFeats.sumOf { it.feat.resourceDice ?: 0 } +
         resourceDice.now +
+        bonusResourceDice +
         if (settings.settlementsGenerateRd) {
             settlements.sumOf {
                 when (it.size.type) {

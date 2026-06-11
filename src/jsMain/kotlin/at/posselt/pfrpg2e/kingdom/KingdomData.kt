@@ -108,6 +108,7 @@ external interface KingdomSettings {
     var capStructureBonusAtKingdomLevel: Boolean
     var capitalCanGrowOneSizeLarger: Boolean
     var enableCouncilMissions: Boolean
+    var autoGainFamePerTurn: Boolean
 
     // Army & war pressure board (roadmap #12) — nullable for back-compat (read via the
     // isArmyPressureBoardEnabled()/… helpers in ArmyWarPressure.kt).
@@ -126,6 +127,9 @@ external interface KingdomSettings {
     var pacingAlertChapterTargetLevel: Int?
     // Dedicated loot-imbalance tolerance; null falls back to pacingAlertLevelMismatchRange.
     var pacingAlertLootImbalanceRange: Int?
+
+    // Rough terrain cost multipliers (roadmap #14)
+    var enableRoughTerrainCosts: Boolean?
 }
 
 @JsPlainObject
@@ -250,6 +254,9 @@ external interface KingdomData {
     var pacingLastLevelMismatch: String?
     /** Pacing tracking: last reported loot-imbalance severity, so it fires only on change. */
     var pacingLastLootImbalance: String?
+
+    /** Bonus resource dice granted by the GM this turn (e.g. from events). Applied during collection, then reset. */
+    var bonusResourceDice: Int = 0
 }
 
 fun RawLeaderKingdomSkills.hasSkill(leader: Leader, skill: KingdomSkill) =

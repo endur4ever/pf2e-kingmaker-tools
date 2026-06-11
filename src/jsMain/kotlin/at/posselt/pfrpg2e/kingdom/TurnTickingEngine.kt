@@ -47,6 +47,8 @@ data class TickResult(
 		val warThreats: Array<RawWarThreat> = emptyArray(),
 		val armyDeployments: Array<RawArmyDeployment> = emptyArray(),
 		val warPressure: RawWarPressure? = null,
+	val xpAwarded: Int = 0,
+	val bonusResourceDice: Int = 0,
 )
 
 /**
@@ -78,8 +80,15 @@ object TurnTickingEngine {
 	 * @param commodities Current commodity state.
 	 * @param storage Commodity storage capacity (used to cap end-turn merge).
 	 * @param councilCooldowns Nullable council cooldown state.
-	 * @param modifiers Current array of active modifiers (may carry turn durations).
-	 * @param campaignClocks Array of campaign clocks to tick.
+	 * @param warPressure Current war pressure state.
+	 * @param currentTurn Current turn number (for war-threat bookkeeping).
+	 * @param xp Current kingdom XP.
+	 * @param xpThreshold XP needed to reach the next kingdom level.
+	 * @param rpNow Current resource points (now) — used for RP-to-XP conversion.
+	 * @param rpToXpConversionRate How many RP convert to 1 XP (e.g. 10 means 10 RP = 1 XP). 0 disables.
+	 * @param rpToXpConversionLimit Max RP that can be converted per turn. 0 means no limit.
+	 * @param maximumFamePoints Maximum fame the kingdom can hold.
+	 * @param autoGainFamePerTurn If true, automatically gain 1 fame at end of turn (up to maximum).
 	 * @return [TickResult] with all post-tick values and a list of changes.
 	 */
 	fun tick(
@@ -98,6 +107,14 @@ object TurnTickingEngine {
 		armyDeployments: Array<RawArmyDeployment> = emptyArray(),
 		warPressure: RawWarPressure? = null,
 		currentTurn: Int = 0,
+		xp: Int = 0,
+		xpThreshold: Int = 0,
+		rpNow: Int = 0,
+		rpToXpConversionRate: Int = 0,
+		rpToXpConversionLimit: Int = 0,
+		maximumFamePoints: Int = 3,
+		autoGainFamePerTurn: Boolean = false,
+		bonusResourceDice: Int = 0,
 	): TickResult {
 		val changes = mutableListOf<TickChange>()
 
@@ -231,10 +248,38 @@ object TurnTickingEngine {
 			changes += TickChange("warPressure", "currentPressure", warPressure?.currentPressure, newWarPressure.currentPressure)
 		}
 
+		// 13) RP-to-XP conversion: convert current RP into XP based on rate and limit
+		var xpAwarded = 0
+		if (rpToXpConversionRate > 0 && rpNow > 0) {
+			val convertibleRp = if (rpToXpConversionLimit > 0) {
+				minOf(rpNow, rpToXpConversionLimit)
+			} else {
+				rpNow
+			}
+			xpAwarded = convertibleRp / rpToXpConversionRate
+			if (xpAwarded > 0) {
+				changes += TickChange("xp", "xpAwarded", null, xpAwarded)
+			}
+		}
+
+		// 14) Auto-gain fame per turn (up to maximumFamePoints)
+		val fameAfterAutoGain = if (autoGainFamePerTurn) {
+			val currentFameNow = newFame.now
+			if (currentFameNow < maximumFamePoints) {
+				val withAutoFame = RawFame(now = currentFameNow + 1, next = newFame.next, type = newFame.type)
+				changes += TickChange("fame", "autoGain", currentFameNow, withAutoFame.now)
+				withAutoFame
+			} else {
+				newFame
+			}
+		} else {
+			newFame
+		}
+
 		return TickResult(
 			supernaturalSolutions = 0,
 			creativeSolutions = 0,
-			fame = newFame,
+			fame = fameAfterAutoGain,
 			resourcePoints = newResourcePoints,
 			resourceDice = newResourceDice,
 			consumption = newConsumption,
@@ -249,6 +294,8 @@ object TurnTickingEngine {
 			warThreats = tickedThreats,
 			armyDeployments = armyDeployments,
 			warPressure = newWarPressure,
+			xpAwarded = xpAwarded,
+			bonusResourceDice = bonusResourceDice,
 		)
 	}
 

@@ -1,4 +1,13 @@
 <h2>{{localizeKM "chatMessages.endTurn.title"}}</h2>
+{{#if (or xpAwarded fame)}}
+<div class="km-end-turn-summary">
+    {{#if xpAwarded}}
+    <p><strong>{{localizeKM "kingdom.xpAwarded"}}:</strong> {{xpAwarded}}</p>
+    {{/if}}
+    <p><strong>{{localizeKM "kingdom.fameNow"}}:</strong> {{fame}}{{#if maximumFamePoints}}/{{maximumFamePoints}}{{/if}}</p>
+    <hr>
+</div>
+{{/if}}
 {{#if changes.length}}
 <ul>
     {{#each changes}}

@@ -25,6 +25,7 @@ class SessionPrepNarrativeGeneratorTest {
         unresolvedEvents: List<SessionPrepEntry> = emptyList(),
         hexHooks: List<SessionPrepEntry> = emptyList(),
         companionMoments: List<SessionPrepEntry> = emptyList(),
+        recentTurns: List<TurnRecentEntry> = emptyList(),
         isGM: Boolean = true,
     ) = SessionPrepView(
         openQuests = openQuests,
@@ -32,6 +33,7 @@ class SessionPrepNarrativeGeneratorTest {
         unresolvedEvents = unresolvedEvents,
         hexHooks = hexHooks,
         companionMoments = companionMoments,
+        recentTurns = recentTurns,
         isGM = isGM,
     )
 

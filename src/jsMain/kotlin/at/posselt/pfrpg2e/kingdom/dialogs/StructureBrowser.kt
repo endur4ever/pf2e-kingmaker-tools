@@ -106,6 +106,7 @@ external interface StructureContext {
     val constructedRp: Int
     val remainingRp: Int
     val initialRp: Int?
+    val terrainWarning: String?
 }
 
 @Suppress("unused")
@@ -429,7 +430,15 @@ class StructureBrowser(
             }
 
             Cost.HALF -> structures.map { it.copy(notes = null, construction = it.construction.halveCost()) }
-            Cost.FULL -> structures.map { it.copy(notes = null) }
+            Cost.FULL -> structures.map {
+                val base = it.copy(notes = null)
+                if (kingdom.settings.enableRoughTerrainCosts == true) {
+                    val terrain = kingdom.settlements.find { s -> s.sceneId == kingdom.activeSettlement }?.terrain
+                    base.copy(construction = base.construction.withTerrainCost(terrain))
+                } else {
+                    base
+                }
+            }
             Cost.PARTIAL ->
                 structures.map {
                     it.copy(
@@ -614,6 +623,16 @@ class StructureBrowser(
                         lacksFunds = it.construction.luxuries > kingdom.commodities.now.luxuries,
                     ),
                     initialRp = initialRp,
+                    terrainWarning = if (kingdom.settings.enableRoughTerrainCosts == true) {
+                        val terrain = kingdom.settlements.find { s -> s.sceneId == kingdom.activeSettlement }?.terrain
+                        if (terrain != null && terrain != "plains") {
+                            t("kingdom.terrainCostWarning", recordOf("terrain" to t("settlementTerrain.$terrain")))
+                        } else {
+                            null
+                        }
+                    } else {
+                        null
+                    },
                 )
             }.toTypedArray()
         val activeSettlement = Select(

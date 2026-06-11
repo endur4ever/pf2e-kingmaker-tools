@@ -118,6 +118,14 @@ fun runKingdomTurnTick(kingdom: KingdomData, storage: CommodityStorage, currentT
         armyDeployments = kingdom.armyDeployments ?: emptyArray(),
         warPressure = kingdom.warPressure,
         currentTurn = currentTurn,
+        xp = kingdom.xp,
+        xpThreshold = kingdom.xpThreshold,
+        rpNow = kingdom.resourcePoints.now,
+        rpToXpConversionRate = kingdom.settings.rpToXpConversionRate,
+        rpToXpConversionLimit = kingdom.settings.rpToXpConversionLimit,
+        maximumFamePoints = kingdom.settings.maximumFamePoints,
+        autoGainFamePerTurn = kingdom.settings.autoGainFamePerTurn,
+        bonusResourceDice = kingdom.bonusResourceDice,
     )
 
 suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData): TickResult {
@@ -141,6 +149,7 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
     kingdom.warThreats = tickResult.warThreats
     kingdom.armyDeployments = tickResult.armyDeployments
     kingdom.warPressure = tickResult.warPressure
+    kingdom.bonusResourceDice = tickResult.bonusResourceDice
 
     // Apply campaign clock tick results (already included in tickResult)
     kingdom.campaignClocks = tickResult.updatedClocks
@@ -212,6 +221,7 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
             resourcePoints = kingdom.resourcePoints.now,
             consumption = kingdom.consumption.now,
             unrest = kingdom.unrest,
+            xpAwarded = tickResult.xpAwarded,
             clockEvents = clockEventNames,
             warPressure = warPressureNow,
         ),
@@ -237,6 +247,9 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
     endTurnContext.clockEvents = tickResult.clockEvents
     endTurnContext.changes = tickResult.changes.map { it.toDisplayString() }.toTypedArray()
     endTurnContext.kingdomName = kingdom.name
+    endTurnContext.xpAwarded = tickResult.xpAwarded
+    endTurnContext.fame = kingdom.fame.now
+    endTurnContext.maximumFamePoints = kingdom.settings.maximumFamePoints
     postChatTemplate(
         templatePath = "chatmessages/end-turn.hbs",
         templateContext = endTurnContext,

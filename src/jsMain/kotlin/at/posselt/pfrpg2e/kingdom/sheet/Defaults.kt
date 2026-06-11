@@ -41,6 +41,7 @@ fun createKingdomDefaults(name: String) =
         unrest = 0,
         resourcePoints = RawResources(now = 0, next = 0),
         resourceDice = RawResources(now = 0, next = 0),
+        bonusResourceDice = 0,
         workSites = RawWorkSites(
             farmlands = RawWorkSite(
                 quantity = 0,
@@ -117,6 +118,7 @@ fun createKingdomDefaults(name: String) =
             capStructureBonusAtKingdomLevel = false,
             capitalCanGrowOneSizeLarger = false,
             enableCouncilMissions = false,
+            autoGainFamePerTurn = false,
             leaderSkills = RawLeaderSkills(
                 ruler = arrayOf(
                     "diplomacy",

@@ -5,6 +5,7 @@ import at.posselt.pfrpg2e.companion.CompanionPersonalQuest
 import at.posselt.pfrpg2e.data.hex.HexContentVisibility
 import at.posselt.pfrpg2e.kingdom.data.RawHexContent
 import at.posselt.pfrpg2e.kingdom.data.RawQuest
+import at.posselt.pfrpg2e.kingdom.data.RawTurnRecord
 
 /**
  * Session Prep & Recap Dashboard (roadmap #10).
@@ -32,17 +33,31 @@ data class SessionPrepEntry(
     val turnsRemaining: Int? = null,
 )
 
+data class TurnRecentEntry(
+    val turn: Int,
+    val timestamp: String,
+    val fame: Int,
+    val resourcePoints: Int,
+    val consumption: Int,
+    val unrest: Int,
+    val xpAwarded: Int?,
+    val clockEvents: Array<String>?,
+    val warPressure: Int?,
+    val notes: String?,
+)
+
 data class SessionPrepView(
     val openQuests: List<SessionPrepEntry>,
     val activeClocks: List<SessionPrepEntry>,
     val unresolvedEvents: List<SessionPrepEntry>,
     val hexHooks: List<SessionPrepEntry>,
     val companionMoments: List<SessionPrepEntry>,
+    val recentTurns: List<TurnRecentEntry>,
     val isGM: Boolean,
 ) {
     val totalCount: Int
         get() = openQuests.size + activeClocks.size + unresolvedEvents.size +
-            hexHooks.size + companionMoments.size
+            hexHooks.size + companionMoments.size + recentTurns.size
 
     val hasAnything: Boolean
         get() = totalCount > 0
@@ -123,6 +138,7 @@ fun buildSessionPrepView(
     hexContents: Array<RawHexContent>?,
     companionQuests: Array<CompanionPersonalQuest>?,
     isGM: Boolean,
+    turnHistory: Array<RawTurnRecord>? = null,
 ): SessionPrepView = SessionPrepView(
     openQuests = buildOpenQuests(quests),
     // Campaign clocks + unresolved events are GM-facing prep; withheld from players.
@@ -130,5 +146,26 @@ fun buildSessionPrepView(
     unresolvedEvents = if (isGM) buildUnresolvedEvents(events) else emptyList(),
     hexHooks = buildHexHooks(hexContents, isGM),
     companionMoments = buildCompanionMoments(companionQuests, isGM),
+    // Recent turns are GM-only, like activeClocks.
+    recentTurns = if (isGM) buildRecentTurns(turnHistory) else emptyList(),
     isGM = isGM,
 )
+
+private fun buildRecentTurns(turnHistory: Array<RawTurnRecord>?): List<TurnRecentEntry> =
+    (turnHistory ?: emptyArray())
+        .takeLast(10)
+        .reversed()
+        .map { record ->
+            TurnRecentEntry(
+                turn = record.turn,
+                timestamp = record.timestamp,
+                fame = record.fame,
+                resourcePoints = record.resourcePoints,
+                consumption = record.consumption,
+                unrest = record.unrest,
+                xpAwarded = record.xpAwarded,
+                clockEvents = record.clockEvents,
+                warPressure = record.warPressure,
+                notes = record.notes,
+            )
+        }
