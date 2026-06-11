@@ -23,6 +23,9 @@ import at.posselt.pfrpg2e.kingdom.pacingChapterTargetLevel
 import at.posselt.pfrpg2e.kingdom.postPacingAlertChat
 import at.posselt.pfrpg2e.kingdom.data.ChosenFeature
 import at.posselt.pfrpg2e.kingdom.data.RawPacingAlert
+import at.posselt.pfrpg2e.kingdom.data.RawTurnRecord
+import at.posselt.pfrpg2e.kingdom.appendTurnRecord
+import at.posselt.pfrpg2e.kingdom.buildTurnRecord
 import at.posselt.pfrpg2e.data.kingdom.structures.CommodityStorage
 import at.posselt.pfrpg2e.actor.partyMembers
 import at.posselt.pfrpg2e.kingdom.resources.calculateStorage
@@ -196,6 +199,23 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
     if (firedPacingAlerts.isNotEmpty()) {
         kingdom.pacingAlerts = (kingdom.pacingAlerts ?: emptyArray()) + firedPacingAlerts.toTypedArray()
     }
+
+    // Per-turn history record (gap analysis item 2): snapshot post-tick kingdom state.
+    val clockEventNames = tickResult.clockEvents.map { it.label }.toTypedArray()
+    val warPressureNow = kingdom.warPressure?.currentPressure
+    kingdom.turnHistory = appendTurnRecord(
+        history = kingdom.turnHistory,
+        record = buildTurnRecord(
+            turn = currentTurn,
+            timestamp = kotlin.js.Date().toISOString(),
+            fame = kingdom.fame.now,
+            resourcePoints = kingdom.resourcePoints.now,
+            consumption = kingdom.consumption.now,
+            unrest = kingdom.unrest,
+            clockEvents = clockEventNames,
+            warPressure = warPressureNow,
+        ),
+    )
 
     actor.setKingdom(kingdom)
 

@@ -25,6 +25,7 @@ import at.posselt.pfrpg2e.kingdom.data.RawAbilityBoostChoices
 import at.posselt.pfrpg2e.kingdom.data.RawAbilityScores
 import at.posselt.pfrpg2e.kingdom.data.RawArmyDeployment
 import at.posselt.pfrpg2e.kingdom.data.RawPacingAlert
+import at.posselt.pfrpg2e.kingdom.data.RawTurnRecord
 import at.posselt.pfrpg2e.kingdom.data.RawWarPressure
 import at.posselt.pfrpg2e.kingdom.data.RawWarThreat
 import at.posselt.pfrpg2e.kingdom.data.RawHexContent
@@ -239,6 +240,9 @@ external interface KingdomData {
 
     /** Balance & pacing alerts (roadmap #13) — advisory alert history, nullable for back-compat. */
     var pacingAlerts: Array<RawPacingAlert>?
+
+    /** Per-turn history records (gap analysis item 2) — newest last, nullable for back-compat. */
+    var turnHistory: Array<RawTurnRecord>?
     /** Pacing tracking: last observed unrest + consecutive turns it hasn't changed. */
     var pacingLastUnrest: Int?
     var pacingTurnsSinceUnrestChange: Int?
