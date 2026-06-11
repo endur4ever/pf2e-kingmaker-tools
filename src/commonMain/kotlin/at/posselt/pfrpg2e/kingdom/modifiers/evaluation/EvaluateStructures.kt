@@ -204,7 +204,8 @@ fun evaluateSettlement(
     val constructedStructures = structures.filter { !it.slowed && it.rpPaid }
     val slowedStructures = structures.filter { it.slowed }
     val underConstructionStructures = structures.filter { !it.slowed && !it.rpPaid }
-    val consumptionReduction = calculateConsumptionReduction(constructedStructures)
+    val waterAdjacentMillBonus = if (data.waterBorders >= 1 && constructedStructures.any { it.id == "mill" }) 1 else 0
+    val consumptionReduction = calculateConsumptionReduction(constructedStructures) + waterAdjacentMillBonus
     val (bonuses, eventBonus, leaderBonus) = combineBonuses(
         constructedStructures,
         allStructuresStack,

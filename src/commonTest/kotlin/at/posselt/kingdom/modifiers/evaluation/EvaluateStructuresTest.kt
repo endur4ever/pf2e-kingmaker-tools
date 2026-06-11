@@ -588,4 +588,95 @@ class EvaluateStructuresTest {
         )
         assertEquals(2, result.divine)
     }
+
+    @Test
+    fun millGetsExtraConsumptionReductionWhenWaterAdjacent() {
+        val resultWithWater = evaluateSettlement(
+            data = SettlementData(
+                name = "name",
+                id = "name",
+                type = SettlementType.CAPITAL,
+                waterBorders = 1,
+                occupiedBlocks = 4,
+                isSecondaryTerritory = false,
+                layoutType = SettlementLayoutType.RIGID,
+            ),
+            structures = listOf(
+                Structure(
+                    name = "Mill",
+                    id = "mill",
+                    consumptionReduction = 1,
+                    uuid = "",
+                    actorUuid = ""
+                ),
+            ),
+            allStructuresStack = false,
+            allowCapitalInvestmentInCapitalWithoutBank = false,
+            kingdomLevel = 1,
+            capStructureBonusAtKingdomLevel = false,
+            blocks = emptyList()
+        )
+        val resultWithoutWater = evaluateSettlement(
+            data = SettlementData(
+                name = "name",
+                id = "name",
+                type = SettlementType.CAPITAL,
+                waterBorders = 0,
+                occupiedBlocks = 4,
+                isSecondaryTerritory = false,
+                layoutType = SettlementLayoutType.RIGID,
+            ),
+            structures = listOf(
+                Structure(
+                    name = "Mill",
+                    id = "mill",
+                    consumptionReduction = 1,
+                    uuid = "",
+                    actorUuid = ""
+                ),
+            ),
+            allStructuresStack = false,
+            allowCapitalInvestmentInCapitalWithoutBank = false,
+            kingdomLevel = 1,
+            capStructureBonusAtKingdomLevel = false,
+            blocks = emptyList()
+        )
+        // Mill with water borders >= 1 gets +1 consumption reduction (total 2)
+        assertEquals(2, resultWithWater.consumptionReduction)
+        // Mill without water borders only gets base consumption reduction (1)
+        assertEquals(1, resultWithoutWater.consumptionReduction)
+        // Water-adjacent mill results in lower consumption
+        assertTrue(resultWithWater.consumption < resultWithoutWater.consumption)
+    }
+
+    @Test
+    fun nonMillStructureDoesNotGetWaterAdjacentBonus() {
+        val result = evaluateSettlement(
+            data = SettlementData(
+                name = "name",
+                id = "name",
+                type = SettlementType.CAPITAL,
+                waterBorders = 3,
+                occupiedBlocks = 4,
+                isSecondaryTerritory = false,
+                layoutType = SettlementLayoutType.RIGID,
+            ),
+            structures = listOf(
+                Structure(
+                    name = "residential",
+                    id = "residential",
+                    consumptionReduction = 1,
+                    uuid = "",
+                    actorUuid = ""
+                ),
+            ),
+            allStructuresStack = false,
+            allowCapitalInvestmentInCapitalWithoutBank = false,
+            kingdomLevel = 1,
+            capStructureBonusAtKingdomLevel = false,
+            blocks = emptyList()
+        )
+        // Non-mill structure does NOT get the water-adjacent bonus
+        assertEquals(1, result.consumptionReduction)
+    }
 }
