@@ -276,6 +276,11 @@ object TurnTickingEngine {
 			newFame
 		}
 
+		// 15) Reset bonus resource dice after applying them
+		if (bonusResourceDice != 0) {
+			changes += TickChange("bonusResourceDice", "reset", bonusResourceDice, 0)
+		}
+
 		return TickResult(
 			supernaturalSolutions = 0,
 			creativeSolutions = 0,
@@ -295,7 +300,7 @@ object TurnTickingEngine {
 			armyDeployments = armyDeployments,
 			warPressure = newWarPressure,
 			xpAwarded = xpAwarded,
-			bonusResourceDice = bonusResourceDice,
+			bonusResourceDice = 0,
 		)
 	}
 

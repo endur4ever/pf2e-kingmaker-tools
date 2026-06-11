@@ -109,6 +109,7 @@ class KingdomSheetDataModel(
                 }
             }
             string("activeSettlement", nullable = true)
+            int("bonusResourceDice")
             schema("notes") {
                 string("gm")
                 string("public")

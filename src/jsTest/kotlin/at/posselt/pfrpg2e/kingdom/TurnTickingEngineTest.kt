@@ -802,9 +802,17 @@ class TurnTickingEngineTest {
     // ── Bonus resource dice ─────────────────────────────────────────────
 
     @Test
-    fun testBonusResourceDicePassedThroughToTickResult() {
+    fun testBonusResourceDiceResetToZeroAfterTick() {
         val result = tick(bonusResourceDice = 3)
-        assertEquals(3, result.bonusResourceDice)
+        assertEquals(0, result.bonusResourceDice)
+    }
+
+    @Test
+    fun testBonusResourceDiceResetEmitsTickChange() {
+        val result = tick(bonusResourceDice = 3)
+        assertTrue(result.changes.any {
+            it.category == "bonusResourceDice" && it.field == "reset" && it.oldValue == 3 && it.newValue == 0
+        })
     }
 
     @Test
@@ -820,6 +828,12 @@ class TurnTickingEngineTest {
         val result = tick(resourceDice = dice, bonusResourceDice = 4)
         assertEquals(2, result.resourceDice.now)  // next -> now
         assertEquals(0, result.resourceDice.next) // next reset
-        assertEquals(4, result.bonusResourceDice)
+        assertEquals(0, result.bonusResourceDice) // always reset to 0
+    }
+
+    @Test
+    fun testBonusResourceDiceZeroDoesNotEmitTickChange() {
+        val result = tick(bonusResourceDice = 0)
+        assertTrue(result.changes.none { it.category == "bonusResourceDice" })
     }
 }

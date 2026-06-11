@@ -15,6 +15,7 @@
                         {{/if}}
                         {{#if hasCheck}}
                         <button {{#if disabled}}disabled{{/if}}
+                                {{#if disabledReason}}title="{{disabledReason}}"{{/if}}
                                 data-activity="{{id}}"
                                 type="button"
                                 class="km-kingdom-activity-check"

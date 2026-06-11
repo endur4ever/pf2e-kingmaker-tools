@@ -94,6 +94,7 @@ class KingdomSettingsDataModel(
             boolean("enableCouncilMissions")
             boolean("enableLeadershipModifiers")
             boolean("enableRoughTerrainCosts")
+            boolean("enableAnarchyActivityGating")
             string("recruitableArmiesFolderId", nullable = true)
             string("kingdomCultTable", nullable = true)
             string("kingdomEventsTable", nullable = true)
@@ -483,6 +484,17 @@ class KingdomSettingsApplication(
                             value = settings.pacingLootImbalanceRange(),
                             help = t("kingdom.pacingLootImbalanceRangeHelp"),
                             stacked = false,
+                        ),
+                    ),
+                ),
+                Section(
+                    legend = t("kingdom.anarchyActivityGatingSettings"),
+                    formRows = listOf(
+                        CheckboxInput(
+                            name = "enableAnarchyActivityGating",
+                            label = t("kingdom.enableAnarchyActivityGating"),
+                            value = settings.enableAnarchyActivityGating == true,
+                            help = t("kingdom.enableAnarchyActivityGatingHelp"),
                         ),
                     ),
                 ),

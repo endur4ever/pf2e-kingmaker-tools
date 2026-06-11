@@ -18,6 +18,8 @@ import at.posselt.pfrpg2e.utils.t
 import at.posselt.pfrpg2e.utils.getAppFlag
 import at.posselt.pfrpg2e.kingdom.KingdomActor
 import at.posselt.pfrpg2e.kingdom.ActivityCapCalculator
+import at.posselt.pfrpg2e.kingdom.activityAllowedDuringAnarchy
+import at.posselt.pfrpg2e.kingdom.isInAnarchy
 import com.foundryvtt.core.applications.ux.TextEditor.enrichHtml
 import js.array.toTypedArray
 import js.objects.Object
@@ -37,6 +39,7 @@ external interface ActivitySkillContext {
 external interface ActivityContext {
     val label: String
     val disabled: Boolean
+    val disabledReason: String?
     val description: String
     val actions: Array<Int>
     val id: String
@@ -86,6 +89,8 @@ private suspend fun toActivityContext(
     chosenFeatures: List<ChosenFeature>,
     openedDetails: Set<String>,
     activeLeader: Leader?,
+    anarchyAt: Int,
+    currentUnrest: Int,
 ): ActivityContext = coroutineScope {
     val descriptionP = async { enrichHtml(activity.description) }
     val criticalSuccessP = async { activity.criticalSuccess?.msg?.let { enrichHtml(it) } }
@@ -130,6 +135,22 @@ private suspend fun toActivityContext(
     } else {
         arrayOf(activity.actions ?: 1)
     }
+    val baseDisabled = !activity.canBePerformed(
+        allowCapitalInvestment = allowCapitalInvestment,
+        kingdomSkillRanks = kingdomSkillRanks,
+        kingdom = kingdom,
+        chosenFeats = chosenFeats,
+    )
+    val inAnarchy = isInAnarchy(currentUnrest, anarchyAt)
+    val anarchyGated = kingdom.settings.enableAnarchyActivityGating == true
+        && inAnarchy
+        && !activityAllowedDuringAnarchy(activity.id)
+    val disabled = baseDisabled || anarchyGated
+    val disabledReason = if (anarchyGated) {
+        t("kingdom.activityDisabledDuringAnarchy")
+    } else {
+        null
+    }
     ActivityContext(
         id = activity.id,
         label = activity.label(
@@ -141,12 +162,8 @@ private suspend fun toActivityContext(
         description = description,
         special = activity.special,
         automationNotes = activity.automationNotes,
-        disabled = !activity.canBePerformed(
-            allowCapitalInvestment = allowCapitalInvestment,
-            kingdomSkillRanks = kingdomSkillRanks,
-            kingdom = kingdom,
-            chosenFeats = chosenFeats,
-        ),
+        disabled = disabled,
+        disabledReason = disabledReason,
         fortune = activity.fortune,
         requirement = activity.requirement,
         criticalSuccess = criticalSuccess,
@@ -170,6 +187,8 @@ suspend fun activitiesToActivityContext(
     kingdom: KingdomData,
     chosenFeats: List<ChosenFeat>,
     activeLeader: Leader?,
+    anarchyAt: Int,
+    currentUnrest: Int,
 ) = coroutineScope {
     activities
         .map {
@@ -179,11 +198,13 @@ suspend fun activitiesToActivityContext(
                     kingdomLevel = kingdom.level,
                     allowCapitalInvestment = allowCapitalInvestment,
                     kingdomSkillRanks = kingdomSkillRanks,
-                    chosenFeatures = chosenFeatures,
-                    openedDetails = openedDetails,
                     kingdom = kingdom,
                     chosenFeats = chosenFeats,
+                    chosenFeatures = chosenFeatures,
+                    openedDetails = openedDetails,
                     activeLeader = activeLeader,
+                    anarchyAt = anarchyAt,
+                    currentUnrest = currentUnrest,
                 )
             }
         }
@@ -204,6 +225,8 @@ suspend fun toActivitiesContext(
     chosenFeatures: List<ChosenFeature>,
     openedDetails: Set<String>,
     activeLeader: Leader?,
+    anarchyAt: Int,
+    currentUnrest: Int,
 ): ActivitiesContext = coroutineScope {
     val activitiesByPhase = activities
         .asSequence()
@@ -218,6 +241,8 @@ suspend fun toActivitiesContext(
         kingdom,
         chosenFeats,
         activeLeader,
+        anarchyAt,
+        currentUnrest,
     )
     val leadership = activitiesToActivityContext(
         activitiesByPhase[KingdomPhase.LEADERSHIP.value].orEmpty(),
@@ -228,6 +253,8 @@ suspend fun toActivitiesContext(
         kingdom,
         chosenFeats,
         activeLeader,
+        anarchyAt,
+        currentUnrest,
     )
     val civic = activitiesToActivityContext(
         activitiesByPhase[KingdomPhase.CIVIC.value].orEmpty(),
@@ -238,6 +265,8 @@ suspend fun toActivitiesContext(
         kingdom,
         chosenFeats,
         activeLeader,
+        anarchyAt,
+        currentUnrest,
     )
     val region = activitiesToActivityContext(
         activitiesByPhase[KingdomPhase.REGION.value].orEmpty(),
@@ -248,6 +277,8 @@ suspend fun toActivitiesContext(
         kingdom,
         chosenFeats,
         activeLeader,
+        anarchyAt,
+        currentUnrest,
     )
     val army = activitiesToActivityContext(
         activitiesByPhase[KingdomPhase.ARMY.value].orEmpty(),
@@ -258,6 +289,8 @@ suspend fun toActivitiesContext(
         kingdom,
         chosenFeats,
         activeLeader,
+        anarchyAt,
+        currentUnrest,
     )
     val upkeep = activitiesToActivityContext(
         activitiesByPhase[KingdomPhase.UPKEEP.value].orEmpty(),
@@ -268,6 +301,8 @@ suspend fun toActivitiesContext(
         kingdom,
         chosenFeats,
         activeLeader,
+        anarchyAt,
+        currentUnrest,
     )
 
     val turnWizardState = actor.getAppFlag<KingdomActor, dynamic>("turn-wizard-state")

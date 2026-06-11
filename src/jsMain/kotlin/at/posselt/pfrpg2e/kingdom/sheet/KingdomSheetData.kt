@@ -57,4 +57,5 @@ external interface KingdomSheetData {
     val initialProficiencies: Array<String?>
     val activeLeader: String?
     val companions: Array<RawCharacter>
+    var bonusResourceDice: Int
 }

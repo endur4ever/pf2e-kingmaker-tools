@@ -130,6 +130,10 @@ external interface KingdomSettings {
 
     // Rough terrain cost multipliers (roadmap #14)
     var enableRoughTerrainCosts: Boolean?
+
+    // Anarchy activity gating — when enabled, non-essential activities are
+    // disabled in the UI during anarchy with an explanatory tooltip.
+    var enableAnarchyActivityGating: Boolean?
 }
 
 @JsPlainObject
@@ -256,7 +260,7 @@ external interface KingdomData {
     var pacingLastLootImbalance: String?
 
     /** Bonus resource dice granted by the GM this turn (e.g. from events). Applied during collection, then reset. */
-    var bonusResourceDice: Int = 0
+    var bonusResourceDice: Int
 }
 
 fun RawLeaderKingdomSkills.hasSkill(leader: Leader, skill: KingdomSkill) =

@@ -2080,6 +2080,8 @@ class KingdomSheet(
             kingdom = kingdom,
             chosenFeats = chosenFeats,
             activeLeader = game.getActiveLeader(),
+            anarchyAt = anarchyAt,
+            currentUnrest = kingdom.unrest,
         )
         val leadersContext = kingdom.leaders.toContext(
             leaderActors = leaderActors,
