@@ -24,6 +24,7 @@ import at.posselt.pfrpg2e.kingdom.data.MilestoneChoice
 import at.posselt.pfrpg2e.kingdom.data.RawAbilityBoostChoices
 import at.posselt.pfrpg2e.kingdom.data.RawAbilityScores
 import at.posselt.pfrpg2e.kingdom.data.RawArmyDeployment
+import at.posselt.pfrpg2e.kingdom.data.RawArmyBattle
 import at.posselt.pfrpg2e.kingdom.data.RawPacingAlert
 import at.posselt.pfrpg2e.kingdom.data.RawTurnRecord
 import at.posselt.pfrpg2e.kingdom.data.RawWarPressure
@@ -245,6 +246,7 @@ external interface KingdomData {
     var warThreats: Array<RawWarThreat>?
     var armyDeployments: Array<RawArmyDeployment>?
     var warPressure: RawWarPressure?
+    var activeBattles: Array<RawArmyBattle>?
 
     /** Balance & pacing alerts (roadmap #13) — advisory alert history, nullable for back-compat. */
     var pacingAlerts: Array<RawPacingAlert>?
