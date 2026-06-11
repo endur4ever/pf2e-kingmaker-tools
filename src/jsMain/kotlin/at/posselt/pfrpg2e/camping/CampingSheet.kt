@@ -1189,8 +1189,6 @@ class CampingSheet(
             }
             .toMap()
         val groupActivities = camping.groupActivities().sortedBy { it.data.id }
-        console.log("KM_DEBUG: All activities in groupActivities:", groupActivities.map { it.data.id }.joinToString(","))
-        console.log("KM_DEBUG: All activities in getAllActivities():", camping.getAllActivities().map { it.id }.joinToString(","))
         val section = fromCamelCase<CampingSheetSection>(camping.section) ?: CampingSheetSection.PREPARE_CAMPSITE
         val prepareCampSection = section == CampingSheetSection.PREPARE_CAMPSITE
         val campingActivitiesSection = section == CampingSheetSection.CAMPING_ACTIVITIES

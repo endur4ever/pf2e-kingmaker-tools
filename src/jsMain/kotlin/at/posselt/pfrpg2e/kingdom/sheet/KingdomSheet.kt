@@ -1067,7 +1067,7 @@ class KingdomSheet(
                         isGM = game.user.isGM,
                     )
                     val folder = SessionPrepJournalExporter.export(game, view)
-                    ui.notifications.info(t("kingdom.obsidianExportSuccess", recordOf("folder" to folder)))
+                    ui.notifications.info(t("kingdom.sessionPrep.exportSuccess", recordOf("folder" to folder)))
                 } catch (e: Throwable) {
                     ui.notifications.error("Export failed: ${e.message}")
                 }

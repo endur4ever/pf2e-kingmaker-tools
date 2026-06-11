@@ -5,6 +5,7 @@ import at.posselt.pfrpg2e.kingdom.data.RawCharacter
 import at.posselt.pfrpg2e.resting.DAY_SECONDS
 import at.posselt.pfrpg2e.settings.pfrpg2eKingdomCampingWeather
 import at.posselt.pfrpg2e.utils.buildPromise
+import at.posselt.pfrpg2e.utils.escapeHtml
 import at.posselt.pfrpg2e.utils.fromUuidOfTypes
 import at.posselt.pfrpg2e.utils.isFirstGM
 import at.posselt.pfrpg2e.utils.postChatMessage
@@ -188,7 +189,8 @@ private suspend fun announceArrival(game: Game, companion: RawCharacter) {
 	val destX = companion.destinationX ?: 0
 	val destY = companion.destinationY ?: 0
 	postChatMessage(
-		t("kingdom.companionArrival", recordOf("name" to companionName, "x" to destX, "y" to destY)),
+		// The message template is HTML; the actor-provided name must not inject into it.
+		t("kingdom.companionArrival", recordOf("name" to escapeHtml(companionName), "x" to destX, "y" to destY)),
 		isHtml = true,
 	)
 }

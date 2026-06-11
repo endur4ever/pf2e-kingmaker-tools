@@ -17,8 +17,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.asDeferred
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.promise
-import kotlinx.html.dom.create
-import kotlinx.html.js.span
 import kotlin.contracts.contract
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.io.encoding.Base64
@@ -131,9 +129,17 @@ fun Int.formatAsModifier() = if (this > 0) {
     "$this"
 }
 
-fun escapeHtml(value: String) = document.create.span {
-    +(value)
-}.innerText
+/**
+ * Escapes a plain string for safe interpolation into HTML. The previous DOM-based
+ * implementation (span text node read back via innerText) returned the input
+ * unchanged — every caller silently posted unescaped text.
+ */
+fun escapeHtml(value: String) = value
+    .replace("&", "&amp;")
+    .replace("<", "&lt;")
+    .replace(">", "&gt;")
+    .replace("\"", "&quot;")
+    .replace("'", "&#39;")
 
 
 @JsName("Number")

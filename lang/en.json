@@ -639,7 +639,8 @@
         "generateNarrativeTooltip": "Generate a narrative recap of the session prep data",
         "narrativeEmpty": "No session prep data available to generate a narrative from.",
         "exportToJournal": "Export to Journal",
-        "exportToJournalTooltip": "Export session prep to a Foundry Journal Entry"
+        "exportToJournalTooltip": "Export session prep to a Foundry Journal Entry",
+        "exportSuccess": "Successfully exported Session Prep to Journal folder: {folder}!"
       },
       "quests": {
         "addQuest": "Add Quest",
