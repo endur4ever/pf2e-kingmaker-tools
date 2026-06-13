@@ -21,6 +21,7 @@ import at.posselt.pfrpg2e.data.checks.RollMode
 import at.posselt.pfrpg2e.data.events.KingdomEventTrait
 import at.posselt.pfrpg2e.data.kingdom.KingdomSkill
 import at.posselt.pfrpg2e.data.kingdom.Relations
+import at.posselt.pfrpg2e.data.kingdom.applyStandingDelta
 import at.posselt.pfrpg2e.data.kingdom.calculateControlDC
 import at.posselt.pfrpg2e.data.kingdom.calculateHexXP
 import at.posselt.pfrpg2e.data.kingdom.calculateRpXP
@@ -58,6 +59,7 @@ import at.posselt.pfrpg2e.kingdom.data.limitBy
 import at.posselt.pfrpg2e.kingdom.data.RawConsumption
 import at.posselt.pfrpg2e.utils.typeSafeUpdate
 import com.foundryvtt.core.grid.GridOffset2D
+import at.posselt.pfrpg2e.kingdom.data.RawFactionStandingEntry
 import at.posselt.pfrpg2e.kingdom.data.RawGroup
 import at.posselt.pfrpg2e.kingdom.data.endTurn
 import at.posselt.pfrpg2e.kingdom.data.getChosenCharter
@@ -158,6 +160,7 @@ import at.posselt.pfrpg2e.kingdom.postPacingAlertChat
 import at.posselt.pfrpg2e.kingdom.recalculateWarPressure
 import at.posselt.pfrpg2e.kingdom.defaultWarPressure
 import at.posselt.pfrpg2e.kingdom.dialogs.AddWarThreat
+import at.posselt.pfrpg2e.kingdom.dialogs.ModifyFactionStanding
 import at.posselt.pfrpg2e.kingdom.dialogs.DeployableArmyOption
 import at.posselt.pfrpg2e.kingdom.dialogs.DeployThreatOption
 import at.posselt.pfrpg2e.kingdom.data.WarThreatStatus
@@ -922,6 +925,28 @@ class KingdomSheet(
                 val kingdom = getKingdom()
                 kingdom.groups = kingdom.groups.filterIndexed { idx, _ -> idx != index }.toTypedArray()
                 actor.setKingdom(kingdom)
+            }
+
+            "adjust-standing" -> {
+                val index = target.dataset["index"]?.toInt() ?: 0
+                val group = getKingdom().groups.getOrNull(index)
+                if (group != null) {
+                    ModifyFactionStanding(factionName = group.name) { delta, reason ->
+                        buildPromise {
+                            val kingdom = getKingdom()
+                            val g = kingdom.groups.getOrNull(index)
+                            if (g != null && delta != 0) {
+                                g.standing = applyStandingDelta(g.standing, delta)
+                                g.standingLog = (g.standingLog ?: emptyArray()) + RawFactionStandingEntry(
+                                    turn = kingdom.currentTurn ?: 0,
+                                    delta = delta,
+                                    reason = reason,
+                                )
+                                actor.setKingdom(kingdom)
+                            }
+                        }
+                    }.launch()
+                }
             }
 
             "configure-activities" -> ActivityManagement(kingdomActor = actor).launch()

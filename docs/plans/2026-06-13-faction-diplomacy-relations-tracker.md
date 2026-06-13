@@ -1,8 +1,21 @@
 # Faction & Diplomacy Relations Tracker Implementation Plan
 
-> **Status:** Draft — pending Gregory review
+> **Status:** In progress — phases 1–3 landed on `kingmaker.5`.
 > **Date:** 2026-06-13
 > **Roadmap item:** New backlog #1 (Faction & diplomacy relations tracker)
+>
+> **Implementation progress (2026-06-13):**
+> - ✅ **Phase 1** — `FactionAttitude` enum + pure `FactionRelations` standing math
+>   (commonMain) with `FactionRelationsTest`; `RawFactionStandingEntry` + nullable
+>   `standing`/`standingLog`/`allianceLevel` on `RawGroup`. Commit `7d90f6c7`.
+> - ✅ **Phase 2** — attitude/standing shown read-only in the existing Trade Agreements
+>   section via `GroupContext` + i18n. Commit `4afde69c`.
+> - ✅ **Phase 3** — `ModifyFactionStanding` dialog: adjust a faction's standing by a signed
+>   delta with a reason; applies via `applyStandingDelta` and appends a change-log entry.
+> - ⬜ **Phase 4 (deferred)** — turn-tick standing drift, threshold hooks (war-threat / quest
+>   offers via `shouldOfferWarThreat` / `shouldOfferDiplomacyQuest`), treaty UI, and the
+>   `faction-standing-change` chat card. Note: implementation integrates into the existing
+>   Trade Agreements section rather than a standalone Diplomacy section/nav (less duplication).
 > **Builds on:** `kingdom/data/RawGroup.kt` (existing static trade-partner model), the
 > Army & War Pressure board (#12), and the Quest/Event generator (#2).
 
