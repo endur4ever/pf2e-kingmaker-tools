@@ -71,6 +71,15 @@ data class BlockGrid(
 	val pavedCount: Int
 		get() = lots.count { it == BlockTerrain.PAVED }
 
+	val stoneWallCount: Int
+		get() = lots.count { it == BlockTerrain.STONE_WALL }
+
+	val woodWallCount: Int
+		get() = lots.count { it == BlockTerrain.WOOD_WALL }
+
+	val wallCount: Int
+		get() = stoneWallCount + woodWallCount
+
 	val isLand: Boolean
 		get() = lots.all { it == BlockTerrain.LAND }
 }
@@ -105,4 +114,7 @@ data class UrbanGrid(
 
 	val occupiedBlocks: Int
 		get() = blocks.count { !it.isLand }
+
+	val totalPavedLots: Int
+		get() = blocks.sumOf { it.pavedCount }
 }

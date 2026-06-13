@@ -6,6 +6,7 @@ import at.posselt.pfrpg2e.data.kingdom.structures.GroupedStructureBonus
 import at.posselt.pfrpg2e.data.kingdom.structures.Structure
 import kotlin.math.abs
 import kotlin.math.max
+import kotlin.math.min
 
 data class Block(
     val delayedStructures: List<Structure>,
@@ -155,7 +156,7 @@ data class Settlement(
                 }
                 .toSet()
         }
-    val level = max(1, occupiedBlocks)
+    val level = max(1, min(20, occupiedBlocks))
 
     val itemPurchaseLevel: Int
         get() = when (size.type) {
