@@ -1,11 +1,25 @@
 # Kingmaker Campaign Automation Feature Roadmap
 
 Created: 2026-05-31
+Status updated: 2026-06-13
 Repo: `/home/grego/code/pf2e-kingmaker-tools`
 
 ## Goal
 
 Capture suggested future features for automating more of a Kingmaker campaign, including homebrew support, before any implementation starts.
+
+## Status summary (2026-06-13)
+
+**All 13 features in the original backlog below are now implemented** and verified
+against the codebase and the Hermes kanban board (`~/.hermes/kanban/boards/pf2e-kingmaker-tools`).
+Each feature section is annotated with its implementing files. A large amount of
+follow-on work has also shipped beyond the original 13 — see
+[Completed beyond the original backlog](#completed-beyond-the-original-backlog).
+
+What remains open lives in [New backlog (not yet started)](#new-backlog-not-yet-started);
+there are no blocked items remaining.
+
+Legend: ✅ Implemented · 🟡 Partial · 🚧 In progress · 📝 Plan written · ⛔ Blocked · ⬜ Not started
 
 ## Planning rule
 
@@ -36,6 +50,10 @@ The repo already has useful building blocks:
 
 ### 1. Campaign timeline and pressure-clock dashboard
 
+**Status: ✅ Implemented** — `kingdom/sheet/contexts/CampaignClockContext.kt`,
+`kingdom/dialogs/CampaignClockDialog.kt`, `kingdom/dialogs/ModifyCampaignClock.kt`,
+clock ticking wired through `TurnTickingEngine.kt` + migration.
+
 Purpose: track chapter deadlines, escalating threats, and time pressure so travel/kingdom turns matter.
 
 Examples:
@@ -59,6 +77,9 @@ Plan requirements:
 
 ### 2. Quest/event generator tied to kingdom events
 
+**Status: ✅ Implemented** — `questevent/QuestGeneratorSettings.kt`,
+`questevent/GenerateQuestDialog.kt`; quest data models + migration shipped.
+
 Purpose: turn kingdom events into actionable quests, complications, and rewards.
 
 Examples:
@@ -80,6 +101,10 @@ Plan requirements:
 - Tests for reward application and status transitions.
 
 ### 3. Hex content and discovery manager
+
+**Status: ✅ Implemented** — `kingdom/dialogs/HexContentManager.kt`;
+hex content enums/helpers, data models + Migration 27, and `explored`/`cleared`
+hex states synced through `kingdom/map/HexGridSync.kt`.
 
 Purpose: track what each hex contains, what players know, what is hidden, and what changes after claiming or clearing it.
 
@@ -104,6 +129,8 @@ Plan requirements:
 
 ### 4. Travel and route planner
 
+**Status: ✅ Implemented** — `camping/TravelRouteService.kt`, `camping/TravelModels.kt`.
+
 Purpose: calculate travel time, route costs, and arrival estimates from current party state and map conditions.
 
 Examples:
@@ -124,6 +151,10 @@ Plan requirements:
 - Tests for roads, rivers, terrain, mounts, forced march, and weather modifiers.
 
 ### 5. Kingdom turn assistant
+
+**Status: ✅ Implemented** — `kingdom/dialogs/TurnWizardApplication.kt`,
+`kingdom/sheet/contexts/TurnWizardContext.kt`, `kingdom/ActivityCapCalculator.kt`;
+preview/commit tick parity verified.
 
 Purpose: guide the GM and players through a kingdom turn with fewer missed steps.
 
@@ -147,6 +178,10 @@ Plan requirements:
 
 ### 6. Settlement benefit and access tracker
 
+**Status: ✅ Implemented** — `kingdom/dialogs/InspectSettlement.kt`
+exposes `trainers`, `craftingAccess`, and `availableItemLevels` with a full
+structure → trainable-class mapping.
+
 Purpose: make structures matter to PCs beyond kingdom bonuses.
 
 Examples:
@@ -167,6 +202,9 @@ Plan requirements:
 - Tests for access calculation and display context.
 
 ### 7. Companion relationship and personal quest manager
+
+**Status: ✅ Implemented** — `kingdom/sheet/contexts/CompanionProfileContext.kt`,
+`CompanionQuestContext.kt`, `PartyInfluenceContext.kt`, `data/RawPartyMemberInfluence.kt`.
 
 Purpose: manage companion influence, camp availability, learning activities, and personal quest hooks.
 
@@ -190,6 +228,9 @@ Plan requirements:
 
 ### 8. Camping encounter resolver
 
+**Status: ✅ Implemented** — `camping/EncounterResolverEngine.kt`,
+`camping/EncounterPreviewDialog.kt`.
+
 Purpose: automate the watch encounter flow without removing GM control.
 
 Examples:
@@ -211,6 +252,9 @@ Plan requirements:
 - Tests for degree-of-success outcomes.
 
 ### 9. Homebrew rules profile system
+
+**Status: ✅ Implemented** — `kingdom/dialogs/HomebrewProfileManager.kt`;
+homebrew data classes, Foundry settings registration, sheet Homebrew tab, and i18n.
 
 Purpose: let the GM switch between RAW, Vance & Kerenshara-style, and Gregory/custom rules without code edits.
 
@@ -234,6 +278,11 @@ Plan requirements:
 - Tests for RAW vs homebrew profile behavior.
 
 ### 10. Session prep and recap dashboard
+
+**Status: ✅ Implemented** — `kingdom/SessionPrepView.kt`,
+`kingdom/sheet/contexts/SessionPrepContext.kt`,
+`kingdom/SessionPrepNarrativeGenerator.kt`; narrative prose layer and
+journal recap export both shipped.
 
 Purpose: produce a GM-facing plan before play and a player-facing recap after play.
 
@@ -259,6 +308,10 @@ Plan requirements:
 
 ### 11. Random encounter and rumor curator
 
+**Status: ✅ Implemented** — `camping/EncounterCuratorData.kt`,
+`camping/EncounterPreviewDialog.kt`, `camping/dialogs/CategoryWeightSettings.kt`,
+`camping/dialogs/RegionEncounterTables.kt`, `camping/dialogs/RegionConfig.kt`.
+
 Purpose: improve random encounters so they support campaign pacing instead of just adding combat.
 
 Examples:
@@ -281,6 +334,12 @@ Plan requirements:
 
 ### 12. Army and war pressure board
 
+**Status: ✅ Implemented** — `kingdom/ArmyWarPressure.kt`, `kingdom/ArmyPressureView.kt`,
+`kingdom/data/RawWarThreat.kt`, `kingdom/dialogs/AddWarThreat.kt`,
+`kingdom/dialogs/DeployArmy.kt`, `kingdom/dialogs/ResolveBattle.kt`; full 4-phase
+warfare resolver (battle models, pure battle engine, army XP/leveling/recovery,
+Resolve Battle dialog + chat log) shipped.
+
 Purpose: track army threats, invasions, and chapter war pressure in one place.
 
 Examples:
@@ -302,6 +361,10 @@ Plan requirements:
 
 ### 13. Balance and pacing alerts
 
+**Status: ✅ Implemented** — `kingdom/PacingAlerts.kt`, `kingdom/PacingAlertView.kt`,
+`kingdom/PacingAlertChat.kt`, `kingdom/sheet/contexts/PacingAlertContext.kt`;
+stagnation tracking wired via `pacingAlertMinUnrestDelta`.
+
 Purpose: warn the GM when the campaign is drifting away from the intended pressure curve.
 
 Examples:
@@ -321,38 +384,79 @@ Plan requirements:
 - Dashboard alert panel.
 - Tests for threshold calculations.
 
-## Suggested first plans to write
+## Completed beyond the original backlog
 
-1. `docs/plans/campaign-timeline-pressure-clocks.md`
-2. `docs/plans/hex-content-discovery-manager.md`
-3. `docs/plans/kingdom-turn-assistant.md`
-4. `docs/plans/homebrew-rules-profile-system.md`
-5. `docs/plans/session-prep-recap-dashboard.md`
+Work that shipped in addition to the 13 features above (from the kanban board and code):
 
-These five create the strongest automation base without immediately overfitting to one rule subsystem.
+- ✅ **Gear settings profile system** — versioned schema, import/export, settings UI;
+  V&K activity/structure toggles wired into the gear-settings pipeline.
+- ✅ **Workbook house-rule structures & activities continuation** — migrated workbook
+  data (Advancement, Milestone XP, RP→XP, water-adjacency tables) into Kotlin data
+  classes with tests; settlement urban-grid parity audit + fixes.
+- ✅ **Living settlement population** — population data model + migration, NPC name
+  generator (River-Kingdoms/Brevoy name tables), starter-roster generation from the
+  population number, settlement-sheet population roster CRUD (`PopulationDialogs.kt`).
+- ✅ **No-roll camping downtime fix** — no-roll activities (e.g. Enhance Weapons) now
+  charge 2h downtime at commit; sheet shows hours spent and disables activities at 8h.
+  (Resolves the long-standing `docs/todo.md` bug.)
+- ✅ **Turn history** — durable per-turn `TurnRecord` (`kingdom/TurnHistory.kt`) +
+  "Recent Turns" recap section.
+- ✅ **End-turn XP awards** — RP→XP conversion + opt-in automatic Fame gain.
+- ✅ **Bonus resource dice** — grant → roll → reset model.
+- ✅ **Water-adjacency structure rules** — Mill consumption wired into evaluation.
+- ✅ **Rough terrain construction costs** (opt-in) and **Anarchy activity gating** (opt-in).
+- ✅ **Obsidian integration** (feasibility → implementation decision).
+- ✅ **World Anvil integration** — `kingdom/sheet/WorldAnvilExporter.kt`.
+- ✅ **Hermes companion profiles** — in-character soul profiles for the Kingmaker companions.
+- ✅ **Camping sheet render performance** — addressed the ~20s context-prep cost.
+- ✅ **Kingdom creation: V&K extras** — charter/heartland extra trained skills and an extra
+  ability boost during creation, each gated by an independent setting (default off, so RAW
+  behavior is preserved). Derivation extracted to a pure, unit-tested
+  `kingdom/VkExtras.kt` (`vkInitialSkillSlots` / `vkExtraAbilityBoosts`, with `VkExtrasTest`
+  now calling the real functions); `assemble jsTest` green. This was the last blocked board item.
 
-## Proposed implementation order
+## Blocked / in-progress
 
-1. Homebrew rules profile system.
-2. Campaign timeline and pressure clocks.
-3. Hex content and discovery manager.
-4. Kingdom turn assistant.
-5. Session prep and recap dashboard.
-6. Quest/event generator.
-7. Travel and route planner.
-8. Settlement benefit/access tracker.
-9. Companion relationship manager.
-10. Camping encounter resolver.
-11. Random encounter and rumor curator.
-12. Army and war pressure board.
-13. Balance and pacing alerts.
+- None. The previously-blocked **Kingdom creation: V&K extras** item was finished on
+  `kingmaker.5` (pure `VkExtras.kt` + tests, `assemble jsTest` green) — see
+  [Completed beyond the original backlog](#completed-beyond-the-original-backlog).
 
-Reasoning: start with rule configuration and shared state, then build dashboards and automations on top of stable data.
+## New backlog (not yet started)
 
-## Open decisions for Gregory
+Candidate features that are **not** covered by the work above. Per the planning rule,
+write a `docs/plans/` doc before implementing any of these.
 
-- Should homebrew support start as one Gregory profile or a general multi-profile system?
-- Should generated quests be GM-only by default?
-- Should campaign clocks be strict automation or advisory warnings first?
-- Should hex content live on scene drawings, module flags, or both?
-- Should session prep generate prose automatically or just aggregate structured data first?
+1. 📝 **Faction & diplomacy relations tracker.** Extend the static trade-partner
+   `kingdom/data/RawGroup.kt` into a living diplomacy system: per-faction attitude/standing
+   (Sootscale, Pitax, Brevoy houses, the fey, Varnhold), shifts driven by kingdom
+   activities/events, treaty/trade-agreement state, and faction-driven quests/threats.
+   Ties into the army war-pressure board and the quest/event generator.
+   **Plan:** [`docs/plans/2026-06-13-faction-diplomacy-relations-tracker.md`](plans/2026-06-13-faction-diplomacy-relations-tracker.md).
+2. ⬜ **Calendar-module integration (Simple Calendar / Seasons & Stars).** The module
+   already advances Foundry world time and derives season for weather/camping
+   (`com/foundryvtt/core/helpers/GameTime.kt`, `utils/Time.kt`, `kingdom/DailyTickHooks.kt`).
+   Surface kingdom turns, camping days, weather, and campaign clocks on a real in-world
+   calendar; auto-derive season; advance turns from the calendar.
+3. 📝 **Campaign analytics / trends dashboard.** `TurnHistory.kt` records per-turn state
+   but nothing visualizes it. Chart RP, unrest, ruin, kingdom level, commodities, and size
+   over turns with pacing-alert thresholds overlaid. Low-risk; reuses existing data.
+   **Plan:** [`docs/plans/2026-06-13-campaign-analytics-trends-dashboard.md`](plans/2026-06-13-campaign-analytics-trends-dashboard.md).
+4. ⬜ **Commodity market & trade-route/caravan economy.** Add flow between settlements and
+   trade-partner Groups: caravans that take travel time (reuse the route planner), are
+   exposed to random encounters, and convert commodities ↔ RP.
+5. ⬜ **Player-facing collaborative kingdom view.** Permission-filtered player view where
+   each player drives their own leadership role's activities and submits them for the turn.
+   Builds on `kingdom/Leaders.kt` + `ActivityCapCalculator.kt`.
+
+## Decisions resolved by implementation
+
+The original "Open decisions for Gregory" have effectively been answered by shipped code;
+recorded here for history:
+
+- Homebrew support shipped as a general **multi-profile** system (`HomebrewProfileManager.kt`),
+  plus a separate **gear settings** profile system.
+- Generated quests carry a GM-only/visibility distinction.
+- Campaign clocks tick through the turn engine with chat/journal output.
+- Hex content/discovery syncs to Foundry **scene drawings** (`explored`/`cleared` states).
+- Session prep produces both **structured aggregation** and a **narrative prose** layer,
+  with journal recap export.
