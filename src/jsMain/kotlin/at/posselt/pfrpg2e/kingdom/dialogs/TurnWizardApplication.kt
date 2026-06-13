@@ -127,6 +127,7 @@ fun runKingdomTurnTick(kingdom: KingdomData, storage: CommodityStorage, currentT
         maximumFamePoints = kingdom.settings.maximumFamePoints,
         autoGainFamePerTurn = kingdom.settings.autoGainFamePerTurn,
         bonusResourceDice = kingdom.bonusResourceDice,
+        activeBattles = kingdom.activeBattles ?: emptyArray(),
     )
 
 suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData): TickResult {
@@ -151,6 +152,7 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
     kingdom.armyDeployments = tickResult.armyDeployments
     kingdom.warPressure = tickResult.warPressure
     kingdom.bonusResourceDice = tickResult.bonusResourceDice
+    kingdom.activeBattles = tickResult.activeBattles
 
     // Apply campaign clock tick results (already included in tickResult)
     kingdom.campaignClocks = tickResult.updatedClocks

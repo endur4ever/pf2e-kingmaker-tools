@@ -64,6 +64,7 @@ class TurnTickingEngineTest {
         councilCooldowns: RawCouncilCooldowns? = null,
         modifiers: Array<RawModifier> = emptyArray(),
         bonusResourceDice: Int = 0,
+        activeBattles: Array<at.posselt.pfrpg2e.kingdom.data.RawArmyBattle> = emptyArray(),
     ) = TurnTickingEngine.tick(
         fame = fame,
         resourcePoints = resourcePoints,
@@ -74,6 +75,7 @@ class TurnTickingEngineTest {
         councilCooldowns = councilCooldowns,
         modifiers = modifiers,
         bonusResourceDice = bonusResourceDice,
+        activeBattles = activeBattles,
     )
 
     // ── War threats & pressure (roadmap #12) ───────────────────────────
@@ -835,5 +837,120 @@ class TurnTickingEngineTest {
     fun testBonusResourceDiceZeroDoesNotEmitTickChange() {
         val result = tick(bonusResourceDice = 0)
         assertTrue(result.changes.none { it.category == "bonusResourceDice" })
+    }
+
+    // ── Battle archiving (activeBattles) ─────────────────────────────────
+
+    private fun battleArch(
+        id: String = "b1",
+        status: String = "active",
+        name: String = "Test Battle",
+        round: Int = 3,
+    ) = jsObject<at.posselt.pfrpg2e.kingdom.data.RawArmyBattle> {
+        this.id = id
+        this.threatId = null
+        this.name = name
+        this.round = round
+        this.terrain = null
+        this.attackers = emptyArray<at.posselt.pfrpg2e.kingdom.data.RawBattleArmy>()
+        this.defenders = emptyArray<at.posselt.pfrpg2e.kingdom.data.RawBattleArmy>()
+        this.log = emptyArray<String>()
+        this.status = status
+    }
+
+    private fun tickWithBattles(
+        battles: Array<at.posselt.pfrpg2e.kingdom.data.RawArmyBattle>,
+    ) = tick(activeBattles = battles)
+
+    @Test
+    fun testNoBattlesProducesEmptyActiveBattles() {
+        val result = tick()
+        assertEquals(0, result.activeBattles.size)
+    }
+
+    @Test
+    fun testActiveBattleNotArchived() {
+        val b = battleArch(status = "active")
+        val result = tickWithBattles(arrayOf(b))
+        assertEquals(1, result.activeBattles.size)
+        assertEquals("active", result.activeBattles[0].status)
+    }
+
+    @Test
+    fun testCompletedBattleIsArchived() {
+        val b = battleArch(id = "b1", status = "completed")
+        val result = tickWithBattles(arrayOf(b))
+        assertEquals(1, result.activeBattles.size)
+        assertEquals("archived", result.activeBattles[0].status)
+    }
+
+    @Test
+    fun testDefeatBattleIsArchived() {
+        val b = battleArch(id = "b2", status = "defeat")
+        val result = tickWithBattles(arrayOf(b))
+        assertEquals(1, result.activeBattles.size)
+        assertEquals("archived", result.activeBattles[0].status)
+    }
+
+    @Test
+    fun testArchivedBattleStaysArchived() {
+        val b = battleArch(id = "b3", status = "archived")
+        val result = tickWithBattles(arrayOf(b))
+        assertEquals(1, result.activeBattles.size)
+        assertEquals("archived", result.activeBattles[0].status)
+    }
+
+    @Test
+    fun testMixedBattlesOnlyCompletedAndDefeatArchived() {
+        val active = battleArch(id = "a1", status = "active")
+        val completed = battleArch(id = "c1", status = "completed")
+        val defeat = battleArch(id = "d1", status = "defeat")
+        val alreadyArchived = battleArch(id = "ar1", status = "archived")
+        val result = tickWithBattles(arrayOf(active, completed, defeat, alreadyArchived))
+        assertEquals(4, result.activeBattles.size)
+        assertEquals("active", result.activeBattles[0].status)
+        assertEquals("archived", result.activeBattles[1].status)
+        assertEquals("archived", result.activeBattles[2].status)
+        assertEquals("archived", result.activeBattles[3].status)
+    }
+
+    @Test
+    fun testArchivedBattleEmitsChangeEntry() {
+        val b = battleArch(id = "b1", status = "completed")
+        val result = tickWithBattles(arrayOf(b))
+        val archiveChange = result.changes.find { it.category == "battle" && it.field == "archived" }
+        assertNotNull(archiveChange, "Should emit a change entry when archiving a battle")
+        assertEquals("b1", archiveChange.oldValue)
+        assertEquals("completed", archiveChange.newValue)
+    }
+
+    @Test
+    fun testNoChangeEntryForNonArchivedBattles() {
+        val b = battleArch(status = "active")
+        val result = tickWithBattles(arrayOf(b))
+        assertTrue(
+            result.changes.none { it.category == "battle" && it.field == "archived" },
+            "Active battles should not emit archive change entries"
+        )
+    }
+
+    @Test
+    fun testVictoryBattleIsArchived() {
+        val b = battleArch(id = "v1", status = "victory")
+        val result = tickWithBattles(arrayOf(b))
+        assertEquals(1, result.activeBattles.size)
+        assertEquals("archived", result.activeBattles[0].status)
+        assertEquals("victory", result.changes.find { it.category == "battle" && it.field == "archived" }?.newValue)
+    }
+
+    @Test
+    fun testMultipleCompletedBattlesAllArchived() {
+        val b1 = battleArch(id = "b1", status = "completed")
+        val b2 = battleArch(id = "b2", status = "completed")
+        val b3 = battleArch(id = "b3", status = "defeat")
+        val result = tickWithBattles(arrayOf(b1, b2, b3))
+        assertEquals(3, result.activeBattles.size)
+        assertTrue(result.activeBattles.all { it.status == "archived" })
+        assertEquals(3, result.changes.count { it.category == "battle" && it.field == "archived" })
     }
 }

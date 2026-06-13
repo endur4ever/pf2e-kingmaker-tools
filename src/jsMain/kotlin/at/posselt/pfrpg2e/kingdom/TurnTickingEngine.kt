@@ -11,9 +11,14 @@ import at.posselt.pfrpg2e.kingdom.data.RawConsumption
 import at.posselt.pfrpg2e.kingdom.RawCouncilCooldowns
 import at.posselt.pfrpg2e.kingdom.data.RawFame
 import at.posselt.pfrpg2e.kingdom.data.RawResources
+import at.posselt.pfrpg2e.data.armies.BattleStatus
 import at.posselt.pfrpg2e.kingdom.data.RawArmyDeployment
+import at.posselt.pfrpg2e.kingdom.data.RawArmyBattle
 import at.posselt.pfrpg2e.kingdom.data.RawWarPressure
 import at.posselt.pfrpg2e.kingdom.data.RawWarThreat
+
+/** Persisted [RawArmyBattle.status] for battles archived at end of turn (not part of [BattleStatus]). */
+const val ARCHIVED_BATTLE_STATUS = "archived"
 
 /**
  * Represents the diff of a single tick operation for auditing/logging.
@@ -49,6 +54,7 @@ data class TickResult(
 		val warPressure: RawWarPressure? = null,
 	val xpAwarded: Int = 0,
 	val bonusResourceDice: Int = 0,
+	val activeBattles: Array<RawArmyBattle> = emptyArray(),
 )
 
 /**
@@ -88,7 +94,8 @@ object TurnTickingEngine {
 	 * @param rpToXpConversionRate How many RP convert to 1 XP (e.g. 10 means 10 RP = 1 XP). 0 disables.
 	 * @param rpToXpConversionLimit Max RP that can be converted per turn. 0 means no limit.
 	 * @param maximumFamePoints Maximum fame the kingdom can hold.
-	 * @param autoGainFamePerTurn If true, automatically gain 1 fame at end of turn (up to maximum).
+	 * @param bonusResourceDice Bonus resource dice granted by the GM this turn (e.g. from events). Applied during collection, then reset.
+	 * @param activeBattles Current active army battles to archive at end of turn.
 	 * @return [TickResult] with all post-tick values and a list of changes.
 	 */
 	fun tick(
@@ -115,6 +122,7 @@ object TurnTickingEngine {
 		maximumFamePoints: Int = 3,
 		autoGainFamePerTurn: Boolean = false,
 		bonusResourceDice: Int = 0,
+		activeBattles: Array<RawArmyBattle> = emptyArray(),
 	): TickResult {
 		val changes = mutableListOf<TickChange>()
 
@@ -281,6 +289,18 @@ object TurnTickingEngine {
 			changes += TickChange("bonusResourceDice", "reset", bonusResourceDice, 0)
 		}
 
+		// 16) Archive finished battles: any battle no longer ACTIVE (victory,
+		// defeat, retreat, …) is marked archived so the board only offers
+		// live battles for resolution. Already-archived ones pass through.
+		val archivedBattles = activeBattles.map { battle ->
+			if (battle.status != BattleStatus.ACTIVE.value && battle.status != ARCHIVED_BATTLE_STATUS) {
+				changes += TickChange("battle", "archived", battle.id, battle.status)
+				RawArmyBattle.copy(battle, status = ARCHIVED_BATTLE_STATUS)
+			} else {
+				battle
+			}
+		}.toTypedArray()
+
 		return TickResult(
 			supernaturalSolutions = 0,
 			creativeSolutions = 0,
@@ -301,6 +321,7 @@ object TurnTickingEngine {
 			warPressure = newWarPressure,
 			xpAwarded = xpAwarded,
 			bonusResourceDice = 0,
+			activeBattles = archivedBattles,
 		)
 	}
 

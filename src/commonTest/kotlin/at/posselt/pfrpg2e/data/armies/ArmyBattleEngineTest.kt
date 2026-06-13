@@ -573,3 +573,261 @@ class WorkbookLookupTest {
         assertEquals(0, getArmyRoutThresholdModifier("Nonexistent Army"))
     }
 }
+
+// ---------------------------------------------------------------------------
+// XP awards (awardBattleXp)
+// ---------------------------------------------------------------------------
+
+class XpAwardTest {
+
+    @Test
+    fun sameLevelAwards15Xp() {
+        assertEquals(15, awardBattleXp(victorLevel = 5, defeatedLevel = 5))
+    }
+
+    @Test
+    fun oneLevelHigherAwards20Xp() {
+        assertEquals(20, awardBattleXp(victorLevel = 5, defeatedLevel = 6))
+    }
+
+    @Test
+    fun twoLevelsHigherAwards25Xp() {
+        assertEquals(25, awardBattleXp(victorLevel = 5, defeatedLevel = 7))
+    }
+
+    @Test
+    fun threeLevelsHigherAwards30Xp() {
+        assertEquals(30, awardBattleXp(victorLevel = 5, defeatedLevel = 8))
+    }
+
+    @Test
+    fun fourLevelsHigherAwards40Xp() {
+        assertEquals(40, awardBattleXp(victorLevel = 5, defeatedLevel = 9))
+    }
+
+    @Test
+    fun fiveLevelsHigherAwards50Xp() {
+        assertEquals(50, awardBattleXp(victorLevel = 5, defeatedLevel = 10))
+    }
+
+    @Test
+    fun sixLevelsHigherAwards60Xp() {
+        assertEquals(60, awardBattleXp(victorLevel = 5, defeatedLevel = 11))
+    }
+
+    @Test
+    fun sevenOrMoreLevelsHigherAwards80Xp() {
+        assertEquals(80, awardBattleXp(victorLevel = 5, defeatedLevel = 12))
+        assertEquals(80, awardBattleXp(victorLevel = 1, defeatedLevel = 20))
+    }
+
+    @Test
+    fun fourOrMoreLevelsLowerAwards5Xp() {
+        assertEquals(5, awardBattleXp(victorLevel = 5, defeatedLevel = 1))
+        assertEquals(5, awardBattleXp(victorLevel = 10, defeatedLevel = 1))
+    }
+
+    @Test
+    fun threeLevelsLowerAwards8Xp() {
+        assertEquals(8, awardBattleXp(victorLevel = 5, defeatedLevel = 2))
+    }
+
+    @Test
+    fun twoLevelsLowerAwards10Xp() {
+        assertEquals(10, awardBattleXp(victorLevel = 5, defeatedLevel = 3))
+    }
+
+    @Test
+    fun oneLevelLowerAwards13Xp() {
+        assertEquals(13, awardBattleXp(victorLevel = 5, defeatedLevel = 4))
+    }
+}
+
+// ---------------------------------------------------------------------------
+// XP thresholds (xpThresholdForLevel)
+// ---------------------------------------------------------------------------
+
+class XpThresholdTest {
+
+    @Test
+    fun level1ThresholdIs100() {
+        assertEquals(100, xpThresholdForLevel(1))
+    }
+
+    @Test
+    fun level5ThresholdIs200() {
+        assertEquals(200, xpThresholdForLevel(5))
+    }
+
+    @Test
+    fun level10ThresholdIs480() {
+        assertEquals(480, xpThresholdForLevel(10))
+    }
+
+    @Test
+    fun level15ThresholdIs1120() {
+        assertEquals(1120, xpThresholdForLevel(15))
+    }
+
+    @Test
+    fun level20ThresholdIsMaxValue() {
+        assertEquals(Int.MAX_VALUE, xpThresholdForLevel(20))
+    }
+
+    @Test
+    fun outOfRangeLevelReturnsMaxValue() {
+        assertEquals(Int.MAX_VALUE, xpThresholdForLevel(0))
+        assertEquals(Int.MAX_VALUE, xpThresholdForLevel(21))
+        assertEquals(Int.MAX_VALUE, xpThresholdForLevel(99))
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Level-up (applyLevelUp)
+// ---------------------------------------------------------------------------
+
+class LevelUpTest {
+
+    @Test
+    fun noLevelUpWhenXpBelowThreshold() {
+        val army = testArmy(level = 3, hp = 4)
+        val (result, remainingXp) = applyLevelUp(army, xp = 50, threshold = 140)
+        assertEquals(3, result.level)
+        assertEquals(4, result.maxHp)
+        assertEquals(50, remainingXp)
+    }
+
+    @Test
+    fun noLevelUpWhenAtMaxLevel() {
+        val army = testArmy(level = 20, hp = 40)
+        val (result, remainingXp) = applyLevelUp(army, xp = 9999, threshold = Int.MAX_VALUE)
+        assertEquals(20, result.level)
+        assertEquals(40, result.maxHp)
+        assertEquals(9999, remainingXp)
+    }
+
+    @Test
+    fun levelUpIncreasesLevelByOne() {
+        val army = testArmy(level = 3, hp = 4)
+        val (result, remainingXp) = applyLevelUp(army, xp = 140, threshold = 140)
+        assertEquals(4, result.level)
+        assertEquals(0, remainingXp)
+    }
+
+    @Test
+    fun levelUpIncreasesMaxHp() {
+        val army = testArmy(level = 3, hp = 4)
+        val (result, _) = applyLevelUp(army, xp = 140, threshold = 140)
+        // getArmyHpPerLevel returns +2 HP per level
+        assertEquals(6, result.maxHp)
+    }
+
+    @Test
+    fun levelUpIncreasesCurrentHp() {
+        val army = testArmy(level = 3, hp = 4, currentHp = 2)
+        val (result, _) = applyLevelUp(army, xp = 140, threshold = 140)
+        assertEquals(4, result.currentHp)
+    }
+
+    @Test
+    fun excessXpIsPreserved() {
+        val army = testArmy(level = 3, hp = 4)
+        val (result, remainingXp) = applyLevelUp(army, xp = 200, threshold = 140)
+        assertEquals(4, result.level)
+        assertEquals(60, remainingXp)
+    }
+
+    @Test
+    fun levelUpCappedAt20() {
+        val army = testArmy(level = 19, hp = 38)
+        val (result, remainingXp) = applyLevelUp(army, xp = 2240, threshold = 2240)
+        assertEquals(20, result.level)
+        assertEquals(0, remainingXp)
+    }
+
+    @Test
+    fun getArmyHpPerLevelReturns2() {
+        assertEquals(2, getArmyHpPerLevel(1))
+        assertEquals(2, getArmyHpPerLevel(10))
+        assertEquals(2, getArmyHpPerLevel(20))
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Condition recovery (recoverConditions)
+// ---------------------------------------------------------------------------
+
+class ConditionRecoveryTest {
+
+    @Test
+    fun wearyAlwaysRecovers() {
+        val army = testArmy(conditions = setOf(ArmyCondition.WEARY))
+        val result = recoverConditions(army)
+        assertFalse(ArmyCondition.WEARY in result.conditions)
+    }
+
+    @Test
+    fun routedAlwaysRecovers() {
+        val army = testArmy(conditions = setOf(ArmyCondition.ROUTED))
+        val result = recoverConditions(army)
+        assertFalse(ArmyCondition.ROUTED in result.conditions)
+    }
+
+    @Test
+    fun miredRecoversOnHighRoll() {
+        val army = testArmy(conditions = setOf(ArmyCondition.MIRED))
+        val result = recoverConditions(army, miredRoll = 10)
+        assertFalse(ArmyCondition.MIRED in result.conditions)
+    }
+
+    @Test
+    fun miredStaysOnLowRoll() {
+        val army = testArmy(conditions = setOf(ArmyCondition.MIRED))
+        val result = recoverConditions(army, miredRoll = 9)
+        assertTrue(ArmyCondition.MIRED in result.conditions)
+    }
+
+    @Test
+    fun pinnedRecoversOnHighRoll() {
+        val army = testArmy(conditions = setOf(ArmyCondition.PINNED))
+        val result = recoverConditions(army, pinnedRoll = 15)
+        assertFalse(ArmyCondition.PINNED in result.conditions)
+    }
+
+    @Test
+    fun pinnedStaysOnLowRoll() {
+        val army = testArmy(conditions = setOf(ArmyCondition.PINNED))
+        val result = recoverConditions(army, pinnedRoll = 1)
+        assertTrue(ArmyCondition.PINNED in result.conditions)
+    }
+
+    @Test
+    fun damagedNeverRecovers() {
+        val army = testArmy(conditions = setOf(ArmyCondition.DAMAGED))
+        val result = recoverConditions(army)
+        assertTrue(ArmyCondition.DAMAGED in result.conditions)
+    }
+
+    @Test
+    fun destroyedNeverRecovers() {
+        val army = testArmy(conditions = setOf(ArmyCondition.DESTROYED))
+        val result = recoverConditions(army)
+        assertTrue(ArmyCondition.DESTROYED in result.conditions)
+    }
+
+    @Test
+    fun multipleConditionsRecoverIndependently() {
+        val army = testArmy(conditions = setOf(ArmyCondition.WEARY, ArmyCondition.MIRED, ArmyCondition.DAMAGED))
+        val result = recoverConditions(army, miredRoll = 10)
+        assertFalse(ArmyCondition.WEARY in result.conditions)
+        assertFalse(ArmyCondition.MIRED in result.conditions)
+        assertTrue(ArmyCondition.DAMAGED in result.conditions)
+    }
+
+    @Test
+    fun noConditionsUnchanged() {
+        val army = testArmy(conditions = emptySet())
+        val result = recoverConditions(army)
+        assertTrue(result.conditions.isEmpty())
+    }
+}

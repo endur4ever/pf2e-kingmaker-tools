@@ -70,6 +70,7 @@ data class BattleArmyState(
     val ac: Int,
     val routThreshold: Int,       // absolute HP value (e.g. 2 means rout at ≤2 HP)
     val moraleBonus: Int = 0,
+    val xp: Int = 0,
 )
 
 /**
@@ -364,3 +365,181 @@ fun getArmyHitPoints(name: String): Int =
  */
 fun getArmyRoutThresholdModifier(name: String): Int =
     workbookSpecializedArmyModifiers.find { it.name == name }?.routThreshold ?: 0
+
+// ---------------------------------------------------------------------------
+// XP awards, leveling, and condition recovery
+// ---------------------------------------------------------------------------
+
+/**
+ * PF2e XP reward for defeating an army based on the level difference
+ * between the victor and the defeated army.
+ *
+ * Uses the standard PF2e creature-XP table (same as the kingdom XP table
+ * in WorkbookArmyData / RpToXp):
+ *   level difference ≤ -4  →  5 XP
+ *   level difference = -3  →  8 XP  (not in standard table; interpolated)
+ *   level difference = -2  → 10 XP  (not in standard table; interpolated)
+ *   level difference = -1  → 13 XP  (not in standard table; interpolated)
+ *   level difference =  0  → 15 XP
+ *   level difference = +1  → 20 XP
+ *   level difference = +2  → 25 XP
+ *   level difference = +3  → 30 XP
+ *   level difference = +4  → 40 XP
+ *   level difference = +5  → 50 XP
+ *   level difference = +6  → 60 XP
+ *   level difference ≥ +7  → 80 XP
+ *
+ * @param victorLevel  level of the winning army
+ * @param defeatedLevel level of the defeated (destroyed/routed) army
+ * @return XP awarded
+ */
+fun awardBattleXp(victorLevel: Int, defeatedLevel: Int): Int {
+    val diff = defeatedLevel - victorLevel
+    return when {
+        diff <= -4 -> 5
+        diff == -3 -> 8
+        diff == -2 -> 10
+        diff == -1 -> 13
+        diff == 0 -> 15
+        diff == 1 -> 20
+        diff == 2 -> 25
+        diff == 3 -> 30
+        diff == 4 -> 40
+        diff == 5 -> 50
+        diff == 6 -> 60
+        else -> 80
+    }
+}
+
+/**
+ * Determines the XP threshold for an army to reach the next level.
+ *
+ * Uses the PF2e army XP table (mirrors the kingdom advancement table):
+ *   Level 1  → 100 XP to reach level 2
+ *   Level 2  → 120 XP
+ *   Level 3  → 140 XP
+ *   Level 4  → 160 XP
+ *   Level 5  → 200 XP
+ *   Level 6  → 240 XP
+ *   Level 7  → 280 XP
+ *   Level 8  → 320 XP
+ *   Level 9  → 400 XP
+ *   Level 10 → 480 XP
+ *   Level 11 → 560 XP
+ *   Level 12 → 640 XP
+ *   Level 13 → 800 XP
+ *   Level 14 → 960 XP
+ *   Level 15 → 1120 XP
+ *   Level 16 → 1280 XP
+ *   Level 17 → 1600 XP
+ *   Level 18 → 1920 XP
+ *   Level 19 → 2240 XP
+ *   Level 20 → 2560 XP (max level)
+ *
+ * @param currentLevel the army's current level (1-20)
+ * @return XP needed to reach the next level, or Int.MAX_VALUE if at max level
+ */
+fun xpThresholdForLevel(currentLevel: Int): Int =
+    when (currentLevel) {
+        1 -> 100
+        2 -> 120
+        3 -> 140
+        4 -> 160
+        5 -> 200
+        6 -> 240
+        7 -> 280
+        8 -> 320
+        9 -> 400
+        10 -> 480
+        11 -> 560
+        12 -> 640
+        13 -> 800
+        14 -> 960
+        15 -> 1120
+        16 -> 1280
+        17 -> 1600
+        18 -> 1920
+        19 -> 2240
+        20 -> Int.MAX_VALUE
+        else -> Int.MAX_VALUE
+    }
+
+/**
+ * Attempts to level up an army based on accumulated XP.
+ *
+ * If [xp] meets or exceeds [threshold], the army levels up:
+ *   - level increases by 1 (capped at 20)
+ *   - excess XP is preserved (not lost)
+ *   - HP increases by the workbook per-level HP gain
+ *
+ * @param army       the army to level up
+ * @param xp         current XP total
+ * @param threshold  XP required for next level (from [xpThresholdForLevel])
+ * @return pair of (updated army, remaining XP after level-up)
+ */
+fun applyLevelUp(
+    army: BattleArmyState,
+    xp: Int,
+    threshold: Int,
+): Pair<BattleArmyState, Int> {
+    if (xp < threshold || army.level >= 20) {
+        return Pair(army, xp)
+    }
+    val newLevel = (army.level + 1).coerceAtMost(20)
+    val hpGain = getArmyHpPerLevel(newLevel)
+    val newMaxHp = army.maxHp + hpGain
+    val newCurrentHp = army.currentHp + hpGain
+    val remainingXp = xp - threshold
+    val leveledUp = army.copy(
+        level = newLevel,
+        maxHp = newMaxHp,
+        currentHp = newCurrentHp,
+    )
+    return Pair(leveledUp, remainingXp)
+}
+
+/**
+ * Returns the HP gained when an army reaches the given level.
+ * Per the workbook, each level-up grants +2 HP.
+ */
+fun getArmyHpPerLevel(@Suppress("UNUSED_PARAMETER") level: Int): Int = 2
+
+/**
+ * Attempts to recover from negative conditions at the end of a battle.
+ *
+ * Recovery rules (Kingmaker workbook):
+ *   • MIRED:    50% chance to recover (d20 roll >= 10)
+ *   • PINNED:   50% chance to recover (d20 roll >= 10)
+ *   • WEARY:    always recovers after battle (rest)
+ *   • ROUTED:   always recovers after battle (regroup)
+ *   • DAMAGED:  does NOT recover automatically (requires downtime / healing)
+ *   • DESTROYED: does NOT recover (permanently destroyed)
+ *
+ * @param army       the army to recover
+ * @param miredRoll  d20 roll for MIRED recovery (ignored if not mired)
+ * @param pinnedRoll d20 roll for PINNED recovery (ignored if not pinned)
+ * @return updated army state with recovered conditions removed
+ */
+fun recoverConditions(
+    army: BattleArmyState,
+    miredRoll: Int = 10,
+    pinnedRoll: Int = 10,
+): BattleArmyState {
+    val newConditions = army.conditions.toMutableSet()
+
+    // Always recover: weary, routed
+    newConditions.remove(ArmyCondition.WEARY)
+    newConditions.remove(ArmyCondition.ROUTED)
+
+    // Chance-based recovery: mired, pinned (roll >= 10 succeeds)
+    if (ArmyCondition.MIRED in newConditions && miredRoll >= 10) {
+        newConditions.remove(ArmyCondition.MIRED)
+    }
+    if (ArmyCondition.PINNED in newConditions && pinnedRoll >= 10) {
+        newConditions.remove(ArmyCondition.PINNED)
+    }
+
+    // DAMAGED and DESTROYED are never auto-recovered
+
+    return army.copy(conditions = newConditions)
+}
