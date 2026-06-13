@@ -1,5 +1,11 @@
 # Kingmaker AP Gap Analysis — 2026-06-11
 
+> ⚠️ **SUPERSEDED (2026-06-13).** Most "remaining gaps" below have since shipped (tactical
+> warfare resolver, durable turn history, end-turn XP, bonus dice, water-adjacency wiring,
+> rough terrain, anarchy gating, urban-grid parity, V&K creation extras, pacing-alert wiring).
+> See the current [`kingmaker-ap-gap-analysis-2026-06-13.md`](kingmaker-ap-gap-analysis-2026-06-13.md)
+> for the live status. Kept for history only.
+
 **Scope:** Re-assessment of `kingmaker-workbook-notebooklm-missing-features-report.md` (2026-06-03)
 against the current `kingmaker.5` codebase, after the roadmap #1–#13 completion sprint.
 **Verdict:** The two areas the June report ranked highest-value (settings/profile foundation,
