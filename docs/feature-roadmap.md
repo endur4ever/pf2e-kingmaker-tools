@@ -426,12 +426,15 @@ Work that shipped in addition to the 13 features above (from the kanban board an
 Candidate features that are **not** covered by the work above. Per the planning rule,
 write a `docs/plans/` doc before implementing any of these.
 
-1. 📝 **Faction & diplomacy relations tracker.** Extend the static trade-partner
+1. 🚧 **Faction & diplomacy relations tracker.** Extend the static trade-partner
    `kingdom/data/RawGroup.kt` into a living diplomacy system: per-faction attitude/standing
    (Sootscale, Pitax, Brevoy houses, the fey, Varnhold), shifts driven by kingdom
    activities/events, treaty/trade-agreement state, and faction-driven quests/threats.
    Ties into the army war-pressure board and the quest/event generator.
    **Plan:** [`docs/plans/2026-06-13-faction-diplomacy-relations-tracker.md`](plans/2026-06-13-faction-diplomacy-relations-tracker.md).
+   **Progress:** phases 1–3 landed on `kingmaker.5` (pure standing logic + tests, attitude
+   display in the Trade Agreements section, adjust-standing dialog); phase 4 (turn-tick drift,
+   threshold hooks, treaty UI, chat card) tracked on the board as `t_d3f6044c`.
 2. ⬜ **Calendar-module integration (Simple Calendar / Seasons & Stars).** The module
    already advances Foundry world time and derives season for weather/camping
    (`com/foundryvtt/core/helpers/GameTime.kt`, `utils/Time.kt`, `kingdom/DailyTickHooks.kt`).
