@@ -1,10 +1,13 @@
 package at.posselt.pfrpg2e.data.kingdom.settlements
 
+import at.posselt.pfrpg2e.data.kingdom.KingdomSkill
 import at.posselt.pfrpg2e.data.kingdom.structures.AvailableItemBonuses
 import at.posselt.pfrpg2e.data.kingdom.structures.CommodityStorage
+import at.posselt.pfrpg2e.data.kingdom.structures.GroupedStructureBonus
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /**
@@ -240,5 +243,253 @@ class UrbanGridParityAuditTest {
             hasBridge = false,
         )
         assertTrue(settlement.lacksBridge)
+    }
+
+    // --- Settlement.level cap at 20 (S0) ---
+
+    @Test
+    fun levelMinimumIsOne() {
+        val settlement = createSettlementForAudit(occupiedBlocks = 0)
+        assertEquals(1, settlement.level)
+    }
+
+    @Test
+    fun levelEqualsOccupiedBlocks() {
+        val settlement = createSettlementForAudit(occupiedBlocks = 5)
+        assertEquals(5, settlement.level)
+    }
+
+    @Test
+    fun levelCapsAtTwenty() {
+        val settlement = createSettlementForAudit(occupiedBlocks = 25)
+        assertEquals(20, settlement.level)
+    }
+
+    @Test
+    fun levelExactlyTwentyWhenOccupiedBlocksIsTwenty() {
+        val settlement = createSettlementForAudit(occupiedBlocks = 20)
+        assertEquals(20, settlement.level)
+    }
+
+    // --- BlockGrid.wallCount (U5 / U6) ---
+
+    @Test
+    fun blockGridWallCountMixedStoneAndWood() {
+        val grid = BlockGrid(
+            topLeft = BlockTerrain.STONE_WALL,
+            topRight = BlockTerrain.WOOD_WALL,
+            bottomLeft = BlockTerrain.LAND,
+            bottomRight = BlockTerrain.STONE_WALL,
+        )
+        assertEquals(3, grid.wallCount)
+    }
+
+    @Test
+    fun blockGridStoneWallCountOnly() {
+        val grid = BlockGrid(
+            topLeft = BlockTerrain.STONE_WALL,
+            topRight = BlockTerrain.STONE_WALL,
+            bottomLeft = BlockTerrain.LAND,
+            bottomRight = BlockTerrain.LAND,
+        )
+        assertEquals(2, grid.stoneWallCount)
+        assertEquals(0, grid.woodWallCount)
+    }
+
+    @Test
+    fun blockGridWoodWallCountOnly() {
+        val grid = BlockGrid(
+            topLeft = BlockTerrain.WOOD_WALL,
+            topRight = BlockTerrain.LAND,
+            bottomLeft = BlockTerrain.WOOD_WALL,
+            bottomRight = BlockTerrain.WOOD_WALL,
+        )
+        assertEquals(0, grid.stoneWallCount)
+        assertEquals(3, grid.woodWallCount)
+    }
+
+    // --- BlockGrid.pavedCount / UrbanGrid.totalPavedLots (U8 / U12) ---
+
+    @Test
+    fun blockGridPavedCountCorrect() {
+        val grid = BlockGrid(
+            topLeft = BlockTerrain.PAVED,
+            topRight = BlockTerrain.PAVED,
+            bottomLeft = BlockTerrain.LAND,
+            bottomRight = BlockTerrain.WATER,
+        )
+        assertEquals(2, grid.pavedCount)
+    }
+
+    @Test
+    fun urbanGridTotalPavedLotsSumsAllBlocks() {
+        val grid = UrbanGrid(
+            blockA = BlockGrid(topLeft = BlockTerrain.PAVED, topRight = BlockTerrain.PAVED),
+            blockB = BlockGrid(topLeft = BlockTerrain.PAVED),
+            blockC = BlockGrid(bottomRight = BlockTerrain.PAVED),
+        )
+        assertEquals(4, grid.totalPavedLots)
+    }
+
+    @Test
+    fun urbanGridTotalPavedLotsZeroByDefault() {
+        val grid = UrbanGrid()
+        assertEquals(0, grid.totalPavedLots)
+    }
+
+    // --- Settlement.highestUniqueBonuses dedup (S10) ---
+
+    @Test
+    fun highestUniqueBonusesKeepsMaxPerSkillActivityPair() {
+        val settlement = createSettlementForAudit().copy(
+            bonuses = setOf(
+                GroupedStructureBonus(
+                    structureNames = setOf("Farm"),
+                    skill = KingdomSkill.AGRICULTURE,
+                    activity = null,
+                    value = 2,
+                    locatedIn = "audit",
+                ),
+                GroupedStructureBonus(
+                    structureNames = setOf("Ranch"),
+                    skill = KingdomSkill.AGRICULTURE,
+                    activity = null,
+                    value = 3,
+                    locatedIn = "audit",
+                ),
+                GroupedStructureBonus(
+                    structureNames = setOf("Mill"),
+                    skill = KingdomSkill.AGRICULTURE,
+                    activity = null,
+                    value = 1,
+                    locatedIn = "audit",
+                ),
+            ),
+        )
+        val unique = settlement.highestUniqueBonuses
+        assertEquals(1, unique.size)
+        assertEquals(3, unique.first().value)
+    }
+
+    @Test
+    fun highestUniqueBonusesSeparateGroupsForDifferentSkills() {
+        val settlement = createSettlementForAudit().copy(
+            bonuses = setOf(
+                GroupedStructureBonus(
+                    structureNames = setOf("Farm"),
+                    skill = KingdomSkill.AGRICULTURE,
+                    activity = null,
+                    value = 2,
+                    locatedIn = "audit",
+                ),
+                GroupedStructureBonus(
+                    structureNames = setOf("Theater"),
+                    skill = KingdomSkill.ARTS,
+                    activity = null,
+                    value = 1,
+                    locatedIn = "audit",
+                ),
+            ),
+        )
+        val unique = settlement.highestUniqueBonuses
+        assertEquals(2, unique.size)
+    }
+
+    @Test
+    fun highestUniqueBonusesGroupsByActivityWhenPresent() {
+        val settlement = createSettlementForAudit().copy(
+            bonuses = setOf(
+                GroupedStructureBonus(
+                    structureNames = setOf("Museum"),
+                    skill = KingdomSkill.ARTS,
+                    activity = "rest-and-relax",
+                    value = 3,
+                    locatedIn = "audit",
+                ),
+                GroupedStructureBonus(
+                    structureNames = setOf("Theater"),
+                    skill = KingdomSkill.ARTS,
+                    activity = null,
+                    value = 1,
+                    locatedIn = "audit",
+                ),
+            ),
+        )
+        val unique = settlement.highestUniqueBonuses
+        assertEquals(2, unique.size)
+    }
+
+    // --- SettlementDetailsMatrix: every row has non-empty label (S11) ---
+
+    @Test
+    fun allMatrixRowsHaveNonEmptyLabels() {
+        for (row in settlementDetailsMatrixRows) {
+            assertTrue(row.label.isNotEmpty(), "Row label must not be empty")
+        }
+    }
+
+    @Test
+    fun matrixBonusForHeaderRowMatchesSkillOnlyBonuses() {
+        val settlement = createSettlementForAudit().copy(
+            bonuses = setOf(
+                GroupedStructureBonus(
+                    structureNames = setOf("Farm"),
+                    skill = KingdomSkill.AGRICULTURE,
+                    activity = null,
+                    value = 2,
+                    locatedIn = "audit",
+                ),
+            ),
+        )
+        val row = settlementDetailsMatrixRows.first { it.label == "Agriculture" }
+        assertEquals(2, settlement.matrixBonusFor(row))
+    }
+
+    @Test
+    fun matrixBonusForSkillQualifiedRowMatchesSkillAndActivity() {
+        val settlement = createSettlementForAudit().copy(
+            bonuses = setOf(
+                GroupedStructureBonus(
+                    structureNames = setOf("Farm"),
+                    skill = KingdomSkill.AGRICULTURE,
+                    activity = null,
+                    value = 1,
+                    locatedIn = "audit",
+                ),
+                GroupedStructureBonus(
+                    structureNames = setOf("Irrigation"),
+                    skill = KingdomSkill.AGRICULTURE,
+                    activity = "establish-farmland",
+                    value = 3,
+                    locatedIn = "audit",
+                ),
+            ),
+        )
+        val row = settlementDetailsMatrixRows.first { it.label == "Establish Farmland" }
+        assertEquals(3, settlement.matrixBonusFor(row))
+    }
+
+    @Test
+    fun matrixBonusForReturnsNullWhenNoMatch() {
+        val settlement = createSettlementForAudit()
+        val row = settlementDetailsMatrixRows.first { it.label == "Agriculture" }
+        assertNull(settlement.matrixBonusFor(row))
+    }
+
+    @Test
+    fun matrixBonusForActivityOnlyRowMatchesByActivityRegardlessOfSkill() {
+        val settlement = createSettlementForAudit().copy(
+            bonuses = setOf(
+                GroupedStructureBonus(
+                    structureNames = setOf("Yard"),
+                    skill = KingdomSkill.ENGINEERING,
+                    activity = "build-structure",
+                    value = 4,
+                    locatedIn = "audit",
+                ),
+            ),
+        )
+        val row = settlementDetailsMatrixRows.first { it.label == "Build Structure" }
+        assertEquals(4, settlement.matrixBonusFor(row))
     }
 }
