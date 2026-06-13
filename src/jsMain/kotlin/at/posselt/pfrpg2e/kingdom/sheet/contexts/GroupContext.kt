@@ -4,7 +4,9 @@ import at.posselt.pfrpg2e.app.forms.CheckboxInput
 import at.posselt.pfrpg2e.app.forms.FormElementContext
 import at.posselt.pfrpg2e.app.forms.Select
 import at.posselt.pfrpg2e.app.forms.TextInput
+import at.posselt.pfrpg2e.data.kingdom.DEFAULT_FACTION_STANDING
 import at.posselt.pfrpg2e.data.kingdom.Relations
+import at.posselt.pfrpg2e.data.kingdom.attitudeFor
 import at.posselt.pfrpg2e.kingdom.data.RawGroup
 import at.posselt.pfrpg2e.utils.t
 import kotlinx.js.JsPlainObject
@@ -17,6 +19,8 @@ external interface GroupContext {
     val atWar: FormElementContext
     val preventPledgeOfFealty: FormElementContext
     val relations: FormElementContext
+    val attitude: String
+    val standing: Int
 }
 
 fun Array<RawGroup>.toContext() =
@@ -51,5 +55,7 @@ fun Array<RawGroup>.toContext() =
                 hideLabel = true,
                 value = Relations.fromString(group.relations) ?: Relations.NONE,
             ).toContext(),
+            attitude = t(attitudeFor(group.standing).i18nKey),
+            standing = group.standing ?: DEFAULT_FACTION_STANDING,
         )
     }.toTypedArray()

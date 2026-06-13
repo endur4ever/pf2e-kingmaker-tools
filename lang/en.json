@@ -569,6 +569,13 @@
       "y": "Location Y",
       "success": "Placed block onto scene {sceneName}!"
     },
+    "factionAttitude": {
+      "hostile": "Hostile",
+      "unfriendly": "Unfriendly",
+      "indifferent": "Indifferent",
+      "friendly": "Friendly",
+      "helpful": "Helpful"
+    },
     "kingdom": {
       "turnWizard": {
         "title": "Kingdom Turn Assistant",
@@ -1333,6 +1340,7 @@
       "negotiationDc": "Negotiation DC",
       "atWar": "At War",
       "relations": "Relations",
+      "attitude": "Attitude",
       "newSettlement": "New Settlement",
       "addCurrentScene": "Add Current Scene",
       "settlementSize": "Settlement Size",
