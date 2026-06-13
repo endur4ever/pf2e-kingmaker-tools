@@ -4,8 +4,10 @@ import at.posselt.pfrpg2e.data.kingdom.settlements.Block
 import at.posselt.pfrpg2e.data.kingdom.settlements.NpcEntry
 import at.posselt.pfrpg2e.data.kingdom.settlements.PopulationRoster
 import at.posselt.pfrpg2e.data.kingdom.settlements.Settlement
+import at.posselt.pfrpg2e.data.kingdom.settlements.SettlementEdges
 import at.posselt.pfrpg2e.data.kingdom.settlements.SettlementLayoutType
 import at.posselt.pfrpg2e.data.kingdom.settlements.SettlementType
+import at.posselt.pfrpg2e.data.kingdom.settlements.UrbanGrid
 import at.posselt.pfrpg2e.data.kingdom.settlements.findSettlementMaxItemBonusLevel
 import at.posselt.pfrpg2e.data.kingdom.settlements.findSettlementSize
 import at.posselt.pfrpg2e.data.kingdom.settlements.generateInitialPopulation
@@ -184,6 +186,12 @@ data class SettlementData(
     val id: String,
     val layoutType: SettlementLayoutType,
     val populationRoster: PopulationRoster = PopulationRoster(),
+    val magicalStreetlamps: Boolean = false,
+    val pavedStreets: Boolean = false,
+    val sewerSystem: Boolean = false,
+    val lotsBorderingWater: Int = 0,
+    val edges: SettlementEdges = SettlementEdges(),
+    val urbanGrid: UrbanGrid = UrbanGrid(),
 )
 
 fun evaluateSettlement(
@@ -259,6 +267,12 @@ fun evaluateSettlement(
         settlementActions = structures.maxOfOrNull { it.increaseMinimumSettlementActions } ?: 0,
         blocks = blocks,
         populationRoster = data.populationRoster,
+        magicalStreetlamps = data.magicalStreetlamps,
+        pavedStreets = data.pavedStreets,
+        sewerSystem = data.sewerSystem,
+        lotsBorderingWater = data.lotsBorderingWater,
+        edges = data.edges,
+        urbanGrid = data.urbanGrid,
     )
     return if (settlement.populationRoster.npcs.isEmpty()) {
         settlement.copy(populationRoster = settlement.generateInitialPopulation())
