@@ -9,4 +9,12 @@ external interface RawGroup {
     var atWar: Boolean
     var preventPledgeOfFealty: Boolean
     var relations: String  // none, diplomatic-relations, trade-agreement
+
+    // Faction & diplomacy relations tracker (nullable for back-compat with pre-existing
+    // groups). `standing` is the numeric attitude (null => Indifferent); `standingLog` is
+    // the append-only change history; `allianceLevel` is an optional treaty tier
+    // (null | non-aggression | alliance | tribute).
+    var standing: Int?
+    var standingLog: Array<RawFactionStandingEntry>?
+    var allianceLevel: String?
 }

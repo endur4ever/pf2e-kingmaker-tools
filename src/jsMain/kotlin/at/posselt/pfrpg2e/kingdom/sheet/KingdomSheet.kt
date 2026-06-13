@@ -910,6 +910,9 @@ class KingdomSheet(
                     atWar = false,
                     relations = "none",
                     preventPledgeOfFealty = false,
+                    standing = null,
+                    standingLog = null,
+                    allianceLevel = null,
                 )
                 actor.setKingdom(kingdom)
             }
