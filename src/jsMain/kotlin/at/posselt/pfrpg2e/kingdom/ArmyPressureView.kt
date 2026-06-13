@@ -3,6 +3,7 @@ package at.posselt.pfrpg2e.kingdom
 import at.posselt.pfrpg2e.kingdom.data.RawArmyDeployment
 import at.posselt.pfrpg2e.kingdom.data.RawWarPressure
 import at.posselt.pfrpg2e.kingdom.data.RawWarThreat
+import at.posselt.pfrpg2e.kingdom.data.WarThreatStatus
 
 /**
  * Display view-models for the Army & War Pressure board (roadmap #12).
@@ -25,6 +26,8 @@ data class WarThreatView(
     val status: String,
     val targetHexLocation: String?,
     val pauseOnExpiry: Boolean,
+    val hasAssignedArmies: Boolean = false,
+    val canResolveBattle: Boolean = false,
 )
 
 data class ArmyDeploymentView(
@@ -56,8 +59,10 @@ data class ArmyPressureView(
     val pressure: WarPressureView?,
 )
 
-private fun RawWarThreat.toView(): WarThreatView {
+private fun RawWarThreat.toView(deployments: Array<RawArmyDeployment>): WarThreatView {
     val max = if (maxEscalation > 0) maxEscalation else 1
+    val assigned = deployments.any { it.assignedThreatId == id }
+    val active = status == WarThreatStatus.ACTIVE.value
     return WarThreatView(
         id = id,
         name = name,
@@ -70,6 +75,8 @@ private fun RawWarThreat.toView(): WarThreatView {
         status = status,
         targetHexLocation = targetHexLocation,
         pauseOnExpiry = pauseOnExpiry,
+        hasAssignedArmies = assigned,
+        canResolveBattle = active && assigned,
     )
 }
 
@@ -99,10 +106,13 @@ fun buildArmyPressureView(
     deployments: Array<RawArmyDeployment>?,
     pressure: RawWarPressure?,
     settings: KingdomSettings,
-): ArmyPressureView = ArmyPressureView(
-    enabled = settings.isArmyPressureBoardEnabled(),
-    showThreatDistance = settings.shouldShowThreatDistance(),
-    threats = (threats ?: emptyArray()).map { it.toView() },
-    deployments = (deployments ?: emptyArray()).map { it.toView() },
-    pressure = pressure?.toView(),
-)
+): ArmyPressureView {
+    val deploymentArray = deployments ?: emptyArray()
+    return ArmyPressureView(
+        enabled = settings.isArmyPressureBoardEnabled(),
+        showThreatDistance = settings.shouldShowThreatDistance(),
+        threats = (threats ?: emptyArray()).map { it.toView(deploymentArray) },
+        deployments = deploymentArray.map { it.toView() },
+        pressure = pressure?.toView(),
+    )
+}

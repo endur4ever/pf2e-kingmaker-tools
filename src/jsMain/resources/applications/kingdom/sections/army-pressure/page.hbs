@@ -49,6 +49,7 @@
                                 <td><span class="km-threat-status km-threat-status-{{this.status}}">{{this.statusLabel}}</span></td>
                                 {{#if ../isGM}}
                                     <td class="km-army-row-actions">
+                                        {{#if this.canResolveBattle}}<button type="button" data-action="resolve-battle" data-threat-id="{{this.id}}" data-tooltip="{{localizeKM "armyPressure.resolveBattle"}}"><i class="fa-solid fa-swords"></i></button>{{/if}}
                                         <button type="button" data-action="edit-war-threat" data-id="{{this.id}}"><i class="fa-solid fa-pen"></i></button>
                                         <button type="button" data-action="delete-war-threat" data-id="{{this.id}}"><i class="fa-solid fa-trash"></i></button>
                                     </td>

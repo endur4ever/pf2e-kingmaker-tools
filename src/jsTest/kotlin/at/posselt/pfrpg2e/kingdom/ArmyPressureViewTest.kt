@@ -58,4 +58,56 @@ class ArmyPressureViewTest {
         assertTrue(view.deployments.isEmpty())
         assertNull(view.pressure)
     }
+
+    // ── Resolve Battle availability (roadmap #12, phase 4) ──────────────
+
+    private fun threat(id: String = "w1", status: String = "active") = RawWarThreat(
+        id = id, name = "Goblin Horde", description = "raiders", enemyFaction = null,
+        escalationLevel = 1, maxEscalation = 4, eta = 2,
+        targetSettlementSceneId = null, targetHexLocation = null,
+        linkedQuestId = null, linkedEventId = null, pauseOnExpiry = false,
+        status = status, triggeredTurn = null,
+    )
+
+    private fun deployment(assignedThreatId: String?) = RawArmyDeployment(
+        id = "d1", armyActorUuid = "Actor.x", armyName = "1st Legion", armyType = "infantry",
+        assignedThreatId = assignedThreatId, garrisonedSettlementId = null,
+        status = "deployed", deployedTurn = 0,
+    )
+
+    @Test
+    fun activeThreatWithAssignedArmiesCanResolveBattle() {
+        val view = buildArmyPressureView(
+            arrayOf(threat()),
+            arrayOf(deployment(assignedThreatId = "w1")),
+            null,
+            settings(enabled = true, showDistance = false),
+        )
+        assertTrue(view.threats[0].hasAssignedArmies)
+        assertTrue(view.threats[0].canResolveBattle)
+    }
+
+    @Test
+    fun threatWithoutAssignedArmiesCannotResolveBattle() {
+        val view = buildArmyPressureView(
+            arrayOf(threat()),
+            arrayOf(deployment(assignedThreatId = null)),
+            null,
+            settings(enabled = true, showDistance = false),
+        )
+        assertFalse(view.threats[0].hasAssignedArmies)
+        assertFalse(view.threats[0].canResolveBattle)
+    }
+
+    @Test
+    fun nonActiveThreatCannotResolveBattleEvenWithArmies() {
+        val view = buildArmyPressureView(
+            arrayOf(threat(status = "defeated")),
+            arrayOf(deployment(assignedThreatId = "w1")),
+            null,
+            settings(enabled = true, showDistance = false),
+        )
+        assertTrue(view.threats[0].hasAssignedArmies)
+        assertFalse(view.threats[0].canResolveBattle)
+    }
 }

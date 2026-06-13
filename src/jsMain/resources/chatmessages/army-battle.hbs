@@ -1,0 +1,11 @@
+<div class="km-battle-chat">
+    <h2>{{localizeKM "warBattle.chatTitle" battleName=battleName round=round}}</h2>
+    <div class="km-battle-log">
+        {{#each log}}
+            <p>{{this}}</p>
+        {{/each}}
+    </div>
+    {{#if resultLabel}}
+        <p class="km-battle-result"><strong>{{resultLabel}}</strong></p>
+    {{/if}}
+</div>

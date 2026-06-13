@@ -134,6 +134,7 @@ fun main() {
                     "kingdom-roster" to "applications/kingdom/sections/roster/page.hbs",
                     "kingdom-party" to "applications/kingdom/sections/party/page.hbs",
                     "kingdom-army-pressure" to "applications/kingdom/sections/army-pressure/page.hbs",
+                    "kingdom-resolve-battle" to "applications/kingdom/dialogs/resolve-battle.hbs",
                     "kingdom-pacing-alerts" to "applications/kingdom/sections/pacing-alerts/page.hbs",
                     "kingdom-session-prep" to "applications/kingdom/sections/session-prep/page.hbs",
                     "kingdom-character-sheet" to "applications/kingdom/sections/character-sheet/page.hbs",

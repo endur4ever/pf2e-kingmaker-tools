@@ -1,0 +1,71 @@
+<div class="km-resolve-battle">
+    <h1>{{battleName}}</h1>
+    <p><strong>{{localizeKM "warBattle.round"}}:</strong> {{round}}</p>
+
+    {{#if battleResult}}
+        <p class="km-battle-result"><strong>{{battleResult}}</strong></p>
+    {{else}}
+        <div class="km-battle-armies">
+            <div class="km-battle-armies__side">
+                <h2>{{localizeKM "warBattle.attackers"}}</h2>
+                <select name="selectedAttackerIndex">
+                    {{#each attackers}}
+                        {{#unless isDestroyed}}
+                            <option value="{{index}}" {{#if (eq index ../selectedAttackerIndex)}}selected{{/if}}>
+                                {{name}} (Lv {{level}}, HP {{currentHp}}/{{maxHp}})
+                            </option>
+                        {{/unless}}
+                    {{/each}}
+                </select>
+            </div>
+
+            <div class="km-battle-armies__side">
+                <h2>{{localizeKM "warBattle.defenders"}}</h2>
+                <select name="selectedDefenderIndex">
+                    {{#each defenders}}
+                        {{#unless isDestroyed}}
+                            <option value="{{index}}" {{#if (eq index ../selectedDefenderIndex)}}selected{{/if}}>
+                                {{name}} (Lv {{level}}, HP {{currentHp}}/{{maxHp}})
+                            </option>
+                        {{/unless}}
+                    {{/each}}
+                </select>
+            </div>
+        </div>
+
+        <div class="km-battle-actions">
+            <button type="button" data-action="resolve-round">
+                <i class="fa-solid fa-swords"></i> {{localizeKM "warBattle.resolveRound"}}
+            </button>
+        </div>
+    {{/if}}
+
+    <div class="km-battle-armies km-battle-armies--status">
+        <div class="km-battle-armies__side">
+            <h3>{{localizeKM "warBattle.attackerStatus"}}</h3>
+            {{#each attackers}}
+                <p class="{{#if isDestroyed}}km-battle-army--destroyed{{/if}}">
+                    <strong>{{name}}</strong> — HP {{currentHp}}/{{maxHp}}
+                    {{#if conditions}} ({{conditions}}){{/if}}
+                </p>
+            {{/each}}
+        </div>
+
+        <div class="km-battle-armies__side">
+            <h3>{{localizeKM "warBattle.defenderStatus"}}</h3>
+            {{#each defenders}}
+                <p class="{{#if isDestroyed}}km-battle-army--destroyed{{/if}}">
+                    <strong>{{name}}</strong> — HP {{currentHp}}/{{maxHp}}
+                    {{#if conditions}} ({{conditions}}){{/if}}
+                </p>
+            {{/each}}
+        </div>
+    </div>
+
+    <div class="km-battle-log">
+        <h3>{{localizeKM "warBattle.battleLog"}}</h3>
+        {{#each log}}
+            <p>{{this}}</p>
+        {{/each}}
+    </div>
+</div>

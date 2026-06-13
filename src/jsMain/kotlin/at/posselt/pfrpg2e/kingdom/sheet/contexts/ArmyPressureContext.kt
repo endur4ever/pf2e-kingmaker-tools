@@ -26,6 +26,7 @@ external interface ArmyThreatContext {
     val statusLabel: String
     val targetHexLocation: String?
     val pauseOnExpiry: Boolean
+    val canResolveBattle: Boolean
 }
 
 @JsPlainObject
@@ -77,6 +78,7 @@ fun buildArmyPressureContext(view: ArmyPressureView): ArmyPressureContext {
             statusLabel = WarThreatStatus.fromString(tv.status)?.let { t(it.i18nKey) } ?: tv.status,
             targetHexLocation = tv.targetHexLocation,
             pauseOnExpiry = tv.pauseOnExpiry,
+            canResolveBattle = tv.canResolveBattle,
         )
     }.toTypedArray()
     val deployments = view.deployments.map { dv ->

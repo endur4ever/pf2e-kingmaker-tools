@@ -6464,6 +6464,7 @@
       "noThreats": "No active threats.",
       "deployments": "Army Deployments",
       "deployArmy": "Deploy Army",
+      "resolveBattle": "Resolve Battle",
       "armyName": "Army",
       "armyType": "Type",
       "assignThreat": "Assign to Threat",
@@ -6491,6 +6492,19 @@
       "battle": "In Battle",
       "retreated": "Retreated",
       "destroyed": "Destroyed"
+    },
+    "warBattle": {
+      "resolveBattle": "Resolve Battle",
+      "round": "Round",
+      "attackers": "Attackers",
+      "defenders": "Defenders",
+      "attackerStatus": "Attacker Status",
+      "defenderStatus": "Defender Status",
+      "resolveRound": "Resolve Round",
+      "battleLog": "Battle Log",
+      "chatTitle": "{{battleName}} — Round {{round}}",
+      "victory": "Victory! The kingdom's armies have defeated the threat.",
+      "defeat": "Defeat… the kingdom's armies have been destroyed."
     },
     "pacingAlertType": {
       "levelMismatch": "The party's level has drifted far from the chapter's intended level. Consider adjusting encounter difficulty or rewards.",

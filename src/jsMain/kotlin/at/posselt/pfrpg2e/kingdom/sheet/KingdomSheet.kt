@@ -78,6 +78,8 @@ import at.posselt.pfrpg2e.kingdom.dialogs.KingdomEventManagement
 import at.posselt.pfrpg2e.kingdom.dialogs.KingdomSettingsApplication
 import at.posselt.pfrpg2e.kingdom.dialogs.MilestoneManagement
 import at.posselt.pfrpg2e.kingdom.dialogs.StructureBrowser
+import at.posselt.pfrpg2e.kingdom.dialogs.DeployArmy
+import at.posselt.pfrpg2e.kingdom.dialogs.ResolveBattle
 import at.posselt.pfrpg2e.kingdom.dialogs.addSettlementBlockDialog
 import at.posselt.pfrpg2e.kingdom.dialogs.armyBrowser
 import at.posselt.pfrpg2e.kingdom.dialogs.armyTacticsBrowser
@@ -153,11 +155,14 @@ import at.posselt.pfrpg2e.kingdom.postPacingAlertChat
 import at.posselt.pfrpg2e.kingdom.recalculateWarPressure
 import at.posselt.pfrpg2e.kingdom.defaultWarPressure
 import at.posselt.pfrpg2e.kingdom.dialogs.AddWarThreat
-import at.posselt.pfrpg2e.kingdom.dialogs.DeployArmy
 import at.posselt.pfrpg2e.kingdom.dialogs.DeployableArmyOption
 import at.posselt.pfrpg2e.kingdom.dialogs.DeployThreatOption
 import at.posselt.pfrpg2e.kingdom.data.WarThreatStatus
+import at.posselt.pfrpg2e.kingdom.data.RawWarThreat
+import at.posselt.pfrpg2e.kingdom.BattleArmyInfo
+import at.posselt.pfrpg2e.kingdom.createArmyBattle
 import at.posselt.pfrpg2e.data.armies.ArmyType
+import at.posselt.pfrpg2e.data.armies.BattleStatus
 import com.foundryvtt.pf2e.actor.PF2EArmy
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.CompanionRef
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.PartyMemberRef
@@ -572,6 +577,71 @@ class KingdomSheet(
                     kingdom.warPressure,
                 )
                 actor.setKingdom(kingdom)
+            }
+
+            "resolve-battle" -> buildPromise {
+                val threatId = target.dataset["threatId"]
+                val kingdom = getKingdom()
+                val threat = (kingdom.warThreats ?: emptyArray()).find { it.id == threatId }
+                if (threat == null) {
+                    ui.notifications.warn(t("armyPressure.noThreats"))
+                } else {
+                    val existing = (kingdom.activeBattles ?: emptyArray())
+                        .find { it.threatId == threatId && it.status == BattleStatus.ACTIVE.value }
+                    val battle = existing ?: run {
+                        val armiesByUuid = game.actors.contents
+                            .filterIsInstance<PF2EArmy>()
+                            .associateBy { it.uuid }
+                        val infos = (kingdom.armyDeployments ?: emptyArray())
+                            .filter { it.assignedThreatId == threatId }
+                            .mapNotNull { deployment ->
+                                armiesByUuid[deployment.armyActorUuid]?.let {
+                                    BattleArmyInfo(
+                                        uuid = it.uuid,
+                                        name = it.name,
+                                        level = it.system.details.level.value,
+                                    )
+                                }
+                            }
+                        if (infos.isEmpty()) {
+                            ui.notifications.warn(t("armyPressure.noArmiesAvailable"))
+                            return@buildPromise
+                        }
+                        val created = createArmyBattle(
+                            id = "battle-${kotlin.js.Date().getTime().toLong()}",
+                            threat = threat,
+                            attackers = infos,
+                        )
+                        kingdom.activeBattles = (kingdom.activeBattles ?: emptyArray()) + created
+                        actor.setKingdom(kingdom)
+                        created
+                    }
+                    ResolveBattle(battle) { updated ->
+                        buildPromise {
+                            val current = getKingdom()
+                            current.activeBattles = (current.activeBattles ?: emptyArray())
+                                .map { if (it.id == updated.id) updated else it }
+                                .toTypedArray()
+                            if (updated.status == BattleStatus.VICTORY.value) {
+                                current.warThreats = (current.warThreats ?: emptyArray())
+                                    .map {
+                                        if (it.id == updated.threatId) {
+                                            RawWarThreat.copy(it, status = WarThreatStatus.DEFEATED.value)
+                                        } else {
+                                            it
+                                        }
+                                    }
+                                    .toTypedArray()
+                                current.warPressure = recalculateWarPressure(
+                                    current.warThreats ?: emptyArray(),
+                                    current.armyDeployments ?: emptyArray(),
+                                    current.warPressure,
+                                )
+                            }
+                            actor.setKingdom(current)
+                        }
+                    }.launch()
+                }
             }
 
             "dismiss-pacing-alert" -> buildPromise {
