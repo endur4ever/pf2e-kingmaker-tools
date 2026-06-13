@@ -99,6 +99,9 @@ class KingdomSettingsDataModel(
             boolean("enableLeadershipModifiers")
             boolean("enableRoughTerrainCosts")
             boolean("enableAnarchyActivityGating")
+            boolean("vkCharterExtraSkills")
+            boolean("vkHeartlandExtraSkills")
+            boolean("vkExtraAbilityBoost")
             string("recruitableArmiesFolderId", nullable = true)
             string("kingdomCultTable", nullable = true)
             string("kingdomEventsTable", nullable = true)
@@ -366,6 +369,24 @@ class KingdomSettingsApplication(
                             label = t("kingdom.xpRules"),
                             value = settings.vanceAndKerensharaXP,
                             help = t("kingdom.xpRulesHelp"),
+                        ),
+                        CheckboxInput(
+                            name = "vkCharterExtraSkills",
+                            label = t("kingdom.vkCharterExtraSkills"),
+                            value = settings.vkCharterExtraSkills == true,
+                            help = t("kingdom.vkCharterExtraSkillsHelp"),
+                        ),
+                        CheckboxInput(
+                            name = "vkHeartlandExtraSkills",
+                            label = t("kingdom.vkHeartlandExtraSkills"),
+                            value = settings.vkHeartlandExtraSkills == true,
+                            help = t("kingdom.vkHeartlandExtraSkillsHelp"),
+                        ),
+                        CheckboxInput(
+                            name = "vkExtraAbilityBoost",
+                            label = t("kingdom.vkExtraAbilityBoost"),
+                            value = settings.vkExtraAbilityBoost == true,
+                            help = t("kingdom.vkExtraAbilityBoostHelp"),
                         ),
                         NumberInput(
                             name = "rpToXpConversionRate",

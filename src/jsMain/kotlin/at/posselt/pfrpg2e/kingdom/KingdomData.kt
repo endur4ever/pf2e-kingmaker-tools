@@ -135,6 +135,11 @@ external interface KingdomSettings {
     // Anarchy activity gating — when enabled, non-essential activities are
     // disabled in the UI during anarchy with an explanatory tooltip.
     var enableAnarchyActivityGating: Boolean?
+
+    // V&K (Vance & Kerenshara) XP sub-rules — which V&K bonuses to apply
+    var vkCharterExtraSkills: Boolean?
+    var vkHeartlandExtraSkills: Boolean?
+    var vkExtraAbilityBoost: Boolean?
 }
 
 @JsPlainObject

@@ -41,6 +41,9 @@ import at.posselt.pfrpg2e.kingdom.SettlementTerrain
 import at.posselt.pfrpg2e.kingdom.armies.setupArmies
 import at.posselt.pfrpg2e.kingdom.armies.updateArmyConsumption
 import at.posselt.pfrpg2e.kingdom.TurnTickingEngine
+import at.posselt.pfrpg2e.kingdom.BASE_ABILITY_BOOSTS
+import at.posselt.pfrpg2e.kingdom.vkExtraAbilityBoosts
+import at.posselt.pfrpg2e.kingdom.vkInitialSkillSlots
 import at.posselt.pfrpg2e.campaign.CampaignClockManager
 import at.posselt.pfrpg2e.kingdom.dialogs.CampaignClockDialog
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.CampaignClockContext
@@ -2102,7 +2105,9 @@ class KingdomSheet(
             settlements.allSettlements,
             kingdomLevel = kingdom.level,
         )
-        val initialProficiencies = (0..3).map { index ->
+        // RAW grants 4 trained skill proficiencies at creation; the V&K charter/heartland
+        // sub-rules each add one more independently of the V&K XP setting (see [vkInitialSkillSlots]).
+        val initialProficiencies = (0 until vkInitialSkillSlots(kingdom.settings)).map { index ->
             val proficiency = kingdom.initialProficiencies.getOrNull(index)
                 ?.let { KingdomSkill.fromString(it) }
             val result = Select(
@@ -2254,7 +2259,7 @@ class KingdomSheet(
             charter = kingdom.charter.toContext(enabledCharters),
             heartland = kingdom.heartland.toContext(enabledHeartlands),
             government = kingdom.government.toContext(enabledGovernments, feats),
-            abilityBoosts = kingdom.abilityBoosts.toContext("", 2 + increaseScorePicksBy),
+            abilityBoosts = kingdom.abilityBoosts.toContext("", BASE_ABILITY_BOOSTS + increaseScorePicksBy + vkExtraAbilityBoosts(kingdom.settings)),
             currentNavEntry = currentNavEntry.value,
             hideCreation = currentCharacterSheetNavEntry != "Creation",
             hideBonus = currentCharacterSheetNavEntry != "Bonus",

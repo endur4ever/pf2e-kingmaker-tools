@@ -119,6 +119,9 @@ fun createKingdomDefaults(name: String) =
             capitalCanGrowOneSizeLarger = false,
             enableCouncilMissions = false,
             autoGainFamePerTurn = false,
+            vkCharterExtraSkills = false,
+            vkHeartlandExtraSkills = false,
+            vkExtraAbilityBoost = false,
             leaderSkills = RawLeaderSkills(
                 ruler = arrayOf(
                     "diplomacy",
