@@ -80,6 +80,8 @@ external interface AddQuestContext : ValidatedHandlebarsContext {
 
 class AddQuest(
     private val existing: RawQuest? = null,
+    private val prefillTitle: String? = null,
+    private val prefillGiver: String? = null,
     private val onSave: suspend (quest: RawQuest) -> Unit,
 ) : FormApp<AddQuestContext, AddQuestData>(
     title = t(if (existing != null) "kingdom.quests.editQuest" else "kingdom.quests.addQuest"),
@@ -109,9 +111,11 @@ class AddQuest(
             sourceEventName = null,
         )
     } ?: AddQuestData(
-        title = "",
+        // create mode: optional prefills seed the faction context when opened from a
+        // faction-standing threshold offer.
+        title = prefillTitle ?: "",
         description = "",
-        giver = "",
+        giver = prefillGiver ?: "",
         type = "other",
         target = null,
         rp = 0,

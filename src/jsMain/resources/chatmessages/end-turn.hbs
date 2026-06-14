@@ -44,3 +44,35 @@
     {{/each}}
 </ul>
 {{/if}}
+{{#if standingChanges.length}}
+<hr>
+<h3>{{localizeKM "chatMessages.endTurn.factionStanding"}}</h3>
+<ul>
+    {{#each standingChanges}}
+    <li>
+        {{localizeKM "chatMessages.endTurn.factionStandingChange"
+            group=this.group
+            oldAttitude=this.oldAttitude
+            newAttitude=this.newAttitude
+            delta=this.delta
+        }}
+        {{#if this.offerWarThreat}}
+        <button type="button"
+                class="km-offer-war-threat"
+                data-faction="{{this.group}}"
+                data-kingdom-actor-uuid="{{../actorUuid}}">
+            {{localizeKM "chatMessages.endTurn.raiseWarThreat"}}
+        </button>
+        {{/if}}
+        {{#if this.offerDiplomacyQuest}}
+        <button type="button"
+                class="km-offer-diplomacy-quest"
+                data-faction="{{this.group}}"
+                data-kingdom-actor-uuid="{{../actorUuid}}">
+            {{localizeKM "chatMessages.endTurn.offerDiplomacyQuest"}}
+        </button>
+        {{/if}}
+    </li>
+    {{/each}}
+</ul>
+{{/if}}

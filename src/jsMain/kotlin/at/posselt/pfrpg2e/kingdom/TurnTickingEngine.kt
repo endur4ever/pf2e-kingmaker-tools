@@ -3,6 +3,10 @@ package at.posselt.pfrpg2e.kingdom
 import at.posselt.pfrpg2e.campaign.CampaignClock
 import at.posselt.pfrpg2e.campaign.CampaignClockManager
 import at.posselt.pfrpg2e.campaign.ClockTickEvent
+import at.posselt.pfrpg2e.data.kingdom.applyStandingDelta
+import at.posselt.pfrpg2e.data.kingdom.attitudeFor
+import at.posselt.pfrpg2e.data.kingdom.shouldOfferDiplomacyQuest
+import at.posselt.pfrpg2e.data.kingdom.shouldOfferWarThreat
 import at.posselt.pfrpg2e.data.kingdom.structures.CommodityStorage
 import at.posselt.pfrpg2e.kingdom.data.RawCurrentCommodities
 import at.posselt.pfrpg2e.kingdom.RawModifier
@@ -10,6 +14,8 @@ import at.posselt.pfrpg2e.kingdom.data.endTurn
 import at.posselt.pfrpg2e.kingdom.data.RawConsumption
 import at.posselt.pfrpg2e.kingdom.RawCouncilCooldowns
 import at.posselt.pfrpg2e.kingdom.data.RawFame
+import at.posselt.pfrpg2e.kingdom.data.RawFactionStandingEntry
+import at.posselt.pfrpg2e.kingdom.data.RawGroup
 import at.posselt.pfrpg2e.kingdom.data.RawResources
 import at.posselt.pfrpg2e.data.armies.BattleStatus
 import at.posselt.pfrpg2e.kingdom.data.RawArmyDeployment
@@ -55,6 +61,10 @@ data class TickResult(
 	val xpAwarded: Int = 0,
 	val bonusResourceDice: Int = 0,
 	val activeBattles: Array<RawArmyBattle> = emptyArray(),
+	val groups: Array<RawGroup> = emptyArray(),
+	val factionStandingDrift: Boolean = false,
+	val warThreatOffers: Int = 0,
+	val diplomacyQuestOffers: Int = 0,
 )
 
 /**
@@ -68,6 +78,7 @@ data class TickResult(
  * - Counts down council cooldowns
  * - Ticks down modifier durations and expires finished modifiers
  * - Ticks campaign clocks
+ * - Applies faction standing drift and evaluates threshold hooks (war threat / diplomacy quest offers)
  *
  * Day-scale concerns (weather, companion travel) are NOT handled here; they tick
  * daily off the world clock — see [DailyTickEngine] and `registerDailyTickHooks`.
@@ -96,6 +107,8 @@ object TurnTickingEngine {
 	 * @param maximumFamePoints Maximum fame the kingdom can hold.
 	 * @param bonusResourceDice Bonus resource dice granted by the GM this turn (e.g. from events). Applied during collection, then reset.
 	 * @param activeBattles Current active army battles to archive at end of turn.
+	 * @param groups Current faction/group list with standing and treaty state.
+	 * @param factionStandingDriftPerTurn Signed standing delta applied to every faction each turn (e.g. -1 for slow decay). 0 disables.
 	 * @return [TickResult] with all post-tick values and a list of changes.
 	 */
 	fun tick(
@@ -123,6 +136,8 @@ object TurnTickingEngine {
 		autoGainFamePerTurn: Boolean = false,
 		bonusResourceDice: Int = 0,
 		activeBattles: Array<RawArmyBattle> = emptyArray(),
+		groups: Array<RawGroup> = emptyArray(),
+		factionStandingDriftPerTurn: Int = 0,
 	): TickResult {
 		val changes = mutableListOf<TickChange>()
 
@@ -301,6 +316,44 @@ object TurnTickingEngine {
 			}
 		}.toTypedArray()
 
+		// 17) Faction standing drift — applies a signed delta to every group's
+		// standing once per turn, then checks attitude threshold crossings to
+		// determine whether a war-threat or diplomacy-quest hook should fire.
+		var warThreatOffers = 0
+		var diplomacyQuestOffers = 0
+		val driftedGroups = if (factionStandingDriftPerTurn != 0 && groups.isNotEmpty()) {
+			groups.map { group ->
+				val before = group.standing
+				val after = applyStandingDelta(before, factionStandingDriftPerTurn)
+				if (before != after) {
+					changes += TickChange(
+						category = "factionStanding",
+						field = group.name,
+						oldValue = before,
+						newValue = after,
+					)
+					val logEntry = RawFactionStandingEntry(
+						turn = currentTurn,
+						delta = factionStandingDriftPerTurn,
+						reason = "kingdom.factionStanding.drift",
+					)
+					val newLog = if (group.standingLog != null) {
+						group.standingLog!! + logEntry
+					} else {
+						arrayOf(logEntry)
+					}
+					val drifted = RawGroup.copy(group, standing = after, standingLog = newLog)
+					if (shouldOfferWarThreat(before, after)) warThreatOffers++
+					if (shouldOfferDiplomacyQuest(before, after)) diplomacyQuestOffers++
+					drifted
+				} else {
+					group
+				}
+			}.toTypedArray()
+		} else {
+			groups
+		}
+
 		return TickResult(
 			supernaturalSolutions = 0,
 			creativeSolutions = 0,
@@ -322,6 +375,10 @@ object TurnTickingEngine {
 			xpAwarded = xpAwarded,
 			bonusResourceDice = 0,
 			activeBattles = archivedBattles,
+			groups = driftedGroups,
+			factionStandingDrift = factionStandingDriftPerTurn != 0,
+			warThreatOffers = warThreatOffers,
+			diplomacyQuestOffers = diplomacyQuestOffers,
 		)
 	}
 

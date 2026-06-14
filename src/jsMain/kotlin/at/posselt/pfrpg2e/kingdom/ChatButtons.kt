@@ -1,6 +1,8 @@
 package at.posselt.pfrpg2e.kingdom
 
 import at.posselt.pfrpg2e.data.events.KingdomEventTrait
+import at.posselt.pfrpg2e.kingdom.dialogs.AddQuest
+import at.posselt.pfrpg2e.kingdom.dialogs.AddWarThreat
 import at.posselt.pfrpg2e.kingdom.dialogs.pickEventSettlement
 import at.posselt.pfrpg2e.kingdom.dialogs.pickLeader
 import at.posselt.pfrpg2e.kingdom.sheet.executeResourceButton
@@ -10,6 +12,7 @@ import at.posselt.pfrpg2e.takeIfInstance
 import at.posselt.pfrpg2e.utils.bindChatClick
 import at.posselt.pfrpg2e.utils.buildPromise
 import at.posselt.pfrpg2e.utils.deserializeB64Json
+import at.posselt.pfrpg2e.utils.launch
 import at.posselt.pfrpg2e.utils.postChatMessage
 import at.posselt.pfrpg2e.utils.postChatTemplate
 import at.posselt.pfrpg2e.utils.t
@@ -149,6 +152,42 @@ private val buttons = listOf(
                 }
             }
         }
+    },
+    ChatButton("km-offer-war-threat") { game, actor, event, button ->
+        // GM-confirmed offer from a faction-standing threshold crossing (#1 → #12).
+        // Opens the AddWarThreat dialog prefilled with the faction; nothing is created
+        // until the GM saves.
+        val faction = button.dataset["faction"] ?: ""
+        AddWarThreat(
+            prefillName = t("chatMessages.endTurn.warThreatName", recordOf("group" to faction)),
+            prefillEnemyFaction = faction.ifBlank { null },
+        ) { threat ->
+            buildPromise {
+                actor.getKingdom()?.let { kingdom ->
+                    kingdom.warThreats = (kingdom.warThreats ?: emptyArray()) + threat
+                    kingdom.warPressure = recalculateWarPressure(
+                        kingdom.warThreats ?: emptyArray(),
+                        kingdom.armyDeployments ?: emptyArray(),
+                        kingdom.warPressure,
+                    )
+                    actor.setKingdom(kingdom)
+                }
+            }
+        }.launch()
+    },
+    ChatButton("km-offer-diplomacy-quest") { game, actor, event, button ->
+        // GM-confirmed offer from a faction-standing threshold crossing (#1 → #2).
+        // Opens the AddQuest dialog prefilled with the faction as giver.
+        val faction = button.dataset["faction"] ?: ""
+        AddQuest(
+            prefillTitle = t("chatMessages.endTurn.diplomacyQuestTitle", recordOf("group" to faction)),
+            prefillGiver = faction,
+        ) { quest ->
+            actor.getKingdom()?.let { kingdom ->
+                kingdom.quests = (kingdom.quests ?: emptyArray()) + quest
+                actor.setKingdom(kingdom)
+            }
+        }.launch()
     },
     ChatButton("km-apply-modifier-effect") { game, actor, event, button ->
         val mod = deserializeB64Json<RawModifier>(button.dataset["data"] ?: "")

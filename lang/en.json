@@ -1345,6 +1345,17 @@
       "standingDelta": "Standing Change",
       "standingDeltaHelp": "Signed change to this faction's standing (e.g. 10 or -15). Standing is clamped to -100..100.",
       "standingReason": "Reason",
+      "treaty": "Treaty",
+      "standingLog": "Standing Log",
+      "turnNumber": "Turn",
+      "allianceLevel": {
+        "non-aggression": "Non-Aggression Pact",
+        "alliance": "Alliance",
+        "tribute": "Tribute"
+      },
+      "factionStanding": {
+        "drift": "Passive Standing Drift"
+      },
       "newSettlement": "New Settlement",
       "addCurrentScene": "Add Current Scene",
       "settlementSize": "Settlement Size",
@@ -1525,7 +1536,13 @@
         "resetRP": "Setting Resource Points to 0",
         "reduceMods": "Reducing Modifiers' Turns by 1",
         "resetSolutions": "Setting available Supernatural and Creative Solutions to 0",
-        "moveValues": "Adding values from the next columns to the now columns, respecting their resource limits"
+        "moveValues": "Adding values from the next columns to the now columns, respecting their resource limits",
+        "factionStanding": "Faction Standing Changes",
+        "factionStandingChange": "{{group}}: {{oldAttitude}} → {{newAttitude}} ({{delta}})",
+        "raiseWarThreat": "Raise War Threat",
+        "offerDiplomacyQuest": "Offer Diplomacy Quest",
+        "warThreatName": "{{group}} Aggression",
+        "diplomacyQuestTitle": "Diplomatic Accord with {{group}}"
       },
       "firstRun": {
         "dontShowAgain": "Don't show this again",

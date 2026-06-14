@@ -28,6 +28,9 @@ import at.posselt.pfrpg2e.kingdom.data.RawTurnRecord
 import at.posselt.pfrpg2e.kingdom.appendTurnRecord
 import at.posselt.pfrpg2e.kingdom.buildTurnRecord
 import at.posselt.pfrpg2e.data.kingdom.structures.CommodityStorage
+import at.posselt.pfrpg2e.data.kingdom.attitudeFor
+import at.posselt.pfrpg2e.data.kingdom.shouldOfferDiplomacyQuest
+import at.posselt.pfrpg2e.data.kingdom.shouldOfferWarThreat
 import at.posselt.pfrpg2e.actor.partyMembers
 import at.posselt.pfrpg2e.kingdom.resources.calculateStorage
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.TurnWizardContext
@@ -128,6 +131,8 @@ fun runKingdomTurnTick(kingdom: KingdomData, storage: CommodityStorage, currentT
         autoGainFamePerTurn = kingdom.settings.autoGainFamePerTurn,
         bonusResourceDice = kingdom.bonusResourceDice,
         activeBattles = kingdom.activeBattles ?: emptyArray(),
+        groups = kingdom.groups,
+        factionStandingDriftPerTurn = kingdom.settings.factionStandingDriftPerTurn ?: 0,
     )
 
 suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData): TickResult {
@@ -153,6 +158,7 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
     kingdom.warPressure = tickResult.warPressure
     kingdom.bonusResourceDice = tickResult.bonusResourceDice
     kingdom.activeBattles = tickResult.activeBattles
+    kingdom.groups = tickResult.groups
 
     // Apply campaign clock tick results (already included in tickResult)
     kingdom.campaignClocks = tickResult.updatedClocks
@@ -254,6 +260,24 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
     endTurnContext.xpAwarded = tickResult.xpAwarded
     endTurnContext.fame = kingdom.fame.now
     endTurnContext.maximumFamePoints = kingdom.settings.maximumFamePoints
+    endTurnContext.actorUuid = actor.uuid
+    endTurnContext.standingChanges = tickResult.changes
+        .filter { it.category == "factionStanding" }
+        .map { change ->
+            val groupName = kingdom.groups.find { it.name == change.field }?.name ?: change.field
+            val oldStanding = change.oldValue as? Int ?: 0
+            val newStanding = change.newValue as? Int ?: 0
+            val entry = js("{}")
+            entry.group = groupName
+            entry.oldAttitude = t(attitudeFor(oldStanding).i18nKey)
+            entry.newAttitude = t(attitudeFor(newStanding).i18nKey)
+            entry.delta = newStanding - oldStanding
+            // GM-confirmed threshold offers (never auto-applied): surface a button only on
+            // the tick that crosses into Hostile (war threat) or Friendly+ (diplomacy quest).
+            entry.offerWarThreat = shouldOfferWarThreat(oldStanding, newStanding)
+            entry.offerDiplomacyQuest = shouldOfferDiplomacyQuest(oldStanding, newStanding)
+            entry
+        }.toTypedArray()
     postChatTemplate(
         templatePath = "chatmessages/end-turn.hbs",
         templateContext = endTurnContext,

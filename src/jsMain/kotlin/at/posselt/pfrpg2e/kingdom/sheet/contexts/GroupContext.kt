@@ -7,6 +7,7 @@ import at.posselt.pfrpg2e.app.forms.TextInput
 import at.posselt.pfrpg2e.data.kingdom.DEFAULT_FACTION_STANDING
 import at.posselt.pfrpg2e.data.kingdom.Relations
 import at.posselt.pfrpg2e.data.kingdom.attitudeFor
+import at.posselt.pfrpg2e.kingdom.data.RawFactionStandingEntry
 import at.posselt.pfrpg2e.kingdom.data.RawGroup
 import at.posselt.pfrpg2e.utils.t
 import kotlinx.js.JsPlainObject
@@ -21,6 +22,8 @@ external interface GroupContext {
     val relations: FormElementContext
     val attitude: String
     val standing: Int
+    val allianceLevel: String?
+    val standingLog: Array<RawFactionStandingEntry>?
 }
 
 fun Array<RawGroup>.toContext() =
@@ -57,5 +60,7 @@ fun Array<RawGroup>.toContext() =
             ).toContext(),
             attitude = t(attitudeFor(group.standing).i18nKey),
             standing = group.standing ?: DEFAULT_FACTION_STANDING,
+            allianceLevel = group.allianceLevel,
+            standingLog = group.standingLog,
         )
     }.toTypedArray()

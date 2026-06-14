@@ -136,6 +136,9 @@ external interface KingdomSettings {
     // disabled in the UI during anarchy with an explanatory tooltip.
     var enableAnarchyActivityGating: Boolean?
 
+    // Faction & diplomacy relations tracker (roadmap #1 faction standing drift)
+    var factionStandingDriftPerTurn: Int?
+
     // V&K (Vance & Kerenshara) XP sub-rules — which V&K bonuses to apply
     var vkCharterExtraSkills: Boolean?
     var vkHeartlandExtraSkills: Boolean?

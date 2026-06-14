@@ -66,6 +66,8 @@ external interface WarThreatFormContext : ValidatedHandlebarsContext, SectionsCo
 @JsExport
 class AddWarThreat(
     private val existing: RawWarThreat? = null,
+    private val prefillName: String? = null,
+    private val prefillEnemyFaction: String? = null,
     private val onSave: (RawWarThreat) -> Unit,
 ) : FormApp<WarThreatFormContext, WarThreatFormData>(
     title = if (existing == null) t("armyPressure.addThreat") else t("armyPressure.editThreat"),
@@ -75,10 +77,12 @@ class AddWarThreat(
     width = 480,
     id = "kmWarThreat",
 ) {
+    // In create mode (existing == null) the optional prefills seed the faction context
+    // when the dialog is opened from a faction-standing threshold offer.
     private var data: WarThreatFormData = WarThreatFormData(
-        name = existing?.name ?: "",
+        name = existing?.name ?: prefillName ?: "",
         description = existing?.description ?: "",
-        enemyFaction = existing?.enemyFaction,
+        enemyFaction = existing?.enemyFaction ?: prefillEnemyFaction,
         maxEscalation = existing?.maxEscalation ?: 3,
         eta = existing?.eta,
         targetHexLocation = existing?.targetHexLocation,

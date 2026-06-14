@@ -11,6 +11,7 @@
                     <td>{{localizeKM "kingdom.preventPledgeOfFealty"}}</td>
                     <td>{{localizeKM "kingdom.relations"}}</td>
                     <td>{{localizeKM "kingdom.attitude"}}</td>
+                    <td>{{localizeKM "kingdom.treaty"}}</td>
                     <td>{{localizeKM "applications.delete"}}</td>
                 </tr>
                 </thead>
@@ -27,6 +28,7 @@
                                 <i class="fa-solid fa-scale-balanced"></i>
                             </button>
                         </td>
+                        <td>{{#if allianceLevel}}{{localizeKM (concat "kingdom.allianceLevel." allianceLevel)}}{{/if}}</td>
                         <td><button type="button" data-action="delete-group" data-index="{{@index}}">
                             <i class="fa-solid fa-trash"></i>
                         </button></td>
@@ -34,6 +36,34 @@
                 {{/each}}
                 </tbody>
             </table>
+        </section>
+        <section>
+            <h2>{{localizeKM "kingdom.standingLog"}}</h2>
+            {{#each groups}}
+                {{#if standingLog.length}}
+                    <details>
+                        <summary>{{name.text}}</summary>
+                        <table>
+                            <thead>
+                            <tr>
+                                <td>{{localizeKM "kingdom.turnNumber"}}</td>
+                                <td>{{localizeKM "kingdom.standingDelta"}}</td>
+                                <td>{{localizeKM "kingdom.standingReason"}}</td>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {{#each standingLog}}
+                            <tr>
+                                <td>{{turn}}</td>
+                                <td>{{delta}}</td>
+                                <td>{{localizeKM reason}}</td>
+                            </tr>
+                            {{/each}}
+                            </tbody>
+                        </table>
+                    </details>
+                {{/if}}
+            {{/each}}
         </section>
     </div>
 </div>
