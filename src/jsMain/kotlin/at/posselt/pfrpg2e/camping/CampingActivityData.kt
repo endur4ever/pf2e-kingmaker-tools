@@ -66,10 +66,17 @@ external interface CampingActivityData {
     var requiredCompanion: String?
 }
 
-fun CampingActivityData.isRequiredCompanionPresent(actorNames: Set<String>): Boolean =
+/**
+ * Whether [actorName] is the companion this activity belongs to (e.g. Amiri for
+ * "Enhance Weapons"). Matched on a word boundary so "Amiri the Barbarian" still counts.
+ */
+fun CampingActivityData.isActorRequiredCompanion(actorName: String): Boolean =
     requiredCompanion?.let { companionName ->
-        actorNames.any { it.equals(companionName, ignoreCase = true) }
-    } ?: true
+        Regex("\\b$companionName\\b", RegexOption.IGNORE_CASE).containsMatchIn(actorName)
+    } ?: false
+
+fun CampingActivityData.isRequiredCompanionPresent(actorNames: Set<String>): Boolean =
+    if (requiredCompanion == null) true else actorNames.any { isActorRequiredCompanion(it) }
 
 /**
  * Companion-learning activities must stay visible in the activity list (greyed out when the

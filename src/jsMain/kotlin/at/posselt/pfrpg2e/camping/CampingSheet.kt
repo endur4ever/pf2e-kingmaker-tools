@@ -40,6 +40,7 @@ import at.posselt.pfrpg2e.utils.MacroData
 import at.posselt.pfrpg2e.utils.SheetType
 import at.posselt.pfrpg2e.utils.asSequence
 import at.posselt.pfrpg2e.utils.buildPromise
+import at.posselt.pfrpg2e.utils.escapeHtml
 import at.posselt.pfrpg2e.utils.formatSeconds
 import at.posselt.pfrpg2e.utils.fromDateInputString
 import at.posselt.pfrpg2e.utils.fromUuidTypeSafe
@@ -113,6 +114,10 @@ external interface CampingSheetActor : BaseActorContext {
     val downtimeHoursRemaining: Int?
     val downtimeHoursMax: Int?
     val downtimeBudgetFull: Boolean?
+
+    // Pre-rendered HTML (escaped) listing the companion activities this actor knows,
+    // shown as a Foundry tooltip on the avatar. Null when nothing has been learned.
+    val learnedActivities: String?
 }
 
 @Suppress("unused")
@@ -844,58 +849,81 @@ class CampingSheet(
                 ui.notifications.error(t("camping.onlyCharactersCanPerformActivities"))
             } else if (activity == null) {
                 ui.notifications.error(t("camping.activityNotFound", recordOf("id" to activityId)))
-            } else if (!activityActor.satisfiesAnyActivitySkillRequirement(activity, camping.ignoreSkillRequirements)) {
-                ui.notifications.error(
-                    t(
-                        "camping.actorLacksSkillRequirements",
-                        recordOf("activityName" to activity.name)
-                    )
-                )
-            } else if (activity.requiresACheck() && !activityActor.hasAnyActivitySkill(activity)) {
-                ui.notifications.error(t("camping.actorLacksSkills", recordOf("activityName" to activity.name)))
             } else {
-                // GMs can always (re)assign actors; players are subject to scheduling rules
-                val schedulingResult = if (game.user.isGM) {
-                    CampingActivityScheduler.SchedulingResult.Allowed
-                } else {
-                    CampingActivityScheduler.canAssign(
-                        activities = camping.campingActivitiesWithId(),
-                        activityData = activity,
-                        actorUuid = actorUuid,
+                val companionUnavailable = activity.requiredCompanion?.let { companionName ->
+                    val unavailableCompanionNames = (game.getKingdomActors().firstOrNull()?.getKingdom()
+                        ?.companions ?: emptyArray())
+                        .filter { it.asDynamic().campAvailable == false }
+                        .map { it.name }
+                        .toSet()
+                    val regex = Regex("\\b$companionName\\b", RegexOption.IGNORE_CASE)
+                    unavailableCompanionNames.any { regex.containsMatchIn(it) }
+                } ?: false
+
+                if (!activityActor.satisfiesAnyActivitySkillRequirement(activity, camping.ignoreSkillRequirements)) {
+                    ui.notifications.error(
+                        t(
+                            "camping.actorLacksSkillRequirements",
+                            recordOf("activityName" to activity.name)
+                        )
                     )
-                }
-                when (schedulingResult) {
-                    is CampingActivityScheduler.SchedulingResult.Blocked -> {
-                        ui.notifications.error(schedulingResult.reason)
-                    }
-                    is CampingActivityScheduler.SchedulingResult.Allowed -> {
-                        val skill = activityActor
-                            .findCampingActivitySkills(activity, camping.ignoreSkillRequirements)
-                            .filterNot { it.validateOnly }
-                            .firstOrNull()
-                        val previous = camping.campingActivities[activityId]
-                        val previousActorUuid = previous?.actorUuid
-                        actor.typedCampingUpdate { current ->
-                            campingActivities[activityId] = CampingActivity(
-                                actorUuid = actorUuid,
-                                selectedSkill = skill?.attribute?.value,
-                                // Re-dropping the same actor keeps their repetitions; a new
-                                // actor starts over at one.
-                                repetitions = if (previousActorUuid == actorUuid) previous?.repetitions else 1,
+                } else if (activity.requiresACheck() && !activityActor.hasAnyActivitySkill(activity)) {
+                    ui.notifications.error(t("camping.actorLacksSkills", recordOf("activityName" to activity.name)))
+                } else if (!camping.canActorPerformActivity(activity, actorUuid, activityActor.name, companionUnavailable)) {
+                    ui.notifications.error(
+                        t(
+                            "camping.actorCannotPerformCompanionActivity",
+                            recordOf(
+                                "actor" to activityActor.name,
+                                "activityName" to activity.name,
+                                "companion" to (activity.requiredCompanion ?: ""),
                             )
-                            // No-check activities have no roll to charge on, so the drop itself
-                            // charges the hours; a reassignment moves the charge to the new actor,
-                            // refunding every repetition the previous actor had accumulated.
-                            if (!activity.requiresACheck() && previousActorUuid != actorUuid) {
-                                downtimeHoursSpent.set(
-                                    moveNoCheckDowntimeCharge(
-                                        spent = current.downtimeHoursSpent,
-                                        previousActorUuid = previousActorUuid,
-                                        newActorUuid = actorUuid,
-                                        refundHours = (previous?.repetitionsOrDefault() ?: 0) *
-                                            CampingActivityScheduler.DOWNTIME_HOURS_PER_ACTIVITY,
-                                    )
+                        )
+                    )
+                } else {
+                    // GMs can always (re)assign actors; players are subject to scheduling rules
+                    val schedulingResult = if (game.user.isGM) {
+                        CampingActivityScheduler.SchedulingResult.Allowed
+                    } else {
+                        CampingActivityScheduler.canAssign(
+                            activities = camping.campingActivitiesWithId(),
+                            activityData = activity,
+                            actorUuid = actorUuid,
+                        )
+                    }
+                    when (schedulingResult) {
+                        is CampingActivityScheduler.SchedulingResult.Blocked -> {
+                            ui.notifications.error(schedulingResult.reason)
+                        }
+                        is CampingActivityScheduler.SchedulingResult.Allowed -> {
+                            val skill = activityActor
+                                .findCampingActivitySkills(activity, camping.ignoreSkillRequirements)
+                                .filterNot { it.validateOnly }
+                                .firstOrNull()
+                            val previous = camping.campingActivities[activityId]
+                            val previousActorUuid = previous?.actorUuid
+                            actor.typedCampingUpdate { current ->
+                                campingActivities[activityId] = CampingActivity(
+                                    actorUuid = actorUuid,
+                                    selectedSkill = skill?.attribute?.value,
+                                    // Re-dropping the same actor keeps their repetitions; a new
+                                    // actor starts over at one.
+                                    repetitions = if (previousActorUuid == actorUuid) previous?.repetitions else 1,
                                 )
+                                // No-check activities have no roll to charge on, so the drop itself
+                                // charges the hours; a reassignment moves the charge to the new actor,
+                                // refunding every repetition the previous actor had accumulated.
+                                if (!activity.requiresACheck() && previousActorUuid != actorUuid) {
+                                    downtimeHoursSpent.set(
+                                        moveNoCheckDowntimeCharge(
+                                            spent = current.downtimeHoursSpent,
+                                            previousActorUuid = previousActorUuid,
+                                            newActorUuid = actorUuid,
+                                            refundHours = (previous?.repetitionsOrDefault() ?: 0) *
+                                                CampingActivityScheduler.DOWNTIME_HOURS_PER_ACTIVITY,
+                                        )
+                                    )
+                                }
                             }
                         }
                     }
@@ -1245,7 +1273,7 @@ class CampingSheet(
         val unavailableCompanionNames = (game.getKingdomActors().firstOrNull()?.getKingdom()
             ?.companions ?: emptyArray())
             .filter { it.asDynamic().campAvailable == false }
-            .map { it.name.lowercase() }
+            .map { it.name }
             .toSet()
         val activities = groupActivities.mapIndexed { _, groupedActivity ->
             val (data, result) = groupedActivity
@@ -1268,10 +1296,20 @@ class CampingSheet(
             val isCompanionPresent = data.isRequiredCompanionPresent(
                 actorNames = actorsByUuid.values.map { it.name }.toSet()
             )
-            val isLearned = data.id in camping.learnedCompanionActivities
-            val requiredCompanionUnavailable = data.requiredCompanion?.lowercase() in unavailableCompanionNames
-            val companionDisabled = !hidden && data.requiredCompanion != null && !isLearned &&
-                    (!isCompanionPresent || requiredCompanionUnavailable)
+            val anyoneLearned = actorsByUuid.keys.any { camping.hasActorLearnedActivity(it, data.id) }
+            val requiredCompanionUnavailable = data.requiredCompanion?.let { companionName ->
+                val regex = Regex("\\b$companionName\\b", RegexOption.IGNORE_CASE)
+                unavailableCompanionNames.any { regex.containsMatchIn(it) }
+            } ?: false
+            val companionDisabled = !hidden && data.requiredCompanion != null && if (actor != null) {
+                // A specific actor is assigned: only the companion themselves or a character
+                // who has learned the activity may perform it — presence alone is not enough.
+                !camping.canActorPerformActivity(data, actor.uuid, actor.name, requiredCompanionUnavailable)
+            } else {
+                // No one assigned yet: the tile is usable if the companion is in camp (and
+                // available) or someone in camp has learned it.
+                !((isCompanionPresent && !requiredCompanionUnavailable) || anyoneLearned)
+            }
             val budgetExhausted = !hidden && actor != null && !data.isPrepareCampsite() && camping.downtimeHoursRemaining(actor.uuid) <= 0
             // Assigned no-check tiles must stay clickable when the budget runs out —
             // .disabled sets pointer-events: none, which would lock the player out of
@@ -1279,10 +1317,17 @@ class CampingSheet(
             val budgetDisabled = budgetExhausted && requiresCheck
             val disabled = companionDisabled || budgetDisabled
             val disabledReason = if (companionDisabled) {
-                t(
-                    "camping.activityRequiresCompanion",
-                    recordOf("companion" to data.requiredCompanion)
-                )
+                if (actor != null) {
+                    t(
+                        "camping.activityRequiresCompanionOrLearned",
+                        recordOf("companion" to data.requiredCompanion)
+                    )
+                } else {
+                    t(
+                        "camping.activityRequiresCompanion",
+                        recordOf("companion" to data.requiredCompanion)
+                    )
+                }
             } else if (budgetDisabled) {
                 t("camping.downtimeBudgetExhausted")
             } else null
@@ -1290,6 +1335,7 @@ class CampingSheet(
                 getLearnTargetSelect(
                     activityId = data.id,
                     camping = camping,
+                    actorUuid = result.actorUuid,
                     presentActorNames = actorsByUuid.values.map { it.name }.toSet(),
                     selected = groupedActivity.result.learnTargetActivityId,
                 )
@@ -1529,6 +1575,7 @@ class CampingSheet(
                 travelPathError = t("camping.noPathFound")
             }
         }
+        val companionActivities = camping.getAllActivities().filter { it.requiredCompanion != null }
         CampingSheetContext(
             canRollEncounter = currentRegion?.rollTableUuid != null,
             availableFood = availableFood,
@@ -1586,6 +1633,29 @@ class CampingSheet(
                         downtimeBudgetFull = if (campingActivitiesSection) {
                             camping.downtimeHoursRemaining(uuid) <= 0
                         } else null,
+                        learnedActivities = run {
+                            // Companion activities this actor knows: their own (if they are the
+                            // companion) plus any they have learned. Mirrors canActorPerformActivity.
+                            val names = companionActivities
+                                .filter {
+                                    it.isActorRequiredCompanion(actor.name)
+                                            || camping.hasActorLearnedActivity(uuid, it.id)
+                                }
+                                .map { it.name }
+                                .distinct()
+                                .sorted()
+                            if (names.isEmpty()) {
+                                null
+                            } else {
+                                buildString {
+                                    append("<strong>")
+                                    append(escapeHtml(t("camping.learnedActivitiesHeader")))
+                                    append("</strong><ul>")
+                                    names.forEach { append("<li>").append(escapeHtml(it)).append("</li>") }
+                                    append("</ul>")
+                                }
+                            }
+                        },
                     )
                 }
             }.toTypedArray(),
@@ -1878,10 +1948,15 @@ private fun getActivitySkills(
 private fun getLearnTargetSelect(
     activityId: String,
     camping: CampingData,
+    actorUuid: String?,
     presentActorNames: Set<String>,
     selected: String?,
 ): FormElementContext {
-    val learned = camping.learnedCompanionActivities.toSet()
+    val learned = actorUuid?.let { uuid ->
+        val key = uuid.replace('.', '_')
+        val actorLearned = camping.learnedCompanionActivitiesByActor?.get(key)?.toSet() ?: emptySet()
+        actorLearned + camping.learnedCompanionActivities.toSet()
+    } ?: camping.learnedCompanionActivities.toSet()
     val options = camping.getAllActivities()
         .filter { activity ->
             activity.requiredCompanion != null

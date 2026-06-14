@@ -20,6 +20,7 @@ import at.posselt.pfrpg2e.fromCamelCase
 import at.posselt.pfrpg2e.utils.fromUuidTypeSafe
 import at.posselt.pfrpg2e.utils.postChatTemplate
 import com.foundryvtt.core.Game
+import js.objects.recordOf
 import kotlinx.js.JsPlainObject
 
 @JsPlainObject
@@ -99,8 +100,21 @@ private fun handleLearnFromCompanion(
     val isCompanionActivity = camping.getAllActivities()
         .any { it.id == targetId && it.requiredCompanion != null }
     if (!isCompanionActivity) return false
-    val existing = camping.learnedCompanionActivities.toSet()
-    if (targetId in existing) return false
-    camping.learnedCompanionActivities = (existing + targetId).toTypedArray()
-    return true
+    val actorUuid = learnResult.actorUuid ?: return false
+    val key = actorUuid.replace('.', '_')
+    val byActor = camping.learnedCompanionActivitiesByActor ?: recordOf()
+    val actorLearned = byActor[key]?.toSet() ?: emptySet()
+    val globalLearned = camping.learnedCompanionActivities.toSet()
+
+    var changed = false
+    if (targetId !in actorLearned) {
+        byActor[key] = (actorLearned + targetId).toTypedArray()
+        camping.learnedCompanionActivitiesByActor = byActor
+        changed = true
+    }
+    if (targetId !in globalLearned) {
+        camping.learnedCompanionActivities = (globalLearned + targetId).toTypedArray()
+        changed = true
+    }
+    return changed
 }

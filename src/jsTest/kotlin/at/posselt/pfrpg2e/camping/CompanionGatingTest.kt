@@ -27,6 +27,19 @@ class CompanionGatingTest {
     }
 
     @Test
+    fun testCompanionPresentWithSuffix() {
+        val activity = activityWithCompanion("Amiri")
+        assertTrue(activity.isRequiredCompanionPresent(setOf("Amiri (Companion)")))
+        assertTrue(activity.isRequiredCompanionPresent(setOf("Amiri - Level 5")))
+    }
+
+    @Test
+    fun testCompanionPresentWithPrefix() {
+        val activity = activityWithCompanion("Amiri")
+        assertTrue(activity.isRequiredCompanionPresent(setOf("Level 5 Amiri")))
+    }
+
+    @Test
     fun testCompanionPresentCaseInsensitive() {
         val activity = activityWithCompanion("harrim")
         assertTrue(activity.isRequiredCompanionPresent(setOf("Harrim")))

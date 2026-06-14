@@ -378,4 +378,137 @@ class LearnedCompanionActivityTest {
             "Non-companion activity should be shown when not locked",
         )
     }
+
+    @Test
+    fun testPerActorLearning() {
+        val camping = unsafeJso<CampingData> {
+            learnedCompanionActivities = emptyArray()
+            learnedCompanionActivitiesByActor = recordOf(
+                "Actor_1" to arrayOf("blend-into-the-night"),
+                "Actor_2" to arrayOf("bolster-confidence")
+            )
+        }
+
+        // Actor 1 learned "blend-into-the-night" but not "bolster-confidence"
+        assertTrue(camping.hasActorLearnedActivity("Actor.1", "blend-into-the-night"))
+        assertFalse(camping.hasActorLearnedActivity("Actor.1", "bolster-confidence"))
+
+        // Actor 2 learned "bolster-confidence" but not "blend-into-the-night"
+        assertTrue(camping.hasActorLearnedActivity("Actor.2", "bolster-confidence"))
+        assertFalse(camping.hasActorLearnedActivity("Actor.2", "blend-into-the-night"))
+
+        // Actor 3 has not learned either
+        assertFalse(camping.hasActorLearnedActivity("Actor.3", "blend-into-the-night"))
+
+        // If we add to global, it should be learned for everyone (backward compatibility)
+        camping.learnedCompanionActivities = arrayOf("blend-into-the-night")
+        assertTrue(camping.hasActorLearnedActivity("Actor.3", "blend-into-the-night"))
+        assertTrue(camping.hasActorLearnedActivity("Actor.1", "blend-into-the-night"))
+    }
+
+    // === learnedActivityIdsForActor (backs the avatar tooltip) ===
+
+    @Test
+    fun testLearnedActivityIdsForActorUnionsPerActorAndGlobal() {
+        val camping = unsafeJso<CampingData> {
+            learnedCompanionActivities = arrayOf("bolster-confidence")
+            learnedCompanionActivitiesByActor = recordOf(
+                "Actor_1" to arrayOf("blend-into-the-night"),
+            )
+        }
+
+        // Actor 1 sees their own learned activity plus the party-wide one.
+        assertEquals(
+            setOf("blend-into-the-night", "bolster-confidence"),
+            camping.learnedActivityIdsForActor("Actor.1"),
+        )
+
+        // An actor with no personal entry still sees the party-wide one.
+        assertEquals(
+            setOf("bolster-confidence"),
+            camping.learnedActivityIdsForActor("Actor.2"),
+        )
+    }
+
+    @Test
+    fun testLearnedActivityIdsForActorEmptyWhenNothingLearned() {
+        val camping = unsafeJso<CampingData> {
+            learnedCompanionActivities = emptyArray()
+            learnedCompanionActivitiesByActor = recordOf()
+        }
+
+        assertTrue(camping.learnedActivityIdsForActor("Actor.1").isEmpty())
+    }
+
+    // === canActorPerformActivity: only the companion or those who learned it may perform ===
+
+    private fun noLearnedCamping(): CampingData = unsafeJso {
+        learnedCompanionActivities = emptyArray()
+        learnedCompanionActivitiesByActor = recordOf()
+    }
+
+    @Test
+    fun testCanActorPerformNonCompanionActivityIsAlwaysTrue() {
+        val camping = noLearnedCamping()
+        val activity = universalActivity("relax")
+
+        assertTrue(camping.canActorPerformActivity(activity, "Actor.1", "Valeros", companionUnavailable = false))
+    }
+
+    @Test
+    fun testCompanionCanPerformOwnActivity() {
+        val camping = noLearnedCamping()
+        val activity = companionActivity("enhance-weapons", "Amiri")
+
+        assertTrue(
+            camping.canActorPerformActivity(activity, "Actor.amiri", "Amiri", companionUnavailable = false),
+            "The companion always knows their own activity",
+        )
+    }
+
+    @Test
+    fun testCompanionCannotPerformOwnActivityWhenUnavailable() {
+        val camping = noLearnedCamping()
+        val activity = companionActivity("enhance-weapons", "Amiri")
+
+        assertFalse(
+            camping.canActorPerformActivity(activity, "Actor.amiri", "Amiri", companionUnavailable = true),
+        )
+    }
+
+    @Test
+    fun testOtherActorCannotPerformCompanionActivityJustBecauseCompanionIsPresent() {
+        val camping = noLearnedCamping()
+        val activity = companionActivity("enhance-weapons", "Amiri")
+
+        // Amiri being in the party does NOT let Valeros perform her activity — he must learn it.
+        assertFalse(
+            camping.canActorPerformActivity(activity, "Actor.1", "Valeros", companionUnavailable = false),
+        )
+    }
+
+    @Test
+    fun testLearnerCanPerformCompanionActivityEvenWhenCompanionAbsentOrUnavailable() {
+        val camping = unsafeJso<CampingData> {
+            learnedCompanionActivities = emptyArray()
+            learnedCompanionActivitiesByActor = recordOf("Actor_1" to arrayOf("enhance-weapons"))
+        }
+        val activity = companionActivity("enhance-weapons", "Amiri")
+
+        assertTrue(
+            camping.canActorPerformActivity(activity, "Actor.1", "Valeros", companionUnavailable = true),
+            "Once learned, an actor can perform the activity without the companion",
+        )
+    }
+
+    @Test
+    fun testPartyWideLearnedActivityLetsAnyActorPerform() {
+        val camping = unsafeJso<CampingData> {
+            learnedCompanionActivities = arrayOf("enhance-weapons")
+            learnedCompanionActivitiesByActor = recordOf()
+        }
+        val activity = companionActivity("enhance-weapons", "Amiri")
+
+        assertTrue(camping.canActorPerformActivity(activity, "Actor.99", "Ekundayo", companionUnavailable = false))
+    }
 }

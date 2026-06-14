@@ -167,6 +167,12 @@ external interface CampingData {
     var learnedCompanionActivities: Array<String>
 
     /**
+     * Companion-specific activity IDs learned per actor.
+     * Key is the actor's UUID or ID (with dots replaced by underscores), value is the array of learned activity IDs.
+     */
+    var learnedCompanionActivitiesByActor: Record<String, Array<String>>?
+
+    /**
      * One entry per watch slot; each entry is the list of actor UUIDs assigned to that watch.
      * The number of watch slots equals this array's size (defaults to [defaultNumberOfWatches]).
      */
@@ -416,6 +422,7 @@ fun getDefaultCamping(game: Game): CampingData {
         travelStartHex = null,
         travelEndHex = null,
         learnedCompanionActivities = emptyArray(),
+        learnedCompanionActivitiesByActor = recordOf(),
         watchSlots = emptyArray(),
         downtimeHoursSpent = recordOf(),
         regionSettings = RegionSettings(
@@ -806,4 +813,37 @@ fun CampingData.findCookingChoices(
             )
         }
     )
+}
+
+/**
+ * Companion activity IDs this actor effectively knows: those learned individually
+ * ([learnedCompanionActivitiesByActor]) unioned with the party-wide
+ * [learnedCompanionActivities] (which count as known by everyone).
+ */
+fun CampingData.learnedActivityIdsForActor(actorUuid: String): Set<String> {
+    val key = actorUuid.replace('.', '_')
+    val learnedByActor = learnedCompanionActivitiesByActor?.get(key)?.toSet() ?: emptySet()
+    return learnedByActor + learnedCompanionActivities.toSet()
+}
+
+fun CampingData.hasActorLearnedActivity(actorUuid: String, activityId: String): Boolean =
+    activityId in learnedActivityIdsForActor(actorUuid)
+
+/**
+ * Whether [actorUuid] / [actorName] may perform [activity].
+ *
+ * Non-companion activities are open to everyone. A companion activity can only be
+ * performed by the companion themselves (when they are available) or by an actor who
+ * has learned it — merely having the companion present in camp does NOT let everyone
+ * else perform it.
+ */
+fun CampingData.canActorPerformActivity(
+    activity: CampingActivityData,
+    actorUuid: String,
+    actorName: String,
+    companionUnavailable: Boolean,
+): Boolean {
+    if (activity.requiredCompanion == null) return true
+    if (hasActorLearnedActivity(actorUuid, activity.id)) return true
+    return activity.isActorRequiredCompanion(actorName) && !companionUnavailable
 }
