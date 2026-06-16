@@ -20,6 +20,13 @@ external interface WorkSiteContext {
     val resourcesValue: Int
 }
 
+@Suppress("unused")
+@JsPlainObject
+external interface UnclaimedWorksiteContext {
+    val typeLabel: String
+    val hexLabel: String
+}
+
 fun RawWorkSite.toContext(worksites: RealmData.WorkSite, key: String, label: String, automate: Boolean) =
     WorkSiteContext(
         label = label,

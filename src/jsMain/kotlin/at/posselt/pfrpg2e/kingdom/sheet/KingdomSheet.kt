@@ -105,6 +105,8 @@ import at.posselt.pfrpg2e.kingdom.dialogs.performEndTurn
 import at.posselt.pfrpg2e.kingdom.data.RawCharacter
 import at.posselt.pfrpg2e.kingdom.getActiveLeader
 import at.posselt.pfrpg2e.kingdom.getActivity
+import at.posselt.pfrpg2e.kingdom.recordActivityPerformed
+import at.posselt.pfrpg2e.kingdom.toggleActivityPerformed
 import at.posselt.pfrpg2e.kingdom.getAllActivities
 import at.posselt.pfrpg2e.kingdom.vkActivityIds
 import at.posselt.pfrpg2e.kingdom.vkToBaseActivityIds
@@ -121,6 +123,7 @@ import at.posselt.pfrpg2e.kingdom.getKingdom
 import at.posselt.pfrpg2e.kingdom.getMilestones
 import at.posselt.pfrpg2e.kingdom.getOngoingEvents
 import at.posselt.pfrpg2e.kingdom.getRealmData
+import at.posselt.pfrpg2e.kingdom.getUnclaimedWorksites
 import at.posselt.pfrpg2e.kingdom.getTrainedSkills
 import at.posselt.pfrpg2e.kingdom.hasLeaderUuid
 import at.posselt.pfrpg2e.kingdom.modifiers.ModifierType
@@ -141,6 +144,7 @@ import at.posselt.pfrpg2e.kingdom.sheet.contexts.NavEntryContext
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.createBonusFeatContext
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.createTabs
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.skillChecks
+import at.posselt.pfrpg2e.kingdom.sheet.contexts.UnclaimedWorksiteContext
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.toActivitiesContext
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.toContext
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.toRosterContext
@@ -1739,6 +1743,13 @@ class KingdomSheet(
                 configureLeaderKingdomSkills(kingdom.settings.leaderKingdomSkills, true) {}
             }
 
+            "toggle-activity-performed" -> buildPromise {
+                val activityId = target.dataset["activity"]
+                checkNotNull(activityId)
+                actor.toggleActivityPerformed(activityId)
+                render()
+            }
+
             "perform-activity" -> buildPromise {
                 val activityId = target.dataset["activity"]
                 checkNotNull(activityId)
@@ -1814,6 +1825,10 @@ class KingdomSheet(
                                 selectedLeader = game.getActiveLeader(),
                                 groups = groups,
                                 events = events,
+                                afterRoll = {
+                                    actor.recordActivityPerformed(activity.id)
+                                    render()
+                                },
                             )
                         }
                     }
@@ -2274,6 +2289,14 @@ class KingdomSheet(
             ),
             commoditiesContext = kingdom.commodities.toContext(storage),
             worksitesContext = kingdom.workSites.toContext(realm.worksites, automateResources),
+            unclaimedWorksites = game.getUnclaimedWorksites(kingdom)
+                .map {
+                    UnclaimedWorksiteContext(
+                        typeLabel = t("kingdom.worksiteName.${it.camp}"),
+                        hexLabel = it.hexLabel,
+                    )
+                }
+                .toTypedArray(),
             sizeInput = sizeInput.toContext(),
             size = realm.size,
             kingdomSize = t(realm.sizeInfo.type),
@@ -2367,7 +2390,10 @@ class KingdomSheet(
             cultEventDC = getCultEventDC(kingdom),
             civicPlanning = kingdom.level >= 12,
             heartlandLabel = heartland?.name,
-            leadershipActivities = if (globalBonuses.increaseLeadershipActivities) 3 else 2,
+            leadershipActivities = if (globalBonuses.increaseLeadershipActivities)
+                game.settings.pfrpg2eKingdomCampingWeather.getLeadershipActivityCapWithTownhall()
+            else
+                game.settings.pfrpg2eKingdomCampingWeather.getLeadershipActivityCap(),
             collectTaxesReduceUnrestDisabled = kingdom.unrest <= 0,
             consumption = consumption.total,
             automateStats = automateStats,

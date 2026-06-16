@@ -1,0 +1,29 @@
+{
+  "id": "provide-aid",
+  "name": "campingActivities.provide-aid.name",
+  "journalUuid": "Compendium.pf2e-kingmaker-tools.kingmaker-tools-journals.JournalEntry.uSTTCqRYCWj7a38F.JournalEntryPage.ODZNlkmpBByewUQW",
+  "isLocked": false,
+  "isSecret": false,
+  "isHomebrew": false,
+  "skills": [
+    {
+      "name": "any",
+      "dcType": "static",
+      "proficiency": "untrained",
+      "dc": 20
+    }
+  ],
+  "criticalSuccess": {
+    "message": "campingActivities.provide-aid.criticalSuccess.message"
+  },
+  "success": {
+    "message": "campingActivities.provide-aid.success.message"
+  },
+  "failure": {
+    "message": "campingActivities.provide-aid.failure.message"
+  },
+  "criticalFailure": {
+    "message": "campingActivities.provide-aid.criticalFailure.message"
+  },
+  "oncePerSession": false
+}

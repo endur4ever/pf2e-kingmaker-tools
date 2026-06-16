@@ -15,12 +15,16 @@ import at.posselt.pfrpg2e.kingdom.label
 import at.posselt.pfrpg2e.kingdom.parse
 import at.posselt.pfrpg2e.kingdom.skillRanks
 import at.posselt.pfrpg2e.utils.t
-import at.posselt.pfrpg2e.utils.getAppFlag
 import at.posselt.pfrpg2e.kingdom.KingdomActor
+import at.posselt.pfrpg2e.kingdom.ActivityCap
 import at.posselt.pfrpg2e.kingdom.ActivityCapCalculator
+import at.posselt.pfrpg2e.kingdom.getPerformedActivities
+import at.posselt.pfrpg2e.kingdom.sumPerformedByPhase
 import at.posselt.pfrpg2e.kingdom.activityAllowedDuringAnarchy
 import at.posselt.pfrpg2e.kingdom.isInAnarchy
+import at.posselt.pfrpg2e.settings.pfrpg2eKingdomCampingWeather
 import com.foundryvtt.core.applications.ux.TextEditor.enrichHtml
+import com.foundryvtt.core.game
 import js.array.toTypedArray
 import js.objects.Object
 import kotlinx.coroutines.async
@@ -56,6 +60,9 @@ external interface ActivityContext {
     val open: Boolean
     val hasCheck: Boolean
     val skills: Array<ActivitySkillContext>
+    val performedCount: Int
+    val performed: Boolean
+    val performedBadge: String?
 }
 
 @Suppress("unused")
@@ -69,14 +76,19 @@ external interface ActivitiesContext {
     val upkeep: Array<ActivityContext>
     val leadershipPerformed: Int
     val leadershipCap: Int
+    val leadershipRemaining: Int
     val civicPerformed: Int
     val civicCap: Int
+    val civicRemaining: Int
     val regionPerformed: Int
     val regionCap: Int
+    val regionRemaining: Int
     val armyPerformed: Int
     val armyCap: Int
+    val armyRemaining: Int
     val commercePerformed: Int
     val commerceCap: Int
+    val commerceRemaining: Int
 }
 
 private suspend fun toActivityContext(
@@ -91,6 +103,7 @@ private suspend fun toActivityContext(
     activeLeader: Leader?,
     anarchyAt: Int,
     currentUnrest: Int,
+    performedCount: Int,
 ): ActivityContext = coroutineScope {
     val descriptionP = async { enrichHtml(activity.description) }
     val criticalSuccessP = async { activity.criticalSuccess?.msg?.let { enrichHtml(it) } }
@@ -175,6 +188,9 @@ private suspend fun toActivityContext(
         open = ("activity-" + activity.id) in openedDetails,
         hasCheck = Object.keys(activity.skills).isNotEmpty(),
         skills = skills,
+        performedCount = performedCount,
+        performed = performedCount > 0,
+        performedBadge = if (performedCount > 1) "×$performedCount" else null,
     )
 }
 
@@ -189,6 +205,7 @@ suspend fun activitiesToActivityContext(
     activeLeader: Leader?,
     anarchyAt: Int,
     currentUnrest: Int,
+    performedByActivityId: Map<String, Int>,
 ) = coroutineScope {
     activities
         .map {
@@ -205,6 +222,7 @@ suspend fun activitiesToActivityContext(
                     activeLeader = activeLeader,
                     anarchyAt = anarchyAt,
                     currentUnrest = currentUnrest,
+                    performedCount = performedByActivityId[it.id] ?: 0,
                 )
             }
         }
@@ -232,6 +250,8 @@ suspend fun toActivitiesContext(
         .asSequence()
         .filter { it.id !in activityBlacklist || it.id in unlockedActivities }
         .groupBy { it.phase }
+    val performedByActivityId = actor.getPerformedActivities()
+    val phaseByActivityId = activities.associate { it.id to it.phase }
     val commerce = activitiesToActivityContext(
         activitiesByPhase[KingdomPhase.COMMERCE.value].orEmpty(),
         allowCapitalInvestment,
@@ -243,6 +263,7 @@ suspend fun toActivitiesContext(
         activeLeader,
         anarchyAt,
         currentUnrest,
+        performedByActivityId,
     )
     val leadership = activitiesToActivityContext(
         activitiesByPhase[KingdomPhase.LEADERSHIP.value].orEmpty(),
@@ -255,6 +276,7 @@ suspend fun toActivitiesContext(
         activeLeader,
         anarchyAt,
         currentUnrest,
+        performedByActivityId,
     )
     val civic = activitiesToActivityContext(
         activitiesByPhase[KingdomPhase.CIVIC.value].orEmpty(),
@@ -267,6 +289,7 @@ suspend fun toActivitiesContext(
         activeLeader,
         anarchyAt,
         currentUnrest,
+        performedByActivityId,
     )
     val region = activitiesToActivityContext(
         activitiesByPhase[KingdomPhase.REGION.value].orEmpty(),
@@ -279,6 +302,7 @@ suspend fun toActivitiesContext(
         activeLeader,
         anarchyAt,
         currentUnrest,
+        performedByActivityId,
     )
     val army = activitiesToActivityContext(
         activitiesByPhase[KingdomPhase.ARMY.value].orEmpty(),
@@ -291,6 +315,7 @@ suspend fun toActivitiesContext(
         activeLeader,
         anarchyAt,
         currentUnrest,
+        performedByActivityId,
     )
     val upkeep = activitiesToActivityContext(
         activitiesByPhase[KingdomPhase.UPKEEP.value].orEmpty(),
@@ -303,23 +328,25 @@ suspend fun toActivitiesContext(
         activeLeader,
         anarchyAt,
         currentUnrest,
+        performedByActivityId,
     )
 
-    val turnWizardState = actor.getAppFlag<KingdomActor, dynamic>("turn-wizard-state")
-    val performedCounts = mutableMapOf<String, Int>()
-    if (turnWizardState != null && turnWizardState.activitiesPerformed != null) {
-        val keys = js("Object.keys")(turnWizardState.activitiesPerformed).unsafeCast<Array<String>>()
-        for (key in keys) {
-            performedCounts[key] = turnWizardState.activitiesPerformed[key].unsafeCast<Int>()
-        }
-    }
-
-    val capsResult = ActivityCapCalculator.calculate(kingdom, performedCounts)
+    val phasePerformed = sumPerformedByPhase(performedByActivityId, phaseByActivityId)
+    val leadershipSettings = game.settings.pfrpg2eKingdomCampingWeather
+    val capsResult = ActivityCapCalculator.calculate(
+        kingdom,
+        phasePerformed,
+        leadershipCap = leadershipSettings.getLeadershipActivityCap(),
+        leadershipCapWithTownhall = leadershipSettings.getLeadershipActivityCapWithTownhall(),
+    )
     val leadershipCap = capsResult.caps.find { it.phase == "leadership" }
     val civicCap = capsResult.caps.find { it.phase == "civic" }
     val regionCap = capsResult.caps.find { it.phase == "region" }
     val armyCap = capsResult.caps.find { it.phase == "army" }
     val commerceCap = capsResult.caps.find { it.phase == "commerce" }
+
+    fun ActivityCap?.remaining(default: Int) =
+        ((this?.maximum ?: default) - (this?.current ?: 0)).coerceAtLeast(0)
 
     ActivitiesContext(
         upkeep = upkeep,
@@ -329,14 +356,19 @@ suspend fun toActivitiesContext(
         civic = civic,
         army = army,
         leadershipPerformed = leadershipCap?.current ?: 0,
-        leadershipCap = leadershipCap?.maximum ?: 2,
+        leadershipCap = leadershipCap?.maximum ?: 0,
+        leadershipRemaining = leadershipCap.remaining(0),
         civicPerformed = civicCap?.current ?: 0,
         civicCap = civicCap?.maximum ?: 0,
+        civicRemaining = civicCap.remaining(0),
         regionPerformed = regionCap?.current ?: 0,
         regionCap = regionCap?.maximum ?: 0,
+        regionRemaining = regionCap.remaining(0),
         armyPerformed = armyCap?.current ?: 0,
         armyCap = armyCap?.maximum ?: 0,
+        armyRemaining = armyCap.remaining(0),
         commercePerformed = commerceCap?.current ?: 0,
         commerceCap = commerceCap?.maximum ?: 1,
+        commerceRemaining = commerceCap.remaining(1),
     )
 }

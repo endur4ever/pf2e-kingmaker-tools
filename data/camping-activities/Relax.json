@@ -1,0 +1,20 @@
+{
+  "id": "relax",
+  "name": "campingActivities.relax.name",
+  "journalUuid": "Compendium.pf2e-kingmaker-tools.kingmaker-tools-journals.JournalEntry.uSTTCqRYCWj7a38F.JournalEntryPage.J2SaSNjxAKy9IhzI",
+  "isLocked": false,
+  "isSecret": false,
+  "isHomebrew": false,
+  "skills": [],
+  "effectUuids": [
+    {
+      "uuid": "Compendium.pf2e-kingmaker-tools.kingmaker-tools-camping-effects.Item.zliIP2agG0TVwKV4",
+      "target": "self"
+    },
+    {
+      "uuid": "Compendium.pf2e-kingmaker-tools.kingmaker-tools-camping-effects.Item.QvR2yvuIVQuztCwQ",
+      "target": "self"
+    }
+  ],
+  "oncePerSession": false
+}

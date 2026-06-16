@@ -224,17 +224,17 @@
         </section>
         <section class="km-kingdom-sheet-section">
             <h2 id="{{actorUuid}}-km-turn-commerce" {{#unless activities.commerce}}hidden{{/unless}}>{{localizeKM
-                    "kingdom.commerce"}} ({{activities.commercePerformed}}/{{activities.commerceCap}})</h2>
+                    "kingdom.commerce"}} ({{localizeKM "kingdom.activitiesRemaining" remaining=activities.commerceRemaining max=activities.commerceCap}})</h2>
             {{> kingdom-activities activities=activities.commerce collectTaxesReduceUnrestDisabled=collectTaxesReduceUnrestDisabled}}
         </section>
         <section class="km-kingdom-sheet-section">
             <h2 id="{{actorUuid}}-km-turn-leadership" {{#unless activities.leadership}}hidden{{/unless}}>{{localizeKM
-                    "kingdom.leadership" count=leadershipActivities}} ({{activities.leadershipPerformed}}/{{activities.leadershipCap}})</h2>
+                    "kingdom.leadership" count=leadershipActivities}} ({{localizeKM "kingdom.activitiesRemaining" remaining=activities.leadershipRemaining max=activities.leadershipCap}})</h2>
             {{> kingdom-activities activities=activities.leadership}}
         </section>
         <section class="km-kingdom-sheet-section">
             <h2 id="{{actorUuid}}-km-turn-region" {{#unless activities.region}}hidden{{/unless}}>{{localizeKM
-                    "kingdom.region"}} ({{activities.regionPerformed}}/{{activities.regionCap}})</h2>
+                    "kingdom.region"}} ({{localizeKM "kingdom.activitiesRemaining" remaining=activities.regionRemaining max=activities.regionCap}})</h2>
 
             {{#if heartlandLabel}}
                 <p>{{localizeKM "kingdom.favoredLand" heartland=heartlandLabel}}</p>
@@ -254,7 +254,7 @@
         </section>
         <section class="km-kingdom-sheet-section">
             <h2 id="{{actorUuid}}-km-turn-civic" {{#unless activities.civic}}hidden{{/unless}}>{{localizeKM
-                    "kingdom.civic"}} ({{activities.civicPerformed}}/{{activities.civicCap}})</h2>
+                    "kingdom.civic"}} ({{localizeKM "kingdom.activitiesRemaining" remaining=activities.civicRemaining max=activities.civicCap}})</h2>
             {{#if civicPlanning}}
                 <p>{{localizeKM "kingdom.civicPlanning"}}</p>
             {{/if}}
@@ -263,7 +263,7 @@
         </section>
         <section class="km-kingdom-sheet-section">
             <h2 id="{{actorUuid}}-km-turn-army" {{#unless activities.army}}hidden{{/unless}}>{{localizeKM
-                    "kingdom.armyPhaseTitle"}} ({{activities.armyPerformed}}/{{activities.armyCap}})</h2>
+                    "kingdom.armyPhaseTitle"}} ({{localizeKM "kingdom.activitiesRemaining" remaining=activities.armyRemaining max=activities.armyCap}})</h2>
             <p>{{localizeKM "kingdom.armyHelp"}}</p>
             {{> kingdom-activities activities=activities.army}}
         </section>

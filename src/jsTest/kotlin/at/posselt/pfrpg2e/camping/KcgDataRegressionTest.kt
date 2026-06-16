@@ -503,11 +503,12 @@ class KcgDataRegressionTest {
 
     @Test
     fun testTotalCampingActivities() {
-        // 10 universal + 13 companion-specific = 23 total
-        val universal = 10
+        // 12 universal + 13 companion-specific = 25 total
+        // Universal set includes Provide Aid and Relax (standard PF2e camping activities).
+        val universal = 12
         val companion = 13
-        assertEquals(23, universal + companion,
-            "Should have 23 total camping activities (10 universal + 13 companion)")
+        assertEquals(25, universal + companion,
+            "Should have 25 total camping activities (12 universal + 13 companion)")
     }
 
     @Test

@@ -101,6 +101,11 @@ class HexContentManager(
 ) : FormApp<HexContentManagerContext, HexContentManagerData>(
     title = t("kingdom.hexContent.managerTitle"),
     template = "applications/kingdom/hex-content-manager.hbs",
+    // This manager persists via an explicit Save button (saveContent + getFormData), not the
+    // dataModel submit flow. With submitOnChange=true the form re-renders on every field change
+    // and rebuilds the edit form from the still-unsaved entry, snapping selects (e.g. type) back
+    // to their saved value — so changes could never "stick". Keep auto-submit off here.
+    submitOnChange = false,
     width = 700,
     height = 600,
     id = "kmHexContentManager",

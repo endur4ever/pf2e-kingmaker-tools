@@ -3,10 +3,12 @@ package at.posselt.pfrpg2e.kingdom.dialogs
 import at.posselt.pfrpg2e.app.forms.SimpleApp
 import at.posselt.pfrpg2e.kingdom.KingdomActor
 import at.posselt.pfrpg2e.kingdom.KingdomData
+import at.posselt.pfrpg2e.kingdom.clearPerformedActivities
 import at.posselt.pfrpg2e.kingdom.TurnTickingEngine
 import at.posselt.pfrpg2e.kingdom.TickChange
 import at.posselt.pfrpg2e.kingdom.TickResult
 import at.posselt.pfrpg2e.kingdom.ActivityCapCalculator
+import at.posselt.pfrpg2e.settings.pfrpg2eKingdomCampingWeather
 import at.posselt.pfrpg2e.kingdom.getRealmData
 import at.posselt.pfrpg2e.kingdom.getKingdom
 import at.posselt.pfrpg2e.kingdom.setKingdom
@@ -138,6 +140,7 @@ fun runKingdomTurnTick(kingdom: KingdomData, storage: CommodityStorage, currentT
 suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData): TickResult {
     val currentTurn = (kingdom.currentTurn ?: 0) + 1
     kingdom.currentTurn = currentTurn
+    actor.clearPerformedActivities()
     val realm = game.getRealmData(actor, kingdom)
     val settlements = kingdom.getAllSettlements(game)
     val storage = calculateStorage(realm = realm, settlements = settlements.allSettlements)
@@ -522,7 +525,24 @@ class TurnWizardApplication(
                 activeModifiers = kingdom.modifiers.size
             )
 
-            val capsResult = ActivityCapCalculator.calculate(kingdom, emptyMap())
+            // Resolve the configured per-PC-leader activity allotment; fall back to RAW defaults
+            // (2, or 3 with a Town Hall/Castle/Palace) when the game settings aren't available
+            // (e.g. unit test environments). The total cap scales with the number of PC leaders.
+            var leadershipCap = 2
+            var leadershipCapWithTownhall = 3
+            try {
+                val leadershipSettings = game.settings.pfrpg2eKingdomCampingWeather
+                leadershipCap = leadershipSettings.getLeadershipActivityCap()
+                leadershipCapWithTownhall = leadershipSettings.getLeadershipActivityCapWithTownhall()
+            } catch (e: Throwable) {
+                // Ignore errors during unit test environments
+            }
+            val capsResult = ActivityCapCalculator.calculate(
+                kingdom,
+                emptyMap(),
+                leadershipCap = leadershipCap,
+                leadershipCapWithTownhall = leadershipCapWithTownhall,
+            )
             val activityCaps = capsResult.caps.map { cap ->
                 ActivityCapContext(
                     phase = cap.phase,

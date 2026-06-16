@@ -299,6 +299,23 @@
             }
         }
 
+        .km-unclaimed-worksites-notice {
+            margin: 0.4rem 0 0.2rem;
+            font-size: 0.85em;
+            color: var(--color-level-warning, #885600);
+
+            i {
+                margin-right: 0.3em;
+            }
+        }
+
+        .km-unclaimed-worksites {
+            margin: 0 0 0.4rem;
+            padding-left: 1.4rem;
+            font-size: 0.85em;
+            list-style: disc;
+        }
+
         .km-unrest {
             td {
                 padding: 3px;
@@ -659,7 +676,26 @@
 
                     .km-detail-controls {
                         display: flex;
+                        align-items: center;
+                        gap: .25em;
                         margin-left: auto;
+
+                        .km-activity-performed-toggle {
+                            display: inline-flex;
+                            align-items: center;
+                            gap: .25em;
+                            opacity: .65;
+
+                            &.km-active {
+                                opacity: 1;
+                                color: var(--color-level-success, #18520b);
+                            }
+
+                            .km-activity-performed-count {
+                                font-variant-numeric: tabular-nums;
+                                font-weight: bold;
+                            }
+                        }
                     }
 
                     button:not(.km-icon-only) {

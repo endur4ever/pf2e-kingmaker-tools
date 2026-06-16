@@ -1,5 +1,8 @@
 package at.posselt.pfrpg2e.kingdom
 
+import at.posselt.pfrpg2e.data.kingdom.leaders.LeaderType
+import at.posselt.pfrpg2e.kingdom.data.RawLeaderValues
+
 data class ActivityCapsResult(
     val caps: List<ActivityCap>,
     val totalPerformed: Int,
@@ -14,15 +17,50 @@ data class ActivityCap(
     val isOverCap: Boolean
 )
 
+/**
+ * Counts the distinct PCs holding a non-vacant leadership role. RAW: "each PC in a leadership role
+ * may attempt up to 2 (or 3) Leadership activities" — so the cap scales with the number of PC
+ * leaders, not a flat number. Only PCs count (NPC leaders cannot perform kingdom activities). A PC
+ * assigned to two roles is counted once (deduped by actor uuid); a non-vacant PC role with no actor
+ * linked still counts as one leader, matching the "Vacant Positions" UI where the GM declares which
+ * roles are filled.
+ */
+fun countPcLeaders(kingdom: KingdomData): Int {
+    val leaders = kingdom.asDynamic().leaders
+    if (leaders == null) return 0
+    val pcRoles = arrayOf(
+        "ruler", "counselor", "emissary", "general", "magister", "treasurer", "viceroy", "warden",
+    )
+        .map { leaders[it] }
+        .filter { it != null }
+        .map { it.unsafeCast<RawLeaderValues>() }
+        .filter { it.type == LeaderType.PC.value && it.vacant != true }
+    val distinctAssigned = pcRoles.mapNotNull { it.uuid }.toSet().size
+    val unassigned = pcRoles.count { it.uuid == null }
+    return distinctAssigned + unassigned
+}
+
 object ActivityCapCalculator {
-    fun calculate(kingdom: KingdomData, performedCounts: Map<String, Int> = emptyMap()): ActivityCapsResult {
+    fun calculate(
+        kingdom: KingdomData,
+        performedCounts: Map<String, Int> = emptyMap(),
+        leadershipCap: Int = 2,
+        leadershipCapWithTownhall: Int = 3,
+    ): ActivityCapsResult {
         val settings = kingdom.settings
         val settlements = kingdom.settlements ?: emptyArray()
         val hexContents = kingdom.hexContents ?: emptyArray()
-        
-        // Leadership cap: base 2 + 1 if increaseLeadershipActivities bonus
-        val leadershipMax = if (settings.asDynamic().increaseLeadershipActivities == true) 3 else 2
-        
+
+        // RAW: each PC leader may attempt [leadershipCap] Leadership activities per turn (default 2),
+        // rising to [leadershipCapWithTownhall] (default 3) when the capital has a Town Hall/Castle/
+        // Palace (the increaseLeadershipActivities structure bonus). The total scales with the number
+        // of PC leaders — leadershipCap/leadershipCapWithTownhall are the PER-PC-LEADER allotment.
+        val perLeader = if (settings.asDynamic().increaseLeadershipActivities == true)
+            leadershipCapWithTownhall
+        else
+            leadershipCap
+        val leadershipMax = countPcLeaders(kingdom) * perLeader
+
         // Civic cap: number of settlements
         val civicMax = settlements.size
         

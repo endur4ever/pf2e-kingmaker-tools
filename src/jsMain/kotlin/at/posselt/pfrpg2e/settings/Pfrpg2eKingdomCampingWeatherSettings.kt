@@ -579,13 +579,13 @@ object Pfrpg2eKingdomCampingWeatherSettings {
         )
         game.settings.registerInt(
             key = "leadershipActivityCap",
-            name = "Leadership Activity Cap",
-            default = 6,
+            name = "Leadership Activities per PC Leader",
+            default = 2,
         )
         game.settings.registerInt(
             key = "leadershipActivityCapWithTownhall",
-            name = "Leadership Activity Cap With Town Hall",
-            default = 8,
+            name = "Leadership Activities per PC Leader (Town Hall/Castle/Palace)",
+            default = 3,
         )
         game.settings.registerScalar<Boolean>(
             key = "canUpgradeNonCapital",

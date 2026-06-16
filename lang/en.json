@@ -1288,6 +1288,8 @@
       "skipReduceUnrest": "Reduce Unrest",
       "check": "Check",
       "requirement": "Requirement",
+      "activitiesRemaining": "{remaining} of {max} left",
+      "markActivityPerformed": "Toggle whether this activity has been performed this turn",
       "status": "Status",
       "vacancies": "Vacant Positions",
       "characterSkills": "Character Skills",
@@ -1377,6 +1379,14 @@
       "consumptionBreakdown": "Consumption Breakdown",
       "abilityScores": "Ability Scores",
       "worksitesAndResources": "Worksites & Resources",
+      "unclaimedWorksitesNotice": "These work sites sit on unclaimed hexes and produce nothing — claim the hex to gather their Commodities:",
+      "unclaimedWorksiteEntry": "{type} on hex {hex}",
+      "worksiteName": {
+        "quarry": "Quarry",
+        "mine": "Mine",
+        "lumber": "Lumber Camp",
+        "farmland": "Farmland"
+      },
       "creation": "Creation",
       "bonus": "Bonus",
       "pickBoosts": "Pick {count, plural, =1 {1 Boost} other {# Boosts}}",
@@ -2221,6 +2231,24 @@
         "criticalFailure": {
           "message": "Prepare Campsite: Your campsite is a mess. You can use it to rest and to perform daily preparations, but it isn’t good enough to allow for Campsite activities at all. Worse, your attempt to secure a campsite has possibly attracted unwanted attention—attempt a flat check against the zone’s Encounter DC. If successful, a random encounter automatically occurs."
         }
+      },
+      "provide-aid": {
+        "name": "Provide Aid",
+        "criticalSuccess": {
+          "message": "You grant your ally a +2 circumstance bonus to the activity. If you’re a master with the check you attempted, the bonus is +3, and if you’re legendary, it’s +4. Circumstance bonuses granted by Provide Aid don’t stack."
+        },
+        "success": {
+          "message": "You grant your ally a +1 circumstance bonus to the activity’s check. Circumstance bonuses granted by Provide Aid don’t stack."
+        },
+        "failure": {
+          "message": "Your assistance has no effect; your ally gains no bonus."
+        },
+        "criticalFailure": {
+          "message": "Your ally takes a –1 circumstance penalty to their activity’s check."
+        }
+      },
+      "relax": {
+        "name": "Relax"
       },
       "set-alarms": {
         "name": "Set Alarms"

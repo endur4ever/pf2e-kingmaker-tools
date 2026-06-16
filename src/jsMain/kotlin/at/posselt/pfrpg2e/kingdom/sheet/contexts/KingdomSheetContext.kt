@@ -29,6 +29,7 @@ external interface KingdomSheetContext : ValidatedHandlebarsContext {
     val resourcePointsContext: ResourceContext
     val resourceDiceContext: ResourceContext
     val worksitesContext: Array<WorkSiteContext>
+    val unclaimedWorksites: Array<UnclaimedWorksiteContext>
     val ruinContext: Array<RuinContext>
     val controlDc: Int
     val unrestPenalty: Int

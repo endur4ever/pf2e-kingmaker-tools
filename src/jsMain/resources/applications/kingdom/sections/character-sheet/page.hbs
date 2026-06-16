@@ -63,6 +63,17 @@
             </tr>
             {{/each}}
         </table>
+        {{#if unclaimedWorksites.length}}
+            <p class="km-unclaimed-worksites-notice">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                {{localizeKM "kingdom.unclaimedWorksitesNotice"}}
+            </p>
+            <ul class="km-unclaimed-worksites">
+                {{#each unclaimedWorksites}}
+                    <li>{{localizeKM "kingdom.unclaimedWorksiteEntry" type=typeLabel hex=hexLabel}}</li>
+                {{/each}}
+            </ul>
+        {{/if}}
     </div>
 </aside>
 <div class="km-kingdom-sheet-content" {{#if (ne currentNavEntry 'kingdom')}}hidden{{/if}}>
