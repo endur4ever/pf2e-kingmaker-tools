@@ -48,6 +48,15 @@ import at.posselt.pfrpg2e.kingdom.vkInitialSkillSlots
 import at.posselt.pfrpg2e.campaign.CampaignClockManager
 import at.posselt.pfrpg2e.kingdom.dialogs.CampaignClockDialog
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.CampaignClockContext
+import at.posselt.pfrpg2e.kingdom.extractSeries
+import at.posselt.pfrpg2e.kingdom.summarizeSeries
+import at.posselt.pfrpg2e.kingdom.mapSeriesToCoordinates
+import at.posselt.pfrpg2e.kingdom.pacingChapterTargetLevel
+import at.posselt.pfrpg2e.kingdom.pacingLevelMismatchRange
+import at.posselt.pfrpg2e.kingdom.sheet.contexts.AnalyticsContext
+import at.posselt.pfrpg2e.kingdom.sheet.contexts.MetricPointContext
+import at.posselt.pfrpg2e.kingdom.sheet.contexts.MetricSeriesContext
+import at.posselt.pfrpg2e.kingdom.sheet.contexts.ThresholdLineContext
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.toDashboardContext
 import at.posselt.pfrpg2e.kingdom.createModifiers
 import at.posselt.pfrpg2e.kingdom.createSimpleContext
@@ -124,6 +133,25 @@ import at.posselt.pfrpg2e.kingdom.getMilestones
 import at.posselt.pfrpg2e.kingdom.getOngoingEvents
 import at.posselt.pfrpg2e.kingdom.getRealmData
 import at.posselt.pfrpg2e.kingdom.getUnclaimedWorksites
+import at.posselt.pfrpg2e.kingdom.computeCaravanEtaTurns
+import at.posselt.pfrpg2e.kingdom.caravanPurchaseCost
+import at.posselt.pfrpg2e.kingdom.data.RawCaravan
+import at.posselt.pfrpg2e.kingdom.map.KingmakerHexGridProvider
+import at.posselt.pfrpg2e.kingdom.dialogs.CaravanDispatchDialog
+import at.posselt.pfrpg2e.kingdom.dialogs.CaravanHexOption
+import at.posselt.pfrpg2e.kingdom.dialogs.CaravanPartnerOption
+import at.posselt.pfrpg2e.kingdom.sheet.contexts.CaravanRowContext
+import at.posselt.pfrpg2e.kingdom.sheet.contexts.toCaravanRowContexts
+import at.posselt.pfrpg2e.kingdom.sheet.contexts.toShipmentRowContexts
+import at.posselt.pfrpg2e.kingdom.data.RawCaravanShipment
+import at.posselt.pfrpg2e.kingdom.dialogs.CaravanShipmentDialog
+import at.posselt.pfrpg2e.kingdom.computeCaravanRoute
+import at.posselt.pfrpg2e.kingdom.caravanEtaTurns
+import at.posselt.pfrpg2e.kingdom.parseBulk
+import com.foundryvtt.kingmaker.kingmaker
+import at.posselt.pfrpg2e.utils.asSequence
+import js.array.component1
+import js.array.component2
 import at.posselt.pfrpg2e.kingdom.getTrainedSkills
 import at.posselt.pfrpg2e.kingdom.hasLeaderUuid
 import at.posselt.pfrpg2e.kingdom.modifiers.ModifierType
@@ -306,6 +334,7 @@ class KingdomSheet(
     private var bonusFeat: String? = null
     private var showDetailedMatrix: Boolean = false
     private val openedDetails = mutableSetOf<String>()
+    private var analyticsWindowSize: Int = 25
 
     init {
         appHook.onDeleteScene { _, _, _ -> render() }
@@ -456,6 +485,13 @@ class KingdomSheet(
                 event.preventDefault()
                 event.stopPropagation()
                 currentNavEntry = target.dataset["link"]?.let { MainNavEntry.fromString(it) } ?: MainNavEntry.TURN
+                render()
+            }
+
+            "change-analytics-window" -> {
+                event.preventDefault()
+                event.stopPropagation()
+                analyticsWindowSize = target.dataset["window"]?.toIntOrNull() ?: 25
                 render()
             }
 
@@ -935,18 +971,32 @@ class KingdomSheet(
                 val index = target.dataset["index"]?.toInt() ?: 0
                 val group = getKingdom().groups.getOrNull(index)
                 if (group != null) {
-                    ModifyFactionStanding(factionName = group.name) { delta, reason ->
+                    ModifyFactionStanding(factionName = group.name, initialAllianceLevel = group.allianceLevel) { delta, reason, allianceLevel ->
                         buildPromise {
                             val kingdom = getKingdom()
                             val g = kingdom.groups.getOrNull(index)
-                            if (g != null && delta != 0) {
-                                g.standing = applyStandingDelta(g.standing, delta)
-                                g.standingLog = (g.standingLog ?: emptyArray()) + RawFactionStandingEntry(
-                                    turn = kingdom.currentTurn ?: 0,
-                                    delta = delta,
-                                    reason = reason,
-                                )
-                                actor.setKingdom(kingdom)
+                            if (g != null) {
+                                val standingChanged = delta != 0
+                                val allianceChanged = allianceLevel != g.allianceLevel
+                                if (standingChanged || allianceChanged) {
+                                    if (standingChanged) {
+                                        g.standing = applyStandingDelta(g.standing, delta)
+                                    }
+                                    val logReason = if (standingChanged && reason.isNotBlank()) {
+                                        reason
+                                    } else if (allianceChanged) {
+                                        reason.ifBlank { "kingdom.factionStanding.allianceChange" }
+                                    } else {
+                                        reason
+                                    }
+                                    g.standingLog = (g.standingLog ?: emptyArray()) + RawFactionStandingEntry(
+                                        turn = kingdom.currentTurn ?: 0,
+                                        delta = delta,
+                                        reason = logReason,
+                                    )
+                                    g.allianceLevel = allianceLevel
+                                    actor.setKingdom(kingdom)
+                                }
                             }
                         }
                     }.launch()
@@ -1750,6 +1800,217 @@ class KingdomSheet(
                 render()
             }
 
+            "dispatch-caravan" -> buildPromise {
+                val kingdom = getKingdom()
+                val claimedHexes = runCatching {
+                    kingmaker.state.hexes.asSequence()
+                        .filter { (_, hex) -> hex.claimed == true }
+                        .mapNotNull { (key, _) ->
+                            key.toIntOrNull()?.let {
+                                CaravanHexOption(hexKey = key, label = "${it / 1000}.${it % 1000}")
+                            }
+                        }
+                        .toList()
+                }.getOrDefault(emptyList())
+                val partners = kingdom.groups
+                    .filter { !it.hexKey.isNullOrBlank() }
+                    .map { CaravanPartnerOption(name = it.name, hexKey = it.hexKey!!, label = it.name) }
+                when {
+                    claimedHexes.isEmpty() -> ui.notifications.warn(t("kingdom.caravans.noOriginHexes"))
+                    partners.isEmpty() -> ui.notifications.warn(t("kingdom.caravans.noPartners"))
+                    else -> CaravanDispatchDialog(
+                        hexes = claimedHexes,
+                        partners = partners,
+                        commodities = listOf("food", "lumber", "stone", "ore", "luxuries"),
+                    ) { req ->
+                        buildPromise {
+                            val current = getKingdom()
+                            val eta = computeCaravanEtaTurns(
+                                KingmakerHexGridProvider(),
+                                req.originHexKey,
+                                req.partnerHexKey,
+                            )
+                            if (eta == null) {
+                                ui.notifications.warn(t("kingdom.caravans.unreachable"))
+                            } else {
+                                val etaTurns = eta
+                                val partner = current.groups.find { it.name == req.partnerName }
+                                val originLabel = claimedHexes.find { it.hexKey == req.originHexKey }?.label
+                                    ?: req.originHexKey
+                                fun makeCaravan(kind: String, cargoRp: Int?) = RawCaravan(
+                                    id = "caravan-${kotlin.js.Date().getTime().toLong()}",
+                                    kind = kind,
+                                    originHexKey = req.originHexKey,
+                                    destHexKey = req.partnerHexKey,
+                                    originLabel = originLabel,
+                                    destLabel = req.partnerName,
+                                    partnerName = req.partnerName,
+                                    cargoCommodity = req.commodity,
+                                    cargoAmount = req.amount,
+                                    cargoRp = cargoRp,
+                                    etaTurns = etaTurns,
+                                    turnsRemaining = etaTurns,
+                                    status = "inTransit",
+                                )
+                                if (req.kind == "buyFromPartner") {
+                                    val cost = caravanPurchaseCost(
+                                        req.commodity, req.amount, partner?.standing, partner?.allianceLevel,
+                                    )
+                                    if (current.resourcePoints.now < cost) {
+                                        ui.notifications.warn(t("kingdom.caravans.notEnoughRp"))
+                                    } else {
+                                        current.resourcePoints.now = current.resourcePoints.now - cost
+                                        current.caravans = (current.caravans ?: emptyArray()) +
+                                            makeCaravan("buyFromPartner", cost)
+                                        actor.setKingdom(current)
+                                    }
+                                } else {
+                                    val now = current.commodities.now.asDynamic()
+                                    val available = (now[req.commodity].unsafeCast<Int?>()) ?: 0
+                                    if (available < req.amount) {
+                                        ui.notifications.warn(t("kingdom.caravans.notEnough"))
+                                    } else {
+                                        now[req.commodity] = available - req.amount
+                                        current.caravans = (current.caravans ?: emptyArray()) +
+                                            makeCaravan("sellToPartner", null)
+                                        actor.setKingdom(current)
+                                    }
+                                }
+                            }
+                        }
+                    }.launch()
+                }
+            }
+
+            "recall-caravan" -> buildPromise {
+                val id = target.dataset["caravanId"]
+                checkNotNull(id)
+                val current = getKingdom()
+                val caravan = (current.caravans ?: emptyArray()).find { it.id == id }
+                if (caravan != null && caravan.status == "inTransit") {
+                    if (caravan.kind == "buyFromPartner") {
+                        // RP was spent at dispatch — refund it.
+                        current.resourcePoints.now = current.resourcePoints.now + (caravan.cargoRp ?: 0)
+                    } else {
+                        // Commodities were loaded at dispatch — return them.
+                        val commodity = caravan.cargoCommodity
+                        if (commodity != null) {
+                            val now = current.commodities.now.asDynamic()
+                            now[commodity] = ((now[commodity].unsafeCast<Int?>()) ?: 0) + caravan.cargoAmount
+                        }
+                    }
+                    current.caravans = (current.caravans ?: emptyArray()).filter { it.id != id }.toTypedArray()
+                    actor.setKingdom(current)
+                }
+            }
+
+            "dispatch-shipment" -> buildPromise {
+                val kingdom = getKingdom()
+                val settlements = kingdom.settlements
+                    .filter { !it.hexKey.isNullOrBlank() }
+                    .map { raw ->
+                        val sceneName = game.scenes.get(raw.sceneId)?.name ?: raw.sceneId
+                        val hexKeyStr = raw.hexKey!!
+                        val label = sceneName + (hexKeyStr.toIntOrNull()?.let { " (${it / 1000}.${it % 1000})" } ?: " ($hexKeyStr)")
+                        CaravanHexOption(hexKey = hexKeyStr, label = label)
+                    }
+                if (settlements.size < 2) {
+                    ui.notifications.warn(t("kingdom.caravans.needTwoSettlements"))
+                } else {
+                    CaravanShipmentDialog(settlements) { req ->
+                        buildPromise {
+                            val current = getKingdom()
+                            val route = computeCaravanRoute(
+                                KingmakerHexGridProvider(),
+                                req.originHexKey,
+                                req.destHexKey,
+                            )
+                            if (route == null) {
+                                ui.notifications.warn(t("kingdom.caravans.unreachable"))
+                            } else {
+                                val routeCost = route.totalCost
+                                val speed = when (req.caravanType) {
+                                    "light" -> 4.0
+                                    "heavy" -> 2.0
+                                    else -> 3.0
+                                }
+                                val baseCostPerType = when (req.caravanType) {
+                                    "light" -> 5.0
+                                    "heavy" -> 20.0
+                                    else -> 10.0
+                                }
+                                val totalBulk = parseBulk(req.itemBulk) * req.itemQuantity
+                                val shipmentCost = (baseCostPerType * routeCost) + (totalBulk * 0.5 * routeCost)
+                                val finalGoldCost = shipmentCost + (if (req.isPurchase) req.itemPriceGp * req.itemQuantity else 0.0)
+                                val roundedGoldCost = kotlin.math.round(finalGoldCost * 100.0) / 100.0
+
+                                if (req.isPurchase) {
+                                    val parsedSettlements = current.getAllSettlements(game).allSettlements
+                                    val originRaw = current.settlements.find { it.hexKey == req.originHexKey }
+                                    val originParsed = parsedSettlements.find { it.id == originRaw?.sceneId }
+                                    val originPurchaseLevel = originParsed?.itemPurchaseLevel ?: 0
+                                    if (req.itemLevel > originPurchaseLevel) {
+                                        ui.notifications.warn(
+                                            t("kingdom.caravans.itemLevelTooHigh", recordOf("level" to originPurchaseLevel.toString()))
+                                        )
+                                        return@buildPromise
+                                    }
+                                }
+
+                                val gpVal = actor.asDynamic().system?.resources?.coins?.gp.unsafeCast<Double?>() ?: 0.0
+                                if (gpVal < roundedGoldCost) {
+                                    ui.notifications.warn(t("kingdom.caravans.notEnoughGold"))
+                                } else {
+                                    val newGp = gpVal - roundedGoldCost
+                                    actor.update(js("{ 'system.resources.coins.gp': newGp }")).await()
+
+                                    val etaTurns = caravanEtaTurns(routeCost, speed)
+                                    val originLabel = settlements.find { it.hexKey == req.originHexKey }?.label ?: req.originHexKey
+                                    val destLabel = settlements.find { it.hexKey == req.destHexKey }?.label ?: req.destHexKey
+
+                                    val newShipment = RawCaravanShipment(
+                                        id = "shipment-${kotlin.js.Date().getTime().toLong()}",
+                                        itemName = req.itemName,
+                                        itemQuantity = req.itemQuantity,
+                                        itemLevel = req.itemLevel,
+                                        itemBulk = req.itemBulk,
+                                        itemPriceGp = req.itemPriceGp,
+                                        originHexKey = req.originHexKey,
+                                        destHexKey = req.destHexKey,
+                                        originLabel = originLabel,
+                                        destLabel = destLabel,
+                                        caravanType = req.caravanType,
+                                        goldCost = roundedGoldCost,
+                                        etaTurns = etaTurns,
+                                        turnsRemaining = etaTurns,
+                                        path = route.path.toTypedArray(),
+                                        currentHexKey = req.originHexKey,
+                                        status = "inTransit"
+                                    )
+                                    current.shipments = (current.shipments ?: emptyArray()) + newShipment
+                                    actor.setKingdom(current)
+                                }
+                            }
+                        }
+                    }.launch()
+                }
+            }
+
+            "recall-shipment" -> buildPromise {
+                val id = target.dataset["shipmentId"]
+                checkNotNull(id)
+                val current = getKingdom()
+                val shipment = (current.shipments ?: emptyArray()).find { it.id == id }
+                if (shipment != null && shipment.status == "inTransit") {
+                    val gpVal = actor.asDynamic().system?.resources?.coins?.gp.unsafeCast<Double?>() ?: 0.0
+                    val newGp = gpVal + shipment.goldCost
+                    actor.update(js("{ 'system.resources.coins.gp': newGp }")).await()
+
+                    current.shipments = (current.shipments ?: emptyArray()).filter { it.id != id }.toTypedArray()
+                    actor.setKingdom(current)
+                }
+            }
+
             "perform-activity" -> buildPromise {
                 val activityId = target.dataset["activity"]
                 checkNotNull(activityId)
@@ -2264,6 +2525,102 @@ class KingdomSheet(
         ).toContext()
         val activeSettlementType = settlements.current?.size?.type?.value ?: "none"
         val background = game.settings.pfrpg2eKingdomCampingWeather.resolveKingdomBackground(activeSettlementType)
+        val history = kingdom.turnHistory ?: emptyArray()
+        val hasData = history.isNotEmpty()
+
+        val seriesList = if (hasData) {
+            val metrics = listOf(
+                "unrest" to "kingdom.analytics.unrest",
+                "resourcePoints" to "kingdom.analytics.resourcePoints",
+                "consumption" to "kingdom.analytics.consumption",
+                "fame" to "kingdom.analytics.fame",
+                "xpAwarded" to "kingdom.analytics.xpAwarded",
+                "warPressure" to "kingdom.analytics.warPressure",
+                "level" to "kingdom.analytics.level",
+                "size" to "kingdom.analytics.size",
+                "ruinCorruption" to "kingdom.analytics.ruinCorruption",
+                "ruinCrime" to "kingdom.analytics.ruinCrime",
+                "ruinDecay" to "kingdom.analytics.ruinDecay",
+                "ruinStrife" to "kingdom.analytics.ruinStrife"
+            )
+
+            metrics.mapNotNull { (key, labelKey) ->
+                val series = extractSeries(history, key, limit = if (analyticsWindowSize > 0) analyticsWindowSize else null)
+                val summary = summarizeSeries(series)
+                if (summary != null) {
+                    val graphicPoints = mapSeriesToCoordinates(series, 400.0, 150.0, 15.0)
+                    val pointsCtx = graphicPoints.map { p ->
+                        MetricPointContext(turn = p.turn, value = p.value, x = p.x, y = p.y)
+                    }.toTypedArray()
+                    val polylinePoints = graphicPoints.joinToString(" ") { "${it.x},${it.y}" }
+
+                    val thresholdLinesList = mutableListOf<ThresholdLineContext>()
+                    
+                    if (key == "level") {
+                        val partyLevels = actor.partyMembers().map { it.system.details.level.value }
+                        val avgPartyLevel = if (partyLevels.isNotEmpty()) partyLevels.sum() / partyLevels.size else null
+                        val targetLevel = kingdom.settings.pacingChapterTargetLevel() ?: avgPartyLevel
+                        val range = kingdom.settings.pacingLevelMismatchRange()
+                        if (targetLevel != null) {
+                            val upperVal = (targetLevel + range).toDouble()
+                            val lowerVal = (targetLevel - range).toDouble()
+                            
+                            val minVal = series.minOf { it.second }
+                            val maxVal = series.maxOf { it.second }
+                            val valRange = maxVal - minVal
+                            val innerHeight = 150.0 - 2 * 15.0
+                            
+                            fun getY(v: Double): Double {
+                                return if (valRange > 0.0) {
+                                    15.0 + innerHeight - ((v - minVal) / valRange) * innerHeight
+                                } else {
+                                    15.0 + innerHeight / 2.0
+                                }
+                            }
+                            
+                            thresholdLinesList.add(ThresholdLineContext(
+                                label = t("kingdom.analytics.targetLevelMax"),
+                                value = upperVal,
+                                y = getY(upperVal),
+                                textY = getY(upperVal) - 4.0
+                            ))
+                            thresholdLinesList.add(ThresholdLineContext(
+                                label = t("kingdom.analytics.targetLevelMin"),
+                                value = lowerVal,
+                                y = getY(lowerVal),
+                                textY = getY(lowerVal) + 12.0
+                            ))
+                        }
+                    }
+
+                    MetricSeriesContext(
+                        key = key,
+                        label = t(labelKey),
+                        points = pointsCtx,
+                        polylinePoints = polylinePoints,
+                        min = summary.min,
+                        max = summary.max,
+                        current = summary.current,
+                        mean = summary.mean,
+                        deltaFromStart = summary.deltaFromStart,
+                        hasThresholds = thresholdLinesList.isNotEmpty(),
+                        thresholdLines = if (thresholdLinesList.isNotEmpty()) thresholdLinesList.toTypedArray() else null
+                    )
+                } else {
+                    null
+                }
+            }.toTypedArray()
+        } else {
+            emptyArray()
+        }
+
+        val analyticsContext = AnalyticsContext(
+            series = seriesList,
+            windowSize = analyticsWindowSize,
+            hasData = hasData,
+            isGM = isGM
+        )
+
         KingdomSheetContext(
             partId = parent.partId,
             isFormValid = true,
@@ -2297,6 +2654,8 @@ class KingdomSheet(
                     )
                 }
                 .toTypedArray(),
+            caravans = (kingdom.caravans ?: emptyArray()).toCaravanRowContexts(),
+            shipments = (kingdom.shipments ?: emptyArray()).toShipmentRowContexts(),
             sizeInput = sizeInput.toContext(),
             size = realm.size,
             kingdomSize = t(realm.sizeInfo.type),
@@ -2474,6 +2833,7 @@ class KingdomSheet(
                 companions = kingdom.companions ?: emptyArray(),
                 isGM = isGM,
             ) { t(it) },
+            analyticsContext = analyticsContext,
         )
     }
 
@@ -2485,29 +2845,37 @@ class KingdomSheet(
 
     private fun createMainNav(kingdom: KingdomData): Array<NavEntryContext> {
         val tradeAgreements = kingdom.groups.count { it.relations == Relations.TRADE_AGREEMENT.value }
-        return MainNavEntry.entries.map {
-            val postfix = when (it) {
-                MainNavEntry.TRADE_AGREEMENTS -> " ($tradeAgreements)"
-                MainNavEntry.SETTLEMENTS -> {
-                    val size = kingdom.settlements.mapNotNull { game.scenes.get(it.sceneId) }.size
-                    " ($size)"
+        val isGM = game.user.isGM
+        return MainNavEntry.entries
+            .filter { entry ->
+                when (entry) {
+                    MainNavEntry.ANALYTICS -> isGM
+                    else -> true
                 }
-
-                MainNavEntry.MODIFIERS -> " (${kingdom.modifiers.size})"
-                MainNavEntry.QUESTS -> {
-                    val activeSize = (kingdom.quests ?: emptyArray()).count { it.status == "active" }
-                    " ($activeSize)"
-                }
-                else -> ""
             }
-            NavEntryContext(
-                label = "${t(it)}$postfix",
-                active = currentNavEntry == it,
-                link = it.value,
-                title = t(it),
-                action = "change-nav",
-            )
-        }
+            .map {
+                val postfix = when (it) {
+                    MainNavEntry.TRADE_AGREEMENTS -> " ($tradeAgreements)"
+                    MainNavEntry.SETTLEMENTS -> {
+                        val size = kingdom.settlements.mapNotNull { game.scenes.get(it.sceneId) }.size
+                        " ($size)"
+                    }
+
+                    MainNavEntry.MODIFIERS -> " (${kingdom.modifiers.size})"
+                    MainNavEntry.QUESTS -> {
+                        val activeSize = (kingdom.quests ?: emptyArray()).count { it.status == "active" }
+                        " ($activeSize)"
+                    }
+                    else -> ""
+                }
+                NavEntryContext(
+                    label = "${t(it)}$postfix",
+                    active = currentNavEntry == it,
+                    link = it.value,
+                    title = t(it),
+                    action = "change-nav",
+                )
+            }
             .toTypedArray()
     }
 

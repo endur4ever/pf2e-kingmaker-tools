@@ -29,8 +29,10 @@ private fun parseKingmakerWorksite(
         // treated as a luxury source (counted, but it produces no Commodity here) and is excluded
         // from the ore-mine count.
         val (quantity, resources) = when {
+            // A mine on a Luxury Resource hex generates 1 Luxury Commodity per turn instead of Ore
+            // (RAW: it does not double). Counted only for the luxury-source pass.
             type == "mine" && commodity == "luxuries" ->
-                (if (it.commodity == "luxuries") 1 else 0) to 0
+                (if (it.commodity == "luxuries") 1 else 0).let { it to it }
             type == "mine" && it.commodity == "luxuries" ->
                 0 to 0
             // RAW: an established Work Site generates 1 Commodity of its type, doubled to 2 when the

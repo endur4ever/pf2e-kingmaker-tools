@@ -33,6 +33,12 @@ fun buildTurnRecord(
     clockEvents: Array<String>? = null,
     warPressure: Int? = null,
     notes: String? = null,
+    level: Int? = null,
+    size: Int? = null,
+    ruinCorruption: Int? = null,
+    ruinCrime: Int? = null,
+    ruinDecay: Int? = null,
+    ruinStrife: Int? = null,
 ): RawTurnRecord = RawTurnRecord(
     turn = turn,
     timestamp = timestamp,
@@ -44,4 +50,10 @@ fun buildTurnRecord(
     clockEvents = clockEvents,
     warPressure = warPressure,
     notes = notes,
+    level = level,
+    size = size,
+    ruinCorruption = ruinCorruption,
+    ruinCrime = ruinCrime,
+    ruinDecay = ruinDecay,
+    ruinStrife = ruinStrife,
 )

@@ -20,6 +20,7 @@ external interface GroupContext {
     val atWar: FormElementContext
     val preventPledgeOfFealty: FormElementContext
     val relations: FormElementContext
+    val hexKey: FormElementContext
     val attitude: String
     val standing: Int
     val allianceLevel: String?
@@ -57,6 +58,13 @@ fun Array<RawGroup>.toContext() =
                 name = "groups.$index.relations",
                 hideLabel = true,
                 value = Relations.fromString(group.relations) ?: Relations.NONE,
+            ).toContext(),
+            hexKey = TextInput(
+                name = "groups.$index.hexKey",
+                label = t("kingdom.caravans.partnerHex"),
+                hideLabel = true,
+                value = group.hexKey ?: "",
+                required = false,
             ).toContext(),
             attitude = t(attitudeFor(group.standing).i18nKey),
             standing = group.standing ?: DEFAULT_FACTION_STANDING,

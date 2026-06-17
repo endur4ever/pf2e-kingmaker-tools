@@ -403,6 +403,45 @@
             </table>
         </section>
         <section class="km-kingdom-sheet-section">
+            <h2>{{localizeKM "kingdom.caravans.title"}}</h2>
+            <p class="km-turn-buttons">
+                <button type="button" data-action="dispatch-caravan"><i class="fa-solid fa-truck-fast"></i> {{localizeKM "kingdom.caravans.dispatch"}}</button>
+                <button type="button" data-action="dispatch-shipment"><i class="fa-solid fa-box-open"></i> {{localizeKM "kingdom.caravans.dispatchShipment"}}</button>
+            </p>
+            {{#if caravans.length}}
+                <ul class="km-caravans">
+                    {{#each caravans}}
+                        <li class="km-caravan">
+                            <span class="km-caravan-summary">{{summary}}</span>
+                            <span class="km-caravan-eta">{{localizeKM "kingdom.caravans.eta" turns=turnsRemaining}}</span>
+                            {{#if recallable}}
+                                <button type="button" class="km-btn-sm" data-action="recall-caravan" data-caravan-id="{{id}}">{{localizeKM "kingdom.caravans.recall"}}</button>
+                            {{/if}}
+                        </li>
+                    {{/each}}
+                </ul>
+            {{/if}}
+            {{#if shipments.length}}
+                <h3 style="margin-top: 10px; font-size: 1.1em; opacity: 0.9;">{{localizeKM "kingdom.caravans.equipmentShipments"}}</h3>
+                <ul class="km-caravans">
+                    {{#each shipments}}
+                        <li class="km-caravan">
+                            <span class="km-caravan-summary">{{summary}}</span>
+                            <span class="km-caravan-eta">{{localizeKM "kingdom.caravans.eta" turns=turnsRemaining}}</span>
+                            {{#if recallable}}
+                                <button type="button" class="km-btn-sm" data-action="recall-shipment" data-shipment-id="{{id}}">{{localizeKM "kingdom.caravans.recall"}}</button>
+                            {{/if}}
+                        </li>
+                    {{/each}}
+                </ul>
+            {{/if}}
+            {{#unless caravans.length}}
+                {{#unless shipments.length}}
+                    <p>{{localizeKM "kingdom.caravans.none"}}</p>
+                {{/unless}}
+            {{/unless}}
+        </section>
+        <section class="km-kingdom-sheet-section">
             <h2 id="{{actorUuid}}-km-turn-end">{{localizeKM "kingdom.endTurn"}}</h2>
             <p class="km-turn-buttons">
                 <button type="button" {{#unless canLevelUp}}disabled{{/unless}} data-action="level-up">{{localizeKM

@@ -444,9 +444,17 @@ write a `docs/plans/` doc before implementing any of these.
    but nothing visualizes it. Chart RP, unrest, ruin, kingdom level, commodities, and size
    over turns with pacing-alert thresholds overlaid. Low-risk; reuses existing data.
    **Plan:** [`docs/plans/2026-06-13-campaign-analytics-trends-dashboard.md`](plans/2026-06-13-campaign-analytics-trends-dashboard.md).
-4. ⬜ **Commodity market & trade-route/caravan economy.** Add flow between settlements and
-   trade-partner Groups: caravans that take travel time (reuse the route planner), are
-   exposed to random encounters, and convert commodities ↔ RP.
+4. ✅ **Commodity market & trade-route/caravan economy.** Caravans carry Commodities to
+   trade-partner Groups over map-routed travel time (reuses the camping route planner via
+   `CaravanRouting`/`KingmakerHexGridProvider`), face a per-turn raid flat check (DC by
+   standing/at-war/route safety) in `CaravanTick`, and deliver bonus Resource Dice on arrival
+   (standing/alliance-scaled). Dispatch dialog + Turn-tab board + recall; partners get a map
+   `hexKey`. Wired into End Turn (`performEndTurn`). **Plan:**
+   [`docs/plans/2026-06-16-commodity-market-caravan-economy.md`](plans/2026-06-16-commodity-market-caravan-economy.md).
+   Both selling (Commodities→Resource Dice) and buying (RP→Commodities, RAW Purchase Commodities
+   pricing with standing/treaty discounts) are supported. Follow-ups: per-settlement stockpiles
+   (the kingdom currently uses a single Commodity pool, so settlement transfers are
+   logistics-risk only) and a real claimed-hex route-safety modifier for the raid DC.
 5. ⬜ **Player-facing collaborative kingdom view.** Permission-filtered player view where
    each player drives their own leadership role's activities and submits them for the turn.
    Builds on `kingdom/Leaders.kt` + `ActivityCapCalculator.kt`.

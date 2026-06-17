@@ -257,6 +257,7 @@ class KingdomSheetDataModel(
                     boolean("atWar")
                     boolean("preventPledgeOfFealty")
                     enum<Relations>("relations")
+                    string("hexKey", nullable = true)
                 }
             }
             schema("skillRanks") {
@@ -303,6 +304,27 @@ class KingdomSheetDataModel(
                     boolean("active")
                     string("role")
                     string("img", nullable = true)
+                }
+            }
+            array("shipments") {
+                schema {
+                    string("id")
+                    string("itemName")
+                    int("itemQuantity")
+                    int("itemLevel")
+                    string("itemBulk")
+                    double("itemPriceGp")
+                    string("originHexKey")
+                    string("destHexKey")
+                    string("originLabel")
+                    string("destLabel")
+                    string("caravanType")
+                    double("goldCost")
+                    int("etaTurns")
+                    int("turnsRemaining")
+                    stringArray("path")
+                    string("currentHexKey")
+                    string("status")
                 }
             }
             string("homebrewProfileName", nullable = true)

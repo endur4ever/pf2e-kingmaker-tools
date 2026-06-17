@@ -30,6 +30,8 @@ external interface KingdomSheetContext : ValidatedHandlebarsContext {
     val resourceDiceContext: ResourceContext
     val worksitesContext: Array<WorkSiteContext>
     val unclaimedWorksites: Array<UnclaimedWorksiteContext>
+    val caravans: Array<CaravanRowContext>
+    val shipments: Array<ShipmentRowContext>
     val ruinContext: Array<RuinContext>
     val controlDc: Int
     val unrestPenalty: Int
@@ -103,6 +105,7 @@ external interface KingdomSheetContext : ValidatedHandlebarsContext {
     val activeEventCount: Int
     val questTimerChanges: Array<QuestTimerChangeContext>
     val personalQuests: Array<CompanionQuestRowContext>
+    val analyticsContext: AnalyticsContext?
 }
 
 @JsPlainObject

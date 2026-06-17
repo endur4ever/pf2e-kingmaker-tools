@@ -8,6 +8,20 @@ import at.posselt.pfrpg2e.kingdom.TurnTickingEngine
 import at.posselt.pfrpg2e.kingdom.TickChange
 import at.posselt.pfrpg2e.kingdom.TickResult
 import at.posselt.pfrpg2e.kingdom.ActivityCapCalculator
+import at.posselt.pfrpg2e.kingdom.CARAVAN_BASE_RAID_DC
+import at.posselt.pfrpg2e.kingdom.CaravanEventKind
+import at.posselt.pfrpg2e.kingdom.CaravanTickInput
+import at.posselt.pfrpg2e.kingdom.caravanRaidDc
+import at.posselt.pfrpg2e.kingdom.caravanRdPerCommodity
+import at.posselt.pfrpg2e.kingdom.tickCaravans
+import at.posselt.pfrpg2e.kingdom.tickShipments
+import at.posselt.pfrpg2e.kingdom.ShipmentTickInput
+import at.posselt.pfrpg2e.kingdom.data.RawCaravanShipment
+import com.foundryvtt.kingmaker.kingmaker
+import at.posselt.pfrpg2e.utils.postChatMessage
+import kotlin.math.roundToInt
+import js.array.component1
+import js.array.component2
 import at.posselt.pfrpg2e.settings.pfrpg2eKingdomCampingWeather
 import at.posselt.pfrpg2e.kingdom.getRealmData
 import at.posselt.pfrpg2e.kingdom.getKingdom
@@ -58,6 +72,7 @@ import js.objects.Record
 import js.objects.recordOf
 import kotlin.js.Promise
 import kotlinx.coroutines.await
+import at.posselt.pfrpg2e.utils.asSequence
 
 fun TickChange.toDisplayString(): String {
     return when {
@@ -169,6 +184,121 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
         kingdom.unrest = kingdom.unrest + tickResult.totalUnrestChange
     }
 
+    // Caravan economy: advance in-transit caravans — raid checks, then arrival deliveries.
+    val inTransitCaravans = (kingdom.caravans ?: emptyArray()).filter { it.status == "inTransit" }
+    if (inTransitCaravans.isNotEmpty()) {
+        val groupsByName = kingdom.groups.associateBy { it.name }
+        val caravanResult = tickCaravans(
+            inTransitCaravans.map { caravan ->
+                val partner = groupsByName[caravan.partnerName]
+                CaravanTickInput(
+                    caravan = caravan,
+                    raidDc = caravanRaidDc(
+                        baseDc = CARAVAN_BASE_RAID_DC,
+                        partnerStanding = partner?.standing,
+                        atWar = partner?.atWar == true,
+                        claimedFraction = 0.0,
+                    ),
+                    raidRoll = kotlin.random.Random.nextInt(1, 21),
+                    rdPerCommodity = caravanRdPerCommodity(partner?.standing, partner?.allianceLevel),
+                )
+            }
+        )
+        kingdom.caravans = caravanResult.remaining.toTypedArray()
+        if (caravanResult.bonusResourceDice != 0) {
+            kingdom.bonusResourceDice = kingdom.bonusResourceDice + caravanResult.bonusResourceDice
+        }
+        if (caravanResult.deliveredCommodities.isNotEmpty()) {
+            val now = kingdom.commodities.now.asDynamic()
+            caravanResult.deliveredCommodities.forEach { (commodity, amount) ->
+                now[commodity] = ((now[commodity].unsafeCast<Int?>()) ?: 0) + amount
+            }
+        }
+        val caravanLines = caravanResult.events.map { event ->
+            when (event.kind) {
+                CaravanEventKind.DELIVERED ->
+                    if (event.bonusResourceDice > 0)
+                        t("kingdom.caravans.chatDeliveredRd", recordOf("summary" to event.summary, "rd" to event.bonusResourceDice.toString()))
+                    else
+                        t("kingdom.caravans.chatDeliveredCommodity", recordOf("summary" to event.summary, "amount" to event.deliveredAmount.toString()))
+                CaravanEventKind.RAIDED ->
+                    t("kingdom.caravans.chatRaided", recordOf("summary" to event.summary, "lost" to event.cargoLost.toString()))
+                CaravanEventKind.LOST ->
+                    t("kingdom.caravans.chatLost", recordOf("summary" to event.summary))
+            }
+        }
+        if (caravanLines.isNotEmpty()) {
+            val body = caravanLines.joinToString("") { "<li>$it</li>" }
+            postChatMessage("<h3>${t("kingdom.caravans.title")}</h3><ul>$body</ul>", isHtml = true)
+        }
+    }
+
+    // Caravan shipments: tick active/in-transit shipments en route.
+    val inTransitShipments = (kingdom.shipments ?: emptyArray()).filter { it.status == "inTransit" }
+    if (inTransitShipments.isNotEmpty()) {
+        val claimedHexes = runCatching {
+            kingmaker.state.hexes.asSequence()
+                .filter { (_, hex) -> hex.claimed == true }
+                .map { (key, _) -> key }
+                .toSet()
+        }.getOrDefault(emptySet())
+
+        val shipmentResult = tickShipments(
+            inTransitShipments.map { shipment ->
+                val routeHexes = shipment.path
+                val claimedCount = routeHexes.count { it in claimedHexes }
+                val claimedFraction = if (routeHexes.isEmpty()) 1.0 else claimedCount.toDouble() / routeHexes.size
+                val raidDc = (CARAVAN_BASE_RAID_DC - (claimedFraction * 4).roundToInt()).coerceAtLeast(5)
+                ShipmentTickInput(
+                    shipment = shipment,
+                    raidDc = raidDc,
+                    raidRoll = kotlin.random.Random.nextInt(1, 21),
+                )
+            }
+        )
+
+        // For delivered shipments, add them to the PF2e Party actor's inventory
+        for (shipment in shipmentResult.delivered) {
+            val itemData = js("""
+                {
+                    name: "",
+                    type: "equipment",
+                    system: {
+                        quantity: 1,
+                        level: { value: 1 },
+                        bulk: { value: "1" },
+                        price: { value: { gp: 0 } }
+                    }
+                }
+            """)
+            itemData.name = shipment.itemName
+            itemData.system.quantity = shipment.itemQuantity
+            itemData.system.level.value = shipment.itemLevel
+            itemData.system.bulk.value = shipment.itemBulk
+            itemData.system.price.value.gp = shipment.itemPriceGp
+            actor.addToInventory(itemData.unsafeCast<com.foundryvtt.core.AnyObject>()).await()
+        }
+
+        // Save remaining in-transit shipments
+        kingdom.shipments = shipmentResult.remaining.toTypedArray()
+
+        // Generate chat logs
+        val shipmentLines = shipmentResult.events.map { event ->
+            when (event.kind) {
+                CaravanEventKind.DELIVERED ->
+                    t("kingdom.caravans.chatDeliveredShipment", recordOf("summary" to event.summary, "amount" to event.deliveredAmount.toString()))
+                CaravanEventKind.RAIDED ->
+                    t("kingdom.caravans.chatRaidedShipment", recordOf("summary" to event.summary, "lost" to event.cargoLost.toString()))
+                CaravanEventKind.LOST ->
+                    t("kingdom.caravans.chatLostShipment", recordOf("summary" to event.summary))
+            }
+        }
+        if (shipmentLines.isNotEmpty()) {
+            val body = shipmentLines.joinToString("") { "<li>$it</li>" }
+            postChatMessage("<h3>${t("kingdom.caravans.shipmentTitle")}</h3><ul>$body</ul>", isHtml = true)
+        }
+    }
+
     // Balance & pacing alerts (roadmap #13): fire-once advisories, accumulated then posted to chat below.
     val firedPacingAlerts = mutableListOf<RawPacingAlert>()
 
@@ -237,6 +367,12 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
             xpAwarded = tickResult.xpAwarded,
             clockEvents = clockEventNames,
             warPressure = warPressureNow,
+            level = kingdom.level,
+            size = realm.size,
+            ruinCorruption = kingdom.ruin.corruption.value,
+            ruinCrime = kingdom.ruin.crime.value,
+            ruinDecay = kingdom.ruin.decay.value,
+            ruinStrife = kingdom.ruin.strife.value,
         ),
     )
 

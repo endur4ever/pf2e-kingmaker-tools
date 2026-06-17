@@ -15,6 +15,7 @@ external interface RawSettlement {
     var waterBorders: Int
     var populationRoster: RawPopulationRoster?
     var terrain: String? // SettlementTerrain value, e.g. "forest", "swamp"
+    var hexKey: String? // realm-map hex this settlement occupies (for caravan routing)
 }
 
 @JsPlainObject

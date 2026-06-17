@@ -17,4 +17,7 @@ external interface RawGroup {
     var standing: Int?
     var standingLog: Array<RawFactionStandingEntry>?
     var allianceLevel: String?
+
+    // Realm-map hex this faction's trade hub sits on, for caravan routing (null => no location set).
+    var hexKey: String?
 }

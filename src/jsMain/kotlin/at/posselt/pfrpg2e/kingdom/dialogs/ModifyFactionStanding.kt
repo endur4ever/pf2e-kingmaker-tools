@@ -7,6 +7,8 @@ import at.posselt.pfrpg2e.app.forms.NumberInput
 import at.posselt.pfrpg2e.app.forms.Section
 import at.posselt.pfrpg2e.app.forms.SectionsContext
 import at.posselt.pfrpg2e.app.forms.TextInput
+import at.posselt.pfrpg2e.app.forms.Select
+import at.posselt.pfrpg2e.app.forms.SelectOption
 import at.posselt.pfrpg2e.app.forms.formContext
 import at.posselt.pfrpg2e.utils.buildPromise
 import at.posselt.pfrpg2e.utils.t
@@ -27,6 +29,7 @@ import kotlin.js.Promise
 external interface FactionStandingFormData {
     var delta: Int
     var reason: String
+    var allianceLevel: String
 }
 
 @JsExport
@@ -39,6 +42,7 @@ class FactionStandingDataModel(
         fun defineSchema() = buildSchema {
             int("delta")
             string("reason")
+            string("allianceLevel")
         }
     }
 }
@@ -47,15 +51,15 @@ class FactionStandingDataModel(
 external interface FactionStandingFormContext : ValidatedHandlebarsContext, SectionsContext
 
 /**
- * Adjust one faction/group's diplomatic standing by a signed delta with a reason.
- * [onSave] receives the raw delta and reason; the caller applies it via
- * [at.posselt.pfrpg2e.data.kingdom.applyStandingDelta] and appends a change-log entry,
- * keeping standing math in the pure layer rather than this UI.
+ * Adjust one faction/group's diplomatic standing and treaty level.
+ * [onSave] receives the raw delta, reason, and allianceLevel; the caller applies it,
+ * keeping standing math in the pure layer.
  */
 @JsExport
 class ModifyFactionStanding(
     private val factionName: String,
-    private val onSave: (delta: Int, reason: String) -> Unit,
+    private val initialAllianceLevel: String?,
+    private val onSave: (delta: Int, reason: String, allianceLevel: String?) -> Unit,
 ) : FormApp<FactionStandingFormContext, FactionStandingFormData>(
     title = t("kingdom.adjustStanding"),
     template = "components/forms/application-form.hbs",
@@ -67,6 +71,7 @@ class ModifyFactionStanding(
     private var data: FactionStandingFormData = FactionStandingFormData(
         delta = 0,
         reason = "",
+        allianceLevel = initialAllianceLevel ?: "none",
     )
 
     override fun _preparePartContext(
@@ -95,6 +100,19 @@ class ModifyFactionStanding(
                             value = data.reason,
                             stacked = false,
                         ),
+                        Select(
+                            label = t("kingdom.treaty"),
+                            name = "allianceLevel",
+                            value = data.allianceLevel,
+                            options = listOf(
+                                SelectOption(t("kingdom.allianceLevel.none"), "none"),
+                                SelectOption(t("kingdom.allianceLevel.non-aggression"), "non-aggression"),
+                                SelectOption(t("kingdom.allianceLevel.alliance"), "alliance"),
+                                SelectOption(t("kingdom.allianceLevel.tribute"), "tribute"),
+                            ),
+                            required = false,
+                            stacked = false,
+                        ),
                     )
                 )
             )
@@ -110,7 +128,9 @@ class ModifyFactionStanding(
         when (target.dataset["action"]) {
             "km-save" -> {
                 close()
-                onSave(data.delta, data.reason)
+                val level = data.allianceLevel.ifBlank { "none" }
+                val finalAllianceLevel = if (level == "none") null else level
+                onSave(data.delta, data.reason, finalAllianceLevel)
             }
         }
     }

@@ -21,4 +21,10 @@ external interface RawTurnRecord {
     var clockEvents: Array<String>?
     var warPressure: Int?
     var notes: String?
+    var level: Int?
+    var size: Int?
+    var ruinCorruption: Int?
+    var ruinCrime: Int?
+    var ruinDecay: Int?
+    var ruinStrife: Int?
 }

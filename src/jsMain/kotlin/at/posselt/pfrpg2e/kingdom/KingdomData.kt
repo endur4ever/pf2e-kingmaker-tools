@@ -24,6 +24,8 @@ import at.posselt.pfrpg2e.kingdom.data.MilestoneChoice
 import at.posselt.pfrpg2e.kingdom.data.RawAbilityBoostChoices
 import at.posselt.pfrpg2e.kingdom.data.RawAbilityScores
 import at.posselt.pfrpg2e.kingdom.data.RawArmyDeployment
+import at.posselt.pfrpg2e.kingdom.data.RawCaravan
+import at.posselt.pfrpg2e.kingdom.data.RawCaravanShipment
 import at.posselt.pfrpg2e.kingdom.data.RawArmyBattle
 import at.posselt.pfrpg2e.kingdom.data.RawPacingAlert
 import at.posselt.pfrpg2e.kingdom.data.RawTurnRecord
@@ -258,6 +260,12 @@ external interface KingdomData {
 
     /** Balance & pacing alerts (roadmap #13) — advisory alert history, nullable for back-compat. */
     var pacingAlerts: Array<RawPacingAlert>?
+
+    /** Commodity market / caravan economy — in-transit caravans, nullable for back-compat. */
+    var caravans: Array<RawCaravan>?
+
+    /** Active caravan shipments for equipment/supplies. */
+    var shipments: Array<RawCaravanShipment>?
 
     /** Per-turn history records (gap analysis item 2) — newest last, nullable for back-compat. */
     var turnHistory: Array<RawTurnRecord>?
