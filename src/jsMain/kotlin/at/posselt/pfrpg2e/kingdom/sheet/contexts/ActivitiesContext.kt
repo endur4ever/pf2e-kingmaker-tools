@@ -23,6 +23,7 @@ import at.posselt.pfrpg2e.kingdom.sumPerformedByPhase
 import at.posselt.pfrpg2e.kingdom.activityAllowedDuringAnarchy
 import at.posselt.pfrpg2e.kingdom.isInAnarchy
 import at.posselt.pfrpg2e.settings.pfrpg2eKingdomCampingWeather
+import at.posselt.pfrpg2e.utils.getAppFlag
 import com.foundryvtt.core.applications.ux.TextEditor.enrichHtml
 import com.foundryvtt.core.game
 import js.array.toTypedArray
@@ -91,6 +92,43 @@ external interface ActivitiesContext {
     val commerceRemaining: Int
 }
 
+fun getActivePhaseForGating(checkedItems: Set<String>): KingdomPhase? {
+    if ("gain-fame" !in checkedItems || "adjust-unrest" !in checkedItems || "collect-resources" !in checkedItems || "pay-consumption" !in checkedItems) {
+        return KingdomPhase.UPKEEP
+    }
+    if ("leadership-phase" !in checkedItems) {
+        return KingdomPhase.LEADERSHIP
+    }
+    if ("civic-phase" !in checkedItems) {
+        return KingdomPhase.CIVIC
+    }
+    if ("region-phase" !in checkedItems) {
+        return KingdomPhase.REGION
+    }
+    if ("commerce-phase" !in checkedItems) {
+        return KingdomPhase.COMMERCE
+    }
+    if ("army-phase" !in checkedItems) {
+        return KingdomPhase.ARMY
+    }
+    if ("check-events" !in checkedItems) {
+        return KingdomPhase.EVENT
+    }
+    return null
+}
+
+/**
+ * Whether an activity of [activityPhase] should be locked given the wizard's [checkedItems].
+ * Only gates when [isStrict] is true and a phase is currently active that differs from the
+ * activity's phase. Once the whole turn checklist is complete (active phase is null) nothing
+ * is gated.
+ */
+fun isActivityPhaseGated(activityPhase: String, checkedItems: Set<String>, isStrict: Boolean): Boolean {
+    if (!isStrict) return false
+    val activePhase = getActivePhaseForGating(checkedItems) ?: return false
+    return activityPhase != activePhase.value
+}
+
 private suspend fun toActivityContext(
     activity: RawActivity,
     kingdomLevel: Int,
@@ -104,6 +142,7 @@ private suspend fun toActivityContext(
     anarchyAt: Int,
     currentUnrest: Int,
     performedCount: Int,
+    checkedItems: Set<String> = emptySet(),
 ): ActivityContext = coroutineScope {
     val descriptionP = async { enrichHtml(activity.description) }
     val criticalSuccessP = async { activity.criticalSuccess?.msg?.let { enrichHtml(it) } }
@@ -158,8 +197,19 @@ private suspend fun toActivityContext(
     val anarchyGated = kingdom.settings.enableAnarchyActivityGating == true
         && inAnarchy
         && !activityAllowedDuringAnarchy(activity.id)
-    val disabled = baseDisabled || anarchyGated
-    val disabledReason = if (anarchyGated) {
+    val isStrict = kingdom.settings.enableStrictPhaseGating == true
+    val activePhase = if (isStrict) getActivePhaseForGating(checkedItems) else null
+    val phaseGated = isActivityPhaseGated(activity.phase, checkedItems, isStrict)
+
+    val disabled = baseDisabled || anarchyGated || phaseGated
+    val disabledReason = if (phaseGated) {
+        val phaseLabel = t("kingdomPhase.${activity.phase}")
+        val activePhaseLabel = t("kingdomPhase.${activePhase!!.value}")
+        val params = js("{}")
+        params["phase"] = phaseLabel
+        params["activePhase"] = activePhaseLabel
+        t("kingdom.activityPhaseGated", params.unsafeCast<com.foundryvtt.core.AnyObject>())
+    } else if (anarchyGated) {
         t("kingdom.activityDisabledDuringAnarchy")
     } else {
         null
@@ -206,6 +256,7 @@ suspend fun activitiesToActivityContext(
     anarchyAt: Int,
     currentUnrest: Int,
     performedByActivityId: Map<String, Int>,
+    checkedItems: Set<String> = emptySet(),
 ) = coroutineScope {
     activities
         .map {
@@ -223,6 +274,7 @@ suspend fun activitiesToActivityContext(
                     anarchyAt = anarchyAt,
                     currentUnrest = currentUnrest,
                     performedCount = performedByActivityId[it.id] ?: 0,
+                    checkedItems = checkedItems,
                 )
             }
         }
@@ -252,6 +304,12 @@ suspend fun toActivitiesContext(
         .groupBy { it.phase }
     val performedByActivityId = actor.getPerformedActivities()
     val phaseByActivityId = activities.associate { it.id to it.phase }
+    val state = actor.getAppFlag<KingdomActor, dynamic>("turn-wizard-state")
+    val checkedItems = mutableSetOf<String>()
+    if (state != null && state.checklist != null) {
+        val array = state.checklist.unsafeCast<Array<String>>()
+        checkedItems.addAll(array)
+    }
     val commerce = activitiesToActivityContext(
         activitiesByPhase[KingdomPhase.COMMERCE.value].orEmpty(),
         allowCapitalInvestment,
@@ -264,6 +322,7 @@ suspend fun toActivitiesContext(
         anarchyAt,
         currentUnrest,
         performedByActivityId,
+        checkedItems,
     )
     val leadership = activitiesToActivityContext(
         activitiesByPhase[KingdomPhase.LEADERSHIP.value].orEmpty(),
@@ -277,6 +336,7 @@ suspend fun toActivitiesContext(
         anarchyAt,
         currentUnrest,
         performedByActivityId,
+        checkedItems,
     )
     val civic = activitiesToActivityContext(
         activitiesByPhase[KingdomPhase.CIVIC.value].orEmpty(),
@@ -290,6 +350,7 @@ suspend fun toActivitiesContext(
         anarchyAt,
         currentUnrest,
         performedByActivityId,
+        checkedItems,
     )
     val region = activitiesToActivityContext(
         activitiesByPhase[KingdomPhase.REGION.value].orEmpty(),
@@ -303,6 +364,7 @@ suspend fun toActivitiesContext(
         anarchyAt,
         currentUnrest,
         performedByActivityId,
+        checkedItems,
     )
     val army = activitiesToActivityContext(
         activitiesByPhase[KingdomPhase.ARMY.value].orEmpty(),
@@ -316,6 +378,7 @@ suspend fun toActivitiesContext(
         anarchyAt,
         currentUnrest,
         performedByActivityId,
+        checkedItems,
     )
     val upkeep = activitiesToActivityContext(
         activitiesByPhase[KingdomPhase.UPKEEP.value].orEmpty(),
@@ -329,6 +392,7 @@ suspend fun toActivitiesContext(
         anarchyAt,
         currentUnrest,
         performedByActivityId,
+        checkedItems,
     )
 
     val phasePerformed = sumPerformedByPhase(performedByActivityId, phaseByActivityId)

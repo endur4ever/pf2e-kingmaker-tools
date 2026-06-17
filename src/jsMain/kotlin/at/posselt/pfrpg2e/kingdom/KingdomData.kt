@@ -138,6 +138,9 @@ external interface KingdomSettings {
     // disabled in the UI during anarchy with an explanatory tooltip.
     var enableAnarchyActivityGating: Boolean?
 
+    // Strict phase gating for the Turn Wizard (rules/state machine)
+    var enableStrictPhaseGating: Boolean?
+
     // Faction & diplomacy relations tracker (roadmap #1 faction standing drift)
     var factionStandingDriftPerTurn: Int?
 

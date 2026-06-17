@@ -99,6 +99,7 @@ class KingdomSettingsDataModel(
             boolean("enableLeadershipModifiers")
             boolean("enableRoughTerrainCosts")
             boolean("enableAnarchyActivityGating")
+            boolean("enableStrictPhaseGating")
             boolean("vkCharterExtraSkills")
             boolean("vkHeartlandExtraSkills")
             boolean("vkExtraAbilityBoost")
@@ -529,6 +530,17 @@ class KingdomSettingsApplication(
                             label = t("kingdom.enableAnarchyActivityGating"),
                             value = settings.enableAnarchyActivityGating == true,
                             help = t("kingdom.enableAnarchyActivityGatingHelp"),
+                        ),
+                    ),
+                ),
+                Section(
+                    legend = t("kingdom.turnWizardPhaseGatingSettings"),
+                    formRows = listOf(
+                        CheckboxInput(
+                            name = "enableStrictPhaseGating",
+                            label = t("kingdom.enableStrictPhaseGating"),
+                            value = settings.enableStrictPhaseGating == true,
+                            help = t("kingdom.enableStrictPhaseGatingHelp"),
                         ),
                     ),
                 ),

@@ -521,11 +521,11 @@ class TurnWizardApplication(
             state.checklist = emptyArray<String>()
         }
         val checklistArray = state.checklist.unsafeCast<Array<String>>()
-        val newChecklist = if (id in checklistArray) {
-            checklistArray.filter { it != id }.toTypedArray()
-        } else {
-            checklistArray + id
-        }
+
+        val kingdom = kingdomActor.getKingdom() ?: return
+        val isStrict = kingdom.settings.enableStrictPhaseGating == true
+
+        val newChecklist = applyChecklistToggle(checklistArray.toList(), id, isStrict).toTypedArray()
         state.checklist = newChecklist
         kingdomActor.setAppFlag("turn-wizard-state", state)
         render()
@@ -563,6 +563,38 @@ class TurnWizardApplication(
     }
 
     companion object {
+        // Ordered turn sequence used when strict phase gating is enabled. Upkeep steps come
+        // first, then one boundary item per activity phase, then the event step.
+        val strictChecklistSequence = listOf(
+            "gain-fame", "adjust-unrest", "collect-resources", "pay-consumption",
+            "leadership-phase", "civic-phase", "region-phase", "commerce-phase", "army-phase",
+            "check-events",
+        )
+
+        /**
+         * Pure transition for toggling a checklist [id] given the current [checklist] and whether
+         * strict gating is active. Behaviour:
+         *  - non-strict: plain add/remove.
+         *  - strict check: only succeeds when every preceding sequence item is already checked.
+         *  - strict uncheck: removes the item and every downstream sequence item.
+         *  - ids not in the sequence fall back to plain add/remove.
+         * Existing checklist order is preserved.
+         */
+        fun applyChecklistToggle(checklist: List<String>, id: String, isStrict: Boolean): List<String> {
+            val present = id in checklist
+            val idx = strictChecklistSequence.indexOf(id)
+            if (!isStrict || idx == -1) {
+                return if (present) checklist.filter { it != id } else checklist + id
+            }
+            return if (present) {
+                val allowed = strictChecklistSequence.take(idx).toSet()
+                checklist.filter { it in allowed }
+            } else {
+                val allPreviousChecked = strictChecklistSequence.take(idx).all { it in checklist }
+                if (allPreviousChecked) checklist + id else checklist
+            }
+        }
+
         fun buildContext(
             kingdom: KingdomData,
             actor: KingdomActor? = null,
@@ -572,43 +604,47 @@ class TurnWizardApplication(
             showPreview: Boolean = false,
             previewChanges: Array<TickChangeContext> = emptyArray(),
         ): TurnWizardContext {
-            val checklist = arrayOf(
-                ChecklistItemContext(
-                    id = "gain-fame",
-                    label = t("kingdom.turnWizard.checklist.gainFame"),
-                    description = "",
-                    checked = "gain-fame" in checkedItems,
-                    highlight = false
-                ),
-                ChecklistItemContext(
-                    id = "adjust-unrest",
-                    label = t("kingdom.turnWizard.checklist.adjustUnrest"),
-                    description = "",
-                    checked = "adjust-unrest" in checkedItems,
-                    highlight = kingdom.unrest > 0
-                ),
-                ChecklistItemContext(
-                    id = "collect-resources",
-                    label = t("kingdom.turnWizard.checklist.collectResources"),
-                    description = "",
-                    checked = "collect-resources" in checkedItems,
-                    highlight = false
-                ),
-                ChecklistItemContext(
-                    id = "pay-consumption",
-                    label = t("kingdom.turnWizard.checklist.payConsumption"),
-                    description = "",
-                    checked = "pay-consumption" in checkedItems,
-                    highlight = false
-                ),
-                ChecklistItemContext(
-                    id = "check-events",
-                    label = t("kingdom.turnWizard.checklist.checkEvents"),
-                    description = "",
-                    checked = "check-events" in checkedItems,
-                    highlight = false
-                )
+            class ChecklistItemInfo(val id: String, val label: String, val highlight: Boolean)
+            val isStrict = kingdom.settings.enableStrictPhaseGating == true
+
+            val allItems = mutableListOf(
+                ChecklistItemInfo("gain-fame", t("kingdom.turnWizard.checklist.gainFame"), false),
+                ChecklistItemInfo("adjust-unrest", t("kingdom.turnWizard.checklist.adjustUnrest"), kingdom.unrest > 0),
+                ChecklistItemInfo("collect-resources", t("kingdom.turnWizard.checklist.collectResources"), false),
+                ChecklistItemInfo("pay-consumption", t("kingdom.turnWizard.checklist.payConsumption"), false)
             )
+
+            if (isStrict) {
+                allItems.addAll(listOf(
+                    ChecklistItemInfo("leadership-phase", t("kingdom.turnWizard.checklist.leadershipPhase"), false),
+                    ChecklistItemInfo("civic-phase", t("kingdom.turnWizard.checklist.civicPhase"), false),
+                    ChecklistItemInfo("region-phase", t("kingdom.turnWizard.checklist.regionPhase"), false),
+                    ChecklistItemInfo("commerce-phase", t("kingdom.turnWizard.checklist.commercePhase"), false),
+                    ChecklistItemInfo("army-phase", t("kingdom.turnWizard.checklist.armyPhase"), false)
+                ))
+            }
+
+            allItems.add(ChecklistItemInfo("check-events", t("kingdom.turnWizard.checklist.checkEvents"), false))
+
+            val shownSequence = allItems.map { it.id }
+            val rawChecklist = mutableListOf<ChecklistItemContext>()
+
+            for (idx in allItems.indices) {
+                val item = allItems[idx]
+                val checked = item.id in checkedItems
+                val disabled = isStrict && idx > 0 && shownSequence.take(idx).any { it !in checkedItems }
+                rawChecklist.add(
+                    ChecklistItemContext(
+                        id = item.id,
+                        label = item.label,
+                        description = "",
+                        checked = checked,
+                        highlight = item.highlight,
+                        disabled = disabled
+                    )
+                )
+            }
+            val checklist = rawChecklist.toTypedArray()
 
             val commodities = kingdom.commodities
             
