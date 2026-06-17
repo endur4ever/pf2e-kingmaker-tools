@@ -440,9 +440,14 @@ write a `docs/plans/` doc before implementing any of these.
    (`com/foundryvtt/core/helpers/GameTime.kt`, `utils/Time.kt`, `kingdom/DailyTickHooks.kt`).
    Surface kingdom turns, camping days, weather, and campaign clocks on a real in-world
    calendar; auto-derive season; advance turns from the calendar.
-3. 📝 **Campaign analytics / trends dashboard.** `TurnHistory.kt` records per-turn state
-   but nothing visualizes it. Chart RP, unrest, ruin, kingdom level, commodities, and size
-   over turns with pacing-alert thresholds overlaid. Low-risk; reuses existing data.
+3. ✅ **Campaign analytics / trends dashboard.** GM-only read-only **Analytics** tab
+   (`MainNavEntry.ANALYTICS`) charts the recorded `RawTurnRecord` series — unrest, RP,
+   consumption, fame, XP, war pressure, kingdom level/size, and all four ruin tracks — as
+   inline-SVG line charts with min/max/mean/current/delta summaries and a 10/25/all window
+   selector. The level chart overlays the pacing-alert tolerance band. Pure math lives in
+   `TurnAnalytics.kt` (`extractSeries`/`summarizeSeries`/`mapSeriesToCoordinates`,
+   unit-tested in `TurnAnalyticsTest.kt`); the sheet builds an `AnalyticsContext` rendered by
+   `sections/analytics/{page,metric-chart}.hbs`. Zero new deps, no game-state mutation.
    **Plan:** [`docs/plans/2026-06-13-campaign-analytics-trends-dashboard.md`](plans/2026-06-13-campaign-analytics-trends-dashboard.md).
 4. ✅ **Commodity market & trade-route/caravan economy.** Caravans carry Commodities to
    trade-partner Groups over map-routed travel time (reuses the camping route planner via

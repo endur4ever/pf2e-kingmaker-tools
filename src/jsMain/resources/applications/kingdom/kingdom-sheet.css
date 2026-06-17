@@ -1549,3 +1549,189 @@
         margin-bottom: .3em;
     }
 }
+
+/* Campaign Analytics & Trends dashboard (read-only, GM-only). Dark cards in both
+   themes so the white grid lines / amber polyline keep their contrast. */
+.km-kingdom-sheet .km-analytics {
+
+    .km-analytics-header {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: .5em 1em;
+        margin-bottom: .75em;
+    }
+
+    .km-analytics-header h2 {
+        display: flex;
+        align-items: center;
+        gap: .5em;
+        margin: 0;
+        border: none;
+    }
+
+    .km-analytics-header h2 i {
+        color: var(--secondary-km, #ee9b3a);
+    }
+
+    .km-analytics-window-selector {
+        display: flex;
+        align-items: center;
+        gap: .35em;
+        margin-left: auto;
+        font-size: var(--font-size-12);
+        color: #9a9a9a;
+    }
+
+    .km-window-btn {
+        flex: 0 0 auto;
+        width: auto;
+        line-height: 1.4;
+        padding: .15em .7em;
+        border-radius: 1em;
+        border: 1px solid rgba(120, 120, 120, 0.35);
+        background: rgba(30, 30, 30, 0.55);
+        color: #cfcfcf;
+        cursor: pointer;
+        transition: background-color .15s ease, border-color .15s ease, color .15s ease;
+    }
+
+    .km-window-btn:hover {
+        border-color: var(--secondary-km, #ee9b3a);
+        color: #f5f5f5;
+    }
+
+    .km-window-btn:focus-visible {
+        outline: 2px solid var(--secondary-km, #ee9b3a);
+        outline-offset: 1px;
+    }
+
+    .km-window-btn.active {
+        background: rgba(238, 155, 58, 0.22);
+        border-color: rgba(238, 155, 58, 0.6);
+        color: #f5b041;
+        font-weight: 600;
+    }
+
+    .km-analytics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1em;
+    }
+
+    .km-analytics-card {
+        display: flex;
+        flex-direction: column;
+        gap: .5em;
+        padding: .6em .75em .5em;
+        border: 1px solid rgba(120, 120, 120, 0.25);
+        border-radius: 8px;
+        background: rgba(30, 30, 30, 0.6);
+        color: #e0e0e0;
+    }
+
+    .km-analytics-card-header {
+        display: flex;
+        align-items: baseline;
+        gap: .5em;
+    }
+
+    .km-analytics-card-title {
+        font-weight: 600;
+        color: #f5f5f5;
+    }
+
+    .km-analytics-card-value-group {
+        display: flex;
+        align-items: baseline;
+        gap: .4em;
+        margin-left: auto;
+    }
+
+    .km-analytics-card-current {
+        font-size: var(--font-size-20, 1.25em);
+        font-weight: 700;
+        line-height: 1;
+        color: var(--secondary-km, #ee9b3a);
+    }
+
+    .km-analytics-card-delta {
+        font-size: var(--font-size-12);
+        font-weight: 600;
+        color: #9a9a9a;
+    }
+
+    .km-analytics-card-delta.km-delta-positive {
+        color: #2ecc71;
+    }
+
+    .km-analytics-card-delta.km-delta-negative {
+        color: #e74c3c;
+    }
+
+    .km-analytics-chart-container {
+        width: 100%;
+    }
+
+    .km-analytics-svg {
+        display: block;
+        width: 100%;
+        height: auto;
+        overflow: visible;
+    }
+
+    .km-chart-dot {
+        fill: var(--color-primary, #df9f28);
+        stroke: rgba(0, 0, 0, 0.4);
+        stroke-width: 1;
+        opacity: .35;
+        transition: opacity .15s ease, r .15s ease;
+        cursor: pointer;
+    }
+
+    .km-chart-dot:hover {
+        opacity: 1;
+        r: 5;
+    }
+
+    .km-analytics-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: .25em;
+        padding-top: .35em;
+        border-top: 1px solid rgba(120, 120, 120, 0.2);
+    }
+
+    .km-stat-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: .1em;
+    }
+
+    .km-stat-label {
+        font-size: var(--font-size-10, .7em);
+        text-transform: uppercase;
+        letter-spacing: .04em;
+        color: #9a9a9a;
+    }
+
+    .km-stat-value {
+        font-size: var(--font-size-14);
+        font-weight: 600;
+        color: #e0e0e0;
+    }
+
+    .km-analytics-empty {
+        text-align: center;
+        padding: 2.5em 1em;
+        color: #999;
+    }
+
+    .km-analytics-empty i {
+        font-size: 2em;
+        display: block;
+        margin-bottom: .3em;
+        color: var(--secondary-km, #ee9b3a);
+    }
+}
