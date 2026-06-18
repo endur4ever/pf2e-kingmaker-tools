@@ -244,6 +244,12 @@ object Pfrpg2eKingdomCampingWeatherSettings {
     fun getLatestMigrationBackup(): String =
         game.settings.getString("latestMigrationBackup")
 
+    suspend fun setCampaignMapSceneIds(value: String) =
+        game.settings.setString("campaignMapSceneIds", value)
+
+    fun getCampaignMapSceneIds(): String =
+        game.settings.getString("campaignMapSceneIds")
+
     suspend fun setSchemaVersion(value: Int) =
         game.settings.setInt("schemaVersion", value)
 
@@ -491,6 +497,12 @@ object Pfrpg2eKingdomCampingWeatherSettings {
             name = t("settings.schemaVersion"),
             hidden = false,
             hint = t("settings.schemaVersionHelp")
+        )
+        game.settings.registerScalar<String>(
+            key = "campaignMapSceneIds",
+            name = t("settings.campaignMapSceneIds"),
+            hint = t("settings.campaignMapSceneIdsHelp"),
+            default = "AJ1k5II28u72JOmz",
         )
         game.settings.registerDataModel<ClimateConfigurationDataModel>(
             key = "climate",

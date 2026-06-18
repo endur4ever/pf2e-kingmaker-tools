@@ -162,12 +162,27 @@ class ActivityCapCalculatorTest {
     }
 
     @Test
-    fun `A PC holding two roles is counted once`() {
+    fun `Each filled seat counts, even when one PC holds two roles`() {
         val kingdom = createTestKingdom(
             leaders = leadersOf(pcLeader("Actor.1"), pcLeader("Actor.1")),
         )
         val leadership = ActivityCapCalculator.calculate(kingdom).caps.find { it.phase == "leadership" }!!
-        assertEquals(2, leadership.maximum, "the same PC in two roles is one leader (1 x 2)")
+        assertEquals(4, leadership.maximum, "two filled PC seats are two leaders (2 x 2), even if the same actor")
+    }
+
+    @Test
+    fun `A full council of eight PC seats gets 16 (8 x 2)`() {
+        // The realistic Kingmaker case: 8 leadership roles filled, even by fewer distinct players.
+        val kingdom = createTestKingdom(
+            leaders = leadersOf(
+                pcLeader("Actor.1"), pcLeader("Actor.1"),
+                pcLeader("Actor.2"), pcLeader("Actor.2"),
+                pcLeader("Actor.3"), pcLeader("Actor.3"),
+                pcLeader("Actor.4"), pcLeader("Actor.4"),
+            ),
+        )
+        val leadership = ActivityCapCalculator.calculate(kingdom).caps.find { it.phase == "leadership" }!!
+        assertEquals(16, leadership.maximum, "8 filled PC seats x 2 = 16, regardless of how many distinct actors")
     }
 
     @Test

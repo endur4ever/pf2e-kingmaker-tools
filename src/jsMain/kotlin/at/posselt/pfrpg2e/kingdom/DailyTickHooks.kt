@@ -21,6 +21,8 @@ import com.foundryvtt.core.grid.HexagonalGrid
 import com.foundryvtt.core.grid.HexagonalGridCube2D
 import com.foundryvtt.core.helpers.TypedHooks
 import com.foundryvtt.core.helpers.onUpdateWorldTime
+import com.foundryvtt.core.helpers.Hooks
+import at.posselt.pfrpg2e.data.regions.getMonth
 import com.pixijs.Point
 import js.objects.recordOf
 import kotlin.math.abs
@@ -50,6 +52,26 @@ fun registerDailyTickHooks(game: Game) {
 			buildPromise {
 				rollDailyWeather(game)
 				tickCompanionTravel(game, daysPassed)
+			}
+		}
+	}
+
+	Hooks.on("simple-calendar-date-time-change") { data: dynamic ->
+		if (game.isFirstGM() && data != null && data.newDate != null && data.previousDate != null) {
+			val newMonth = data.newDate.month.unsafeCast<Int>()
+			val prevMonth = data.previousDate.month.unsafeCast<Int>()
+			if (newMonth != prevMonth) {
+				game.getKingdomActors().forEach { actor ->
+					val kingdom = actor.getKingdom() ?: return@forEach
+					if (kingdom.settings.enableCalendarMonthEndTurn == true) {
+						buildPromise {
+							postChatMessage(
+								t("kingdom.calendarMonthEndTurnPrompt", recordOf("month" to t(getMonth(newMonth)))),
+								isHtml = true
+							)
+						}
+					}
+				}
 			}
 		}
 	}
@@ -192,6 +214,10 @@ private suspend fun announceArrival(game: Game, companion: RawCharacter) {
 		// The message template is HTML; the actor-provided name must not inject into it.
 		t("kingdom.companionArrival", recordOf("name" to escapeHtml(companionName), "x" to destX, "y" to destY)),
 		isHtml = true,
+	)
+	logToCalendar(
+		title = "Companion Arrival",
+		content = "$companionName has arrived at hex ($destX, $destY)."
 	)
 }
 

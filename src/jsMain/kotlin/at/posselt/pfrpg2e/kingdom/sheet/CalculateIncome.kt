@@ -97,3 +97,32 @@ fun KingdomData.getResourceDiceAmount(
         } else {
             0
         }
+
+fun calculateProjectedResources(
+    kingdomData: KingdomData,
+    realmData: RealmData,
+    chosenFeats: List<ChosenFeat>,
+    settlements: List<Settlement>,
+    expressionContext: ExpressionContext,
+    modifiers: List<Modifier>,
+): Income {
+    val resourceDice = kingdomData.getResourceDiceAmount(
+        chosenFeats,
+        settlements,
+        kingdomLevel = kingdomData.level,
+    )
+    val increaseGainedLuxuries = chosenFeats.sumOf { it.feat.increaseGainedLuxuriesOncePerTurnBy ?: 0 }
+    val income = calculateIncome(
+        realmData = realmData,
+        resourceDice = resourceDice,
+        increaseGainedLuxuries = increaseGainedLuxuries,
+    )
+    val ore = calculateModifierResource(modifiers, expressionContext, ModifierSelector.ORE)
+    val stone = calculateModifierResource(modifiers, expressionContext, ModifierSelector.STONE)
+    val lumber = calculateModifierResource(modifiers, expressionContext, ModifierSelector.LUMBER)
+    return income.copy(
+        ore = income.ore + ore,
+        stone = income.stone + stone,
+        lumber = income.lumber + lumber,
+    )
+}

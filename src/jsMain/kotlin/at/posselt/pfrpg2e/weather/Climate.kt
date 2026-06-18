@@ -13,6 +13,7 @@ import at.posselt.pfrpg2e.data.regions.findWeatherType
 import at.posselt.pfrpg2e.data.regions.getMonth
 import at.posselt.pfrpg2e.data.regions.resolveRandomWeatherEvent
 import at.posselt.pfrpg2e.data.regions.WeatherEventResult
+import at.posselt.pfrpg2e.data.regions.getSeasonForMonth
 import at.posselt.pfrpg2e.fromCamelCase
 import at.posselt.pfrpg2e.settings.pfrpg2eKingdomCampingWeather
 import at.posselt.pfrpg2e.toCamelCase
@@ -26,6 +27,8 @@ import at.posselt.pfrpg2e.utils.rollWithCompendiumFallback
 import at.posselt.pfrpg2e.utils.t
 import com.foundryvtt.core.Game
 import com.foundryvtt.core.documents.TableMessageOptions
+import com.foundryvtt.core.helpers.SimpleCalendar
+import at.posselt.pfrpg2e.kingdom.logToCalendar
 import js.objects.recordOf
 
 private val hazardLevelRegex = "\\(Hazard (?<level>\\d+)\\+?\\)".toRegex(RegexOption.IGNORE_CASE)
@@ -183,6 +186,14 @@ private suspend fun rollWeather(
                 isCold = checkCold?.degreeOfSuccess?.succeeded() == true,
                 hasPrecipitation = checkPrecipitation?.degreeOfSuccess?.succeeded() == true,
             )
+            val weatherLabel = when (type) {
+                WeatherType.COLD -> t("weather.cold")
+                WeatherType.SNOWY -> t("weather.snow")
+                WeatherType.RAINY -> t("weather.rainy")
+                WeatherType.SUNNY -> t("weather.sunny")
+            }
+            logToCalendar(title = "Daily Weather", content = "Today's weather: $weatherLabel")
+
             val weatherEffect = when (type) {
                 WeatherType.COLD -> {
                     postChatMessage(t("weather.cold"))
@@ -220,9 +231,14 @@ suspend fun rollWeather(game: Game) {
     val settings = game.settings.pfrpg2eKingdomCampingWeather
     val climateSettings = settings.getClimateSettings()
     val climate = climateSettings.months.mapIndexed { index, climateSetting ->
+        val derivedSeason = if (SimpleCalendar?.api != null) {
+            getSeasonForMonth(index)
+        } else {
+            fromCamelCase<Season>(climateSetting.season)!!
+        }
         Climate(
             month = getMonth(index),
-            season = fromCamelCase<Season>(climateSetting.season)!!,
+            season = derivedSeason,
             coldDc = climateSetting.coldDc,
             precipitationDc = climateSetting.precipitationDc,
             weatherEventDc = climateSetting.weatherEventDc,

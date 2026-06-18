@@ -10,10 +10,19 @@ const foundry = {
     abstract: {
         DataModel: class {
 
+        },
+        Document: class {
+
         }
     },
     utils: {
         expandObject: () => {
+        },
+        fromUuid: function(uuid) {
+            if (globalThis.fromUuidMock) {
+                return globalThis.fromUuidMock(uuid);
+            }
+            return Promise.resolve(null);
         }
     },
     documents: {

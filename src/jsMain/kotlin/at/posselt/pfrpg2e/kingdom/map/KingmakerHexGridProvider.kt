@@ -2,7 +2,6 @@ package at.posselt.pfrpg2e.kingdom.map
 
 import at.posselt.pfrpg2e.camping.HexGridProvider
 import at.posselt.pfrpg2e.data.hex.HexContent
-import com.foundryvtt.kingmaker.HexOffsetCoordinate
 import com.foundryvtt.kingmaker.KingmakerHex
 import com.foundryvtt.kingmaker.kingmaker
 
@@ -25,7 +24,12 @@ class KingmakerHexGridProvider : HexGridProvider {
         val hex = runCatching { kingmaker.region.hexes.find { it.key == key } }.getOrNull() ?: return emptyList()
         return hex.getNeighbors()
             .mapNotNull { neighbor ->
-                runCatching { KingmakerHex.getKey(neighbor.offset.unsafeCast<HexOffsetCoordinate>()) }.getOrNull()
+                // getNeighbors() is typed as base GridHex, but at runtime each neighbor is a KingmakerHex
+                // that already carries its region `key`. Read it directly. The previous approach recomputed
+                // the key via KingmakerHex.getKey(neighbor.offset); that throws at runtime and — being
+                // swallowed by runCatching — silently dropped every neighbor, leaving adjacency empty so
+                // every caravan/shipment route resolved as "unreachable".
+                runCatching { neighbor.unsafeCast<KingmakerHex>().key }.getOrNull()
             }
             .filter { it in regionKeys }
             .map { it.toString() }

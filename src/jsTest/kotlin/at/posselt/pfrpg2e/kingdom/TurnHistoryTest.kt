@@ -123,4 +123,112 @@ class TurnHistoryTest {
         assertEquals(0, result.clockEvents?.size ?: -1) // Should be 0 if not null
         assertEquals(null, result.notes)
     }
+
+    @Test
+    fun formatTurnGazetteEmptyReturnsNull() {
+        val result = formatTurnGazette(
+            activities = emptyList(),
+            sizeChange = 0,
+            currentSize = 5,
+            caravanEvents = emptyList(),
+            shipmentEvents = emptyList(),
+            campaignClocks = emptyList(),
+        )
+        assertEquals(null, result)
+    }
+
+    @Test
+    fun formatTurnGazetteActivitiesOnly() {
+        val result = formatTurnGazette(
+            activities = listOf("Claim Hex", "Build Structure (x2)"),
+            sizeChange = 0,
+            currentSize = 5,
+        )
+        assertEquals("Activities: Claim Hex, Build Structure (x2)", result)
+    }
+
+    @Test
+    fun formatTurnGazetteExpansionOnly() {
+        val result = formatTurnGazette(
+            activities = emptyList(),
+            sizeChange = 3,
+            currentSize = 8,
+        )
+        assertEquals("Expansion: Claimed 3 hex(es) (Size: 8)", result)
+    }
+
+    @Test
+    fun formatTurnGazetteCaravansOnly() {
+        val events = listOf(
+            CaravanEvent(CaravanEventKind.DELIVERED, "Restov Caravan", deliveredAmount = 5),
+            CaravanEvent(CaravanEventKind.DELIVERED, "Oleg's Caravan", bonusResourceDice = 2),
+            CaravanEvent(CaravanEventKind.RAIDED, "Narlmarches Caravan", cargoLost = 3),
+            CaravanEvent(CaravanEventKind.LOST, "Stolen Lands Caravan")
+        )
+        val result = formatTurnGazette(
+            activities = emptyList(),
+            sizeChange = 0,
+            currentSize = 5,
+            caravanEvents = events,
+        )
+        val expected = "Caravans: Caravan delivered: Restov Caravan (delivered 5); " +
+            "Caravan delivered: Oleg's Caravan (+2 RD); " +
+            "Caravan raided: Narlmarches Caravan (lost 3); " +
+            "Caravan lost: Stolen Lands Caravan"
+        assertEquals(expected, result)
+    }
+
+    @Test
+    fun formatTurnGazetteShipmentsOnly() {
+        val events = listOf(
+            CaravanEvent(CaravanEventKind.DELIVERED, "Fine Wine"),
+            CaravanEvent(CaravanEventKind.RAIDED, "Iron Ore", cargoLost = 10),
+            CaravanEvent(CaravanEventKind.LOST, "Rare Herbs")
+        )
+        val result = formatTurnGazette(
+            activities = emptyList(),
+            sizeChange = 0,
+            currentSize = 5,
+            shipmentEvents = events,
+        )
+        val expected = "Shipments: Shipment arrived: Fine Wine; " +
+            "Shipment raided: Iron Ore (lost 10); " +
+            "Shipment lost: Rare Herbs"
+        assertEquals(expected, result)
+    }
+
+    @Test
+    fun formatTurnGazetteClocksOnly() {
+        val result = formatTurnGazette(
+            activities = emptyList(),
+            sizeChange = 0,
+            currentSize = 5,
+            campaignClocks = listOf("Clock A", "Clock B"),
+        )
+        assertEquals("Campaign Clocks: Clock A, Clock B", result)
+    }
+
+    @Test
+    fun formatTurnGazetteCombinedEvents() {
+        val caravanEvents = listOf(
+            CaravanEvent(CaravanEventKind.DELIVERED, "Restov", deliveredAmount = 3)
+        )
+        val shipmentEvents = listOf(
+            CaravanEvent(CaravanEventKind.LOST, "Gold Shipment")
+        )
+        val result = formatTurnGazette(
+            activities = listOf("Pave Streets"),
+            sizeChange = 1,
+            currentSize = 12,
+            caravanEvents = caravanEvents,
+            shipmentEvents = shipmentEvents,
+            campaignClocks = listOf("Troll Invasion Escalation"),
+        )
+        val expected = "Activities: Pave Streets | " +
+            "Expansion: Claimed 1 hex(es) (Size: 12) | " +
+            "Caravans: Caravan delivered: Restov (delivered 3) | " +
+            "Shipments: Shipment lost: Gold Shipment | " +
+            "Campaign Clocks: Troll Invasion Escalation"
+        assertEquals(expected, result)
+    }
 }

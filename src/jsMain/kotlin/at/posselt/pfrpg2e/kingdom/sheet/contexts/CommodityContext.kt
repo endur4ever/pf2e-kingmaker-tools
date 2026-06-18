@@ -2,10 +2,12 @@ package at.posselt.pfrpg2e.kingdom.sheet.contexts
 
 import at.posselt.pfrpg2e.app.forms.FormElementContext
 import at.posselt.pfrpg2e.app.forms.Select
+import at.posselt.pfrpg2e.app.forms.NumberInput
 import at.posselt.pfrpg2e.data.kingdom.structures.CommodityStorage
 import at.posselt.pfrpg2e.kingdom.data.RawCommodities
 import at.posselt.pfrpg2e.kingdom.data.RawCurrentCommodities
 import at.posselt.pfrpg2e.kingdom.sheet.Turn
+import at.posselt.pfrpg2e.kingdom.resources.Income
 import at.posselt.pfrpg2e.utils.t
 import kotlinx.js.JsPlainObject
 
@@ -35,7 +37,60 @@ external interface CommoditiesContext {
     val capacity: CapacityContext
 }
 
-fun RawCommodities.toContext(round: Turn, capacity: CommodityStorage) =
+fun RawCommodities.toContext(
+    round: Turn,
+    capacity: CommodityStorage,
+    automate: Boolean = false,
+    projected: Income? = null,
+) = if (round == Turn.NEXT && automate && projected != null) {
+    CommodityContext(
+        food = NumberInput(
+            name = "commodities.${round.value}.food",
+            label = t(round.i18nKeyShort),
+            value = 0,
+            stacked = false,
+            elementClasses = listOf("km-width-small", "km-slim-inputs"),
+            hideLabel = true,
+            readonly = true,
+        ).toContext(),
+        lumber = NumberInput(
+            name = "commodities.${round.value}.lumber",
+            label = t(round.i18nKeyShort),
+            value = projected.lumber,
+            stacked = false,
+            elementClasses = listOf("km-width-small", "km-slim-inputs"),
+            hideLabel = true,
+            readonly = true,
+        ).toContext(),
+        luxuries = NumberInput(
+            name = "commodities.${round.value}.luxuries",
+            label = t(round.i18nKeyShort),
+            value = projected.luxuries,
+            stacked = false,
+            elementClasses = listOf("km-width-small", "km-slim-inputs"),
+            hideLabel = true,
+            readonly = true,
+        ).toContext(),
+        ore = NumberInput(
+            name = "commodities.${round.value}.ore",
+            label = t(round.i18nKeyShort),
+            value = projected.ore,
+            stacked = false,
+            elementClasses = listOf("km-width-small", "km-slim-inputs"),
+            hideLabel = true,
+            readonly = true,
+        ).toContext(),
+        stone = NumberInput(
+            name = "commodities.${round.value}.stone",
+            label = t(round.i18nKeyShort),
+            value = projected.stone,
+            stacked = false,
+            elementClasses = listOf("km-width-small", "km-slim-inputs"),
+            hideLabel = true,
+            readonly = true,
+        ).toContext(),
+    )
+} else {
     CommodityContext(
         food = Select.range(
             from = 0,
@@ -93,13 +148,12 @@ fun RawCommodities.toContext(round: Turn, capacity: CommodityStorage) =
             hideLabel = round == Turn.NEXT,
         ).toContext(),
     )
+}
 
-
-
-fun RawCurrentCommodities.toContext(capacity: CommodityStorage) =
+fun RawCurrentCommodities.toContext(capacity: CommodityStorage, automate: Boolean = false, projected: Income? = null) =
     CommoditiesContext(
-        now = now.toContext(Turn.NOW, capacity),
-        next = next.toContext(Turn.NEXT, capacity),
+        now = now.toContext(Turn.NOW, capacity, automate = false, projected = null),
+        next = next.toContext(Turn.NEXT, capacity, automate, projected),
         capacity = CapacityContext(
             ore = capacity.ore,
             food = capacity.food,

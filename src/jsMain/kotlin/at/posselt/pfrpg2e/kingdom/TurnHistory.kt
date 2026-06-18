@@ -57,3 +57,59 @@ fun buildTurnRecord(
     ruinDecay = ruinDecay,
     ruinStrife = ruinStrife,
 )
+
+fun formatTurnGazette(
+    activities: List<String>,
+    sizeChange: Int,
+    currentSize: Int,
+    caravanEvents: List<CaravanEvent> = emptyList(),
+    shipmentEvents: List<CaravanEvent> = emptyList(),
+    campaignClocks: List<String> = emptyList(),
+    tributeRp: Int = 0,
+): String? {
+    val gazetteEvents = mutableListOf<String>()
+
+    if (tributeRp > 0) {
+        gazetteEvents.add("Tribute: +$tributeRp RP collected from vassal states")
+    }
+
+    if (activities.isNotEmpty()) {
+        gazetteEvents.add("Activities: " + activities.joinToString(", "))
+    }
+
+    if (sizeChange > 0) {
+        gazetteEvents.add("Expansion: Claimed $sizeChange hex(es) (Size: $currentSize)")
+    }
+
+    val caravanGazetteList = caravanEvents.map { event ->
+        when (event.kind) {
+            CaravanEventKind.DELIVERED -> {
+                val reward = if (event.bonusResourceDice > 0) " (+${event.bonusResourceDice} RD)" else " (delivered ${event.deliveredAmount})"
+                "Caravan delivered: ${event.summary}$reward"
+            }
+            CaravanEventKind.RAIDED -> "Caravan raided: ${event.summary} (lost ${event.cargoLost})"
+            CaravanEventKind.LOST -> "Caravan lost: ${event.summary}"
+        }
+    }
+    if (caravanGazetteList.isNotEmpty()) {
+        gazetteEvents.add("Caravans: " + caravanGazetteList.joinToString("; "))
+    }
+
+    val shipmentGazetteList = shipmentEvents.map { event ->
+        when (event.kind) {
+            CaravanEventKind.DELIVERED -> "Shipment arrived: ${event.summary}"
+            CaravanEventKind.RAIDED -> "Shipment raided: ${event.summary} (lost ${event.cargoLost})"
+            CaravanEventKind.LOST -> "Shipment lost: ${event.summary}"
+        }
+    }
+    if (shipmentGazetteList.isNotEmpty()) {
+        gazetteEvents.add("Shipments: " + shipmentGazetteList.joinToString("; "))
+    }
+
+    if (campaignClocks.isNotEmpty()) {
+        gazetteEvents.add("Campaign Clocks: " + campaignClocks.joinToString(", "))
+    }
+
+    return if (gazetteEvents.isNotEmpty()) gazetteEvents.joinToString(" | ") else null
+}
+

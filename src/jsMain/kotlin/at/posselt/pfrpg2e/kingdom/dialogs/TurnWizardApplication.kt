@@ -1,22 +1,37 @@
 package at.posselt.pfrpg2e.kingdom.dialogs
 
+import at.posselt.pfrpg2e.Config
 import at.posselt.pfrpg2e.app.forms.SimpleApp
+import com.foundryvtt.core.abstract.DatabaseUpdateOperation
 import at.posselt.pfrpg2e.kingdom.KingdomActor
 import at.posselt.pfrpg2e.kingdom.KingdomData
 import at.posselt.pfrpg2e.kingdom.clearPerformedActivities
+import at.posselt.pfrpg2e.kingdom.getPerformedActivities
+import at.posselt.pfrpg2e.kingdom.getActivity
+import at.posselt.pfrpg2e.kingdom.formatTurnGazette
+import at.posselt.pfrpg2e.kingdom.getExplodedFeatures
+import at.posselt.pfrpg2e.kingdom.data.getChosenFeatures
+import at.posselt.pfrpg2e.kingdom.data.getChosenFeats
+import at.posselt.pfrpg2e.kingdom.createSimpleContext
+import at.posselt.pfrpg2e.kingdom.createModifiers
 import at.posselt.pfrpg2e.kingdom.TurnTickingEngine
 import at.posselt.pfrpg2e.kingdom.TickChange
 import at.posselt.pfrpg2e.kingdom.TickResult
 import at.posselt.pfrpg2e.kingdom.ActivityCapCalculator
 import at.posselt.pfrpg2e.kingdom.CARAVAN_BASE_RAID_DC
 import at.posselt.pfrpg2e.kingdom.CaravanEventKind
+import at.posselt.pfrpg2e.kingdom.CaravanEvent
 import at.posselt.pfrpg2e.kingdom.CaravanTickInput
 import at.posselt.pfrpg2e.kingdom.caravanRaidDc
 import at.posselt.pfrpg2e.kingdom.caravanRdPerCommodity
 import at.posselt.pfrpg2e.kingdom.tickCaravans
 import at.posselt.pfrpg2e.kingdom.tickShipments
 import at.posselt.pfrpg2e.kingdom.ShipmentTickInput
+import at.posselt.pfrpg2e.kingdom.sheet.calculateProjectedResources
 import at.posselt.pfrpg2e.kingdom.data.RawCaravanShipment
+import at.posselt.pfrpg2e.kingdom.data.RawGroup
+import at.posselt.pfrpg2e.kingdom.computeCaravanRoute
+import at.posselt.pfrpg2e.kingdom.map.KingmakerHexGridProvider
 import com.foundryvtt.kingmaker.kingmaker
 import at.posselt.pfrpg2e.utils.postChatMessage
 import kotlin.math.roundToInt
@@ -68,14 +83,21 @@ import com.foundryvtt.core.applications.api.ApplicationRenderOptions
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.asList
 import org.w3c.dom.get
+import js.objects.Object
 import js.objects.Record
 import js.objects.recordOf
 import kotlin.js.Promise
 import kotlinx.coroutines.await
 import at.posselt.pfrpg2e.utils.asSequence
+import at.posselt.pfrpg2e.kingdom.logToCalendar
 
 fun TickChange.toDisplayString(): String {
     return when {
+        category == "resourcePoints" && field == "tribute" -> {
+            val params = js("{}")
+            params["amount"] = newValue.toString()
+            t("kingdom.turnWizard.preview.tributeRp", params.unsafeCast<com.foundryvtt.core.AnyObject>())
+        }
         category == "resourcePoints" && field == "now" -> {
             val params = js("{}")
             params["old"] = oldValue.toString()
@@ -148,15 +170,34 @@ fun runKingdomTurnTick(kingdom: KingdomData, storage: CommodityStorage, currentT
         autoGainFamePerTurn = kingdom.settings.autoGainFamePerTurn,
         bonusResourceDice = kingdom.bonusResourceDice,
         activeBattles = kingdom.activeBattles ?: emptyArray(),
-        groups = kingdom.groups,
+        // `groups` is typed non-null but can be undefined at runtime on kingdoms
+        // predating the diplomacy subsystem; cast to nullable so the guard is a real
+        // runtime check (matches the sibling arrays above) and tick() never sees undefined.
+        groups = kingdom.groups.unsafeCast<Array<RawGroup>?>() ?: emptyArray(),
         factionStandingDriftPerTurn = kingdom.settings.factionStandingDriftPerTurn ?: 0,
     )
 
 suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData): TickResult {
     val currentTurn = (kingdom.currentTurn ?: 0) + 1
     kingdom.currentTurn = currentTurn
+
+    val performed = actor.getPerformedActivities()
+    val activitySummaries = performed.mapNotNull { (id, count) ->
+        val act = kingdom.getActivity(id)
+        if (act != null) {
+            val title = act.title
+            if (count > 1) "$title (x$count)" else title
+        } else {
+            null
+        }
+    }
+    var caravanEvents = emptyList<CaravanEvent>()
+    var shipmentEvents = emptyList<CaravanEvent>()
+
     actor.clearPerformedActivities()
     val realm = game.getRealmData(actor, kingdom)
+    val previousSize = kingdom.turnHistory?.lastOrNull()?.size ?: realm.size
+    val sizeChange = realm.size - previousSize
     val settlements = kingdom.getAllSettlements(game)
     val storage = calculateStorage(realm = realm, settlements = settlements.allSettlements)
 
@@ -191,13 +232,25 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
         val caravanResult = tickCaravans(
             inTransitCaravans.map { caravan ->
                 val partner = groupsByName[caravan.partnerName]
+                val provider = KingmakerHexGridProvider()
+                val route = computeCaravanRoute(provider, caravan.originHexKey, caravan.destHexKey)
+                val claimedFraction = if (route != null && route.path.isNotEmpty()) {
+                    val path = route.path
+                    val safeCount = path.count { key ->
+                        val hs = kingmaker.state.hexes[key]
+                        hs?.claimed == true || hs?.cleared == true
+                    }
+                    safeCount.toDouble() / path.size
+                } else {
+                    0.0
+                }
                 CaravanTickInput(
                     caravan = caravan,
                     raidDc = caravanRaidDc(
                         baseDc = CARAVAN_BASE_RAID_DC,
                         partnerStanding = partner?.standing,
                         atWar = partner?.atWar == true,
-                        claimedFraction = 0.0,
+                        claimedFraction = claimedFraction,
                     ),
                     raidRoll = kotlin.random.Random.nextInt(1, 21),
                     rdPerCommodity = caravanRdPerCommodity(partner?.standing, partner?.allianceLevel),
@@ -205,6 +258,7 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
             }
         )
         kingdom.caravans = caravanResult.remaining.toTypedArray()
+        caravanEvents = caravanResult.events
         if (caravanResult.bonusResourceDice != 0) {
             kingdom.bonusResourceDice = kingdom.bonusResourceDice + caravanResult.bonusResourceDice
         }
@@ -281,6 +335,7 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
 
         // Save remaining in-transit shipments
         kingdom.shipments = shipmentResult.remaining.toTypedArray()
+        shipmentEvents = shipmentResult.events
 
         // Generate chat logs
         val shipmentLines = shipmentResult.events.map { event ->
@@ -354,6 +409,17 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
 
     // Per-turn history record (gap analysis item 2): snapshot post-tick kingdom state.
     val clockEventNames = tickResult.clockEvents.map { it.label }.toTypedArray()
+    val tributeRp = tickResult.changes.find { it.category == "resourcePoints" && it.field == "tribute" }?.newValue as? Int ?: 0
+    val turnNotes = formatTurnGazette(
+        activities = activitySummaries,
+        sizeChange = sizeChange,
+        currentSize = realm.size,
+        caravanEvents = caravanEvents,
+        shipmentEvents = shipmentEvents,
+        campaignClocks = tickResult.clockEvents.map { it.label },
+        tributeRp = tributeRp
+    )
+
     val warPressureNow = kingdom.warPressure?.currentPressure
     kingdom.turnHistory = appendTurnRecord(
         history = kingdom.turnHistory,
@@ -373,8 +439,34 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
             ruinCrime = kingdom.ruin.crime.value,
             ruinDecay = kingdom.ruin.decay.value,
             ruinStrife = kingdom.ruin.strife.value,
+            notes = turnNotes,
         ),
     )
+
+    val automateResources = kingdom.settings.automateResources != "manual"
+    if (automateResources) {
+        val settlements = kingdom.getAllSettlements(game)
+        val allFeatures = kingdom.getExplodedFeatures()
+        val chosenFeatures = kingdom.getChosenFeatures(allFeatures)
+        val chosenFeats = kingdom.getChosenFeats(chosenFeatures)
+        val expressionContext = kingdom.createSimpleContext(settlements)
+        val modifiers = kingdom.createModifiers(settlements)
+
+        val projected = calculateProjectedResources(
+            kingdomData = kingdom,
+            realmData = realm,
+            chosenFeats = chosenFeats,
+            settlements = settlements.allSettlements,
+            expressionContext = expressionContext,
+            modifiers = modifiers,
+        )
+        kingdom.commodities.next.ore = projected.ore
+        kingdom.commodities.next.stone = projected.stone
+        kingdom.commodities.next.lumber = projected.lumber
+        kingdom.commodities.next.luxuries = projected.luxuries
+        kingdom.commodities.next.food = 0
+        kingdom.resourceDice.next = projected.resourceDice
+    }
 
     actor.setKingdom(kingdom)
 
@@ -420,6 +512,14 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
     postChatTemplate(
         templatePath = "chatmessages/end-turn.hbs",
         templateContext = endTurnContext,
+    )
+
+    val changesText = tickResult.changes
+        .map { it.toDisplayString() }
+        .joinToString("\n") { "- $it" }
+    logToCalendar(
+        title = "Kingdom Turn $currentTurn Complete",
+        content = "Kingdom Turn $currentTurn completed.\n\nChanges:\n$changesText"
     )
 
     return tickResult
@@ -527,8 +627,46 @@ class TurnWizardApplication(
 
         val newChecklist = applyChecklistToggle(checklistArray.toList(), id, isStrict).toTypedArray()
         state.checklist = newChecklist
-        kingdomActor.setAppFlag("turn-wizard-state", state)
+        // Persist with Foundry's automatic re-render suppressed, then drive a serialized forced
+        // render of the Kingdom Sheet. Two problems make the naive path unreliable:
+        //  1. Foundry does not fire the actor-update hook when the checklist array *shrinks*
+        //     (cascading uncheck), so gating would stay stale.
+        //  2. The Kingdom Sheet's render is async and slow; overlapping renders from rapid toggles
+        //     race and a stale one can paint last.
+        // Suppressing the auto-render and serializing forced renders (one in flight at a time, with
+        // a re-render queued if more toggles arrive) guarantees the final render reads the settled
+        // checklist, so phase gating repaints reliably regardless of toggle speed.
+        val updateData = js("{}")
+        updateData["flags.${Config.moduleId}.turn-wizard-state"] = state
+        kingdomActor.update(updateData, js("{ render: false }").unsafeCast<DatabaseUpdateOperation>()).await()
+        refreshKingdomSheets()
         render()
+    }
+
+    private var sheetRenderInFlight: Boolean = false
+    private var sheetRenderQueued: Boolean = false
+
+    /**
+     * Forced re-render of open Kingdom Sheets, serialized so at most one render runs at a time.
+     * If more toggles arrive mid-render, exactly one follow-up render is queued, which re-reads the
+     * latest checklist — so the final paint always reflects the settled state and slow async renders
+     * cannot race. The Turn Wizard is a [SimpleApp] not registered on the actor, so only the sheet
+     * is refreshed.
+     */
+    private suspend fun refreshKingdomSheets() {
+        sheetRenderQueued = true
+        if (sheetRenderInFlight) return
+        sheetRenderInFlight = true
+        try {
+            while (sheetRenderQueued) {
+                sheetRenderQueued = false
+                Object.values(kingdomActor.apps).forEach {
+                    it.render(ApplicationRenderOptions(force = true)).await()
+                }
+            }
+        } finally {
+            sheetRenderInFlight = false
+        }
     }
 
     private suspend fun previewTurn() {

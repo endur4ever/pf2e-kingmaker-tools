@@ -4,6 +4,8 @@ import at.posselt.pfrpg2e.data.kingdom.KingdomSkill
 import at.posselt.pfrpg2e.data.kingdom.structures.AvailableItemBonuses
 import at.posselt.pfrpg2e.data.kingdom.structures.CommodityStorage
 import at.posselt.pfrpg2e.data.kingdom.structures.GroupedStructureBonus
+import at.posselt.pfrpg2e.kingdom.modifiers.evaluation.SettlementData
+import at.posselt.pfrpg2e.kingdom.modifiers.evaluation.evaluateSettlement
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -491,5 +493,113 @@ class UrbanGridParityAuditTest {
         )
         val row = settlementDetailsMatrixRows.first { it.label == "Build Structure" }
         assertEquals(4, settlement.matrixBonusFor(row))
+    }
+
+    // --- resolveUrbanGrid tests ---
+
+    @Test
+    fun resolveUrbanGridCenterBlockE() {
+        // Center block E depends purely on pavedStreets flag
+        val gridPaved = resolveUrbanGrid(SettlementEdges(), pavedStreets = true)
+        assertEquals(BlockTerrain.PAVED, gridPaved.blockE.topLeft)
+        assertEquals(BlockTerrain.PAVED, gridPaved.blockE.topRight)
+        assertEquals(BlockTerrain.PAVED, gridPaved.blockE.bottomLeft)
+        assertEquals(BlockTerrain.PAVED, gridPaved.blockE.bottomRight)
+
+        val gridUnpaved = resolveUrbanGrid(SettlementEdges(), pavedStreets = false)
+        assertEquals(BlockTerrain.UNPAVED, gridUnpaved.blockE.topLeft)
+        assertEquals(BlockTerrain.UNPAVED, gridUnpaved.blockE.topRight)
+        assertEquals(BlockTerrain.UNPAVED, gridUnpaved.blockE.bottomLeft)
+        assertEquals(BlockTerrain.UNPAVED, gridUnpaved.blockE.bottomRight)
+    }
+
+    @Test
+    fun resolveUrbanGridCornerBlockA() {
+        // Corner block A (N+W)
+        // West checks: topLeft, bottomLeft. North checks: topRight, bottomRight.
+        // allowBridge is always false for Block A.
+        // allowWall is true only for bottomLeft (West) and bottomRight (North).
+        
+        val edges = SettlementEdges(
+            west = UrbanGridEdge(hasWater = true, hasBridge = true, hasStoneWall = true),
+            north = UrbanGridEdge(hasWoodWall = true)
+        )
+        val grid = resolveUrbanGrid(edges, pavedStreets = false)
+
+        // West hasWater=true, allowBridge=false -> topLeft: WATER, bottomLeft: WATER
+        assertEquals(BlockTerrain.WATER, grid.blockA.topLeft)
+        assertEquals(BlockTerrain.WATER, grid.blockA.bottomLeft)
+
+        // North hasWater=false, hasWoodWall=true, allowWall=false (topRight) -> LAND
+        assertEquals(BlockTerrain.LAND, grid.blockA.topRight)
+        // North hasWater=false, hasWoodWall=true, allowWall=true (bottomRight) -> WOOD_WALL
+        assertEquals(BlockTerrain.WOOD_WALL, grid.blockA.bottomRight)
+    }
+
+    @Test
+    fun resolveUrbanGridEdgeBlockB() {
+        // Edge block B (North)
+        // North checks all 4 lots.
+        // allowBridge is true on topLeft, bottomLeft.
+        // allowWall is true on bottomLeft, bottomRight.
+
+        val edgesWaterAndBridge = SettlementEdges(
+            north = UrbanGridEdge(hasWater = true, hasBridge = true)
+        )
+        val gridBridge = resolveUrbanGrid(edgesWaterAndBridge, pavedStreets = false)
+        assertEquals(BlockTerrain.BRIDGE, gridBridge.blockB.topLeft)
+        assertEquals(BlockTerrain.WATER, gridBridge.blockB.topRight) // no bridge allowed
+        assertEquals(BlockTerrain.BRIDGE, gridBridge.blockB.bottomLeft)
+        assertEquals(BlockTerrain.WATER, gridBridge.blockB.bottomRight) // no bridge allowed
+
+        val edgesWalls = SettlementEdges(
+            north = UrbanGridEdge(hasStoneWall = true, hasWoodWall = true) // both walls, stone takes priority
+        )
+        val gridWalls = resolveUrbanGrid(edgesWalls, pavedStreets = false)
+        assertEquals(BlockTerrain.LAND, gridWalls.blockB.topLeft) // no wall allowed
+        assertEquals(BlockTerrain.LAND, gridWalls.blockB.topRight) // no wall allowed
+        assertEquals(BlockTerrain.STONE_WALL, gridWalls.blockB.bottomLeft) // wall allowed
+        assertEquals(BlockTerrain.STONE_WALL, gridWalls.blockB.bottomRight) // wall allowed
+    }
+
+    @Test
+    fun evaluateSettlementResolvesGridWhenDefault() {
+        // If data.urbanGrid is empty/default, it should resolve from edges & pavedStreets
+        val data = SettlementData(
+            name = "Test Settlement",
+            occupiedBlocks = 1,
+            type = SettlementType.SETTLEMENT,
+            isSecondaryTerritory = false,
+            waterBorders = 0,
+            id = "test-id",
+            layoutType = SettlementLayoutType.RIGID,
+            pavedStreets = true,
+            edges = SettlementEdges(
+                north = UrbanGridEdge(hasWater = true)
+            )
+        )
+        val settlement = evaluateSettlement(
+            data = data,
+            structures = emptyList(),
+            allStructuresStack = false,
+            allowCapitalInvestmentInCapitalWithoutBank = false,
+            capStructureBonusAtKingdomLevel = false,
+            kingdomLevel = 1,
+            blocks = emptyList()
+        )
+
+        // Urban grid should be resolved
+        val grid = settlement.urbanGrid
+        assertEquals(BlockTerrain.PAVED, grid.blockE.topLeft) // Block E is paved because pavedStreets = true
+        assertEquals(BlockTerrain.WATER, grid.blockB.topRight) // Block B topRight has water because north edge has water
+
+        // lotsBorderingWater should be derived from urbanGrid.totalWaterLots
+        // Let's count how many water lots are expected with North edge having water:
+        // - Block A (corner N+W) topRight & bottomRight check North -> 2 WATER lots
+        // - Block B (edge North) all 4 lots check North -> 4 WATER lots
+        // - Block C (corner N+E) topLeft & bottomLeft check North -> 2 WATER lots
+        // Total = 2 + 4 + 2 = 8 water lots.
+        assertEquals(8, grid.totalWaterLots)
+        assertEquals(8, settlement.lotsBorderingWater)
     }
 }

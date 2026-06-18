@@ -9,6 +9,7 @@ import at.posselt.pfrpg2e.app.forms.HiddenInput
 import at.posselt.pfrpg2e.app.forms.NumberInput
 import at.posselt.pfrpg2e.app.forms.OverrideType
 import at.posselt.pfrpg2e.app.forms.Select
+import at.posselt.pfrpg2e.app.forms.TextInput
 import at.posselt.pfrpg2e.data.ValueEnum
 import at.posselt.pfrpg2e.data.kingdom.settlements.SettlementLayoutType
 import at.posselt.pfrpg2e.data.kingdom.settlements.SettlementType
@@ -83,6 +84,7 @@ external interface InspectSettlementContext : ValidatedHandlebarsContext {
     val waterBordersInput: FormElementContext
     val layoutInput: FormElementContext
     val terrainInput: FormElementContext
+    val hexKeyInput: FormElementContext
     val level: Int
     val type: String
     val manualSettlementLevel: Boolean
@@ -120,6 +122,7 @@ external interface InspectSettlementData {
     val waterBorders: Int
     val layoutType: String
     val terrain: String?
+    val hexKey: String?
 }
 
 @JsExport
@@ -137,6 +140,7 @@ class InspectSettlementDataModel(
             boolean("secondaryTerritory")
             boolean("manualSettlementLevel")
             int("waterBorders")
+            string("hexKey", nullable = true)
         }
     }
 }
@@ -220,6 +224,7 @@ class InspectSettlement(
         waterBorders = settlement.waterBorders,
         layoutType = settlement.layoutType,
         terrain = settlement.terrain,
+        hexKey = settlement.hexKey,
         populationRoster = settlement.populationRoster ?: RawPopulationRoster(),
     )
 
@@ -425,6 +430,14 @@ class InspectSettlement(
             value = current.waterBorders,
             hideLabel = true,
         )
+        val hexKeyInput = TextInput(
+            name = "hexKey",
+            label = t("kingdom.caravans.settlementHex"),
+            value = current.hexKey,
+            required = false,
+            help = t("kingdom.caravans.settlementHexHelp"),
+            hideLabel = true,
+        )
         val blacklist = (kingdom.structureBlacklist ?: emptyArray()).toSet()
         val settlementStructures = parsed.constructedStructures
             .filter { it.id !in blacklist }
@@ -599,6 +612,7 @@ class InspectSettlement(
             storage = storage,
             layoutInput = settlementLayout.toContext(),
             terrainInput = terrainSelect.toContext(),
+            hexKeyInput = hexKeyInput.toContext(),
             tabs = createTabs<SettlementNav>("change-nav", currentNav)
                 .filter {
                     if (it.link == SettlementNav.BONUSES.value) {
@@ -627,6 +641,7 @@ class InspectSettlement(
         current.waterBorders = value.waterBorders
         current.layoutType = value.layoutType
         current.terrain = value.terrain
+        current.hexKey = value.hexKey?.takeIf { it.isNotBlank() }
         undefined
     }
 

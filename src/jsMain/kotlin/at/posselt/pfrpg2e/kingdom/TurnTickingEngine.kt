@@ -159,12 +159,23 @@ object TurnTickingEngine {
 		}
 
 		// 3) Advance resource points: next -> now
-		val newResourcePoints = resourcePoints.endTurn()
+		val tributeRp = groups.filter { it.allianceLevel == "tribute" }.sumOf { 2 }
+		val newResourcePoints = if (tributeRp > 0) {
+			RawResources(
+				now = resourcePoints.next + tributeRp,
+				next = 0
+			)
+		} else {
+			resourcePoints.endTurn()
+		}
 		if (newResourcePoints.now != resourcePoints.now) {
 			changes += TickChange("resourcePoints", "now", resourcePoints.now, newResourcePoints.now)
 		}
 		if (newResourcePoints.next != resourcePoints.next) {
 			changes += TickChange("resourcePoints", "next", resourcePoints.next, newResourcePoints.next)
+		}
+		if (tributeRp > 0) {
+			changes += TickChange("resourcePoints", "tribute", 0, tributeRp)
 		}
 
 		// 4) Advance resource dice: next -> now

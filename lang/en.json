@@ -54,6 +54,8 @@
       "advancementHelp": "If set to Milestone, will not display XP option in end combat dialog",
       "artDirectory": "Art Directory",
       "artDirectoryHelp": "Path to your art directory relative to Foundry Data folder. For expected files, view the Art help journal in your kingdom sheet.",
+      "campaignMapSceneIds": "Campaign Map Scene IDs",
+      "campaignMapSceneIdsHelp": "A comma-separated list of Scene IDs that act as regional maps. Moving the party token on these scenes automatically updates the active camping region based on hex coordinates.",
       "enableAfterCombatDialog": "Enable End Combat Dialog",
       "enableAfterCombatDialogHelp": "If enabled, shows a popup after ending combat that allows you to award XP and hero points",
       "disableFirstRunMessage": "Disable First Run Message",
@@ -645,7 +647,8 @@
           "changeRp": "RP: {old} → {new}",
           "changeFame": "Fame: {old} → {new}",
           "changeConsumption": "Consumption: {old} → {new}",
-          "expiredModifiers": "{count} modifier(s) expired"
+          "expiredModifiers": "{count} modifier(s) expired",
+          "tributeRp": "Vassal Tribute: +{amount} RP"
         },
         "commit": "Complete Turn",
         "cancel": "Cancel",
@@ -983,6 +986,10 @@
       "enableStrictPhaseGating": "Strict Phase Gating",
       "enableStrictPhaseGatingHelp": "When enabled, checklist items in the Turn Wizard must be completed in order. Furthermore, sheet activities are locked until their corresponding phase is active.",
       "activityPhaseGated": "Locked: Current turn step is {activePhase} (this activity is {phase}).",
+      "calendarIntegrationSettings": "Calendar Integration",
+      "enableCalendarMonthEndTurn": "Prompt End Turn on Month Change",
+      "enableCalendarMonthEndTurnHelp": "When enabled, you will be prompted to perform a Kingdom End Turn whenever the active calendar month changes.",
+      "calendarMonthEndTurnPrompt": "Calendar Month has advanced to {month}! Make sure to perform your monthly Kingdom End Turn.",
       "kingdomSkillIncreaseEveryLevel": "Kingdom Skill Increase Every Level",
       "kingdomSettings": "Kingdom Settings",
       "numActions": "{count, plural, =1 {1 Action} other {# Actions}}",
@@ -1382,6 +1389,8 @@
       "relations": "Relations",
       "attitude": "Attitude",
       "adjustStanding": "Adjust Standing",
+      "annexTooltip": "Annex Vassal State",
+      "annexConfirm": "Are you sure you want to annex the vassal state of {name}? This will clear their tribute treaty, increase Unrest by 2, and claim their trade hub hex.",
       "standingDelta": "Standing Change",
       "standingDeltaHelp": "Signed change to this faction's standing (e.g. 10 or -15). Standing is clamped to -100..100.",
       "standingReason": "Reason",
@@ -1396,7 +1405,8 @@
       },
       "factionStanding": {
         "drift": "Passive Standing Drift",
-        "allianceChange": "Treaty Level Changed"
+        "allianceChange": "Treaty Level Changed",
+        "annexation": "Annexed Vassal State"
       },
       "newSettlement": "New Settlement",
       "addCurrentScene": "Add Current Scene",
@@ -1468,7 +1478,17 @@
         "itemLevelTooHigh": "The item level is higher than the origin settlement's purchase level ({level}).",
         "chatDeliveredShipment": "Shipment delivered ({summary}) — {amount} items added to Party inventory.",
         "chatRaidedShipment": "Shipment raided en route ({summary}) — lost {lost} quantity.",
-        "chatLostShipment": "Shipment lost to raiders ({summary})."
+        "chatLostShipment": "Shipment lost to raiders ({summary}).",
+        "settlementHex": "Realm Map Hex",
+        "settlementHexHelp": "The realm-map hex this settlement occupies (e.g. 5015), required to route caravan shipments to or from it.",
+        "originCustomHex": "Custom origin hex",
+        "destCustomHex": "Custom destination hex",
+        "customHexHelp": "Optional: a realm-map hex key (e.g. 5015) for a location not in the list above, such as a distant city. Overrides the dropdown when filled.",
+        "pickOriginDest": "Pick or enter both an origin and a destination hex.",
+        "noShipmentLocations": "Give at least one settlement or trade-partner faction a realm-map hex first (then you can also enter a custom hex for the other end).",
+        "partyLocation": "The Party (current location)",
+        "typeWithCapacity": "{type} — up to {bulk} Bulk",
+        "overCapacity": "This shipment is {bulk} Bulk, over this caravan's {capacity}-Bulk capacity. Pick a larger caravan or reduce the quantity."
       },
       "creation": "Creation",
       "bonus": "Bonus",
@@ -1625,6 +1645,12 @@
       }
     },
     "chatMessages": {
+      "annexation": {
+        "title": "Vassal State Annexed",
+        "body": "The vassal state of {name} has been formally annexed into the kingdom.",
+        "unrestReason": "Annexation integration",
+        "hexClaimed": "Claimed Hex"
+      },
       "addHuntAndGather": {
         "gained": "{actorName} gained:"
       },

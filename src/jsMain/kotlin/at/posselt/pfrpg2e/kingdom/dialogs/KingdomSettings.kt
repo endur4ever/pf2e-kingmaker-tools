@@ -100,6 +100,7 @@ class KingdomSettingsDataModel(
             boolean("enableRoughTerrainCosts")
             boolean("enableAnarchyActivityGating")
             boolean("enableStrictPhaseGating")
+            boolean("enableCalendarMonthEndTurn")
             boolean("vkCharterExtraSkills")
             boolean("vkHeartlandExtraSkills")
             boolean("vkExtraAbilityBoost")
@@ -541,6 +542,17 @@ class KingdomSettingsApplication(
                             label = t("kingdom.enableStrictPhaseGating"),
                             value = settings.enableStrictPhaseGating == true,
                             help = t("kingdom.enableStrictPhaseGatingHelp"),
+                        ),
+                    ),
+                ),
+                Section(
+                    legend = t("kingdom.calendarIntegrationSettings"),
+                    formRows = listOf(
+                        CheckboxInput(
+                            name = "enableCalendarMonthEndTurn",
+                            label = t("kingdom.enableCalendarMonthEndTurn"),
+                            value = settings.enableCalendarMonthEndTurn == true,
+                            help = t("kingdom.enableCalendarMonthEndTurnHelp"),
                         ),
                     ),
                 ),

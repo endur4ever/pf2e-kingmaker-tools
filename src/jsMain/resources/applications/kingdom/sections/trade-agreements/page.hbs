@@ -30,7 +30,18 @@
                                 <i class="fa-solid fa-scale-balanced"></i>
                             </button>
                         </td>
-                        <td>{{#if allianceLevel}}{{localizeKM (concat "kingdom.allianceLevel." allianceLevel)}}{{/if}}</td>
+                        <td>
+                            {{#if allianceLevel}}
+                                {{localizeKM (concat "kingdom.allianceLevel." allianceLevel)}}
+                                {{#if (eq allianceLevel "tribute")}}
+                                    {{#if ../isGM}}
+                                        <button type="button" data-action="annex-group" data-index="{{@index}}" data-tooltip="{{localizeKM "kingdom.annexTooltip"}}">
+                                            <i class="fa-solid fa-crown"></i>
+                                        </button>
+                                    {{/if}}
+                                {{/if}}
+                            {{/if}}
+                        </td>
                         <td><button type="button" data-action="delete-group" data-index="{{@index}}">
                             <i class="fa-solid fa-trash"></i>
                         </button></td>

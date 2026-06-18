@@ -113,6 +113,7 @@ import at.posselt.pfrpg2e.kingdom.dialogs.TurnWizardApplication
 import at.posselt.pfrpg2e.kingdom.dialogs.performEndTurn
 import at.posselt.pfrpg2e.kingdom.data.RawCharacter
 import at.posselt.pfrpg2e.kingdom.getActiveLeader
+import at.posselt.pfrpg2e.kingdom.getOwnedLeaderRoles
 import at.posselt.pfrpg2e.kingdom.getActivity
 import at.posselt.pfrpg2e.kingdom.recordActivityPerformed
 import at.posselt.pfrpg2e.kingdom.toggleActivityPerformed
@@ -148,6 +149,9 @@ import at.posselt.pfrpg2e.kingdom.dialogs.CaravanShipmentDialog
 import at.posselt.pfrpg2e.kingdom.computeCaravanRoute
 import at.posselt.pfrpg2e.kingdom.caravanEtaTurns
 import at.posselt.pfrpg2e.kingdom.parseBulk
+import at.posselt.pfrpg2e.kingdom.CARAVAN_PARTY_SURCHARGE
+import at.posselt.pfrpg2e.kingdom.caravanBulkCapacity
+import com.pixijs.Point
 import com.foundryvtt.kingmaker.kingmaker
 import at.posselt.pfrpg2e.utils.asSequence
 import js.array.component1
@@ -166,6 +170,7 @@ import at.posselt.pfrpg2e.kingdom.parseRuins
 import at.posselt.pfrpg2e.kingdom.parseSkillRanks
 import at.posselt.pfrpg2e.kingdom.resources.calculateConsumption
 import at.posselt.pfrpg2e.kingdom.resources.calculateStorage
+import at.posselt.pfrpg2e.kingdom.resources.Income
 import at.posselt.pfrpg2e.kingdom.setKingdom
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.KingdomSheetContext
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.NavEntryContext
@@ -221,6 +226,7 @@ import at.posselt.pfrpg2e.kingdom.structures.isStructure
 import at.posselt.pfrpg2e.kingdom.structures.levelUpTo
 import at.posselt.pfrpg2e.kingdom.vacancies
 import at.posselt.pfrpg2e.settings.pfrpg2eKingdomCampingWeather
+import at.posselt.pfrpg2e.app.confirm
 import at.posselt.pfrpg2e.takeIfInstance
 import at.posselt.pfrpg2e.app.jsonFilePicker
 import at.posselt.pfrpg2e.kingdom.sheet.KingdomJournalExporter
@@ -965,6 +971,59 @@ class KingdomSheet(
                 val kingdom = getKingdom()
                 kingdom.groups = kingdom.groups.filterIndexed { idx, _ -> idx != index }.toTypedArray()
                 actor.setKingdom(kingdom)
+            }
+
+            "annex-group" -> buildPromise {
+                val index = target.dataset["index"]?.toInt() ?: 0
+                val kingdom = getKingdom()
+                val group = kingdom.groups.getOrNull(index)
+                if (group != null) {
+                    if (confirm(t("kingdom.annexConfirm", recordOf("name" to group.name)))) {
+                        val hexKey = group.hexKey
+                        if (!hexKey.isNullOrBlank()) {
+                            if (game.modules.get("pf2e-kingmaker")?.active == true) {
+                                val updateData = js("{}")
+                                updateData["hexes.$hexKey.claimed"] = true
+                                updateData["hexes.$hexKey.explored"] = true
+                                updateData["hexes.$hexKey.cleared"] = true
+                                val promise = com.foundryvtt.kingmaker.kingmaker.state.asDynamic().update(updateData) as? Promise<*>
+                                promise?.await()
+                            }
+                        }
+                        group.allianceLevel = null
+                        kingdom.unrest = kingdom.unrest + 2
+                        
+                        group.standingLog = (group.standingLog ?: emptyArray()) + RawFactionStandingEntry(
+                            turn = kingdom.currentTurn ?: 0,
+                            delta = 0,
+                            reason = "kingdom.factionStanding.annexation",
+                        )
+                        
+                        actor.setKingdom(kingdom)
+                        
+                        val title = t("chatMessages.annexation.title")
+                        val body = t("chatMessages.annexation.body", recordOf("name" to group.name))
+                        val unrestLabel = t("kingdom.unrest")
+                        val unrestReason = t("chatMessages.annexation.unrestReason")
+                        val hexLabel = if (!hexKey.isNullOrBlank()) {
+                            val label = t("chatMessages.annexation.hexClaimed")
+                            "<li><b>$label</b>: $hexKey</li>"
+                        } else {
+                            ""
+                        }
+                        val content = """
+                            <div class="pf2e-kingmaker-tools chat-card">
+                                <h3>$title</h3>
+                                <p>$body</p>
+                                <ul>
+                                    <li><b>$unrestLabel</b>: +2 ($unrestReason)</li>
+                                    $hexLabel
+                                </ul>
+                            </div>
+                        """.trimIndent()
+                        postChatMessage(content, speaker = actor, isHtml = true)
+                    }
+                }
             }
 
             "adjust-standing" -> {
@@ -1906,18 +1965,42 @@ class KingdomSheet(
 
             "dispatch-shipment" -> buildPromise {
                 val kingdom = getKingdom()
-                val settlements = kingdom.settlements
+                fun hexCoords(h: String) =
+                    h.toIntOrNull()?.let { " (${it / 1000}.${it % 1000})" } ?: " ($h)"
+                val settlementOptions = kingdom.settlements
                     .filter { !it.hexKey.isNullOrBlank() }
                     .map { raw ->
                         val sceneName = game.scenes.get(raw.sceneId)?.name ?: raw.sceneId
                         val hexKeyStr = raw.hexKey!!
-                        val label = sceneName + (hexKeyStr.toIntOrNull()?.let { " (${it / 1000}.${it % 1000})" } ?: " ($hexKeyStr)")
-                        CaravanHexOption(hexKey = hexKeyStr, label = label)
+                        CaravanHexOption(hexKey = hexKeyStr, label = sceneName + hexCoords(hexKeyStr))
                     }
-                if (settlements.size < 2) {
-                    ui.notifications.warn(t("kingdom.caravans.needTwoSettlements"))
+                // Trade-partner factions (groups with a map-hex) are routable origins/destinations too —
+                // this is how you ship from a non-kingdom location such as Restov.
+                val factionOptions = kingdom.groups
+                    .filter { !it.hexKey.isNullOrBlank() }
+                    .map { CaravanHexOption(hexKey = it.hexKey!!, label = it.name + hexCoords(it.hexKey!!)) }
+                // The party itself is a routable destination/origin: derive its current hex from its token
+                // on the active hex-grid scene. Shipments to/from a moving party carry a surcharge.
+                val partyHex: String? = run {
+                    val scene = game.scenes.active
+                    if (scene == null || !scene.grid.isHexagonal) return@run null
+                    val token = scene.tokens.contents.find { it.actorId == actor.id } ?: return@run null
+                    val grid = scene.grid
+                    val center = Point(
+                        x = token.x + grid.sizeX / 2.0,
+                        y = token.y + grid.sizeY / 2.0,
+                    )
+                    val offset = grid.getOffset(center)
+                    (offset.i * 1000 + offset.j).toString()
+                }
+                val partyOption = partyHex?.let {
+                    CaravanHexOption(hexKey = it, label = t("kingdom.caravans.partyLocation") + hexCoords(it))
+                }
+                val locations = settlementOptions + factionOptions + listOfNotNull(partyOption)
+                if (locations.isEmpty()) {
+                    ui.notifications.warn(t("kingdom.caravans.noShipmentLocations"))
                 } else {
-                    CaravanShipmentDialog(settlements) { req ->
+                    CaravanShipmentDialog(locations) { req ->
                         buildPromise {
                             val current = getKingdom()
                             val route = computeCaravanRoute(
@@ -1940,14 +2023,28 @@ class KingdomSheet(
                                     else -> 10.0
                                 }
                                 val totalBulk = parseBulk(req.itemBulk) * req.itemQuantity
-                                val shipmentCost = (baseCostPerType * routeCost) + (totalBulk * 0.5 * routeCost)
+                                val capacity = caravanBulkCapacity(req.caravanType)
+                                if (totalBulk > capacity) {
+                                    val shownBulk = kotlin.math.round(totalBulk * 10.0) / 10.0
+                                    ui.notifications.warn(
+                                        t("kingdom.caravans.overCapacity", recordOf("bulk" to shownBulk.toString(), "capacity" to capacity.toString()))
+                                    )
+                                    return@buildPromise
+                                }
+                                val baseFee = (baseCostPerType * routeCost) + (totalBulk * 0.5 * routeCost)
+                                // Surcharge when the party's current hex is either endpoint (mobile delivery).
+                                val partyInvolved = partyHex != null && (req.originHexKey == partyHex || req.destHexKey == partyHex)
+                                val shipmentCost = if (partyInvolved) baseFee * CARAVAN_PARTY_SURCHARGE else baseFee
                                 val finalGoldCost = shipmentCost + (if (req.isPurchase) req.itemPriceGp * req.itemQuantity else 0.0)
                                 val roundedGoldCost = kotlin.math.round(finalGoldCost * 100.0) / 100.0
 
-                                if (req.isPurchase) {
+                                // The item-level purchase gate only applies when buying FROM one of our own
+                                // settlements; external markets (factions / free-form locations) are assumed
+                                // to stock the requested item.
+                                val originSettlement = current.settlements.find { it.hexKey == req.originHexKey }
+                                if (req.isPurchase && originSettlement != null) {
                                     val parsedSettlements = current.getAllSettlements(game).allSettlements
-                                    val originRaw = current.settlements.find { it.hexKey == req.originHexKey }
-                                    val originParsed = parsedSettlements.find { it.id == originRaw?.sceneId }
+                                    val originParsed = parsedSettlements.find { it.id == originSettlement.sceneId }
                                     val originPurchaseLevel = originParsed?.itemPurchaseLevel ?: 0
                                     if (req.itemLevel > originPurchaseLevel) {
                                         ui.notifications.warn(
@@ -1957,16 +2054,30 @@ class KingdomSheet(
                                     }
                                 }
 
-                                val gpVal = actor.asDynamic().system?.resources?.coins?.gp.unsafeCast<Double?>() ?: 0.0
-                                if (gpVal < roundedGoldCost) {
+                                val availableGp = (actor.asDynamic().inventory?.coins?.goldValue).unsafeCast<Double?>() ?: 0.0
+                                if (availableGp < roundedGoldCost) {
                                     ui.notifications.warn(t("kingdom.caravans.notEnoughGold"))
                                 } else {
-                                    val newGp = gpVal - roundedGoldCost
-                                    actor.update(js("{ 'system.resources.coins.gp': newGp }")).await()
+                                    // Party gold lives in the PF2e inventory (actor.inventory.coins), not
+                                    // system.resources.coins — which does not exist on a party actor, so the old
+                                    // path always read 0 and every dispatch failed as "not enough gold". Charge
+                                    // whole gp via removeCoins(byValue) so higher denominations are broken as needed.
+                                    val costGp = kotlin.math.ceil(roundedGoldCost).toInt().coerceAtLeast(0)
+                                    val payCoins = js("{}")
+                                    payCoins.gp = costGp
+                                    val paid = actor.asDynamic().inventory
+                                        .removeCoins(payCoins, js("{ byValue: true }"))
+                                        .unsafeCast<kotlin.js.Promise<Boolean>>().await()
+                                    if (paid == false) {
+                                        ui.notifications.warn(t("kingdom.caravans.notEnoughGold"))
+                                        return@buildPromise
+                                    }
 
                                     val etaTurns = caravanEtaTurns(routeCost, speed)
-                                    val originLabel = settlements.find { it.hexKey == req.originHexKey }?.label ?: req.originHexKey
-                                    val destLabel = settlements.find { it.hexKey == req.destHexKey }?.label ?: req.destHexKey
+                                    val originLabel = locations.find { it.hexKey == req.originHexKey }?.label
+                                        ?: req.originHexKey.toIntOrNull()?.let { "${it / 1000}.${it % 1000}" } ?: req.originHexKey
+                                    val destLabel = locations.find { it.hexKey == req.destHexKey }?.label
+                                        ?: req.destHexKey.toIntOrNull()?.let { "${it / 1000}.${it % 1000}" } ?: req.destHexKey
 
                                     val newShipment = RawCaravanShipment(
                                         id = "shipment-${kotlin.js.Date().getTime().toLong()}",
@@ -2002,9 +2113,11 @@ class KingdomSheet(
                 val current = getKingdom()
                 val shipment = (current.shipments ?: emptyArray()).find { it.id == id }
                 if (shipment != null && shipment.status == "inTransit") {
-                    val gpVal = actor.asDynamic().system?.resources?.coins?.gp.unsafeCast<Double?>() ?: 0.0
-                    val newGp = gpVal + shipment.goldCost
-                    actor.update(js("{ 'system.resources.coins.gp': newGp }")).await()
+                    // Refund into the PF2e inventory (see dispatch note on the gold path).
+                    val refundGp = kotlin.math.ceil(shipment.goldCost).toInt().coerceAtLeast(0)
+                    val refundCoins = js("{}")
+                    refundCoins.gp = refundGp
+                    actor.asDynamic().inventory.addCoins(refundCoins).unsafeCast<kotlin.js.Promise<*>>().await()
 
                     current.shipments = (current.shipments ?: emptyArray()).filter { it.id != id }.toTypedArray()
                     actor.setKingdom(current)
@@ -2193,6 +2306,8 @@ class KingdomSheet(
     ): Promise<KingdomSheetContext> = buildPromise {
         val parent = super._preparePartContext(partId, context, options).await()
         val kingdom = getKingdom()
+        val isGM = game.user.isGM
+        val ownedRoles = getOwnedLeaderRoles(game, kingdom)
         
         // Merge manual quests and generated campaign quests
         val manualQuests = kingdom.quests ?: emptyArray()
@@ -2280,14 +2395,29 @@ class KingdomSheet(
         } else {
             calculateInvestedBonus(kingdom.level, leaderActors)
         }
+        val expressionContext = kingdom.createSimpleContext(settlements)
+        val modifiers = kingdom.createModifiers(settlements)
         val consumption = calculateConsumption(
             settlements = settlements.allSettlements,
             realmData = realm,
             armyConsumption = kingdom.consumption.armies,
             now = kingdom.consumption.now,
-            expressionContext = kingdom.createSimpleContext(settlements),
-            modifiers = kingdom.createModifiers(settlements),
+            expressionContext = expressionContext,
+            modifiers = modifiers,
         )
+        val automateResources = kingdom.settings.automateResources != AutomateResources.MANUAL.value
+        val projected = if (automateResources) {
+            calculateProjectedResources(
+                kingdomData = kingdom,
+                realmData = realm,
+                chosenFeats = chosenFeats,
+                settlements = settlements.allSettlements,
+                expressionContext = expressionContext,
+                modifiers = modifiers,
+            )
+        } else {
+            null
+        }
         val kingdomNameInput = TextInput(
             name = "name",
             label = t("applications.kingdom"),
@@ -2296,6 +2426,7 @@ class KingdomSheet(
             labelClasses = listOf("km-slim-inputs"),
             required = false,
             stacked = false,
+            readonly = !isGM,
         )
         val settlementInput = Select(
             name = "activeSettlement",
@@ -2304,6 +2435,7 @@ class KingdomSheet(
             options = settlements.allSettlements.map { SelectOption(it.name, it.id) },
             required = false,
             labelClasses = listOf("km-slim-inputs"),
+            disabled = !isGM,
         )
         val xpInput = NumberInput(
             name = "xp",
@@ -2312,6 +2444,7 @@ class KingdomSheet(
             elementClasses = listOf("km-width-small", "km-slim-inputs"),
             value = kingdom.xp,
             stacked = false,
+            readonly = !isGM,
         )
         val xpThresholdInput = NumberInput(
             name = "xpThreshold",
@@ -2320,6 +2453,7 @@ class KingdomSheet(
             elementClasses = listOf("km-width-small", "km-slim-inputs"),
             value = kingdom.xpThreshold,
             stacked = false,
+            readonly = !isGM,
         )
         val levelInput = Select.range(
             name = "level",
@@ -2330,11 +2464,13 @@ class KingdomSheet(
             from = 1,
             to = 20,
             stacked = false,
+            disabled = !isGM,
         )
         val atWarInput = CheckboxInput(
             name = "atWar",
             value = kingdom.atWar,
-            label = t("kingdom.atWar")
+            label = t("kingdom.atWar"),
+            disabled = !isGM,
         )
         val anarchyAt = calculateAnarchy(chosenFeats)
         val unrestInput = Select.range(
@@ -2346,6 +2482,7 @@ class KingdomSheet(
             stacked = false,
             elementClasses = listOf("km-width-small"),
             labelClasses = listOf("km-slim-inputs"),
+            disabled = !isGM,
         )
         val sizeInput = if (kingdom.settings.automateResources == AutomateResources.MANUAL.value) {
             NumberInput(
@@ -2355,6 +2492,7 @@ class KingdomSheet(
                 elementClasses = listOf("km-slim-inputs", "km-width-small"),
                 hideLabel = true,
                 stacked = false,
+                readonly = !isGM,
             )
         } else {
             HiddenInput(
@@ -2370,6 +2508,7 @@ class KingdomSheet(
             stacked = false,
             elementClasses = listOf("km-width-small"),
             labelClasses = listOf("km-slim-inputs"),
+            readonly = !isGM,
         )
         val creativeSolutionsInput = NumberInput(
             name = "creativeSolutions",
@@ -2378,6 +2517,7 @@ class KingdomSheet(
             stacked = false,
             elementClasses = listOf("km-width-small"),
             labelClasses = listOf("km-slim-inputs"),
+            readonly = !isGM,
         )
         val bonusResourceDiceInput = NumberInput(
             name = "bonusResourceDice",
@@ -2386,6 +2526,7 @@ class KingdomSheet(
             stacked = false,
             elementClasses = listOf("km-width-small"),
             labelClasses = listOf("km-slim-inputs"),
+            readonly = !isGM,
         )
         val unrestPenalty = calculateUnrestPenalty(kingdom.unrest)
         val feats = kingdom.getFeats()
@@ -2480,8 +2621,6 @@ class KingdomSheet(
             chosenGovernment = government,
             chosenFeatures = chosenFeatures,
         )
-        val automateResources = kingdom.settings.automateResources != AutomateResources.MANUAL.value
-        val isGM = game.user.isGM
         val cooldowns = kingdom.councilCooldowns ?: RawCouncilCooldowns(0, 0, 0, 0)
         val canAudit = kingdom.settings.enableCouncilMissions &&
                 !vacancies.resolveVacancy(Leader.TREASURER) &&
@@ -2516,12 +2655,19 @@ class KingdomSheet(
             (it.asDynamic().status as? String) == "active"
         }.size
         val questTimerChanges = emptyArray<Any>()
-        val activeLeaderContext = Select.fromEnum<Leader>(
+        val activeLeaderOptions = if (isGM) {
+            Leader.entries.map { SelectOption(t(it), it.value) }
+        } else {
+            ownedRoles.map { SelectOption(t(it), it.value) }
+        }
+        val activeLeaderContext = Select(
             name = "activeLeader",
             label = t("kingdom.activeLeader"),
             required = false,
-            value = game.getActiveLeader(),
+            value = game.getActiveLeader()?.value,
+            options = activeLeaderOptions,
             labelClasses = listOf("km-slim-inputs"),
+            disabled = !isGM && ownedRoles.isEmpty(),
         ).toContext()
         val activeSettlementType = settlements.current?.size?.type?.value ?: "none"
         val background = game.settings.pfrpg2eKingdomCampingWeather.resolveKingdomBackground(activeSettlementType)
@@ -2644,7 +2790,7 @@ class KingdomSheet(
                     government = kingdom.government,
                 )
             ),
-            commoditiesContext = kingdom.commodities.toContext(storage),
+            commoditiesContext = kingdom.commodities.toContext(storage, automateResources, projected),
             worksitesContext = kingdom.workSites.toContext(realm.worksites, automateResources),
             unclaimedWorksites = game.getUnclaimedWorksites(kingdom)
                 .map {
@@ -2660,7 +2806,7 @@ class KingdomSheet(
             size = realm.size,
             kingdomSize = t(realm.sizeInfo.type),
             resourcePointsContext = kingdom.resourcePoints.toContext("resourcePoints", t("kingdom.resourcePoints")),
-            resourceDiceContext = kingdom.resourceDice.toContext("resourceDice", t("kingdom.resourceDice")),
+            resourceDiceContext = kingdom.resourceDice.toContext("resourceDice", t("kingdom.resourceDice"), automate = automateResources, projectedValue = if (automateResources) resourceDiceNum else null),
             consumptionContext = kingdom.consumption.toContext(kingdom.settings.autoCalculateArmyConsumption),
             supernaturalSolutionsInput = supernaturalSolutionsInput.toContext(),
             creativeSolutionsInput = creativeSolutionsInput.toContext(),
@@ -2938,6 +3084,11 @@ class KingdomSheet(
 
     override fun onParsedSubmit(value: KingdomSheetData): Promise<Void> = buildPromise {
         if (isFormValid) {
+            if (!game.user.isGM) {
+                game.settings.pfrpg2eKingdomCampingWeather.setKingdomActiveLeader(value.activeLeader)
+                render()
+                return@buildPromise null
+            }
             val previousKingdom = getKingdom()
             val kingdom = deepClone(previousKingdom)
             kingdom.name = value.name
@@ -2975,6 +3126,33 @@ class KingdomSheet(
             kingdom.milestones = value.milestones
             kingdom.notes = value.notes
             kingdom.initialProficiencies = value.initialProficiencies
+
+            val automateResources = kingdom.settings.automateResources != AutomateResources.MANUAL.value
+            if (automateResources) {
+                val realm = game.getRealmData(actor, kingdom)
+                val settlements = kingdom.getAllSettlements(game)
+                val allFeatures = kingdom.getExplodedFeatures()
+                val chosenFeatures = kingdom.getChosenFeatures(allFeatures)
+                val chosenFeats = kingdom.getChosenFeats(chosenFeatures)
+                val expressionContext = kingdom.createSimpleContext(settlements)
+                val modifiers = kingdom.createModifiers(settlements)
+
+                val projected = calculateProjectedResources(
+                    kingdomData = kingdom,
+                    realmData = realm,
+                    chosenFeats = chosenFeats,
+                    settlements = settlements.allSettlements,
+                    expressionContext = expressionContext,
+                    modifiers = modifiers,
+                )
+                kingdom.commodities.next.ore = projected.ore
+                kingdom.commodities.next.stone = projected.stone
+                kingdom.commodities.next.lumber = projected.lumber
+                kingdom.commodities.next.luxuries = projected.luxuries
+                kingdom.commodities.next.food = 0
+                kingdom.resourceDice.next = projected.resourceDice
+            }
+
             beforeKingdomUpdate(previousKingdom, kingdom)
             actor.setKingdom(kingdom)
             // custom handling for values, that don't persist data on the document and therefore don't

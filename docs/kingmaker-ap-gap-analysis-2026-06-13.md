@@ -91,9 +91,9 @@ they are tracked in [`feature-roadmap.md`](feature-roadmap.md) under "New backlo
 
 1. **Faction & diplomacy relations tracker** — plan written: `docs/plans/2026-06-13-faction-diplomacy-relations-tracker.md`.
 2. **Campaign analytics / trends dashboard** — plan written: `docs/plans/2026-06-13-campaign-analytics-trends-dashboard.md`.
-3. Calendar-module integration (Simple Calendar / Seasons & Stars).
-4. Commodity market & trade-route / caravan economy.
-5. Player-facing collaborative kingdom view.
+3. Calendar-module integration (Seasons & Stars).
+4. **Commodity market & trade-route / caravan economy** — Plan written: `docs/plans/2026-06-16-commodity-market-caravan-economy.md`.
+5. **Player-facing collaborative kingdom view** — Implemented on `kingmaker.5`.
 
 ---
 

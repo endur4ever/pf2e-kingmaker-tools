@@ -148,6 +148,7 @@ external interface KingdomSettings {
     var vkCharterExtraSkills: Boolean?
     var vkHeartlandExtraSkills: Boolean?
     var vkExtraAbilityBoost: Boolean?
+    var enableCalendarMonthEndTurn: Boolean?
 }
 
 @JsPlainObject

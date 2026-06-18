@@ -45,6 +45,16 @@ private fun shipment(
 class CaravanShipmentTest {
 
     @Test
+    fun caravanBulkCapacityByType() {
+        assertEquals(20, caravanBulkCapacity("light"))
+        assertEquals(60, caravanBulkCapacity("medium"))
+        assertEquals(150, caravanBulkCapacity("heavy"))
+        // unknown / unset types fall back to the medium capacity
+        assertEquals(60, caravanBulkCapacity("unknown"))
+        assertEquals(60, caravanBulkCapacity(""))
+    }
+
+    @Test
     fun parseBulkMapsValuesCorrectly() {
         assertEquals(0.1, parseBulk("L"))
         assertEquals(0.1, parseBulk("l"))

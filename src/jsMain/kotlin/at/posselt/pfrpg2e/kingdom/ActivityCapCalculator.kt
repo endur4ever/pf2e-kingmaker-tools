@@ -18,26 +18,25 @@ data class ActivityCap(
 )
 
 /**
- * Counts the distinct PCs holding a non-vacant leadership role. RAW: "each PC in a leadership role
- * may attempt up to 2 (or 3) Leadership activities" — so the cap scales with the number of PC
- * leaders, not a flat number. Only PCs count (NPC leaders cannot perform kingdom activities). A PC
- * assigned to two roles is counted once (deduped by actor uuid); a non-vacant PC role with no actor
- * linked still counts as one leader, matching the "Vacant Positions" UI where the GM declares which
- * roles are filled.
+ * Counts the filled PC leadership roles. RAW: "each PC in a leadership role may attempt up to 2 (or
+ * 3) Leadership activities" — so the cap scales with the number of PC leadership seats, not a flat
+ * number. Each of the eight leadership roles is counted on its own: a full council of PCs is 8
+ * leaders, and one PC holding two roles contributes two leaders' worth of activities (the second
+ * seat is a second post that can act). Only PC-typed roles count (NPC leaders use a separate, much
+ * smaller allotment), and vacant seats are skipped. A non-vacant PC role with no actor linked still
+ * counts as one leader, matching the "Vacant Positions" UI where the GM declares which roles are
+ * filled.
  */
 fun countPcLeaders(kingdom: KingdomData): Int {
     val leaders = kingdom.asDynamic().leaders
     if (leaders == null) return 0
-    val pcRoles = arrayOf(
+    return arrayOf(
         "ruler", "counselor", "emissary", "general", "magister", "treasurer", "viceroy", "warden",
     )
         .map { leaders[it] }
         .filter { it != null }
         .map { it.unsafeCast<RawLeaderValues>() }
-        .filter { it.type == LeaderType.PC.value && it.vacant != true }
-    val distinctAssigned = pcRoles.mapNotNull { it.uuid }.toSet().size
-    val unassigned = pcRoles.count { it.uuid == null }
-    return distinctAssigned + unassigned
+        .count { it.type == LeaderType.PC.value && it.vacant != true }
 }
 
 object ActivityCapCalculator {

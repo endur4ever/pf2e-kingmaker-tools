@@ -118,3 +118,116 @@ data class UrbanGrid(
 	val totalPavedLots: Int
 		get() = blocks.sumOf { it.pavedCount }
 }
+
+fun resolveUrbanGrid(
+	edges: SettlementEdges,
+	pavedStreets: Boolean,
+	magicalStreetlamps: Boolean = false,
+	sewerSystem: Boolean = false,
+): UrbanGrid {
+	val defaultTerrain = if (pavedStreets) BlockTerrain.PAVED else BlockTerrain.UNPAVED
+
+	// Helper to resolve a lot based on edge terrain rules:
+	// Water -> Bridge -> Stone Wall -> Wood Wall -> Land
+	fun resolveLot(
+		hasWater: Boolean,
+		hasBridge: Boolean,
+		hasStoneWall: Boolean,
+		hasWoodWall: Boolean,
+		allowBridge: Boolean,
+		allowWall: Boolean,
+		fallback: BlockTerrain
+	): BlockTerrain {
+		return when {
+			hasWater -> if (allowBridge && hasBridge) BlockTerrain.BRIDGE else BlockTerrain.WATER
+			allowBridge && hasBridge -> BlockTerrain.BRIDGE
+			allowWall && hasStoneWall -> BlockTerrain.STONE_WALL
+			allowWall && hasWoodWall -> BlockTerrain.WOOD_WALL
+			else -> fallback
+		}
+	}
+
+	// Resolve Block A (corner N+W)
+	val blockA = BlockGrid(
+		topLeft = resolveLot(edges.west.hasWater, edges.west.hasBridge, edges.west.hasStoneWall, edges.west.hasWoodWall, allowBridge = false, allowWall = false, fallback = BlockTerrain.LAND),
+		topRight = resolveLot(edges.north.hasWater, edges.north.hasBridge, edges.north.hasStoneWall, edges.north.hasWoodWall, allowBridge = false, allowWall = false, fallback = BlockTerrain.LAND),
+		bottomLeft = resolveLot(edges.west.hasWater, edges.west.hasBridge, edges.west.hasStoneWall, edges.west.hasWoodWall, allowBridge = false, allowWall = true, fallback = BlockTerrain.LAND),
+		bottomRight = resolveLot(edges.north.hasWater, edges.north.hasBridge, edges.north.hasStoneWall, edges.north.hasWoodWall, allowBridge = false, allowWall = true, fallback = BlockTerrain.LAND)
+	)
+
+	// Resolve Block B (edge North)
+	val blockB = BlockGrid(
+		topLeft = resolveLot(edges.north.hasWater, edges.north.hasBridge, edges.north.hasStoneWall, edges.north.hasWoodWall, allowBridge = true, allowWall = false, fallback = BlockTerrain.LAND),
+		topRight = resolveLot(edges.north.hasWater, edges.north.hasBridge, edges.north.hasStoneWall, edges.north.hasWoodWall, allowBridge = false, allowWall = false, fallback = BlockTerrain.LAND),
+		bottomLeft = resolveLot(edges.north.hasWater, edges.north.hasBridge, edges.north.hasStoneWall, edges.north.hasWoodWall, allowBridge = true, allowWall = true, fallback = BlockTerrain.LAND),
+		bottomRight = resolveLot(edges.north.hasWater, edges.north.hasBridge, edges.north.hasStoneWall, edges.north.hasWoodWall, allowBridge = false, allowWall = true, fallback = BlockTerrain.LAND)
+	)
+
+	// Resolve Block C (corner N+E)
+	val blockC = BlockGrid(
+		topLeft = resolveLot(edges.north.hasWater, edges.north.hasBridge, edges.north.hasStoneWall, edges.north.hasWoodWall, allowBridge = false, allowWall = false, fallback = BlockTerrain.LAND),
+		topRight = resolveLot(edges.east.hasWater, edges.east.hasBridge, edges.east.hasStoneWall, edges.east.hasWoodWall, allowBridge = false, allowWall = false, fallback = BlockTerrain.LAND),
+		bottomLeft = resolveLot(edges.north.hasWater, edges.north.hasBridge, edges.north.hasStoneWall, edges.north.hasWoodWall, allowBridge = false, allowWall = true, fallback = BlockTerrain.LAND),
+		bottomRight = resolveLot(edges.east.hasWater, edges.east.hasBridge, edges.east.hasStoneWall, edges.east.hasWoodWall, allowBridge = false, allowWall = true, fallback = BlockTerrain.LAND)
+	)
+
+	// Resolve Block D (edge West)
+	val blockD = BlockGrid(
+		topLeft = resolveLot(edges.west.hasWater, edges.west.hasBridge, edges.west.hasStoneWall, edges.west.hasWoodWall, allowBridge = false, allowWall = false, fallback = BlockTerrain.LAND),
+		topRight = resolveLot(edges.west.hasWater, edges.west.hasBridge, edges.west.hasStoneWall, edges.west.hasWoodWall, allowBridge = false, allowWall = true, fallback = BlockTerrain.LAND),
+		bottomLeft = resolveLot(edges.west.hasWater, edges.west.hasBridge, edges.west.hasStoneWall, edges.west.hasWoodWall, allowBridge = true, allowWall = false, fallback = BlockTerrain.LAND),
+		bottomRight = resolveLot(edges.west.hasWater, edges.west.hasBridge, edges.west.hasStoneWall, edges.west.hasWoodWall, allowBridge = true, allowWall = true, fallback = BlockTerrain.LAND)
+	)
+
+	// Resolve Block E (center)
+	val blockE = BlockGrid(
+		topLeft = defaultTerrain,
+		topRight = defaultTerrain,
+		bottomLeft = defaultTerrain,
+		bottomRight = defaultTerrain
+	)
+
+	// Resolve Block F (edge East)
+	val blockF = BlockGrid(
+		topLeft = resolveLot(edges.east.hasWater, edges.east.hasBridge, edges.east.hasStoneWall, edges.east.hasWoodWall, allowBridge = false, allowWall = true, fallback = BlockTerrain.LAND),
+		topRight = resolveLot(edges.east.hasWater, edges.east.hasBridge, edges.east.hasStoneWall, edges.east.hasWoodWall, allowBridge = false, allowWall = false, fallback = BlockTerrain.LAND),
+		bottomLeft = resolveLot(edges.east.hasWater, edges.east.hasBridge, edges.east.hasStoneWall, edges.east.hasWoodWall, allowBridge = true, allowWall = true, fallback = BlockTerrain.LAND),
+		bottomRight = resolveLot(edges.east.hasWater, edges.east.hasBridge, edges.east.hasStoneWall, edges.east.hasWoodWall, allowBridge = true, allowWall = false, fallback = BlockTerrain.LAND)
+	)
+
+	// Resolve Block G (corner S+W)
+	val blockG = BlockGrid(
+		topLeft = resolveLot(edges.west.hasWater, edges.west.hasBridge, edges.west.hasStoneWall, edges.west.hasWoodWall, allowBridge = false, allowWall = false, fallback = BlockTerrain.LAND),
+		topRight = resolveLot(edges.south.hasWater, edges.south.hasBridge, edges.south.hasStoneWall, edges.south.hasWoodWall, allowBridge = false, allowWall = false, fallback = BlockTerrain.LAND),
+		bottomLeft = resolveLot(edges.west.hasWater, edges.west.hasBridge, edges.west.hasStoneWall, edges.west.hasWoodWall, allowBridge = false, allowWall = true, fallback = BlockTerrain.LAND),
+		bottomRight = resolveLot(edges.south.hasWater, edges.south.hasBridge, edges.south.hasStoneWall, edges.south.hasWoodWall, allowBridge = false, allowWall = true, fallback = BlockTerrain.LAND)
+	)
+
+	// Resolve Block H (edge South)
+	val blockH = BlockGrid(
+		topLeft = resolveLot(edges.south.hasWater, edges.south.hasBridge, edges.south.hasStoneWall, edges.south.hasWoodWall, allowBridge = true, allowWall = true, fallback = BlockTerrain.LAND),
+		topRight = resolveLot(edges.south.hasWater, edges.south.hasBridge, edges.south.hasStoneWall, edges.south.hasWoodWall, allowBridge = false, allowWall = true, fallback = BlockTerrain.LAND),
+		bottomLeft = resolveLot(edges.south.hasWater, edges.south.hasBridge, edges.south.hasStoneWall, edges.south.hasWoodWall, allowBridge = true, allowWall = false, fallback = BlockTerrain.LAND),
+		bottomRight = resolveLot(edges.south.hasWater, edges.south.hasBridge, edges.south.hasStoneWall, edges.south.hasWoodWall, allowBridge = false, allowWall = false, fallback = BlockTerrain.LAND)
+	)
+
+	// Resolve Block I (corner S+E)
+	val blockI = BlockGrid(
+		topLeft = resolveLot(edges.south.hasWater, edges.south.hasBridge, edges.south.hasStoneWall, edges.south.hasWoodWall, allowBridge = false, allowWall = false, fallback = BlockTerrain.LAND),
+		topRight = resolveLot(edges.east.hasWater, edges.east.hasBridge, edges.east.hasStoneWall, edges.east.hasWoodWall, allowBridge = false, allowWall = false, fallback = BlockTerrain.LAND),
+		bottomLeft = resolveLot(edges.south.hasWater, edges.south.hasBridge, edges.south.hasStoneWall, edges.south.hasWoodWall, allowBridge = false, allowWall = true, fallback = BlockTerrain.LAND),
+		bottomRight = resolveLot(edges.east.hasWater, edges.east.hasBridge, edges.east.hasStoneWall, edges.east.hasWoodWall, allowBridge = false, allowWall = true, fallback = BlockTerrain.LAND)
+	)
+
+	return UrbanGrid(
+		blockA = blockA,
+		blockB = blockB,
+		blockC = blockC,
+		blockD = blockD,
+		blockE = blockE,
+		blockF = blockF,
+		blockG = blockG,
+		blockH = blockH,
+		blockI = blockI
+	)
+}

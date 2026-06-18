@@ -1,23 +1,17 @@
 # Kingmaker Campaign Automation Feature Roadmap
 
 Created: 2026-05-31
-Status updated: 2026-06-13
+Status updated: 2026-06-16
 Repo: `/home/grego/code/pf2e-kingmaker-tools`
 
 ## Goal
 
 Capture suggested future features for automating more of a Kingmaker campaign, including homebrew support, before any implementation starts.
 
-## Status summary (2026-06-13)
+## Status summary (2026-06-17)
 
-**All 13 features in the original backlog below are now implemented** and verified
-against the codebase and the Hermes kanban board (`~/.hermes/kanban/boards/pf2e-kingmaker-tools`).
-Each feature section is annotated with its implementing files. A large amount of
-follow-on work has also shipped beyond the original 13 — see
-[Completed beyond the original backlog](#completed-beyond-the-original-backlog).
-
-What remains open lives in [New backlog (not yet started)](#new-backlog-not-yet-started);
-there are no blocked items remaining.
+**All 13 features in the original backlog and all 5 new backlog features are now fully implemented** and verified against the codebase and the Hermes kanban board (`~/.hermes/kanban/boards/pf2e-kingmaker-tools`).
+Each feature section is annotated with its implementing files. There are no blocked or remaining items left in the backlogs.
 
 Legend: ✅ Implemented · 🟡 Partial · 🚧 In progress · 📝 Plan written · ⛔ Blocked · ⬜ Not started
 
@@ -426,20 +420,19 @@ Work that shipped in addition to the 13 features above (from the kanban board an
 Candidate features that are **not** covered by the work above. Per the planning rule,
 write a `docs/plans/` doc before implementing any of these.
 
-1. 🚧 **Faction & diplomacy relations tracker.** Extend the static trade-partner
+1. ✅ **Faction & diplomacy relations tracker.** Extended the static trade-partner
    `kingdom/data/RawGroup.kt` into a living diplomacy system: per-faction attitude/standing
    (Sootscale, Pitax, Brevoy houses, the fey, Varnhold), shifts driven by kingdom
    activities/events, treaty/trade-agreement state, and faction-driven quests/threats.
-   Ties into the army war-pressure board and the quest/event generator.
    **Plan:** [`docs/plans/2026-06-13-faction-diplomacy-relations-tracker.md`](plans/2026-06-13-faction-diplomacy-relations-tracker.md).
-   **Progress:** phases 1–3 landed on `kingmaker.5` (pure standing logic + tests, attitude
-   display in the Trade Agreements section, adjust-standing dialog); phase 4 (turn-tick drift,
-   threshold hooks, treaty UI, chat card) tracked on the board as `t_d3f6044c`.
-2. ⬜ **Calendar-module integration (Simple Calendar / Seasons & Stars).** The module
-   already advances Foundry world time and derives season for weather/camping
-   (`com/foundryvtt/core/helpers/GameTime.kt`, `utils/Time.kt`, `kingdom/DailyTickHooks.kt`).
-   Surface kingdom turns, camping days, weather, and campaign clocks on a real in-world
-   calendar; auto-derive season; advance turns from the calendar.
+   **Progress:** Implemented phases 1–4 on `kingmaker.5` (pure standing logic + tests, attitude
+   display, adjust-standing dialog, turn-tick drift, threshold GM-confirmed offers for war threats/diplomacy quests).
+ 2. ✅ **Calendar-module integration (Seasons & Stars).** Implemented on
+    `kingmaker.5` — `com/foundryvtt/core/helpers/SimpleCalendar.kt` (bindings),
+    `kingdom/CalendarLogger.kt` (logger), integrated in `Climate.kt`, `DailyTickHooks.kt`,
+    `Resting.kt`, and `TurnWizardApplication.kt` w/ settings UI in `KingdomSettings.kt` and `KingdomData.kt`.
+    Surfaces weather, kingdom turns, camping sessions, and companion arrivals on the in-world
+    Seasons & Stars calendar; auto-derives season from month; prompts GMs in chat when the month advances.
 3. ✅ **Campaign analytics / trends dashboard.** GM-only read-only **Analytics** tab
    (`MainNavEntry.ANALYTICS`) charts the recorded `RawTurnRecord` series — unrest, RP,
    consumption, fame, XP, war pressure, kingdom level/size, and all four ruin tracks — as
@@ -460,9 +453,12 @@ write a `docs/plans/` doc before implementing any of these.
    pricing with standing/treaty discounts) are supported. Follow-ups: per-settlement stockpiles
    (the kingdom currently uses a single Commodity pool, so settlement transfers are
    logistics-risk only) and a real claimed-hex route-safety modifier for the raid DC.
-5. ⬜ **Player-facing collaborative kingdom view.** Permission-filtered player view where
-   each player drives their own leadership role's activities and submits them for the turn.
-   Builds on `kingdom/Leaders.kt` + `ActivityCapCalculator.kt`.
+5. ✅ **Player-facing collaborative kingdom view.** Permission-filtered read-only sheet access for players, character-owned active leader selection gating, and roll/assurance button checks. Shipped in `KingdomSheet.kt`, `KingdomCheckDialog.kt`, `check.hbs`, and `Leaders.kt`.
+6. ⬜ **Chronological Kingdom Event Log & Gazette.** Generate a player-facing campaign journal or gazette summarizing all kingdom achievements, builds, claims, diplomatic treaties, and events (e.g. "In Turn 12, Calistril: Built a Mill, Claimed Hex 0204, signed Sylvan Alliance treaty").
+7. ⬜ **Hex-based Resource Worksite & Yield Calculator.** Integrate worksite building (Mines, Lumber Camps, Quarries) with hex content discovery to automatically calculate and project commodity storage increments and resource dice pools for each turn.
+8. ⬜ **Vassal State, Settlement Annexation, & Tribute Tracking.** Automate diplomacy-based or conquest-based integration of adjacent territories, calculating monthly tribute, unrest penalties, and structural changes on annexation.
+9. ⬜ **Caravan Route Safety Overlays & Threat Indicators.** Draw visual path safety indicators (risk levels, raid modifiers) on the scene map based on the number of claimed/cleared hexes along the active route.
+
 
 ## Decisions resolved by implementation
 

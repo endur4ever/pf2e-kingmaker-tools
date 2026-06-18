@@ -7,6 +7,10 @@ import at.posselt.pfrpg2e.utils.getAppFlag
 import at.posselt.pfrpg2e.utils.setAppFlag
 import at.posselt.pfrpg2e.utils.unsetAppFlag
 import at.posselt.pfrpg2e.utils.getRealmTileData
+import at.posselt.pfrpg2e.utils.RealmTileData
+import at.posselt.pfrpg2e.kingdom.computeCaravanRoute
+import at.posselt.pfrpg2e.kingdom.caravanRaidDc
+import at.posselt.pfrpg2e.kingdom.CARAVAN_BASE_RAID_DC
 import at.posselt.pfrpg2e.kingdom.getKingdomActors
 import at.posselt.pfrpg2e.kingdom.getKingdom
 import at.posselt.pfrpg2e.kingdom.isKingdomActor
@@ -86,6 +90,7 @@ fun registerHexGridSync(game: Game) {
             syncHexDrawingsToNativeState(game)
             syncSettlementMarkers(game)
             syncZoneLabels(game)
+            syncCaravanRoutes(game)
         }
     }
 
@@ -93,6 +98,7 @@ fun registerHexGridSync(game: Game) {
         if (actor.isKingdomActor()) {
             buildPromise {
                 syncSettlementMarkers(game)
+                syncCaravanRoutes(game)
             }
         }
     }
@@ -100,6 +106,7 @@ fun registerHexGridSync(game: Game) {
     TypedHooks.onUpdateScene { _, _, _, _ ->
         buildPromise {
             syncSettlementMarkers(game)
+            syncCaravanRoutes(game)
         }
     }
 
@@ -108,6 +115,7 @@ fun registerHexGridSync(game: Game) {
             syncHexDrawingsToNativeState(game)
             syncSettlementMarkers(game)
             syncZoneLabels(game)
+            syncCaravanRoutes(game)
         }
     }
 }
@@ -672,6 +680,182 @@ suspend fun syncZoneLabels(game: Game) {
         activeScene.createDrawingsResilient(
             arrayOf(drawingData)
         )
+    }
+}
+
+const val CARAVAN_ROUTE_DRAWING_TYPE = "caravanRoute"
+
+suspend fun syncCaravanRoutes(game: Game) {
+    if (!game.settings.pfrpg2eKingdomCampingWeather.getHexMapEnabled()) return
+    val activeScene = game.scenes.active ?: return
+    if (!activeScene.grid.isHexagonal) return
+
+    val kingdomActor = game.getKingdomActors().firstOrNull() ?: return
+    val kingdom = kingdomActor.getKingdom() ?: return
+    val caravans = (kingdom.caravans ?: emptyArray()).filter { it.status == "inTransit" }
+
+    val activeDrawings = activeScene.drawings.contents
+
+    // 1. Delete all existing caravan route drawings
+    val ours = activeDrawings.filter {
+        val data = it.getRealmTileData()
+        data?.type == CARAVAN_ROUTE_DRAWING_TYPE && data.kingdomActorUuid == kingdomActor.uuid
+    }
+    if (ours.isNotEmpty()) {
+        activeScene.deleteDrawingsResilient(ours.map { it._id }.toTypedArray())
+    }
+
+    if (caravans.isEmpty()) return
+
+    val groupsByName = kingdom.groups.associateBy { it.name }
+    val provider = KingmakerHexGridProvider()
+
+    // 2. Draw caravan routes and labels
+    for (caravan in caravans) {
+        val route = computeCaravanRoute(provider, caravan.originHexKey, caravan.destHexKey) ?: continue
+        val path = route.path
+        if (path.isEmpty()) continue
+
+        var safeCount = 0
+        val segmentDrawings = mutableListOf<com.foundryvtt.core.AnyObject>()
+
+        for (i in 0 until path.size - 1) {
+            val fromKey = path[i]
+            val toKey = path[i + 1]
+
+            val fromHex = kingmaker.region.hexes.find { it.key.toString() == fromKey } ?: continue
+            val toHex = kingmaker.region.hexes.find { it.key.toString() == toKey } ?: continue
+
+            val fromPoint = activeScene.grid.getCenterPoint(fromHex.offset)
+            val toPoint = activeScene.grid.getCenterPoint(toHex.offset)
+
+            val toHs = kingmaker.state.hexes[toKey]
+            val isToSafe = toHs?.claimed == true || toHs?.cleared == true
+
+            val fx = fromPoint.x.unsafeCast<Double>()
+            val fy = fromPoint.y.unsafeCast<Double>()
+            val tx = toPoint.x.unsafeCast<Double>()
+            val ty = toPoint.y.unsafeCast<Double>()
+            val dx = tx - fx
+            val dy = ty - fy
+            val len = sqrt(dx * dx + dy * dy)
+            if (len == 0.0) continue
+
+            val thickness = 8.0
+            val nx = -dy / len * (thickness / 2.0)
+            val ny = dx / len * (thickness / 2.0)
+
+            val c0x = fx + nx; val c0y = fy + ny
+            val c1x = tx + nx; val c1y = ty + ny
+            val c2x = tx - nx; val c2y = ty - ny
+            val c3x = fx - nx; val c3y = fy - ny
+            val originX = minOf(c0x, c1x, c2x, c3x)
+            val originY = minOf(c0y, c1y, c2y, c3y)
+            val width = maxOf(c0x, c1x, c2x, c3x) - originX
+            val height = maxOf(c0y, c1y, c2y, c3y) - originY
+            val flatPoints = arrayOf(
+                c0x - originX, c0y - originY,
+                c1x - originX, c1y - originY,
+                c2x - originX, c2y - originY,
+                c3x - originX, c3y - originY,
+            )
+
+            val strokeColor = if (isToSafe) "#2ecc71" else "#e74c3c"
+
+            val drawingData = recordOf(
+                "x" to originX,
+                "y" to originY,
+                "shape" to recordOf(
+                    "type" to "p",
+                    "width" to width,
+                    "height" to height,
+                    "points" to flatPoints,
+                ),
+                "fillType" to 0,
+                "fillAlpha" to 0.0,
+                "strokeWidth" to thickness,
+                "strokeColor" to strokeColor,
+                "strokeAlpha" to 0.8,
+                "locked" to true,
+                "flags" to recordOf(
+                    "pf2e-kingmaker-tools" to recordOf(
+                        "realmTile" to recordOf(
+                            "type" to CARAVAN_ROUTE_DRAWING_TYPE,
+                            "kingdomActorUuid" to kingdomActor.uuid,
+                            "hexKey" to caravan.id,
+                        )
+                    )
+                ),
+            ).unsafeCast<com.foundryvtt.core.AnyObject>()
+            segmentDrawings.add(drawingData)
+        }
+
+        // Calculate claimed fraction over all hexes in the path
+        for (k in path) {
+            val hs = kingmaker.state.hexes[k]
+            if (hs?.claimed == true || hs?.cleared == true) {
+                safeCount++
+            }
+        }
+        val claimedFraction = if (path.isNotEmpty()) safeCount.toDouble() / path.size else 0.0
+
+        val partner = groupsByName[caravan.partnerName]
+        val raidDc = caravanRaidDc(
+            baseDc = CARAVAN_BASE_RAID_DC,
+            partnerStanding = partner?.standing,
+            atWar = partner?.atWar == true,
+            claimedFraction = claimedFraction,
+        )
+
+        // Draw midpoint label
+        val midIndex = path.size / 2
+        val midHexKey = path[midIndex]
+        val midHex = kingmaker.region.hexes.find { it.key.toString() == midHexKey } ?: continue
+        val midPoint = activeScene.grid.getCenterPoint(midHex.offset)
+
+        val partnerDisplay = caravan.partnerName ?: caravan.destLabel
+        val labelText = "Caravan to $partnerDisplay: ${caravan.turnsRemaining}/${caravan.etaTurns} turns (Raid DC: $raidDc)"
+
+        val labelWidth = 400.0
+        val labelHeight = 45.0
+        val lx = midPoint.x.unsafeCast<Double>() - labelWidth / 2
+        val ly = midPoint.y.unsafeCast<Double>() - labelHeight / 2
+
+        val labelDrawing = recordOf(
+            "shape" to recordOf(
+                "type" to "r",
+                "width" to labelWidth,
+                "height" to labelHeight,
+            ),
+            "height" to labelHeight,
+            "width" to labelWidth,
+            "locked" to true,
+            "x" to lx,
+            "y" to ly,
+            "text" to labelText,
+            "textAlpha" to 1,
+            "fontSize" to 16,
+            "textColor" to "#FFFFFF",
+            "fillType" to 1,
+            "fillColor" to "#111111",
+            "fillAlpha" to 0.7,
+            "strokeWidth" to 2,
+            "strokeColor" to "#444444",
+            "strokeAlpha" to 1.0,
+            "flags" to recordOf(
+                "pf2e-kingmaker-tools" to recordOf(
+                    "realmTile" to recordOf(
+                        "type" to CARAVAN_ROUTE_DRAWING_TYPE,
+                        "kingdomActorUuid" to kingdomActor.uuid,
+                        "hexKey" to caravan.id,
+                    )
+                )
+            ),
+        ).unsafeCast<com.foundryvtt.core.AnyObject>()
+
+        segmentDrawings.add(labelDrawing)
+
+        activeScene.createDrawingsResilient(segmentDrawings.toTypedArray())
     }
 }
 

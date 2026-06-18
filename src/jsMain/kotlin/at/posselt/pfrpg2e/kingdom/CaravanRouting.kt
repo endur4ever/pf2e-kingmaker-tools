@@ -18,6 +18,29 @@ import kotlin.math.ceil
 /** How much route cost a caravan covers in one kingdom turn. Pacing knob; ~3 hexes per turn. */
 const val CARAVAN_COST_PER_TURN: Double = 3.0
 
+/**
+ * Extra multiplier on the shipping fee when a shipment originates from or is delivered to the party's
+ * current map position (a moving target) instead of a fixed settlement/faction hub. The convenience of
+ * a caravan chasing the party down costs a premium.
+ */
+const val CARAVAN_PARTY_SURCHARGE: Double = 1.5
+
+/**
+ * Maximum total Bulk a caravan of each size can carry in one shipment. Light caravans are fast and cheap
+ * but small; heavy caravans are slow and pricey but haul a lot. Total shipment Bulk is
+ * `parseBulk(itemBulk) * quantity`.
+ */
+const val CARAVAN_LIGHT_BULK_CAPACITY: Int = 20
+const val CARAVAN_MEDIUM_BULK_CAPACITY: Int = 60
+const val CARAVAN_HEAVY_BULK_CAPACITY: Int = 150
+
+/** Max Bulk a caravan of [caravanType] ("light"|"medium"|"heavy") can carry; unknown types use medium. */
+fun caravanBulkCapacity(caravanType: String): Int = when (caravanType) {
+    "light" -> CARAVAN_LIGHT_BULK_CAPACITY
+    "heavy" -> CARAVAN_HEAVY_BULK_CAPACITY
+    else -> CARAVAN_MEDIUM_BULK_CAPACITY
+}
+
 /** Converts a route cost into whole kingdom turns of travel (minimum 1). */
 fun caravanEtaTurns(routeCost: Double, costPerTurn: Double = CARAVAN_COST_PER_TURN): Int =
     if (routeCost <= 0.0) 1 else maxOf(1, ceil(routeCost / costPerTurn).toInt())

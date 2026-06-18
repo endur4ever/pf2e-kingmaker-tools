@@ -20,6 +20,9 @@ import at.posselt.pfrpg2e.camping.dialogs.play
 import at.posselt.pfrpg2e.camping.getActorsInCamp
 import at.posselt.pfrpg2e.camping.getAllActivities
 import at.posselt.pfrpg2e.camping.getAllRecipes
+import at.posselt.pfrpg2e.camping.groupActivities
+import at.posselt.pfrpg2e.camping.doesNotRequireACheck
+import at.posselt.pfrpg2e.camping.repetitionsOrDefault
 import at.posselt.pfrpg2e.camping.getAppliedCampingEffects
 import at.posselt.pfrpg2e.camping.getAppliedMealEffects
 import at.posselt.pfrpg2e.camping.getCampingActorsByUuid
@@ -50,6 +53,7 @@ import at.posselt.pfrpg2e.utils.postChatTemplate
 import at.posselt.pfrpg2e.utils.t
 import at.posselt.pfrpg2e.utils.typeSafeUpdate
 import at.posselt.pfrpg2e.utils.worldTimeSeconds
+import at.posselt.pfrpg2e.kingdom.logToCalendar
 import com.foundryvtt.core.AnyObject
 import com.foundryvtt.core.Game
 import com.foundryvtt.pf2e.actions.CheckDC
@@ -391,6 +395,39 @@ private suspend fun completeDailyPreparations(
     camping.dailyPrepsAtTime = game.time.worldTimeSeconds
     camping.secondsSpentTraveling = 0
     camping.secondsSpentHexploring = 0
+
+    val activitiesSummary = camping.groupActivities()
+        .filter { it.result.actorUuid != null }
+        .map { activity ->
+            val actorName = activity.result.actorUuid?.let { uuid ->
+                actors.find { it.uuid == uuid }?.name ?: uuid
+            } ?: "Unknown"
+            val activityName = t(activity.data.name)
+            val outcome = activity.result.result?.let { res ->
+                val degree = fromCamelCase<DegreeOfSuccess>(res)
+                if (degree != null) t(degree) else res
+            } ?: if (activity.data.doesNotRequireACheck()) {
+                val reps = activity.result.repetitionsOrDefault()
+                "Performed (repetitions: $reps)"
+            } else {
+                "Assigned"
+            }
+            "- $activityName ($actorName): $outcome"
+        }
+        .joinToString("\n")
+
+    val summaryContent = buildString {
+        append("Camping session completed.\n\n")
+        if (activitiesSummary.isNotEmpty()) {
+            append("Activities:\n")
+            append(activitiesSummary)
+            append("\n\n")
+        }
+        append("Daily preparations completed. Healing applied.")
+    }
+
+    logToCalendar(title = "Camp Rest Completed", content = summaryContent)
+
     Object.values(camping.campingActivities).forEach { it.result = null }
     Object.values(camping.cooking.results).forEach { it.result = null }
     camping.resetDowntimeHours()

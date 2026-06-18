@@ -42,6 +42,7 @@ import at.posselt.pfrpg2e.kingdom.getAllActivities
 import at.posselt.pfrpg2e.kingdom.getAllSettlements
 import at.posselt.pfrpg2e.kingdom.getExplodedFeatures
 import at.posselt.pfrpg2e.kingdom.getKingdom
+import at.posselt.pfrpg2e.kingdom.getOwnedLeaderRoles
 import at.posselt.pfrpg2e.kingdom.getRealmData
 import at.posselt.pfrpg2e.kingdom.hasAssurance
 import at.posselt.pfrpg2e.kingdom.increasedSkills
@@ -185,6 +186,7 @@ external interface CheckContext : ValidatedHandlebarsContext {
     val rollTwiceKeepLowest: Boolean
     val supernaturalSolutionDisabled: Boolean
     val notes: String
+    val rollDisabled: Boolean
 }
 
 @JsPlainObject
@@ -294,6 +296,7 @@ external interface SerializedDegree {
 }
 
 private class KingdomCheckDialog(
+    private val game: Game,
     private val kingdomActor: KingdomActor,
     private val kingdom: KingdomData,
     private var baseModifiers: List<Modifier>,
@@ -355,9 +358,11 @@ private class KingdomCheckDialog(
     override fun _onClickAction(event: PointerEvent, target: HTMLElement) {
         when (target.dataset["action"]) {
             "assurance" -> {
-                val modifier = target.dataset["modifier"]?.toInt() ?: 0
-                val pills = arrayOf("${t("kingdom.assurance")} $modifier")
                 buildPromise {
+                    val ownedRoles = getOwnedLeaderRoles(game, kingdom)
+                    if (!game.user.isGM && ownedRoles.isEmpty()) return@buildPromise null
+                    val modifier = target.dataset["modifier"]?.toInt() ?: 0
+                    val pills = arrayOf("${t("kingdom.assurance")} $modifier")
                     roll(
                         modifier = modifier,
                         pills = pills,
@@ -379,6 +384,8 @@ private class KingdomCheckDialog(
 
             "roll" -> {
                 buildPromise {
+                    val ownedRoles = getOwnedLeaderRoles(game, kingdom)
+                    if (!game.user.isGM && ownedRoles.isEmpty()) return@buildPromise null
                     val rollTwiceKeepHighest = target.dataset["rollTwiceKeepHighest"] == "true"
                     val rollTwiceKeepLowest = target.dataset["rollTwiceKeepLowest"] == "true"
                     val fortune = target.dataset["fortune"] == "true"
@@ -498,6 +505,7 @@ private class KingdomCheckDialog(
         )
         if (data.supernaturalSolution && !data.assurance) {
             KingdomCheckDialog(
+                game = game,
                 kingdomActor = kingdomActor,
                 kingdom = kingdom,
                 baseModifiers = baseModifiers,
@@ -534,6 +542,17 @@ private class KingdomCheckDialog(
         options: HandlebarsRenderOptions
     ): Promise<CheckContext> = buildPromise {
         val parent = super._preparePartContext(partId, context, options).await()
+        val isGM = game.user.isGM
+        val ownedRoles = getOwnedLeaderRoles(game, kingdom)
+        if (!isGM) {
+            val currentLeader = Leader.fromString(data.leader)
+            if (currentLeader !in ownedRoles) {
+                val fallback = ownedRoles.firstOrNull()
+                if (fallback != null) {
+                    data.leader = fallback.value
+                }
+            }
+        }
         val currentlyEnabledModIds = data.modifiers.filter { it.enabled }.map { it.id }.toSet()
         val enabledModifiers = baseModifiers.map { it.copy(enabled = it.id in currentlyEnabledModIds) }
         val phase = data.phase?.let { fromCamelCase<KingdomPhase>(it) }
@@ -606,9 +625,16 @@ private class KingdomCheckDialog(
         CheckContext(
             partId = parent.partId,
             isFormValid = isFormValid,
-            leaderInput = Select.fromEnum<Leader>(
+            leaderInput = Select(
                 name = "leader",
-                value = fromCamelCase<Leader>(data.leader),
+                label = t("enums.leader"),
+                value = fromCamelCase<Leader>(data.leader)?.value,
+                options = if (isGM) {
+                    Leader.entries.map { SelectOption(t(it), it.value) }
+                } else {
+                    ownedRoles.map { SelectOption(t(it), it.value) }
+                },
+                disabled = !isGM && ownedRoles.isEmpty()
             ).toContext(),
             rollModeInput = Select.fromEnum<RollMode>(
                 name = "rollMode",
@@ -723,6 +749,7 @@ private class KingdomCheckDialog(
             notes = notes,
             freeAndFairPills = freeAndFairPills,
             modifierWithoutFreeAndFair = freeAndFairModifiers.total,
+            rollDisabled = !isGM && ownedRoles.isEmpty(),
         )
     }
 
@@ -972,6 +999,7 @@ suspend fun kingdomCheckDialog(
         emptyList()
     }
     KingdomCheckDialog(
+        game = game,
         params = params,
         afterRoll = afterRoll,
         kingdomActor = kingdomActor,

@@ -11,8 +11,10 @@ import at.posselt.pfrpg2e.app.forms.Select
 import at.posselt.pfrpg2e.app.forms.SelectOption
 import at.posselt.pfrpg2e.app.forms.TextInput
 import at.posselt.pfrpg2e.app.forms.formContext
+import at.posselt.pfrpg2e.kingdom.caravanBulkCapacity
 import at.posselt.pfrpg2e.utils.buildPromise
 import at.posselt.pfrpg2e.utils.t
+import js.objects.recordOf
 import com.foundryvtt.core.AnyObject
 import com.foundryvtt.core.abstract.DataModel
 import com.foundryvtt.core.abstract.DocumentConstructionContext
@@ -36,6 +38,8 @@ external interface CaravanShipmentFormData {
     var itemPriceGp: Double
     var originHexKey: String
     var destHexKey: String
+    var originCustomHex: String?
+    var destCustomHex: String?
     var caravanType: String
     var isPurchase: Boolean
 }
@@ -55,6 +59,8 @@ class CaravanShipmentDataModel(
             double("itemPriceGp")
             string("originHexKey")
             string("destHexKey")
+            string("originCustomHex", nullable = true)
+            string("destCustomHex", nullable = true)
             string("caravanType")
             boolean("isPurchase")
         }
@@ -65,7 +71,7 @@ class CaravanShipmentDataModel(
 external interface CaravanShipmentFormContext : ValidatedHandlebarsContext, SectionsContext
 
 class CaravanShipmentDialog(
-    private val settlements: List<CaravanHexOption>,
+    private val locations: List<CaravanHexOption>,
     private val onSave: (CaravanShipmentFormData) -> Unit,
 ) : FormApp<CaravanShipmentFormContext, CaravanShipmentFormData>(
     title = t("kingdom.caravans.shipmentTitle"),
@@ -80,8 +86,10 @@ class CaravanShipmentDialog(
         itemLevel = 1,
         itemBulk = "1",
         itemPriceGp = 0.0,
-        originHexKey = settlements.firstOrNull()?.hexKey ?: "",
-        destHexKey = settlements.getOrNull(1)?.hexKey ?: settlements.firstOrNull()?.hexKey ?: "",
+        originHexKey = locations.firstOrNull()?.hexKey ?: "",
+        destHexKey = locations.getOrNull(1)?.hexKey ?: locations.firstOrNull()?.hexKey ?: "",
+        originCustomHex = "",
+        destCustomHex = "",
         caravanType = "medium",
         isPurchase = true,
     )
@@ -140,14 +148,30 @@ class CaravanShipmentDialog(
                             name = "originHexKey",
                             label = t("kingdom.caravans.origin"),
                             value = data.originHexKey,
-                            options = settlements.map { SelectOption(it.label, it.hexKey) },
+                            options = locations.map { SelectOption(it.label, it.hexKey) },
+                            stacked = false,
+                        ),
+                        TextInput(
+                            name = "originCustomHex",
+                            label = t("kingdom.caravans.originCustomHex"),
+                            value = data.originCustomHex ?: "",
+                            required = false,
+                            help = t("kingdom.caravans.customHexHelp"),
                             stacked = false,
                         ),
                         Select(
                             name = "destHexKey",
                             label = t("kingdom.caravans.destination"),
                             value = data.destHexKey,
-                            options = settlements.map { SelectOption(it.label, it.hexKey) },
+                            options = locations.map { SelectOption(it.label, it.hexKey) },
+                            stacked = false,
+                        ),
+                        TextInput(
+                            name = "destCustomHex",
+                            label = t("kingdom.caravans.destCustomHex"),
+                            value = data.destCustomHex ?: "",
+                            required = false,
+                            help = t("kingdom.caravans.customHexHelp"),
                             stacked = false,
                         ),
                         Select(
@@ -155,10 +179,18 @@ class CaravanShipmentDialog(
                             label = t("kingdom.caravans.caravanType"),
                             value = data.caravanType,
                             options = listOf(
-                                SelectOption(t("kingdom.caravans.typeLight"), "light"),
-                                SelectOption(t("kingdom.caravans.typeMedium"), "medium"),
-                                SelectOption(t("kingdom.caravans.typeHeavy"), "heavy"),
-                            ),
+                                "light" to "kingdom.caravans.typeLight",
+                                "medium" to "kingdom.caravans.typeMedium",
+                                "heavy" to "kingdom.caravans.typeHeavy",
+                            ).map { (type, nameKey) ->
+                                SelectOption(
+                                    t(
+                                        "kingdom.caravans.typeWithCapacity",
+                                        recordOf("type" to t(nameKey), "bulk" to caravanBulkCapacity(type).toString()),
+                                    ),
+                                    type,
+                                )
+                            },
                             stacked = false,
                         ),
                     )
@@ -177,10 +209,20 @@ class CaravanShipmentDialog(
             "km-save" -> {
                 if (data.itemName.isBlank()) return
                 if (data.itemQuantity <= 0) return
-                if (data.originHexKey == data.destHexKey) {
+                // A non-blank custom hex overrides the dropdown, so origin/destination can be any
+                // realm-map hex — a settlement, a trade-partner faction, or a free-form location.
+                val originHex = data.originCustomHex?.trim()?.ifBlank { null } ?: data.originHexKey
+                val destHex = data.destCustomHex?.trim()?.ifBlank { null } ?: data.destHexKey
+                if (originHex.isBlank() || destHex.isBlank()) {
+                    ui.notifications.warn(t("kingdom.caravans.pickOriginDest"))
+                    return
+                }
+                if (originHex == destHex) {
                     ui.notifications.warn(t("kingdom.caravans.sameOriginDest"))
                     return
                 }
+                data.originHexKey = originHex
+                data.destHexKey = destHex
                 close()
                 onSave(data)
             }

@@ -3,6 +3,7 @@ package at.posselt.pfrpg2e.camping
 import at.posselt.pfrpg2e.actor.isKingmakerInstalled
 import at.posselt.pfrpg2e.utils.buildPromise
 import at.posselt.pfrpg2e.utils.isFirstGM
+import at.posselt.pfrpg2e.settings.Pfrpg2eKingdomCampingWeatherSettings
 import com.foundryvtt.core.Game
 import com.foundryvtt.core.documents.TokenDocument
 import com.foundryvtt.core.documents.onMoveToken
@@ -15,15 +16,25 @@ import kotlinx.js.JsPlainObject
 import kotlin.js.Promise
 import kotlin.math.abs
 
+private fun Game.isCampaignMapScene(sceneId: String?): Boolean {
+    if (sceneId == null) return false
+    val configuredIds = Pfrpg2eKingdomCampingWeatherSettings.getCampaignMapSceneIds()
+        .split(",")
+        .map { it.trim() }
+        .filter { it.isNotEmpty() }
+        .toSet()
+    return sceneId in configuredIds
+}
+
 fun registerCampingTokenMove(game: Game) {
     if (game.isFirstGM() && game.isKingmakerInstalled) {
         TypedHooks.onMoveToken { document, changed, _, _ ->
             val actor = document.actor
-            val hexScene = game.scenes.get(stolenLandsId)
-            if (actor is PF2EParty && hexScene != null && game.scenes.current?.id == stolenLandsId) {
+            val scene = document.scene
+            if (actor is PF2EParty && game.isCampaignMapScene(scene.id)) {
                 actor.getCamping()?.let { camping ->
                     val point = Point(x = changed.destination.x, y = changed.destination.y)
-                    val offset = hexScene.grid.getOffset(point)
+                    val offset = scene.grid.getOffset(point)
                     val abbreviatedZone = findKingmakerHexRegion(offset)
                     val zoneNames = kingmakerRegions[abbreviatedZone].orEmpty()
                     camping.regionSettings.regions
@@ -72,8 +83,6 @@ private fun findKingmakerHexRegion(offset: GridOffset2D): String? {
         ?.zone
         ?.id
 }
-
-private const val stolenLandsId = "AJ1k5II28u72JOmz"
 
 /**
  * A Kingmaker map zone.
