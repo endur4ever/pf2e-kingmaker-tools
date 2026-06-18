@@ -980,14 +980,26 @@ class KingdomSheet(
                 if (group != null) {
                     if (confirm(t("kingdom.annexConfirm", recordOf("name" to group.name)))) {
                         val hexKey = group.hexKey
-                        if (!hexKey.isNullOrBlank()) {
-                            if (game.modules.get("pf2e-kingmaker")?.active == true) {
-                                val updateData = js("{}")
-                                updateData["hexes.$hexKey.claimed"] = true
-                                updateData["hexes.$hexKey.explored"] = true
-                                updateData["hexes.$hexKey.cleared"] = true
-                                val promise = com.foundryvtt.kingmaker.kingmaker.state.asDynamic().update(updateData) as? Promise<*>
-                                promise?.await()
+                        if (!hexKey.isNullOrBlank() && game.modules.get("pf2e-kingmaker")?.active == true) {
+                            // Claim the vassal's trade-hub hex on the realm map. The Kingmaker
+                            // module's state is a DataModel persisted to a world setting, so we
+                            // mutate it via updateSource(...) + save() (the same path its own hex
+                            // editor uses) — there is no Document-style .update() on it. Wrapped so
+                            // a failed/absent realm-map API never aborts the rest of the annexation.
+                            runCatching {
+                                val state = com.foundryvtt.kingmaker.kingmaker.state.asDynamic()
+                                val hexFlags = js("{}")
+                                hexFlags.claimed = true
+                                hexFlags.explored = true
+                                hexFlags.cleared = true
+                                val hexes = js("{}")
+                                hexes[hexKey] = hexFlags
+                                val changes = js("{}")
+                                changes.hexes = hexes
+                                state.updateSource(changes)
+                                (state.save() as? Promise<*>)?.await()
+                            }.onFailure {
+                                console.error("[pf2e-kmt] Failed to claim annexed hex $hexKey", it)
                             }
                         }
                         group.allianceLevel = null

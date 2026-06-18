@@ -1160,4 +1160,79 @@ class TurnTickingEngineTest {
             assertEquals(c.newValue, p.newValue)
         }
     }
+
+    // ── Vassal-state tribute (roadmap #8) ───────────────────────────────
+
+    private fun tickWithTributeGroups(
+        groups: Array<RawGroup>,
+        resourcePoints: RawResources = resourcePoints(),
+    ) = TurnTickingEngine.tick(
+        fame = fame(),
+        resourcePoints = resourcePoints,
+        resourceDice = resourcePoints(),
+        consumption = consumption(),
+        commodities = commodities(),
+        storage = storage(),
+        councilCooldowns = null,
+        modifiers = emptyArray(),
+        groups = groups,
+    )
+
+    @Test
+    fun testSingleVassalYieldsTwoTributeRp() {
+        // next (5) rolls into now and the vassal adds +2 => 7
+        val vassal = rawGroup(id = "g1", allianceLevel = "tribute")
+        val result = tickWithTributeGroups(arrayOf(vassal), resourcePoints(now = 3, next = 5))
+        assertEquals(7, result.resourcePoints.now)
+        assertEquals(0, result.resourcePoints.next)
+        val tribute = result.changes.firstOrNull { it.category == "resourcePoints" && it.field == "tribute" }
+        assertNotNull(tribute, "expected a resourcePoints/tribute change")
+        assertEquals(0, tribute!!.oldValue)
+        assertEquals(2, tribute.newValue)
+    }
+
+    @Test
+    fun testMultipleVassalsStackTribute() {
+        // two tribute vassals => +4 RP on top of next (5) => 9
+        val groups = arrayOf(
+            rawGroup(id = "g1", allianceLevel = "tribute"),
+            rawGroup(id = "g2", allianceLevel = "tribute"),
+        )
+        val result = tickWithTributeGroups(groups, resourcePoints(now = 0, next = 5))
+        assertEquals(9, result.resourcePoints.now)
+        val tribute = result.changes.first { it.category == "resourcePoints" && it.field == "tribute" }
+        assertEquals(4, tribute.newValue)
+    }
+
+    @Test
+    fun testOnlyTributeAllianceLevelYieldsTribute() {
+        // non-tribute treaties (alliance / non-aggression / none) contribute nothing
+        val groups = arrayOf(
+            rawGroup(id = "g1", allianceLevel = "tribute"),
+            rawGroup(id = "g2", allianceLevel = "alliance"),
+            rawGroup(id = "g3", allianceLevel = "non-aggression"),
+            rawGroup(id = "g4", allianceLevel = null),
+        )
+        val result = tickWithTributeGroups(groups, resourcePoints(now = 0, next = 10))
+        assertEquals(12, result.resourcePoints.now)
+        val tribute = result.changes.first { it.category == "resourcePoints" && it.field == "tribute" }
+        assertEquals(2, tribute.newValue)
+    }
+
+    @Test
+    fun testNoVassalsLeavesResourcePointsAtNormalEndTurn() {
+        // with no tribute treaties the RP simply rolls next -> now with no tribute change
+        val groups = arrayOf(rawGroup(id = "g1", allianceLevel = "alliance"))
+        val result = tickWithTributeGroups(groups, resourcePoints(now = 4, next = 6))
+        assertEquals(6, result.resourcePoints.now)
+        assertEquals(0, result.resourcePoints.next)
+        assertTrue(result.changes.none { it.category == "resourcePoints" && it.field == "tribute" })
+    }
+
+    @Test
+    fun testTributeWithEmptyGroupsLeavesRpUnchanged() {
+        val result = tickWithTributeGroups(emptyArray(), resourcePoints(now = 4, next = 6))
+        assertEquals(6, result.resourcePoints.now)
+        assertTrue(result.changes.none { it.category == "resourcePoints" && it.field == "tribute" })
+    }
 }
