@@ -65,11 +65,20 @@ suspend fun removeAllHexOverlays(game: Game) {
 }
 
 fun registerHexGridSync(game: Game) {
+    // Creating/deleting the overlay Drawing documents is a GM-only operation: Foundry restricts
+    // embedded-document writes to the GM (or document owner) and replicates the results to players,
+    // so a non-GM client attempting a sync throws "User X lacks permission to create Drawing".
+    // Players still need the pointer-event passthrough below for the GM's replicated overlays, so
+    // that hook is registered for everyone; every write-sync hook is gated behind `isGM`.
+    val isGM = game.user.isGM
+
     // When "Hex Map Enabled" is off, strip any overlays previously drawn (on load and whenever a
     // scene becomes active) so the native map works exactly like vanilla, then do nothing else.
     if (!game.settings.pfrpg2eKingdomCampingWeather.getHexMapEnabled()) {
-        buildPromise { removeAllHexOverlays(game) }
-        TypedHooks.onCanvasReady { _ -> buildPromise { removeAllHexOverlays(game) } }
+        if (isGM) {
+            buildPromise { removeAllHexOverlays(game) }
+            TypedHooks.onCanvasReady { _ -> buildPromise { removeAllHexOverlays(game) } }
+        }
         return
     }
 
@@ -84,6 +93,9 @@ fun registerHexGridSync(game: Game) {
         }
         Unit
     }
+
+    // Only the GM writes overlay Drawings; players just render the replicated documents.
+    if (!isGM) return
 
     TypedHooks.onCloseKingmakerHexEdit { _, _ ->
         buildPromise {

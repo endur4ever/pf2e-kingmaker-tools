@@ -155,6 +155,12 @@ suspend fun syncHexContentMarkers(game: Game, kingdomActor: KingdomActor) {
  * Register hooks to sync hex content markers on relevant events.
  */
 fun registerHexContentSync(game: Game) {
+    // Hex-content markers are Drawing documents written to the active scene. Embedded-document
+    // creation/deletion is GM-only in Foundry (results replicate to players automatically), so a
+    // non-GM client running this sync throws "User X lacks permission to create Drawing". Skip the
+    // write hooks entirely for players.
+    if (!game.user.isGM) return
+
     TypedHooks.onUpdateActor { actor, _, _, _ ->
         if (actor is KingdomActor) {
             buildPromise {
