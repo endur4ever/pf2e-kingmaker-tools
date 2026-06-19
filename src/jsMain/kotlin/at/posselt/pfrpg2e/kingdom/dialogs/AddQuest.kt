@@ -92,6 +92,8 @@ class AddQuest(
     debug = true,
     dataModel = QuestModel::class.js,
     id = "kmAddQuest",
+    width = 680,
+    resizable = true,
 ) {
     var data: AddQuestData = existing?.let { q ->
         AddQuestData(
