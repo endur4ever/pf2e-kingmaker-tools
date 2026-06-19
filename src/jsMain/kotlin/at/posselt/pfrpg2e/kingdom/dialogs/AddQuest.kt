@@ -4,6 +4,7 @@ import at.posselt.pfrpg2e.app.FormApp
 import at.posselt.pfrpg2e.app.HandlebarsRenderContext
 import at.posselt.pfrpg2e.app.ValidatedHandlebarsContext
 import at.posselt.pfrpg2e.app.forms.FormElementContext
+import at.posselt.pfrpg2e.app.forms.TextArea
 import at.posselt.pfrpg2e.app.forms.TextInput
 import at.posselt.pfrpg2e.app.forms.Select
 import at.posselt.pfrpg2e.app.forms.SelectOption
@@ -48,6 +49,7 @@ class QuestModel(
             int("ore")
             int("luxuries")
             string("flavorTextCompleted")
+            string("notes", nullable = true)
         }
     }
 }
@@ -68,6 +70,7 @@ external interface AddQuestData {
     val ore: Int
     val luxuries: Int
     val flavorTextCompleted: String
+    val notes: String?
     val generatedFromEvent: Boolean
     val sourceEventId: String?
     val sourceEventName: String?
@@ -106,6 +109,7 @@ class AddQuest(
             ore = q.rewards.ore ?: 0,
             luxuries = q.rewards.luxuries ?: 0,
             flavorTextCompleted = q.flavorTextCompleted,
+            notes = q.notes ?: "",
             generatedFromEvent = false,
             sourceEventId = null,
             sourceEventName = null,
@@ -127,6 +131,7 @@ class AddQuest(
         ore = 0,
         luxuries = 0,
         flavorTextCompleted = "",
+        notes = "",
         generatedFromEvent = false,
         sourceEventId = null,
         sourceEventName = null,
@@ -158,6 +163,7 @@ class AddQuest(
                         luxuries = if (data.luxuries != 0) data.luxuries else null,
                     ),
                     flavorTextCompleted = data.flavorTextCompleted,
+                    notes = data.notes?.takeIf { it.isNotBlank() },
                 )
                 buildPromise {
                     onSave(quest)
@@ -219,6 +225,14 @@ class AddQuest(
                 label = t("kingdom.quests.fields.flavorTextCompleted"),
                 stacked = false,
                 value = data.flavorTextCompleted,
+            ),
+            TextArea(
+                name = "notes",
+                label = t("kingdom.quests.fields.notes"),
+                help = t("kingdom.quests.fields.notesHelp"),
+                value = data.notes ?: "",
+                required = false,
+                elementClasses = listOf("km-quest-notes-input"),
             ),
             NumberInput(
                 name = "rp",

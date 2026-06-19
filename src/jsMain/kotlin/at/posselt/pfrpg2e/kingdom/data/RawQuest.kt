@@ -25,4 +25,5 @@ external interface RawQuest {
     var target: String?
     var rewards: RawQuestRewards
     var flavorTextCompleted: String
+    var notes: String? // freeform GM-only notes
 }

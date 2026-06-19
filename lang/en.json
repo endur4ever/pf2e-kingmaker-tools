@@ -722,6 +722,8 @@
           "target": "Target",
           "description": "Description",
           "flavorTextCompleted": "Completion Flavor Text",
+          "notes": "GM Notes",
+          "notesHelp": "Private notes visible only to the GM. Not shown to players.",
           "rp": "RP Reward",
           "xp": "XP Reward",
           "unrest": "Unrest Adjustment",

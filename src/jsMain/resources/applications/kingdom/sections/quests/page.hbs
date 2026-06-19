@@ -65,6 +65,17 @@
                         {{{description}}}
                     </div>
 
+                    {{#if ../isGM}}
+                    {{#if notes}}
+                    <div class="km-quest-notes">
+                        <div class="km-quest-notes-label">
+                            <i class="fa-solid fa-user-secret"></i> {{localizeKM "kingdom.quests.fields.notes"}}
+                        </div>
+                        <div class="km-quest-notes-body">{{notes}}</div>
+                    </div>
+                    {{/if}}
+                    {{/if}}
+
                     <div class="km-quest-rewards-container">
                         <div class="km-rewards-title">{{localizeKM "kingdom.quests.rewards"}}</div>
                         <div class="km-rewards-pills">
@@ -176,6 +187,16 @@
                         <div class="km-quest-row-flavor">
                             "{{flavorTextCompleted}}"
                         </div>
+                        {{/if}}
+                        {{#if ../isGM}}
+                        {{#if notes}}
+                        <div class="km-quest-notes km-quest-notes-compact">
+                            <div class="km-quest-notes-label">
+                                <i class="fa-solid fa-user-secret"></i> {{localizeKM "kingdom.quests.fields.notes"}}
+                            </div>
+                            <div class="km-quest-notes-body">{{notes}}</div>
+                        </div>
+                        {{/if}}
                         {{/if}}
                     </div>
                     
