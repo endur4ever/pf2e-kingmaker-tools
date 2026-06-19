@@ -1991,3 +1991,73 @@
     .km-hex-link-count { margin-right: 6px; opacity: 0.85; }
     .km-hex-no-links { opacity: 0.4; }
 }
+
+/* Linked References panel injected into the native pf2e-kingmaker hex editor */
+fieldset.km-hex-editor-links {
+    legend { font-weight: bold; }
+
+    .km-hexed-stack { flex-direction: column; align-items: stretch; }
+    .km-hexed-stack > label { margin-bottom: 4px; }
+
+    .km-hexed-quests {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        max-height: 130px;
+        overflow-y: auto;
+    }
+
+    .km-hexed-quest {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.9em;
+        cursor: pointer;
+
+        input { margin: 0; flex: 0 0 auto; }
+    }
+
+    .km-hexed-threat { width: 100%; }
+
+    .km-hexed-drop {
+        border: 2px dashed var(--color-border-light-2, rgba(120, 120, 120, 0.5));
+        border-radius: 6px;
+        padding: 8px;
+        text-align: center;
+        font-size: 0.85em;
+        opacity: 0.8;
+    }
+
+    .km-hexed-drop:hover {
+        border-color: var(--color-warm-2, #c9a227);
+        background: rgba(201, 162, 39, 0.08);
+    }
+
+    .km-hexed-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 6px;
+    }
+
+    .km-hexed-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 2px 6px;
+        border-radius: 4px;
+        background: rgba(201, 162, 39, 0.14);
+        border: 1px solid rgba(201, 162, 39, 0.35);
+        font-size: 0.85em;
+    }
+
+    .km-hexed-remove {
+        cursor: pointer;
+        font-weight: bold;
+        opacity: 0.6;
+        text-decoration: none;
+        padding: 0 2px;
+    }
+
+    .km-hexed-remove:hover { opacity: 1; color: var(--color-level-error, #c0392b); }
+}

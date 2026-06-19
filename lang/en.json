@@ -1591,6 +1591,7 @@
         "travelModifier": "Travel Modifier",
         "linkedQuestId": "Linked Quest ID",
         "linkedUuid": "Linked UUID",
+        "linkedReferences": "Linked References",
         "linkedQuests": "Linked Quests",
         "linkedDocuments": "Linked Documents",
         "linkedWarThreat": "Linked War Threat",

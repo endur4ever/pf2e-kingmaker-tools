@@ -235,6 +235,13 @@ fun main() {
             ),
         )
 
+        // Insulated registration: the big onReady block below can abort partway on some worlds
+        // (a sibling throws), which previously swallowed the last few registrations. Keep the
+        // native hex-editor link panel in its own onReady so it always wires up.
+        TypedHooks.onReady {
+            at.posselt.pfrpg2e.kingdom.map.registerHexEditorLinks(game)
+        }
+
         TypedHooks.onReady {
             buildPromise {
                 game.migratePfrpg2eKingdomCampingWeather()
