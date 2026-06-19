@@ -93,7 +93,13 @@ class AddQuest(
     dataModel = QuestModel::class.js,
     id = "kmAddQuest",
     width = 680,
+    height = 700,
     resizable = true,
+    // explicit height + scrollable content so the window can be freely resized
+    // and keeps its size across submitOnChange re-renders (instead of snapping
+    // back to content height); overflow lets a shorter window scroll.
+    scrollable = setOf(".window-content"),
+    classes = setOf("km-scroll-application"),
 ) {
     var data: AddQuestData = existing?.let { q ->
         AddQuestData(
