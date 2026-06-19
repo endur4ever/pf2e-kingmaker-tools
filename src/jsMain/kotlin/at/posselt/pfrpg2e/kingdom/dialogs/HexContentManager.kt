@@ -4,6 +4,7 @@ import at.posselt.pfrpg2e.app.FormApp
 import at.posselt.pfrpg2e.app.HandlebarsRenderContext
 import at.posselt.pfrpg2e.app.ValidatedHandlebarsContext
 import at.posselt.pfrpg2e.app.forms.*
+import at.posselt.pfrpg2e.app.toGenericRef
 import at.posselt.pfrpg2e.data.hex.HexContentType
 import at.posselt.pfrpg2e.data.hex.HexContentVisibility
 import at.posselt.pfrpg2e.kingdom.KingdomActor
@@ -11,17 +12,23 @@ import at.posselt.pfrpg2e.kingdom.getKingdom
 import at.posselt.pfrpg2e.kingdom.setKingdom
 import at.posselt.pfrpg2e.kingdom.data.RawHexContent
 import at.posselt.pfrpg2e.utils.buildPromise
+import at.posselt.pfrpg2e.utils.buildUuid
 import at.posselt.pfrpg2e.utils.t
 import com.foundryvtt.core.AnyObject
 import com.foundryvtt.core.abstract.DataModel
 import com.foundryvtt.core.abstract.DocumentConstructionContext
 import com.foundryvtt.core.applications.api.HandlebarsRenderOptions
+import com.foundryvtt.core.applications.ux.TextEditor.TextEditor
 import com.foundryvtt.core.data.dsl.buildSchema
+import com.foundryvtt.core.utils.fromUuid
 import com.foundryvtt.kingmaker.kingmaker
 import js.core.Void
+import kotlinx.browser.document
 import kotlinx.coroutines.await
 import kotlinx.js.JsPlainObject
+import org.w3c.dom.Element
 import org.w3c.dom.HTMLElement
+import org.w3c.dom.HTMLInputElement
 import org.w3c.dom.get
 import org.w3c.dom.pointerevents.PointerEvent
 import kotlin.js.Promise
@@ -41,6 +48,25 @@ external interface HexContentEntryContext {
     val visibility: String
     val visibilityName: String
     val hasGmNotes: Boolean
+    val linkedQuestCount: Int
+    val linkedDocCount: Int
+    val hasWarThreat: Boolean
+    val hasLinks: Boolean
+}
+
+// A kingdom quest the GM can toggle on/off as a hex reference.
+@JsPlainObject
+external interface HexQuestChoiceContext {
+    val id: String
+    val title: String
+    val checked: Boolean
+}
+
+// A linked Foundry document, pre-enriched into a clickable content link.
+@JsPlainObject
+external interface HexLinkedDocContext {
+    val uuid: String
+    val link: String
 }
 
 @JsPlainObject
@@ -50,6 +76,8 @@ external interface HexContentManagerContext : ValidatedHandlebarsContext {
     val hexKeyOptions: Array<SelectOption>
     val typeOptions: Array<SelectOption>
     val visibilityOptions: Array<SelectOption>
+    val linkedQuestChoices: Array<HexQuestChoiceContext>
+    val linkedDocs: Array<HexLinkedDocContext>
     val isEditing: Boolean
     val editId: String?
     val isAdding: Boolean
@@ -65,8 +93,7 @@ external interface HexContentManagerData {
     val visibility: String
     val suppressesEncounters: Boolean
     val travelModifier: Int
-    val linkedQuestId: String
-    val linkedUuid: String
+    val linkedWarThreatId: String
     val icon: String
 }
 
@@ -86,8 +113,7 @@ class HexContentManagerModel(
             string("visibility")
             boolean("suppressesEncounters")
             int("travelModifier")
-            string("linkedQuestId", nullable = true)
-            string("linkedUuid", nullable = true)
+            string("linkedWarThreatId", nullable = true)
             string("icon", nullable = true)
         }
     }
@@ -114,7 +140,88 @@ class HexContentManager(
     private var editingId: String? = null
     private var isAdding: Boolean = false
 
+    init {
+        // Accept Foundry documents dropped onto the link zone (journals, actors, scenes, items).
+        // Chips are added/removed via direct DOM updates (not a re-render) so unsaved edits to the
+        // other fields aren't lost — everything is read back from the DOM on Save.
+        on(".km-hex-drop-zone", "dragover") { event ->
+            event.asDynamic().preventDefault()
+            Unit
+        }
+        on(".km-hex-drop-zone", "drop") { event ->
+            event.asDynamic().preventDefault()
+            val raw = event.asDynamic().dataTransfer?.getData("text/plain") as? String
+            raw?.let { toGenericRef(it) }?.let { ref ->
+                buildPromise { addDroppedDoc(ref.uuid) }
+            }
+            Unit
+        }
+        on(".km-hex-link-list", "click") { event ->
+            val target = event.asDynamic().target
+            val remove = if (target != null && target != undefined) target.closest(".km-hex-link-remove") else null
+            if (remove != null && remove != undefined) {
+                event.asDynamic().preventDefault()
+                val chip = remove.closest(".km-hex-link-chip")
+                if (chip != null && chip != undefined) chip.remove()
+            }
+            Unit
+        }
+    }
+
     private fun currentKingdom() = actor.getKingdom()
+
+    // Linked quests = new array plus the legacy single id (back-compat for content saved before this).
+    private fun questIdsOf(content: RawHexContent?): Set<String> {
+        if (content == null) return emptySet()
+        val ids = (content.linkedQuestIds ?: emptyArray()).toMutableSet()
+        content.linkedQuestId?.takeIf { it.isNotBlank() }?.let { ids.add(it) }
+        return ids
+    }
+
+    private fun uuidsOf(content: RawHexContent?): List<String> {
+        if (content == null) return emptyList()
+        val uuids = (content.linkedUuids ?: emptyArray()).toMutableList()
+        content.linkedUuid?.takeIf { it.isNotBlank() && it !in uuids }?.let { uuids.add(it) }
+        return uuids
+    }
+
+    // Append a clickable link chip for a dropped document, resolving its name. No-op on duplicates.
+    private suspend fun addDroppedDoc(uuid: String) {
+        val root = element ?: return
+        val list = root.querySelector(".km-hex-link-list") ?: return
+        if (list.querySelector("[data-uuid=\"$uuid\"]") != null) return
+        val doc = fromUuid(uuid).await()
+        val name = (doc?.asDynamic()?.name as? String) ?: uuid
+        val link = TextEditor.enrichHTML(buildUuid(uuid, name)).await()
+        val chip = document.createElement("span")
+        chip.className = "km-hex-link-chip"
+        chip.setAttribute("data-uuid", uuid)
+        chip.innerHTML = "$link <a class=\"km-hex-link-remove\" data-uuid=\"$uuid\" " +
+            "title=\"${t("kingdom.hexContent.removeLink")}\">×</a>"
+        list.appendChild(chip)
+    }
+
+    private fun collectLinkedQuestIds(): Array<String> {
+        val root = element ?: return emptyArray()
+        val boxes = root.querySelectorAll(".km-hex-quest-choices input[name=\"questLink\"]")
+        val result = mutableListOf<String>()
+        for (i in 0 until boxes.length) {
+            val box = boxes[i] as? HTMLInputElement ?: continue
+            if (box.checked) result.add(box.value)
+        }
+        return result.toTypedArray()
+    }
+
+    private fun collectLinkedUuids(): Array<String> {
+        val root = element ?: return emptyArray()
+        val chips = root.querySelectorAll(".km-hex-link-list .km-hex-link-chip")
+        val result = mutableListOf<String>()
+        for (i in 0 until chips.length) {
+            val chip = chips[i] as? Element ?: continue
+            chip.getAttribute("data-uuid")?.let { result.add(it) }
+        }
+        return result.toTypedArray()
+    }
 
     // (native key string, human-readable label) for every hex in the region.
     // The native key is `1000*row + col`; the map labels hexes "row.col", so we
@@ -228,6 +335,9 @@ class HexContentManager(
                 travelModifier = current.travelModifier,
                 linkedQuestId = current.linkedQuestId,
                 linkedUuid = current.linkedUuid,
+                linkedQuestIds = current.linkedQuestIds,
+                linkedUuids = current.linkedUuids,
+                linkedWarThreatId = current.linkedWarThreatId,
                 icon = current.icon,
             )
             kingdom.hexContents = contents.toTypedArray()
@@ -239,6 +349,12 @@ class HexContentManager(
         val kingdom = currentKingdom() ?: return
         val contents = getHexContents().toMutableList()
         val formData = getFormData()
+
+        // New multi-reference fields: quests from the checkboxes, documents from the chip DOM,
+        // war threat from the select. Legacy single fields are cleared (migrated into the arrays).
+        val questIds = collectLinkedQuestIds().takeIf { it.isNotEmpty() }
+        val uuids = collectLinkedUuids().takeIf { it.isNotEmpty() }
+        val warThreatId = (formData["linkedWarThreatId"] as? String)?.takeIf { it.isNotBlank() }
 
         if (editingId != null) {
             val idx = contents.indexOfFirst { it.id == editingId }
@@ -254,8 +370,11 @@ class HexContentManager(
                     playerText = formData["playerText"] as? String ?: existing.playerText,
                     suppressesEncounters = formData["suppressesEncounters"] as? Boolean,
                     travelModifier = formData["travelModifier"] as? Int,
-                    linkedQuestId = formData["linkedQuestId"] as? String,
-                    linkedUuid = formData["linkedUuid"] as? String,
+                    linkedQuestId = null,
+                    linkedUuid = null,
+                    linkedQuestIds = questIds,
+                    linkedUuids = uuids,
+                    linkedWarThreatId = warThreatId,
                     icon = formData["icon"] as? String,
                 )
             }
@@ -272,8 +391,11 @@ class HexContentManager(
                     playerText = formData["playerText"] as? String ?: "",
                     suppressesEncounters = formData["suppressesEncounters"] as? Boolean,
                     travelModifier = formData["travelModifier"] as? Int,
-                    linkedQuestId = formData["linkedQuestId"] as? String,
-                    linkedUuid = formData["linkedUuid"] as? String,
+                    linkedQuestId = null,
+                    linkedUuid = null,
+                    linkedQuestIds = questIds,
+                    linkedUuids = uuids,
+                    linkedWarThreatId = warThreatId,
                     icon = formData["icon"] as? String,
                 )
             )
@@ -342,6 +464,9 @@ class HexContentManager(
         val entries = contents.map { content ->
             val type = HexContentType.fromString(content.type)
             val vis = HexContentVisibility.fromString(content.visibility)
+            val questCount = questIdsOf(content).size
+            val docCount = uuidsOf(content).size
+            val hasThreat = !content.linkedWarThreatId.isNullOrBlank()
             HexContentEntryContext(
                 id = content.id,
                 hexKey = content.hexKey,
@@ -352,10 +477,21 @@ class HexContentManager(
                 visibility = content.visibility,
                 visibilityName = if (vis != null) t("hexContentVisibility.${vis.value}") else content.visibility,
                 hasGmNotes = content.gmNotes.isNotEmpty(),
+                linkedQuestCount = questCount,
+                linkedDocCount = docCount,
+                hasWarThreat = hasThreat,
+                hasLinks = questCount > 0 || docCount > 0 || hasThreat,
             )
         }.toTypedArray()
 
         val editingContent = if (editingId != null) contents.find { it.id == editingId } else null
+
+        // War-threat dropdown options (a "none" entry plus each active threat).
+        val warThreatOptions = listOf(
+            SelectOption(value = "", label = t("kingdom.hexContent.noWarThreat")),
+        ) + (kingdom?.warThreats ?: emptyArray()).map { threat ->
+            SelectOption(value = threat.id, label = threat.name.ifBlank { threat.id })
+        }
 
         val formRows = if (isAdding || editingId != null) {
             formContext(
@@ -419,17 +555,11 @@ class HexContentManager(
                     stacked = false,
                     required = false,
                 ),
-                TextInput(
-                    name = "linkedQuestId",
-                    label = t("kingdom.hexContent.linkedQuestId"),
-                    value = editingContent?.linkedQuestId ?: "",
-                    stacked = false,
-                    required = false,
-                ),
-                TextInput(
-                    name = "linkedUuid",
-                    label = t("kingdom.hexContent.linkedUuid"),
-                    value = editingContent?.linkedUuid ?: "",
+                Select(
+                    name = "linkedWarThreatId",
+                    label = t("kingdom.hexContent.linkedWarThreat"),
+                    options = warThreatOptions,
+                    value = editingContent?.linkedWarThreatId ?: "",
                     stacked = false,
                     required = false,
                 ),
@@ -445,6 +575,30 @@ class HexContentManager(
             emptyArray()
         }
 
+        // Quest reference checkboxes: every kingdom quest, pre-checked if already linked.
+        val linkedQuestIds = questIdsOf(editingContent)
+        val linkedQuestChoices = if (isAdding || editingId != null) {
+            (kingdom?.quests ?: emptyArray()).map { quest ->
+                HexQuestChoiceContext(
+                    id = quest.id,
+                    title = quest.title.ifBlank { quest.id },
+                    checked = quest.id in linkedQuestIds,
+                )
+            }.toTypedArray()
+        } else {
+            emptyArray()
+        }
+
+        // Resolve already-linked documents into clickable content links for the chips.
+        val linkedDocs = uuidsOf(editingContent).map { uuid ->
+            val doc = fromUuid(uuid).await()
+            val name = (doc?.asDynamic()?.name as? String) ?: uuid
+            HexLinkedDocContext(
+                uuid = uuid,
+                link = TextEditor.enrichHTML(buildUuid(uuid, name)).await(),
+            )
+        }.toTypedArray()
+
         HexContentManagerContext(
             partId = parent.partId,
             isFormValid = isFormValid,
@@ -453,6 +607,8 @@ class HexContentManager(
             hexKeyOptions = hexKeyOptions.toTypedArray(),
             typeOptions = typeOptions.toTypedArray(),
             visibilityOptions = visibilityOptions.toTypedArray(),
+            linkedQuestChoices = linkedQuestChoices,
+            linkedDocs = linkedDocs,
             isEditing = editingId != null,
             isAdding = isAdding,
             editId = editingId,

@@ -13,7 +13,10 @@ external interface RawHexContent {
     var playerText: String
     var suppressesEncounters: Boolean?
     var travelModifier: Int?
-    var linkedQuestId: String?
-    var linkedUuid: String?
+    var linkedQuestId: String?       // legacy single-quest link (kept for back-compat)
+    var linkedUuid: String?          // legacy single-document link (kept for back-compat)
+    var linkedQuestIds: Array<String>?   // referenced kingdom quests
+    var linkedUuids: Array<String>?      // referenced Foundry documents (journals/actors/scenes/items)
+    var linkedWarThreatId: String?       // referenced war threat
     var icon: String?
 }
