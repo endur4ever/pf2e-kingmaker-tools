@@ -17,12 +17,14 @@ import at.posselt.pfrpg2e.utils.t
 import com.foundryvtt.core.AnyObject
 import com.foundryvtt.core.abstract.DataModel
 import com.foundryvtt.core.abstract.DocumentConstructionContext
+import com.foundryvtt.core.applications.api.ApplicationRenderOptions
 import com.foundryvtt.core.applications.api.HandlebarsRenderOptions
 import com.foundryvtt.core.data.dsl.buildSchema
 import js.core.Void
 import kotlinx.coroutines.await
 import kotlinx.js.JsPlainObject
 import org.w3c.dom.HTMLElement
+import org.w3c.dom.asList
 import org.w3c.dom.get
 import org.w3c.dom.pointerevents.PointerEvent
 import kotlin.js.Promise
@@ -151,6 +153,32 @@ class AddQuest(
 
     init {
         isFormValid = existing != null
+    }
+
+    // FormApp uses submitOnChange, so every edit re-renders the form and rebuilds
+    // the textareas at their default height — discarding any manual resize. Remember
+    // each textarea's dragged height (by name) and reapply it after every render so a
+    // resized notes/reward box keeps its size for as long as the dialog is open.
+    private val textareaHeights = mutableMapOf<String, String>()
+
+    private fun snapshotTextareaHeights() {
+        element.querySelectorAll("textarea[name]").asList().forEach { node ->
+            val ta = node.asDynamic()
+            val name = ta.name as? String ?: return@forEach
+            val height = ta.style.height as? String
+            if (!height.isNullOrEmpty()) {
+                textareaHeights[name] = height
+            }
+        }
+    }
+
+    override fun _onRender(context: AnyObject, options: ApplicationRenderOptions) {
+        super._onRender(context, options)
+        element.querySelectorAll("textarea[name]").asList().forEach { node ->
+            val ta = node.asDynamic()
+            val name = ta.name as? String ?: return@forEach
+            textareaHeights[name]?.let { ta.style.height = it }
+        }
     }
 
     override fun _onClickAction(event: PointerEvent, target: HTMLElement) {
@@ -320,6 +348,8 @@ class AddQuest(
     }
 
     override fun onParsedSubmit(value: AddQuestData): Promise<Void> = buildPromise {
+        // capture current textarea sizes before the (imminent) re-render resets them
+        snapshotTextareaHeights()
         data = value
         null
     }
