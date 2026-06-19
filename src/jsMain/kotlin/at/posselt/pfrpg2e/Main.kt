@@ -246,11 +246,17 @@ fun main() {
                 registerHexGridSync(game)
                 registerHexContentSync(game)
                 at.posselt.pfrpg2e.kingdom.map.registerSelectedHexTracker()
-                syncHexDrawingsToNativeState(game)
-                syncSettlementMarkers(game)
-                syncZoneLabels(game)
-                game.getKingdomActors().firstOrNull()?.let { actor ->
-                    at.posselt.pfrpg2e.kingdom.map.syncHexContentMarkers(game, actor)
+                // Initial overlay draw on load. These create/delete Scene Drawing documents, which
+                // only the GM may do (Foundry replicates them to players), so gate the same way the
+                // sync hooks are gated — otherwise a non-GM client throws "User X lacks permission
+                // to create Drawing in parent Scene Y" on every load.
+                if (game.user.isGM) {
+                    syncHexDrawingsToNativeState(game)
+                    syncSettlementMarkers(game)
+                    syncZoneLabels(game)
+                    game.getKingdomActors().firstOrNull()?.let { actor ->
+                        at.posselt.pfrpg2e.kingdom.map.syncHexContentMarkers(game, actor)
+                    }
                 }
             }
         }
