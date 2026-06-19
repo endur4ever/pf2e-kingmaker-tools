@@ -731,7 +731,9 @@
           "lumber": "Lumber Reward",
           "stone": "Stone Reward",
           "ore": "Ore Reward",
-          "luxuries": "Luxuries Reward"
+          "luxuries": "Luxuries Reward",
+          "rewardOther": "Other / Custom Reward",
+          "rewardOtherHelp": "Freeform bounty text for rewards that aren't tracked resources — a magic item, a title, a favor, land, etc."
         },
         "optional": "Optional"
       },

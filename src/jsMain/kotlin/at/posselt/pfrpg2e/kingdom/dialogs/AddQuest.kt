@@ -48,6 +48,7 @@ class QuestModel(
             int("stone")
             int("ore")
             int("luxuries")
+            string("rewardOther", nullable = true)
             string("flavorTextCompleted")
             string("notes", nullable = true)
         }
@@ -69,6 +70,7 @@ external interface AddQuestData {
     val stone: Int
     val ore: Int
     val luxuries: Int
+    val rewardOther: String?
     val flavorTextCompleted: String
     val notes: String?
     val generatedFromEvent: Boolean
@@ -116,6 +118,7 @@ class AddQuest(
             stone = q.rewards.stone ?: 0,
             ore = q.rewards.ore ?: 0,
             luxuries = q.rewards.luxuries ?: 0,
+            rewardOther = q.rewards.other ?: "",
             flavorTextCompleted = q.flavorTextCompleted,
             notes = q.notes ?: "",
             generatedFromEvent = false,
@@ -138,6 +141,7 @@ class AddQuest(
         stone = 0,
         ore = 0,
         luxuries = 0,
+        rewardOther = "",
         flavorTextCompleted = "",
         notes = "",
         generatedFromEvent = false,
@@ -169,6 +173,7 @@ class AddQuest(
                         stone = if (data.stone != 0) data.stone else null,
                         ore = if (data.ore != 0) data.ore else null,
                         luxuries = if (data.luxuries != 0) data.luxuries else null,
+                        other = data.rewardOther?.takeIf { it.isNotBlank() },
                     ),
                     flavorTextCompleted = data.flavorTextCompleted,
                     notes = data.notes?.takeIf { it.isNotBlank() },
@@ -297,6 +302,14 @@ class AddQuest(
                 value = data.luxuries,
                 stacked = false,
                 required = false,
+            ),
+            TextArea(
+                name = "rewardOther",
+                label = t("kingdom.quests.fields.rewardOther"),
+                help = t("kingdom.quests.fields.rewardOtherHelp"),
+                value = data.rewardOther ?: "",
+                required = false,
+                elementClasses = listOf("km-quest-reward-other-input"),
             ),
         )
         AddQuestContext(

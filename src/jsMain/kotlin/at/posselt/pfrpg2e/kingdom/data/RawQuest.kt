@@ -12,6 +12,7 @@ external interface RawQuestRewards {
     var stone: Int?
     var ore: Int?
     var luxuries: Int?
+    var other: String? // freeform / custom bounty reward text
 }
 
 @JsPlainObject

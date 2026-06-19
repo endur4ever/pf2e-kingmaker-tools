@@ -1222,6 +1222,26 @@
         gap: 6px;
     }
 
+    .km-reward-other {
+        margin-top: 6px;
+        font-size: 0.88em;
+        line-height: 1.4;
+        white-space: pre-wrap;
+        word-break: break-word;
+        font-style: italic;
+        color: #cdbd8f;
+
+        i { margin-right: 4px; font-style: normal; color: #c79a3a; }
+    }
+
+    .theme-light .km-reward-other { color: #6b5a2b; }
+
+    .km-quest-reward-other-input textarea,
+    textarea.km-quest-reward-other-input {
+        min-height: 70px;
+        resize: vertical;
+    }
+
     .km-reward-pill {
         font-size: 0.8em;
         padding: 3px 8px;

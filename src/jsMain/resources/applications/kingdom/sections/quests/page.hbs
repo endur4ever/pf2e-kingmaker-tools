@@ -120,6 +120,11 @@
                             </span>
                             {{/if}}
                         </div>
+                        {{#if rewards.other}}
+                        <div class="km-reward-other">
+                            <i class="fa-solid fa-gift"></i> {{rewards.other}}
+                        </div>
+                        {{/if}}
                     </div>
 
                     {{#if ../isGM}}
