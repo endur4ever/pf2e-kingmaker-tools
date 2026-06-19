@@ -42,6 +42,7 @@ class QuestModel(
             string("description")
             string("giver")
             string("type")
+            int("level")
             string("target", nullable = true)
             int("rp")
             int("xp")
@@ -65,6 +66,7 @@ external interface AddQuestData {
     val description: String
     val giver: String
     val type: String
+    val level: Int
     val target: String?
     val rp: Int
     val xp: Int
@@ -114,6 +116,7 @@ class AddQuest(
             description = q.description,
             giver = q.giver,
             type = q.type,
+            level = q.level ?: 0,
             target = q.target,
             rp = q.rewards.rp ?: 0,
             xp = q.rewards.xp ?: 0,
@@ -138,6 +141,7 @@ class AddQuest(
         description = "",
         giver = prefillGiver ?: "",
         type = "other",
+        level = 0,
         target = null,
         rp = 0,
         xp = 0,
@@ -196,6 +200,7 @@ class AddQuest(
                     giver = data.giver,
                     status = existing?.status ?: "active",
                     type = data.type,
+                    level = if (data.level != 0) data.level else null,
                     target = data.target,
                     rewards = RawQuestRewards(
                         rp = if (data.rp != 0) data.rp else null,
@@ -253,6 +258,14 @@ class AddQuest(
                 value = data.type,
                 options = typeOptions,
                 stacked = false,
+            ),
+            NumberInput(
+                name = "level",
+                label = t("kingdom.quests.fields.level"),
+                help = t("kingdom.quests.fields.levelHelp"),
+                value = data.level,
+                stacked = false,
+                required = false,
             ),
             TextInput(
                 name = "target",

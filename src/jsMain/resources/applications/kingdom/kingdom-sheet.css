@@ -1097,6 +1097,26 @@
         opacity: 0.8;
     }
 
+    /* Recommended party level for the quest, shown as a pill beside the type badge. */
+    .km-quest-level-badge {
+        font-size: 0.75em;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        white-space: nowrap;
+        background: rgba(52, 152, 219, 0.18);
+        color: #5dade2;
+        border: 1px solid rgba(52, 152, 219, 0.35);
+    }
+
+    .theme-light .km-quest-level-badge {
+        color: #2471a3;
+        background: rgba(52, 152, 219, 0.12);
+    }
+
     .km-quest-card-header {
         display: flex;
         justify-content: space-between;

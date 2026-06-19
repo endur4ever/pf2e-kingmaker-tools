@@ -36,6 +36,11 @@
                             <i class="fa-solid fa-hourglass-half"></i> {{turnsRemaining}} {{localizeKM "turns"}}
                         </span>
                         {{/if}}
+                        {{#if level}}
+                        <div class="km-quest-level-badge" title="{{localizeKM 'kingdom.quests.fields.level'}}">
+                            <i class="fa-solid fa-arrow-up-right-dots"></i> {{localizeKM "kingdom.quests.levelBadge"}} {{level}}
+                        </div>
+                        {{/if}}
                         <div class="km-quest-badge km-quest-type-{{type}}">
                             {{#if (eq type "explore_hex")}}<i class="fa-solid fa-compass"></i>{{/if}}
                             {{#if (eq type "claim_hex")}}<i class="fa-solid fa-flag"></i>{{/if}}
@@ -193,6 +198,7 @@
                                 {{title}}
                             </span>
                             <span class="km-quest-row-meta">
+                                {{#if level}}• {{localizeKM 'kingdom.quests.fields.level'}}: <b>{{level}}</b>{{/if}}
                                 {{#if giver}}• {{localizeKM 'kingdom.quests.fields.giver'}}: <b>{{giver}}</b>{{/if}}
                                 {{#if target}}• {{localizeKM 'kingdom.quests.fields.target'}}: <b>{{target}}</b>{{/if}}
                             </span>
