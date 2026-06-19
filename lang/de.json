@@ -721,6 +721,8 @@
           "target": "Target",
           "description": "Description",
           "flavorTextCompleted": "Completion Flavor Text",
+          "notes": "GM Notes",
+          "notesHelp": "Private notes visible only to the GM. Not shown to players.",
           "rp": "RP Reward",
           "xp": "XP Reward",
           "unrest": "Unrest Adjustment",
@@ -728,7 +730,9 @@
           "lumber": "Lumber Reward",
           "stone": "Stone Reward",
           "ore": "Ore Reward",
-          "luxuries": "Luxuries Reward"
+          "luxuries": "Luxuries Reward",
+          "rewardOther": "Other / Custom Reward",
+          "rewardOtherHelp": "Freeform bounty text for rewards that aren't tracked resources — a magic item, a title, a favor, land, etc."
         },
         "optional": "Optional"
       },
