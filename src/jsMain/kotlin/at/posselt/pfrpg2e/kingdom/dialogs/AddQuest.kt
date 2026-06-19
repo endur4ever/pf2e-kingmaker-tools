@@ -3,6 +3,7 @@ package at.posselt.pfrpg2e.kingdom.dialogs
 import at.posselt.pfrpg2e.app.FormApp
 import at.posselt.pfrpg2e.app.HandlebarsRenderContext
 import at.posselt.pfrpg2e.app.ValidatedHandlebarsContext
+import at.posselt.pfrpg2e.app.forms.CheckboxInput
 import at.posselt.pfrpg2e.app.forms.FormElementContext
 import at.posselt.pfrpg2e.app.forms.TextArea
 import at.posselt.pfrpg2e.app.forms.TextInput
@@ -53,6 +54,7 @@ class QuestModel(
             string("rewardOther", nullable = true)
             string("flavorTextCompleted")
             string("notes", nullable = true)
+            boolean("hidden")
         }
     }
 }
@@ -75,6 +77,7 @@ external interface AddQuestData {
     val rewardOther: String?
     val flavorTextCompleted: String
     val notes: String?
+    val hidden: Boolean
     val generatedFromEvent: Boolean
     val sourceEventId: String?
     val sourceEventName: String?
@@ -123,6 +126,7 @@ class AddQuest(
             rewardOther = q.rewards.other ?: "",
             flavorTextCompleted = q.flavorTextCompleted,
             notes = q.notes ?: "",
+            hidden = q.hidden ?: false,
             generatedFromEvent = false,
             sourceEventId = null,
             sourceEventName = null,
@@ -146,6 +150,7 @@ class AddQuest(
         rewardOther = "",
         flavorTextCompleted = "",
         notes = "",
+        hidden = false,
         generatedFromEvent = false,
         sourceEventId = null,
         sourceEventName = null,
@@ -205,6 +210,7 @@ class AddQuest(
                     ),
                     flavorTextCompleted = data.flavorTextCompleted,
                     notes = data.notes?.takeIf { it.isNotBlank() },
+                    hidden = data.hidden,
                 )
                 buildPromise {
                     onSave(quest)
@@ -274,6 +280,14 @@ class AddQuest(
                 value = data.notes ?: "",
                 required = false,
                 elementClasses = listOf("km-quest-notes-input"),
+            ),
+            CheckboxInput(
+                name = "hidden",
+                label = t("kingdom.quests.fields.hidden"),
+                help = t("kingdom.quests.fields.hiddenHelp"),
+                value = data.hidden,
+                required = false,
+                stacked = false,
             ),
             NumberInput(
                 name = "rp",

@@ -27,4 +27,5 @@ external interface RawQuest {
     var rewards: RawQuestRewards
     var flavorTextCompleted: String
     var notes: String? // freeform GM-only notes
+    var hidden: Boolean? // GM-only: greyed out for the GM, hidden from players entirely
 }

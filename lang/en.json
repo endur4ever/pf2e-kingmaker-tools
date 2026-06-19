@@ -713,6 +713,7 @@
         "rewards": "Bounty Rewards",
         "completeQuest": "Complete Quest",
         "deleteQuest": "Delete Quest",
+        "hiddenBadge": "Hidden",
         "completed": "Quest Completed",
         "flavorTextCompleted": "Completion Story / Details",
         "fields": {
@@ -724,6 +725,8 @@
           "flavorTextCompleted": "Completion Flavor Text",
           "notes": "GM Notes",
           "notesHelp": "Private notes visible only to the GM. Not shown to players.",
+          "hidden": "Hidden from Players",
+          "hiddenHelp": "When checked, this quest is greyed out for the GM and not shown to players at all.",
           "rp": "RP Reward",
           "xp": "XP Reward",
           "unrest": "Unrest Adjustment",

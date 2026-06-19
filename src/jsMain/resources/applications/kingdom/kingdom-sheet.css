@@ -1071,6 +1071,32 @@
         box-shadow: 0 4px 8px rgba(0,0,0,0.08);
     }
 
+    /* Hidden quests are GM-only (filtered out for players) and shown de-emphasised
+       so the GM can tell at a glance which entries their players cannot see. */
+    .km-quest-card.km-quest-hidden,
+    .km-quest-row.km-quest-hidden {
+        opacity: 0.55;
+        filter: grayscale(0.6);
+    }
+
+    .km-quest-hidden-badge {
+        font-size: 0.75em;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        white-space: nowrap;
+        background: rgba(120, 120, 120, 0.25);
+        color: inherit;
+        border: 1px solid rgba(120, 120, 120, 0.4);
+    }
+
+    .km-quest-hidden-icon {
+        opacity: 0.8;
+    }
+
     .km-quest-card-header {
         display: flex;
         justify-content: space-between;

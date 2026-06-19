@@ -712,6 +712,7 @@
         "rewards": "Bounty Rewards",
         "completeQuest": "Complete Quest",
         "deleteQuest": "Delete Quest",
+        "hiddenBadge": "Verborgen",
         "completed": "Quest Completed",
         "flavorTextCompleted": "Completion Story / Details",
         "fields": {
@@ -723,6 +724,8 @@
           "flavorTextCompleted": "Completion Flavor Text",
           "notes": "GM Notes",
           "notesHelp": "Private notes visible only to the GM. Not shown to players.",
+          "hidden": "Vor Spielern verborgen",
+          "hiddenHelp": "Wenn aktiviert, wird diese Quest für den SL ausgegraut und Spielern überhaupt nicht angezeigt.",
           "rp": "RP Reward",
           "xp": "XP Reward",
           "unrest": "Unrest Adjustment",

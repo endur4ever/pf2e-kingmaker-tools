@@ -15,9 +15,14 @@
             {{#if activeQuests.length}}
             <div class="km-quests-grid">
                 {{#each activeQuests}}
-                <div class="km-quest-card km-quest-active" data-id="{{id}}">
+                <div class="km-quest-card km-quest-active{{#if hidden}} km-quest-hidden{{/if}}" data-id="{{id}}">
                     <div class="km-quest-card-header">
                         <div class="km-quest-title">{{title}}</div>
+                        {{#if hidden}}
+                        <span class="km-quest-hidden-badge" title="{{localizeKM 'kingdom.quests.fields.hiddenHelp'}}">
+                            <i class="fa-solid fa-eye-slash"></i> {{localizeKM "kingdom.quests.hiddenBadge"}}
+                        </span>
+                        {{/if}}
                         {{#if generatedByEvent}}
                         <span class="km-quest-generated-badge">
                             {{localizeKM "kingdom.questGenerator.generatedBadge"}}
@@ -172,10 +177,13 @@
             {{#if completedQuests.length}}
             <div class="km-quests-list">
                 {{#each completedQuests}}
-                <div class="km-quest-row km-quest-{{status}}" data-id="{{id}}">
+                <div class="km-quest-row km-quest-{{status}}{{#if hidden}} km-quest-hidden{{/if}}" data-id="{{id}}">
                     <div class="km-quest-row-main">
                         <div class="km-quest-row-header">
                             <span class="km-quest-row-title">
+                                {{#if hidden}}
+                                    <i class="fa-solid fa-eye-slash km-quest-hidden-icon" title="{{localizeKM 'kingdom.quests.fields.hiddenHelp'}}" style="margin-right: 5px;"></i>
+                                {{/if}}
                                 {{#if (eq status "failed")}}
                                     <i class="fa-solid fa-circle-xmark km-fail-icon" style="color: var(--color-level-error, #ff4a4a); margin-right: 5px;"></i>
                                 {{else}}

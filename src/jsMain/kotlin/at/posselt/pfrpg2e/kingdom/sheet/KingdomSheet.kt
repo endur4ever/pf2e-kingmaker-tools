@@ -2357,6 +2357,8 @@ class KingdomSheet(
                 target: null,
                 rewards: mappedRewards,
                 flavorTextCompleted: "",
+                notes: null,
+                hidden: false,
                 generatedByEvent: true,
                 turnsRemaining: d.turnsRemaining
             })""")
@@ -2374,13 +2376,17 @@ class KingdomSheet(
                 target: d.target,
                 rewards: d.rewards,
                 flavorTextCompleted: d.flavorTextCompleted,
+                notes: d.notes,
+                hidden: d.hidden || false,
                 generatedByEvent: false,
                 turnsRemaining: null
             })""")
         } + campaignQuestsList
 
-        val activeQuests = allQuests.filter { (it.status as? String) == "active" }.toTypedArray()
-        val completedQuests = allQuests.filter { 
+        // Players never see hidden quests; the GM sees them greyed out (see template).
+        val visibleQuests = if (isGM) allQuests else allQuests.filter { (it.hidden as? Boolean) != true }
+        val activeQuests = visibleQuests.filter { (it.status as? String) == "active" }.toTypedArray()
+        val completedQuests = visibleQuests.filter {
             val s = it.status as? String
             s == "completed" || s == "failed"
         }.toTypedArray()
