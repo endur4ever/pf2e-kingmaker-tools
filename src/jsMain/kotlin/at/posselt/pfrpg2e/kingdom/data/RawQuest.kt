@@ -29,4 +29,7 @@ external interface RawQuest {
     var flavorTextCompleted: String
     var notes: String? // freeform GM-only notes
     var hidden: Boolean? // GM-only: greyed out for the GM, hidden from players entirely
+    var source: String? // source material reference — book + page, a URL, etc.
+    var createdAt: Double? // epoch millis when the quest was first created
+    var updatedAt: Double? // epoch millis of the most recent edit
 }

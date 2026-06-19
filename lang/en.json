@@ -715,6 +715,8 @@
         "deleteQuest": "Delete Quest",
         "hiddenBadge": "Hidden",
         "levelBadge": "Lvl",
+        "createdAt": "Created",
+        "updatedAt": "Updated",
         "completed": "Quest Completed",
         "flavorTextCompleted": "Completion Story / Details",
         "fields": {
@@ -730,6 +732,8 @@
           "notesHelp": "Private notes visible only to the GM. Not shown to players.",
           "hidden": "Hidden from Players",
           "hiddenHelp": "When checked, this quest is greyed out for the GM and not shown to players at all.",
+          "source": "Source / Reference",
+          "sourceHelp": "Where this quest comes from — an adventure book and page, a URL, or any reference.",
           "rp": "RP Reward",
           "xp": "XP Reward",
           "unrest": "Unrest Adjustment",

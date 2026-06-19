@@ -714,6 +714,8 @@
         "deleteQuest": "Delete Quest",
         "hiddenBadge": "Verborgen",
         "levelBadge": "Stufe",
+        "createdAt": "Erstellt",
+        "updatedAt": "Aktualisiert",
         "completed": "Quest Completed",
         "flavorTextCompleted": "Completion Story / Details",
         "fields": {
@@ -729,6 +731,8 @@
           "notesHelp": "Private notes visible only to the GM. Not shown to players.",
           "hidden": "Vor Spielern verborgen",
           "hiddenHelp": "Wenn aktiviert, wird diese Quest für den SL ausgegraut und Spielern überhaupt nicht angezeigt.",
+          "source": "Quelle / Referenz",
+          "sourceHelp": "Woher diese Quest stammt — ein Abenteuerbuch mit Seite, eine URL oder eine beliebige Referenz.",
           "rp": "RP Reward",
           "xp": "XP Reward",
           "unrest": "Unrest Adjustment",

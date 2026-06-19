@@ -1117,6 +1117,22 @@
         background: rgba(52, 152, 219, 0.12);
     }
 
+    /* Created/updated stamps — muted, small, below the quest body. */
+    .km-quest-timestamps {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2px 14px;
+        font-size: 0.72em;
+        opacity: 0.6;
+        margin-top: 4px;
+
+        i { margin-right: 3px; }
+    }
+
+    .km-quest-timestamps-compact {
+        margin-top: 2px;
+    }
+
     .km-quest-card-header {
         display: flex;
         justify-content: space-between;

@@ -56,6 +56,7 @@ class QuestModel(
             string("flavorTextCompleted")
             string("notes", nullable = true)
             boolean("hidden")
+            string("source", nullable = true)
         }
     }
 }
@@ -80,6 +81,7 @@ external interface AddQuestData {
     val flavorTextCompleted: String
     val notes: String?
     val hidden: Boolean
+    val source: String?
     val generatedFromEvent: Boolean
     val sourceEventId: String?
     val sourceEventName: String?
@@ -130,6 +132,7 @@ class AddQuest(
             flavorTextCompleted = q.flavorTextCompleted,
             notes = q.notes ?: "",
             hidden = q.hidden ?: false,
+            source = q.source ?: "",
             generatedFromEvent = false,
             sourceEventId = null,
             sourceEventName = null,
@@ -155,6 +158,7 @@ class AddQuest(
         flavorTextCompleted = "",
         notes = "",
         hidden = false,
+        source = "",
         generatedFromEvent = false,
         sourceEventId = null,
         sourceEventName = null,
@@ -193,6 +197,7 @@ class AddQuest(
     override fun _onClickAction(event: PointerEvent, target: HTMLElement) {
         when (target.dataset["action"]) {
             "km-save" -> {
+                val now = kotlin.js.Date.now()
                 val quest = RawQuest(
                     id = existing?.id ?: "quest-${js("Date.now()")}",
                     title = data.title,
@@ -216,6 +221,9 @@ class AddQuest(
                     flavorTextCompleted = data.flavorTextCompleted,
                     notes = data.notes?.takeIf { it.isNotBlank() },
                     hidden = data.hidden,
+                    source = data.source?.takeIf { it.isNotBlank() },
+                    createdAt = existing?.createdAt ?: now,
+                    updatedAt = now,
                 )
                 buildPromise {
                     onSave(quest)
@@ -285,6 +293,14 @@ class AddQuest(
                 label = t("kingdom.quests.fields.flavorTextCompleted"),
                 stacked = false,
                 value = data.flavorTextCompleted,
+            ),
+            TextInput(
+                name = "source",
+                label = t("kingdom.quests.fields.source"),
+                help = t("kingdom.quests.fields.sourceHelp"),
+                stacked = false,
+                value = data.source ?: "",
+                required = false,
             ),
             TextArea(
                 name = "notes",

@@ -69,6 +69,11 @@
                             <i class="fa-solid fa-crosshairs"></i> <b>{{target}}</b>
                         </span>
                         {{/if}}
+                        {{#if source}}
+                        <span class="km-quest-meta-item" title="{{localizeKM 'kingdom.quests.fields.source'}}">
+                            <i class="fa-solid fa-book-bookmark"></i> <b>{{source}}</b>
+                        </span>
+                        {{/if}}
                     </div>
 
                     <div class="km-quest-description">
@@ -138,6 +143,19 @@
                         {{/if}}
                     </div>
 
+                    {{#if createdAtLabel}}
+                    <div class="km-quest-timestamps">
+                        <span title="{{localizeKM 'kingdom.quests.createdAt'}}">
+                            <i class="fa-regular fa-clock"></i> {{localizeKM 'kingdom.quests.createdAt'}}: {{createdAtLabel}}
+                        </span>
+                        {{#if showUpdated}}
+                        <span title="{{localizeKM 'kingdom.quests.updatedAt'}}">
+                            <i class="fa-solid fa-pen"></i> {{localizeKM 'kingdom.quests.updatedAt'}}: {{updatedAtLabel}}
+                        </span>
+                        {{/if}}
+                    </div>
+                    {{/if}}
+
                     {{#if ../isGM}}
                     <div class="km-quest-actions">
                         <button type="button" class="km-quest-action-btn km-complete-btn" data-action="complete-quest" data-id="{{id}}" title="{{localizeKM 'kingdom.quests.completeQuest'}}">
@@ -201,8 +219,15 @@
                                 {{#if level}}• {{localizeKM 'kingdom.quests.fields.level'}}: <b>{{level}}</b>{{/if}}
                                 {{#if giver}}• {{localizeKM 'kingdom.quests.fields.giver'}}: <b>{{giver}}</b>{{/if}}
                                 {{#if target}}• {{localizeKM 'kingdom.quests.fields.target'}}: <b>{{target}}</b>{{/if}}
+                                {{#if source}}• {{localizeKM 'kingdom.quests.fields.source'}}: <b>{{source}}</b>{{/if}}
                             </span>
                         </div>
+                        {{#if createdAtLabel}}
+                        <div class="km-quest-timestamps km-quest-timestamps-compact">
+                            <span><i class="fa-regular fa-clock"></i> {{localizeKM 'kingdom.quests.createdAt'}}: {{createdAtLabel}}</span>
+                            {{#if showUpdated}}<span><i class="fa-solid fa-pen"></i> {{localizeKM 'kingdom.quests.updatedAt'}}: {{updatedAtLabel}}</span>{{/if}}
+                        </div>
+                        {{/if}}
                         {{#if flavorTextCompleted}}
                         <div class="km-quest-row-flavor">
                             "{{flavorTextCompleted}}"

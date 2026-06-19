@@ -2360,6 +2360,10 @@ class KingdomSheet(
                 flavorTextCompleted: "",
                 notes: null,
                 hidden: false,
+                source: null,
+                createdAtLabel: null,
+                updatedAtLabel: null,
+                showUpdated: false,
                 generatedByEvent: true,
                 turnsRemaining: d.turnsRemaining
             })""")
@@ -2380,6 +2384,10 @@ class KingdomSheet(
                 flavorTextCompleted: d.flavorTextCompleted,
                 notes: d.notes,
                 hidden: d.hidden || false,
+                source: d.source,
+                createdAtLabel: d.createdAt ? new Date(d.createdAt).toLocaleString() : null,
+                updatedAtLabel: d.updatedAt ? new Date(d.updatedAt).toLocaleString() : null,
+                showUpdated: (d.updatedAt && d.createdAt && d.updatedAt !== d.createdAt) ? true : false,
                 generatedByEvent: false,
                 turnsRemaining: null
             })""")
