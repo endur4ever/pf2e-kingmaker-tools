@@ -1201,6 +1201,38 @@
         }
     }
 
+    /* GM notes collapse to just their label by default; click the summary to
+       expand. Native <details> keeps this JS-free and robust across re-renders.
+       Force block layout so the native collapse works regardless of Chromium
+       version (flex/grid on <details> broke collapsing in older builds). */
+    details.km-quest-notes {
+        display: block;
+
+        > summary.km-quest-notes-label {
+            cursor: pointer;
+            list-style: none;
+            user-select: none;
+        }
+
+        > .km-quest-notes-body {
+            margin-top: 4px;
+        }
+
+        > summary.km-quest-notes-label::-webkit-details-marker {
+            display: none;
+        }
+
+        .km-quest-notes-caret {
+            display: inline-block;
+            font-size: 0.9em;
+            transition: transform 0.15s ease;
+        }
+
+        &[open] .km-quest-notes-caret {
+            transform: rotate(90deg);
+        }
+    }
+
     .km-quest-notes-compact {
         margin-top: 6px;
     }

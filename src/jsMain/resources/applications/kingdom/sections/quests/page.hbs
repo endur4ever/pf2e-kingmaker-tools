@@ -72,12 +72,13 @@
 
                     {{#if ../isGM}}
                     {{#if notes}}
-                    <div class="km-quest-notes">
-                        <div class="km-quest-notes-label">
+                    <details class="km-quest-notes">
+                        <summary class="km-quest-notes-label">
+                            <i class="fa-solid fa-chevron-right km-quest-notes-caret"></i>
                             <i class="fa-solid fa-user-secret"></i> {{localizeKM "kingdom.quests.fields.notes"}}
-                        </div>
+                        </summary>
                         <div class="km-quest-notes-body">{{notes}}</div>
-                    </div>
+                    </details>
                     {{/if}}
                     {{/if}}
 
@@ -203,12 +204,13 @@
                         {{/if}}
                         {{#if ../isGM}}
                         {{#if notes}}
-                        <div class="km-quest-notes km-quest-notes-compact">
-                            <div class="km-quest-notes-label">
+                        <details class="km-quest-notes km-quest-notes-compact">
+                            <summary class="km-quest-notes-label">
+                                <i class="fa-solid fa-chevron-right km-quest-notes-caret"></i>
                                 <i class="fa-solid fa-user-secret"></i> {{localizeKM "kingdom.quests.fields.notes"}}
-                            </div>
+                            </summary>
                             <div class="km-quest-notes-body">{{notes}}</div>
-                        </div>
+                        </details>
                         {{/if}}
                         {{/if}}
                     </div>
