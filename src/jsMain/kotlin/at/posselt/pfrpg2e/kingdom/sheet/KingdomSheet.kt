@@ -2386,6 +2386,7 @@ class KingdomSheet(
                 giver: d.giver,
                 status: d.status,
                 type: d.type,
+                category: d.category,
                 level: d.level || null,
                 target: d.target,
                 rewards: d.rewards,
