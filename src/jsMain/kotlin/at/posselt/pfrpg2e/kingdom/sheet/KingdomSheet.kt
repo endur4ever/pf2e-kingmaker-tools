@@ -348,6 +348,7 @@ class KingdomSheet(
     private var questFilterMin: String = ""
     private var questFilterMax: String = ""
     private var questFilterHidden: String = "all"
+    private var questFilterCategory: String = "all"
 
     init {
         appHook.onDeleteScene { _, _, _ -> render() }
@@ -3128,6 +3129,7 @@ class KingdomSheet(
         val minInput = bar.querySelector(".km-quest-filter-level-min")
         val maxInput = bar.querySelector(".km-quest-filter-level-max")
         val hiddenSelect = bar.querySelector(".km-quest-filter-hidden")
+        val categorySelect = bar.querySelector(".km-quest-filter-category")
         val clearBtn = bar.querySelector(".km-quest-filter-clear")
         val countEl = bar.querySelector(".km-quest-filter-count")?.takeIfInstance<HTMLElement>()
         val noMatches = htmlElement.querySelector(".km-quest-no-matches")?.takeIfInstance<HTMLElement>()
@@ -3142,14 +3144,17 @@ class KingdomSheet(
             val min = strVal(minInput).toIntOrNull()
             val max = strVal(maxInput).toIntOrNull()
             val hiddenMode = strVal(hiddenSelect).ifEmpty { "all" }
+            val categoryMode = strVal(categorySelect).ifEmpty { "all" }
             var shown = 0
             cards.forEach { card ->
                 val title = (card.dataset["title"] ?: "").lowercase()
                 val level = card.dataset["level"]?.toIntOrNull() ?: 0
                 val isHidden = card.dataset["hidden"] == "1"
+                val category = card.dataset["category"] ?: ""
                 val show = (q.isEmpty() || title.contains(q)) &&
                     (min == null || level >= min) &&
                     (max == null || level <= max) &&
+                    (categoryMode == "all" || category == categoryMode) &&
                     when (hiddenMode) {
                         "hidden" -> isHidden
                         "visible" -> !isHidden
@@ -3166,6 +3171,7 @@ class KingdomSheet(
             questFilterMin = strVal(minInput)
             questFilterMax = strVal(maxInput)
             questFilterHidden = hiddenMode
+            questFilterCategory = categoryMode
             countEl?.textContent = "$shown / ${cards.size}"
             noMatches?.hidden = shown != 0 || cards.isEmpty()
         }
@@ -3175,8 +3181,9 @@ class KingdomSheet(
         setVal(minInput, questFilterMin)
         setVal(maxInput, questFilterMax)
         setVal(hiddenSelect, questFilterHidden)
+        setVal(categorySelect, questFilterCategory)
 
-        listOfNotNull(titleInput, minInput, maxInput, hiddenSelect).forEach { c ->
+        listOfNotNull(titleInput, minInput, maxInput, hiddenSelect, categorySelect).forEach { c ->
             c.addEventListener("change", { it.stopPropagation(); applyFilter() })
         }
         listOfNotNull(titleInput, minInput, maxInput).forEach { c ->
@@ -3189,6 +3196,7 @@ class KingdomSheet(
             setVal(minInput, "")
             setVal(maxInput, "")
             setVal(hiddenSelect, "all")
+            setVal(categorySelect, "all")
             applyFilter()
         })
         applyFilter()

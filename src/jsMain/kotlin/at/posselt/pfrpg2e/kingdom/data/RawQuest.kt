@@ -23,6 +23,7 @@ external interface RawQuest {
     var giver: String
     var status: String // "active" | "completed"
     var type: String   // "explore_hex" | "claim_hex" | "build_structure" | "clear_hex" | "assign_leader" | "other"
+    var category: String? // "main_story" | "side" | "mythic" | "companion"
     var level: Int?    // recommended party/quest level (null or 0 = unset)
     var target: String?
     var rewards: RawQuestRewards

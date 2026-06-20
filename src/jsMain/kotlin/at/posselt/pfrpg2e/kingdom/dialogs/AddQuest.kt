@@ -42,6 +42,7 @@ class QuestModel(
             string("description")
             string("giver")
             string("type")
+            string("category", nullable = true)
             int("level")
             string("target", nullable = true)
             int("rp")
@@ -67,6 +68,7 @@ external interface AddQuestData {
     val description: String
     val giver: String
     val type: String
+    val category: String?
     val level: Int
     val target: String?
     val rp: Int
@@ -118,6 +120,7 @@ class AddQuest(
             description = q.description,
             giver = q.giver,
             type = q.type,
+            category = q.category ?: "side",
             level = q.level ?: 0,
             target = q.target,
             rp = q.rewards.rp ?: 0,
@@ -144,6 +147,7 @@ class AddQuest(
         description = "",
         giver = prefillGiver ?: "",
         type = "other",
+        category = "side",
         level = 0,
         target = null,
         rp = 0,
@@ -205,6 +209,7 @@ class AddQuest(
                     giver = data.giver,
                     status = existing?.status ?: "active",
                     type = data.type,
+                    category = data.category?.takeIf { it.isNotBlank() },
                     level = if (data.level != 0) data.level else null,
                     target = data.target,
                     rewards = RawQuestRewards(
@@ -265,6 +270,18 @@ class AddQuest(
                 label = t("kingdom.quests.fields.type"),
                 value = data.type,
                 options = typeOptions,
+                stacked = false,
+            ),
+            Select(
+                name = "category",
+                label = t("kingdom.quests.fields.category"),
+                value = data.category ?: "side",
+                options = listOf(
+                    SelectOption(value = "main_story", label = t("kingdom.quests.category.main_story")),
+                    SelectOption(value = "side", label = t("kingdom.quests.category.side")),
+                    SelectOption(value = "mythic", label = t("kingdom.quests.category.mythic")),
+                    SelectOption(value = "companion", label = t("kingdom.quests.category.companion")),
+                ),
                 stacked = false,
             ),
             NumberInput(

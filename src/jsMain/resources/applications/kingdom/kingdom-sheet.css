@@ -1246,6 +1246,23 @@
         .km-quest-badge.km-quest-type-other { color: #117a65; }
     }
 
+    .km-quest-badge.km-quest-category-main_story { background: rgba(201, 162, 39, 0.18); color: #e0c050; border-color: rgba(201, 162, 39, 0.4); }
+    .km-quest-badge.km-quest-category-side { background: rgba(120, 144, 156, 0.18); color: #b0bec5; border-color: rgba(120, 144, 156, 0.35); }
+    .km-quest-badge.km-quest-category-mythic { background: rgba(142, 68, 173, 0.2); color: #c39bd3; border-color: rgba(142, 68, 173, 0.4); }
+    .km-quest-badge.km-quest-category-companion { background: rgba(192, 57, 43, 0.16); color: #ec7063; border-color: rgba(192, 57, 43, 0.35); }
+
+    .theme-light {
+        .km-quest-badge.km-quest-category-main_story { color: #9a7d12; }
+        .km-quest-badge.km-quest-category-mythic { color: #6c3483; }
+        .km-quest-badge.km-quest-category-companion { color: #922b21; }
+    }
+
+    /* compact category icon on completed-quest rows */
+    .km-quest-category-icon.km-quest-category-main_story { color: #d4ac2b; }
+    .km-quest-category-icon.km-quest-category-side { color: #90a4ae; }
+    .km-quest-category-icon.km-quest-category-mythic { color: #a569bd; }
+    .km-quest-category-icon.km-quest-category-companion { color: #cb4335; }
+
     .km-quest-meta {
         display: flex;
         flex-wrap: wrap;

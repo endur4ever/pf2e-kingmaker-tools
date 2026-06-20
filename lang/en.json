@@ -709,6 +709,12 @@
           "crafting": "Crafting",
           "travel": "Travel"
         },
+        "category": {
+          "main_story": "Main Story",
+          "side": "Side Quest",
+          "mythic": "Mythic",
+          "companion": "Companion"
+        },
         "target": "Target",
         "rewards": "Bounty Rewards",
         "completeQuest": "Complete Quest",
@@ -726,6 +732,8 @@
           "visibilityAll": "All",
           "visibilityVisible": "Visible only",
           "visibilityHidden": "Hidden only",
+          "category": "Filter by category",
+          "categoryAll": "All categories",
           "clear": "Clear filters",
           "noMatches": "No quests match the current filters."
         },
@@ -735,6 +743,7 @@
           "title": "Title",
           "giver": "Quest Giver",
           "type": "Quest Type",
+          "category": "Quest Category",
           "level": "Level",
           "levelHelp": "Recommended party level for this quest (0 = none).",
           "target": "Target",

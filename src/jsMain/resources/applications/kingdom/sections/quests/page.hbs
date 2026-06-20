@@ -28,6 +28,13 @@
                     <input type="number" class="km-quest-filter-level-max" min="0" max="30" inputmode="numeric"
                            placeholder="{{localizeKM 'kingdom.quests.filter.max'}}">
                 </div>
+                <select class="km-quest-filter-category" title="{{localizeKM 'kingdom.quests.filter.category'}}">
+                    <option value="all">{{localizeKM "kingdom.quests.filter.categoryAll"}}</option>
+                    <option value="main_story">{{localizeKM "kingdom.quests.category.main_story"}}</option>
+                    <option value="side">{{localizeKM "kingdom.quests.category.side"}}</option>
+                    <option value="mythic">{{localizeKM "kingdom.quests.category.mythic"}}</option>
+                    <option value="companion">{{localizeKM "kingdom.quests.category.companion"}}</option>
+                </select>
                 {{#if isGM}}
                 <select class="km-quest-filter-hidden" title="{{localizeKM 'kingdom.quests.filter.visibility'}}">
                     <option value="all">{{localizeKM "kingdom.quests.filter.visibilityAll"}}</option>
@@ -44,7 +51,7 @@
             <div class="km-quests-grid">
                 {{#each activeQuests}}
                 <div class="km-quest-card km-quest-active{{#if hidden}} km-quest-hidden{{/if}}" data-id="{{id}}"
-                     data-title="{{title}}" data-level="{{#if level}}{{level}}{{else}}0{{/if}}" data-hidden="{{#if hidden}}1{{else}}0{{/if}}">
+                     data-title="{{title}}" data-level="{{#if level}}{{level}}{{else}}0{{/if}}" data-hidden="{{#if hidden}}1{{else}}0{{/if}}" data-category="{{category}}">
                     <div class="km-quest-card-header">
                         <div class="km-quest-title">{{title}}</div>
                         {{#if hidden}}
@@ -68,6 +75,15 @@
                         {{#if level}}
                         <div class="km-quest-level-badge" title="{{localizeKM 'kingdom.quests.fields.level'}}">
                             <i class="fa-solid fa-arrow-up-right-dots"></i> {{localizeKM "kingdom.quests.levelBadge"}} {{level}}
+                        </div>
+                        {{/if}}
+                        {{#if category}}
+                        <div class="km-quest-badge km-quest-category-badge km-quest-category-{{category}}" title="{{localizeKM 'kingdom.quests.fields.category'}}">
+                            {{#if (eq category "main_story")}}<i class="fa-solid fa-crown"></i>{{/if}}
+                            {{#if (eq category "side")}}<i class="fa-solid fa-code-branch"></i>{{/if}}
+                            {{#if (eq category "mythic")}}<i class="fa-solid fa-wand-sparkles"></i>{{/if}}
+                            {{#if (eq category "companion")}}<i class="fa-solid fa-heart"></i>{{/if}}
+                            {{localizeKM (concat "kingdom.quests.category." category)}}
                         </div>
                         {{/if}}
                         <div class="km-quest-badge km-quest-type-{{type}}">
@@ -242,6 +258,7 @@
                                 {{else}}
                                     <i class="fa-solid fa-circle-check km-check-icon" style="color: #4a6741; margin-right: 5px;"></i>
                                 {{/if}}
+                                {{#if category}}<i class="km-quest-category-icon km-quest-category-{{category}} fa-solid {{#if (eq category 'main_story')}}fa-crown{{/if}}{{#if (eq category 'side')}}fa-code-branch{{/if}}{{#if (eq category 'mythic')}}fa-wand-sparkles{{/if}}{{#if (eq category 'companion')}}fa-heart{{/if}}" title="{{localizeKM (concat 'kingdom.quests.category.' category)}}" style="margin-right: 5px;"></i>{{/if}}
                                 {{title}}
                             </span>
                             <span class="km-quest-row-meta">
