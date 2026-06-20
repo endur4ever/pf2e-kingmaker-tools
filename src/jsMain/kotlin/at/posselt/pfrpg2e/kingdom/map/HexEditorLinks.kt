@@ -17,6 +17,7 @@ import com.foundryvtt.core.helpers.TypedHooks
 import com.foundryvtt.core.utils.fromUuid
 import com.foundryvtt.kingmaker.onRenderHexEditor
 import kotlinx.browser.document
+import kotlinx.browser.window
 import kotlinx.coroutines.await
 import org.w3c.dom.Element
 import org.w3c.dom.HTMLElement
@@ -124,13 +125,21 @@ private suspend fun injectHexLinksPanel(game: Game, app: AnyObject, html: HTMLEl
     fieldset.className = "km-hex-editor-links"
     fieldset.innerHTML = sb.toString()
 
-    // Put the panel at the top of the editor (above the native sections) so it isn't buried
-    // under the Features list at the bottom.
-    val first = html.firstElementChild
-    if (first != null) html.insertBefore(fieldset, first) else html.appendChild(fieldset)
+    // Insert among the native sections — before the first <fieldset>, inside .window-content.
+    // (NOT before html.firstElementChild, which is the window header: that put the panel
+    // outside the form content.)
+    val firstFieldset = html.querySelector("fieldset")
+    val fieldsetParent = firstFieldset?.parentElement
+    if (fieldsetParent != null) {
+        fieldsetParent.insertBefore(fieldset, firstFieldset)
+    } else {
+        (html.querySelector(".window-content") ?: html).appendChild(fieldset)
+    }
 
     attachListeners(game, hexKey, fieldset)
-    app.asDynamic().setPosition(js("({ height: 'auto' })"))
+    // Grow the window to fit the added content once layout settles, so it expands instead of
+    // staying fixed-size and clipping the Save footer (the editor is auto-height).
+    window.requestAnimationFrame { app.asDynamic().setPosition(js("({ height: 'auto' })")); Unit }
 }
 
 private suspend fun resolveName(uuid: String): String {
