@@ -124,8 +124,10 @@ private suspend fun injectHexLinksPanel(game: Game, app: AnyObject, html: HTMLEl
     fieldset.className = "km-hex-editor-links"
     fieldset.innerHTML = sb.toString()
 
-    val footer = html.querySelector("footer, .form-footer")
-    if (footer != null) html.insertBefore(fieldset, footer) else html.appendChild(fieldset)
+    // Put the panel at the top of the editor (above the native sections) so it isn't buried
+    // under the Features list at the bottom.
+    val first = html.firstElementChild
+    if (first != null) html.insertBefore(fieldset, first) else html.appendChild(fieldset)
 
     attachListeners(game, hexKey, fieldset)
     app.asDynamic().setPosition(js("({ height: 'auto' })"))
