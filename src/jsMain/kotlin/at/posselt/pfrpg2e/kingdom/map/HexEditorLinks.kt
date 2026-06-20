@@ -137,9 +137,29 @@ private suspend fun injectHexLinksPanel(game: Game, app: AnyObject, html: HTMLEl
     }
 
     attachListeners(game, hexKey, fieldset)
-    // Grow the window to fit the added content once layout settles, so it expands instead of
-    // staying fixed-size and clipping the Save footer (the editor is auto-height).
-    window.requestAnimationFrame { app.asDynamic().setPosition(js("({ height: 'auto' })")); Unit }
+
+    // Make every future open wider (≈2×) and user-resizable at a bounded height — patch the
+    // class defaults once. The ApplicationV2 frame for THIS already-open instance can't gain a
+    // resize handle retroactively, so its size is set directly below.
+    runCatching {
+        val ctor = app.asDynamic().constructor
+        if (ctor.__kmHexResizable != true) {
+            ctor.__kmHexResizable = true
+            ctor.DEFAULT_OPTIONS.window.resizable = true
+            ctor.DEFAULT_OPTIONS.position.width = 840
+            ctor.DEFAULT_OPTIONS.position.height = 640
+        }
+    }
+    // Widen + bound the current window's height so it fits the screen and the content scrolls
+    // vertically (Save reachable) instead of growing past the viewport bottom.
+    val targetHeight = kotlin.math.min(640, window.innerHeight - 80)
+    window.requestAnimationFrame {
+        val pos = js("({})")
+        pos.width = 840
+        pos.height = targetHeight
+        app.asDynamic().setPosition(pos)
+        Unit
+    }
 }
 
 private suspend fun resolveName(uuid: String): String {

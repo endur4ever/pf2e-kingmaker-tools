@@ -2129,3 +2129,17 @@ fieldset.km-hex-editor-links {
 
     .km-hexed-remove:hover { opacity: 1; color: var(--color-level-error, #c0392b); }
 }
+
+/* Native hex editor: let the content scroll vertically within the (now bounded, resizable)
+   window so the Save footer stays reachable instead of being pushed off-screen. */
+#kingmaker-hex-edit .window-content {
+    overflow-y: auto;
+}
+
+#kingmaker-hex-edit .form-footer {
+    position: sticky;
+    bottom: 0;
+    margin-top: auto;
+    padding-top: 8px;
+    background: var(--color-bg, var(--background, rgba(20, 20, 26, 0.96)));
+}
