@@ -17,7 +17,6 @@ import com.foundryvtt.core.helpers.TypedHooks
 import com.foundryvtt.core.utils.fromUuid
 import com.foundryvtt.kingmaker.onRenderHexEditor
 import kotlinx.browser.document
-import kotlinx.browser.window
 import kotlinx.coroutines.await
 import org.w3c.dom.Element
 import org.w3c.dom.HTMLElement
@@ -71,6 +70,30 @@ private fun uuidsOf(e: RawHexContent?): List<String> {
 
 private suspend fun injectHexLinksPanel(game: Game, app: AnyObject, html: HTMLElement) {
     if (html.querySelector(".km-hex-editor-links") != null) return // already injected
+
+    // One-time: make the native editor wider (≈2×) and user-resizable for every open. The class
+    // defaults can only be patched once we've seen the class (first render), and an ApplicationV2
+    // frame can't gain a resize handle after it's built — so reopen this first instance once so it
+    // (and all future opens) come up resizable at the wider size.
+    val ctor = app.asDynamic().constructor
+    if (ctor.__kmHexResizable != true) {
+        ctor.__kmHexResizable = true
+        runCatching {
+            ctor.DEFAULT_OPTIONS.window.resizable = true
+            ctor.DEFAULT_OPTIONS.position.width = 840
+            ctor.DEFAULT_OPTIONS.position.height = 640
+        }
+        val hex = app.asDynamic().options?.hex
+        if (hex != null && hex != undefined) {
+            app.asDynamic().close().then(fun(_: dynamic) {
+                val opts = js("({})")
+                opts.hex = hex
+                js("Reflect").construct(ctor, arrayOf<Any?>(opts)).render(js("({ force: true })"))
+            })
+            return
+        }
+    }
+
     val hexKey = hexKeyOf(app)
     if (hexKey == null) {
         console.warn("[km] HexEditor links: could not resolve the hex key — no Linked References panel injected")
@@ -137,29 +160,6 @@ private suspend fun injectHexLinksPanel(game: Game, app: AnyObject, html: HTMLEl
     }
 
     attachListeners(game, hexKey, fieldset)
-
-    // Make every future open wider (≈2×) and user-resizable at a bounded height — patch the
-    // class defaults once. The ApplicationV2 frame for THIS already-open instance can't gain a
-    // resize handle retroactively, so its size is set directly below.
-    runCatching {
-        val ctor = app.asDynamic().constructor
-        if (ctor.__kmHexResizable != true) {
-            ctor.__kmHexResizable = true
-            ctor.DEFAULT_OPTIONS.window.resizable = true
-            ctor.DEFAULT_OPTIONS.position.width = 840
-            ctor.DEFAULT_OPTIONS.position.height = 640
-        }
-    }
-    // Widen + bound the current window's height so it fits the screen and the content scrolls
-    // vertically (Save reachable) instead of growing past the viewport bottom.
-    val targetHeight = kotlin.math.min(640, window.innerHeight - 80)
-    window.requestAnimationFrame {
-        val pos = js("({})")
-        pos.width = 840
-        pos.height = targetHeight
-        app.asDynamic().setPosition(pos)
-        Unit
-    }
 }
 
 private suspend fun resolveName(uuid: String): String {
