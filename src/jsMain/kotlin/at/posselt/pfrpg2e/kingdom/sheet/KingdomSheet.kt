@@ -283,6 +283,7 @@ import js.core.Void
 import js.objects.recordOf
 import kotlinx.browser.document
 import kotlinx.coroutines.await
+import org.w3c.dom.Element
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.asList
 import org.w3c.dom.get
@@ -341,6 +342,12 @@ class KingdomSheet(
     private var showDetailedMatrix: Boolean = false
     private val openedDetails = mutableSetOf<String>()
     private var analyticsWindowSize: Int = 25
+    // Quick-filter state for the active quests grid. Kept on the instance so it
+    // survives Foundry's full re-render (which rebuilds the DOM on every change).
+    private var questFilterTitle: String = ""
+    private var questFilterMin: String = ""
+    private var questFilterMax: String = ""
+    private var questFilterHidden: String = "all"
 
     init {
         appHook.onDeleteScene { _, _, _ -> render() }
@@ -3108,6 +3115,83 @@ class KingdomSheet(
                     }
                 })
             }
+        attachQuestFilter(htmlElement)
+    }
+
+    // Wires the quick-filter bar above the active quests grid. The inputs carry no
+    // `name`, and we stopPropagation on their events, so they never feed the form's
+    // submitOnChange (which would re-render and steal focus). Filter state is mirrored
+    // into instance fields so it can be restored after an unrelated re-render.
+    private fun attachQuestFilter(htmlElement: HTMLElement) {
+        val bar = htmlElement.querySelector(".km-quest-filters")?.takeIfInstance<HTMLElement>() ?: return
+        val titleInput = bar.querySelector(".km-quest-filter-title")
+        val minInput = bar.querySelector(".km-quest-filter-level-min")
+        val maxInput = bar.querySelector(".km-quest-filter-level-max")
+        val hiddenSelect = bar.querySelector(".km-quest-filter-hidden")
+        val clearBtn = bar.querySelector(".km-quest-filter-clear")
+        val countEl = bar.querySelector(".km-quest-filter-count")?.takeIfInstance<HTMLElement>()
+        val noMatches = htmlElement.querySelector(".km-quest-no-matches")?.takeIfInstance<HTMLElement>()
+        val cards = htmlElement.querySelectorAll(".km-quests-grid .km-quest-card").asList()
+            .filterIsInstance<HTMLElement>()
+
+        fun strVal(e: Element?): String = (e?.asDynamic()?.value as? String)?.trim() ?: ""
+        fun setVal(e: Element?, v: String) { e?.asDynamic()?.value = v }
+
+        val applyFilter = {
+            val q = strVal(titleInput).lowercase()
+            val min = strVal(minInput).toIntOrNull()
+            val max = strVal(maxInput).toIntOrNull()
+            val hiddenMode = strVal(hiddenSelect).ifEmpty { "all" }
+            var shown = 0
+            cards.forEach { card ->
+                val title = (card.dataset["title"] ?: "").lowercase()
+                val level = card.dataset["level"]?.toIntOrNull() ?: 0
+                val isHidden = card.dataset["hidden"] == "1"
+                val show = (q.isEmpty() || title.contains(q)) &&
+                    (min == null || level >= min) &&
+                    (max == null || level <= max) &&
+                    when (hiddenMode) {
+                        "hidden" -> isHidden
+                        "visible" -> !isHidden
+                        else -> true
+                    }
+                if (show) {
+                    card.classList.remove("km-quest-filtered-out")
+                    shown++
+                } else {
+                    card.classList.add("km-quest-filtered-out")
+                }
+            }
+            questFilterTitle = strVal(titleInput)
+            questFilterMin = strVal(minInput)
+            questFilterMax = strVal(maxInput)
+            questFilterHidden = hiddenMode
+            countEl?.textContent = "$shown / ${cards.size}"
+            noMatches?.hidden = shown != 0 || cards.isEmpty()
+        }
+
+        // restore any filter that was active before the last re-render
+        setVal(titleInput, questFilterTitle)
+        setVal(minInput, questFilterMin)
+        setVal(maxInput, questFilterMax)
+        setVal(hiddenSelect, questFilterHidden)
+
+        listOfNotNull(titleInput, minInput, maxInput, hiddenSelect).forEach { c ->
+            c.addEventListener("change", { it.stopPropagation(); applyFilter() })
+        }
+        listOfNotNull(titleInput, minInput, maxInput).forEach { c ->
+            c.addEventListener("input", { it.stopPropagation(); applyFilter() })
+        }
+        clearBtn?.addEventListener("click", {
+            it.preventDefault()
+            it.stopPropagation()
+            setVal(titleInput, "")
+            setVal(minInput, "")
+            setVal(maxInput, "")
+            setVal(hiddenSelect, "all")
+            applyFilter()
+        })
+        applyFilter()
     }
 
     override fun onParsedSubmit(value: KingdomSheetData): Promise<Void> = buildPromise {

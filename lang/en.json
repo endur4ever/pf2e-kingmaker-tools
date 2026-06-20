@@ -717,6 +717,18 @@
         "levelBadge": "Lvl",
         "createdAt": "Created",
         "updatedAt": "Updated",
+        "filter": {
+          "titlePlaceholder": "Search quests…",
+          "levelRange": "Filter by level range",
+          "min": "min",
+          "max": "max",
+          "visibility": "Visibility",
+          "visibilityAll": "All",
+          "visibilityVisible": "Visible only",
+          "visibilityHidden": "Hidden only",
+          "clear": "Clear filters",
+          "noMatches": "No quests match the current filters."
+        },
         "completed": "Quest Completed",
         "flavorTextCompleted": "Completion Story / Details",
         "fields": {

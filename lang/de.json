@@ -716,6 +716,18 @@
         "levelBadge": "Stufe",
         "createdAt": "Erstellt",
         "updatedAt": "Aktualisiert",
+        "filter": {
+          "titlePlaceholder": "Quests durchsuchen…",
+          "levelRange": "Nach Stufenbereich filtern",
+          "min": "Min",
+          "max": "Max",
+          "visibility": "Sichtbarkeit",
+          "visibilityAll": "Alle",
+          "visibilityVisible": "Nur sichtbare",
+          "visibilityHidden": "Nur verborgene",
+          "clear": "Filter zurücksetzen",
+          "noMatches": "Keine Quests entsprechen den aktuellen Filtern."
+        },
         "completed": "Quest Completed",
         "flavorTextCompleted": "Completion Story / Details",
         "fields": {

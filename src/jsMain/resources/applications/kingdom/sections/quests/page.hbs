@@ -13,9 +13,38 @@
             </h2>
 
             {{#if activeQuests.length}}
+            <div class="km-quest-filters">
+                <div class="km-quest-filter-field km-quest-filter-search">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="search" class="km-quest-filter-title" autocomplete="off"
+                           placeholder="{{localizeKM 'kingdom.quests.filter.titlePlaceholder'}}">
+                </div>
+                <div class="km-quest-filter-field km-quest-filter-levels" title="{{localizeKM 'kingdom.quests.filter.levelRange'}}">
+                    <i class="fa-solid fa-arrow-up-right-dots"></i>
+                    <span>{{localizeKM "kingdom.quests.levelBadge"}}</span>
+                    <input type="number" class="km-quest-filter-level-min" min="0" max="30" inputmode="numeric"
+                           placeholder="{{localizeKM 'kingdom.quests.filter.min'}}">
+                    <span>–</span>
+                    <input type="number" class="km-quest-filter-level-max" min="0" max="30" inputmode="numeric"
+                           placeholder="{{localizeKM 'kingdom.quests.filter.max'}}">
+                </div>
+                {{#if isGM}}
+                <select class="km-quest-filter-hidden" title="{{localizeKM 'kingdom.quests.filter.visibility'}}">
+                    <option value="all">{{localizeKM "kingdom.quests.filter.visibilityAll"}}</option>
+                    <option value="visible">{{localizeKM "kingdom.quests.filter.visibilityVisible"}}</option>
+                    <option value="hidden">{{localizeKM "kingdom.quests.filter.visibilityHidden"}}</option>
+                </select>
+                {{/if}}
+                <button type="button" class="km-quest-filter-clear" title="{{localizeKM 'kingdom.quests.filter.clear'}}">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+                <span class="km-quest-filter-count"></span>
+            </div>
+            <div class="km-quest-no-matches" hidden>{{localizeKM "kingdom.quests.filter.noMatches"}}</div>
             <div class="km-quests-grid">
                 {{#each activeQuests}}
-                <div class="km-quest-card km-quest-active{{#if hidden}} km-quest-hidden{{/if}}" data-id="{{id}}">
+                <div class="km-quest-card km-quest-active{{#if hidden}} km-quest-hidden{{/if}}" data-id="{{id}}"
+                     data-title="{{title}}" data-level="{{#if level}}{{level}}{{else}}0{{/if}}" data-hidden="{{#if hidden}}1{{else}}0{{/if}}">
                     <div class="km-quest-card-header">
                         <div class="km-quest-title">{{title}}</div>
                         {{#if hidden}}

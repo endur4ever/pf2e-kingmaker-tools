@@ -1133,6 +1133,74 @@
         margin-top: 2px;
     }
 
+    /* Quick-filter bar above the active quests grid. */
+    .km-quest-filters {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 12px;
+        padding: 8px 10px;
+        border-radius: 8px;
+        background: rgba(120, 120, 120, 0.12);
+        border: 1px solid rgba(120, 120, 120, 0.28);
+
+        .km-quest-filter-field {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .km-quest-filter-search {
+            flex: 1 1 180px;
+            min-width: 140px;
+        }
+
+        .km-quest-filter-title {
+            width: 100%;
+        }
+
+        .km-quest-filter-levels {
+            white-space: nowrap;
+            opacity: 0.95;
+        }
+
+        .km-quest-filter-level-min,
+        .km-quest-filter-level-max {
+            width: 52px;
+        }
+
+        .km-quest-filter-hidden {
+            width: auto;
+            flex: 0 0 auto;
+        }
+
+        .km-quest-filter-clear {
+            flex: 0 0 auto;
+            width: auto;
+            line-height: 1;
+            padding: 0 8px;
+        }
+
+        .km-quest-filter-count {
+            margin-left: auto;
+            font-size: 0.8em;
+            opacity: 0.65;
+            white-space: nowrap;
+        }
+    }
+
+    .km-quest-card.km-quest-filtered-out {
+        display: none;
+    }
+
+    .km-quest-no-matches {
+        padding: 14px;
+        text-align: center;
+        font-style: italic;
+        opacity: 0.7;
+    }
+
     .km-quest-card-header {
         display: flex;
         justify-content: space-between;
