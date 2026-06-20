@@ -16,6 +16,7 @@ import com.foundryvtt.core.applications.ux.TextEditor.TextEditor
 import com.foundryvtt.core.helpers.TypedHooks
 import com.foundryvtt.core.utils.fromUuid
 import com.foundryvtt.kingmaker.onRenderHexEditor
+import com.foundryvtt.kingmaker.onRenderHexHud
 import kotlinx.browser.document
 import kotlinx.coroutines.await
 import org.w3c.dom.Element
@@ -35,6 +36,35 @@ fun registerHexEditorLinks(game: Game) {
     TypedHooks.onRenderHexEditor { app, html, _ ->
         buildPromise { injectHexLinksPanel(game, app, html) }
     }
+    // Also surface a hex's linked quests in the native hover tooltip.
+    TypedHooks.onRenderHexHud { app, html, _ ->
+        injectHudQuests(game, app, html)
+    }
+}
+
+// Add a "Linked Quests" group to the native hex hover HUD, listing the quests linked to that hex.
+private fun injectHudQuests(game: Game, app: AnyObject, html: HTMLElement) {
+    if (!game.user.isGM) return
+    if (html.querySelector(".km-hexhud-quests") != null) return
+    val rawKey = app.asDynamic().hex?.key
+    val hexKey = (rawKey as? Int)?.toString() ?: (rawKey as? Double)?.toInt()?.toString() ?: return
+    val actor = game.getKingdomActors().firstOrNull() ?: return
+    val kingdom = actor.getKingdom() ?: return
+    val entry = (kingdom.hexContents ?: emptyArray()).firstOrNull { it.hexKey == hexKey } ?: return
+    val questIds = questIdsOf(entry)
+    if (questIds.isEmpty()) return
+    val quests = kingdom.quests ?: emptyArray()
+    val titles = questIds.map { id -> quests.find { it.id == id }?.title?.takeIf { it.isNotBlank() } ?: id }
+
+    val group = document.createElement("div")
+    group.className = "group feature km-hexhud-quests"
+    val sb = StringBuilder()
+    sb.append("<p class=\"item\"><span class=\"value gray\">${escapeHtml(t("kingdom.hexContent.linkedQuests"))}</span></p>")
+    titles.forEach { title ->
+        sb.append("<p class=\"item\"><i class=\"fa-solid fa-scroll\"></i> <span class=\"key\">${escapeHtml(title)}</span></p>")
+    }
+    group.innerHTML = sb.toString()
+    html.appendChild(group)
 }
 
 private fun hexKeyOf(app: AnyObject): String? {

@@ -15,5 +15,10 @@ fun <O> HooksEventListener.onCloseKingmakerHexEdit(callback: (KingmakerHexEditAp
 fun <O> HooksEventListener.onRenderHexEditor(callback: (app: AnyObject, html: HTMLElement, context: AnyObject) -> O) =
     on("renderHexEditor", callback)
 
+// The native hover tooltip class is `HexHUD` in km 2.3.x, so Foundry fires `renderHexHUD`
+// (the older `renderKingmakerHexHUD` binding above is stale). `app.hex` is the hovered KingmakerHex.
+fun <O> HooksEventListener.onRenderHexHud(callback: (app: AnyObject, html: HTMLElement, context: AnyObject) -> O) =
+    on("renderHexHUD", callback)
+
 fun <O> HooksEventListener.onRenderKingmakerHexHud(callback: (app: KingmakerHexHud, html: HTMLElement, messageData: AnyObject) -> O) =
     on("renderKingmakerHexHUD", callback)

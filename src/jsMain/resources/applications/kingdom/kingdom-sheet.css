@@ -2143,3 +2143,9 @@ fieldset.km-hex-editor-links {
     padding-top: 8px;
     background: var(--color-bg, var(--background, rgba(20, 20, 26, 0.96)));
 }
+
+/* Linked quests in the native hex hover tooltip */
+#kingmaker-hex-hud .km-hexhud-quests .fa-scroll {
+    margin-right: 4px;
+    color: var(--secondary-km, #ee9b3a);
+}
