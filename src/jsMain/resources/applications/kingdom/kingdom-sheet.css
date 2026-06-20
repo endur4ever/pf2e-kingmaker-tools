@@ -1170,9 +1170,11 @@
             width: 52px;
         }
 
-        .km-quest-filter-hidden {
+        .km-quest-filter-hidden,
+        .km-quest-filter-category {
             width: auto;
             flex: 0 0 auto;
+            max-width: 170px;
         }
 
         .km-quest-filter-clear {
