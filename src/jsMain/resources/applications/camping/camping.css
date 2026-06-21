@@ -216,6 +216,7 @@ ul.km-camping-actors {
         line-height: 20px;
         top: 4px;
         left: 4px;
+        pointer-events: none;
 
         &:hover i {
             box-shadow: none;
@@ -257,6 +258,7 @@ ul.km-camping-actors {
             top: 4px;
             left: 4px;
             border: 1px solid rgb(231, 209, 177);
+            pointer-events: none;
         }
 
         .km-camping-actor-hours {
