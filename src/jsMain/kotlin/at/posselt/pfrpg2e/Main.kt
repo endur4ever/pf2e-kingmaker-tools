@@ -71,6 +71,7 @@ import at.posselt.pfrpg2e.utils.loadTemplatePartials
 import at.posselt.pfrpg2e.utils.pf2eKingmakerTools
 import at.posselt.pfrpg2e.utils.registerIcons
 import at.posselt.pfrpg2e.utils.registerMacroDropHooks
+import at.posselt.pfrpg2e.utils.registerTouchDragGuard
 import at.posselt.pfrpg2e.utils.registerTokenMappings
 import at.posselt.pfrpg2e.weather.registerWeatherHooks
 import at.posselt.pfrpg2e.weather.rollWeather
@@ -240,6 +241,19 @@ fun main() {
         // native hex-editor link panel in its own onReady so it always wires up.
         TypedHooks.onReady {
             at.posselt.pfrpg2e.kingdom.map.registerHexEditorLinks(game)
+        }
+
+        // Insulated: silence the upstream Foundry/PF2e touch drag-cancel crash
+        // (TokenPF2e._finalizeDragLeft → Object.values(undefined)) on mobile/touch.
+        TypedHooks.onReady {
+            registerTouchDragGuard()
+        }
+
+        // Insulated: re-apply the saved Seasons & Stars calendar when S&S 0.26 fell back to
+        // Gregorian because a pack calendar (e.g. PF2e Golarion) finished its async load after
+        // S&S's setup-time restore — otherwise dates, weather seasons and calendar logging are wrong.
+        TypedHooks.onReady {
+            at.posselt.pfrpg2e.utils.fixSeasonsStarsActiveCalendar()
         }
 
         TypedHooks.onReady {
