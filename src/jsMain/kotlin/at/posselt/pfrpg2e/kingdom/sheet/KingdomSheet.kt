@@ -2404,11 +2404,20 @@ class KingdomSheet(
 
         // Players never see hidden quests; the GM sees them greyed out (see template).
         val visibleQuests = if (isGM) allQuests else allQuests.filter { (it.hidden as? Boolean) != true }
-        val activeQuests = visibleQuests.filter { (it.status as? String) == "active" }.toTypedArray()
-        val completedQuests = visibleQuests.filter {
-            val s = it.status as? String
-            s == "completed" || s == "failed"
-        }.toTypedArray()
+        // Default ordering: by level ascending; quests without a level sort last. Sort is stable,
+        // so quests sharing a level keep their existing (creation) order.
+        fun questLevelKey(q: dynamic): Double = (q.level as? Number)?.toDouble() ?: Double.MAX_VALUE
+        val activeQuests = visibleQuests
+            .filter { (it.status as? String) == "active" }
+            .sortedBy { questLevelKey(it) }
+            .toTypedArray()
+        val completedQuests = visibleQuests
+            .filter {
+                val s = it.status as? String
+                s == "completed" || s == "failed"
+            }
+            .sortedBy { questLevelKey(it) }
+            .toTypedArray()
         val allFeatures = kingdom.getExplodedFeatures()
         val chosenFeatures = kingdom.getChosenFeatures(allFeatures)
         val vacancies = kingdom.vacancies(
@@ -2639,6 +2648,7 @@ class KingdomSheet(
             activeLeader = game.getActiveLeader(),
             anarchyAt = anarchyAt,
             currentUnrest = kingdom.unrest,
+            increaseLeadershipActivities = globalBonuses.increaseLeadershipActivities,
         )
         val leadersContext = kingdom.leaders.toContext(
             leaderActors = leaderActors,
