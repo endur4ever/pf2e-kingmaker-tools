@@ -390,13 +390,18 @@ private suspend fun completeDailyPreparations(
 ) = coroutineScope {
     val actors = camping.getActorsInCamp()
     val recipes = camping.getAllRecipes().toList()
-    // Advancing time can throw if the world's calendar (e.g. Seasons & Stars) is misconfigured.
-    // Don't let that abort the rest before we persist its completion below, or the "Continue"
-    // button gets stuck (watchSecondsRemaining never resets to 0).
-    runCatching { game.time.advance(camping.watchSecondsRemaining).await() }
-        .onFailure { console.error("[km] camping rest: failed to advance world time", it) }
+    // Persist that the rest is finished BEFORE advancing the world clock. The advance runs through
+    // third-party calendar modules (Seasons & Stars), which can throw OR hang when the active
+    // calendar is misconfigured ("Calendar not found"). If we only saved afterwards, the "Continue"
+    // button would stay stuck forever (watchSecondsRemaining never resets to 0). Saving first
+    // unsticks camping even if the clock never advances or never returns; the runCatching below
+    // additionally keeps a throw from aborting the remaining daily-prep steps.
+    val secondsToAdvance = camping.watchSecondsRemaining
     camping.watchSecondsRemaining = 0
     camping.encounterModifier = 0
+    campingActor.setCamping(camping)
+    runCatching { game.time.advance(secondsToAdvance).await() }
+        .onFailure { console.error("[km] camping rest: failed to advance world time", it) }
     camping.dailyPrepsAtTime = game.time.worldTimeSeconds
     camping.secondsSpentTraveling = 0
     camping.secondsSpentHexploring = 0
