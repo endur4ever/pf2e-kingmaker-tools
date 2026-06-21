@@ -2404,9 +2404,9 @@ class KingdomSheet(
 
         // Players never see hidden quests; the GM sees them greyed out (see template).
         val visibleQuests = if (isGM) allQuests else allQuests.filter { (it.hidden as? Boolean) != true }
-        // Default ordering: by level ascending; quests without a level sort last. Sort is stable,
-        // so quests sharing a level keep their existing (creation) order.
-        fun questLevelKey(q: dynamic): Double = (q.level as? Number)?.toDouble() ?: Double.MAX_VALUE
+        // Default ordering: by level ascending; quests without a level sort FIRST (they need to be
+        // dealt with sooner). Sort is stable, so quests sharing a level keep their creation order.
+        fun questLevelKey(q: dynamic): Double = (q.level as? Number)?.toDouble() ?: Double.NEGATIVE_INFINITY
         val activeQuests = visibleQuests
             .filter { (it.status as? String) == "active" }
             .sortedBy { questLevelKey(it) }
