@@ -27,7 +27,7 @@ import at.posselt.pfrpg2e.utils.rollWithCompendiumFallback
 import at.posselt.pfrpg2e.utils.t
 import com.foundryvtt.core.Game
 import com.foundryvtt.core.documents.TableMessageOptions
-import com.foundryvtt.core.helpers.SimpleCalendar
+import com.foundryvtt.core.helpers.simpleCalendarOrNull
 import at.posselt.pfrpg2e.kingdom.logToCalendar
 import js.objects.recordOf
 
@@ -231,7 +231,7 @@ suspend fun rollWeather(game: Game) {
     val settings = game.settings.pfrpg2eKingdomCampingWeather
     val climateSettings = settings.getClimateSettings()
     val climate = climateSettings.months.mapIndexed { index, climateSetting ->
-        val derivedSeason = if (SimpleCalendar?.api != null) {
+        val derivedSeason = if (simpleCalendarOrNull()?.api != null) {
             getSeasonForMonth(index)
         } else {
             fromCamelCase<Season>(climateSetting.season)!!
