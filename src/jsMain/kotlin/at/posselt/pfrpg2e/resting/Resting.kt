@@ -371,7 +371,8 @@ private suspend fun beginRest(
             )
         }
 
-        game.time.advance(randomEncounterAt).await()
+        runCatching { game.time.advance(randomEncounterAt).await() }
+            .onFailure { console.error("[km] camping watch: failed to advance world time", it) }
         camping.watchSecondsRemaining = watchDurationSeconds - randomEncounterAt
         campingActor.setCamping(camping)
     } else {
@@ -389,7 +390,11 @@ private suspend fun completeDailyPreparations(
 ) = coroutineScope {
     val actors = camping.getActorsInCamp()
     val recipes = camping.getAllRecipes().toList()
-    game.time.advance(camping.watchSecondsRemaining).await()
+    // Advancing time can throw if the world's calendar (e.g. Seasons & Stars) is misconfigured.
+    // Don't let that abort the rest before we persist its completion below, or the "Continue"
+    // button gets stuck (watchSecondsRemaining never resets to 0).
+    runCatching { game.time.advance(camping.watchSecondsRemaining).await() }
+        .onFailure { console.error("[km] camping rest: failed to advance world time", it) }
     camping.watchSecondsRemaining = 0
     camping.encounterModifier = 0
     camping.dailyPrepsAtTime = game.time.worldTimeSeconds
@@ -434,8 +439,10 @@ private suspend fun completeDailyPreparations(
     campingActor.setCamping(camping)
 
     val additionalHealing = additionalHealingPerActorAfterRest(recipes, camping, actors)
-    game.pf2e.actions.restForTheNight(RestForTheNightOptions(actors = actors.toTypedArray(), skipDialog = true))
-        .await()
+    runCatching {
+        game.pf2e.actions.restForTheNight(RestForTheNightOptions(actors = actors.toTypedArray(), skipDialog = true))
+            .await()
+    }.onFailure { console.error("[km] camping rest: restForTheNight failed", it) }
     applyAdditionalHealing(additionalHealing)
     applyRestHealEffects(actors, recipes, getMealEffectItems(
         recipes = recipes,
