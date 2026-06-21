@@ -371,10 +371,12 @@ private suspend fun beginRest(
             )
         }
 
-        runCatching { game.time.advance(randomEncounterAt).await() }
-            .onFailure { console.error("[km] camping watch: failed to advance world time", it) }
+        // Persist the partial watch state first, then advance the clock detached — a misconfigured
+        // Seasons & Stars calendar that hangs the advance must not strand the watch mid-rest.
         camping.watchSecondsRemaining = watchDurationSeconds - randomEncounterAt
         campingActor.setCamping(camping)
+        game.time.advance(randomEncounterAt)
+            .catch { console.error("[km] camping watch: failed to advance world time", it) }
     } else {
         camping.watchSecondsRemaining = watchDurationSeconds
         completeDailyPreparations(game, dispatcher, campingActor, camping, party)
@@ -390,22 +392,7 @@ private suspend fun completeDailyPreparations(
 ) = coroutineScope {
     val actors = camping.getActorsInCamp()
     val recipes = camping.getAllRecipes().toList()
-    // Persist that the rest is finished BEFORE advancing the world clock. The advance runs through
-    // third-party calendar modules (Seasons & Stars), which can throw OR hang when the active
-    // calendar is misconfigured ("Calendar not found"). If we only saved afterwards, the "Continue"
-    // button would stay stuck forever (watchSecondsRemaining never resets to 0). Saving first
-    // unsticks camping even if the clock never advances or never returns; the runCatching below
-    // additionally keeps a throw from aborting the remaining daily-prep steps.
-    val secondsToAdvance = camping.watchSecondsRemaining
-    camping.watchSecondsRemaining = 0
-    camping.encounterModifier = 0
-    campingActor.setCamping(camping)
-    runCatching { game.time.advance(secondsToAdvance).await() }
-        .onFailure { console.error("[km] camping rest: failed to advance world time", it) }
-    camping.dailyPrepsAtTime = game.time.worldTimeSeconds
-    camping.secondsSpentTraveling = 0
-    camping.secondsSpentHexploring = 0
-
+    // Build the rest summary BEFORE clearing the activity results below.
     val activitiesSummary = camping.groupActivities()
         .filter { it.result.actorUuid != null }
         .map { activity ->
@@ -436,8 +423,18 @@ private suspend fun completeDailyPreparations(
         append("Daily preparations completed. Healing applied.")
     }
 
-    logToCalendar(title = "Camp Rest Completed", content = summaryContent)
-
+    // Finalize and PERSIST all camp state BEFORE any third-party calendar call. Advancing the world
+    // clock goes through Seasons & Stars, which can throw OR hang when the active calendar is
+    // misconfigured ("Calendar not found"). If a hanging clock call were reached first, every step
+    // after it would be skipped: the rest button stays on "Continue", per-actor downtime hours never
+    // reset to their full budget, and assigned activities stay stuck on their cards. So reset and
+    // save everything here first, then run the hang-prone calendar calls last and detached.
+    val secondsToAdvance = camping.watchSecondsRemaining
+    camping.watchSecondsRemaining = 0
+    camping.encounterModifier = 0
+    camping.secondsSpentTraveling = 0
+    camping.secondsSpentHexploring = 0
+    camping.dailyPrepsAtTime = game.time.worldTimeSeconds + secondsToAdvance
     Object.values(camping.campingActivities).forEach { it.result = null }
     Object.values(camping.cooking.results).forEach { it.result = null }
     camping.resetDowntimeHours()
@@ -458,6 +455,12 @@ private suspend fun completeDailyPreparations(
     removeProvisions(actors + listOfNotNull(party))
     removeCombatEffects(actors)
     gainMinimumSubsistence(dispatcher, camping.cooking.minimumSubsistence, party)
+
+    // Hang-prone calendar side effects run last and detached (fire-and-forget) so a misconfigured
+    // Seasons & Stars calendar can never abort or block the camp reset + healing above.
+    buildPromise { logToCalendar(title = "Camp Rest Completed", content = summaryContent) }
+    game.time.advance(secondsToAdvance)
+        .catch { console.error("[km] camping rest: failed to advance world time", it) }
 }
 
 private suspend fun gainMinimumSubsistence(
