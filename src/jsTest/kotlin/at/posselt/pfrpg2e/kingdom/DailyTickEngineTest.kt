@@ -85,4 +85,72 @@ class DailyTickEngineTest {
         assertTrue(result.arrived)
         assertFalse(result.traveling)
     }
+
+    // ── Expedition day ticking ─────────────────────────────────────────
+
+    @Test
+    fun testExpeditionDecrementsByOneDay() {
+        val result = DailyTickEngine.tickExpedition(daysRemaining = 3, days = 1)
+        assertEquals(2, result.newDaysRemaining)
+        assertFalse(result.completed)
+    }
+
+    @Test
+    fun testExpeditionReachingZeroCompletes() {
+        val result = DailyTickEngine.tickExpedition(daysRemaining = 1, days = 1)
+        assertEquals(0, result.newDaysRemaining)
+        assertTrue(result.completed)
+    }
+
+    @Test
+    fun testExpeditionOvershootCompletesOnce() {
+        // Advancing more days than the remaining still completes exactly once.
+        val result = DailyTickEngine.tickExpedition(daysRemaining = 3, days = 5)
+        assertEquals(0, result.newDaysRemaining)
+        assertTrue(result.completed)
+    }
+
+    @Test
+    fun testExpeditionAlreadyCompletedNotRecompleted() {
+        // Once at 0, a subsequent tick must NOT re-fire completion.
+        val result = DailyTickEngine.tickExpedition(daysRemaining = 0, days = 1)
+        assertEquals(0, result.newDaysRemaining)
+        assertFalse(result.completed, "Already-completed expedition must not re-complete")
+    }
+
+    @Test
+    fun testExpeditionZeroOrNegativeDaysCoercedToOne() {
+        val result = DailyTickEngine.tickExpedition(daysRemaining = 3, days = 0)
+        assertEquals(2, result.newDaysRemaining)
+        assertFalse(result.completed)
+    }
+
+    @Test
+    fun testExpeditionDefaultDaysIsOne() {
+        val result = DailyTickEngine.tickExpedition(daysRemaining = 4)
+        assertEquals(3, result.newDaysRemaining)
+    }
+
+    @Test
+    fun testExpeditionSequentialTicksReachCompletion() {
+        var daysRemaining = 3
+        // day 1
+        var result = DailyTickEngine.tickExpedition(daysRemaining, days = 1)
+        daysRemaining = result.newDaysRemaining
+        assertEquals(2, daysRemaining)
+        assertFalse(result.completed)
+        // day 2
+        result = DailyTickEngine.tickExpedition(daysRemaining, days = 1)
+        daysRemaining = result.newDaysRemaining
+        assertEquals(1, daysRemaining)
+        assertFalse(result.completed)
+        // day 3 — completion
+        result = DailyTickEngine.tickExpedition(daysRemaining, days = 1)
+        assertEquals(0, result.newDaysRemaining)
+        assertTrue(result.completed)
+        // day 4 — no re-completion
+        result = DailyTickEngine.tickExpedition(daysRemaining = result.newDaysRemaining, days = 1)
+        assertEquals(0, result.newDaysRemaining)
+        assertFalse(result.completed)
+    }
 }
