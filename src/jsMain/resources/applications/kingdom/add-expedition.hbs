@@ -1,8 +1,8 @@
 <form class="km-add-expedition-dialog">
     <div class="km-dialog-section">
-        <label for="expeditionActivity">{{localize "kingdom.expeditions.activity"}}</label>
+        <label for="expeditionActivity">{{localizeKM "kingdom.expeditions.activity"}}</label>
         <select name="expeditionActivity" id="expeditionActivity" required>
-            <option value="">{{localize "kingdom.expeditions.selectActivity"}}</option>
+            <option value="">{{localizeKM "kingdom.expeditions.selectActivity"}}</option>
             {{#each activities}}
             <option value="{{id}}">{{name}}</option>
             {{/each}}
@@ -10,17 +10,17 @@
     </div>
 
     <div class="km-dialog-section">
-        <label for="expeditionTier">{{localize "kingdom.expeditions.tier"}}</label>
+        <label for="expeditionTier">{{localizeKM "kingdom.expeditions.tier"}}</label>
         <select name="expeditionTier" id="expeditionTier">
-            <option value="routine">{{localize "kingdom.expeditions.tiers.routine"}}</option>
-            <option value="standard" selected>{{localize "kingdom.expeditions.tiers.standard"}}</option>
-            <option value="perilous">{{localize "kingdom.expeditions.tiers.perilous"}}</option>
+            <option value="routine">{{localizeKM "kingdom.expeditions.tiers.routine"}}</option>
+            <option value="standard" selected>{{localizeKM "kingdom.expeditions.tiers.standard"}}</option>
+            <option value="perilous">{{localizeKM "kingdom.expeditions.tiers.perilous"}}</option>
         </select>
-        <p class="km-hint">{{localize "kingdom.expeditions.tierHint"}}</p>
+        <p class="km-hint">{{localizeKM "kingdom.expeditions.tierHint"}}</p>
     </div>
 
     <div class="km-dialog-section">
-        <label>{{localize "kingdom.expeditions.companions"}}</label>
+        <label>{{localizeKM "kingdom.expeditions.companions"}}</label>
         <div class="km-companion-select-grid">
             {{#each companions}}
             <label class="km-companion-checkbox">
@@ -29,23 +29,23 @@
             </label>
             {{/each}}
         </div>
-        <p class="km-hint">{{localize "kingdom.expeditions.companionsHint"}}</p>
+        <p class="km-hint">{{localizeKM "kingdom.expeditions.companionsHint"}}</p>
     </div>
 
     <div class="km-dialog-section">
-        <label for="expeditionNotes">{{localize "kingdom.expeditions.notes"}}</label>
-        <textarea name="expeditionNotes" rows="3" placeholder="{{localize 'kingdom.expeditions.notesPlaceholder'}}">{{gmNotes}}</textarea>
+        <label for="expeditionNotes">{{localizeKM "kingdom.expeditions.notes"}}</label>
+        <textarea name="expeditionNotes" rows="3" placeholder="{{localizeKM 'kingdom.expeditions.notesPlaceholder'}}">{{gmNotes}}</textarea>
     </div>
 
     <div class="km-dialog-section km-checkbox-row">
         <label>
             <input type="checkbox" name="expeditionVisible" {{#if visibleToPlayers}}checked{{/if}} />
-            {{localize "kingdom.expeditions.visibleToPlayers"}}
+            {{localizeKM "kingdom.expeditions.visibleToPlayers"}}
         </label>
     </div>
 
     <div class="km-dialog-actions">
         <button type="button" data-action="cancel">{{localize "Cancel"}}</button>
-        <button type="button" data-action="save" class="km-primary">{{localize "kingdom.expeditions.launch"}}</button>
+        <button type="button" data-action="save" class="km-primary">{{localizeKM "kingdom.expeditions.launch"}}</button>
     </div>
 </form>
