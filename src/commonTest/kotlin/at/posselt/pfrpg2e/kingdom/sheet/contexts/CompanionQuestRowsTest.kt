@@ -61,4 +61,23 @@ class CompanionQuestRowsTest {
         kingdom.companionPersonalQuests = arrayOf(quest("q1", "completed", visible = false, companionId = "uuid-a"))
         assertFalse(kingdom.companionHasActivePersonalQuests(0))
     }
+
+    @Test
+    fun `companionHasActiveExpedition returns true when companion is on expedition`() {
+        val kingdom = js("{}").unsafeCast<KingdomData>()
+        val amiri = RawCharacter("Amiri", "uuid-a").apply { expeditionStatus = "onExpedition" }
+        kingdom.companions = arrayOf(amiri)
+        kingdom.companionExpeditions = arrayOf(
+            js("{ id: 'e1', title: 'Expedition', companionIds: ['uuid-a'], status: 'inProgress', daysRemaining: 3, totalDays: 7, dc: 15, tier: 'standard' }")
+        )
+        assertTrue(kingdom.companionHasActiveExpedition(0))
+    }
+
+    @Test
+    fun `companionHasActiveExpedition returns false when companion is available`() {
+        val kingdom = js("{}").unsafeCast<KingdomData>()
+        val amiri = RawCharacter("Amiri", "uuid-a").apply { expeditionStatus = "available" }
+        kingdom.companions = arrayOf(amiri)
+        assertFalse(kingdom.companionHasActiveExpedition(0))
+    }
 }

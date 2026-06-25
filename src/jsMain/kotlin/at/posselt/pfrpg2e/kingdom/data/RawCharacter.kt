@@ -38,6 +38,14 @@ external interface RawCharacter {
     var discoveryStatus: String
     /** IDs of personal quests linked to this companion. */
     var personalQuestIds: Array<String>
+    /** Companion level (1-20). Default 1. */
+    var level: Int
+    /** Accumulated XP toward next level (0-999). Default 0. */
+    var xp: Int
+    /** Expedition status: "available" | "onExpedition" | "unavailable". Default "available". */
+    var expeditionStatus: String
+    /** Days remaining until injury heals (null when not injured). Default null. */
+    var injuryDaysRemaining: Int?
 }
 
 /**
@@ -47,5 +55,5 @@ fun RawCharacter(
     name: String,
     actorUuid: String? = null,
 ): RawCharacter =
-    js("{ name: name, actorUuid: actorUuid, speed: 0, traveling: false, active: true, role: 'companion', plotHook: '', influence: 0, campAvailable: true, discoveryStatus: 'unknown', personalQuestIds: [] }")
+    js("{ name: name, actorUuid: actorUuid, speed: 0, traveling: false, active: true, role: 'companion', plotHook: '', influence: 0, campAvailable: true, discoveryStatus: 'unknown', personalQuestIds: [], level: 1, xp: 0, expeditionStatus: 'available', injuryDaysRemaining: null }")
         .unsafeCast<RawCharacter>()

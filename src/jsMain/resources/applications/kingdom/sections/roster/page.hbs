@@ -28,12 +28,21 @@
                                 {{this.roleLabel}}
                             </span>
                         </div>
+                        <div class="km-roster-expedition-status-chip km-expedition-status-{{this.expeditionStatus}}" title="{{this.expeditionStatusLabel}}">
+                            {{this.expeditionStatusLabel}}
+                        </div>
 
                         <div class="km-roster-relationship">
                             <div class="km-roster-influence" title="{{localizeKM 'kingdom.companion.influence'}}: {{this.influence}}/12">
                                 <div class="km-roster-influence-bar">
                                     <div class="km-roster-influence-fill" style="width: {{this.influencePercent}}%"></div>
                                 </div>
+                            </div>
+                            <div class="km-roster-xp" title="{{localizeKM 'kingdom.companion.xp'}}: {{this.xp}}/1000 (Lv {{this.level}})">
+                                <div class="km-roster-xp-bar">
+                                    <div class="km-roster-xp-fill" style="width: {{this.xpPercent}}%"></div>
+                                </div>
+                                <span class="km-roster-xp-label">Lv {{this.level}}</span>
                             </div>
                             <div class="km-roster-badges">
                                 <span class="km-roster-camp-badge {{#if this.campAvailable}}km-camp-available{{else}}km-camp-unavailable{{/if}}"
@@ -50,6 +59,16 @@
                                 {{#if this.hasPersonalQuests}}
                                 <span class="km-roster-quest-badge" title="{{localizeKM 'kingdom.companion.personalQuests'}}">
                                     <i class="fa-solid fa-scroll"></i> {{this.personalQuestCount}}
+                                </span>
+                                {{/if}}
+                                {{#if (eq this.expeditionStatus "onExpedition")}}
+                                <span class="km-roster-expedition-badge" title="{{localizeKM 'kingdom.companion.onExpedition'}}">
+                                    <i class="fa-solid fa-compass"></i>
+                                </span>
+                                {{/if}}
+                                {{#if (eq this.expeditionStatus "unavailable")}}
+                                <span class="km-roster-injured-badge" title="{{localizeKM 'kingdom.companion.injured'}} {{#if this.injuryDaysRemaining}}({{this.injuryDaysRemaining}} {{localizeKM 'kingdom.companion.days'}}){{/if}}">
+                                    <i class="fa-solid fa-bandage"></i>
                                 </span>
                                 {{/if}}
                             </div>

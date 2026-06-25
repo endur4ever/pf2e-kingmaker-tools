@@ -24,6 +24,8 @@ external interface CompanionPersonalQuest {
     var visibleToPlayers: Boolean
     /** Influence points granted to the companion on completion (auto-applied, Decision 3). */
     var influenceReward: Int
+    /** XP granted to the companion on completion (auto-applied when companion leveling is enabled). */
+    var rewards: CompanionQuestRewards?
 }
 
 /** Optional richer reward payload (currently influence is the primary auto-applied reward). */

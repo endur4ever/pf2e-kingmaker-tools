@@ -170,4 +170,72 @@ class CalculateIncomeTest {
         // Luxuries = worksite 2 + chosen feat increase 2 = 4
         assertEquals(4, income.luxuries)
     }
+
+    @Test
+    fun testGetResourceDiceAmountExcludesCurrentWhenProjecting() {
+        // A kingdom currently holding 1 resource die (now = 1).
+        val kingdomData = createMockKingdomData(level = 1, resourceDiceNow = 1)
+
+        // This-turn total includes the dice you currently hold: 4 + 1 + now 1 = 6
+        assertEquals(
+            6,
+            kingdomData.getResourceDiceAmount(emptyList(), emptyList(), kingdomData.level)
+        )
+        // A next-turn projection must NOT fold in the current dice (they get spent this turn): 4 + 1 = 5
+        assertEquals(
+            5,
+            kingdomData.getResourceDiceAmount(emptyList(), emptyList(), kingdomData.level, includeCurrent = false)
+        )
+    }
+
+    @Test
+    fun testCalculateProjectedResourcesExcludesCurrentResourceDice() {
+        // Regression: a level-1 kingdom holding 1 resource die used to project 6 (4 + level + now).
+        // The current dice are consumed each turn, so the projection should read 5, not 6.
+        val kingdomData = createMockKingdomData(level = 1, resourceDiceNow = 1)
+
+        val realmData = RealmData(
+            size = 1,
+            worksites = RealmData.WorkSites(
+                farmlands = RealmData.WorkSite(quantity = 0, resources = 0),
+                lumberCamps = RealmData.WorkSite(quantity = 0, resources = 0),
+                mines = RealmData.WorkSite(quantity = 0, resources = 0),
+                quarries = RealmData.WorkSite(quantity = 0, resources = 0),
+                luxurySources = RealmData.WorkSite(quantity = 0, resources = 0)
+            )
+        )
+
+        val expressionContext = ExpressionContext(
+            usedSkill = null,
+            ranks = KingdomSkillRanks(),
+            leader = null,
+            activity = null,
+            phase = null,
+            level = 1,
+            unrest = 0,
+            rollOptions = emptySet(),
+            vacancies = Vacancies(),
+            structure = null,
+            anarchyAt = 20,
+            atWar = false,
+            eventTraits = emptySet(),
+            settlementEvents = emptySet(),
+            eventLeader = null,
+            event = null,
+            structures = emptySet(),
+            waterBorders = 0
+        )
+
+        val income = calculateProjectedResources(
+            kingdomData = kingdomData,
+            realmData = realmData,
+            chosenFeats = emptyList(),
+            settlements = emptyList(),
+            expressionContext = expressionContext,
+            modifiers = emptyList()
+        )
+
+        // 4 base + 1 level, current resourceDice.now (1) excluded
+        assertEquals(5, income.resourceDice)
+    }
 }

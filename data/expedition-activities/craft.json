@@ -1,0 +1,28 @@
+{
+  "id": "craft",
+  "name": "expeditionActivities.craft.name",
+  "isLocked": false,
+  "isSecret": false,
+  "isHomebrew": false,
+  "skills": [
+    {
+      "name": "crafting",
+      "proficiency": "trained",
+      "dcType": "actorLevel",
+      "required": true
+    }
+  ],
+  "criticalSuccess": {
+    "message": "expeditionActivities.craft.criticalSuccess.message"
+  },
+  "success": {
+    "message": "expeditionActivities.craft.success.message"
+  },
+  "failure": {
+    "message": "expeditionActivities.craft.failure.message"
+  },
+  "criticalFailure": {
+    "message": "expeditionActivities.craft.criticalFailure.message"
+  },
+  "oncePerSession": false
+}

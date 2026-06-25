@@ -108,6 +108,7 @@ import at.posselt.pfrpg2e.kingdom.dialogs.settlementSizeHelp
 import at.posselt.pfrpg2e.kingdom.dialogs.structureXpDialog
 import at.posselt.pfrpg2e.kingdom.dialogs.HexContentManager
 import at.posselt.pfrpg2e.kingdom.dialogs.RosterAddDialog
+import at.posselt.pfrpg2e.kingdom.dialogs.AddExpeditionDialog
 import at.posselt.pfrpg2e.kingdom.dialogs.RosterEditDialog
 import at.posselt.pfrpg2e.kingdom.dialogs.TurnWizardApplication
 import at.posselt.pfrpg2e.kingdom.dialogs.performEndTurn
@@ -181,6 +182,8 @@ import at.posselt.pfrpg2e.kingdom.sheet.contexts.UnclaimedWorksiteContext
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.toActivitiesContext
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.toContext
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.toRosterContext
+import at.posselt.pfrpg2e.kingdom.sheet.contexts.toExpeditionsContext
+import at.posselt.pfrpg2e.kingdom.sheet.contexts.companionHasActiveExpedition
 import at.posselt.pfrpg2e.kingdom.SessionPrepNarrativeGenerator
 import at.posselt.pfrpg2e.kingdom.sheet.SessionPrepNarrativeDialog
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.buildPartyInfluenceContext
@@ -877,7 +880,9 @@ class KingdomSheet(
                             },
                             onDelete = { idx ->
                                 val current = getKingdom()
-                                if (current.companionHasActivePersonalQuests(idx)) {
+                                if (current.companionHasActiveExpedition(idx)) {
+                                    ui.notifications.warn(t("kingdom.companion.cannotDeleteOnExpedition"))
+                                } else if (current.companionHasActivePersonalQuests(idx)) {
                                     ui.notifications.warn(t("kingdom.companion.cannotDeleteHasQuests"))
                                 } else {
                                     current.companions = (current.companions ?: emptyArray()).filterIndexed { i, _ -> i != idx }.toTypedArray()
@@ -893,7 +898,9 @@ class KingdomSheet(
                 val index = target.dataset["index"]?.toIntOrNull()
                 if (index != null) {
                     val kingdom = getKingdom()
-                    if (kingdom.companionHasActivePersonalQuests(index)) {
+                    if (kingdom.companionHasActiveExpedition(index)) {
+                        ui.notifications.warn(t("kingdom.companion.cannotDeleteOnExpedition"))
+                    } else if (kingdom.companionHasActivePersonalQuests(index)) {
                         ui.notifications.warn(t("kingdom.companion.cannotDeleteHasQuests"))
                     } else {
                         kingdom.companions = (kingdom.companions ?: emptyArray()).filterIndexed { i, _ -> i != index }.toTypedArray()
@@ -940,6 +947,66 @@ class KingdomSheet(
                         actor.setKingdom(kingdom)
                     }
                 }
+            }
+
+            "add-expedition" -> buildPromise {
+                val kingdom = getKingdom()
+                val comps = kingdom.companions ?: emptyArray()
+                AddExpeditionDialog(
+                    companions = comps,
+                ) { expedition ->
+                    val current = getKingdom()
+                    current.companionExpeditions = (current.companionExpeditions ?: emptyArray()) + expedition
+                    val updatedComps = (current.companions ?: emptyArray()).copyOf()
+                    expedition.companionIds.forEach { cid ->
+                        updatedComps.find { (it.actorUuid ?: it.name) == cid }?.expeditionStatus = "onExpedition"
+                    }
+                    current.companions = updatedComps
+                    actor.setKingdom(current)
+                }.launch()
+            }
+
+            "cancel-expedition" -> buildPromise {
+                val expeditionId = target.dataset["expeditionId"] ?: return@buildPromise
+                val kingdom = getKingdom()
+                if (confirm(t("kingdom.expeditions.cancelConfirm"))) {
+                    val cancelledCompanionIds = (kingdom.companionExpeditions ?: emptyArray())
+                        .find { it.id == expeditionId }
+                        ?.companionIds ?: emptyArray()
+                    kingdom.companionExpeditions = (kingdom.companionExpeditions ?: emptyArray()).map {
+                        if (it.id == expeditionId) {
+                            it.status = "cancelled"
+                            it.daysRemaining = 0
+                        }
+                        it
+                    }.toTypedArray()
+                    // Release companions
+                    kingdom.companions = (kingdom.companions ?: emptyArray()).map { c ->
+                        val key = c.actorUuid ?: c.name
+                        if (key in cancelledCompanionIds) {
+                            c.expeditionStatus = "available"
+                        }
+                        c
+                    }.toTypedArray()
+                    actor.setKingdom(kingdom)
+                }
+            }
+
+            "resolve-expedition" -> buildPromise {
+                val expeditionId = target.dataset["expeditionId"] ?: return@buildPromise
+                val kingdom = getKingdom()
+                val expedition = kingdom.companionExpeditions?.find { it.id == expeditionId } ?: return@buildPromise
+                expedition.status = "resolved"
+                // Release companions
+                val companionIds = expedition.companionIds
+                kingdom.companions = (kingdom.companions ?: emptyArray()).map { c ->
+                    val key = c.actorUuid ?: c.name
+                    if (key in companionIds) {
+                        c.expeditionStatus = "available"
+                    }
+                    c
+                }.toTypedArray()
+                actor.setKingdom(kingdom)
             }
 
             "add-modifier" -> buildPromise {
@@ -1300,6 +1367,8 @@ class KingdomSheet(
                         companionQuests = kingdom.companionPersonalQuests,
                         isGM = game.user.isGM,
                         turnHistory = kingdom.turnHistory,
+                        companionExpeditions = kingdom.companionExpeditions,
+                        companions = kingdom.companions,
                     )
                     val folder = SessionPrepJournalExporter.export(game, view)
                     ui.notifications.info(t("kingdom.sessionPrep.exportSuccess", recordOf("folder" to folder)))
@@ -1319,6 +1388,8 @@ class KingdomSheet(
                         companionQuests = kingdom.companionPersonalQuests,
                         isGM = game.user.isGM,
                         turnHistory = kingdom.turnHistory,
+                        companionExpeditions = kingdom.companionExpeditions,
+                        companions = kingdom.companions,
                     )
                     val html = SessionPrepNarrativeGenerator.generate(view)
                     if (html.isBlank()) {
@@ -2978,6 +3049,11 @@ class KingdomSheet(
             }.toTypedArray().toRosterContext(
                 isGM = isGM,
                 personalQuests = kingdom.companionPersonalQuests ?: emptyArray(),
+                expeditions = kingdom.companionExpeditions ?: emptyArray(),
+            ) { t(it) },
+            expeditionsContext = (kingdom.companionExpeditions ?: emptyArray()).toExpeditionsContext(
+                isGM = isGM,
+                companions = kingdom.companions ?: emptyArray(),
             ) { t(it) },
             partyInfluenceContext = buildPartyInfluenceContext(
                 companions = (kingdom.companions ?: emptyArray()).map {
@@ -3014,6 +3090,8 @@ class KingdomSheet(
                     companionQuests = kingdom.companionPersonalQuests,
                     isGM = isGM,
                     turnHistory = kingdom.turnHistory,
+                    companionExpeditions = kingdom.companionExpeditions,
+                    companions = kingdom.companions,
                 )
             ),
             showDetailedMatrix = showDetailedMatrix,

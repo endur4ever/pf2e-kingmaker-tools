@@ -101,6 +101,57 @@ object SessionPrepNarrativeGenerator {
             sb.append("</p>\n")
         }
 
+        // Companion Expeditions
+        if (view.companionExpeditions.isNotEmpty()) {
+            sb.append("<h2>Companion Expeditions</h2>\n")
+            val inProgress = view.companionExpeditions.filter { it.status == "inProgress" }
+            val awaiting = view.companionExpeditions.filter { it.status == "awaitingResolution" }
+
+            if (inProgress.isNotEmpty()) {
+                sb.append("<p>Companions currently away on expeditions: ")
+                val desc = inProgress.joinToString("; ") { exp ->
+                    val companionsText = if (exp.companionNames.isNotBlank()) "${esc(exp.companionNames)} on " else ""
+                    val daysText = if (exp.turnsRemaining != null) " (${exp.turnsRemaining} days remaining)" else ""
+                    "$companionsText${esc(exp.name)}$daysText"
+                }
+                sb.append("$desc.</p>\n")
+            }
+
+            if (awaiting.isNotEmpty()) {
+                sb.append("<p>Expeditions recently completed and awaiting GM resolution:</p>\n<ul>\n")
+                for (exp in awaiting) {
+                    sb.append("  <li>")
+                    val companionsText = if (exp.companionNames.isNotBlank()) "<strong>${esc(exp.companionNames)}</strong>: " else ""
+                    val degreeLabel = exp.outcomeDegree?.let { d ->
+                        when (d) {
+                            "criticalSuccess" -> "Critical Success"
+                            "success" -> "Success"
+                            "failure" -> "Failure"
+                            "criticalFailure" -> "Critical Failure"
+                            else -> d
+                        }
+                    } ?: "Awaiting Roll"
+                    sb.append("$companionsText${esc(exp.name)} — $degreeLabel")
+
+                    val details = mutableListOf<String>()
+                    if (exp.completesQuest) {
+                        details.add("completed personal quest")
+                    }
+                    if (exp.willLevelUp) {
+                        details.add("ready to level up")
+                    }
+                    if (exp.outcomeDegree == "criticalFailure") {
+                        details.add("complication arose")
+                    }
+                    if (details.isNotEmpty()) {
+                        sb.append(" (${details.joinToString(", ")})")
+                    }
+                    sb.append("</li>\n")
+                }
+                sb.append("</ul>\n")
+            }
+        }
+
         // Recent Turns (GM only)
         if (view.isGM && view.recentTurns.isNotEmpty()) {
             sb.append("<h2>Recent Turns</h2>\n")
@@ -171,6 +222,43 @@ object SessionPrepNarrativeGenerator {
                 val turns = if (m.turnsRemaining != null) " (${m.turnsRemaining} turns remaining)" else ""
                 val detail = if (m.detail.isNotBlank()) " [${m.detail}]" else ""
                 sb.appendLine("- ${m.name}$turns$detail")
+            }
+        }
+
+        if (view.companionExpeditions.isNotEmpty()) {
+            sb.appendLine()
+            sb.appendLine("**Companion Expeditions**")
+            val inProgress = view.companionExpeditions.filter { it.status == "inProgress" }
+            val awaiting = view.companionExpeditions.filter { it.status == "awaitingResolution" }
+
+            if (inProgress.isNotEmpty()) {
+                sb.appendLine("Away on expeditions:")
+                for (exp in inProgress) {
+                    val companionsText = if (exp.companionNames.isNotBlank()) "${exp.companionNames} on " else ""
+                    val daysText = if (exp.turnsRemaining != null) " (${exp.turnsRemaining} days remaining)" else ""
+                    sb.appendLine("- $companionsText${exp.name}$daysText")
+                }
+            }
+            if (awaiting.isNotEmpty()) {
+                if (inProgress.isNotEmpty()) sb.appendLine()
+                sb.appendLine("Completed expeditions awaiting resolution:")
+                for (exp in awaiting) {
+                    val companionsText = if (exp.companionNames.isNotBlank()) "${exp.companionNames}: " else ""
+                    val degreeLabel = when (exp.outcomeDegree) {
+                        "criticalSuccess" -> "Critical Success"
+                        "success" -> "Success"
+                        "failure" -> "Failure"
+                        "criticalFailure" -> "Critical Failure"
+                        else -> exp.outcomeDegree ?: "Awaiting Roll"
+                    }
+                    val details = mutableListOf<String>()
+                    if (exp.completesQuest) details.add("completed personal quest")
+                    if (exp.willLevelUp) details.add("ready to level up")
+                    if (exp.outcomeDegree == "criticalFailure") details.add("complication arose")
+
+                    val detailsText = if (details.isNotEmpty()) " (${details.joinToString(", ")})" else ""
+                    sb.appendLine("- $companionsText${exp.name} — $degreeLabel$detailsText")
+                }
             }
         }
 

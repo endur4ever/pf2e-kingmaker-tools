@@ -1,0 +1,498 @@
+/* ============================================================================
+   Expeditions board — cards, grid, progress/XP bars, status chips, responsive.
+   Reuses km-* conventions and the dark-surface pattern established by roster
+   and quests. .theme-light overrides follow the same sibling block pattern
+   used throughout kingdom-sheet.css.
+   ============================================================================ */
+
+/* ---- Board container ---- */
+.km-expedition-board {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+}
+
+.km-expedition-header {
+    display: flex;
+    align-items: center;
+    gap: .5em;
+    color: var(--secondary-km, #ee9b3a);
+
+    i {
+        font-size: 1.2em;
+    }
+}
+
+.km-expedition-header .km-header-right-align {
+    margin-left: auto;
+}
+
+.km-add-expedition-btn {
+    font-size: 0.85em;
+    padding: 6px 12px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin: 0;
+    background: rgba(39, 174, 96, 0.2);
+    border: 1px solid rgba(39, 174, 96, 0.4);
+    color: #2ecc71;
+
+    &:hover {
+        background: rgba(39, 174, 96, 0.35);
+        border-color: #2ecc71;
+    }
+}
+
+/* ---- Grid ---- */
+.km-expedition-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1em;
+    padding: .5em 0;
+}
+
+/* ---- Card ---- */
+.km-expedition-card {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid rgba(120, 120, 120, 0.25);
+    border-radius: 8px;
+    overflow: hidden;
+    background: rgba(30, 30, 30, 0.6);
+    color: #e0e0e0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.15s ease;
+
+    &:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    }
+}
+
+.km-expedition-card-resolved {
+    opacity: .7;
+    border-color: rgba(120, 120, 120, 0.15);
+}
+
+.km-expedition-card-awaiting {
+    border-color: rgba(241, 196, 15, 0.5);
+    box-shadow: 0 0 0 1px rgba(241, 196, 15, 0.3), 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+/* ---- Card header ---- */
+.km-expedition-card-header {
+    display: flex;
+    align-items: center;
+    gap: .5em;
+    padding: .6em .75em;
+    border-bottom: 1px solid rgba(120, 120, 120, 0.15);
+}
+
+.km-expedition-title {
+    font-weight: bold;
+    font-size: 1.05em;
+    color: #f5f5f5;
+    flex-grow: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ---- Tier badge ---- */
+.km-expedition-tier-badge {
+    font-size: var(--font-size-10, 0.7em);
+    padding: .15em .6em;
+    border-radius: 1em;
+    white-space: nowrap;
+    font-weight: 600;
+    text-transform: capitalize;
+    border: 1px solid transparent;
+
+    &.km-expedition-tier-routine {
+        background: rgba(108, 117, 125, 0.18);
+        color: #adb5bd;
+        border-color: rgba(108, 117, 125, 0.35);
+    }
+
+    &.km-expedition-tier-standard {
+        background: rgba(52, 152, 219, 0.15);
+        color: #5dade2;
+        border-color: rgba(52, 152, 219, 0.35);
+    }
+
+    &.km-expedition-tier-perilous {
+        background: rgba(192, 57, 43, 0.15);
+        color: #ec7063;
+        border-color: rgba(192, 57, 43, 0.35);
+    }
+}
+
+/* ---- Card body ---- */
+.km-expedition-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: .5em;
+    padding: .5em .75em;
+    flex-grow: 1;
+}
+
+.km-expedition-field {
+    display: flex;
+    justify-content: space-between;
+    gap: .5em;
+    font-size: var(--font-size-12);
+
+    label {
+        font-weight: 600;
+        color: #9a9a9a;
+    }
+}
+
+/* ---- Progress bar ---- */
+.km-expedition-progress {
+    display: flex;
+    flex-direction: column;
+    gap: .25em;
+}
+
+.km-expedition-progress-bar {
+    height: 8px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+}
+
+.km-expedition-progress-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #27ae60, #2ecc71 55%, #58d68d);
+    transition: width 200ms ease-out;
+}
+
+.km-expedition-days {
+    font-size: var(--font-size-11, 0.75em);
+    color: #9a9a9a;
+}
+
+/* ---- Outcome display (awaiting resolution) ---- */
+.km-expedition-outcome {
+    display: flex;
+    align-items: center;
+    gap: .5em;
+    font-size: var(--font-size-12);
+}
+
+.km-expedition-outcome-label {
+    color: #9a9a9a;
+    font-weight: 600;
+}
+
+.km-expedition-outcome-degree {
+    font-weight: 600;
+    padding: .1em .5em;
+    border-radius: 4px;
+    font-size: 0.92em;
+
+    &.km-outcome-criticalSuccess {
+        background: rgba(23, 31, 105, 0.25);
+        color: #7b8cff;
+    }
+
+    &.km-outcome-success {
+        background: rgba(30, 69, 151, 0.25);
+        color: #5dade2;
+    }
+
+    &.km-outcome-failure {
+        background: rgba(197, 36, 36, 0.2);
+        color: #ec7063;
+    }
+
+    &.km-outcome-criticalFailure {
+        background: rgba(135, 27, 27, 0.25);
+        color: #ff6b6b;
+    }
+}
+
+/* ---- Resolved summary ---- */
+.km-expedition-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5em;
+    font-size: var(--font-size-12);
+
+    span {
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        padding: .15em .55em;
+        border-radius: 4px;
+        font-weight: 500;
+    }
+}
+
+.km-expedition-xp {
+    background: rgba(52, 152, 219, 0.15);
+    color: #5dade2;
+    border: 1px solid rgba(52, 152, 219, 0.3);
+}
+
+.km-expedition-influence {
+    background: rgba(166, 124, 30, 0.15);
+    color: #d4ac2b;
+    border: 1px solid rgba(166, 124, 30, 0.3);
+}
+
+.km-expedition-loot {
+    &.km-loot-none {
+        background: rgba(108, 117, 125, 0.15);
+        color: #adb5bd;
+        border: 1px solid rgba(108, 117, 125, 0.3);
+    }
+
+    &.km-loot-minor {
+        background: rgba(46, 204, 113, 0.12);
+        color: #2ecc71;
+        border: 1px solid rgba(46, 204, 113, 0.25);
+    }
+
+    &.km-loot-moderate {
+        background: rgba(52, 152, 219, 0.15);
+        color: #5dade2;
+        border: 1px solid rgba(52, 152, 219, 0.3);
+    }
+
+    &.km-loot-major {
+        background: rgba(155, 89, 182, 0.15);
+        color: #bb8fce;
+        border: 1px solid rgba(155, 89, 182, 0.3);
+    }
+}
+
+/* ---- GM notes ---- */
+.km-expedition-notes {
+    font-size: var(--font-size-12);
+    color: #aaa;
+    background: rgba(0, 0, 0, 0.15);
+    border-left: 3px solid rgba(166, 124, 30, 0.5);
+    border-radius: 4px;
+    padding: 6px 10px;
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-style: italic;
+}
+
+/* ---- Card actions ---- */
+.km-expedition-card-actions {
+    display: flex;
+    gap: .5em;
+    padding: .4em .75em .6em;
+    border-top: 1px solid rgba(120, 120, 120, 0.12);
+}
+
+.km-expedition-action-btn {
+    font-size: 0.85em;
+    padding: 6px 12px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin: 0;
+    background: rgba(108, 117, 125, 0.15);
+    border: 1px solid rgba(108, 117, 125, 0.3);
+    color: #aaa;
+
+    &:hover {
+        background: rgba(108, 117, 125, 0.3);
+        color: #e0e0e0;
+    }
+}
+
+.km-expedition-resolve-btn {
+    background: rgba(39, 174, 96, 0.2);
+    border: 1px solid rgba(39, 174, 96, 0.4);
+    color: #2ecc71;
+
+    &:hover {
+        background: rgba(39, 174, 96, 0.35);
+        border-color: #2ecc71;
+    }
+}
+
+/* ---- Empty state ---- */
+.km-expedition-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    color: #777;
+    text-align: center;
+    border: 2px dashed rgba(120, 120, 120, 0.15);
+    border-radius: 8px;
+
+    i {
+        font-size: 3em;
+        margin-bottom: 12px;
+        opacity: 0.5;
+    }
+
+    p {
+        font-size: 1.1em;
+        margin: 0;
+    }
+}
+
+/* ---- Light theme overrides ---- */
+.theme-light {
+    .km-expedition-card {
+        background: rgba(255, 255, 255, 0.5);
+        border-color: rgba(0, 0, 0, 0.1);
+        color: #333;
+    }
+
+    .km-expedition-card-resolved {
+        opacity: 0.75;
+    }
+
+    .km-expedition-card-awaiting {
+        border-color: rgba(199, 154, 58, 0.5);
+        box-shadow: 0 0 0 1px rgba(199, 154, 58, 0.3), 0 2px 4px rgba(0, 0, 0, 0.08);
+    }
+
+    .km-expedition-title { color: #222; }
+
+    .km-expedition-card-header {
+        border-bottom-color: rgba(0, 0, 0, 0.08);
+    }
+
+    .km-expedition-tier-badge {
+        &.km-expedition-tier-routine { color: #495057; }
+        &.km-expedition-tier-standard { color: #20639b; }
+        &.km-expedition-tier-perilous { color: #922b21; }
+    }
+
+    .km-expedition-progress-bar {
+        background: rgba(0, 0, 0, 0.08);
+    }
+
+    .km-expedition-days { color: #666; }
+
+    .km-expedition-field label { color: #555; }
+
+    .km-expedition-outcome-degree {
+        &.km-outcome-criticalSuccess { color: #1a237e; }
+        &.km-outcome-success { color: #1565c0; }
+        &.km-outcome-failure { color: #c62828; }
+        &.km-outcome-criticalFailure { color: #b71c1c; }
+    }
+
+    .km-expedition-summary {
+        .km-expedition-xp { color: #1565c0; }
+        .km-expedition-influence { color: #7d6608; }
+    }
+
+    .km-expedition-notes {
+        background: rgba(0, 0, 0, 0.03);
+        border-left-color: rgba(166, 124, 30, 0.4);
+        color: #555;
+    }
+
+    .km-expedition-action-btn {
+        background: rgba(0, 0, 0, 0.05);
+        border-color: rgba(0, 0, 0, 0.12);
+        color: #555;
+
+        &:hover {
+            background: rgba(0, 0, 0, 0.1);
+            color: #222;
+        }
+    }
+
+    .km-expedition-resolve-btn {
+        background: rgba(39, 174, 96, 0.1);
+        color: #196f3d;
+        border-color: rgba(39, 174, 96, 0.3);
+
+        &:hover {
+            background: rgba(39, 174, 96, 0.2);
+        }
+    }
+
+    .km-add-expedition-btn {
+        background: rgba(39, 174, 96, 0.1);
+        color: #196f3d;
+        border-color: rgba(39, 174, 96, 0.3);
+
+        &:hover {
+            background: rgba(39, 174, 96, 0.2);
+        }
+    }
+
+    .km-expedition-empty {
+        color: #888;
+        border-color: rgba(0, 0, 0, 0.1);
+    }
+}
+
+/* ============================================================================
+   Responsive — tablet (max-width: 768px)
+   The sheet already goes full-viewport at this breakpoint (kingdom-sheet.css).
+   The expedition grid drops to a single column, cards stack, and the tab
+   strip (.km-tabs) scrolls horizontally (handled by kingdom-sheet.css).
+   ============================================================================ */
+@media (max-width: 768px) {
+    .km-expedition-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .km-expedition-card-header {
+        flex-wrap: wrap;
+    }
+
+    .km-expedition-title {
+        white-space: normal;
+        min-width: 0;
+    }
+
+    .km-expedition-card-actions {
+        flex-wrap: wrap;
+    }
+}
+
+/* ============================================================================
+   Responsive — phone (max-width: 480px)
+   Tighter padding, smaller tier badges, full-width action buttons.
+   ============================================================================ */
+@media (max-width: 480px) {
+    .km-expedition-grid {
+        grid-template-columns: 1fr;
+        gap: .75em;
+    }
+
+    .km-expedition-card-body {
+        padding: .4em .55em;
+    }
+
+    .km-expedition-card-header {
+        padding: .4em .55em;
+    }
+
+    .km-expedition-card-actions {
+        padding: .3em .55em .5em;
+        flex-direction: column;
+
+        .km-expedition-action-btn {
+            justify-content: center;
+        }
+    }
+
+    .km-expedition-tier-badge {
+        font-size: var(--font-size-10, 0.65em);
+    }
+}

@@ -151,6 +151,21 @@ object SessionPrepJournalExporter {
             sb.append("</ul>\n")
         }
 
+        // Companion Expeditions
+        sb.append("<h2>Companion Expeditions</h2>\n")
+        if (view.companionExpeditions.isEmpty()) {
+            sb.append("<p><em>No active companion expeditions.</em></p>\n")
+        } else {
+            sb.append("<ul>\n")
+            for (e in view.companionExpeditions) {
+                sb.append("  <li><strong>${esc(e.name)}</strong>")
+                if (e.turnsRemaining != null) sb.append(" — <em>${e.turnsRemaining} days remaining</em>")
+                if (e.detail.isNotBlank()) sb.append(" <span style=\"opacity:0.7\">(${esc(e.detail)})</span>")
+                sb.append("</li>\n")
+            }
+            sb.append("</ul>\n")
+        }
+
         // Recent Turns (GM only)
         if (view.isGM && view.recentTurns.isNotEmpty()) {
             sb.append("<h2>Recent Turns</h2>\n")

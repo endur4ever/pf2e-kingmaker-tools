@@ -297,6 +297,7 @@ suspend fun toActivitiesContext(
     activeLeader: Leader?,
     anarchyAt: Int,
     currentUnrest: Int,
+    increaseLeadershipActivities: Boolean = false,
 ): ActivitiesContext = coroutineScope {
     val activitiesByPhase = activities
         .asSequence()
@@ -402,6 +403,7 @@ suspend fun toActivitiesContext(
         phasePerformed,
         leadershipCap = leadershipSettings.getLeadershipActivityCap(),
         leadershipCapWithTownhall = leadershipSettings.getLeadershipActivityCapWithTownhall(),
+        increaseLeadershipActivities = increaseLeadershipActivities,
     )
     val leadershipCap = capsResult.caps.find { it.phase == "leadership" }
     val civicCap = capsResult.caps.find { it.phase == "civic" }

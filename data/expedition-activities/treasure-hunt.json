@@ -1,0 +1,34 @@
+{
+  "id": "treasure-hunt",
+  "name": "expeditionActivities.treasure-hunt.name",
+  "isLocked": false,
+  "isSecret": false,
+  "isHomebrew": false,
+  "skills": [
+    {
+      "name": "perception",
+      "proficiency": "expert",
+      "dcType": "zone",
+      "required": true
+    },
+    {
+      "name": "thievery",
+      "proficiency": "trained",
+      "dcType": "zone",
+      "required": false
+    }
+  ],
+  "criticalSuccess": {
+    "message": "expeditionActivities.treasure-hunt.criticalSuccess.message"
+  },
+  "success": {
+    "message": "expeditionActivities.treasure-hunt.success.message"
+  },
+  "failure": {
+    "message": "expeditionActivities.treasure-hunt.failure.message"
+  },
+  "criticalFailure": {
+    "message": "expeditionActivities.treasure-hunt.criticalFailure.message"
+  },
+  "oncePerSession": false
+}

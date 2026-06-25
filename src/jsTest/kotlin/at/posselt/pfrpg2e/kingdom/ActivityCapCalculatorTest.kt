@@ -135,10 +135,27 @@ class ActivityCapCalculatorTest {
 
     @Test
     fun `Leadership cap is PC leaders times 3 with a Town Hall structure`() {
-        // 8 PC leaders, with Town Hall: 8 x 3 = 24 (RAW)
+        // 8 PC leaders, with Town Hall: 8 x 3 = 24 (RAW). The town-hall bonus is a structure-derived
+        // flag the caller passes in (evaluateGlobalBonuses), not a kingdom.settings field.
         val kingdom = createTestKingdom(pcLeaders = 8, increaseLeadershipActivities = true)
-        val leadership = ActivityCapCalculator.calculate(kingdom).caps.find { it.phase == "leadership" }!!
+        val leadership = ActivityCapCalculator
+            .calculate(kingdom, increaseLeadershipActivities = true)
+            .caps.find { it.phase == "leadership" }!!
         assertEquals(24, leadership.maximum)
+    }
+
+    @Test
+    fun `Town Hall bonus comes from the caller flag, not kingdom settings`() {
+        // Regression: the calculator used to read a non-existent kingdom.settings flag, so the
+        // town-hall branch was dead and always used the non-town-hall allotment. Setting the old
+        // settings flag must NOT raise the cap; only the explicit parameter does.
+        val kingdom = createTestKingdom(pcLeaders = 8, increaseLeadershipActivities = true)
+        val withoutFlag = ActivityCapCalculator.calculate(kingdom)
+            .caps.find { it.phase == "leadership" }!!
+        assertEquals(16, withoutFlag.maximum, "settings flag alone does nothing (8 x 2)")
+        val withFlag = ActivityCapCalculator.calculate(kingdom, increaseLeadershipActivities = true)
+            .caps.find { it.phase == "leadership" }!!
+        assertEquals(24, withFlag.maximum, "explicit caller flag applies the town-hall allotment (8 x 3)")
     }
 
     @Test

@@ -668,7 +668,31 @@ object Pfrpg2eKingdomCampingWeatherSettings {
             hint = t("settings.obsidianOverwriteHelp"),
             default = true,
         )
+        game.settings.registerScalar<Boolean>(
+            key = "enableCompanionLeveling",
+            name = t("settings.enableCompanionLeveling"),
+            hint = t("settings.enableCompanionLevelingHelp"),
+            default = true,
+        )
+        game.settings.registerScalar<Boolean>(
+            key = "companionAutonomyEnabled",
+            name = t("settings.companionAutonomyEnabled"),
+            hint = t("settings.companionAutonomyEnabledHelp"),
+            default = false,
+        )
     }
+
+    suspend fun setEnableCompanionLeveling(value: Boolean) =
+        game.settings.setBoolean("enableCompanionLeveling", value)
+
+    fun getEnableCompanionLeveling(): Boolean =
+        game.settings.getBoolean("enableCompanionLeveling")
+
+    suspend fun setCompanionAutonomyEnabled(value: Boolean) =
+        game.settings.setBoolean("companionAutonomyEnabled", value)
+
+    fun getCompanionAutonomyEnabled(): Boolean =
+        game.settings.getBoolean("companionAutonomyEnabled")
 }
 
 

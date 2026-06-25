@@ -153,4 +153,46 @@ class DailyTickEngineTest {
         assertEquals(0, result.newDaysRemaining)
         assertFalse(result.completed)
     }
+
+    // ── Personal Quest deadline ticking ─────────────────────────────────
+
+    @Test
+    fun testPersonalQuest_noDeadline() {
+        val result = DailyTickEngine.tickPersonalQuest(status = "active", turnsRemaining = null, days = 1)
+        assertNull(result.newTurnsRemaining)
+        assertEquals("active", result.newStatus)
+        assertFalse(result.failed)
+    }
+
+    @Test
+    fun testPersonalQuest_inactiveQuest() {
+        val result = DailyTickEngine.tickPersonalQuest(status = "completed", turnsRemaining = 3, days = 1)
+        assertEquals(3, result.newTurnsRemaining)
+        assertEquals("completed", result.newStatus)
+        assertFalse(result.failed)
+    }
+
+    @Test
+    fun testPersonalQuest_decrementsTurns() {
+        val result = DailyTickEngine.tickPersonalQuest(status = "active", turnsRemaining = 3, days = 1)
+        assertEquals(2, result.newTurnsRemaining)
+        assertEquals("active", result.newStatus)
+        assertFalse(result.failed)
+    }
+
+    @Test
+    fun testPersonalQuest_reachesZeroAndFails() {
+        val result = DailyTickEngine.tickPersonalQuest(status = "active", turnsRemaining = 1, days = 1)
+        assertEquals(0, result.newTurnsRemaining)
+        assertEquals("failed", result.newStatus)
+        assertTrue(result.failed)
+    }
+
+    @Test
+    fun testPersonalQuest_overshootFails() {
+        val result = DailyTickEngine.tickPersonalQuest(status = "active", turnsRemaining = 2, days = 5)
+        assertEquals(0, result.newTurnsRemaining)
+        assertEquals("failed", result.newStatus)
+        assertTrue(result.failed)
+    }
 }

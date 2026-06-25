@@ -3,7 +3,10 @@ package at.posselt.pfrpg2e.kingdom
 import at.posselt.pfrpg2e.campaign.CampaignClock
 import at.posselt.pfrpg2e.companion.CompanionPersonalQuest
 import at.posselt.pfrpg2e.data.hex.HexContentVisibility
+import at.posselt.pfrpg2e.kingdom.data.RawCompanionExpedition
+import at.posselt.pfrpg2e.kingdom.data.RawCharacter
 import at.posselt.pfrpg2e.kingdom.data.RawHexContent
+import at.posselt.pfrpg2e.settings.Pfrpg2eKingdomCampingWeatherSettings
 import at.posselt.pfrpg2e.kingdom.data.RawQuest
 import at.posselt.pfrpg2e.kingdom.data.RawTurnRecord
 
@@ -31,6 +34,11 @@ data class SessionPrepEntry(
     val detail: String = "",
     /** When non-null, the template renders "N turns remaining". */
     val turnsRemaining: Int? = null,
+    val status: String = "",
+    val companionNames: String = "",
+    val outcomeDegree: String? = null,
+    val willLevelUp: Boolean = false,
+    val completesQuest: Boolean = false,
 )
 
 data class TurnRecentEntry(
@@ -52,12 +60,13 @@ data class SessionPrepView(
     val unresolvedEvents: List<SessionPrepEntry>,
     val hexHooks: List<SessionPrepEntry>,
     val companionMoments: List<SessionPrepEntry>,
+    val companionExpeditions: List<SessionPrepEntry>,
     val recentTurns: List<TurnRecentEntry>,
     val isGM: Boolean,
 ) {
     val totalCount: Int
         get() = openQuests.size + activeClocks.size + unresolvedEvents.size +
-            hexHooks.size + companionMoments.size + recentTurns.size
+            hexHooks.size + companionMoments.size + companionExpeditions.size + recentTurns.size
 
     val hasAnything: Boolean
         get() = totalCount > 0
@@ -131,6 +140,49 @@ private fun buildCompanionMoments(
             )
         }
 
+private fun buildCompanionExpeditions(
+    expeditions: Array<RawCompanionExpedition>?,
+    companions: Array<RawCharacter>?,
+    isGM: Boolean,
+): List<SessionPrepEntry> {
+    val companionMap = companions?.associateBy { it.actorUuid ?: it.name } ?: emptyMap()
+    val levelingEnabled = if (js("typeof game != 'undefined'").unsafeCast<Boolean>()) {
+        Pfrpg2eKingdomCampingWeatherSettings.getEnableCompanionLeveling()
+    } else {
+        true
+    }
+
+    return (expeditions ?: emptyArray())
+        .filter { it.status == "inProgress" || it.status == "awaitingResolution" }
+        .filter { isGM || it.visibleToPlayers }
+        .map { expedition ->
+            val companionNames = expedition.companionIds
+                .mapNotNull { companionMap[it]?.name }
+                .joinToString(", ")
+
+            val firstCompanion = expedition.companionIds.firstOrNull()?.let { companionMap[it] }
+            val willLevelUp = levelingEnabled && firstCompanion != null &&
+                    firstCompanion.role != "npc" &&
+                    (firstCompanion.xp + expedition.accruedXp) >= 1000 &&
+                    firstCompanion.level < 20
+
+            val completesQuest = expedition.activityId == "personal-quest" &&
+                    (expedition.outcomeDegree == "success" || expedition.outcomeDegree == "criticalSuccess")
+
+            SessionPrepEntry(
+                id = expedition.id,
+                name = expedition.title,
+                detail = expedition.activityId,
+                turnsRemaining = expedition.daysRemaining,
+                status = expedition.status,
+                companionNames = companionNames,
+                outcomeDegree = expedition.outcomeDegree,
+                willLevelUp = willLevelUp,
+                completesQuest = completesQuest,
+            )
+        }
+}
+
 fun buildSessionPrepView(
     quests: Array<RawQuest>?,
     clocks: Array<CampaignClock>,
@@ -139,6 +191,8 @@ fun buildSessionPrepView(
     companionQuests: Array<CompanionPersonalQuest>?,
     isGM: Boolean,
     turnHistory: Array<RawTurnRecord>? = null,
+    companionExpeditions: Array<RawCompanionExpedition>? = null,
+    companions: Array<RawCharacter>? = null,
 ): SessionPrepView = SessionPrepView(
     openQuests = buildOpenQuests(quests),
     // Campaign clocks + unresolved events are GM-facing prep; withheld from players.
@@ -146,6 +200,7 @@ fun buildSessionPrepView(
     unresolvedEvents = if (isGM) buildUnresolvedEvents(events) else emptyList(),
     hexHooks = buildHexHooks(hexContents, isGM),
     companionMoments = buildCompanionMoments(companionQuests, isGM),
+    companionExpeditions = buildCompanionExpeditions(companionExpeditions, companions, isGM),
     // Recent turns are GM-only, like activeClocks.
     recentTurns = if (isGM) buildRecentTurns(turnHistory) else emptyList(),
     isGM = isGM,

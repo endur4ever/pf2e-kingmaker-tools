@@ -4,6 +4,7 @@ import at.posselt.pfrpg2e.campaign.CampaignClock
 import at.posselt.pfrpg2e.companion.CompanionPersonalQuest
 import at.posselt.pfrpg2e.data.hex.HexContentType
 import at.posselt.pfrpg2e.data.hex.HexContentVisibility
+import at.posselt.pfrpg2e.kingdom.data.createRawCompanionExpedition
 import at.posselt.pfrpg2e.kingdom.data.RawHexContent
 import at.posselt.pfrpg2e.kingdom.data.RawQuest
 import at.posselt.pfrpg2e.kingdom.data.RawQuestRewards
@@ -278,5 +279,105 @@ class SessionPrepViewTest {
             turnHistory = emptyArray()
         )
         assertTrue(view.recentTurns.isEmpty())
+    }
+
+    @Test
+    fun companionExpeditionsListedWithDaysRemaining() {
+        val expedition = createRawCompanionExpedition(
+            id = "exp1",
+            activityId = "scout",
+            title = "Scout the Western Marshes",
+            companionIds = arrayOf("Amiri"),
+            totalDays = 5,
+            dc = 15,
+            tier = "standard",
+            visibleToPlayers = true,
+        ).also { it.status = "inProgress"; it.daysRemaining = 3 }
+        val view = buildSessionPrepView(
+            quests = null,
+            clocks = emptyArray(),
+            events = null,
+            hexContents = null,
+            companionQuests = null,
+            isGM = true,
+            companionExpeditions = arrayOf(expedition),
+        )
+        assertEquals(listOf("exp1"), view.companionExpeditions.map { it.id })
+        assertEquals(3, view.companionExpeditions.single().turnsRemaining)
+        assertEquals("scout", view.companionExpeditions.single().detail)
+        // 1 expedition
+        assertEquals(1, view.totalCount)
+    }
+
+    @Test
+    fun completedExpeditionsExcluded() {
+        val expedition = createRawCompanionExpedition(
+            id = "exp1",
+            activityId = "scout",
+            title = "Scout the Western Marshes",
+            companionIds = arrayOf("Amiri"),
+            totalDays = 5,
+            dc = 15,
+            tier = "standard",
+            visibleToPlayers = true,
+        ).also { it.status = "resolved"; it.daysRemaining = 0 }
+        val view = buildSessionPrepView(
+            quests = null,
+            clocks = emptyArray(),
+            events = null,
+            hexContents = null,
+            companionQuests = null,
+            isGM = true,
+            companionExpeditions = arrayOf(expedition),
+        )
+        assertTrue(view.companionExpeditions.isEmpty())
+    }
+
+    @Test
+    fun awaitingResolutionExpeditionsIncluded() {
+        val expedition = createRawCompanionExpedition(
+            id = "exp1",
+            activityId = "diplomacy",
+            title = "Negotiate with Breachwarden",
+            companionIds = arrayOf("Ezren"),
+            totalDays = 7,
+            dc = 18,
+            tier = "perilous",
+            visibleToPlayers = false,
+        ).also { it.status = "awaitingResolution"; it.daysRemaining = 0 }
+        val view = buildSessionPrepView(
+            quests = null,
+            clocks = emptyArray(),
+            events = null,
+            hexContents = null,
+            companionQuests = null,
+            isGM = true,
+            companionExpeditions = arrayOf(expedition),
+        )
+        assertEquals(listOf("exp1"), view.companionExpeditions.map { it.id })
+    }
+
+    @Test
+    fun hiddenExpeditionsFilteredForPlayers() {
+        val expedition = createRawCompanionExpedition(
+            id = "exp1",
+            activityId = "scout",
+            title = "Secret Mission",
+            companionIds = arrayOf("Amiri"),
+            totalDays = 5,
+            dc = 15,
+            tier = "standard",
+            visibleToPlayers = false,
+        ).also { it.status = "inProgress"; it.daysRemaining = 2 }
+        val view = buildSessionPrepView(
+            quests = null,
+            clocks = emptyArray(),
+            events = null,
+            hexContents = null,
+            companionQuests = null,
+            isGM = false,
+            companionExpeditions = arrayOf(expedition),
+        )
+        assertTrue(view.companionExpeditions.isEmpty())
     }
 }

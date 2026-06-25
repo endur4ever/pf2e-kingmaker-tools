@@ -22,6 +22,34 @@
     transition: width 200ms ease-out;
 }
 
+.km-roster-xp {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.km-roster-xp-bar {
+    flex-grow: 1;
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+}
+
+.km-roster-xp-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #27ae60, #2ecc71 55%, #58d68d);
+    transition: width 200ms ease-out;
+}
+
+.km-roster-xp-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #a5d6a7;
+    white-space: nowrap;
+}
+
 .km-roster-badges {
     display: flex;
     align-items: center;
@@ -31,7 +59,9 @@
 
 .km-roster-camp-badge,
 .km-roster-discovery-icon,
-.km-roster-quest-badge {
+.km-roster-quest-badge,
+.km-roster-expedition-badge,
+.km-roster-injured-badge {
     display: inline-flex;
     align-items: center;
     gap: 3px;
@@ -47,6 +77,8 @@
 .km-roster-discovery-icon[data-status="bonded"] { color: #b3306b; }
 .km-roster-discovery-icon[data-status="trusted"] { color: #c0392b; }
 .km-roster-quest-badge { color: #8a6d3b; background: rgba(201, 162, 39, 0.15); font-weight: 600; }
+.km-roster-expedition-badge { color: #5dade2; background: rgba(52, 152, 219, 0.12); }
+.km-roster-injured-badge { color: #e74c3c; background: rgba(231, 76, 60, 0.12); }
 
 .km-roster-action-btn.km-profile-btn { color: #6d4c8a; }
 
@@ -89,12 +121,51 @@
 }
 .km-cp-influence-controls { display: flex; gap: 6px; justify-content: flex-end; }
 
+/* ---- Companion profile: level + XP bar ---- */
+.km-cp-level {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 12px;
+    align-items: center;
+}
+
+.km-cp-level-label,
+.km-cp-xp-label {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 600;
+}
+
+.km-cp-level-value,
+.km-cp-xp-value {
+    font-variant-numeric: tabular-nums;
+}
+
+.km-cp-xp-bar {
+    grid-column: span 2;
+    height: 10px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+}
+
+.km-cp-xp-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #27ae60, #2ecc71 55%, #58d68d);
+    transition: width 200ms ease-out;
+}
+
 .km-cp-status-row { display: flex; gap: 16px; flex-wrap: wrap; align-items: end; }
 .km-cp-camp, .km-cp-discovery-control { display: flex; align-items: center; gap: 8px; }
 .km-cp-discovery-control select { min-width: 120px; }
 .km-cp-badge { font-size: 0.8rem; padding: 2px 8px; border-radius: 999px; }
 .km-cp-badge.km-camp-available { color: #2e7d32; background: rgba(46, 125, 50, 0.12); }
 .km-cp-badge.km-camp-unavailable { color: #9e9e9e; background: rgba(0, 0, 0, 0.08); }
+.km-cp-badge.km-expedition-available { color: #2ecc71; background: rgba(46, 204, 113, 0.15); }
+.km-cp-badge.km-expedition-onExpedition { color: #5dade2; background: rgba(52, 152, 219, 0.15); }
+.km-cp-badge.km-expedition-unavailable { color: #e74c3c; background: rgba(231, 76, 60, 0.15); }
+.km-cp-badge.km-injured { color: #e67e22; background: rgba(230, 126, 34, 0.15); }
 
 .km-cp-plot-hook { background: rgba(0, 0, 0, 0.04); border-left: 3px solid #c9a227; padding: 6px 10px; border-radius: 4px; }
 .km-cp-plot-hook label { font-weight: 600; display: block; }
@@ -214,4 +285,232 @@
     text-align: center;
     font-variant-numeric: tabular-nums;
     font-weight: 600;
+}
+
+/* ---- Companion profile: expedition list & cards ---- */
+.km-cp-expeditions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.km-cp-expeditions-header {
+    font-size: 1.1rem;
+    margin: 0;
+    font-weight: 700;
+    color: var(--secondary-km, #ee9b3a);
+}
+
+.km-cp-expedition-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.km-cp-expedition-card {
+    border: 1px solid rgba(120, 120, 120, 0.25);
+    border-left: 4px solid #3498db;
+    border-radius: 6px;
+    padding: 8px 12px;
+    background: rgba(30, 30, 30, 0.4);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.km-cp-expedition-card.km-cp-expedition-resolved {
+    border-left-color: #2ecc71;
+    background: rgba(30, 30, 30, 0.2);
+    opacity: 0.8;
+}
+
+.km-cp-expedition-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.km-cp-badge.km-tier-routine {
+    color: #adb5bd;
+    background: rgba(108, 117, 125, 0.15);
+}
+
+.km-cp-badge.km-tier-standard {
+    color: #5dade2;
+    background: rgba(52, 152, 219, 0.15);
+}
+
+.km-cp-badge.km-tier-perilous {
+    color: #ec7063;
+    background: rgba(192, 57, 43, 0.15);
+}
+
+.km-cp-expedition-progress {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.km-cp-progress-bar {
+    flex-grow: 1;
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+}
+
+.km-cp-progress-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #27ae60, #2ecc71 55%, #58d68d);
+    transition: width 200ms ease-out;
+}
+
+.km-cp-expedition-days {
+    font-size: 0.75rem;
+    color: #999;
+    white-space: nowrap;
+}
+
+.km-cp-expedition-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: #888;
+}
+
+.km-cp-expedition-action {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.km-cp-send-expedition {
+    font-size: 0.9em;
+    padding: 6px 12px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(39, 174, 96, 0.2);
+    border: 1px solid rgba(39, 174, 96, 0.4);
+    color: #2ecc71;
+    margin: 0;
+
+    &:hover {
+        background: rgba(39, 174, 96, 0.35);
+        border-color: #2ecc71;
+    }
+}
+
+/* ---- Light Theme Overrides ---- */
+.theme-light {
+    .km-roster-xp-bar {
+        background: rgba(0, 0, 0, 0.1);
+    }
+    
+    .km-roster-xp-label {
+        color: #27ae60;
+    }
+    
+    .km-roster-expedition-badge {
+        color: #2980b9;
+        background: rgba(52, 152, 219, 0.08);
+    }
+    
+    .km-roster-injured-badge {
+        color: #c0392b;
+        background: rgba(231, 76, 60, 0.08);
+    }
+    
+    .km-cp-xp-bar {
+        background: rgba(0, 0, 0, 0.15);
+    }
+    
+    .km-cp-badge.km-expedition-available {
+        color: #27ae60;
+        background: rgba(46, 204, 113, 0.1);
+    }
+    
+    .km-cp-badge.km-expedition-onExpedition {
+        color: #20639b;
+        background: rgba(52, 152, 219, 0.1);
+    }
+    
+    .km-cp-badge.km-expedition-unavailable {
+        color: #c0392b;
+        background: rgba(231, 76, 60, 0.1);
+    }
+    
+    .km-cp-badge.km-injured {
+        color: #d35400;
+        background: rgba(230, 126, 34, 0.1);
+    }
+    
+    .km-cp-send-expedition {
+        background: rgba(39, 174, 96, 0.1);
+        color: #196f3d;
+        border-color: rgba(39, 174, 96, 0.3);
+        
+        &:hover {
+            background: rgba(39, 174, 96, 0.2);
+        }
+    }
+    
+    .km-cp-expedition-card {
+        background: rgba(255, 255, 255, 0.4);
+        border-color: rgba(0, 0, 0, 0.12);
+        color: #333;
+    }
+    
+    .km-cp-expedition-card.km-cp-expedition-resolved {
+        background: rgba(255, 255, 255, 0.2);
+    }
+    
+    .km-cp-badge.km-tier-routine { color: #495057; }
+    .km-cp-badge.km-tier-standard { color: #20639b; }
+    .km-cp-badge.km-tier-perilous { color: #922b21; }
+    
+    .km-cp-progress-bar {
+        background: rgba(0, 0, 0, 0.08);
+    }
+    
+    .km-cp-expedition-days {
+        color: #666;
+    }
+    
+    .km-cp-expedition-meta {
+        color: #555;
+    }
+}
+
+/* ============================================================================
+   Responsive — mobile breakpoints
+   ============================================================================ */
+@media (max-width: 480px) {
+    .km-cp-status-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .km-cp-camp,
+    .km-cp-expedition-status,
+    .km-cp-discovery-control {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .km-cp-discovery-control select {
+        flex-grow: 1;
+        min-width: 0;
+    }
+
+    .km-cp-send-expedition {
+        width: 100%;
+        justify-content: center;
+    }
 }

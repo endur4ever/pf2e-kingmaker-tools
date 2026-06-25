@@ -25,6 +25,15 @@ data class ExpeditionTickResult(
 )
 
 /**
+ * Result of advancing a companion personal quest deadline.
+ */
+data class PersonalQuestTickResult(
+	val newTurnsRemaining: Int?,
+	val newStatus: String,
+	val failed: Boolean,
+)
+
+/**
  * Daily ticking engine.
  *
  * Processes the *day-scale* state transitions that the [TurnTickingEngine] (monthly,
@@ -77,6 +86,31 @@ object DailyTickEngine {
 			ExpeditionTickResult(newDaysRemaining = 0, completed = daysRemaining > 0)
 		} else {
 			ExpeditionTickResult(newDaysRemaining = next, completed = false)
+		}
+	}
+
+	/**
+	 * Advance a companion's personal quest deadline by [days] elapsed days.
+	 *
+	 * @param status Current quest status.
+	 * @param turnsRemaining Current remaining turns (null = no deadline).
+	 * @param days Number of days elapsed since the last tick (coerced to >= 1).
+	 * @return [PersonalQuestTickResult] with the post-tick turns, new status, and failure trigger.
+	 */
+	fun tickPersonalQuest(
+		status: String,
+		turnsRemaining: Int?,
+		days: Int = 1
+	): PersonalQuestTickResult {
+		if (status != "active" || turnsRemaining == null) {
+			return PersonalQuestTickResult(newTurnsRemaining = turnsRemaining, newStatus = status, failed = false)
+		}
+		val elapsed = days.coerceAtLeast(1)
+		val next = turnsRemaining - elapsed
+		return if (next <= 0) {
+			PersonalQuestTickResult(newTurnsRemaining = 0, newStatus = "failed", failed = true)
+		} else {
+			PersonalQuestTickResult(newTurnsRemaining = next, newStatus = "active", failed = false)
 		}
 	}
 }

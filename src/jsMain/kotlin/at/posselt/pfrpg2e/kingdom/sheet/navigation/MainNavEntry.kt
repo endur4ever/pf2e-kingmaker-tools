@@ -19,7 +19,8 @@ enum class MainNavEntry: Translatable, ValueEnum {
     CAMPAIGN,
     ARMY_PRESSURE,
     PACING,
-    ANALYTICS;
+    ANALYTICS,
+    EXPEDITIONS;
 
     companion object {
         fun fromString(value: String) = fromCamelCase<MainNavEntry>(value)

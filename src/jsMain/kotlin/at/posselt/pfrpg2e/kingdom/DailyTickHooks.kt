@@ -2,6 +2,7 @@ package at.posselt.pfrpg2e.kingdom
 
 import at.posselt.pfrpg2e.camping.getActiveCamping
 import at.posselt.pfrpg2e.kingdom.data.RawCharacter
+import at.posselt.pfrpg2e.kingdom.data.RawCompanionExpedition
 import at.posselt.pfrpg2e.resting.DAY_SECONDS
 import at.posselt.pfrpg2e.settings.pfrpg2eKingdomCampingWeather
 import at.posselt.pfrpg2e.utils.buildPromise
@@ -50,9 +51,11 @@ fun registerDailyTickHooks(game: Game) {
 		val daysPassed = daysCrossed(worldTime, deltaInSeconds)
 		if (game.isFirstGM() && daysPassed >= 1) {
 			buildPromise {
-				rollDailyWeather(game)
-				tickCompanionTravel(game, daysPassed)
-			}
+					rollDailyWeather(game)
+					tickCompanionTravel(game, daysPassed)
+					tickCompanionExpeditions(game, daysPassed)
+					tickPersonalQuests(game, daysPassed)
+				}
 		}
 	}
 
@@ -202,6 +205,128 @@ private suspend fun advanceCompanionTravel(game: Game, companion: RawCharacter, 
 		y = point.y
 	}
 	return arrived
+}
+
+/**
+ * Daily tick for companion expeditions: counts down active expeditions,
+ * triggers resolution when complete, and decrements injury timers.
+ *
+ * Mirrors [tickCompanionTravel] structure: iterate kingdom actors, read
+ * `companionExpeditions`, apply the pure [DailyTickEngine.tickExpedition]
+ * countdown, and when a crossing fires:
+ *   - set `status = 'awaitingResolution'`
+ *   - call [offerExpeditionResolution] (impure wrapper: roll + accrue + persist)
+ *
+ * The same loop decrements `injuryDaysRemaining`; at <= 0 clears the injury,
+ * restores `expeditionStatus` to `available` and `campAvailable` to true,
+ * and posts an escaped "X recovered" line.
+ *
+ * `game.time.advance` is NOT called here ([DailyTickEngine] is pure).
+ */
+private suspend fun tickCompanionExpeditions(game: Game, daysPassed: Int) {
+	game.getKingdomActors().forEach { actor ->
+		val kingdom = actor.getKingdom() ?: return@forEach
+		val companions = kingdom.companions ?: return@forEach
+		val expeditions = kingdom.companionExpeditions ?: return@forEach
+		if (expeditions.isEmpty()) return@forEach
+
+		var changed = false
+		// Work on a mutable copy so we can reassign atomically.
+		val updated = expeditions.toMutableList()
+
+		for (i in updated.indices) {
+			val exp = updated[i]
+			if (exp.status != "inProgress") continue
+
+			val result = DailyTickEngine.tickExpedition(exp.daysRemaining, daysPassed)
+			exp.daysRemaining = result.newDaysRemaining
+			changed = true
+
+			if (result.completed) {
+				exp.status = "awaitingResolution"
+				// Find the companion(s) for this expedition to resolve the check.
+				for (companion in companions) {
+					val isParticipant = exp.companionIds.any { id ->
+						id == companion.actorUuid || id == companion.name
+					}
+					if (isParticipant) {
+						offerExpeditionResolution(game, actor, companion, exp)
+						break  // one resolution per expedition
+					}
+				}
+			}
+		}
+
+		// Decrement injury timers on companions not already on expedition.
+		for (companion in companions) {
+			val injuryDays = companion.injuryDaysRemaining ?: continue
+			val remaining = injuryDays - daysPassed
+			if (remaining <= 0) {
+				companion.injuryDaysRemaining = null
+				companion.expeditionStatus = "available"
+				companion.campAvailable = true
+				changed = true
+				val name = escapeHtml(
+					companion.actorUuid?.let {
+						fromUuidOfTypes(it, PF2ECharacter::class, PF2ENpc::class)?.name
+					} ?: companion.name
+				)
+				postChatMessage(
+					t("kingdom.companionRecovered", recordOf("name" to name)),
+					isHtml = true,
+				)
+			} else {
+				companion.injuryDaysRemaining = remaining
+				changed = true
+			}
+		}
+
+		if (changed) {
+			kingdom.companionExpeditions = updated.toTypedArray()
+			actor.setKingdom(kingdom)
+		}
+	}
+}
+
+/**
+ * Daily tick for companion personal quests: decrements [CompanionPersonalQuest.turnsRemaining]
+ * for each active quest with a deadline. When [turnsRemaining] reaches zero the quest is marked
+ * as "failed" (the companion ran out of time).
+ *
+ * Travels with [tickCompanionExpeditions] since both are day-scale ticks driven by the
+ * world-clock hook.
+ */
+private suspend fun tickPersonalQuests(game: Game, daysPassed: Int) {
+	game.getKingdomActors().forEach { actor ->
+		val kingdom = actor.getKingdom() ?: return@forEach
+		val quests = kingdom.companionPersonalQuests ?: return@forEach
+		if (quests.isEmpty()) return@forEach
+
+		var changed = false
+		val updated = quests.toMutableList()
+		for (i in updated.indices) {
+			val quest = updated[i]
+			val result = DailyTickEngine.tickPersonalQuest(quest.status, quest.turnsRemaining, daysPassed)
+			if (result.newStatus != quest.status || result.newTurnsRemaining != quest.turnsRemaining) {
+				quest.status = result.newStatus
+				quest.turnsRemaining = result.newTurnsRemaining
+				changed = true
+				if (result.failed) {
+					postChatMessage(
+						t(
+							"kingdom.companionQuestFailed",
+							recordOf("quest" to escapeHtml(quest.title), "name" to escapeHtml(quest.companionId)),
+						),
+						isHtml = true,
+					)
+				}
+			}
+		}
+		if (changed) {
+			kingdom.companionPersonalQuests = updated.toTypedArray()
+			actor.setKingdom(kingdom)
+		}
+	}
 }
 
 private suspend fun announceArrival(game: Game, companion: RawCharacter) {

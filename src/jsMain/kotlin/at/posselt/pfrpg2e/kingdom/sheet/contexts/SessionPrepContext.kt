@@ -47,6 +47,7 @@ external interface SessionPrepContext {
     val unresolvedEvents: Array<SessionPrepEntryContext>
     val hexHooks: Array<SessionPrepEntryContext>
     val companionMoments: Array<SessionPrepEntryContext>
+    val companionExpeditions: Array<SessionPrepEntryContext>
     val recentTurns: Array<TurnRecentEntryContext>
     val isGM: Boolean
     val hasAnything: Boolean
@@ -92,6 +93,7 @@ fun buildSessionPrepContext(view: SessionPrepView): SessionPrepContext =
         unresolvedEvents = view.unresolvedEvents.toContexts(),
         hexHooks = view.hexHooks.toContexts(),
         companionMoments = view.companionMoments.toContexts(),
+        companionExpeditions = view.companionExpeditions.toContexts(),
         recentTurns = view.recentTurns.toTurnContexts(),
         isGM = view.isGM,
         hasAnything = view.hasAnything,

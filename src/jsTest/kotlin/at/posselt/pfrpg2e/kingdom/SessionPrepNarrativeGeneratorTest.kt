@@ -25,6 +25,7 @@ class SessionPrepNarrativeGeneratorTest {
         unresolvedEvents: List<SessionPrepEntry> = emptyList(),
         hexHooks: List<SessionPrepEntry> = emptyList(),
         companionMoments: List<SessionPrepEntry> = emptyList(),
+        companionExpeditions: List<SessionPrepEntry> = emptyList(),
         recentTurns: List<TurnRecentEntry> = emptyList(),
         isGM: Boolean = true,
     ) = SessionPrepView(
@@ -33,6 +34,7 @@ class SessionPrepNarrativeGeneratorTest {
         unresolvedEvents = unresolvedEvents,
         hexHooks = hexHooks,
         companionMoments = companionMoments,
+        companionExpeditions = companionExpeditions,
         recentTurns = recentTurns,
         isGM = isGM,
     )
@@ -169,5 +171,85 @@ class SessionPrepNarrativeGeneratorTest {
         val html = SessionPrepNarrativeGenerator.generate(v)
         assertTrue(html.contains("Personal Moment"))
         assertFalse(html.contains("["))
+    }
+
+    private fun expeditionEntry(
+        id: String,
+        name: String,
+        status: String,
+        companionNames: String = "",
+        turnsRemaining: Int? = null,
+        outcomeDegree: String? = null,
+        willLevelUp: Boolean = false,
+        completesQuest: Boolean = false,
+    ) = SessionPrepEntry(
+        id = id,
+        name = name,
+        status = status,
+        companionNames = companionNames,
+        turnsRemaining = turnsRemaining,
+        outcomeDegree = outcomeDegree,
+        willLevelUp = willLevelUp,
+        completesQuest = completesQuest,
+    )
+
+    @Test
+    fun companionExpeditionsInProgressFormattedCorrectly() {
+        val v = view(
+            companionExpeditions = listOf(
+                expeditionEntry(
+                    id = "exp1",
+                    name = "Scouting the Hills",
+                    status = "inProgress",
+                    companionNames = "Amiri, Valeros",
+                    turnsRemaining = 3
+                )
+            )
+        )
+
+        val html = SessionPrepNarrativeGenerator.generate(v)
+        assertTrue(html.contains("<h2>Companion Expeditions</h2>"))
+        assertTrue(html.contains("Companions currently away on expeditions: Amiri, Valeros on Scouting the Hills (3 days remaining)."))
+
+        val plainText = SessionPrepNarrativeGenerator.generatePlainText(v)
+        assertTrue(plainText.contains("**Companion Expeditions**"))
+        assertTrue(plainText.contains("Away on expeditions:"))
+        assertTrue(plainText.contains("- Amiri, Valeros on Scouting the Hills (3 days remaining)"))
+    }
+
+    @Test
+    fun companionExpeditionsAwaitingResolutionFormattedCorrectly() {
+        val v = view(
+            companionExpeditions = listOf(
+                expeditionEntry(
+                    id = "exp1",
+                    name = "Diplomatic Mission",
+                    status = "awaitingResolution",
+                    companionNames = "Ezren",
+                    outcomeDegree = "success",
+                    willLevelUp = true,
+                    completesQuest = true
+                ),
+                expeditionEntry(
+                    id = "exp2",
+                    name = "Dangerous Ruin Expedition",
+                    status = "awaitingResolution",
+                    companionNames = "Harrim",
+                    outcomeDegree = "criticalFailure",
+                    willLevelUp = false,
+                    completesQuest = false
+                )
+            )
+        )
+
+        val html = SessionPrepNarrativeGenerator.generate(v)
+        assertTrue(html.contains("<h2>Companion Expeditions</h2>"))
+        assertTrue(html.contains("<strong>Ezren</strong>: Diplomatic Mission — Success (completed personal quest, ready to level up)"))
+        assertTrue(html.contains("<strong>Harrim</strong>: Dangerous Ruin Expedition — Critical Failure (complication arose)"))
+
+        val plainText = SessionPrepNarrativeGenerator.generatePlainText(v)
+        assertTrue(plainText.contains("Completed expeditions awaiting resolution:"))
+        assertTrue(plainText.contains("- Ezren: Diplomatic Mission — Success (completed personal quest, ready to level up)"))
+        assertTrue(plainText.contains("- Harrim: Dangerous Ruin Expedition — Critical Failure (complication arose)"))
     }
 }

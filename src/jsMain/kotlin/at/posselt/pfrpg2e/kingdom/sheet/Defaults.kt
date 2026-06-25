@@ -10,6 +10,7 @@ import at.posselt.pfrpg2e.kingdom.data.RawAbilityBoostChoices
 import at.posselt.pfrpg2e.kingdom.data.RawAbilityScores
 import at.posselt.pfrpg2e.kingdom.data.RawCharterChoices
 import at.posselt.pfrpg2e.kingdom.data.RawCommodities
+import at.posselt.pfrpg2e.kingdom.data.RawCompanionExpedition
 import at.posselt.pfrpg2e.kingdom.data.RawConsumption
 import at.posselt.pfrpg2e.kingdom.data.RawCurrentCommodities
 import at.posselt.pfrpg2e.kingdom.data.RawFame
@@ -246,7 +247,7 @@ fun createKingdomDefaults(name: String) =
         ),
         activeSettlement = null,
         hexContents = emptyArray<RawHexContent>(),
-        quests = emptyArray(),
+        quests = defaultQuests(),
         councilCooldowns = RawCouncilCooldowns(
             audit = 0,
             scrying = 0,
@@ -373,6 +374,7 @@ fun createKingdomDefaults(name: String) =
         kingdomEventBlacklist = emptyArray(),
         ongoingEvents = emptyArray(),
         companions = emptyArray(),
+        companionExpeditions = emptyArray<RawCompanionExpedition>(),
         structureBlacklist = emptyArray(),
         campaignClocks = emptyArray(),
         questTemplates = emptyArray(),

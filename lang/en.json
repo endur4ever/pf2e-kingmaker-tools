@@ -85,7 +85,11 @@
       "obsidianJournalFolder": "Obsidian Export Folder",
       "obsidianJournalFolderHelp": "The name of the Journal Folder where exported Kingdom summaries will be stored.",
       "obsidianOverwrite": "Overwrite Kingdom Summary",
-      "obsidianOverwriteHelp": "If enabled, overwrites the single 'Kingdom Summary' journal entry on each export. If disabled, creates a historical entry per turn (e.g. 'Kingdom Summary - Turn X')."
+      "obsidianOverwriteHelp": "If enabled, overwrites the single 'Kingdom Summary' journal entry on each export. If disabled, creates a historical entry per turn (e.g. 'Kingdom Summary - Turn X').",
+      "enableCompanionLeveling": "Enable Companion Leveling",
+      "enableCompanionLevelingHelp": "If disabled, companions do not gain levels from expedition XP. Useful for campaigns that prefer milestone-based companion advancement.",
+      "companionAutonomyEnabled": "Companion Autonomy",
+      "companionAutonomyEnabledHelp": "If enabled, when making camp, eligible companions will volunteer for expeditions autonomously. The GM receives an offer card to approve or decline."
     },
     "applications": {
       "apply": "Apply",
@@ -568,7 +572,8 @@
       "campaign": "Campaign",
       "armyPressure": "Army & Pressure",
       "pacing": "Pacing",
-      "analytics": "Analytics"
+      "analytics": "Analytics",
+      "expeditions": "Expeditions"
     },
     "addSettlementBlock": {
       "title": "Add Settlement Block",
@@ -664,6 +669,11 @@
       "obsidianImportError": "Error importing Obsidian data: {error}",
       "obsidianExportSuccess": "Successfully exported Kingdom summary to Journal folder: {folder}!",
       "companionArrival": "<b>{name}</b> has arrived at Hex <b>{x}, {y}</b>!",
+      "companionInjured": "{name} was injured on the expedition.",
+      "companionLeveledUp": "{name} has leveled up to Level {level}!",
+      "companionRecovered": "{name} has recovered from their injuries.",
+      "expeditionRewardApplied": "Expedition rewards for {name} have been applied.",
+      "companionQuestFailed": "Personal Quest Failed: {name} ran out of time to complete '{quest}'.",
       "sessionPrep": {
         "title": "Session Prep",
         "help": "A read-only snapshot to prep before play: open quests, deadlines, unresolved events, hex hooks, and companion moments. GM-only sections are hidden from players.",
@@ -679,6 +689,8 @@
         "noHexHooks": "No hex content hooks",
         "companionMoments": "Companion Moments",
         "noCompanionMoments": "No active companion moments",
+        "companionExpeditions": "Companion Expeditions",
+        "noCompanionExpeditions": "No active companion expeditions",
         "generateNarrative": "Generate Narrative",
         "generateNarrativeTooltip": "Generate a narrative recap of the session prep data",
         "narrativeEmpty": "No session prep data available to generate a narrative from.",
@@ -927,6 +939,8 @@
           "turns": "Turns Remaining (blank = no deadline)",
           "turnsRemaining": "Turns Remaining",
           "influenceReward": "Influence Reward",
+          "xp": "XP Reward",
+          "complication": "Complication: A significant setback has occurred in this personal quest.",
           "visibleToPlayers": "Visible to Players",
           "complete": "Complete Quest",
           "reveal": "Reveal to Players",
@@ -937,6 +951,79 @@
             "failed": "Failed",
             "abandoned": "Abandoned"
           }
+        },
+        "level": "Level",
+        "xp": "XP",
+        "injured": "Injured",
+        "days": "Days",
+        "cannotDeleteOnExpedition": "This companion is currently on an expedition. Resolve or recall it before removing the companion.",
+        "sendOnExpedition": "Send on Expedition",
+        "recallFromExpedition": "Recall from Expedition",
+        "noExpeditions": "No expedition history.",
+        "currentExpeditions": "Current Expeditions",
+        "pastExpeditions": "Past Expeditions",
+        "expeditionStatusLabel": "Expedition Status",
+        "expeditionStatus": {
+          "available": "Idle",
+          "onExpedition": "On Expedition",
+          "onExpeditionDays": "{title}, returns in {days}d",
+          "unavailable": "Recovering",
+          "recoveringDays": "Recovering ({days}d)"
+        }
+      },
+      "expedition": {
+        "tier": {
+          "routine": "Routine",
+          "standard": "Standard",
+          "perilous": "Perilous"
+        },
+        "status": {
+          "inProgress": "In Progress",
+          "awaitingResolution": "Awaiting Resolution",
+          "resolved": "Resolved",
+          "cancelled": "Cancelled"
+        }
+      },
+      "expeditions": {
+        "title": "Expeditions",
+        "noExpeditions": "No expeditions are currently active.",
+        "addExpedition": "Launch Expedition",
+        "cancel": "Cancel",
+        "resolve": "Resolve",
+        "activity": "Activity",
+        "selectActivity": "Select an activity...",
+        "companions": "Companions",
+        "companionsHint": "Choose which companions are setting out on this expedition.",
+        "tier": "Tier",
+        "tierHint": "Routine (2 days, DC 14) / Standard (3 days, DC 18) / Perilous (5 days, DC 22)",
+        "tiers": {
+          "routine": "Routine",
+          "standard": "Standard",
+          "perilous": "Perilous"
+        },
+        "daysRemaining": "Days Remaining",
+        "xp": "XP",
+        "loot": "Loot",
+        "influence": "Influence",
+        "resolution": "Resolution",
+        "launch": "Launch",
+        "notes": "GM Notes",
+        "notesPlaceholder": "Any private notes about this expedition...",
+        "visibleToPlayers": "Visible to Players",
+        "cancelConfirm": "Cancel this expedition? The companions will return immediately with no rewards.",
+        "legendaryReward": "Legendary Reward",
+        "majorReward": "Major Reward",
+        "minorReward": "Minor Reward",
+        "failure": "Failure (No Reward)",
+        "activities": {
+          "escortCaravan": "Escort Caravan",
+          "exploreFrontier": "Explore Frontier",
+          "scoutRuins": "Scout Ruins",
+          "huntGame": "Hunt Game",
+          "mapsRoutes": "Map Routes",
+          "clearMonsters": "Clear Monsters",
+          "protectSettlement": "Protect Settlement",
+          "recoverArtifact": "Recover Artifact"
         }
       },
       "reduceDCToBuildLumberStructures": "Reduce DC for building Structures made out of Lumber by 2",
@@ -1135,7 +1222,6 @@
       "uploadCampingJson": "Upload Camping JSON File",
       "manageActivities": "Manage Activities",
       "resourceDice": "Resource Dice",
-      "bonusResourceDice": "Bonus Resource Dice",
       "luxurySources": "Luxury Sources",
       "quarries": "Quarries",
       "mines": "Mines",
@@ -1710,6 +1796,35 @@
         "warThreatName": "{{group}} Aggression",
         "diplomacyQuestTitle": "Diplomatic Accord with {{group}}"
       },
+      "expeditionResult": {
+        "title": "Companion Expedition: {title}",
+        "expedition": "Expedition",
+        "gmActions": "GM Actions",
+        "applyReward": "Apply Reward",
+        "companionLevelUp": "Level Up Companion",
+        "applyInjury": "Apply Injury",
+        "xpGained": "XP Gained",
+        "influenceGained": "Influence Gained",
+        "lootTier": "Loot Tier",
+        "resolved": "This expedition has been resolved."
+      },
+      "companionAutonomy": {
+        "offerTitle": "Companion Volunteers for Expedition",
+        "offerBody": "The following companions have volunteered for an expedition:",
+        "offerApprove": "Approve",
+        "offerSendElsewhere": "Send on Different Expedition",
+        "offerDecline": "Decline",
+        "noEligible": "No eligible companions available for autonomous expedition.",
+        "personalQuestTag": "Personal Quest",
+        "discoveryTag": "Established+",
+        "influenceLabel": "Influence",
+        "gmActions": "GM Actions",
+        "approvedTitle": "Expedition Approved",
+        "approvedSuffix": "has been dispatched on the expedition.",
+        "approvedMessage": "Approved! The selected companion has been assigned to the expedition.",
+        "declinedMessage": "Declined. The companions remain available.",
+        "sendElsewhereMessage": "Sent on a different expedition. They will return later."
+      },
       "firstRun": {
         "dontShowAgain": "Don't show this again",
         "intro": "You've just enabled the Kingdom Building, Camping & Weather module for PFRPG 2e.",
@@ -2063,6 +2178,7 @@
       "blindroll": "Blind Roll",
       "selfroll": "Self Roll"
     },
+
     "kingdomEventTrait": {
       "downtime": "Downtime",
       "leadership": "Leadership",

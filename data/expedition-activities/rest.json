@@ -1,0 +1,21 @@
+{
+  "id": "rest",
+  "name": "expeditionActivities.rest.name",
+  "isLocked": false,
+  "isSecret": false,
+  "isHomebrew": false,
+  "skills": [],
+  "criticalSuccess": {
+    "message": "expeditionActivities.rest.criticalSuccess.message"
+  },
+  "success": {
+    "message": "expeditionActivities.rest.success.message"
+  },
+  "failure": {
+    "message": "expeditionActivities.rest.failure.message"
+  },
+  "criticalFailure": {
+    "message": "expeditionActivities.rest.criticalFailure.message"
+  },
+  "oncePerSession": false
+}

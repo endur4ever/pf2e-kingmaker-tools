@@ -23,6 +23,9 @@ import at.posselt.pfrpg2e.utils.t
 import at.posselt.pfrpg2e.utils.toMap
 import at.posselt.pfrpg2e.utils.unsetAppFlag
 import at.posselt.pfrpg2e.utils.worldTimeSeconds
+import com.foundryvtt.core.game
+import at.posselt.pfrpg2e.kingdom.getKingdomActors
+import at.posselt.pfrpg2e.kingdom.getKingdom
 import com.foundryvtt.core.AnyObject
 import com.foundryvtt.core.Game
 import com.foundryvtt.core.documents.Actor
@@ -303,7 +306,17 @@ suspend fun CampingData.getActorsCarryingFood(party: PF2EParty?): List<PF2EActor
 suspend fun CampingData.getActorsInCamp(
     campingActivityOnly: Boolean = false,
 ): List<PF2EActor> = coroutineScope {
+    val onExpeditionUuids = game.getKingdomActors()
+        .mapNotNull { it.getKingdom() }
+        .flatMap { kingdom ->
+            (kingdom.companions ?: emptyArray())
+                .filter { it.expeditionStatus == "onExpedition" }
+                .mapNotNull { it.actorUuid }
+        }
+        .toSet()
+
     actorUuids
+        .filter { it !in onExpeditionUuids }
         .map {
             async {
                 if (campingActivityOnly) {

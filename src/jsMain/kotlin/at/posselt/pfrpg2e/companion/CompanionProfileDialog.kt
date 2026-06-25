@@ -1,16 +1,22 @@
 package at.posselt.pfrpg2e.companion
 
+import at.posselt.pfrpg2e.companion.applyCompanionXp
+import at.posselt.pfrpg2e.settings.Pfrpg2eKingdomCampingWeatherSettings
 import at.posselt.pfrpg2e.app.HandlebarsRenderContext
 import at.posselt.pfrpg2e.app.forms.SimpleApp
 import at.posselt.pfrpg2e.kingdom.KingdomActor
 import at.posselt.pfrpg2e.kingdom.data.RawCharacter
+import at.posselt.pfrpg2e.kingdom.data.RawCompanionExpedition
 import at.posselt.pfrpg2e.kingdom.getKingdom
 import at.posselt.pfrpg2e.kingdom.setKingdom
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.CompanionProfileContext
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.buildCompanionProfileContext
+import at.posselt.pfrpg2e.kingdom.dialogs.AddExpeditionDialog
 import at.posselt.pfrpg2e.utils.buildPromise
 import at.posselt.pfrpg2e.utils.launch
+import at.posselt.pfrpg2e.utils.postChatMessage
 import at.posselt.pfrpg2e.utils.t
+import js.objects.recordOf
 import com.foundryvtt.core.applications.api.HandlebarsRenderOptions
 import com.foundryvtt.core.game
 import kotlinx.coroutines.await
@@ -113,12 +119,39 @@ class CompanionProfileDialog(
             "complete-quest" -> {
                 if (questId == null) return
                 // Auto-apply the influence reward on completion (Decision 3), clamped to [0, 12].
+                // Also auto-apply XP reward from CompanionQuestRewards.leveling gate.
+                var leveledCompanionName: String? = null
+                var leveledNewLevel = 0
                 mutate { companion, quests ->
                     quests.find { it.id == questId && it.status == "active" }?.let { quest ->
                         quest.status = "completed"
                         if (quest.influenceReward != 0) {
                             companion.influence = clampInfluence(companion.influence + quest.influenceReward)
                         }
+                        val xpToAward = quest.rewards?.xp
+                        if (xpToAward != null && xpToAward > 0) {
+                            val levelingEnabled = Pfrpg2eKingdomCampingWeatherSettings.getEnableCompanionLeveling()
+                            if (levelingEnabled) {
+                                val levelResult = applyCompanionXp(
+                                    currentLevel = companion.level,
+                                    currentXp = companion.xp,
+                                    gainedXp = xpToAward,
+                                )
+                                companion.level = levelResult.newLevel
+                                companion.xp = levelResult.newXp
+                                if (levelResult.levelsGained > 0) {
+                                    leveledCompanionName = companion.name
+                                    leveledNewLevel = levelResult.newLevel
+                                }
+                            }
+                        }
+                    }
+                }
+                if (leveledCompanionName != null) {
+                    buildPromise {
+                        postChatMessage(
+                            t("kingdom.companionLeveledUp", recordOf("name" to leveledCompanionName, "level" to leveledNewLevel))
+                        )
                     }
                 }
             }
@@ -146,6 +179,30 @@ class CompanionProfileDialog(
 
             "toggle-camp-available" -> mutate { c, _ -> c.campAvailable = !c.campAvailable }
 
+            "send-on-expedition" -> {
+                if (!game.user.isGM) return
+                buildPromise {
+                    val kingdom = kingdomActor.getKingdom() ?: return@buildPromise
+                    val comps = kingdom.companions ?: emptyArray()
+                    val companion = comps.getOrNull(companionIndex) ?: return@buildPromise
+                    val key = companionKey(companion)
+                    AddExpeditionDialog(
+                        companions = comps,
+                        preselectedId = key,
+                    ) { expedition ->
+                        val current = kingdomActor.getKingdom() ?: return@AddExpeditionDialog
+                        current.companionExpeditions = (current.companionExpeditions ?: emptyArray()) + expedition
+                        val updatedComps = (current.companions ?: emptyArray()).copyOf()
+                        expedition.companionIds.forEach { cid ->
+                            updatedComps.find { (it.actorUuid ?: it.name) == cid }?.expeditionStatus = "onExpedition"
+                        }
+                        current.companions = updatedComps
+                        kingdomActor.setKingdom(current)
+                        render()
+                    }.launch()
+                }
+            }
+
             "set-discovery" -> {
                 if (!game.user.isGM) return
                 val select = element.querySelector("select[name='discoveryStatus']") as? HTMLSelectElement
@@ -165,12 +222,14 @@ class CompanionProfileDialog(
         val parent = super._preparePartContext(partId, context, options).await()
         val kingdom = kingdomActor.getKingdom()
         val companion = kingdom?.companions?.getOrNull(companionIndex)
+        val expeditions = kingdom?.companionExpeditions?.toList() ?: emptyList()
         if (companion == null) {
             buildCompanionProfileContext(
                 partId = parent.partId,
                 companion = RawCharacter(name = "?"),
                 quests = emptyList(),
                 isGM = game.user.isGM,
+                expeditions = expeditions,
                 localize = { t(it) },
             )
         } else {
@@ -179,6 +238,7 @@ class CompanionProfileDialog(
                 companion = companion,
                 quests = questsFor(companion, kingdom.companionPersonalQuests ?: emptyArray()),
                 isGM = game.user.isGM,
+                expeditions = expeditions,
                 localize = { t(it) },
             )
         }

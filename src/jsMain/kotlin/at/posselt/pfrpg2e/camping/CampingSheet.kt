@@ -853,7 +853,10 @@ class CampingSheet(
                 val companionUnavailable = activity.requiredCompanion?.let { companionName ->
                     val unavailableCompanionNames = (game.getKingdomActors().firstOrNull()?.getKingdom()
                         ?.companions ?: emptyArray())
-                        .filter { it.asDynamic().campAvailable == false }
+                        .filter { companion ->
+                            companion.asDynamic().campAvailable == false
+                                || companion.asDynamic().expeditionStatus == "onExpedition"
+                        }
                         .map { it.name }
                         .toSet()
                     val regex = Regex("\\b$companionName\\b", RegexOption.IGNORE_CASE)
@@ -1270,9 +1273,13 @@ class CampingSheet(
             .toMap()
         // Companions physically in camp but flagged unavailable (campAvailable == false) gate their
         // required activities even when present (roadmap #7). Null/undefined = available (backward compat).
+        // Companions on expedition are also unavailable for camp activities.
         val unavailableCompanionNames = (game.getKingdomActors().firstOrNull()?.getKingdom()
             ?.companions ?: emptyArray())
-            .filter { it.asDynamic().campAvailable == false }
+            .filter { companion ->
+                companion.asDynamic().campAvailable == false
+                    || companion.asDynamic().expeditionStatus == "onExpedition"
+            }
             .map { it.name }
             .toSet()
         val activities = groupActivities.mapIndexed { _, groupedActivity ->

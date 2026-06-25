@@ -45,16 +45,18 @@ object ActivityCapCalculator {
         performedCounts: Map<String, Int> = emptyMap(),
         leadershipCap: Int = 2,
         leadershipCapWithTownhall: Int = 3,
+        increaseLeadershipActivities: Boolean = false,
     ): ActivityCapsResult {
-        val settings = kingdom.settings
         val settlements = kingdom.settlements ?: emptyArray()
         val hexContents = kingdom.hexContents ?: emptyArray()
 
         // RAW: each PC leader may attempt [leadershipCap] Leadership activities per turn (default 2),
         // rising to [leadershipCapWithTownhall] (default 3) when the capital has a Town Hall/Castle/
-        // Palace (the increaseLeadershipActivities structure bonus). The total scales with the number
-        // of PC leaders — leadershipCap/leadershipCapWithTownhall are the PER-PC-LEADER allotment.
-        val perLeader = if (settings.asDynamic().increaseLeadershipActivities == true)
+        // Palace. [increaseLeadershipActivities] is that structure bonus, evaluated from the kingdom's
+        // settlements by the caller (evaluateGlobalBonuses) — it is NOT a kingdom.settings field. The
+        // total scales with the number of PC leaders; leadershipCap/leadershipCapWithTownhall are the
+        // PER-PC-LEADER allotment.
+        val perLeader = if (increaseLeadershipActivities)
             leadershipCapWithTownhall
         else
             leadershipCap

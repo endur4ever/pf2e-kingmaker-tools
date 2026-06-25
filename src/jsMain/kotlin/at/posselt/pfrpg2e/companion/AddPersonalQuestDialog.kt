@@ -37,6 +37,7 @@ class PersonalQuestModel(
             string("questHook", nullable = true)
             int("turnsRemaining", nullable = true)
             int("influenceReward")
+            int("xp")
             boolean("visibleToPlayers")
         }
     }
@@ -49,6 +50,7 @@ external interface AddPersonalQuestData {
     val questHook: String?
     val turnsRemaining: Int?
     val influenceReward: Int
+    val xp: Int
     val visibleToPlayers: Boolean
 }
 
@@ -78,6 +80,7 @@ class AddPersonalQuest(
             questHook = q.questHook,
             turnsRemaining = q.turnsRemaining,
             influenceReward = q.influenceReward,
+            xp = q.rewards?.xp ?: 0,
             visibleToPlayers = q.visibleToPlayers,
         )
     } ?: AddPersonalQuestData(
@@ -86,6 +89,7 @@ class AddPersonalQuest(
         questHook = null,
         turnsRemaining = null,
         influenceReward = 0,
+        xp = 120,
         visibleToPlayers = false,
     )
 
@@ -107,6 +111,9 @@ class AddPersonalQuest(
                     influenceReward = clampInfluence(data.influenceReward),
                 ).also {
                     it.questHook = data.questHook
+                    if (data.xp > 0) {
+                        it.rewards = CompanionQuestRewards(xp = data.xp)
+                    }
                 }
                 buildPromise {
                     onSave(quest)
@@ -154,6 +161,13 @@ class AddPersonalQuest(
                 name = "influenceReward",
                 label = t("kingdom.companion.quest.influenceReward"),
                 value = data.influenceReward,
+                stacked = false,
+                required = false,
+            ),
+            NumberInput(
+                name = "xp",
+                label = t("kingdom.companion.quest.xp"),
+                value = data.xp,
                 stacked = false,
                 required = false,
             ),

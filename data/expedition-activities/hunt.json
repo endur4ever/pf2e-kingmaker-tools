@@ -1,0 +1,34 @@
+{
+  "id": "hunt",
+  "name": "expeditionActivities.hunt.name",
+  "isLocked": false,
+  "isSecret": false,
+  "isHomebrew": false,
+  "skills": [
+    {
+      "name": "survival",
+      "proficiency": "trained",
+      "dcType": "zone",
+      "required": true
+    },
+    {
+      "name": "hunting",
+      "proficiency": "trained",
+      "dcType": "zone",
+      "required": false
+    }
+  ],
+  "criticalSuccess": {
+    "message": "expeditionActivities.hunt.criticalSuccess.message"
+  },
+  "success": {
+    "message": "expeditionActivities.hunt.success.message"
+  },
+  "failure": {
+    "message": "expeditionActivities.hunt.failure.message"
+  },
+  "criticalFailure": {
+    "message": "expeditionActivities.hunt.criticalFailure.message"
+  },
+  "oncePerSession": false
+}

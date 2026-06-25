@@ -131,5 +131,22 @@
                 <p class="km-session-prep-empty">{{localizeKM "kingdom.sessionPrep.noCompanionMoments"}}</p>
             {{/if}}
         </section>
+
+        <section class="km-session-prep-section">
+            <h3><i class="fa-solid fa-compass"></i> {{localizeKM "kingdom.sessionPrep.companionExpeditions"}} <span class="km-session-prep-count">{{sessionPrepContext.companionExpeditions.length}}</span></h3>
+            {{#if sessionPrepContext.companionExpeditions.length}}
+                <ul class="km-session-prep-list">
+                    {{#each sessionPrepContext.companionExpeditions}}
+                        <li class="km-session-prep-item">
+                            <span class="km-session-prep-item__name">{{this.name}}</span>
+                            {{#if this.hasTurns}}<span class="km-session-prep-item__turns">{{this.turnsRemaining}} {{localizeKM "kingdom.sessionPrep.turnsRemaining"}}</span>{{/if}}
+                            {{#if this.hasDetail}}<span class="km-session-prep-item__detail">{{this.detail}}</span>{{/if}}
+                        </li>
+                    {{/each}}
+                </ul>
+            {{else}}
+                <p class="km-session-prep-empty">{{localizeKM "kingdom.sessionPrep.noCompanionExpeditions"}}</p>
+            {{/if}}
+        </section>
     </div>
 </div>

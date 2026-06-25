@@ -1,0 +1,28 @@
+{
+  "id": "personal-quest",
+  "name": "expeditionActivities.personal-quest.name",
+  "isLocked": false,
+  "isSecret": false,
+  "isHomebrew": false,
+  "skills": [
+    {
+      "name": "any",
+      "proficiency": "trained",
+      "dcType": "actorLevel",
+      "required": true
+    }
+  ],
+  "criticalSuccess": {
+    "message": "expeditionActivities.personal-quest.criticalSuccess.message"
+  },
+  "success": {
+    "message": "expeditionActivities.personal-quest.success.message"
+  },
+  "failure": {
+    "message": "expeditionActivities.personal-quest.failure.message"
+  },
+  "criticalFailure": {
+    "message": "expeditionActivities.personal-quest.criticalFailure.message"
+  },
+  "oncePerSession": false
+}

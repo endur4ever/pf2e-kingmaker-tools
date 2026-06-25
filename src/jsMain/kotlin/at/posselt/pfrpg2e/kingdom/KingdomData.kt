@@ -8,6 +8,7 @@ import at.posselt.pfrpg2e.data.kingdom.KingdomAbilityScores
 import at.posselt.pfrpg2e.data.kingdom.KingdomSkill
 import at.posselt.pfrpg2e.data.kingdom.KingdomSkillRanks
 import at.posselt.pfrpg2e.data.kingdom.RuinValues
+import at.posselt.pfrpg2e.kingdom.data.RawCompanionExpedition
 import at.posselt.pfrpg2e.data.kingdom.calculateScore
 import at.posselt.pfrpg2e.data.kingdom.leaders.Leader
 import at.posselt.pfrpg2e.data.kingdom.leaders.LeaderActor
@@ -283,6 +284,9 @@ external interface KingdomData {
 
     /** Bonus resource dice granted by the GM this turn (e.g. from events). Applied during collection, then reset. */
     var bonusResourceDice: Int
+
+    /** Active and historical companion expeditions. Null when no expeditions have been dispatched. */
+    var companionExpeditions: Array<RawCompanionExpedition>?
 }
 
 fun RawLeaderKingdomSkills.hasSkill(leader: Leader, skill: KingdomSkill) =

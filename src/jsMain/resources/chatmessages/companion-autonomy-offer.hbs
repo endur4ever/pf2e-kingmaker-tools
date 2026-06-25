@@ -1,0 +1,44 @@
+<h2>{{localizeKM "chatMessages.companionAutonomy.offerTitle"}}</h2>
+<div class="km-companion-autonomy-offer">
+    <p>{{localizeKM "chatMessages.companionAutonomy.offerBody"}}</p>
+    <ul class="km-companion-autonomy-list">
+        {{#each volunteers}}
+        <li class="km-companion-autonomy-volunteer">
+            <strong>{{name}}</strong>
+            {{#if hasPersonalQuest}}
+            <span class="km-autonomy-tag km-autonomy-quest">{{localizeKM "chatMessages.companionAutonomy.personalQuestTag"}}
+            </span>
+            {{/if}}
+            {{#if discoveryEstablished}}
+            <span class="km-autonomy-tag km-autonomy-discovery">{{localizeKM "chatMessages.companionAutonomy.discoveryTag"}}
+            </span>
+            {{/if}}
+            <span class="km-autonomy-influence">{{localizeKM "chatMessages.companionAutonomy.influenceLabel"}}: {{influence}}</span>
+        </li>
+        {{/each}}
+    </ul>
+</div>
+{{#if isGM}}
+<hr>
+<h3>{{localizeKM "chatMessages.companionAutonomy.gmActions"}}</h3>
+<div class="km-expedition-offers">
+    <button type="button"
+            class="km-offer-companion-autonomy"
+            data-kingdom-actor-uuid="{{actorUuid}}"
+            data-approve="true">
+        {{localizeKM "chatMessages.companionAutonomy.offerApprove"}}
+    </button>
+    <button type="button"
+            class="km-offer-companion-autonomy"
+            data-kingdom-actor-uuid="{{actorUuid}}"
+            data-send-elsewhere="true">
+        {{localizeKM "chatMessages.companionAutonomy.offerSendElsewhere"}}
+    </button>
+    <button type="button"
+            class="km-offer-companion-autonomy"
+            data-kingdom-actor-uuid="{{actorUuid}}"
+            data-decline="true">
+        {{localizeKM "chatMessages.companionAutonomy.offerDecline"}}
+    </button>
+</div>
+{{/if}}

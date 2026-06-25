@@ -106,6 +106,7 @@ external interface KingdomSheetContext : ValidatedHandlebarsContext {
     val questTimerChanges: Array<QuestTimerChangeContext>
     val personalQuests: Array<CompanionQuestRowContext>
     val analyticsContext: AnalyticsContext?
+    val expeditionsContext: ExpeditionsContext
 }
 
 @JsPlainObject

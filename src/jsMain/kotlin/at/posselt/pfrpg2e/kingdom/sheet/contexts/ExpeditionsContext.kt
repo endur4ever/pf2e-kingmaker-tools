@@ -1,0 +1,120 @@
+package at.posselt.pfrpg2e.kingdom.sheet.contexts
+
+import at.posselt.pfrpg2e.kingdom.KingdomData
+import at.posselt.pfrpg2e.kingdom.data.RawCompanionExpedition
+import at.posselt.pfrpg2e.kingdom.data.RawCharacter
+import kotlinx.js.JsPlainObject
+
+@JsPlainObject
+external interface ExpeditionRowContext {
+    val id: String
+    val title: String
+    val activityId: String
+    val status: String
+    val daysRemaining: Int
+    val totalDays: Int
+    val progressPercent: Int
+    val dc: Int
+    val tier: String
+    val tierLabel: String
+    val outcomeDegree: String?
+    val accruedXp: Int
+    val accruedInfluenceDelta: Int
+    val accruedInjuries: Array<String>
+    val lootTier: String?
+    val factionStandingDelta: Int
+    val companionIds: Array<String>
+    val companionNames: String
+    val visibleToPlayers: Boolean
+    val rewardApplied: Boolean
+    val isResolved: Boolean
+    val isInProgress: Boolean
+    val isAwaitingResolution: Boolean
+    val gmNotes: String
+}
+
+@JsPlainObject
+external interface ExpeditionsContext {
+    val items: Array<ExpeditionRowContext>
+    val isGM: Boolean
+    val hasExpeditions: Boolean
+}
+
+fun Array<RawCompanionExpedition>.toExpeditionsContext(
+    isGM: Boolean,
+    companions: Array<RawCharacter>,
+    localize: (String) -> String = { it },
+): ExpeditionsContext {
+    val companionNameMap = companions.associateBy(
+        { it.actorUuid ?: it.name },
+        { it.name },
+    )
+    val items = this
+        .filter { it.visibleToPlayers || isGM }
+        .map { exp ->
+            val progressPercent = if (exp.totalDays > 0) {
+                ((exp.totalDays - exp.daysRemaining) * 100 / exp.totalDays).coerceIn(0, 100)
+            } else {
+                0
+            }
+            val tierLabel = when (exp.tier) {
+                "routine" -> localize("kingdom.expedition.tier.routine")
+                "standard" -> localize("kingdom.expedition.tier.standard")
+                "perilous" -> localize("kingdom.expedition.tier.perilous")
+                else -> exp.tier
+            }
+            val statusLabel = when (exp.status) {
+                "inProgress" -> localize("kingdom.expedition.status.inProgress")
+                "awaitingResolution" -> localize("kingdom.expedition.status.awaitingResolution")
+                "resolved" -> localize("kingdom.expedition.status.resolved")
+                "cancelled" -> localize("kingdom.expedition.status.cancelled")
+                else -> exp.status
+            }
+            ExpeditionRowContext(
+                id = exp.id,
+                title = exp.title,
+                activityId = exp.activityId,
+                status = statusLabel,
+                daysRemaining = exp.daysRemaining,
+                totalDays = exp.totalDays,
+                progressPercent = progressPercent,
+                dc = exp.dc,
+                tier = exp.tier,
+                tierLabel = tierLabel,
+                outcomeDegree = exp.outcomeDegree,
+                accruedXp = exp.accruedXp,
+                accruedInfluenceDelta = exp.accruedInfluenceDelta,
+                accruedInjuries = exp.accruedInjuries,
+                lootTier = exp.lootTier,
+                factionStandingDelta = exp.factionStandingDelta,
+                companionIds = exp.companionIds,
+                companionNames = exp.companionIds
+                    .mapNotNull { companionNameMap[it] }
+                    .joinToString(", "),
+                visibleToPlayers = exp.visibleToPlayers,
+                rewardApplied = exp.rewardApplied,
+                isResolved = exp.status == "resolved",
+                isInProgress = exp.status == "inProgress",
+                isAwaitingResolution = exp.status == "awaitingResolution",
+                gmNotes = exp.gmNotes,
+            )
+        }
+        .toTypedArray()
+    return ExpeditionsContext(
+        items = items,
+        isGM = isGM,
+        hasExpeditions = items.isNotEmpty(),
+    )
+}
+
+/**
+ * True if the companion at [index] is currently on an unresolved expedition.
+ * Used to BLOCK companion deletion until expeditions are resolved.
+ */
+fun KingdomData.companionHasActiveExpedition(index: Int): Boolean {
+    val companion = companions?.getOrNull(index) ?: return false
+    val key = companion.actorUuid ?: companion.name
+    return (companionExpeditions ?: emptyArray()).any { exp ->
+        key in exp.companionIds && exp.status != "resolved" && exp.status != "cancelled"
+    }
+}

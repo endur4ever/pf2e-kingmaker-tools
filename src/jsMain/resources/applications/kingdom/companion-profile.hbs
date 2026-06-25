@@ -28,6 +28,20 @@
         {{/if}}
     </section>
 
+    <section class="km-cp-level">
+        <div class="km-cp-level-label">
+            <span>{{localizeKM "kingdom.companion.level"}}</span>
+            <span class="km-cp-level-value">{{level}}</span>
+        </div>
+        <div class="km-cp-xp-label">
+            <span>{{localizeKM "kingdom.companion.xp"}}</span>
+            <span class="km-cp-xp-value">{{xp}}</span>
+        </div>
+        <div class="km-cp-xp-bar">
+            <div class="km-cp-xp-fill" style="width: {{xpPercent}}%"></div>
+        </div>
+    </section>
+
     <section class="km-cp-status-row">
         <div class="km-cp-camp">
             <label>{{localizeKM "kingdom.companion.campAvailable"}}</label>
@@ -38,6 +52,14 @@
             <button type="button" class="km-cp-toggle" data-action="toggle-camp-available">
                 <i class="fa-solid fa-right-left"></i>
             </button>
+            {{/if}}
+        </div>
+
+        <div class="km-cp-expedition-status">
+            <label>{{localizeKM "kingdom.companion.expeditionStatusLabel"}}</label>
+            <span class="km-cp-badge km-expedition-{{expeditionStatus}}">{{expeditionStatusLabel}}</span>
+            {{#if injuryDaysRemaining}}
+            <span class="km-cp-badge km-injured">{{localizeKM "kingdom.companion.injured"}} ({{injuryDaysRemaining}} {{localizeKM "kingdom.companion.days"}})</span>
             {{/if}}
         </div>
 
@@ -53,6 +75,58 @@
         </div>
         {{/if}}
     </section>
+
+    {{#if isGM}}
+    {{#if canSendOnExpedition}}
+    <section class="km-cp-expedition-action">
+        <button type="button" class="km-cp-send-expedition" data-action="send-on-expedition">
+            <i class="fa-solid fa-paper-plane"></i> {{localizeKM "kingdom.companion.sendOnExpedition"}}
+        </button>
+    </section>
+    {{/if}}
+    {{/if}}
+
+    {{#if currentExpeditions.length}}
+    <section class="km-cp-expeditions">
+        <h2 class="km-cp-expeditions-header">{{localizeKM "kingdom.companion.currentExpeditions"}}</h2>
+        <div class="km-cp-expedition-list">
+            {{#each currentExpeditions}}
+            <div class="km-cp-expedition-card">
+                <div class="km-cp-expedition-title">
+                    <span>{{this.title}}</span>
+                    <span class="km-cp-badge km-tier-{{this.tier}}">{{this.tierLabel}}</span>
+                </div>
+                <div class="km-cp-expedition-progress">
+                    <div class="km-cp-progress-bar">
+                        <div class="km-cp-progress-fill" style="width: {{this.progressPercent}}%"></div>
+                    </div>
+                    <span class="km-cp-expedition-days">{{this.daysRemaining}} / {{this.totalDays}} {{localizeKM "kingdom.companion.days"}}</span>
+                </div>
+                <div class="km-cp-expedition-meta">
+                    <span>DC {{this.dc}}</span>
+                    <span class="km-cp-badge">{{this.statusLabel}}</span>
+                </div>
+            </div>
+            {{/each}}
+        </div>
+    </section>
+    {{/if}}
+
+    {{#if pastExpeditions.length}}
+    <section class="km-cp-expeditions km-cp-expeditions-past">
+        <h2 class="km-cp-expeditions-header">{{localizeKM "kingdom.companion.pastExpeditions"}}</h2>
+        <div class="km-cp-expedition-list">
+            {{#each pastExpeditions}}
+            <div class="km-cp-expedition-card km-cp-expedition-resolved">
+                <div class="km-cp-expedition-title">
+                    <span>{{this.title}}</span>
+                    <span class="km-cp-badge">{{this.statusLabel}}</span>
+                </div>
+            </div>
+            {{/each}}
+        </div>
+    </section>
+    {{/if}}
 
     {{#if plotHook}}
     <section class="km-cp-plot-hook">

@@ -8,6 +8,7 @@ import at.posselt.pfrpg2e.companion.companionDiscoveryStages
 import at.posselt.pfrpg2e.companion.influenceBarPercent
 import at.posselt.pfrpg2e.companion.normalizeDiscoveryStatus
 import at.posselt.pfrpg2e.kingdom.data.RawCharacter
+import at.posselt.pfrpg2e.kingdom.data.RawCompanionExpedition
 import kotlinx.js.JsPlainObject
 
 @JsPlainObject
@@ -34,6 +35,23 @@ external interface PersonalQuestSummaryContext {
 }
 
 @JsPlainObject
+external interface CompanionExpeditionSummaryContext {
+    val id: String
+    val title: String
+    val status: String
+    val statusLabel: String
+    val daysRemaining: Int
+    val totalDays: Int
+    val progressPercent: Int
+    val dc: Int
+    val tier: String
+    val tierLabel: String
+    val isInProgress: Boolean
+    val isAwaitingResolution: Boolean
+    val isResolved: Boolean
+}
+
+@JsPlainObject
 external interface CompanionProfileContext : HandlebarsRenderContext {
     val companionName: String
     val companionUuid: String?
@@ -50,6 +68,15 @@ external interface CompanionProfileContext : HandlebarsRenderContext {
     val personalQuests: Array<PersonalQuestSummaryContext>
     val activeQuestCount: Int
     val isGM: Boolean
+    val level: Int
+    val xp: Int
+    val xpPercent: Int
+    val expeditionStatus: String
+    val expeditionStatusLabel: String
+    val injuryDaysRemaining: Int?
+    val currentExpeditions: Array<CompanionExpeditionSummaryContext>
+    val pastExpeditions: Array<CompanionExpeditionSummaryContext>
+    val canSendOnExpedition: Boolean
 }
 
 private fun questSummary(
@@ -74,22 +101,41 @@ private fun questSummary(
     )
 
 /**
+ * XP needed to reach the next level from [level]. Uses the simplified companion leveling curve.
+ */
+fun xpForLevel(level: Int): Int = level * 1000
+
+/**
  * Builds the companion profile context. Pure (no Foundry i18n dependency) so it can be unit-tested;
  * the dialog passes [localize] = the real localizer, tests use the identity default.
  *
  * When [isGM] is false (read-only player view, Decision 5) only player-visible quests are shown and
  * quest hooks are stripped.
+ *
+ * [expeditions] are the raw expedition records; the companion's `actorUuid ?: name` is used to
+ * filter those that involve this companion.
  */
 fun buildCompanionProfileContext(
     partId: String,
     companion: RawCharacter,
     quests: List<CompanionPersonalQuest>,
     isGM: Boolean,
+    expeditions: List<RawCompanionExpedition> = emptyList(),
     localize: (String) -> String = { it },
 ): CompanionProfileContext {
     val influence = clampInfluence(companion.influence)
     val status = normalizeDiscoveryStatus(companion.discoveryStatus)
     val visibleQuests = if (isGM) quests else quests.filter { it.visibleToPlayers }
+    val companionKey = companion.actorUuid ?: companion.name
+    val myExpeditions = expeditions.filter { exp -> companionKey in exp.companionIds }
+    val currentExpeditions = myExpeditions.filter { it.status != "resolved" && it.status != "cancelled" }
+    val pastExpeditions = myExpeditions.filter { it.status == "resolved" || it.status == "cancelled" }
+    val level = companion.level
+    val xp = companion.xp
+    val xpPercent = if (level > 0) ((xp * 100) / xpForLevel(level)).coerceIn(0, 100) else 0
+    val expeditionStatus = companion.expeditionStatus
+    val canSendOnExpedition = isGM && expeditionStatus == "available" && companion.injuryDaysRemaining == null
+
     return CompanionProfileContext(
         partId = partId,
         companionName = companion.name,
@@ -113,5 +159,74 @@ fun buildCompanionProfileContext(
         personalQuests = visibleQuests.map { quest -> questSummary(quest, isGM, localize) }.toTypedArray(),
         activeQuestCount = visibleQuests.count { it.status == "active" },
         isGM = isGM,
+        level = level,
+        xp = xp,
+        xpPercent = xpPercent,
+        expeditionStatus = expeditionStatus,
+        expeditionStatusLabel = localize("kingdom.companion.expeditionStatus.$expeditionStatus"),
+        injuryDaysRemaining = companion.injuryDaysRemaining,
+        currentExpeditions = currentExpeditions.map { exp ->
+            val progress = if (exp.totalDays > 0) ((exp.totalDays - exp.daysRemaining) * 100 / exp.totalDays).coerceIn(0, 100) else 0
+            val tierLabel = when (exp.tier) {
+                "routine" -> localize("kingdom.expedition.tier.routine")
+                "standard" -> localize("kingdom.expedition.tier.standard")
+                "perilous" -> localize("kingdom.expedition.tier.perilous")
+                else -> exp.tier
+            }
+            val statusLabel = when (exp.status) {
+                "inProgress" -> localize("kingdom.expedition.status.inProgress")
+                "awaitingResolution" -> localize("kingdom.expedition.status.awaitingResolution")
+                "resolved" -> localize("kingdom.expedition.status.resolved")
+                "cancelled" -> localize("kingdom.expedition.status.cancelled")
+                else -> exp.status
+            }
+            CompanionExpeditionSummaryContext(
+                id = exp.id,
+                title = exp.title,
+                status = exp.status,
+                statusLabel = statusLabel,
+                daysRemaining = exp.daysRemaining,
+                totalDays = exp.totalDays,
+                progressPercent = progress,
+                dc = exp.dc,
+                tier = exp.tier,
+                tierLabel = tierLabel,
+                isInProgress = exp.status == "inProgress",
+                isAwaitingResolution = exp.status == "awaitingResolution",
+                isResolved = exp.status == "resolved",
+            )
+        }.toTypedArray(),
+        pastExpeditions = pastExpeditions.map { exp ->
+            val progress = if (exp.totalDays > 0) ((exp.totalDays - exp.daysRemaining) * 100 / exp.totalDays).coerceIn(0, 100) else 0
+            val tierLabel = when (exp.tier) {
+                "routine" -> localize("kingdom.expedition.tier.routine")
+                "standard" -> localize("kingdom.expedition.tier.standard")
+                "perilous" -> localize("kingdom.expedition.tier.perilous")
+                else -> exp.tier
+            }
+            val statusLabel = when (exp.status) {
+                "inProgress" -> localize("kingdom.expedition.status.inProgress")
+                "awaitingResolution" -> localize("kingdom.expedition.status.awaitingResolution")
+                "resolved" -> localize("kingdom.expedition.status.resolved")
+                "cancelled" -> localize("kingdom.expedition.status.cancelled")
+                else -> exp.status
+            }
+            CompanionExpeditionSummaryContext(
+                id = exp.id,
+                title = exp.title,
+                status = exp.status,
+                statusLabel = statusLabel,
+                daysRemaining = exp.daysRemaining,
+                totalDays = exp.totalDays,
+                progressPercent = progress,
+                dc = exp.dc,
+                tier = exp.tier,
+                tierLabel = tierLabel,
+                isInProgress = exp.status == "inProgress",
+                isAwaitingResolution = exp.status == "awaitingResolution",
+                isResolved = exp.status == "resolved",
+            )
+        }.toTypedArray(),
+        canSendOnExpedition = canSendOnExpedition,
     )
 }

@@ -80,10 +80,13 @@ fun KingdomData.getResourceDiceAmount(
     allFeats: List<ChosenFeat>,
     settlements: List<Settlement>,
     kingdomLevel: Int,
+    // The dice you currently hold are rolled and spent during Collect Resources, so a *next-turn*
+    // projection must not fold them in — otherwise the carried-over value compounds each turn.
+    includeCurrent: Boolean = true,
 ) = 4 +
         kingdomLevel +
         allFeats.sumOf { it.feat.resourceDice ?: 0 } +
-        resourceDice.now +
+        (if (includeCurrent) resourceDice.now else 0) +
         bonusResourceDice +
         if (settings.settlementsGenerateRd) {
             settlements.sumOf {
@@ -110,6 +113,7 @@ fun calculateProjectedResources(
         chosenFeats,
         settlements,
         kingdomLevel = kingdomData.level,
+        includeCurrent = false,
     )
     val increaseGainedLuxuries = chosenFeats.sumOf { it.feat.increaseGainedLuxuriesOncePerTurnBy ?: 0 }
     val income = calculateIncome(
