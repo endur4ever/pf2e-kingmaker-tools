@@ -42,7 +42,7 @@ import kotlinx.coroutines.await
  * 2. Apply a +0..+2 influence circumstance bonus by discovery band:
  *    unknown → +0, introduced/established → +1, trusted/bonded → +2.
  * 3. Convert the roll result to [DegreeOfSuccess] via [fromOrdinal].
- * 4. Hand (baseXp, baseInfluence, tier, degree) to [ExpeditionResolverEngine.resolve].
+ * 4. Hand (baseInfluence, tier, degree) to [ExpeditionResolverEngine.resolve].
  * 5. Write accrued* + outcomeDegree onto the record.
  * 6. Set status, persist, and post a minimal degree-of-success chat line.
  */
@@ -85,11 +85,9 @@ suspend fun offerExpeditionResolution(
         )
     }
 
-    val baseXp = 80  // mid-point base; tier multiplier handled in engine
     val baseInfluence = 1  // engine gates influence gain on degree
 
     val result = ExpeditionResolverEngine.resolve(
-        baseXp = baseXp,
         baseInfluence = baseInfluence,
         tier = expedition.tier,
         degree = degree,

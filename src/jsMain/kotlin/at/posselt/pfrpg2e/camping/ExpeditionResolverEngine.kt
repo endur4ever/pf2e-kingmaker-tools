@@ -3,12 +3,17 @@ package at.posselt.pfrpg2e.camping
 import at.posselt.pfrpg2e.data.checks.DegreeOfSuccess
 import kotlin.js.JsExport
 import kotlin.js.JsName
+import kotlin.math.roundToInt
 
 /**
  * Pure expedition resolution engine.
  *
- * Given a base XP, base influence, tier, and degree of success, computes
- * the actual awards (XP, influence, loot, injuries, faction standing, notes).
+ * Given a base influence, tier, and degree of success, computes the actual
+ * awards (XP, influence, loot, injuries, faction standing, notes).
+ *
+ * XP is a flat per-degree base × tier multiplier (rounded). The per-degree base
+ * is owned by this pure layer so it is unit-tested; failure and critical failure
+ * still award a non-zero trickle (anti-death-spiral). See design doc section 4.
  *
  * This engine contains NO Foundry/DOM/roll/chat/persistence dependencies and
  * is fully unit-testable.
@@ -25,10 +30,16 @@ import kotlin.js.JsName
 @JsName("ExpeditionResolverEngine")
 object ExpeditionResolverEngine {
 
+    /** Flat per-degree base XP (before tier multiplier). */
+    private const val XP_CRITICAL_SUCCESS = 120
+    private const val XP_SUCCESS = 80
+    private const val XP_FAILURE = 30
+    private const val XP_CRITICAL_FAILURE = 10
+
     /**
      * Result of resolving an expedition.
      *
-     * @property xpAwarded XP actually awarded (after tier multiplier).
+     * @property xpAwarded XP actually awarded (per-degree base × tier multiplier).
      * @property influenceDelta Influence change (raw, not clamped).
      * @property lootTier Loot tier earned.
      * @property injuryConditions Injury condition slugs (offered, not applied).
@@ -47,14 +58,12 @@ object ExpeditionResolverEngine {
     /**
      * Resolve an expedition outcome.
      *
-     * @param baseXp The base XP before tier multiplier.
-     * @param baseInfluence The base influence gain (before degree modifier).
+     * @param baseInfluence The base influence gain (applied only on success degrees).
      * @param tier The difficulty tier (routine | standard | perilous).
      * @param degree The degree of success from the check.
      * @return An [ExpeditionResolutionResult] with all awards.
      */
     fun resolve(
-        baseXp: Int,
         baseInfluence: Int,
         tier: String,
         degree: DegreeOfSuccess,
@@ -63,7 +72,7 @@ object ExpeditionResolverEngine {
 
         return when (degree) {
             DegreeOfSuccess.CRITICAL_SUCCESS -> ExpeditionResolutionResult(
-                xpAwarded = (baseXp * multiplier).toInt(),
+                xpAwarded = (XP_CRITICAL_SUCCESS * multiplier).roundToInt(),
                 influenceDelta = baseInfluence,
                 lootTier = "major",
                 injuryConditions = emptyArray(),
@@ -71,7 +80,7 @@ object ExpeditionResolverEngine {
                 gmNotes = "",
             )
             DegreeOfSuccess.SUCCESS -> ExpeditionResolutionResult(
-                xpAwarded = (baseXp * multiplier).toInt(),
+                xpAwarded = (XP_SUCCESS * multiplier).roundToInt(),
                 influenceDelta = baseInfluence,
                 lootTier = "moderate",
                 injuryConditions = emptyArray(),
@@ -79,7 +88,7 @@ object ExpeditionResolverEngine {
                 gmNotes = "",
             )
             DegreeOfSuccess.FAILURE -> ExpeditionResolutionResult(
-                xpAwarded = (baseXp * multiplier).toInt(),
+                xpAwarded = (XP_FAILURE * multiplier).roundToInt(),
                 influenceDelta = 0,
                 lootTier = "none",
                 injuryConditions = emptyArray(),
@@ -87,7 +96,7 @@ object ExpeditionResolverEngine {
                 gmNotes = "lost time, returned whole",
             )
             DegreeOfSuccess.CRITICAL_FAILURE -> ExpeditionResolutionResult(
-                xpAwarded = (baseXp * multiplier).toInt(),
+                xpAwarded = (XP_CRITICAL_FAILURE * multiplier).roundToInt(),
                 influenceDelta = 0,
                 lootTier = "none",
                 injuryConditions = arrayOf("fatigued", "wounded"),
