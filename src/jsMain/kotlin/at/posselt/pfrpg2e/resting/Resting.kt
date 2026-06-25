@@ -12,6 +12,10 @@ import at.posselt.pfrpg2e.camping.RecipeData
 import at.posselt.pfrpg2e.camping.RestSettings
 import at.posselt.pfrpg2e.camping.applyRestHealEffects
 import at.posselt.pfrpg2e.camping.askDc
+import at.posselt.pfrpg2e.kingdom.CompanionAutonomy
+import at.posselt.pfrpg2e.kingdom.getKingdom
+import at.posselt.pfrpg2e.kingdom.getKingdomActors
+import at.posselt.pfrpg2e.settings.Pfrpg2eKingdomCampingWeatherSettings
 import at.posselt.pfrpg2e.camping.calculateDailyPreparationSeconds
 import at.posselt.pfrpg2e.camping.calculateRestDurationSeconds
 import at.posselt.pfrpg2e.camping.campingActivitiesDoublingHealing
@@ -461,6 +465,40 @@ private suspend fun completeDailyPreparations(
     buildPromise { logToCalendar(title = "Camp Rest Completed", content = summaryContent) }
     game.time.advance(secondsToAdvance)
         .catch { console.error("[km] camping rest: failed to advance world time", it) }
+
+    // Companion autonomy: if enabled, post an offer card with volunteering companions
+    if (Pfrpg2eKingdomCampingWeatherSettings.getCompanionAutonomyEnabled()) {
+        buildPromise {
+            val kingdomActor = game.getKingdomActors().firstOrNull() ?: return@buildPromise
+            val kingdom = kingdomActor.getKingdom() ?: return@buildPromise
+            val allCompanions = kingdom.companions ?: return@buildPromise
+            val volunteers = CompanionAutonomy.selectAutonomousCompanions(allCompanions.toList())
+            if (volunteers.isNotEmpty()) {
+                val volunteerData = volunteers.map { companion ->
+                    val discoveryRank = when (companion.discoveryStatus) {
+                        "established", "trusted", "bonded" -> true
+                        else -> false
+                    }
+                    js.objects.recordOf(
+                        "name" to companion.name,
+                        "influence" to companion.influence,
+                        "hasPersonalQuest" to companion.personalQuestIds.isNotEmpty(),
+                        "discoveryEstablished" to discoveryRank,
+                    )
+                }.toTypedArray()
+                postChatTemplate(
+                    templatePath = "chatmessages/companion-autonomy-offer.hbs",
+                    templateContext = js.objects.recordOf(
+                        "volunteers" to volunteerData,
+                        "actorUuid" to kingdomActor.uuid,
+                        "isGM" to true,
+                    )
+                )
+            } else {
+                postChatMessage(t("chatMessages.companionAutonomy.noEligible"))
+            }
+        }
+    }
 }
 
 private suspend fun gainMinimumSubsistence(
