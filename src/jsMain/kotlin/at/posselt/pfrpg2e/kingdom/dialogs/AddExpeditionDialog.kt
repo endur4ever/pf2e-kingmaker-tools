@@ -2,6 +2,7 @@ package at.posselt.pfrpg2e.kingdom.dialogs
 
 import at.posselt.pfrpg2e.app.HandlebarsRenderContext
 import at.posselt.pfrpg2e.app.forms.SimpleApp
+import at.posselt.pfrpg2e.companion.CompanionPersonalQuest
 import at.posselt.pfrpg2e.expedition.ExpeditionActivityData
 import at.posselt.pfrpg2e.expedition.getExpeditionActivities
 import at.posselt.pfrpg2e.kingdom.data.RawCharacter
@@ -27,9 +28,16 @@ external interface AddExpeditionCompanionContext {
 }
 
 @JsPlainObject
+external interface AddExpeditionQuestContext {
+    val id: String
+    val label: String
+}
+
+@JsPlainObject
 external interface AddExpeditionContext : HandlebarsRenderContext {
     val activities: Array<ExpeditionActivityData>
     val companions: Array<AddExpeditionCompanionContext>
+    val quests: Array<AddExpeditionQuestContext>
     val selectedActivityId: String
     val selectedTier: String
     val selectedCompanionIds: Array<String>
@@ -40,6 +48,7 @@ external interface AddExpeditionContext : HandlebarsRenderContext {
 class AddExpeditionDialog(
     private val companions: Array<RawCharacter>,
     private val preselectedId: String? = null,
+    private val quests: Array<CompanionPersonalQuest> = emptyArray(),
     private val onAdd: suspend (RawCompanionExpedition) -> Unit,
 ) : SimpleApp<AddExpeditionContext>(
     title = t("kingdom.expeditions.addExpedition"),
@@ -89,6 +98,10 @@ class AddExpeditionDialog(
                     ?.let { it as? org.w3c.dom.HTMLInputElement }
                     ?.checked ?: false
 
+                val targetQuestId = element.querySelector("select[name='expeditionQuest']")
+                    ?.let { it as? org.w3c.dom.HTMLSelectElement }
+                    ?.value?.takeIf { it.isNotBlank() }
+
                 val expedition = createRawCompanionExpedition(
                     id = v4(),
                     activityId = activityId,
@@ -99,6 +112,7 @@ class AddExpeditionDialog(
                     tier = tier,
                     visibleToPlayers = visibleToPlayers,
                     createdAt = Date().toISOString(),
+                    targetQuestId = targetQuestId,
                 ).also {
                     it.gmNotes = gmNotes
                 }
@@ -129,10 +143,19 @@ class AddExpeditionDialog(
             }
             .toTypedArray()
 
+        val questContexts = quests
+            .filter { it.status == "active" }
+            .map { q ->
+                val companionName = companions.find { (it.actorUuid ?: it.name) == q.companionId }?.name ?: q.companionId
+                AddExpeditionQuestContext(id = q.id, label = "$companionName: ${q.title}")
+            }
+            .toTypedArray()
+
         AddExpeditionContext(
             partId = parent.partId,
             activities = getExpeditionActivities(),
             companions = companionContexts,
+            quests = questContexts,
             selectedActivityId = "",
             selectedTier = "standard",
             selectedCompanionIds = if (preselectedId != null) arrayOf(preselectedId) else emptyArray(),

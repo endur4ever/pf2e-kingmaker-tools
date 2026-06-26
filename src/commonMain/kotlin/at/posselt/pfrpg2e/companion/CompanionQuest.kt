@@ -36,3 +36,23 @@ external interface CompanionQuestRewards {
     var rp: Int?
     var customReward: String?
 }
+
+/**
+ * Select which personal quest an expedition's completion reward applies to.
+ *
+ * Prefers the explicitly targeted quest ([targetQuestId]) when it is still active, so a
+ * companion with multiple active quests gets the reward on the RIGHT one. Falls back to the
+ * companion's first active quest for legacy expeditions created before target linkage existed
+ * (targetQuestId == null). Returns null when no active quest matches.
+ */
+fun selectRewardQuest(
+    quests: List<CompanionPersonalQuest>,
+    companionId: String,
+    targetQuestId: String?,
+): CompanionPersonalQuest? {
+    if (targetQuestId != null) {
+        val targeted = quests.find { it.id == targetQuestId && it.status == "active" }
+        if (targeted != null) return targeted
+    }
+    return quests.find { it.companionId == companionId && it.status == "active" }
+}

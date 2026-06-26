@@ -32,6 +32,19 @@
         <p class="km-hint">{{localizeKM "kingdom.expeditions.companionsHint"}}</p>
     </div>
 
+    {{#if quests}}
+    <div class="km-dialog-section">
+        <label for="expeditionQuest">{{localizeKM "kingdom.expeditions.targetQuest"}}</label>
+        <select name="expeditionQuest" id="expeditionQuest">
+            <option value="">{{localizeKM "kingdom.expeditions.targetQuestNone"}}</option>
+            {{#each quests}}
+            <option value="{{id}}">{{label}}</option>
+            {{/each}}
+        </select>
+        <p class="km-hint">{{localizeKM "kingdom.expeditions.targetQuestHint"}}</p>
+    </div>
+    {{/if}}
+
     <div class="km-dialog-section">
         <label for="expeditionNotes">{{localizeKM "kingdom.expeditions.notes"}}</label>
         <textarea name="expeditionNotes" rows="3" placeholder="{{localizeKM 'kingdom.expeditions.notesPlaceholder'}}">{{gmNotes}}</textarea>

@@ -4,6 +4,7 @@ import at.posselt.pfrpg2e.companion.LevelUpResult
 import at.posselt.pfrpg2e.companion.applyCompanionXp
 import at.posselt.pfrpg2e.companion.applyPersonalQuestReward
 import at.posselt.pfrpg2e.companion.clampInfluence
+import at.posselt.pfrpg2e.companion.selectRewardQuest
 import at.posselt.pfrpg2e.data.events.KingdomEventTrait
 import at.posselt.pfrpg2e.kingdom.dialogs.AddExpeditionDialog
 import at.posselt.pfrpg2e.kingdom.dialogs.AddQuest
@@ -241,7 +242,7 @@ private val buttons = listOf(
             if (expedition.activityId == "personal-quest" && isSuccess && companionId != null) {
                 val companion = kingdom.companions?.find { (it.actorUuid ?: it.name) == companionId }
                 val quests = kingdom.companionPersonalQuests ?: emptyArray()
-                val activeQuest = quests.find { it.companionId == companionId && it.status == "active" }
+                val activeQuest = selectRewardQuest(quests.toList(), companionId, expedition.targetQuestId)
                 if (activeQuest != null) {
                     if (companion != null) {
                         val levelingEnabled = Pfrpg2eKingdomCampingWeatherSettings.getEnableCompanionLeveling()
@@ -375,6 +376,7 @@ private val buttons = listOf(
                 AddExpeditionDialog(
                     companions = companions,
                     preselectedId = key,
+                    quests = kingdom.companionPersonalQuests ?: emptyArray(),
                 ) { expedition ->
                     buildPromise {
                         val current = actor.getKingdom() ?: return@buildPromise
@@ -401,6 +403,7 @@ private val buttons = listOf(
             val companions = kingdom.companions ?: return@ChatButton
             AddExpeditionDialog(
                 companions = companions,
+                quests = kingdom.companionPersonalQuests ?: emptyArray(),
             ) { expedition ->
                 buildPromise {
                     val current = actor.getKingdom() ?: return@buildPromise

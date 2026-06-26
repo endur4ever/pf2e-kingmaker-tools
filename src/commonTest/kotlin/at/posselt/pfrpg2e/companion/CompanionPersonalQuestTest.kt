@@ -43,4 +43,34 @@ class CompanionPersonalQuestTest {
         assertTrue(q.visibleToPlayers)
         assertEquals(4, q.influenceReward)
     }
+
+    // ── selectRewardQuest (expedition -> quest linkage) ─────────────────────
+
+    private fun q(id: String, companionId: String, status: String = "active"): CompanionPersonalQuest =
+        js("{ id: id, title: 'T', description: 'D', companionId: companionId, status: status, turnsRemaining: null, visibleToPlayers: false, influenceReward: 0 }")
+            .unsafeCast<CompanionPersonalQuest>()
+
+    @Test
+    fun `selectRewardQuest prefers the targeted quest over the first active`() {
+        val q1 = q("q1", "c1")
+        val q2 = q("q2", "c1")
+        // Even though q1 is the first active quest for c1, the explicit target wins.
+        assertEquals("q2", selectRewardQuest(listOf(q1, q2), companionId = "c1", targetQuestId = "q2")?.id)
+    }
+
+    @Test
+    fun `selectRewardQuest falls back to first active when target is missing or inactive`() {
+        val q1 = q("q1", "c1", status = "active")
+        val q2 = q("q2", "c1", status = "completed")
+        // Target points at a non-active quest -> fall back to first active.
+        assertEquals("q1", selectRewardQuest(listOf(q1, q2), "c1", targetQuestId = "q2")?.id)
+        // Legacy expedition with no target -> first active.
+        assertEquals("q1", selectRewardQuest(listOf(q1, q2), "c1", targetQuestId = null)?.id)
+    }
+
+    @Test
+    fun `selectRewardQuest returns null when no active quest matches`() {
+        val done = q("q1", "c1", status = "completed")
+        assertNull(selectRewardQuest(listOf(done), "c1", targetQuestId = null))
+    }
 }
