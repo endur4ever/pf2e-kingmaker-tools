@@ -5,8 +5,10 @@ import com.foundryvtt.core.Game
 /**
  * Migration 40 — companion expedition fields.
  *
- * Adds level/xp/expeditionStatus/injuryDaysRemaining defaults to each companion and
- * seeds an empty companionExpeditions array on the kingdom. All additive with safe defaults.
+ * Adds level/xp/expeditionStatus defaults to each companion and seeds an empty
+ * companionExpeditions array on the kingdom. injuryDaysRemaining defaults to null,
+ * i.e. an absent key, which every consumer already treats as null — so it needs no
+ * explicit backfill. All changes are additive with safe defaults.
  */
 class Migration40 : Migration(40) {
     override suspend fun migrateKingdom(game: Game, kingdom: dynamic) {
@@ -20,7 +22,6 @@ class Migration40 : Migration(40) {
                 if (companion.level == null) companion.level = 1
                 if (companion.xp == null) companion.xp = 0
                 if (companion.expeditionStatus == null) companion.expeditionStatus = "available"
-                if (companion.injuryDaysRemaining == null) companion.injuryDaysRemaining = null
             }
         }
     }
