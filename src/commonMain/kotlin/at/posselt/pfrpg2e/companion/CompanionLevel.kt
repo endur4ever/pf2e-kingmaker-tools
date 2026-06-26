@@ -94,3 +94,50 @@ fun shouldOfferLevelUp(
         !isNpc &&
         (currentXp + xpAwarded) >= XP_PER_LEVEL &&
         currentLevel < MAX_COMPANION_LEVEL
+
+/**
+ * Result of applying a personal-quest completion reward to one quest/companion.
+ *
+ * @property applied False when the quest was not "active" (idempotent no-op).
+ * @property newStatus The quest's status after applying ("completed" on apply).
+ * @property newInfluence The companion's clamped influence after the reward.
+ * @property levelResult The companion's level/xp after the quest XP (honoring the setting).
+ */
+data class QuestRewardOutcome(
+    val applied: Boolean,
+    val newStatus: String,
+    val newInfluence: Int,
+    val levelResult: LevelUpResult,
+)
+
+/**
+ * Apply a personal-quest completion reward (influence + XP) to a single quest, idempotently.
+ *
+ * A quest that is not "active" returns `applied = false` with unchanged values, so re-running
+ * the resolution (e.g. a re-clicked reward button) never double-applies. Quest XP honors the
+ * companion-leveling setting via [accruedExpeditionXp].
+ */
+fun applyPersonalQuestReward(
+    status: String,
+    currentInfluence: Int,
+    influenceReward: Int,
+    currentLevel: Int,
+    currentXp: Int,
+    questXp: Int,
+    levelingEnabled: Boolean,
+): QuestRewardOutcome {
+    if (status != "active") {
+        return QuestRewardOutcome(
+            applied = false,
+            newStatus = status,
+            newInfluence = currentInfluence,
+            levelResult = LevelUpResult(newLevel = currentLevel, newXp = currentXp, levelsGained = 0),
+        )
+    }
+    return QuestRewardOutcome(
+        applied = true,
+        newStatus = "completed",
+        newInfluence = clampInfluence(currentInfluence + influenceReward),
+        levelResult = applyCompanionXp(currentLevel, currentXp, accruedExpeditionXp(questXp, levelingEnabled)),
+    )
+}

@@ -167,4 +167,65 @@ class CompanionLevelTest {
             )
         )
     }
+
+    // ── Personal-quest reward (idempotent apply) ────────────────────────────
+
+    @Test
+    fun testApplyPersonalQuestReward_appliesInfluenceAndXpOnce() {
+        val outcome = applyPersonalQuestReward(
+            status = "active",
+            currentInfluence = 4,
+            influenceReward = 2,
+            currentLevel = 1,
+            currentXp = 900,
+            questXp = 200,
+            levelingEnabled = true,
+        )
+        assertTrue(outcome.applied)
+        assertEquals("completed", outcome.newStatus)
+        assertEquals(6, outcome.newInfluence)
+        assertEquals(2, outcome.levelResult.newLevel)
+        assertEquals(100, outcome.levelResult.newXp)
+        assertEquals(1, outcome.levelResult.levelsGained)
+    }
+
+    @Test
+    fun testApplyPersonalQuestReward_idempotentWhenAlreadyCompleted() {
+        // A non-active quest is a no-op so re-running the reward never double-applies.
+        val outcome = applyPersonalQuestReward(
+            status = "completed",
+            currentInfluence = 6,
+            influenceReward = 2,
+            currentLevel = 2,
+            currentXp = 100,
+            questXp = 200,
+            levelingEnabled = true,
+        )
+        assertFalse(outcome.applied)
+        assertEquals("completed", outcome.newStatus)
+        assertEquals(6, outcome.newInfluence)
+        assertEquals(2, outcome.levelResult.newLevel)
+        assertEquals(100, outcome.levelResult.newXp)
+        assertEquals(0, outcome.levelResult.levelsGained)
+    }
+
+    @Test
+    fun testApplyPersonalQuestReward_suppressesXpWhenLevelingOff() {
+        // Influence still applies and the quest completes, but no XP is granted.
+        val outcome = applyPersonalQuestReward(
+            status = "active",
+            currentInfluence = 4,
+            influenceReward = 2,
+            currentLevel = 1,
+            currentXp = 900,
+            questXp = 200,
+            levelingEnabled = false,
+        )
+        assertTrue(outcome.applied)
+        assertEquals("completed", outcome.newStatus)
+        assertEquals(6, outcome.newInfluence)
+        assertEquals(1, outcome.levelResult.newLevel)
+        assertEquals(900, outcome.levelResult.newXp)
+        assertEquals(0, outcome.levelResult.levelsGained)
+    }
 }

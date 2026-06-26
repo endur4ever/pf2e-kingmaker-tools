@@ -128,7 +128,7 @@ object SessionPrepNarrativeGenerator {
                             "success" -> "Success"
                             "failure" -> "Failure"
                             "criticalFailure" -> "Critical Failure"
-                            else -> d
+                            else -> esc(d)
                         }
                     } ?: "Awaiting Roll"
                     sb.append("$companionsText${esc(exp.name)} — $degreeLabel")
@@ -161,7 +161,7 @@ object SessionPrepNarrativeGenerator {
                     append("Turn ${t.turn}: Fame ${t.fame}, ${t.resourcePoints} RP, ${t.consumption} consumption, ${t.unrest} unrest")
                     if (t.warPressure != null) append(", war pressure ${t.warPressure}")
                     if (t.xpAwarded != null) append(", ${t.xpAwarded} XP awarded")
-                    if (!t.clockEvents.isNullOrEmpty()) append("; clock events: ${t.clockEvents.joinToString(", ")}")
+                    if (!t.clockEvents.isNullOrEmpty()) append("; clock events: ${t.clockEvents.joinToString(", ") { esc(it) }}")
                 }
             }
             sb.append("Recent kingdom history: $turnDescriptions.")

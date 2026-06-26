@@ -312,10 +312,14 @@ private suspend fun tickPersonalQuests(game: Game, daysPassed: Int) {
 				quest.turnsRemaining = result.newTurnsRemaining
 				changed = true
 				if (result.failed) {
+					val companionName = kingdom.companions
+						?.find { (it.actorUuid ?: it.name) == quest.companionId }
+						?.name
+						?: quest.companionId
 					postChatMessage(
 						t(
 							"kingdom.companionQuestFailed",
-							recordOf("quest" to escapeHtml(quest.title), "name" to escapeHtml(quest.companionId)),
+							recordOf("quest" to escapeHtml(quest.title), "name" to escapeHtml(companionName)),
 						),
 						isHtml = true,
 					)

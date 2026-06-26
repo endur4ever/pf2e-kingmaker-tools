@@ -52,6 +52,18 @@ class SessionPrepNarrativeGeneratorTest {
     }
 
     @Test
+    fun escapesMarkupInWorldStrings() {
+        // World data (quest/companion names) may contain markup; it must be HTML-escaped so it
+        // cannot inject into the dialog/journal HTML the narrative is rendered into.
+        val v = view(
+            openQuests = listOf(entry("q1", "Tom & <script>alert(1)</script> Crown")),
+        )
+        val html = SessionPrepNarrativeGenerator.generate(v)
+        assertTrue(html.contains("Tom &amp; &lt;script&gt;alert(1)&lt;/script&gt; Crown"))
+        assertFalse(html.contains("<script>"))
+    }
+
+    @Test
     fun openQuestsOnlyGeneratesQuestSection() {
         val v = view(
             openQuests = listOf(entry("q1", "Recover the Crown", detail = "Oleg")),

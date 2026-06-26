@@ -2,6 +2,7 @@ package at.posselt.pfrpg2e.kingdom
 
 import at.posselt.pfrpg2e.companion.LevelUpResult
 import at.posselt.pfrpg2e.companion.applyCompanionXp
+import at.posselt.pfrpg2e.companion.applyPersonalQuestReward
 import at.posselt.pfrpg2e.companion.clampInfluence
 import at.posselt.pfrpg2e.data.events.KingdomEventTrait
 import at.posselt.pfrpg2e.kingdom.dialogs.AddExpeditionDialog
@@ -242,29 +243,28 @@ private val buttons = listOf(
                 val quests = kingdom.companionPersonalQuests ?: emptyArray()
                 val activeQuest = quests.find { it.companionId == companionId && it.status == "active" }
                 if (activeQuest != null) {
-                    activeQuest.status = "completed"
                     if (companion != null) {
-                        if (activeQuest.influenceReward != 0) {
-                            companion.influence = clampInfluence(companion.influence + activeQuest.influenceReward)
+                        val levelingEnabled = Pfrpg2eKingdomCampingWeatherSettings.getEnableCompanionLeveling()
+                        val outcome = applyPersonalQuestReward(
+                            status = activeQuest.status,
+                            currentInfluence = companion.influence,
+                            influenceReward = activeQuest.influenceReward,
+                            currentLevel = companion.level,
+                            currentXp = companion.xp,
+                            questXp = activeQuest.rewards?.xp ?: 0,
+                            levelingEnabled = levelingEnabled,
+                        )
+                        activeQuest.status = outcome.newStatus
+                        companion.influence = outcome.newInfluence
+                        companion.level = outcome.levelResult.newLevel
+                        companion.xp = outcome.levelResult.newXp
+                        if (outcome.levelResult.levelsGained > 0) {
+                            postChatMessage(
+                                t("kingdom.companionLeveledUp", recordOf("name" to companion.name, "level" to outcome.levelResult.newLevel))
+                            )
                         }
-                        val questXp = activeQuest.rewards?.xp ?: 0
-                        if (questXp > 0) {
-                            val levelingEnabled = Pfrpg2eKingdomCampingWeatherSettings.getEnableCompanionLeveling()
-                            if (levelingEnabled) {
-                                val levelResult = applyCompanionXp(
-                                    currentLevel = companion.level,
-                                    currentXp = companion.xp,
-                                    gainedXp = questXp,
-                                )
-                                companion.level = levelResult.newLevel
-                                companion.xp = levelResult.newXp
-                                if (levelResult.levelsGained > 0) {
-                                    postChatMessage(
-                                        t("kingdom.companionLeveledUp", recordOf("name" to companion.name, "level" to levelResult.newLevel))
-                                    )
-                                }
-                            }
-                        }
+                    } else {
+                        activeQuest.status = "completed"
                     }
                     kingdom.companionPersonalQuests = quests
                 }

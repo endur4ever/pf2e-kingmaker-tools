@@ -176,7 +176,7 @@ object SessionPrepJournalExporter {
                 if (t.warPressure != null) sb.append(", War Pressure: ${t.warPressure}")
                 if (t.xpAwarded != null) sb.append(", XP: ${t.xpAwarded}")
                 if (!t.clockEvents.isNullOrEmpty()) {
-                    sb.append("<br/><em>Clock events: ${t.clockEvents.joinToString(", ")}</em>")
+                    sb.append("<br/><em>Clock events: ${t.clockEvents.joinToString(", ") { esc(it) }}</em>")
                 }
                 if (!t.notes.isNullOrBlank()) sb.append("<br/><em>${esc(t.notes)}</em>")
                 sb.append("</li>\n")
