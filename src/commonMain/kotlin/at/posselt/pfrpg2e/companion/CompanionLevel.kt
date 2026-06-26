@@ -68,3 +68,29 @@ fun applyCompanionXp(currentLevel: Int, currentXp: Int, gainedXp: Int): LevelUpR
         levelsGained = levelsGained,
     )
 }
+
+/**
+ * XP actually accrued from an expedition, honoring the companion-leveling setting.
+ * When leveling is disabled the expedition still resolves for flavor but awards no XP.
+ */
+fun accruedExpeditionXp(xpAwarded: Int, levelingEnabled: Boolean): Int =
+    if (levelingEnabled) xpAwarded else 0
+
+/**
+ * Whether a completed expedition should surface a companion level-up offer.
+ *
+ * Only when leveling is enabled, the companion is not an NPC (NPCs accrue shadow XP
+ * but never get the level offer), the projected XP crosses a level threshold, and the
+ * companion is below the level cap.
+ */
+fun shouldOfferLevelUp(
+    levelingEnabled: Boolean,
+    isNpc: Boolean,
+    currentLevel: Int,
+    currentXp: Int,
+    xpAwarded: Int,
+): Boolean =
+    levelingEnabled &&
+        !isNpc &&
+        (currentXp + xpAwarded) >= XP_PER_LEVEL &&
+        currentLevel < MAX_COMPANION_LEVEL

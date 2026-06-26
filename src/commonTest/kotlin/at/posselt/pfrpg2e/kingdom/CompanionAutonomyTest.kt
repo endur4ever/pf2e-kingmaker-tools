@@ -121,4 +121,47 @@ class CompanionAutonomyTest {
         assertEquals("Lini", result[0].name)
         assertEquals("Amiri", result[1].name)
     }
+
+    @Test
+    fun `isEligible rejects camp-unavailable and busy companions`() {
+        val campUnavailable = RawCharacter("Amiri").apply {
+            role = "companion"; active = true; campAvailable = false
+            expeditionStatus = "available"; traveling = false; injuryDaysRemaining = null
+        }
+        assertFalse(CompanionAutonomy.isEligible(campUnavailable))
+
+        val onExpedition = RawCharacter("Amiri").apply {
+            role = "companion"; active = true; campAvailable = true
+            expeditionStatus = "onExpedition"; traveling = false; injuryDaysRemaining = null
+        }
+        assertFalse(CompanionAutonomy.isEligible(onExpedition))
+    }
+
+    @Test
+    fun `isEligible allows established+ NPCs but never unknown or introduced NPCs`() {
+        fun npc(discovery: String) = RawCharacter("Harrim").apply {
+            role = "npc"; active = true; campAvailable = true
+            expeditionStatus = "available"; traveling = false; injuryDaysRemaining = null
+            discoveryStatus = discovery
+        }
+        assertFalse(CompanionAutonomy.isEligible(npc("unknown")))
+        assertFalse(CompanionAutonomy.isEligible(npc("introduced")))
+        assertTrue(CompanionAutonomy.isEligible(npc("established")))
+        assertTrue(CompanionAutonomy.isEligible(npc("trusted")))
+        assertTrue(CompanionAutonomy.isEligible(npc("bonded")))
+    }
+
+    @Test
+    fun `computeWillingnessScore covers every discovery band`() {
+        fun comp(discovery: String) = RawCharacter("Amiri").apply {
+            personalQuestIds = emptyArray(); influence = 0; discoveryStatus = discovery
+        }
+        // Below "established" -> no discovery bonus (introduced is the boundary case).
+        assertEquals(0, CompanionAutonomy.computeWillingnessScore(comp("unknown")))
+        assertEquals(0, CompanionAutonomy.computeWillingnessScore(comp("introduced")))
+        // "established" and above -> +50.
+        assertEquals(50, CompanionAutonomy.computeWillingnessScore(comp("established")))
+        assertEquals(50, CompanionAutonomy.computeWillingnessScore(comp("trusted")))
+        assertEquals(50, CompanionAutonomy.computeWillingnessScore(comp("bonded")))
+    }
 }

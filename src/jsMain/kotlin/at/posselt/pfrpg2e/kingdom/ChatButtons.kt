@@ -359,6 +359,7 @@ private val buttons = listOf(
         }
     },
     ChatButton("km-offer-companion-autonomy") { game, actor, event, button ->
+        if (!game.user.isGM) return@ChatButton
         val approve = button.dataset["approve"] == "true"
         val sendElsewhere = button.dataset["sendElsewhere"] == "true"
         val decline = button.dataset["decline"] == "true"

@@ -2,6 +2,8 @@ package at.posselt.pfrpg2e.companion
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class CompanionLevelTest {
 
@@ -86,5 +88,83 @@ class CompanionLevelTest {
         assertEquals(20, result.newLevel)
         assertEquals(0, result.newXp)
         assertEquals(0, result.levelsGained)
+    }
+
+    // ── Expedition XP suppression (companion-leveling opt-out) ──────────────
+
+    @Test
+    fun testAccruedExpeditionXp_enabled_awardsXp() {
+        assertEquals(80, accruedExpeditionXp(xpAwarded = 80, levelingEnabled = true))
+    }
+
+    @Test
+    fun testAccruedExpeditionXp_disabled_awardsZero() {
+        assertEquals(0, accruedExpeditionXp(xpAwarded = 80, levelingEnabled = false))
+    }
+
+    @Test
+    fun testShouldOfferLevelUp_suppressedWhenLevelingOff() {
+        // Would cross the threshold, but leveling is disabled -> no offer.
+        assertFalse(
+            shouldOfferLevelUp(
+                levelingEnabled = false,
+                isNpc = false,
+                currentLevel = 1,
+                currentXp = 900,
+                xpAwarded = 200,
+            )
+        )
+    }
+
+    @Test
+    fun testShouldOfferLevelUp_suppressedForNpc() {
+        assertFalse(
+            shouldOfferLevelUp(
+                levelingEnabled = true,
+                isNpc = true,
+                currentLevel = 1,
+                currentXp = 900,
+                xpAwarded = 200,
+            )
+        )
+    }
+
+    @Test
+    fun testShouldOfferLevelUp_whenCrossingThreshold() {
+        assertTrue(
+            shouldOfferLevelUp(
+                levelingEnabled = true,
+                isNpc = false,
+                currentLevel = 1,
+                currentXp = 900,
+                xpAwarded = 200,
+            )
+        )
+    }
+
+    @Test
+    fun testShouldOfferLevelUp_notWhenBelowThreshold() {
+        assertFalse(
+            shouldOfferLevelUp(
+                levelingEnabled = true,
+                isNpc = false,
+                currentLevel = 1,
+                currentXp = 100,
+                xpAwarded = 200,
+            )
+        )
+    }
+
+    @Test
+    fun testShouldOfferLevelUp_notAtMaxLevel() {
+        assertFalse(
+            shouldOfferLevelUp(
+                levelingEnabled = true,
+                isNpc = false,
+                currentLevel = 20,
+                currentXp = 999,
+                xpAwarded = 1000,
+            )
+        )
     }
 }

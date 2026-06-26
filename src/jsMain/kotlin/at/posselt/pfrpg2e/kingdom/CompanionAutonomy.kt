@@ -16,7 +16,8 @@ import kotlin.js.JsName
  * 3. Personality affinity via influence (0-12, added directly as bonus)
  *
  * Eligibility requirements:
- * - role == "companion"
+ * - role == "companion", OR role == "npc" with discovery >= "established"
+ *   (unknown / introduced NPCs never auto-volunteer)
  * - active == true
  * - campAvailable == true
  * - expeditionStatus == "available"
@@ -41,6 +42,12 @@ object CompanionAutonomy {
         "bonded" to 4,
     )
 
+    /** Rank at/above which a roster member counts as "established" or better. */
+    private val establishedRank = discoveryRanks["established"] ?: 2
+
+    /** Numeric rank for a discovery status (unknown/unrecognised -> 0). */
+    private fun discoveryRank(status: String): Int = discoveryRanks[status] ?: 0
+
     /**
      * Select and rank eligible companions for an autonomous expedition offer.
      *
@@ -57,7 +64,14 @@ object CompanionAutonomy {
      * Check whether a companion is eligible to volunteer for an expedition.
      */
     fun isEligible(companion: RawCharacter): Boolean {
-        return companion.role == "companion" &&
+        val roleEligible = when (companion.role) {
+            "companion" -> true
+            // NPCs accrue shadow XP but only auto-volunteer once established or better;
+            // unknown / introduced NPCs never volunteer.
+            "npc" -> discoveryRank(companion.discoveryStatus) >= establishedRank
+            else -> false
+        }
+        return roleEligible &&
                 companion.active &&
                 companion.campAvailable &&
                 companion.expeditionStatus == "available" &&
@@ -78,8 +92,7 @@ object CompanionAutonomy {
         }
 
         // Priority 2: Discovery >= established
-        val discoveryRank = discoveryRanks[companion.discoveryStatus] ?: 0
-        if (discoveryRank >= (discoveryRanks["established"] ?: 2)) {
+        if (discoveryRank(companion.discoveryStatus) >= establishedRank) {
             score += DISCOVERY_ESTABLISHED_BONUS
         }
 

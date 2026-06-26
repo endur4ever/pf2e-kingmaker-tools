@@ -11,8 +11,10 @@ import at.posselt.pfrpg2e.data.checks.RollMode
 import at.posselt.pfrpg2e.fromOrdinal
 import at.posselt.pfrpg2e.kingdom.data.RawCharacter
 import at.posselt.pfrpg2e.kingdom.data.RawCompanionExpedition
+import at.posselt.pfrpg2e.companion.accruedExpeditionXp
 import at.posselt.pfrpg2e.companion.applyCompanionXp
 import at.posselt.pfrpg2e.companion.clampInfluence
+import at.posselt.pfrpg2e.companion.shouldOfferLevelUp
 import at.posselt.pfrpg2e.settings.Pfrpg2eKingdomCampingWeatherSettings
 import at.posselt.pfrpg2e.utils.escapeHtml
 import at.posselt.pfrpg2e.utils.fromUuidOfTypes
@@ -96,7 +98,7 @@ suspend fun offerExpeditionResolution(
     // When companion leveling is disabled, zero out XP so the reward offer shows 0
     // and clicking "Apply Reward" gives no XP. Expeditions still resolve for flavor.
     val levelingEnabled = Pfrpg2eKingdomCampingWeatherSettings.getEnableCompanionLeveling()
-    expedition.accruedXp = if (levelingEnabled) result.xpAwarded else 0
+    expedition.accruedXp = accruedExpeditionXp(result.xpAwarded, levelingEnabled)
     expedition.accruedInfluenceDelta = result.influenceDelta
     expedition.accruedInjuries = result.injuryConditions
     expedition.lootTier = result.lootTier
@@ -138,8 +140,13 @@ suspend fun offerExpeditionResolution(
     val offerReward = !expedition.rewardApplied && expedition.status == "awaitingResolution"
     // Level-up offer: only when setting enabled AND companion has enough XP to level
     val enableLeveling = Pfrpg2eKingdomCampingWeatherSettings.getEnableCompanionLeveling()
-    val projectedXp = companion.xp + result.xpAwarded
-    val offerLevelUp = enableLeveling && companion.role != "npc" && projectedXp >= 1000 && companion.level < 20
+    val offerLevelUp = shouldOfferLevelUp(
+        levelingEnabled = enableLeveling,
+        isNpc = companion.role == "npc",
+        currentLevel = companion.level,
+        currentXp = companion.xp,
+        xpAwarded = result.xpAwarded,
+    )
     val targetLevel = if (offerLevelUp) (companion.level + 1).coerceAtMost(20) else companion.level
     val offerInjury = hasInjuries
     val offerFactionStanding = hasFactionStanding
