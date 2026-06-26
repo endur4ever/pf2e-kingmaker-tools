@@ -319,9 +319,15 @@ private val buttons = listOf(
             val companion = kingdom.companions?.find { it.actorUuid == companionId } ?: return@ChatButton
 
             // Apply injury conditions (e.g., fatigued, wounded) to the linked actor.
-            // Set injuryDaysRemaining for self-healing downtime.
-            companion.injuryDaysRemaining = 14  // 14 days self-healing
-            companion.expeditionStatus = "injured"
+            // Time-boxed downtime: recovery days depend on the expedition tier
+            // (routine 2 / standard 3 / perilous 5), decremented by the daily tick.
+            companion.injuryDaysRemaining = when (expedition.tier) {
+                "routine" -> 2
+                "perilous" -> 5
+                else -> 3
+            }
+            companion.expeditionStatus = "unavailable"
+            companion.campAvailable = false
 
             // Mark expedition as resolved since injury was applied.
             expedition.status = "resolved"

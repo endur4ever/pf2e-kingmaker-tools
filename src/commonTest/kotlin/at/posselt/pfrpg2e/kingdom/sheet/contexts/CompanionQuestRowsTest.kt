@@ -80,4 +80,17 @@ class CompanionQuestRowsTest {
         kingdom.companions = arrayOf(amiri)
         assertFalse(kingdom.companionHasActiveExpedition(0))
     }
+
+    @Test
+    fun `companionHasActiveExpedition returns false when the expedition is resolved`() {
+        val kingdom = js("{}").unsafeCast<KingdomData>()
+        val amiri = RawCharacter("Amiri", "uuid-a")
+        kingdom.companions = arrayOf(amiri)
+        // The companion HAS an expedition, but it is resolved — exercises the status
+        // filter (not merely an empty array), so deletion is no longer blocked.
+        kingdom.companionExpeditions = arrayOf(
+            js("{ id: 'e1', title: 'Expedition', companionIds: ['uuid-a'], status: 'resolved', daysRemaining: 0, totalDays: 7, dc: 15, tier: 'standard' }")
+        )
+        assertFalse(kingdom.companionHasActiveExpedition(0))
+    }
 }
