@@ -66,7 +66,9 @@ suspend fun offerExpeditionResolution(
         // to a flat d20 + level modifier.
         val skill = listOf(Skill.NATURE, Skill.SURVIVAL, Skill.ATHLETICS)
             .firstOrNull { linkedActor.hasAttribute(it) }
-        val promise = skill?.let { linkedActor.rollCheck(it, dc + bandBonus, rollMode = RollMode.GMROLL) }
+        // bandBonus is a circumstance BONUS on the roll, modelled as a lower effective DC
+        // (consistent with the unlinked d20Resolve(modifier = bandBonus) path).
+        val promise = skill?.let { linkedActor.rollCheck(it, dc - bandBonus, rollMode = RollMode.GMROLL) }
         if (promise != null) {
             val result = promise.await()
             result?.degreeOfSuccess ?: DegreeOfSuccess.FAILURE
