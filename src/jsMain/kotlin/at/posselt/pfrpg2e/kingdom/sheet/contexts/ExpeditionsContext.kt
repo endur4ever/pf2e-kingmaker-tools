@@ -118,3 +118,10 @@ fun KingdomData.companionHasActiveExpedition(index: Int): Boolean {
         key in exp.companionIds && exp.status != "resolved" && exp.status != "cancelled"
     }
 }
+
+/** Anti-abuse cap: the most expeditions allowed in flight at once (design section 4.7). */
+const val MAX_CONCURRENT_EXPEDITIONS = 3
+
+/** Count expeditions still in flight (inProgress or awaiting resolution). */
+fun activeExpeditionCount(expeditions: Array<RawCompanionExpedition>): Int =
+    expeditions.count { it.status == "inProgress" || it.status == "awaitingResolution" }

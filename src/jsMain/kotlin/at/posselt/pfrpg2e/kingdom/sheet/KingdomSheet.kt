@@ -183,6 +183,8 @@ import at.posselt.pfrpg2e.kingdom.sheet.contexts.toActivitiesContext
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.toContext
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.toRosterContext
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.toExpeditionsContext
+import at.posselt.pfrpg2e.kingdom.sheet.contexts.MAX_CONCURRENT_EXPEDITIONS
+import at.posselt.pfrpg2e.kingdom.sheet.contexts.activeExpeditionCount
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.companionHasActiveExpedition
 import at.posselt.pfrpg2e.kingdom.SessionPrepNarrativeGenerator
 import at.posselt.pfrpg2e.kingdom.sheet.SessionPrepNarrativeDialog
@@ -951,6 +953,10 @@ class KingdomSheet(
 
             "add-expedition" -> buildPromise {
                 val kingdom = getKingdom()
+                if (activeExpeditionCount(kingdom.companionExpeditions ?: emptyArray()) >= MAX_CONCURRENT_EXPEDITIONS) {
+                    ui.notifications.warn(t("kingdom.expeditions.tooMany"))
+                    return@buildPromise
+                }
                 val comps = kingdom.companions ?: emptyArray()
                 AddExpeditionDialog(
                     companions = comps,

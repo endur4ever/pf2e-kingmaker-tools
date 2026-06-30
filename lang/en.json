@@ -1071,6 +1071,7 @@
         "targetQuest": "Target Personal Quest",
         "targetQuestNone": "— None —",
         "targetQuestHint": "For a personal-quest expedition, pick which quest it completes (so the reward lands on the right one).",
+        "tooMany": "Too many active expeditions (max 3). Resolve or cancel one before launching another.",
         "cancelConfirm": "Cancel this expedition? The companions will return immediately with no rewards.",
         "legendaryReward": "Legendary Reward",
         "majorReward": "Major Reward",
