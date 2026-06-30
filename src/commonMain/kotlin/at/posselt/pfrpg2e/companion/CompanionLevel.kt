@@ -141,3 +141,12 @@ fun applyPersonalQuestReward(
         levelResult = applyCompanionXp(currentLevel, currentXp, accruedExpeditionXp(questXp, levelingEnabled)),
     )
 }
+
+/**
+ * Whether an expedition's completion reward can still be applied.
+ *
+ * Guards double-apply: a reward already applied, or an expedition already resolved,
+ * must not award XP/influence/loot a second time (e.g. a re-clicked offer button).
+ */
+fun canApplyExpeditionReward(rewardApplied: Boolean, status: String): Boolean =
+    !rewardApplied && status != "resolved"

@@ -228,4 +228,21 @@ class CompanionLevelTest {
         assertEquals(900, outcome.levelResult.newXp)
         assertEquals(0, outcome.levelResult.levelsGained)
     }
+
+    // ── Expedition reward double-apply guard ────────────────────────────────
+
+    @Test
+    fun testCanApplyExpeditionReward_allowsFreshExpedition() {
+        assertTrue(canApplyExpeditionReward(rewardApplied = false, status = "awaitingResolution"))
+    }
+
+    @Test
+    fun testCanApplyExpeditionReward_blocksAlreadyApplied() {
+        assertFalse(canApplyExpeditionReward(rewardApplied = true, status = "awaitingResolution"))
+    }
+
+    @Test
+    fun testCanApplyExpeditionReward_blocksResolved() {
+        assertFalse(canApplyExpeditionReward(rewardApplied = false, status = "resolved"))
+    }
 }

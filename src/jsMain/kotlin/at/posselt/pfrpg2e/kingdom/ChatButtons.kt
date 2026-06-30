@@ -3,8 +3,12 @@ package at.posselt.pfrpg2e.kingdom
 import at.posselt.pfrpg2e.companion.LevelUpResult
 import at.posselt.pfrpg2e.companion.applyCompanionXp
 import at.posselt.pfrpg2e.companion.applyPersonalQuestReward
+import at.posselt.pfrpg2e.companion.canApplyExpeditionReward
 import at.posselt.pfrpg2e.companion.clampInfluence
 import at.posselt.pfrpg2e.companion.selectRewardQuest
+import at.posselt.pfrpg2e.utils.fromUuidOfTypes
+import com.foundryvtt.pf2e.actor.PF2ECharacter
+import kotlin.math.min
 import at.posselt.pfrpg2e.data.events.KingdomEventTrait
 import at.posselt.pfrpg2e.kingdom.dialogs.AddExpeditionDialog
 import at.posselt.pfrpg2e.kingdom.dialogs.AddQuest
@@ -202,10 +206,9 @@ private val buttons = listOf(
         // Guards double-apply by checking rewardApplied + status.
         if (!game.user.isGM) return@ChatButton
         val expeditionId = button.dataset["expeditionId"] ?: return@ChatButton
-        val companionActorUuid = button.dataset["companionActorUuid"]
         actor.getKingdom()?.let { kingdom ->
             val expedition = kingdom.companionExpeditions?.find { it.id == expeditionId }
-            if (expedition == null || expedition.rewardApplied || expedition.status == "resolved") return@ChatButton
+            if (expedition == null || !canApplyExpeditionReward(expedition.rewardApplied, expedition.status)) return@ChatButton
 
             // Apply XP to the companion (first participant).
             val companionId = expedition.companionIds.firstOrNull()
@@ -285,34 +288,25 @@ private val buttons = listOf(
         }
     },
     ChatButton("km-offer-companion-levelup") { game, actor, event, button ->
-        // GM-confirmed: advance the linked actor's level (separate gentle offer).
+        // GM-confirmed, separate offer: advance the linked PF2e actor's REAL level.
+        // The shadow companion.level is advanced by Apply Reward (applyCompanionXp);
+        // this button is the explicit, never-silent offer to bump the real actor.
         if (!game.user.isGM) return@ChatButton
-        val companionId = button.dataset["companionId"] ?: return@ChatButton
-        val targetLevel = button.dataset["targetLevel"]?.toInt() ?: return@ChatButton
-        val companionActorUuid = button.dataset["companionActorUuid"]
+        // data-companion-id carries the companion's actorUuid (blank when unlinked).
+        val companionActorUuid = button.dataset["companionId"]?.takeIf { it.isNotBlank() } ?: return@ChatButton
+        val targetLevel = button.dataset["targetLevel"]?.toIntOrNull()?.let { min(20, it) } ?: return@ChatButton
+        if (!Pfrpg2eKingdomCampingWeatherSettings.getEnableCompanionLeveling()) return@ChatButton
 
-        // Only apply if the companion is actor-linked.
-        if (companionActorUuid == null) return@ChatButton
-
-        val levelingEnabled = Pfrpg2eKingdomCampingWeatherSettings.getEnableCompanionLeveling()
-        if (!levelingEnabled) return@ChatButton
-
-        actor.getKingdom()?.let { kingdom ->
-            val companion = kingdom.companions?.find { it.actorUuid == companionId } ?: return@ChatButton
-            companion.level = targetLevel
-            actor.setKingdom(kingdom)
-            postChatMessage(t("kingdom.companionLeveledUp", recordOf("name" to companion.name, "level" to targetLevel)))
-        }
+        val linkedActor = fromUuidOfTypes<PF2ECharacter>(companionActorUuid) ?: return@ChatButton
+        linkedActor.typeSafeUpdate { system.details.level.value = targetLevel }
+        postChatMessage(t("kingdom.companionLeveledUp", recordOf("name" to linkedActor.name, "level" to targetLevel)))
     },
     ChatButton("km-offer-injury") { game, actor, event, button ->
         // GM-confirmed: apply injury conditions to the companion (actor-linked only).
         if (!game.user.isGM) return@ChatButton
         val expeditionId = button.dataset["expeditionId"] ?: return@ChatButton
-        val companionId = button.dataset["companionId"] ?: return@ChatButton
-        val companionActorUuid = button.dataset["companionActorUuid"]
-
-        // Only apply if the companion is actor-linked.
-        if (companionActorUuid == null) return@ChatButton
+        // data-companion-id carries the companion's actorUuid; blank when unlinked (injury is actor-linked only).
+        val companionId = button.dataset["companionId"]?.takeIf { it.isNotBlank() } ?: return@ChatButton
 
         actor.getKingdom()?.let { kingdom ->
             val expedition = kingdom.companionExpeditions?.find { it.id == expeditionId } ?: return@ChatButton
