@@ -116,6 +116,29 @@ class ExpeditionResolverEngineTest {
     }
 
     @Test
+    fun testDiplomacyStandingDelta_standardTier() {
+        // Base per-degree standing for a diplomacy expedition at standard tier (×1.0):
+        // crit +8, success +4, failure 0, crit-fail −4 (crit = 2× success, crit-fail = −success).
+        assertEquals(8, ExpeditionResolverEngine.diplomacyStandingDelta("standard", DegreeOfSuccess.CRITICAL_SUCCESS))
+        assertEquals(4, ExpeditionResolverEngine.diplomacyStandingDelta("standard", DegreeOfSuccess.SUCCESS))
+        assertEquals(0, ExpeditionResolverEngine.diplomacyStandingDelta("standard", DegreeOfSuccess.FAILURE))
+        assertEquals(-4, ExpeditionResolverEngine.diplomacyStandingDelta("standard", DegreeOfSuccess.CRITICAL_FAILURE))
+    }
+
+    @Test
+    fun testDiplomacyStandingDelta_tierScaled() {
+        // perilous ×1.5
+        assertEquals(12, ExpeditionResolverEngine.diplomacyStandingDelta("perilous", DegreeOfSuccess.CRITICAL_SUCCESS))
+        assertEquals(6, ExpeditionResolverEngine.diplomacyStandingDelta("perilous", DegreeOfSuccess.SUCCESS))
+        assertEquals(-6, ExpeditionResolverEngine.diplomacyStandingDelta("perilous", DegreeOfSuccess.CRITICAL_FAILURE))
+        // routine ×0.75 (all land on whole numbers here)
+        assertEquals(6, ExpeditionResolverEngine.diplomacyStandingDelta("routine", DegreeOfSuccess.CRITICAL_SUCCESS))
+        assertEquals(3, ExpeditionResolverEngine.diplomacyStandingDelta("routine", DegreeOfSuccess.SUCCESS))
+        assertEquals(-3, ExpeditionResolverEngine.diplomacyStandingDelta("routine", DegreeOfSuccess.CRITICAL_FAILURE))
+        assertEquals(0, ExpeditionResolverEngine.diplomacyStandingDelta("routine", DegreeOfSuccess.FAILURE))
+    }
+
+    @Test
     fun testCriticalSuccess_factionStandingPreserved() {
         // Diplomacy expeditions can set faction standing delta in the impure wrapper;
         // the base resolver returns 0.

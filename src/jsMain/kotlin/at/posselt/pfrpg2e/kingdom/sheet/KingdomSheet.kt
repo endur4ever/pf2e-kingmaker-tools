@@ -978,6 +978,7 @@ class KingdomSheet(
                 AddExpeditionDialog(
                     companions = comps,
                     quests = kingdom.companionPersonalQuests ?: emptyArray(),
+                    factions = kingdom.groups,
                 ) { expedition ->
                     val current = getKingdom()
                     current.companionExpeditions = (current.companionExpeditions ?: emptyArray()) + expedition

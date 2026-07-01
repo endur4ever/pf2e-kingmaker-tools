@@ -8,9 +8,13 @@ import at.posselt.pfrpg2e.data.actor.Skill
 import at.posselt.pfrpg2e.data.checks.DegreeOfSuccess
 import at.posselt.pfrpg2e.data.checks.determineDegreeOfSuccess
 import at.posselt.pfrpg2e.data.checks.RollMode
+import at.posselt.pfrpg2e.data.kingdom.applyStandingDelta
+import at.posselt.pfrpg2e.data.kingdom.shouldOfferDiplomacyQuest
+import at.posselt.pfrpg2e.data.kingdom.shouldOfferWarThreat
 import at.posselt.pfrpg2e.fromOrdinal
 import at.posselt.pfrpg2e.kingdom.data.RawCharacter
 import at.posselt.pfrpg2e.kingdom.data.RawCompanionExpedition
+import at.posselt.pfrpg2e.kingdom.data.RawFactionStandingEntry
 import at.posselt.pfrpg2e.companion.accruedExpeditionXp
 import at.posselt.pfrpg2e.companion.applyCompanionXp
 import at.posselt.pfrpg2e.companion.applyPersonalQuestReward
@@ -110,6 +114,14 @@ suspend fun offerExpeditionResolution(
     expedition.accruedInjuries = result.injuryConditions
     expedition.lootTier = result.lootTier
     expedition.outcomeDegree = degree.value
+    // Diplomacy expeditions move their target faction's standing on resolution; every other
+    // activity leaves it at 0. Application happens when the GM applies the reward.
+    val isDiplomacy = expedition.activityId == "diplomacy" && expedition.targetFactionName != null
+    expedition.factionStandingDelta = if (isDiplomacy) {
+        ExpeditionResolverEngine.diplomacyStandingDelta(expedition.tier, degree)
+    } else {
+        0
+    }
     var gmNotes = result.gmNotes
     if (expedition.activityId == "personal-quest" && degree == DegreeOfSuccess.CRITICAL_FAILURE) {
         val complicationText = t("kingdom.companion.quest.complication")
@@ -142,7 +154,22 @@ suspend fun offerExpeditionResolution(
 
     // Determine offer flags based on accrued results
     val hasInjuries = result.injuryConditions.isNotEmpty()
-    val hasFactionStanding = expedition.factionStandingDelta != 0
+    // The war-threat / diplomacy-quest narrative follow-ups fire only when the pending standing
+    // change actually crosses an attitude band, previewed against the target faction's current
+    // standing (the delta is applied later, when the GM applies the reward).
+    val targetGroup = expedition.targetFactionName?.let { fn -> kingdom.groups.find { it.name == fn } }
+    val hasFactionStanding = expedition.factionStandingDelta != 0 && targetGroup != null
+    val offerWarThreat: Boolean
+    val offerDiplomacyQuest: Boolean
+    if (hasFactionStanding && targetGroup != null) {
+        val before = targetGroup.standing
+        val after = applyStandingDelta(before, expedition.factionStandingDelta)
+        offerWarThreat = shouldOfferWarThreat(before, after)
+        offerDiplomacyQuest = shouldOfferDiplomacyQuest(before, after)
+    } else {
+        offerWarThreat = false
+        offerDiplomacyQuest = false
+    }
 
     val offerReward = !expedition.rewardApplied && expedition.status == "awaitingResolution"
     // Level-up offer: only when setting enabled AND companion has enough XP to level
@@ -157,8 +184,6 @@ suspend fun offerExpeditionResolution(
     val targetLevel = if (offerLevelUp) (companion.level + 1).coerceAtMost(20) else companion.level
     val offerInjury = hasInjuries
     val offerFactionStanding = hasFactionStanding
-    val offerWarThreat = hasFactionStanding && expedition.factionStandingDelta < 0
-    val offerDiplomacyQuest = hasFactionStanding && expedition.factionStandingDelta > 0
 
     postChatTemplate(
         templatePath = "chatmessages/expedition-result.hbs",
@@ -184,7 +209,7 @@ suspend fun offerExpeditionResolution(
             "offerFactionStanding" to offerFactionStanding,
             "offerWarThreat" to offerWarThreat,
             "offerDiplomacyQuest" to offerDiplomacyQuest,
-            "factionName" to "",
+            "factionName" to (expedition.targetFactionName ?: ""),
             "offerReward" to offerReward,
             "offerLevelUp" to offerLevelUp,
         ),
@@ -295,6 +320,24 @@ suspend fun applyExpeditionRewardToKingdom(
     if (lootRp > 0) {
         kingdom.resourcePoints.now = (kingdom.resourcePoints.now + lootRp).coerceAtLeast(0)
         postChatMessage(t("kingdom.expeditionLootApplied", recordOf("rp" to lootRp)))
+    }
+
+    // Diplomacy standing -> target faction (mirrors the manual faction-adjust apply path:
+    // clamp via applyStandingDelta + append a standingLog entry). No-op unless a diplomacy
+    // expedition named a faction and earned a non-zero delta.
+    val factionDelta = expedition.factionStandingDelta
+    val targetFactionName = expedition.targetFactionName
+    if (factionDelta != 0 && targetFactionName != null) {
+        val group = kingdom.groups.find { it.name == targetFactionName }
+        if (group != null) {
+            group.standing = applyStandingDelta(group.standing, factionDelta)
+            group.standingLog = (group.standingLog ?: emptyArray()) + RawFactionStandingEntry(
+                turn = kingdom.currentTurn ?: 0,
+                delta = factionDelta,
+                reason = "kingdom.factionStanding.expedition",
+            )
+            postChatMessage(t("kingdom.expeditionFactionStandingApplied", recordOf("name" to targetFactionName, "delta" to factionDelta)))
+        }
     }
 
     expedition.rewardApplied = true

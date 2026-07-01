@@ -46,6 +46,8 @@ external interface RawCompanionExpedition {
     var spawnedQuestId: String?
     /** The specific personal quest this expedition is pursuing (for "personal-quest" activities). */
     var targetQuestId: String?
+    /** The faction (RawGroup name) a "diplomacy" expedition targets; standing moves on resolution (null => none). */
+    var targetFactionName: String?
     /** GM notes for narrative integration. */
     var gmNotes: String
     /** Whether this expedition is visible to players (read-only board). */
@@ -70,6 +72,7 @@ fun createRawCompanionExpedition(
     visibleToPlayers: Boolean = false,
     createdAt: String? = null,
     targetQuestId: String? = null,
+    targetFactionName: String? = null,
 ): RawCompanionExpedition {
     val obj = js("{ }").unsafeCast<RawCompanionExpedition>()
     obj.id = id
@@ -89,6 +92,7 @@ fun createRawCompanionExpedition(
     obj.factionStandingDelta = 0
     obj.spawnedQuestId = null
     obj.targetQuestId = targetQuestId
+    obj.targetFactionName = targetFactionName
     obj.gmNotes = ""
     obj.visibleToPlayers = visibleToPlayers
     obj.rewardApplied = false

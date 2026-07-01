@@ -301,6 +301,7 @@ private val buttons = listOf(
                     companions = companions,
                     preselectedId = key,
                     quests = kingdom.companionPersonalQuests ?: emptyArray(),
+                    factions = kingdom.groups,
                 ) { expedition ->
                     buildPromise {
                         val current = actor.getKingdom() ?: return@buildPromise
@@ -329,6 +330,7 @@ private val buttons = listOf(
             AddExpeditionDialog(
                 companions = companions,
                 quests = kingdom.companionPersonalQuests ?: emptyArray(),
+                factions = kingdom.groups,
             ) { expedition ->
                 buildPromise {
                     val current = actor.getKingdom() ?: return@buildPromise

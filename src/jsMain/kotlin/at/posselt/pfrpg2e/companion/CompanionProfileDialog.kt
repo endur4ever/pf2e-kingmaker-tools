@@ -191,6 +191,7 @@ class CompanionProfileDialog(
                         companions = comps,
                         preselectedId = key,
                         quests = kingdom.companionPersonalQuests ?: emptyArray(),
+                        factions = kingdom.groups,
                     ) { expedition ->
                         val current = kingdomActor.getKingdom() ?: return@AddExpeditionDialog
                         current.companionExpeditions = (current.companionExpeditions ?: emptyArray()) + expedition

@@ -37,6 +37,19 @@ object ExpeditionResolverEngine {
     private const val XP_CRITICAL_FAILURE = 10
 
     /**
+     * Flat per-degree base faction-standing delta for "diplomacy" expeditions (before tier
+     * multiplier). Sized for the ±50 standing scale (15-point attitude bands, see
+     * [at.posselt.pfrpg2e.data.kingdom.applyStandingDelta]): a standard success (+4) takes
+     * ~4 expeditions to lift a faction one band, a crit (+8) about half that; a crit failure
+     * (−4) sours relations by the same step. Keeps the owner's intended ratio
+     * (crit = 2× success, crit-fail = −success) while actually moving the needle.
+     */
+    private const val STANDING_CRITICAL_SUCCESS = 8
+    private const val STANDING_SUCCESS = 4
+    private const val STANDING_FAILURE = 0
+    private const val STANDING_CRITICAL_FAILURE = -4
+
+    /**
      * Result of resolving an expedition.
      *
      * @property xpAwarded XP actually awarded (per-degree base × tier multiplier).
@@ -104,6 +117,22 @@ object ExpeditionResolverEngine {
                 gmNotes = "Seeds a narrative hook for the GM",
             )
         }
+    }
+
+    /**
+     * Faction-standing delta a "diplomacy" expedition credits to its target faction,
+     * scaled by the same tier multiplier as XP and rounded. Positive on success,
+     * negative on critical failure, zero on plain failure. Non-diplomacy expeditions
+     * never call this (their standing delta stays 0). Pure and unit-tested.
+     */
+    fun diplomacyStandingDelta(tier: String, degree: DegreeOfSuccess): Int {
+        val base = when (degree) {
+            DegreeOfSuccess.CRITICAL_SUCCESS -> STANDING_CRITICAL_SUCCESS
+            DegreeOfSuccess.SUCCESS -> STANDING_SUCCESS
+            DegreeOfSuccess.FAILURE -> STANDING_FAILURE
+            DegreeOfSuccess.CRITICAL_FAILURE -> STANDING_CRITICAL_FAILURE
+        }
+        return (base * tierMultiplier(tier)).roundToInt()
     }
 
     /**

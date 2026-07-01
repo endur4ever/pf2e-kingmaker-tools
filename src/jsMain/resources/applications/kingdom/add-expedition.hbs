@@ -45,6 +45,19 @@
     </div>
     {{/if}}
 
+    {{#if factions}}
+    <div class="km-dialog-section">
+        <label for="expeditionFaction">{{localizeKM "kingdom.expeditions.targetFaction"}}</label>
+        <select name="expeditionFaction" id="expeditionFaction">
+            <option value="">{{localizeKM "kingdom.expeditions.targetFactionNone"}}</option>
+            {{#each factions}}
+            <option value="{{name}}">{{name}}</option>
+            {{/each}}
+        </select>
+        <p class="km-hint">{{localizeKM "kingdom.expeditions.targetFactionHint"}}</p>
+    </div>
+    {{/if}}
+
     <div class="km-dialog-section">
         <label for="expeditionNotes">{{localizeKM "kingdom.expeditions.notes"}}</label>
         <textarea name="expeditionNotes" rows="3" placeholder="{{localizeKM 'kingdom.expeditions.notesPlaceholder'}}">{{gmNotes}}</textarea>
