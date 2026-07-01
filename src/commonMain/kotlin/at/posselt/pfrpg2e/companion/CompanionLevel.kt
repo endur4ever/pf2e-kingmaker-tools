@@ -150,3 +150,28 @@ fun applyPersonalQuestReward(
  */
 fun canApplyExpeditionReward(rewardApplied: Boolean, status: String): Boolean =
     !rewardApplied && status != "resolved"
+
+/**
+ * Resource points a completed expedition's loot tier yields to the kingdom treasury.
+ *
+ * Deliberately small so expeditions supplement rather than replace kingdom income
+ * (they are GM-confirmed and capped at 3 concurrent). Tune the amounts here.
+ */
+fun lootTierToResourcePoints(lootTier: String?): Int = when (lootTier) {
+    "minor" -> 1
+    "moderate" -> 2
+    "major" -> 3
+    else -> 0 // "none" / null
+}
+
+/**
+ * Resource-point cost to provision an expedition, scaled by difficulty tier.
+ *
+ * A modest sink so launching is a real (if small) economic decision alongside the
+ * concurrency cap. Tune here. Deducted (coerced to >= 0) when the expedition is created.
+ */
+fun expeditionLaunchCost(tier: String): Int = when (tier) {
+    "routine" -> 1
+    "perilous" -> 3
+    else -> 2 // standard
+}

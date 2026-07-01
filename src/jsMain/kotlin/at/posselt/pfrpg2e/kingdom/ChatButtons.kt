@@ -2,10 +2,6 @@ package at.posselt.pfrpg2e.kingdom
 
 import at.posselt.pfrpg2e.companion.LevelUpResult
 import at.posselt.pfrpg2e.companion.applyCompanionXp
-import at.posselt.pfrpg2e.companion.applyPersonalQuestReward
-import at.posselt.pfrpg2e.companion.canApplyExpeditionReward
-import at.posselt.pfrpg2e.companion.clampInfluence
-import at.posselt.pfrpg2e.companion.selectRewardQuest
 import at.posselt.pfrpg2e.utils.fromUuidOfTypes
 import com.foundryvtt.pf2e.actor.PF2ECharacter
 import kotlin.math.min
@@ -204,87 +200,15 @@ private val buttons = listOf(
     ChatButton("km-offer-expedition-reward") { game, actor, event, button ->
         // GM-confirmed: apply expedition reward (XP, influence, loot, mark resolved).
         // Guards double-apply by checking rewardApplied + status.
+        // GM-confirmed: apply the accrued expedition reward + mark resolved (idempotent).
         if (!game.user.isGM) return@ChatButton
         val expeditionId = button.dataset["expeditionId"] ?: return@ChatButton
         actor.getKingdom()?.let { kingdom ->
-            val expedition = kingdom.companionExpeditions?.find { it.id == expeditionId }
-            if (expedition == null || !canApplyExpeditionReward(expedition.rewardApplied, expedition.status)) return@ChatButton
-
-            // Apply XP to the companion (first participant).
-            val companionId = expedition.companionIds.firstOrNull()
-            if (companionId != null) {
-                val companion = kingdom.companions?.find { (it.actorUuid ?: it.name) == companionId }
-                if (companion != null) {
-                    val levelingEnabled = Pfrpg2eKingdomCampingWeatherSettings.getEnableCompanionLeveling()
-                    val xpToApply = if (levelingEnabled) expedition.accruedXp else 0
-                    val levelResult = applyCompanionXp(
-                        currentLevel = companion.level,
-                        currentXp = companion.xp,
-                        gainedXp = xpToApply,
-                    )
-                    if (levelingEnabled) {
-                        companion.level = levelResult.newLevel
-                        companion.xp = levelResult.newXp
-                    }
-                    // Mark companion as available again
-                    companion.expeditionStatus = "available"
-                }
+            val expedition = kingdom.companionExpeditions?.find { it.id == expeditionId } ?: return@ChatButton
+            if (applyExpeditionRewardToKingdom(kingdom, expedition)) {
+                actor.setKingdom(kingdom)
+                postChatMessage(t("kingdom.expeditionRewardApplied", recordOf("name" to expedition.title)))
             }
-
-            // Apply influence delta (clamped).
-            if (expedition.accruedInfluenceDelta != 0) {
-                val companion = kingdom.companions?.find { (it.actorUuid ?: it.name) == (expedition.companionIds.firstOrNull() ?: "") }
-                if (companion != null) {
-                    val currentInfluence = companion.influence
-                    companion.influence = clampInfluence(currentInfluence + expedition.accruedInfluenceDelta)
-                }
-            }
-
-            // Wire up personal quest completion and rewards
-            val isSuccess = expedition.outcomeDegree == "success" || expedition.outcomeDegree == "criticalSuccess"
-            if (expedition.activityId == "personal-quest" && isSuccess && companionId != null) {
-                val companion = kingdom.companions?.find { (it.actorUuid ?: it.name) == companionId }
-                val quests = kingdom.companionPersonalQuests ?: emptyArray()
-                val activeQuest = selectRewardQuest(quests.toList(), companionId, expedition.targetQuestId)
-                if (activeQuest != null) {
-                    if (companion != null) {
-                        val levelingEnabled = Pfrpg2eKingdomCampingWeatherSettings.getEnableCompanionLeveling()
-                        val outcome = applyPersonalQuestReward(
-                            status = activeQuest.status,
-                            currentInfluence = companion.influence,
-                            influenceReward = activeQuest.influenceReward,
-                            currentLevel = companion.level,
-                            currentXp = companion.xp,
-                            questXp = activeQuest.rewards?.xp ?: 0,
-                            levelingEnabled = levelingEnabled,
-                        )
-                        activeQuest.status = outcome.newStatus
-                        companion.influence = outcome.newInfluence
-                        companion.level = outcome.levelResult.newLevel
-                        companion.xp = outcome.levelResult.newXp
-                        if (outcome.levelResult.levelsGained > 0) {
-                            postChatMessage(
-                                t("kingdom.companionLeveledUp", recordOf("name" to companion.name, "level" to outcome.levelResult.newLevel))
-                            )
-                        }
-                    } else {
-                        activeQuest.status = "completed"
-                    }
-                    kingdom.companionPersonalQuests = quests
-                }
-            }
-
-            // Mark expedition resolved.
-            expedition.rewardApplied = true
-            expedition.status = "resolved"
-
-            // Persist
-            kingdom.companionExpeditions = kingdom.companionExpeditions?.map {
-                if (it.id == expeditionId) expedition else it
-            }?.toTypedArray()
-            actor.setKingdom(kingdom)
-
-            postChatMessage(t("kingdom.expeditionRewardApplied", recordOf("name" to expedition.title)))
         }
     },
     ChatButton("km-offer-companion-levelup") { game, actor, event, button ->
@@ -387,6 +311,7 @@ private val buttons = listOf(
                         }
                         current.companions = updatedComps
                         actor.setKingdom(current)
+                        logExpeditionLaunched(expedition, updatedComps)
                         postChatTemplate(
                             templatePath = "chatmessages/companion-autonomy-approved.hbs",
                             templateContext = js.objects.recordOf(
@@ -414,6 +339,7 @@ private val buttons = listOf(
                     }
                     current.companions = updatedComps
                     actor.setKingdom(current)
+                    logExpeditionLaunched(expedition, updatedComps)
                 }
             }.launch()
         }

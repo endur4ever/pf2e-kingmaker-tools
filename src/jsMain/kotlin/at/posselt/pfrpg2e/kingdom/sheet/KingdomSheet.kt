@@ -183,6 +183,9 @@ import at.posselt.pfrpg2e.kingdom.sheet.contexts.toActivitiesContext
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.toContext
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.toRosterContext
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.toExpeditionsContext
+import at.posselt.pfrpg2e.companion.expeditionLaunchCost
+import at.posselt.pfrpg2e.kingdom.applyExpeditionRewardToKingdom
+import at.posselt.pfrpg2e.kingdom.logExpeditionLaunched
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.MAX_CONCURRENT_EXPEDITIONS
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.activeExpeditionCount
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.companionHasActiveExpedition
@@ -951,6 +954,20 @@ class KingdomSheet(
                 }
             }
 
+            "resolve-all-expeditions" -> buildPromise {
+                if (!game.user.isGM) return@buildPromise
+                val kingdom = getKingdom()
+                val pending = (kingdom.companionExpeditions ?: emptyArray()).filter { it.status == "awaitingResolution" }
+                var resolved = 0
+                for (exp in pending) {
+                    if (applyExpeditionRewardToKingdom(kingdom, exp)) resolved++
+                }
+                if (resolved > 0) {
+                    actor.setKingdom(kingdom)
+                    postChatMessage(t("kingdom.expeditionBatchResolved", recordOf("count" to resolved)))
+                }
+            }
+
             "add-expedition" -> buildPromise {
                 val kingdom = getKingdom()
                 if (activeExpeditionCount(kingdom.companionExpeditions ?: emptyArray()) >= MAX_CONCURRENT_EXPEDITIONS) {
@@ -964,12 +981,18 @@ class KingdomSheet(
                 ) { expedition ->
                     val current = getKingdom()
                     current.companionExpeditions = (current.companionExpeditions ?: emptyArray()) + expedition
+                    // Provisioning sink: deduct a tier-scaled RP cost to launch (coerced to >= 0).
+                    val launchCost = expeditionLaunchCost(expedition.tier)
+                    if (launchCost > 0) {
+                        current.resourcePoints.now = (current.resourcePoints.now - launchCost).coerceAtLeast(0)
+                    }
                     val updatedComps = (current.companions ?: emptyArray()).copyOf()
                     expedition.companionIds.forEach { cid ->
                         updatedComps.find { (it.actorUuid ?: it.name) == cid }?.expeditionStatus = "onExpedition"
                     }
                     current.companions = updatedComps
                     actor.setKingdom(current)
+                    logExpeditionLaunched(expedition, updatedComps)
                 }.launch()
             }
 

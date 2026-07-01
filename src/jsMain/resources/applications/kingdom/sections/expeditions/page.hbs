@@ -5,6 +5,11 @@
                 <span><i class="fa-solid fa-compass"></i> {{localizeKM "kingdom.expeditions.title"}}</span>
                 {{#if isGM}}
                 <span class="km-header-right-align">
+                    {{#if expeditionsContext.hasAwaitingResolution}}
+                    <button type="button" class="km-resolve-all-expeditions-btn" data-action="resolve-all-expeditions">
+                        <i class="fa-solid fa-check-double"></i> {{localizeKM "kingdom.expeditions.resolveAll"}}
+                    </button>
+                    {{/if}}
                     <button type="button" class="km-add-expedition-btn" data-action="add-expedition">
                         <i class="fa-solid fa-plus"></i> {{localizeKM "kingdom.expeditions.addExpedition"}}
                     </button>

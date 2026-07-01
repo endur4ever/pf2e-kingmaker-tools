@@ -38,6 +38,7 @@ external interface ExpeditionsContext {
     val items: Array<ExpeditionRowContext>
     val isGM: Boolean
     val hasExpeditions: Boolean
+    val hasAwaitingResolution: Boolean
 }
 
 fun Array<RawCompanionExpedition>.toExpeditionsContext(
@@ -78,13 +79,14 @@ fun Array<RawCompanionExpedition>.toExpeditionsContext(
                 daysRemaining = exp.daysRemaining,
                 totalDays = exp.totalDays,
                 progressPercent = progressPercent,
-                dc = exp.dc,
+                // GM-only fields are blanked for the player-facing read-only board (no info leak).
+                dc = if (isGM) exp.dc else 0,
                 tier = exp.tier,
                 tierLabel = tierLabel,
                 outcomeDegree = exp.outcomeDegree,
                 accruedXp = exp.accruedXp,
                 accruedInfluenceDelta = exp.accruedInfluenceDelta,
-                accruedInjuries = exp.accruedInjuries,
+                accruedInjuries = if (isGM) exp.accruedInjuries else emptyArray(),
                 lootTier = exp.lootTier,
                 factionStandingDelta = exp.factionStandingDelta,
                 companionIds = exp.companionIds,
@@ -96,7 +98,7 @@ fun Array<RawCompanionExpedition>.toExpeditionsContext(
                 isResolved = exp.status == "resolved",
                 isInProgress = exp.status == "inProgress",
                 isAwaitingResolution = exp.status == "awaitingResolution",
-                gmNotes = exp.gmNotes,
+                gmNotes = if (isGM) exp.gmNotes else "",
             )
         }
         .toTypedArray()
@@ -104,6 +106,7 @@ fun Array<RawCompanionExpedition>.toExpeditionsContext(
         items = items,
         isGM = isGM,
         hasExpeditions = items.isNotEmpty(),
+        hasAwaitingResolution = items.any { it.isAwaitingResolution },
     )
 }
 
@@ -125,3 +128,21 @@ const val MAX_CONCURRENT_EXPEDITIONS = 3
 /** Count expeditions still in flight (inProgress or awaiting resolution). */
 fun activeExpeditionCount(expeditions: Array<RawCompanionExpedition>): Int =
     expeditions.count { it.status == "inProgress" || it.status == "awaitingResolution" }
+
+/** How many resolved/cancelled expedition rows to retain before pruning the oldest. */
+const val MAX_RESOLVED_EXPEDITIONS = 50
+
+/**
+ * Cap unbounded growth of the expedition log: keep every in-flight expedition
+ * (inProgress / awaitingResolution) and only the most recent [cap] terminal
+ * (resolved / cancelled) ones, preserving array order. Never drops an active row.
+ */
+fun pruneResolvedExpeditions(
+    expeditions: Array<RawCompanionExpedition>,
+    cap: Int = MAX_RESOLVED_EXPEDITIONS,
+): Array<RawCompanionExpedition> {
+    val terminal = expeditions.filter { it.status == "resolved" || it.status == "cancelled" }
+    if (terminal.size <= cap) return expeditions
+    val keep = terminal.takeLast(cap).toSet()
+    return expeditions.filter { it.status != "resolved" && it.status != "cancelled" || it in keep }.toTypedArray()
+}

@@ -13,8 +13,13 @@ import at.posselt.pfrpg2e.kingdom.data.RawCharacter
 import at.posselt.pfrpg2e.kingdom.data.RawCompanionExpedition
 import at.posselt.pfrpg2e.companion.accruedExpeditionXp
 import at.posselt.pfrpg2e.companion.applyCompanionXp
+import at.posselt.pfrpg2e.companion.applyPersonalQuestReward
+import at.posselt.pfrpg2e.companion.canApplyExpeditionReward
 import at.posselt.pfrpg2e.companion.clampInfluence
+import at.posselt.pfrpg2e.companion.lootTierToResourcePoints
+import at.posselt.pfrpg2e.companion.selectRewardQuest
 import at.posselt.pfrpg2e.companion.shouldOfferLevelUp
+import at.posselt.pfrpg2e.kingdom.sheet.contexts.pruneResolvedExpeditions
 import at.posselt.pfrpg2e.settings.Pfrpg2eKingdomCampingWeatherSettings
 import at.posselt.pfrpg2e.utils.escapeHtml
 import at.posselt.pfrpg2e.utils.fromUuidOfTypes
@@ -217,4 +222,85 @@ internal fun influenceBandBonus(discoveryStatus: String): Int {
         ip >= 2 -> 1   // introduced / established
         else -> 0      // unknown
     }
+}
+
+/**
+ * Apply a completed expedition's accrued reward (XP, influence, personal-quest reward, loot) to the
+ * kingdom and mark it resolved. Mutates [kingdom] in place; the CALLER persists via setKingdom, so a
+ * batch can apply many then persist once. Returns true if the reward was applied (false if already
+ * applied / resolved — idempotent via canApplyExpeditionReward). Does NOT apply injuries or the
+ * real-actor level bump — those remain separate GM-per-card offers.
+ */
+suspend fun applyExpeditionRewardToKingdom(
+    kingdom: KingdomData,
+    expedition: RawCompanionExpedition,
+): Boolean {
+    if (!canApplyExpeditionReward(expedition.rewardApplied, expedition.status)) return false
+
+    val companionId = expedition.companionIds.firstOrNull()
+    val levelingEnabled = Pfrpg2eKingdomCampingWeatherSettings.getEnableCompanionLeveling()
+
+    if (companionId != null) {
+        val companion = kingdom.companions?.find { (it.actorUuid ?: it.name) == companionId }
+        if (companion != null) {
+            val levelResult = applyCompanionXp(
+                currentLevel = companion.level,
+                currentXp = companion.xp,
+                gainedXp = accruedExpeditionXp(expedition.accruedXp, levelingEnabled),
+            )
+            if (levelingEnabled) {
+                companion.level = levelResult.newLevel
+                companion.xp = levelResult.newXp
+            }
+            companion.expeditionStatus = "available"
+            if (expedition.accruedInfluenceDelta != 0) {
+                companion.influence = clampInfluence(companion.influence + expedition.accruedInfluenceDelta)
+            }
+        }
+    }
+
+    // Personal-quest completion + reward.
+    val isSuccess = expedition.outcomeDegree == "success" || expedition.outcomeDegree == "criticalSuccess"
+    if (expedition.activityId == "personal-quest" && isSuccess && companionId != null) {
+        val companion = kingdom.companions?.find { (it.actorUuid ?: it.name) == companionId }
+        val quests = kingdom.companionPersonalQuests ?: emptyArray()
+        val activeQuest = selectRewardQuest(quests.toList(), companionId, expedition.targetQuestId)
+        if (activeQuest != null) {
+            if (companion != null) {
+                val outcome = applyPersonalQuestReward(
+                    status = activeQuest.status,
+                    currentInfluence = companion.influence,
+                    influenceReward = activeQuest.influenceReward,
+                    currentLevel = companion.level,
+                    currentXp = companion.xp,
+                    questXp = activeQuest.rewards?.xp ?: 0,
+                    levelingEnabled = levelingEnabled,
+                )
+                activeQuest.status = outcome.newStatus
+                companion.influence = outcome.newInfluence
+                companion.level = outcome.levelResult.newLevel
+                companion.xp = outcome.levelResult.newXp
+                if (outcome.levelResult.levelsGained > 0) {
+                    postChatMessage(t("kingdom.companionLeveledUp", recordOf("name" to companion.name, "level" to outcome.levelResult.newLevel)))
+                }
+            } else {
+                activeQuest.status = "completed"
+            }
+            kingdom.companionPersonalQuests = quests
+        }
+    }
+
+    // Loot tier -> kingdom resource points.
+    val lootRp = lootTierToResourcePoints(expedition.lootTier)
+    if (lootRp > 0) {
+        kingdom.resourcePoints.now = (kingdom.resourcePoints.now + lootRp).coerceAtLeast(0)
+        postChatMessage(t("kingdom.expeditionLootApplied", recordOf("rp" to lootRp)))
+    }
+
+    expedition.rewardApplied = true
+    expedition.status = "resolved"
+    kingdom.companionExpeditions = kingdom.companionExpeditions?.map {
+        if (it.id == expedition.id) expedition else it
+    }?.toTypedArray()?.let { pruneResolvedExpeditions(it) }
+    return true
 }

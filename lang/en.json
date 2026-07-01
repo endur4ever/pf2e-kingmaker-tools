@@ -731,6 +731,8 @@
       "companionLeveledUp": "{name} has leveled up to Level {level}!",
       "companionRecovered": "{name} has recovered from their injuries.",
       "expeditionRewardApplied": "Expedition rewards for {name} have been applied.",
+      "expeditionLootApplied": "Recovered {rp} resource points from the expedition's haul.",
+      "expeditionBatchResolved": "Resolved {count} expedition rewards.",
       "companionQuestFailed": "Personal Quest Failed: {name} ran out of time to complete '{quest}'.",
       "sessionPrep": {
         "title": "Session Prep",
@@ -1046,6 +1048,7 @@
         "title": "Expeditions",
         "noExpeditions": "No expeditions are currently active.",
         "addExpedition": "Launch Expedition",
+        "resolveAll": "Resolve All",
         "cancel": "Cancel",
         "resolve": "Resolve",
         "activity": "Activity",

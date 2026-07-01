@@ -245,4 +245,23 @@ class CompanionLevelTest {
     fun testCanApplyExpeditionReward_blocksResolved() {
         assertFalse(canApplyExpeditionReward(rewardApplied = false, status = "resolved"))
     }
+
+    // ── Loot tier -> resource points ────────────────────────────────────────
+
+    @Test
+    fun testLootTierToResourcePoints_scalesByTier() {
+        assertEquals(0, lootTierToResourcePoints("none"))
+        assertEquals(0, lootTierToResourcePoints(null))
+        assertEquals(1, lootTierToResourcePoints("minor"))
+        assertEquals(2, lootTierToResourcePoints("moderate"))
+        assertEquals(3, lootTierToResourcePoints("major"))
+    }
+
+    @Test
+    fun testExpeditionLaunchCost_scalesByTier() {
+        assertEquals(1, expeditionLaunchCost("routine"))
+        assertEquals(2, expeditionLaunchCost("standard"))
+        assertEquals(3, expeditionLaunchCost("perilous"))
+        assertEquals(2, expeditionLaunchCost("unknown")) // defaults to standard
+    }
 }
