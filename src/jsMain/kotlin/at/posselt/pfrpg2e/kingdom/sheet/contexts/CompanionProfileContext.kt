@@ -30,6 +30,7 @@ external interface PersonalQuestSummaryContext {
     val visibleToPlayers: Boolean
     val influenceReward: Int
     val isActive: Boolean
+    val isCompleted: Boolean
     val questHook: String?
     val isGM: Boolean
 }
@@ -95,6 +96,7 @@ private fun questSummary(
         visibleToPlayers = quest.visibleToPlayers,
         influenceReward = quest.influenceReward,
         isActive = quest.status == "active",
+        isCompleted = quest.status == "completed",
         // Quest hooks are GM-facing narrative triggers; never expose to players.
         questHook = if (isGM) quest.questHook else null,
         isGM = isGM,

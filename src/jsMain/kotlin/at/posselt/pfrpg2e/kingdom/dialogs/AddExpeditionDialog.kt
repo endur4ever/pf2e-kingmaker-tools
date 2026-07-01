@@ -13,6 +13,7 @@ import at.posselt.pfrpg2e.utils.buildPromise
 import io.github.uuidjs.uuid.v4
 import at.posselt.pfrpg2e.utils.t
 import com.foundryvtt.core.applications.api.HandlebarsRenderOptions
+import com.foundryvtt.core.ui
 import kotlinx.coroutines.await
 import kotlinx.js.JsPlainObject
 import org.w3c.dom.HTMLElement
@@ -113,6 +114,13 @@ class AddExpeditionDialog(
                 val targetFactionName = element.querySelector("select[name='expeditionFaction']")
                     ?.let { it as? org.w3c.dom.HTMLSelectElement }
                     ?.value?.takeIf { it.isNotBlank() }
+
+                // A diplomacy expedition with no target faction can never move standing — block the
+                // launch with a clear message rather than silently producing an inert expedition.
+                if (activityId == "diplomacy" && targetFactionName == null) {
+                    ui.notifications.warn(t("kingdom.expeditions.diplomacyRequiresFaction"))
+                    return@buildPromise
+                }
 
                 val expedition = createRawCompanionExpedition(
                     id = v4(),

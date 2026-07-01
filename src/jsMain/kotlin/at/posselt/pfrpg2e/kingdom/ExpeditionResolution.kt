@@ -21,6 +21,7 @@ import at.posselt.pfrpg2e.companion.applyPersonalQuestReward
 import at.posselt.pfrpg2e.companion.canApplyExpeditionReward
 import at.posselt.pfrpg2e.companion.clampInfluence
 import at.posselt.pfrpg2e.companion.lootTierToResourcePoints
+import at.posselt.pfrpg2e.companion.personalQuestCompletionSnapshot
 import at.posselt.pfrpg2e.companion.selectRewardQuest
 import at.posselt.pfrpg2e.companion.shouldOfferLevelUp
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.pruneResolvedExpeditions
@@ -292,6 +293,10 @@ suspend fun applyExpeditionRewardToKingdom(
         val activeQuest = selectRewardQuest(quests.toList(), companionId, expedition.targetQuestId)
         if (activeQuest != null) {
             if (companion != null) {
+                val priorStatus = activeQuest.status
+                val beforeInfluence = companion.influence
+                val beforeLevel = companion.level
+                val beforeXp = companion.xp
                 val outcome = applyPersonalQuestReward(
                     status = activeQuest.status,
                     currentInfluence = companion.influence,
@@ -305,10 +310,34 @@ suspend fun applyExpeditionRewardToKingdom(
                 companion.influence = outcome.newInfluence
                 companion.level = outcome.levelResult.newLevel
                 companion.xp = outcome.levelResult.newXp
+                // Record the applied deltas so a GM "reopen" can reverse them — same snapshot the
+                // manual complete-quest button writes, so an expedition-completed quest is reopenable too.
+                if (outcome.applied) {
+                    activeQuest.completionSnapshot = personalQuestCompletionSnapshot(
+                        priorStatus = priorStatus,
+                        beforeInfluence = beforeInfluence,
+                        afterInfluence = companion.influence,
+                        beforeLevel = beforeLevel,
+                        beforeXp = beforeXp,
+                        afterLevel = companion.level,
+                        afterXp = companion.xp,
+                    )
+                }
                 if (outcome.levelResult.levelsGained > 0) {
                     postChatMessage(t("kingdom.companionLeveledUp", recordOf("name" to companion.name, "level" to outcome.levelResult.newLevel)))
                 }
             } else {
+                // No companion object to reward; only the quest status changes, so a reopen just
+                // flips it back (zero-delta snapshot keeps the reopen path consistent).
+                activeQuest.completionSnapshot = personalQuestCompletionSnapshot(
+                    priorStatus = activeQuest.status,
+                    beforeInfluence = 0,
+                    afterInfluence = 0,
+                    beforeLevel = 1,
+                    beforeXp = 0,
+                    afterLevel = 1,
+                    afterXp = 0,
+                )
                 activeQuest.status = "completed"
             }
             kingdom.companionPersonalQuests = quests
@@ -337,6 +366,11 @@ suspend fun applyExpeditionRewardToKingdom(
                 reason = "kingdom.factionStanding.expedition",
             )
             postChatMessage(t("kingdom.expeditionFactionStandingApplied", recordOf("name" to targetFactionName, "delta" to factionDelta)))
+        } else {
+            // Faction was renamed or removed between launch and apply. Don't silently drop the
+            // earned standing — warn the GM to adjust it manually. The rest of the reward (already
+            // applied above) still resolves; we don't bail here or the XP/loot could double-apply.
+            postChatMessage(t("kingdom.expeditionFactionStandingMissing", recordOf("name" to targetFactionName, "delta" to factionDelta)))
         }
     }
 

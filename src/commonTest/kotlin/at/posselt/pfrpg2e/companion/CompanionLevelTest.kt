@@ -314,4 +314,43 @@ class CompanionLevelTest {
         val delta = after - before
         assertEquals(11, clampInfluence(after - delta))
     }
+
+    @Test
+    fun testReversePersonalQuestReward_restoresInfluenceLevelXpAndStatus() {
+        // Completion: influence 5->8 (+3); level 2/900xp gains 300 -> level 3/200xp.
+        val snap = personalQuestCompletionSnapshot(
+            priorStatus = "active",
+            beforeInfluence = 5,
+            afterInfluence = 8,
+            beforeLevel = 2,
+            beforeXp = 900,
+            afterLevel = 3,
+            afterXp = 200,
+        )
+        val out = reversePersonalQuestReward(snap, currentInfluence = 8, currentLevel = 3, currentXp = 200)
+        assertEquals("active", out.newStatus)
+        assertEquals(5, out.newInfluence)
+        assertEquals(2, out.newLevel)
+        assertEquals(900, out.newXp)
+    }
+
+    @Test
+    fun testReversePersonalQuestReward_zeroDeltaIsStatusOnly() {
+        // The companion-less expedition completion writes a zero-delta snapshot; reopen must not
+        // touch companion state, only flip status back.
+        val snap = personalQuestCompletionSnapshot(
+            priorStatus = "active",
+            beforeInfluence = 0,
+            afterInfluence = 0,
+            beforeLevel = 1,
+            beforeXp = 0,
+            afterLevel = 1,
+            afterXp = 0,
+        )
+        val out = reversePersonalQuestReward(snap, currentInfluence = 7, currentLevel = 4, currentXp = 123)
+        assertEquals("active", out.newStatus)
+        assertEquals(7, out.newInfluence)
+        assertEquals(4, out.newLevel)
+        assertEquals(123, out.newXp)
+    }
 }

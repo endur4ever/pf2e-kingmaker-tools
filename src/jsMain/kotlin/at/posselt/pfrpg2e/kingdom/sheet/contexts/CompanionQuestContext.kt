@@ -32,7 +32,6 @@ external interface CompanionQuestRowContext {
     val visibleToPlayers: Boolean
     val influenceReward: Int
     val isActive: Boolean
-    val isCompleted: Boolean
     val isGM: Boolean
 }
 
@@ -65,7 +64,6 @@ fun buildCompanionQuestRows(
             visibleToPlayers = quest.visibleToPlayers,
             influenceReward = quest.influenceReward,
             isActive = quest.status == "active",
-            isCompleted = quest.status == "completed",
             isGM = isGM,
         )
     }.toTypedArray()

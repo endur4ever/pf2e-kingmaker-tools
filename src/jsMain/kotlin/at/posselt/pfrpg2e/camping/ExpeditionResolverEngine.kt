@@ -38,11 +38,12 @@ object ExpeditionResolverEngine {
 
     /**
      * Flat per-degree base faction-standing delta for "diplomacy" expeditions (before tier
-     * multiplier). Sized for the ±50 standing scale (15-point attitude bands, see
-     * [at.posselt.pfrpg2e.data.kingdom.applyStandingDelta]): a standard success (+4) takes
-     * ~4 expeditions to lift a faction one band, a crit (+8) about half that; a crit failure
-     * (−4) sours relations by the same step. Keeps the owner's intended ratio
-     * (crit = 2× success, crit-fail = −success) while actually moving the needle.
+     * multiplier). The standing scale is ±100 (see [at.posselt.pfrpg2e.data.kingdom.applyStandingDelta])
+     * with attitude bands: Hostile ≤ −50, Unfriendly −49..−15, Indifferent −14..14, Friendly 15..49,
+     * Helpful ≥ 50 (roughly 29–35 points each). On standard tier a success is +4, so crossing from
+     * Indifferent (0) into Friendly (15) takes ~4 expeditions; reaching Helpful (50) is deliberately
+     * a long grind (~13). A crit (+8) is twice as fast; a crit failure (−4) sours by the same step.
+     * Keeps the owner's intended ratio (crit = 2× success, crit-fail = −success).
      */
     private const val STANDING_CRITICAL_SUCCESS = 8
     private const val STANDING_SUCCESS = 4

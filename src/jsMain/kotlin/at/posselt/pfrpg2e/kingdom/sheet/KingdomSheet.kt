@@ -779,6 +779,7 @@ class KingdomSheet(
             }
 
             "complete-quest" -> buildPromise {
+                if (!game.user.isGM) return@buildPromise
                 val questId = target.dataset["id"]
                 if (questId != null) {
                     val kingdom = getKingdom()
@@ -829,6 +830,7 @@ class KingdomSheet(
                         // Record the ACTUAL applied deltas (post-clamp) so reopen reverses exactly.
                         quest.completionSnapshot = RawQuestCompletionSnapshot(
                             priorStatus = priorStatus,
+                            turn = kingdom.currentTurn ?: 0,
                             rp = appliedRp,
                             xp = appliedXp,
                             level = appliedLevel,
@@ -847,6 +849,7 @@ class KingdomSheet(
             }
 
             "reopen-quest" -> buildPromise {
+                if (!game.user.isGM) return@buildPromise
                 val questId = target.dataset["id"]
                 if (questId != null) {
                     val kingdom = getKingdom()
@@ -856,7 +859,11 @@ class KingdomSheet(
                         if (snap != null) {
                             // Reverse each applied delta (coerced to legal floors). Deltas were captured
                             // post-clamp, so this restores the pre-completion state exactly when nothing
-                            // else changed these values in the meantime.
+                            // else changed these values in the meantime. If the turn has since advanced,
+                            // a tick/level-up may have moved kingdom economy — warn that undo is approximate.
+                            if ((kingdom.currentTurn ?: 0) != snap.turn) {
+                                postChatMessage(t("kingdom.quests.reopenStale", recordOf("name" to quest.title)))
+                            }
                             kingdom.resourcePoints.now = (kingdom.resourcePoints.now - snap.rp).coerceAtLeast(0)
                             kingdom.xp = (kingdom.xp - snap.xp).coerceAtLeast(0)
                             kingdom.level = (kingdom.level - snap.level).coerceAtLeast(1)
@@ -882,6 +889,7 @@ class KingdomSheet(
             }
 
             "delete-quest" -> buildPromise {
+                if (!game.user.isGM) return@buildPromise
                 val questId = target.dataset["id"]
                 if (questId != null) {
                     val kingdom = getKingdom()

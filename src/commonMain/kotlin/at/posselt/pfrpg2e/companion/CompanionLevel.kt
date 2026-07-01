@@ -94,6 +94,55 @@ fun fromTotalCompanionXp(total: Int): LevelUpResult {
 }
 
 /**
+ * Build the reward-delta snapshot a personal-quest completion records so a later reopen can
+ * reverse it. [influenceDelta] is the post-clamp influence change; [xpDelta] is measured in
+ * total-XP space so a level-up reverses cleanly. Shared by the manual complete-quest button and
+ * the expedition reward path so the two can never drift.
+ */
+fun personalQuestCompletionSnapshot(
+    priorStatus: String,
+    beforeInfluence: Int,
+    afterInfluence: Int,
+    beforeLevel: Int,
+    beforeXp: Int,
+    afterLevel: Int,
+    afterXp: Int,
+): PersonalQuestCompletionSnapshot = PersonalQuestCompletionSnapshot(
+    priorStatus = priorStatus,
+    influenceDelta = afterInfluence - beforeInfluence,
+    xpDelta = toTotalCompanionXp(afterLevel, afterXp) - toTotalCompanionXp(beforeLevel, beforeXp),
+)
+
+/** Companion state after reversing a personal-quest completion. */
+data class PersonalQuestReopenOutcome(
+    val newStatus: String,
+    val newInfluence: Int,
+    val newLevel: Int,
+    val newXp: Int,
+)
+
+/**
+ * Reverse a personal-quest completion from its [snapshot], restoring the companion's influence and
+ * level/XP by subtracting the applied deltas (total-XP space handles level-downs) and returning the
+ * quest to its prior status. Pure + unit-tested. Exact when nothing else moved the companion since
+ * completion; otherwise preserves unrelated changes by working in deltas rather than absolutes.
+ */
+fun reversePersonalQuestReward(
+    snapshot: PersonalQuestCompletionSnapshot,
+    currentInfluence: Int,
+    currentLevel: Int,
+    currentXp: Int,
+): PersonalQuestReopenOutcome {
+    val restored = fromTotalCompanionXp(toTotalCompanionXp(currentLevel, currentXp) - snapshot.xpDelta)
+    return PersonalQuestReopenOutcome(
+        newStatus = snapshot.priorStatus,
+        newInfluence = clampInfluence(currentInfluence - snapshot.influenceDelta),
+        newLevel = restored.newLevel,
+        newXp = restored.newXp,
+    )
+}
+
+/**
  * XP actually accrued from an expedition, honoring the companion-leveling setting.
  * When leveling is disabled the expedition still resolves for flavor but awards no XP.
  */

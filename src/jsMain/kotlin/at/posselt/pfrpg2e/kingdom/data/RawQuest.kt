@@ -24,6 +24,8 @@ external interface RawQuestRewards {
 @JsPlainObject
 external interface RawQuestCompletionSnapshot {
     var priorStatus: String
+    /** Kingdom turn the quest was completed on, so reopen can warn when dependent state has drifted. */
+    var turn: Int
     var rp: Int
     var xp: Int
     var level: Int
