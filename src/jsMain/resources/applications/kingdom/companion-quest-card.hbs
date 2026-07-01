@@ -29,6 +29,11 @@
             <i class="fa-solid fa-check"></i>
         </button>
         {{/if}}
+        {{#if isCompleted}}
+        <button type="button" data-action="reopen-quest" data-quest-id="{{id}}" title="{{localizeKM 'kingdom.companion.quest.reopen'}}">
+            <i class="fa-solid fa-rotate-left"></i>
+        </button>
+        {{/if}}
         <button type="button" data-action="edit-personal-quest" data-quest-id="{{id}}" title="{{localizeKM 'kingdom.roster.edit'}}">
             <i class="fa-solid fa-pen"></i>
         </button>

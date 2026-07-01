@@ -70,6 +70,30 @@ fun applyCompanionXp(currentLevel: Int, currentXp: Int, gainedXp: Int): LevelUpR
 }
 
 /**
+ * A companion's level+XP collapsed to one monotonic scalar: (level-1)*1000 + xp. Level 1 / 0 XP
+ * maps to 0. Lets a level-crossing reward (or its reversal) be expressed as a single delta.
+ * Inverse of [fromTotalCompanionXp].
+ */
+fun toTotalCompanionXp(level: Int, xp: Int): Int =
+    (clampCompanionLevel(level) - 1) * XP_PER_LEVEL + xp.coerceAtLeast(0)
+
+/**
+ * Inverse of [toTotalCompanionXp]: expand a total-XP scalar back to level/xp, capping at
+ * [MAX_COMPANION_LEVEL] with 0 overflow (mirrors [applyCompanionXp]'s cap). [levelsGained] is
+ * unused here and always 0. Negative totals clamp to level 1 / 0 XP.
+ */
+fun fromTotalCompanionXp(total: Int): LevelUpResult {
+    val t = total.coerceAtLeast(0)
+    var level = t / XP_PER_LEVEL + 1
+    var xp = t % XP_PER_LEVEL
+    if (level >= MAX_COMPANION_LEVEL) {
+        level = MAX_COMPANION_LEVEL
+        xp = 0
+    }
+    return LevelUpResult(newLevel = level, newXp = xp, levelsGained = 0)
+}
+
+/**
  * XP actually accrued from an expedition, honoring the companion-leveling setting.
  * When leveling is disabled the expedition still resolves for flavor but awards no XP.
  */

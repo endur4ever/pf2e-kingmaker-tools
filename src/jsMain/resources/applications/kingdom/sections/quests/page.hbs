@@ -293,6 +293,11 @@
                     
                     {{#if ../isGM}}
                     <div class="km-quest-row-actions">
+                        {{#if (eq status "completed")}}
+                        <button type="button" class="km-quest-row-reopen-btn" data-action="reopen-quest" data-id="{{id}}" title="{{localizeKM 'kingdom.quests.reopenQuest'}}">
+                            <i class="fa-solid fa-rotate-left"></i>
+                        </button>
+                        {{/if}}
                         <button type="button" class="km-quest-row-edit-btn" data-action="edit-quest" data-id="{{id}}" title="{{localizeKM 'kingdom.quests.editQuest'}}">
                             <i class="fa-solid fa-pen-to-square"></i>
                         </button>

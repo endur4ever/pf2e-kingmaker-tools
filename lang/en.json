@@ -791,6 +791,8 @@
         "target": "Target",
         "rewards": "Bounty Rewards",
         "completeQuest": "Complete Quest",
+        "reopenQuest": "Reopen Quest (undo completion)",
+        "reopened": "Quest \"{name}\" reopened; its completion rewards were reversed.",
         "deleteQuest": "Delete Quest",
         "hiddenBadge": "Hidden",
         "levelBadge": "Lvl",
@@ -1004,6 +1006,7 @@
           "complication": "Complication: A significant setback has occurred in this personal quest.",
           "visibleToPlayers": "Visible to Players",
           "complete": "Complete Quest",
+          "reopen": "Reopen Quest (undo completion)",
           "reveal": "Reveal to Players",
           "hide": "Hide from Players",
           "status": {

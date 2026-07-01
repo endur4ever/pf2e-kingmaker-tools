@@ -64,6 +64,7 @@ import at.posselt.pfrpg2e.kingdom.data.RawBonusFeat
 import at.posselt.pfrpg2e.kingdom.data.RawQuest
 import at.posselt.pfrpg2e.kingdom.data.RawQuestRewards
 import at.posselt.pfrpg2e.kingdom.data.RawCommodities
+import at.posselt.pfrpg2e.kingdom.data.RawQuestCompletionSnapshot
 import at.posselt.pfrpg2e.kingdom.data.limitBy
 import at.posselt.pfrpg2e.kingdom.data.RawConsumption
 import at.posselt.pfrpg2e.utils.typeSafeUpdate
@@ -784,6 +785,7 @@ class KingdomSheet(
                     val quests = kingdom.quests ?: emptyArray()
                     val quest = quests.find { it.id == questId }
                     if (quest != null && quest.status == "active") {
+                        val priorStatus = quest.status
                         quest.status = "completed"
                         val realm = game.getRealmData(actor, kingdom)
                         val settlements = kingdom.getAllSettlements(game)
@@ -791,17 +793,29 @@ class KingdomSheet(
                         val allFeatures = kingdom.getExplodedFeatures()
                         val chosenFeatures = kingdom.getChosenFeatures(allFeatures)
                         val chosenFeats = kingdom.getChosenFeats(chosenFeatures)
-                        
+
                         val rewards = quest.rewards
-                        rewards.rp?.let { rpVal ->
-                            kingdom.resourcePoints.now += rpVal
-                        }
+                        val appliedRp = rewards.rp ?: 0
+                        kingdom.resourcePoints.now += appliedRp
+                        // Apply XP on THIS kingdom object rather than actor.gainXp(): gainXp re-fetches
+                        // a fresh clone and persists it, which the actor.setKingdom(kingdom) below would
+                        // clobber — so the quest's XP reward was silently lost. Inline via the same
+                        // calculateXpChange() gainXp uses, then reverse it exactly on reopen.
+                        var appliedXp = 0
+                        var appliedLevel = 0
                         rewards.xp?.let { xpVal ->
-                            actor.gainXp(xpVal)
+                            val change = kingdom.calculateXpChange(xpVal)
+                            change.toChat()
+                            kingdom.level += change.addLevel
+                            kingdom.xp += change.addXp
+                            appliedXp = change.addXp
+                            appliedLevel = change.addLevel
                         }
+                        val unrestBefore = kingdom.unrest
                         rewards.unrest?.let { unrestVal ->
                             kingdom.unrest = kingdom.addUnrest(unrestVal, chosenFeats)
                         }
+                        val appliedUnrest = kingdom.unrest - unrestBefore
                         val currentCommodities = kingdom.commodities.now
                         val newCommodities = RawCommodities(
                             food = currentCommodities.food + (rewards.food ?: 0),
@@ -811,8 +825,57 @@ class KingdomSheet(
                             stone = currentCommodities.stone + (rewards.stone ?: 0)
                         ).limitBy(storage)
                         kingdom.commodities.now = newCommodities
-                        
+
+                        // Record the ACTUAL applied deltas (post-clamp) so reopen reverses exactly.
+                        quest.completionSnapshot = RawQuestCompletionSnapshot(
+                            priorStatus = priorStatus,
+                            rp = appliedRp,
+                            xp = appliedXp,
+                            level = appliedLevel,
+                            unrest = appliedUnrest,
+                            food = newCommodities.food - currentCommodities.food,
+                            lumber = newCommodities.lumber - currentCommodities.lumber,
+                            luxuries = newCommodities.luxuries - currentCommodities.luxuries,
+                            ore = newCommodities.ore - currentCommodities.ore,
+                            stone = newCommodities.stone - currentCommodities.stone,
+                        )
+
                         postChatTemplate("chatmessages/quest-completed.hbs", quest, speaker = actor)
+                        actor.setKingdom(kingdom)
+                    }
+                }
+            }
+
+            "reopen-quest" -> buildPromise {
+                val questId = target.dataset["id"]
+                if (questId != null) {
+                    val kingdom = getKingdom()
+                    val quest = (kingdom.quests ?: emptyArray()).find { it.id == questId }
+                    if (quest != null && quest.status == "completed") {
+                        val snap = quest.completionSnapshot
+                        if (snap != null) {
+                            // Reverse each applied delta (coerced to legal floors). Deltas were captured
+                            // post-clamp, so this restores the pre-completion state exactly when nothing
+                            // else changed these values in the meantime.
+                            kingdom.resourcePoints.now = (kingdom.resourcePoints.now - snap.rp).coerceAtLeast(0)
+                            kingdom.xp = (kingdom.xp - snap.xp).coerceAtLeast(0)
+                            kingdom.level = (kingdom.level - snap.level).coerceAtLeast(1)
+                            kingdom.unrest = (kingdom.unrest - snap.unrest).coerceAtLeast(0)
+                            val c = kingdom.commodities.now
+                            kingdom.commodities.now = RawCommodities(
+                                food = (c.food - snap.food).coerceAtLeast(0),
+                                lumber = (c.lumber - snap.lumber).coerceAtLeast(0),
+                                luxuries = (c.luxuries - snap.luxuries).coerceAtLeast(0),
+                                ore = (c.ore - snap.ore).coerceAtLeast(0),
+                                stone = (c.stone - snap.stone).coerceAtLeast(0),
+                            )
+                            quest.status = snap.priorStatus
+                            quest.completionSnapshot = null
+                        } else {
+                            // Legacy completion with no snapshot: best-effort — just reopen the status.
+                            quest.status = "active"
+                        }
+                        postChatMessage(t("kingdom.quests.reopened", recordOf("name" to quest.title)))
                         actor.setKingdom(kingdom)
                     }
                 }

@@ -125,6 +125,9 @@ class CompanionProfileDialog(
                 var leveledNewLevel = 0
                 mutate { companion, quests ->
                     quests.find { it.id == questId && it.status == "active" }?.let { quest ->
+                        val priorStatus = quest.status
+                        val beforeInfluence = companion.influence
+                        val beforeTotalXp = toTotalCompanionXp(companion.level, companion.xp)
                         quest.status = "completed"
                         if (quest.influenceReward != 0) {
                             companion.influence = clampInfluence(companion.influence + quest.influenceReward)
@@ -146,6 +149,12 @@ class CompanionProfileDialog(
                                 }
                             }
                         }
+                        // Capture the exact applied deltas so a "reopen" restores the companion precisely.
+                        quest.completionSnapshot = PersonalQuestCompletionSnapshot(
+                            priorStatus = priorStatus,
+                            influenceDelta = companion.influence - beforeInfluence,
+                            xpDelta = toTotalCompanionXp(companion.level, companion.xp) - beforeTotalXp,
+                        )
                     }
                 }
                 if (leveledCompanionName != null) {
@@ -153,6 +162,29 @@ class CompanionProfileDialog(
                         postChatMessage(
                             t("kingdom.companionLeveledUp", recordOf("name" to leveledCompanionName, "level" to leveledNewLevel))
                         )
+                    }
+                }
+            }
+
+            "reopen-quest" -> {
+                if (questId == null) return
+                mutate { companion, quests ->
+                    quests.find { it.id == questId && it.status == "completed" }?.let { quest ->
+                        val snap = quest.completionSnapshot
+                        if (snap != null) {
+                            // Reverse the applied influence + XP (total-XP space handles level-downs).
+                            companion.influence = clampInfluence(companion.influence - snap.influenceDelta)
+                            val restored = fromTotalCompanionXp(
+                                toTotalCompanionXp(companion.level, companion.xp) - snap.xpDelta
+                            )
+                            companion.level = restored.newLevel
+                            companion.xp = restored.newXp
+                            quest.status = snap.priorStatus
+                            quest.completionSnapshot = null
+                        } else {
+                            // Legacy completion with no snapshot: best-effort — just reopen the status.
+                            quest.status = "active"
+                        }
                     }
                 }
             }

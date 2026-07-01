@@ -15,6 +15,26 @@ external interface RawQuestRewards {
     var other: String? // freeform / custom bounty reward text
 }
 
+/**
+ * Snapshot of the exact reward deltas a quest applied when it was completed, so a later
+ * "reopen" can reverse them precisely even where completion clamped values (unrest at
+ * anarchy, commodities at storage). Null until the quest is completed; cleared on reopen.
+ * All fields are the ACTUAL applied delta (post-clamp), not the nominal reward.
+ */
+@JsPlainObject
+external interface RawQuestCompletionSnapshot {
+    var priorStatus: String
+    var rp: Int
+    var xp: Int
+    var level: Int
+    var unrest: Int
+    var food: Int
+    var lumber: Int
+    var luxuries: Int
+    var ore: Int
+    var stone: Int
+}
+
 @JsPlainObject
 external interface RawQuest {
     var id: String
@@ -33,4 +53,5 @@ external interface RawQuest {
     var source: String? // source material reference — book + page, a URL, etc.
     var createdAt: Double? // epoch millis when the quest was first created
     var updatedAt: Double? // epoch millis of the most recent edit
+    var completionSnapshot: RawQuestCompletionSnapshot? // reward deltas captured on completion, for reopen
 }

@@ -264,4 +264,54 @@ class CompanionLevelTest {
         assertEquals(3, expeditionLaunchCost("perilous"))
         assertEquals(2, expeditionLaunchCost("unknown")) // defaults to standard
     }
+
+    // ── Companion XP total-scalar + quest-completion reversal ───────────────
+
+    @Test
+    fun testTotalCompanionXp_roundTrips() {
+        assertEquals(0, toTotalCompanionXp(1, 0))
+        assertEquals(500, toTotalCompanionXp(1, 500))
+        assertEquals(1200, toTotalCompanionXp(2, 200))
+        val r = fromTotalCompanionXp(1200)
+        assertEquals(2, r.newLevel)
+        assertEquals(200, r.newXp)
+    }
+
+    @Test
+    fun testFromTotalCompanionXp_capsAtLevel20() {
+        val r = fromTotalCompanionXp(999_999)
+        assertEquals(20, r.newLevel)
+        assertEquals(0, r.newXp)
+    }
+
+    @Test
+    fun testFromTotalCompanionXp_flooredAtLevel1() {
+        val r = fromTotalCompanionXp(-500)
+        assertEquals(1, r.newLevel)
+        assertEquals(0, r.newXp)
+    }
+
+    @Test
+    fun testReverseCompanionXp_restoresAfterLevelCrossingGain() {
+        // Companion at level 2 / 900 XP gains 300 -> level 3 / 200 XP (crosses a level).
+        val after = applyCompanionXp(currentLevel = 2, currentXp = 900, gainedXp = 300)
+        assertEquals(3, after.newLevel)
+        assertEquals(200, after.newXp)
+        // Delta captured at completion (total-XP space) then reversed on reopen restores exactly.
+        val xpDelta = toTotalCompanionXp(after.newLevel, after.newXp) - toTotalCompanionXp(2, 900)
+        assertEquals(300, xpDelta)
+        val restored = fromTotalCompanionXp(toTotalCompanionXp(after.newLevel, after.newXp) - xpDelta)
+        assertEquals(2, restored.newLevel)
+        assertEquals(900, restored.newXp)
+    }
+
+    @Test
+    fun testReverseInfluence_restoresAfterClampedGain() {
+        // Influence clamps to [0,12]: +5 from 11 lands at 12 (applied delta +1), reversing to 11.
+        val before = 11
+        val after = clampInfluence(before + 5)
+        assertEquals(12, after)
+        val delta = after - before
+        assertEquals(11, clampInfluence(after - delta))
+    }
 }

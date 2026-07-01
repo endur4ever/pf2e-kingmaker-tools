@@ -26,6 +26,21 @@ external interface CompanionPersonalQuest {
     var influenceReward: Int
     /** XP granted to the companion on completion (auto-applied when companion leveling is enabled). */
     var rewards: CompanionQuestRewards?
+    /** Reward deltas captured on completion so a "reopen" can reverse them; null until completed. */
+    var completionSnapshot: PersonalQuestCompletionSnapshot?
+}
+
+/**
+ * Snapshot of the exact reward a personal-quest completion applied to its companion, so a
+ * later "reopen" can restore the companion precisely. [xpDelta] is measured in total-XP
+ * space ((level-1)*1000 + xp) so a level-up is reversed cleanly; [influenceDelta] is the
+ * post-clamp influence change.
+ */
+@JsPlainObject
+external interface PersonalQuestCompletionSnapshot {
+    var priorStatus: String
+    var influenceDelta: Int
+    var xpDelta: Int
 }
 
 /** Optional richer reward payload (currently influence is the primary auto-applied reward). */
