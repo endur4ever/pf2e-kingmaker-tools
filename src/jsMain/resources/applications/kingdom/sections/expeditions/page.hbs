@@ -41,6 +41,19 @@
                         </div>
                         {{/if}}
 
+                        {{#if this.targetFactionName}}
+                        <div class="km-expedition-field">
+                            <label>{{localizeKM "kingdom.expeditions.targetFaction"}}</label>
+                            <span class="km-expedition-faction-chip" title="{{localizeKM 'kingdom.expeditions.targetFactionHint'}}">
+                                <i class="fa-solid fa-handshake"></i> {{this.targetFactionName}}
+                                {{#if this.showFactionDelta}}
+                                <span class="km-expedition-standing-delta {{#if this.factionDeltaPositive}}km-standing-up{{else}}km-standing-down{{/if}}"
+                                      title="{{localizeKM 'kingdom.expeditions.standingDelta'}}">{{this.factionDeltaLabel}}</span>
+                                {{/if}}
+                            </span>
+                        </div>
+                        {{/if}}
+
                         {{#if this.isInProgress}}
                         <div class="km-expedition-progress">
                             <div class="km-expedition-progress-bar">

@@ -96,4 +96,43 @@ class ExpeditionsContextTest {
         val es = arrayOf(exp("r1", status = "resolved"), exp("a1", status = "inProgress"))
         assertEquals(2, pruneResolvedExpeditions(es, cap = 50).size)
     }
+
+    private fun diplomacyExp(delta: Int, rewardApplied: Boolean): RawCompanionExpedition =
+        js("{ id: 'e1', title: 'T', activityId: 'diplomacy', status: 'awaitingResolution', daysRemaining: 0, totalDays: 4, dc: 18, tier: 'standard', accruedXp: 80, accruedInfluenceDelta: 1, accruedInjuries: [], factionStandingDelta: delta, targetFactionName: 'Pitax', companionIds: ['uuid-a'], visibleToPlayers: true, rewardApplied: rewardApplied, gmNotes: '' }")
+            .unsafeCast<RawCompanionExpedition>()
+
+    @Test
+    fun `target faction is public but the pending standing delta is GM-only`() {
+        val comps = arrayOf(RawCharacter("Amiri", "uuid-a"))
+        val e = diplomacyExp(delta = 4, rewardApplied = false)
+
+        val gmRow = arrayOf(e).toExpeditionsContext(isGM = true, companions = comps).items[0]
+        assertEquals("Pitax", gmRow.targetFactionName)
+        assertEquals("+4", gmRow.factionDeltaLabel)
+        assertTrue(gmRow.factionDeltaPositive)
+        assertTrue(gmRow.showFactionDelta) // GM previews the pending delta
+
+        val playerRow = arrayOf(e).toExpeditionsContext(isGM = false, companions = comps).items[0]
+        assertEquals("Pitax", playerRow.targetFactionName) // the target itself is public knowledge
+        assertFalse(playerRow.showFactionDelta) // outcome stays hidden until the GM applies it
+    }
+
+    @Test
+    fun `standing delta becomes player-visible once the reward is applied`() {
+        val comps = arrayOf(RawCharacter("Amiri", "uuid-a"))
+        val e = diplomacyExp(delta = -4, rewardApplied = true)
+
+        val playerRow = arrayOf(e).toExpeditionsContext(isGM = false, companions = comps).items[0]
+        assertTrue(playerRow.showFactionDelta)
+        assertEquals("-4", playerRow.factionDeltaLabel)
+        assertFalse(playerRow.factionDeltaPositive)
+    }
+
+    @Test
+    fun `zero standing delta shows no badge even for the GM`() {
+        val comps = arrayOf(RawCharacter("Amiri", "uuid-a"))
+        val e = diplomacyExp(delta = 0, rewardApplied = true)
+        val gmRow = arrayOf(e).toExpeditionsContext(isGM = true, companions = comps).items[0]
+        assertFalse(gmRow.showFactionDelta)
+    }
 }

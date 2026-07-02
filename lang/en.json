@@ -1090,6 +1090,7 @@
         "destinationSettlements": "Settlements",
         "destinationHexes": "Claimed Hexes",
         "destinationHubs": "Faction Trade Hubs",
+        "standingDelta": "Faction standing change from this expedition",
         "tooMany": "Too many active expeditions (max 3). Resolve or cancel one before launching another.",
         "cancelConfirm": "Cancel this expedition? The companions will return immediately with no rewards.",
         "legendaryReward": "Legendary Reward",
@@ -6940,6 +6941,13 @@
       "turnLabel": "Turn",
       "dismiss": "Dismiss",
       "clearAll": "Clear All"
+    },
+    "turnWizard": {
+      "checklist": {
+        "expeditionsAwaitingResolution": "Expeditions awaiting resolution",
+        "warThreatsMaxEscalation": "War threats at max escalation",
+        "companionsInjured": "Companions injured/unavailable"
+      }
     }
   }
 }
