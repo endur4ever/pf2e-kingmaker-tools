@@ -1,5 +1,7 @@
 package at.posselt.pfrpg2e.companion
 
+import at.posselt.pfrpg2e.data.checks.getLevelBasedDC
+
 /**
  * Companion level/XP subsystem.
  *
@@ -248,3 +250,19 @@ fun expeditionLaunchCost(tier: String): Int = when (tier) {
     "perilous" -> 3
     else -> 2 // standard
 }
+
+/** Tier modifier on the level-based expedition DC (design doc 3.5: routine −2 / standard 0 / perilous +4). */
+fun expeditionTierDcModifier(tier: String): Int = when (tier) {
+    "routine" -> -2
+    "perilous" -> 4
+    else -> 0 // standard
+}
+
+/**
+ * Expedition check DC (design doc 3.5): the level-based DC of the STRONGEST participant
+ * (14 + L + L/3, the standard PF2e level-DC curve) plus the tier modifier. Tracking the
+ * companion's own level keeps success rates stable across a career — a hardcoded DC lets
+ * a high-level companion auto-crit routine work forever, hollowing out the leveling loop.
+ */
+fun expeditionDc(maxParticipantLevel: Int, tier: String): Int =
+    getLevelBasedDC(clampCompanionLevel(maxParticipantLevel)) + expeditionTierDcModifier(tier)

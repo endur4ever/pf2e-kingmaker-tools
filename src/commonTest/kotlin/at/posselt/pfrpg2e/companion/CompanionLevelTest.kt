@@ -265,6 +265,34 @@ class CompanionLevelTest {
         assertEquals(2, expeditionLaunchCost("unknown")) // defaults to standard
     }
 
+    // ── Level-based expedition DC (design doc 3.5) ──────────────────────────
+
+    @Test
+    fun testExpeditionTierDcModifier() {
+        assertEquals(-2, expeditionTierDcModifier("routine"))
+        assertEquals(0, expeditionTierDcModifier("standard"))
+        assertEquals(4, expeditionTierDcModifier("perilous"))
+        assertEquals(0, expeditionTierDcModifier("unknown")) // defaults to standard
+    }
+
+    @Test
+    fun testExpeditionDc_tracksStrongestParticipantLevel() {
+        // 14 + L + L/3 (PF2e level-DC curve) + tier mod.
+        assertEquals(15, expeditionDc(1, "standard"))  // 14 + 1 + 0
+        assertEquals(24, expeditionDc(8, "standard"))  // 14 + 8 + 2
+        assertEquals(40, expeditionDc(20, "standard")) // 14 + 20 + 6
+        assertEquals(13, expeditionDc(1, "routine"))   // 15 - 2
+        assertEquals(19, expeditionDc(1, "perilous"))  // 15 + 4
+        assertEquals(28, expeditionDc(8, "perilous"))  // 24 + 4
+    }
+
+    @Test
+    fun testExpeditionDc_clampsLevelIntoValidRange() {
+        // Below 1 clamps to level 1; above 20 clamps to level 20.
+        assertEquals(expeditionDc(1, "standard"), expeditionDc(0, "standard"))
+        assertEquals(expeditionDc(20, "standard"), expeditionDc(99, "standard"))
+    }
+
     // ── Companion XP total-scalar + quest-completion reversal ───────────────
 
     @Test

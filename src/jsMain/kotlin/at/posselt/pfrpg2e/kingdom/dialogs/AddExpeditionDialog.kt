@@ -5,6 +5,7 @@ import at.posselt.pfrpg2e.app.forms.SimpleApp
 import at.posselt.pfrpg2e.companion.CompanionPersonalQuest
 import at.posselt.pfrpg2e.expedition.ExpeditionActivityData
 import at.posselt.pfrpg2e.expedition.getExpeditionActivities
+import at.posselt.pfrpg2e.companion.expeditionDc
 import at.posselt.pfrpg2e.companion.expeditionTotalDays
 import at.posselt.pfrpg2e.kingdom.ExpeditionDestinationOption
 import at.posselt.pfrpg2e.kingdom.ExpeditionDestinationOptions
@@ -103,12 +104,6 @@ class AddExpeditionDialog(
                     travelDaysOneWay = expeditionTravelDaysTo(destinations.originHexKeys, destinationHexKey),
                 )
 
-                val dc = when (tier) {
-                    "routine" -> 14
-                    "perilous" -> 22
-                    else -> 18
-                }
-
                 val companionCheckboxes = element.querySelectorAll("input[name='expeditionCompanions']:checked")
                 val selectedCompanionIds = mutableListOf<String>()
                 for (i in 0 until companionCheckboxes.length) {
@@ -117,6 +112,14 @@ class AddExpeditionDialog(
                 }
 
                 if (selectedCompanionIds.isEmpty()) return@buildPromise
+
+                // Level-based DC (design doc 3.5): the strongest participant's level-DC + tier
+                // modifier, resolved once at launch and stored on the record. Replaces the old
+                // tier-flat 14/18/22, which let a high-level companion auto-crit forever.
+                val maxParticipantLevel = selectedCompanionIds
+                    .mapNotNull { id -> companions.find { (it.actorUuid ?: it.name) == id }?.level }
+                    .maxOrNull() ?: 1
+                val dc = expeditionDc(maxParticipantLevel, tier)
 
                 val gmNotes = element.querySelector("textarea[name='expeditionNotes']")
                     ?.let { it as? org.w3c.dom.HTMLTextAreaElement }
