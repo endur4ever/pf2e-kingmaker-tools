@@ -5,6 +5,7 @@ import at.posselt.pfrpg2e.settings.Pfrpg2eKingdomCampingWeatherSettings
 import at.posselt.pfrpg2e.app.HandlebarsRenderContext
 import at.posselt.pfrpg2e.app.forms.SimpleApp
 import at.posselt.pfrpg2e.kingdom.KingdomActor
+import at.posselt.pfrpg2e.kingdom.buildExpeditionDestinationOptions
 import at.posselt.pfrpg2e.kingdom.logExpeditionLaunched
 import at.posselt.pfrpg2e.kingdom.data.RawCharacter
 import at.posselt.pfrpg2e.kingdom.data.RawCompanionExpedition
@@ -239,6 +240,7 @@ class CompanionProfileDialog(
                         preselectedId = key,
                         quests = kingdom.companionPersonalQuests ?: emptyArray(),
                         factions = kingdom.groups,
+                        destinations = buildExpeditionDestinationOptions(kingdom),
                     ) { expedition ->
                         val current = kingdomActor.getKingdom() ?: return@AddExpeditionDialog
                         current.companionExpeditions = (current.companionExpeditions ?: emptyArray()) + expedition

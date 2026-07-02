@@ -5,6 +5,10 @@ import at.posselt.pfrpg2e.app.forms.SimpleApp
 import at.posselt.pfrpg2e.companion.CompanionPersonalQuest
 import at.posselt.pfrpg2e.expedition.ExpeditionActivityData
 import at.posselt.pfrpg2e.expedition.getExpeditionActivities
+import at.posselt.pfrpg2e.companion.expeditionTotalDays
+import at.posselt.pfrpg2e.kingdom.ExpeditionDestinationOption
+import at.posselt.pfrpg2e.kingdom.ExpeditionDestinationOptions
+import at.posselt.pfrpg2e.kingdom.expeditionTravelDaysTo
 import at.posselt.pfrpg2e.kingdom.data.RawCharacter
 import at.posselt.pfrpg2e.kingdom.data.RawCompanionExpedition
 import at.posselt.pfrpg2e.kingdom.data.RawGroup
@@ -46,6 +50,10 @@ external interface AddExpeditionContext : HandlebarsRenderContext {
     val companions: Array<AddExpeditionCompanionContext>
     val quests: Array<AddExpeditionQuestContext>
     val factions: Array<AddExpeditionFactionContext>
+    val destinationSettlements: Array<ExpeditionDestinationOption>
+    val destinationHexes: Array<ExpeditionDestinationOption>
+    val destinationHubs: Array<ExpeditionDestinationOption>
+    val hasDestinations: Boolean
     val selectedActivityId: String
     val selectedTier: String
     val selectedCompanionIds: Array<String>
@@ -58,6 +66,7 @@ class AddExpeditionDialog(
     private val preselectedId: String? = null,
     private val quests: Array<CompanionPersonalQuest> = emptyArray(),
     private val factions: Array<RawGroup> = emptyArray(),
+    private val destinations: ExpeditionDestinationOptions = ExpeditionDestinationOptions.empty(),
     private val onAdd: suspend (RawCompanionExpedition) -> Unit,
 ) : SimpleApp<AddExpeditionContext>(
     title = t("kingdom.expeditions.addExpedition"),
@@ -78,11 +87,21 @@ class AddExpeditionDialog(
                     ?.let { it as? org.w3c.dom.HTMLSelectElement }
                     ?.value ?: "standard"
 
-                val duration = when (tier) {
+                val destinationHexKey = element.querySelector("select[name='expeditionDestination']")
+                    ?.let { it as? org.w3c.dom.HTMLSelectElement }
+                    ?.value?.takeIf { it.isNotBlank() }
+
+                val tierBaseDays = when (tier) {
                     "routine" -> 2
                     "perilous" -> 5
                     else -> 3
                 }
+                // Distance-derived duration: on-site tier base + round-trip travel from the
+                // nearest settlement. No destination (or unresolvable region data) => tier-flat.
+                val duration = expeditionTotalDays(
+                    tierBaseDays = tierBaseDays,
+                    travelDaysOneWay = expeditionTravelDaysTo(destinations.originHexKeys, destinationHexKey),
+                )
 
                 val dc = when (tier) {
                     "routine" -> 14
@@ -111,9 +130,16 @@ class AddExpeditionDialog(
                     ?.let { it as? org.w3c.dom.HTMLSelectElement }
                     ?.value?.takeIf { it.isNotBlank() }
 
-                val targetFactionName = element.querySelector("select[name='expeditionFaction']")
+                val pickedFactionName = element.querySelector("select[name='expeditionFaction']")
                     ?.let { it as? org.w3c.dom.HTMLSelectElement }
                     ?.value?.takeIf { it.isNotBlank() }
+
+                // Auto-target: a diplomacy mission sent to a faction's trade-hub hex targets that
+                // faction unless the GM picked one explicitly (destination-derived convenience).
+                val targetFactionName = pickedFactionName
+                    ?: destinationHexKey?.let { dest ->
+                        if (activityId == "diplomacy") factions.find { it.hexKey == dest }?.name else null
+                    }
 
                 // A diplomacy expedition with no target faction can never move standing — block the
                 // launch with a clear message rather than silently producing an inert expedition.
@@ -134,6 +160,8 @@ class AddExpeditionDialog(
                     createdAt = Date().toISOString(),
                     targetQuestId = targetQuestId,
                     targetFactionName = targetFactionName,
+                    destinationHexKey = destinationHexKey,
+                    destinationLabel = destinationHexKey?.let { destinations.labelFor(it) },
                 ).also {
                     it.gmNotes = gmNotes
                 }
@@ -182,6 +210,10 @@ class AddExpeditionDialog(
             companions = companionContexts,
             quests = questContexts,
             factions = factionContexts,
+            destinationSettlements = destinations.settlements,
+            destinationHexes = destinations.hexes,
+            destinationHubs = destinations.hubs,
+            hasDestinations = !destinations.isEmpty(),
             selectedActivityId = "",
             selectedTier = "standard",
             selectedCompanionIds = if (preselectedId != null) arrayOf(preselectedId) else emptyArray(),

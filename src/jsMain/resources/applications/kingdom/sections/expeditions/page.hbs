@@ -34,6 +34,13 @@
                             <span>{{this.companionNames}}</span>
                         </div>
 
+                        {{#if this.destinationLabel}}
+                        <div class="km-expedition-field">
+                            <label>{{localizeKM "kingdom.expeditions.destination"}}</label>
+                            <span><i class="fa-solid fa-location-dot"></i> {{this.destinationLabel}}</span>
+                        </div>
+                        {{/if}}
+
                         {{#if this.isInProgress}}
                         <div class="km-expedition-progress">
                             <div class="km-expedition-progress-bar">

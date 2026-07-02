@@ -186,6 +186,7 @@ import at.posselt.pfrpg2e.kingdom.sheet.contexts.toRosterContext
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.toExpeditionsContext
 import at.posselt.pfrpg2e.companion.expeditionLaunchCost
 import at.posselt.pfrpg2e.kingdom.applyExpeditionRewardToKingdom
+import at.posselt.pfrpg2e.kingdom.buildExpeditionDestinationOptions
 import at.posselt.pfrpg2e.kingdom.logExpeditionLaunched
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.MAX_CONCURRENT_EXPEDITIONS
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.activeExpeditionCount
@@ -1050,6 +1051,7 @@ class KingdomSheet(
                     companions = comps,
                     quests = kingdom.companionPersonalQuests ?: emptyArray(),
                     factions = kingdom.groups,
+                    destinations = buildExpeditionDestinationOptions(kingdom),
                 ) { expedition ->
                     val current = getKingdom()
                     current.companionExpeditions = (current.companionExpeditions ?: emptyArray()) + expedition

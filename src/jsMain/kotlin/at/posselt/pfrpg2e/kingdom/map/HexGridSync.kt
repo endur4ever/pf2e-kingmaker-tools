@@ -103,6 +103,7 @@ fun registerHexGridSync(game: Game) {
             syncSettlementMarkers(game)
             syncZoneLabels(game)
             syncCaravanRoutes(game)
+            syncExpeditionMarkers(game)
         }
     }
 
@@ -111,6 +112,7 @@ fun registerHexGridSync(game: Game) {
             buildPromise {
                 syncSettlementMarkers(game)
                 syncCaravanRoutes(game)
+                syncExpeditionMarkers(game)
             }
         }
     }
@@ -119,6 +121,7 @@ fun registerHexGridSync(game: Game) {
         buildPromise {
             syncSettlementMarkers(game)
             syncCaravanRoutes(game)
+            syncExpeditionMarkers(game)
         }
     }
 
@@ -128,6 +131,7 @@ fun registerHexGridSync(game: Game) {
             syncSettlementMarkers(game)
             syncZoneLabels(game)
             syncCaravanRoutes(game)
+            syncExpeditionMarkers(game)
         }
     }
 }
@@ -868,6 +872,79 @@ suspend fun syncCaravanRoutes(game: Game) {
         segmentDrawings.add(labelDrawing)
 
         activeScene.createDrawingsResilient(segmentDrawings.toTypedArray())
+    }
+}
+
+const val EXPEDITION_MARKER_DRAWING_TYPE = "expeditionMarker"
+
+/**
+ * Draw a flag marker at the destination hex of every in-flight companion expedition
+ * (inProgress / awaitingResolution with a destination set). Recreate-all pattern like
+ * [syncCaravanRoutes]: delete our markers, then redraw from current kingdom state.
+ * Markers for expeditions hidden from players are created with Foundry's native
+ * `hidden` field, so only the GM sees them. The realmTile `hexKey` flag carries the
+ * EXPEDITION id (caravan precedent), not the hex key.
+ */
+suspend fun syncExpeditionMarkers(game: Game) {
+    if (!game.settings.pfrpg2eKingdomCampingWeather.getHexMapEnabled()) return
+    val activeScene = game.scenes.active ?: return
+    if (!activeScene.grid.isHexagonal) return
+
+    val kingdomActor = game.getKingdomActors().firstOrNull() ?: return
+    val kingdom = kingdomActor.getKingdom() ?: return
+
+    val ours = activeScene.drawings.contents.filter {
+        val data = it.getRealmTileData()
+        data?.type == EXPEDITION_MARKER_DRAWING_TYPE && data.kingdomActorUuid == kingdomActor.uuid
+    }
+    if (ours.isNotEmpty()) {
+        activeScene.deleteDrawingsResilient(ours.map { it._id }.toTypedArray())
+    }
+
+    val inFlight = (kingdom.companionExpeditions ?: emptyArray()).filter {
+        (it.status == "inProgress" || it.status == "awaitingResolution") && it.destinationHexKey != null
+    }
+    if (inFlight.isEmpty()) return
+
+    for (expedition in inFlight) {
+        val intKey = expedition.destinationHexKey?.toIntOrNull() ?: continue
+        val hex = runCatching { kingmaker.region.hexes.find { it.key == intKey } }.getOrNull() ?: continue
+        val point = activeScene.grid.getCenterPoint(hex.offset)
+
+        val text = "⚑ ${expedition.title}"
+        val boxWidth = 260
+        val boxHeight = 36
+        val drawingData = recordOf(
+            "shape" to recordOf(
+                "type" to "r",
+                "width" to boxWidth,
+                "height" to boxHeight,
+            ),
+            "width" to boxWidth,
+            "height" to boxHeight,
+            "locked" to true,
+            // Below hex center so it doesn't sit on top of a settlement name label.
+            "x" to point.x - boxWidth / 2,
+            "y" to point.y + 20,
+            "text" to text,
+            "textAlpha" to 1,
+            "fontSize" to 20,
+            "textColor" to "#f39c12",
+            "strokeAlpha" to 0,
+            "fillAlpha" to 0,
+            "hidden" to !expedition.visibleToPlayers,
+            "flags" to recordOf(
+                "pf2e-kingmaker-tools" to recordOf(
+                    "realmTile" to recordOf(
+                        "type" to EXPEDITION_MARKER_DRAWING_TYPE,
+                        "kingdomActorUuid" to kingdomActor.uuid,
+                        "hexKey" to expedition.id,
+                    )
+                )
+            ),
+        ).unsafeCast<com.foundryvtt.core.AnyObject>()
+
+        activeScene.createDrawingsResilient(arrayOf(drawingData))
     }
 }
 

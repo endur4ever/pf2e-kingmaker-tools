@@ -58,6 +58,37 @@
     </div>
     {{/if}}
 
+    {{#if hasDestinations}}
+    <div class="km-dialog-section">
+        <label for="expeditionDestination">{{localizeKM "kingdom.expeditions.destination"}}</label>
+        <select name="expeditionDestination" id="expeditionDestination">
+            <option value="">{{localizeKM "kingdom.expeditions.destinationNone"}}</option>
+            {{#if destinationSettlements.length}}
+            <optgroup label="{{localizeKM 'kingdom.expeditions.destinationSettlements'}}">
+                {{#each destinationSettlements}}
+                <option value="{{key}}">{{label}}</option>
+                {{/each}}
+            </optgroup>
+            {{/if}}
+            {{#if destinationHubs.length}}
+            <optgroup label="{{localizeKM 'kingdom.expeditions.destinationHubs'}}">
+                {{#each destinationHubs}}
+                <option value="{{key}}">{{label}}</option>
+                {{/each}}
+            </optgroup>
+            {{/if}}
+            {{#if destinationHexes.length}}
+            <optgroup label="{{localizeKM 'kingdom.expeditions.destinationHexes'}}">
+                {{#each destinationHexes}}
+                <option value="{{key}}">{{label}}</option>
+                {{/each}}
+            </optgroup>
+            {{/if}}
+        </select>
+        <p class="km-hint">{{localizeKM "kingdom.expeditions.destinationHint"}}</p>
+    </div>
+    {{/if}}
+
     <div class="km-dialog-section">
         <label for="expeditionNotes">{{localizeKM "kingdom.expeditions.notes"}}</label>
         <textarea name="expeditionNotes" rows="3" placeholder="{{localizeKM 'kingdom.expeditions.notesPlaceholder'}}">{{gmNotes}}</textarea>

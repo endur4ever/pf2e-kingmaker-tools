@@ -48,6 +48,10 @@ external interface RawCompanionExpedition {
     var targetQuestId: String?
     /** The faction (RawGroup name) a "diplomacy" expedition targets; standing moves on resolution (null => none). */
     var targetFactionName: String?
+    /** Realm-map hex this expedition travels to (null => abstract/no destination). */
+    var destinationHexKey: String?
+    /** Display label for the destination captured at launch (settlement/faction/hex name) — rename-proof snapshot. */
+    var destinationLabel: String?
     /** GM notes for narrative integration. */
     var gmNotes: String
     /** Whether this expedition is visible to players (read-only board). */
@@ -73,6 +77,8 @@ fun createRawCompanionExpedition(
     createdAt: String? = null,
     targetQuestId: String? = null,
     targetFactionName: String? = null,
+    destinationHexKey: String? = null,
+    destinationLabel: String? = null,
 ): RawCompanionExpedition {
     val obj = js("{ }").unsafeCast<RawCompanionExpedition>()
     obj.id = id
@@ -93,6 +99,8 @@ fun createRawCompanionExpedition(
     obj.spawnedQuestId = null
     obj.targetQuestId = targetQuestId
     obj.targetFactionName = targetFactionName
+    obj.destinationHexKey = destinationHexKey
+    obj.destinationLabel = destinationLabel
     obj.gmNotes = ""
     obj.visibleToPlayers = visibleToPlayers
     obj.rewardApplied = false

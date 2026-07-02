@@ -23,6 +23,7 @@ external interface ExpeditionRowContext {
     val accruedInjuries: Array<String>
     val lootTier: String?
     val factionStandingDelta: Int
+    val destinationLabel: String?
     val companionIds: Array<String>
     val companionNames: String
     val visibleToPlayers: Boolean
@@ -89,6 +90,8 @@ fun Array<RawCompanionExpedition>.toExpeditionsContext(
                 accruedInjuries = if (isGM) exp.accruedInjuries else emptyArray(),
                 lootTier = exp.lootTier,
                 factionStandingDelta = exp.factionStandingDelta,
+                // Destination is public knowledge — the mission was launched to a named place.
+                destinationLabel = exp.destinationLabel,
                 companionIds = exp.companionIds,
                 companionNames = exp.companionIds
                     .mapNotNull { companionNameMap[it] }
