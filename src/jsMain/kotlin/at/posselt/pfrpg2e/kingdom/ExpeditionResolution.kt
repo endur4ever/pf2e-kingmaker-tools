@@ -16,10 +16,9 @@ import at.posselt.pfrpg2e.kingdom.data.RawCharacter
 import at.posselt.pfrpg2e.kingdom.data.RawCompanionExpedition
 import at.posselt.pfrpg2e.kingdom.data.RawFactionStandingEntry
 import at.posselt.pfrpg2e.companion.accruedExpeditionXp
-import at.posselt.pfrpg2e.companion.applyCompanionXp
+import at.posselt.pfrpg2e.companion.applyExpeditionParticipantReward
 import at.posselt.pfrpg2e.companion.applyPersonalQuestReward
 import at.posselt.pfrpg2e.companion.canApplyExpeditionReward
-import at.posselt.pfrpg2e.companion.clampInfluence
 import at.posselt.pfrpg2e.companion.lootTierToResourcePoints
 import at.posselt.pfrpg2e.companion.personalQuestCompletionSnapshot
 import at.posselt.pfrpg2e.companion.selectRewardQuest
@@ -44,6 +43,10 @@ import kotlinx.coroutines.await
  * completion, accrues the result onto the expedition record (XP, influence,
  * loot, injuries, degree), sets status to `awaitingResolution`,
  * and persists via [setKingdom].
+ *
+ * Multi-companion expeditions: the LEAD companion (first of `companionIds`) makes the
+ * check on the party's behalf; every participant then shares the accrued reward when
+ * the GM applies it (see [applyExpeditionRewardToKingdom]'s participant loop).
  *
  * This function does NOT mutate the companion's level / XP / conditions —
  * that happens only when the GM clicks the offer button (next task).
@@ -263,26 +266,30 @@ suspend fun applyExpeditionRewardToKingdom(
 ): Boolean {
     if (!canApplyExpeditionReward(expedition.rewardApplied, expedition.status)) return false
 
+    // Lead companion (first id): rolls the check and owns any personal-quest reward below.
     val companionId = expedition.companionIds.firstOrNull()
     val levelingEnabled = Pfrpg2eKingdomCampingWeatherSettings.getEnableCompanionLeveling()
 
-    if (companionId != null) {
-        val companion = kingdom.companions?.find { (it.actorUuid ?: it.name) == companionId }
-        if (companion != null) {
-            val levelResult = applyCompanionXp(
-                currentLevel = companion.level,
-                currentXp = companion.xp,
-                gainedXp = accruedExpeditionXp(expedition.accruedXp, levelingEnabled),
-            )
-            if (levelingEnabled) {
-                companion.level = levelResult.newLevel
-                companion.xp = levelResult.newXp
-            }
-            companion.expeditionStatus = "available"
-            if (expedition.accruedInfluenceDelta != 0) {
-                companion.influence = clampInfluence(companion.influence + expedition.accruedInfluenceDelta)
-            }
+    // Reward + status restore for EVERY participant, not just the lead — the expedition
+    // rolled once as a party, so all members share the accrued XP/influence. Restoring
+    // expeditionStatus here is also what un-strands companions: a missed participant would
+    // stay "onExpedition" forever and be locked out of all future launches.
+    for (participantId in expedition.companionIds) {
+        val companion = kingdom.companions?.find { (it.actorUuid ?: it.name) == participantId } ?: continue
+        val outcome = applyExpeditionParticipantReward(
+            currentLevel = companion.level,
+            currentXp = companion.xp,
+            currentInfluence = companion.influence,
+            accruedXp = expedition.accruedXp,
+            accruedInfluenceDelta = expedition.accruedInfluenceDelta,
+            levelingEnabled = levelingEnabled,
+        )
+        if (levelingEnabled) {
+            companion.level = outcome.levelResult.newLevel
+            companion.xp = outcome.levelResult.newXp
         }
+        companion.influence = outcome.newInfluence
+        companion.expeditionStatus = "available"
     }
 
     // Personal-quest completion + reward.

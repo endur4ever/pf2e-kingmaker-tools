@@ -251,6 +251,40 @@ fun expeditionLaunchCost(tier: String): Int = when (tier) {
     else -> 2 // standard
 }
 
+/** Outcome of applying an expedition's accrued reward to ONE participant. */
+data class ExpeditionParticipantOutcome(
+    val levelResult: LevelUpResult,
+    val newInfluence: Int,
+)
+
+/**
+ * Apply an expedition's accrued XP + influence to a single participant.
+ *
+ * The expedition rolls ONCE as a party (lead companion's check), so every participant
+ * receives the SAME accrued reward — the apply site loops this helper over all of
+ * `expedition.companionIds`. XP honors the leveling setting via [accruedExpeditionXp];
+ * influence is clamped. Pure and unit-tested.
+ */
+fun applyExpeditionParticipantReward(
+    currentLevel: Int,
+    currentXp: Int,
+    currentInfluence: Int,
+    accruedXp: Int,
+    accruedInfluenceDelta: Int,
+    levelingEnabled: Boolean,
+): ExpeditionParticipantOutcome = ExpeditionParticipantOutcome(
+    levelResult = applyCompanionXp(
+        currentLevel = currentLevel,
+        currentXp = currentXp,
+        gainedXp = accruedExpeditionXp(accruedXp, levelingEnabled),
+    ),
+    newInfluence = if (accruedInfluenceDelta != 0) {
+        clampInfluence(currentInfluence + accruedInfluenceDelta)
+    } else {
+        currentInfluence
+    },
+)
+
 /** Tier modifier on the level-based expedition DC (design doc 3.5: routine −2 / standard 0 / perilous +4). */
 fun expeditionTierDcModifier(tier: String): Int = when (tier) {
     "routine" -> -2

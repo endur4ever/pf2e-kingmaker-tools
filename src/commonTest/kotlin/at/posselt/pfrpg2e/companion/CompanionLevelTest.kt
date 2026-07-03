@@ -265,6 +265,50 @@ class CompanionLevelTest {
         assertEquals(2, expeditionLaunchCost("unknown")) // defaults to standard
     }
 
+    // ── Per-participant expedition reward (multi-companion fix) ─────────────
+
+    @Test
+    fun testParticipantReward_everyParticipantSharesTheSameAccruedReward() {
+        // Two companions on one expedition: the same accrued 300 XP / +1 influence
+        // applies to each independently — including a level-crossing for the one at 900 XP.
+        val nearLevel = applyExpeditionParticipantReward(
+            currentLevel = 2, currentXp = 900, currentInfluence = 5,
+            accruedXp = 300, accruedInfluenceDelta = 1, levelingEnabled = true,
+        )
+        assertEquals(3, nearLevel.levelResult.newLevel)
+        assertEquals(200, nearLevel.levelResult.newXp)
+        assertEquals(6, nearLevel.newInfluence)
+
+        val freshRecruit = applyExpeditionParticipantReward(
+            currentLevel = 1, currentXp = 0, currentInfluence = 12,
+            accruedXp = 300, accruedInfluenceDelta = 1, levelingEnabled = true,
+        )
+        assertEquals(1, freshRecruit.levelResult.newLevel)
+        assertEquals(300, freshRecruit.levelResult.newXp)
+        assertEquals(12, freshRecruit.newInfluence) // clamped at the 0..12 cap
+    }
+
+    @Test
+    fun testParticipantReward_levelingDisabledStillAppliesInfluence() {
+        val outcome = applyExpeditionParticipantReward(
+            currentLevel = 4, currentXp = 500, currentInfluence = 3,
+            accruedXp = 300, accruedInfluenceDelta = 1, levelingEnabled = false,
+        )
+        assertEquals(4, outcome.levelResult.newLevel)  // XP zeroed by the setting
+        assertEquals(500, outcome.levelResult.newXp)
+        assertEquals(4, outcome.newInfluence)          // influence unaffected by the setting
+    }
+
+    @Test
+    fun testParticipantReward_zeroDeltaLeavesInfluenceUntouched() {
+        val outcome = applyExpeditionParticipantReward(
+            currentLevel = 1, currentXp = 0, currentInfluence = 7,
+            accruedXp = 30, accruedInfluenceDelta = 0, levelingEnabled = true,
+        )
+        assertEquals(7, outcome.newInfluence)
+        assertEquals(30, outcome.levelResult.newXp)
+    }
+
     // ── Level-based expedition DC (design doc 3.5) ──────────────────────────
 
     @Test

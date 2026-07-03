@@ -247,6 +247,18 @@ private val buttons = listOf(
             companion.expeditionStatus = "unavailable"
             companion.campAvailable = false
 
+            // Applying injury consumes the reward path (status=resolved + rewardApplied below),
+            // so applyExpeditionRewardToKingdom will never run for this expedition — release the
+            // OTHER participants here or they'd stay "onExpedition" forever, locked out of all
+            // future launches. Only the injured companion goes into downtime.
+            expedition.companionIds
+                .filter { it != companionId }
+                .forEach { participantId ->
+                    kingdom.companions
+                        ?.find { (it.actorUuid ?: it.name) == participantId }
+                        ?.expeditionStatus = "available"
+                }
+
             // Mark expedition as resolved since injury was applied.
             expedition.status = "resolved"
             expedition.rewardApplied = true
