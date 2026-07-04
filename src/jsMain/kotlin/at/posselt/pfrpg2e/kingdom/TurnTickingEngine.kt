@@ -26,6 +26,9 @@ import at.posselt.pfrpg2e.kingdom.data.RawWarThreat
 /** Persisted [RawArmyBattle.status] for battles archived at end of turn (not part of [BattleStatus]). */
 const val ARCHIVED_BATTLE_STATUS = "archived"
 
+/** Default number of turns to extend a quest deadline when GM clicks [Extend]. */
+const val DEFAULT_QUEST_EXTEND_TURNS = 2
+
 /**
  * Represents the diff of a single tick operation for auditing/logging.
  */
@@ -65,6 +68,7 @@ data class TickResult(
 	val factionStandingDrift: Boolean = false,
 	val warThreatOffers: Int = 0,
 	val diplomacyQuestOffers: Int = 0,
+	val questDeadlineReached: List<String> = emptyList(),
 )
 
 /**
@@ -266,7 +270,7 @@ object TurnTickingEngine {
 		val clockResult = CampaignClockManager.tickAll(campaignClocks)
 
 		// 10) Tick quest timers
-		val (updatedQuests, questChanges) = tickQuests(campaignQuests, kingdomLevel)
+		val (updatedQuests, deadlineReached, questChanges) = tickQuests(campaignQuests, kingdomLevel)
 		changes += questChanges
 
 		// 11) Tick war threats (roadmap #12): ETA countdown, escalation, expiry/soft-pause
@@ -366,64 +370,68 @@ object TurnTickingEngine {
 		}
 
 		return TickResult(
-			supernaturalSolutions = 0,
-			creativeSolutions = 0,
-			fame = fameAfterAutoGain,
-			resourcePoints = newResourcePoints,
-			resourceDice = newResourceDice,
-			consumption = newConsumption,
-			commodities = newCommodities,
-			councilCooldowns = newCooldowns,
-			modifiers = newModifiers,
-			changes = changes,
-			clockEvents = clockResult.events,
-			updatedClocks = clockResult.updatedClocks,
-			totalUnrestChange = clockResult.totalUnrestChange,
-			campaignQuests = updatedQuests,
-			warThreats = tickedThreats,
-			armyDeployments = armyDeployments,
-			warPressure = newWarPressure,
-			xpAwarded = xpAwarded,
-			bonusResourceDice = 0,
-			activeBattles = archivedBattles,
-			groups = driftedGroups,
-			factionStandingDrift = factionStandingDriftPerTurn != 0,
-			warThreatOffers = warThreatOffers,
-			diplomacyQuestOffers = diplomacyQuestOffers,
-		)
+				supernaturalSolutions = 0,
+				creativeSolutions = 0,
+				fame = fameAfterAutoGain,
+				resourcePoints = newResourcePoints,
+				resourceDice = newResourceDice,
+				consumption = newConsumption,
+				commodities = newCommodities,
+				councilCooldowns = newCooldowns,
+				modifiers = newModifiers,
+				changes = changes,
+				clockEvents = clockResult.events,
+				updatedClocks = clockResult.updatedClocks,
+				totalUnrestChange = clockResult.totalUnrestChange,
+				campaignQuests = updatedQuests,
+				warThreats = tickedThreats,
+				armyDeployments = armyDeployments,
+				warPressure = newWarPressure,
+				xpAwarded = xpAwarded,
+				bonusResourceDice = 0,
+				activeBattles = archivedBattles,
+				groups = driftedGroups,
+				factionStandingDrift = factionStandingDriftPerTurn != 0,
+				warThreatOffers = warThreatOffers,
+				diplomacyQuestOffers = diplomacyQuestOffers,
+				questDeadlineReached = deadlineReached,
+			)
 	}
 
 	/**
 	 * Advance quest timers for generated quests.
-	 * Decrements turnsRemaining on ACTIVE generated quests; marks as FAILED at 0.
-	 * Returns the updated quest array and any TickChange entries produced.
+	 * Decrements turnsRemaining on ACTIVE generated quests; marks as deadlineReached at 0.
+	 * Returns the updated quest array, quest IDs that hit 0 this tick, and any TickChange entries produced.
 	 */
 	fun tickQuests(
 		quests: Array<dynamic>,
 		kingdomLevel: Int,
-	): Pair<Array<dynamic>, List<TickChange>> {
+	): Triple<Array<dynamic>, List<String>, List<TickChange>> {
 		val changes = mutableListOf<TickChange>()
+		val deadlineReached = mutableListOf<String>()
 		val updated = quests.map { quest ->
 			val status = quest.status as? String
 			val generated = quest.generatedByEvent as? Boolean ?: false
 			val turns = quest.turnsRemaining as? Int
+			val questId = quest.id as? String ?: ""
 			if (status == "active" && generated && turns != null && turns > 0) {
 				val newTurns = turns - 1
 				if (newTurns <= 0) {
-					changes += TickChange("quest", "status", "active", "failed")
+					// Quest deadline reached — stays active at 0 turns, offer will be posted by GM
 					changes += TickChange("quest", "turnsRemaining", turns, 0)
-					quest.asDynamic().status = "failed"
-					quest.asDynamic().turnsRemaining = 0
+					quest.turnsRemaining = 0
+					// Track that this quest hit 0 this tick (for GM offer)
+					deadlineReached.add(questId)
 					quest
 				} else {
 					changes += TickChange("quest", "turnsRemaining", turns, newTurns)
-					quest.asDynamic().turnsRemaining = newTurns
+					quest.turnsRemaining = newTurns
 					quest
 				}
 			} else {
 				quest
 			}
 		}.toTypedArray()
-		return Pair(updated, changes)
+		return Triple(updated, deadlineReached, changes)
 	}
 }

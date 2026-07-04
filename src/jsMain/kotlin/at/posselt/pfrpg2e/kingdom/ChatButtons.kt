@@ -371,7 +371,34 @@ private val buttons = listOf(
                 }
             }.launch()
         }
-    }
+    },
+    ChatButton("km-offer-quest-deadline") { game, actor, event, button ->
+        // GM-confirmed offer for a quest that has reached its deadline.
+        // Buttons: [Fail Now] (data-action="fail") or [Extend N Turns] (data-action="extend" + data-extend-turns).
+        if (!game.user.isGM) return@ChatButton
+        val action = button.dataset["action"] ?: return@ChatButton
+        val questId = button.dataset["questId"] ?: return@ChatButton
+        val extendTurns = button.dataset["extendTurns"]?.toIntOrNull() ?: DEFAULT_QUEST_EXTEND_TURNS
+
+        actor.getKingdom()?.let { kingdom ->
+            val quest = kingdom.campaignQuests?.find { it.id == questId } ?: return@ChatButton
+            when (action) {
+                "fail" -> {
+                    // GM chose to fail the quest — mark as failed
+                    quest.status = "failed"
+                    quest.turnsRemaining = 0
+                    actor.setKingdom(kingdom)
+                    postChatMessage(t("chatMessages.questDeadline.failed", recordOf("name" to quest.title)))
+                }
+                "extend" -> {
+                    // GM chose to extend the deadline
+                    quest.turnsRemaining = extendTurns
+                    actor.setKingdom(kingdom)
+                    postChatMessage(t("chatMessages.questDeadline.extended", recordOf("name" to quest.title, "turns" to extendTurns.toString())))
+                }
+            }
+        }
+    },
 )
 
 fun bindChatButtons(game: Game) {

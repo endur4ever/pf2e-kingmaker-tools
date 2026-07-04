@@ -685,7 +685,11 @@
           "regionPhase": "Region Phase",
           "commercePhase": "Commerce Phase",
           "armyPhase": "Army Phase",
-          "checkEvents": "Check Ongoing Events"
+          "checkEvents": "Check Ongoing Events",
+          "questsFailing": "Quests failing this turn",
+          "warThreatsMax": "War threats at maximum escalation",
+          "expeditionsAwaiting": "Expeditions awaiting resolution",
+          "companionsInjured": "Companions injured"
         },
         "stateTitle": "Kingdom State",
         "state": {
@@ -1965,7 +1969,9 @@
         "offerTitle": "Quest Deadline Approaching",
         "offerBody": "The quest {name} is nearing its deadline.",
         "failNow": "Fail Quest Now",
-        "extendTurns": "Extend by {turns} Turns"
+        "extendTurns": "Extend by {turns} Turns",
+        "failed": "Quest \"{name}\" has failed — its deadline passed.",
+        "extended": "Quest \"{name}\" extended by {turns} turns."
       },
       "warThreatArrival": {
         "offerTitle": "War Threat Arrived",

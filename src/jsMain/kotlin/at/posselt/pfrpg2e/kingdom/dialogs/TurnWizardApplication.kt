@@ -17,7 +17,12 @@ import at.posselt.pfrpg2e.kingdom.createModifiers
 import at.posselt.pfrpg2e.kingdom.TurnTickingEngine
 import at.posselt.pfrpg2e.kingdom.TickChange
 import at.posselt.pfrpg2e.kingdom.TickResult
+import at.posselt.pfrpg2e.kingdom.DEFAULT_QUEST_EXTEND_TURNS
 import at.posselt.pfrpg2e.kingdom.ActivityCapCalculator
+import at.posselt.pfrpg2e.kingdom.countQuestsFailingThisTurn
+import at.posselt.pfrpg2e.kingdom.countWarThreatsAtMaxEscalation
+import at.posselt.pfrpg2e.kingdom.countExpeditionsAwaitingResolution
+import at.posselt.pfrpg2e.kingdom.countInjuredCompanions
 import at.posselt.pfrpg2e.kingdom.CARAVAN_BASE_RAID_DC
 import at.posselt.pfrpg2e.kingdom.CaravanEventKind
 import at.posselt.pfrpg2e.kingdom.CaravanEvent
@@ -218,6 +223,16 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
     kingdom.bonusResourceDice = tickResult.bonusResourceDice
     kingdom.activeBattles = tickResult.activeBattles
     kingdom.groups = tickResult.groups
+
+    // Post GM offer cards for quests that hit their deadline this turn
+    if (tickResult.questDeadlineReached.isNotEmpty()) {
+        tickResult.questDeadlineReached.forEach { questId ->
+            val quest = kingdom.campaignQuests.find { it.id == questId }
+            if (quest != null) {
+                postQuestDeadlineOffer(game, actor, quest)
+            }
+        }
+    }
 
     // Apply campaign clock tick results (already included in tickResult)
     kingdom.campaignClocks = tickResult.updatedClocks
@@ -742,7 +757,14 @@ class TurnWizardApplication(
             showPreview: Boolean = false,
             previewChanges: Array<TickChangeContext> = emptyArray(),
         ): TurnWizardContext {
-            class ChecklistItemInfo(val id: String, val label: String, val highlight: Boolean)
+            class ChecklistItemInfo(
+                val id: String,
+                val label: String,
+                val highlight: Boolean,
+                val isAttention: Boolean = false,
+                val count: Int = 0,
+                val icon: String = "",
+            )
             val isStrict = kingdom.settings.enableStrictPhaseGating == true
 
             val allItems = mutableListOf(
@@ -764,13 +786,42 @@ class TurnWizardApplication(
 
             allItems.add(ChecklistItemInfo("check-events", t("kingdom.turnWizard.checklist.checkEvents"), false))
 
+            // Attention rows (read-only, highlight when count > 0)
+            val questsFailing = countQuestsFailingThisTurn(
+                (kingdom.campaignQuests ?: emptyArray()).map { q ->
+                    (q.status as? String ?: "") to (q.turnsRemaining as? Int)
+                }
+            )
+            val warThreatsMax = countWarThreatsAtMaxEscalation(
+                (kingdom.warThreats ?: emptyArray()).map { t ->
+                    ((t.escalationLevel as? Int) ?: 0) to ((t.maxEscalation as? Int) ?: 3)
+                }
+            )
+            val expeditionsAwaiting = countExpeditionsAwaitingResolution(
+                (kingdom.companionExpeditions ?: emptyArray()).map { e ->
+                    e.status as? String ?: ""
+                }
+            )
+            val companionsInjured = countInjuredCompanions(
+                (kingdom.companions ?: emptyArray()).map { c ->
+                    c.injuryDaysRemaining as? Int
+                }
+            )
+
+            allItems.addAll(listOf(
+                ChecklistItemInfo("attention-quests-failing", t("kingdom.turnWizard.checklist.questsFailing"), questsFailing > 0, isAttention = true, count = questsFailing, icon = "fa-solid fa-scroll"),
+                ChecklistItemInfo("attention-war-threats-max", t("kingdom.turnWizard.checklist.warThreatsMax"), warThreatsMax > 0, isAttention = true, count = warThreatsMax, icon = "fa-solid fa-skull-crossbones"),
+                ChecklistItemInfo("attention-expeditions-awaiting", t("kingdom.turnWizard.checklist.expeditionsAwaiting"), expeditionsAwaiting > 0, isAttention = true, count = expeditionsAwaiting, icon = "fa-solid fa-compass"),
+                ChecklistItemInfo("attention-companions-injured", t("kingdom.turnWizard.checklist.companionsInjured"), companionsInjured > 0, isAttention = true, count = companionsInjured, icon = "fa-solid fa-user-injured"),
+            ))
+
             val shownSequence = allItems.map { it.id }
             val rawChecklist = mutableListOf<ChecklistItemContext>()
 
             for (idx in allItems.indices) {
                 val item = allItems[idx]
                 val checked = item.id in checkedItems
-                val disabled = isStrict && idx > 0 && shownSequence.take(idx).any { it !in checkedItems }
+                val disabled = isStrict && idx > 0 && shownSequence.take(idx).any { it !in checkedItems } || item.isAttention
                 rawChecklist.add(
                     ChecklistItemContext(
                         id = item.id,
@@ -778,7 +829,10 @@ class TurnWizardApplication(
                         description = "",
                         checked = checked,
                         highlight = item.highlight,
-                        disabled = disabled
+                        disabled = disabled,
+                        isAttention = item.isAttention,
+                        count = item.count,
+                        icon = item.icon,
                     )
                 )
             }
@@ -898,4 +952,26 @@ class TurnWizardApplication(
             )
         }
     }
+}
+
+/**
+ * Posts a GM-only offer card for a quest that has reached its deadline.
+ * Follows the km-offer-* pattern: buttons with data-* attributes, handled in ChatButtons.kt.
+ */
+suspend fun postQuestDeadlineOffer(game: Game, actor: KingdomActor, quest: dynamic) {
+    val title = quest.title as String
+    val questId = quest.id as String
+
+    val context = js("{}")
+    context.title = t("chatMessages.questDeadline.offerTitle")
+    context.body = t("chatMessages.questDeadline.offerBody", recordOf("name" to title))
+    context.questId = questId
+    context.extendTurns = DEFAULT_QUEST_EXTEND_TURNS
+    context.failNowLabel = t("chatMessages.questDeadline.failNow")
+    context.extendLabel = t("chatMessages.questDeadline.extendTurns", recordOf("turns" to DEFAULT_QUEST_EXTEND_TURNS.toString()))
+
+    postChatTemplate(
+        templatePath = "chatmessages/quest-deadline-offer.hbs",
+        templateContext = context,
+    )
 }

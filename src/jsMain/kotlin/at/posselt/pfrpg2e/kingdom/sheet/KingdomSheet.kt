@@ -885,6 +885,13 @@ class KingdomSheet(
                         }
                         postChatMessage(t("kingdom.quests.reopened", recordOf("name" to quest.title)))
                         actor.setKingdom(kingdom)
+                    } else if (quest != null && quest.status == "failed") {
+                        // Failed quests have no rewards/snapshot — pure status flip back to active.
+                        val q = quest.asDynamic()
+                        q.status = "active"
+                        q.turnsRemaining = 1 // Reset to 1 turn remaining
+                        postChatMessage(t("kingdom.quests.reopened", recordOf("name" to quest.title)))
+                        actor.setKingdom(kingdom)
                     }
                 }
             }

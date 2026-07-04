@@ -11,6 +11,9 @@ external interface ChecklistItemContext {
     val checked: Boolean
     val highlight: Boolean  // true when item needs attention (e.g., unrest > 0)
     val disabled: Boolean?
+    val isAttention: Boolean?
+    val count: Int?
+    val icon: String?
 }
 
 @JsPlainObject

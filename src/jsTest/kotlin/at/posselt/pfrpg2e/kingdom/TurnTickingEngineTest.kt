@@ -1235,4 +1235,106 @@ class TurnTickingEngineTest {
         assertEquals(6, result.resourcePoints.now)
         assertTrue(result.changes.none { it.category == "resourcePoints" && it.field == "tribute" })
     }
+
+    // ── Quest deadline tracking tests for tickQuests ────────────────────────────────────────────
+
+    private fun quest(
+        id: String = "q1",
+        status: String = "active",
+        generated: Boolean = true,
+        turnsRemaining: Int? = 5,
+    ) = jsObject<dynamic> {
+        this.id = id
+        this.status = status
+        this.generatedByEvent = generated
+        this.turnsRemaining = turnsRemaining
+    }
+
+    @Test
+    fun testTickQuestsEmptyArray() {
+        val (updated, deadlineReached, changes) = TurnTickingEngine.tickQuests(emptyArray(), 1)
+        assertEquals(0, updated.size)
+        assertEquals(0, deadlineReached.size)
+        assertEquals(0, changes.size)
+    }
+
+    @Test
+    fun testTickQuestsNonGeneratedIgnored() {
+        val q = quest(id = "q1", generated = false, turnsRemaining = 1)
+        val (updated, deadlineReached, changes) = TurnTickingEngine.tickQuests(arrayOf(q), 1)
+        assertEquals(1, updated.size)
+        assertEquals(0, deadlineReached.size)
+        assertEquals(0, changes.size)
+        assertEquals(1, updated[0].turnsRemaining) // unchanged
+    }
+
+    @Test
+    fun testTickQuestsCompletedIgnored() {
+        val q = quest(id = "q1", status = "completed", turnsRemaining = 1)
+        val (updated, deadlineReached, changes) = TurnTickingEngine.tickQuests(arrayOf(q), 1)
+        assertEquals(1, updated.size)
+        assertEquals(0, deadlineReached.size)
+        assertEquals(0, changes.size)
+        assertEquals(1, updated[0].turnsRemaining) // unchanged
+    }
+
+    @Test
+    fun testTickQuestsDecrementsTurns() {
+        val q = quest(id = "q1", turnsRemaining = 5)
+        val (updated, deadlineReached, changes) = TurnTickingEngine.tickQuests(arrayOf(q), 1)
+        assertEquals(1, updated.size)
+        assertEquals(0, deadlineReached.size)
+        assertEquals(1, changes.size)
+        assertEquals(4, updated[0].turnsRemaining)
+        assertEquals("active", updated[0].status) // still active
+    }
+
+    @Test
+    fun testTickQuestsDeadlineReachedAtZero() {
+        val q = quest(id = "q1", turnsRemaining = 1)
+        val (updated, deadlineReached, changes) = TurnTickingEngine.tickQuests(arrayOf(q), 1)
+        assertEquals(1, updated.size)
+        assertEquals(1, deadlineReached.size)
+        assertEquals("q1", deadlineReached[0])
+        assertEquals(1, changes.size)
+        assertEquals(0, updated[0].turnsRemaining)
+        assertEquals("active", updated[0].status) // stays active, not failed!
+    }
+
+    @Test
+    fun testTickQuestsMultipleSomeReachDeadline() {
+        val q1 = quest(id = "q1", turnsRemaining = 1) // deadline
+        val q2 = quest(id = "q2", turnsRemaining = 3) // normal
+        val q3 = quest(id = "q3", turnsRemaining = 1) // deadline
+        val (updated, deadlineReached, changes) = TurnTickingEngine.tickQuests(arrayOf(q1, q2, q3), 1)
+        assertEquals(3, updated.size)
+        assertEquals(2, deadlineReached.size)
+        assertTrue(deadlineReached.contains("q1"))
+        assertTrue(deadlineReached.contains("q3"))
+        assertEquals(3, changes.size) // 1 for q1, 1 for q2, 1 for q3
+        assertEquals(0, updated[0].turnsRemaining)
+        assertEquals(2, updated[1].turnsRemaining)
+        assertEquals(0, updated[2].turnsRemaining)
+        assertEquals("active", updated[0].status)
+        assertEquals("active", updated[2].status)
+    }
+
+    @Test
+    fun testTickQuestsAlreadyAtZeroStaysAtZero() {
+        val q = quest(id = "q1", turnsRemaining = 0)
+        val (updated, deadlineReached, changes) = TurnTickingEngine.tickQuests(arrayOf(q), 1)
+        assertEquals(1, updated.size)
+        assertEquals(0, deadlineReached.size)
+        assertEquals(0, changes.size)
+        assertEquals(0, updated[0].turnsRemaining)
+    }
+
+    @Test
+    fun testTickQuestsNullTurnsRemainingIgnored() {
+        val q = quest(id = "q1", turnsRemaining = null)
+        val (updated, deadlineReached, changes) = TurnTickingEngine.tickQuests(arrayOf(q), 1)
+        assertEquals(1, updated.size)
+        assertEquals(0, deadlineReached.size)
+        assertEquals(0, changes.size)
+    }
 }
