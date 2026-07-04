@@ -6,6 +6,7 @@ import at.posselt.pfrpg2e.app.HandlebarsRenderContext
 import at.posselt.pfrpg2e.app.forms.SimpleApp
 import at.posselt.pfrpg2e.kingdom.KingdomActor
 import at.posselt.pfrpg2e.kingdom.buildExpeditionDestinationOptions
+import at.posselt.pfrpg2e.kingdom.launchExpedition
 import at.posselt.pfrpg2e.kingdom.logExpeditionLaunched
 import at.posselt.pfrpg2e.kingdom.data.RawCharacter
 import at.posselt.pfrpg2e.kingdom.data.RawCompanionExpedition
@@ -21,6 +22,7 @@ import at.posselt.pfrpg2e.utils.t
 import js.objects.recordOf
 import com.foundryvtt.core.applications.api.HandlebarsRenderOptions
 import com.foundryvtt.core.game
+import com.foundryvtt.core.ui
 import kotlinx.coroutines.await
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.HTMLSelectElement
@@ -243,15 +245,15 @@ class CompanionProfileDialog(
                         destinations = buildExpeditionDestinationOptions(kingdom),
                     ) { expedition ->
                         val current = kingdomActor.getKingdom() ?: return@AddExpeditionDialog
-                        current.companionExpeditions = (current.companionExpeditions ?: emptyArray()) + expedition
                         val updatedComps = (current.companions ?: emptyArray()).copyOf()
-                        expedition.companionIds.forEach { cid ->
-                            updatedComps.find { (it.actorUuid ?: it.name) == cid }?.expeditionStatus = "onExpedition"
+                        if (launchExpedition(current, expedition, updatedComps)) {
+                            current.companions = updatedComps
+                            kingdomActor.setKingdom(current)
+                            logExpeditionLaunched(expedition, updatedComps)
+                            render()
+                        } else {
+                            ui.notifications.warn(t("kingdom.expeditions.tooMany"))
                         }
-                        current.companions = updatedComps
-                        kingdomActor.setKingdom(current)
-                        logExpeditionLaunched(expedition, updatedComps)
-                        render()
                     }.launch()
                 }
             }

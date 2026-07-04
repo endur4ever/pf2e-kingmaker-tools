@@ -1,17 +1,20 @@
 <h2>{{localizeKM "chatMessages.companionAutonomy.offerTitle"}}</h2>
 <div class="km-companion-autonomy-offer">
     <p>{{localizeKM "chatMessages.companionAutonomy.offerBody"}}</p>
+    {{#if proposal}}
+    <div class="km-autonomy-proposal">
+        <p>{{localizeKM "chatMessages.companionAutonomy.proposalPitch" proposal}}</p>
+    </div>
+    {{/if}}
     <ul class="km-companion-autonomy-list">
         {{#each volunteers}}
         <li class="km-companion-autonomy-volunteer">
             <strong>{{name}}</strong>
             {{#if hasPersonalQuest}}
-            <span class="km-autonomy-tag km-autonomy-quest">{{localizeKM "chatMessages.companionAutonomy.personalQuestTag"}}
-            </span>
+            <span class="km-autonomy-tag km-autonomy-quest">{{localizeKM "chatMessages.companionAutonomy.personalQuestTag"}}</span>
             {{/if}}
             {{#if discoveryEstablished}}
-            <span class="km-autonomy-tag km-autonomy-discovery">{{localizeKM "chatMessages.companionAutonomy.discoveryTag"}}
-            </span>
+            <span class="km-autonomy-tag km-autonomy-discovery">{{localizeKM "chatMessages.companionAutonomy.discoveryTag"}}</span>
             {{/if}}
             <span class="km-autonomy-influence">{{localizeKM "chatMessages.companionAutonomy.influenceLabel"}}: {{influence}}</span>
         </li>

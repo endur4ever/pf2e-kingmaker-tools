@@ -184,7 +184,7 @@ import at.posselt.pfrpg2e.kingdom.sheet.contexts.toActivitiesContext
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.toContext
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.toRosterContext
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.toExpeditionsContext
-import at.posselt.pfrpg2e.companion.expeditionLaunchCost
+import at.posselt.pfrpg2e.kingdom.launchExpedition
 import at.posselt.pfrpg2e.kingdom.applyExpeditionRewardToKingdom
 import at.posselt.pfrpg2e.kingdom.buildExpeditionDestinationOptions
 import at.posselt.pfrpg2e.kingdom.logExpeditionLaunched
@@ -1042,10 +1042,6 @@ class KingdomSheet(
 
             "add-expedition" -> buildPromise {
                 val kingdom = getKingdom()
-                if (activeExpeditionCount(kingdom.companionExpeditions ?: emptyArray()) >= MAX_CONCURRENT_EXPEDITIONS) {
-                    ui.notifications.warn(t("kingdom.expeditions.tooMany"))
-                    return@buildPromise
-                }
                 val comps = kingdom.companions ?: emptyArray()
                 AddExpeditionDialog(
                     companions = comps,
@@ -1054,19 +1050,14 @@ class KingdomSheet(
                     destinations = buildExpeditionDestinationOptions(kingdom),
                 ) { expedition ->
                     val current = getKingdom()
-                    current.companionExpeditions = (current.companionExpeditions ?: emptyArray()) + expedition
-                    // Provisioning sink: deduct a tier-scaled RP cost to launch (coerced to >= 0).
-                    val launchCost = expeditionLaunchCost(expedition.tier)
-                    if (launchCost > 0) {
-                        current.resourcePoints.now = (current.resourcePoints.now - launchCost).coerceAtLeast(0)
-                    }
                     val updatedComps = (current.companions ?: emptyArray()).copyOf()
-                    expedition.companionIds.forEach { cid ->
-                        updatedComps.find { (it.actorUuid ?: it.name) == cid }?.expeditionStatus = "onExpedition"
+                    if (launchExpedition(current, expedition, updatedComps)) {
+                        current.companions = updatedComps
+                        actor.setKingdom(current)
+                        logExpeditionLaunched(expedition, updatedComps)
+                    } else {
+                        ui.notifications.warn(t("kingdom.expeditions.tooMany"))
                     }
-                    current.companions = updatedComps
-                    actor.setKingdom(current)
-                    logExpeditionLaunched(expedition, updatedComps)
                 }.launch()
             }
 

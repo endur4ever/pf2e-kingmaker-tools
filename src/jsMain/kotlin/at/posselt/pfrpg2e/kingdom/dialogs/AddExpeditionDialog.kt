@@ -56,6 +56,7 @@ external interface AddExpeditionContext : HandlebarsRenderContext {
     val destinationHubs: Array<ExpeditionDestinationOption>
     val hasDestinations: Boolean
     val selectedActivityId: String
+    val selectedQuestId: String
     val selectedTier: String
     val selectedCompanionIds: Array<String>
     val gmNotes: String
@@ -65,6 +66,8 @@ external interface AddExpeditionContext : HandlebarsRenderContext {
 class AddExpeditionDialog(
     private val companions: Array<RawCharacter>,
     private val preselectedId: String? = null,
+    private val preselectedActivityId: String? = null,
+    private val preselectedQuestId: String? = null,
     private val quests: Array<CompanionPersonalQuest> = emptyArray(),
     private val factions: Array<RawGroup> = emptyArray(),
     private val destinations: ExpeditionDestinationOptions = ExpeditionDestinationOptions.empty(),
@@ -217,7 +220,8 @@ class AddExpeditionDialog(
             destinationHexes = destinations.hexes,
             destinationHubs = destinations.hubs,
             hasDestinations = !destinations.isEmpty(),
-            selectedActivityId = "",
+            selectedActivityId = preselectedActivityId ?: "",
+            selectedQuestId = preselectedQuestId ?: "",
             selectedTier = "standard",
             selectedCompanionIds = if (preselectedId != null) arrayOf(preselectedId) else emptyArray(),
             gmNotes = "",

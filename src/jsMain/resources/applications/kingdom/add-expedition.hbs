@@ -4,7 +4,7 @@
         <select name="expeditionActivity" id="expeditionActivity" required>
             <option value="">{{localizeKM "kingdom.expeditions.selectActivity"}}</option>
             {{#each activities}}
-            <option value="{{id}}">{{name}}</option>
+            <option value="{{id}}" {{#if (eq id ../selectedActivityId)}}selected{{/if}}>{{name}}</option>
             {{/each}}
         </select>
     </div>
@@ -38,7 +38,7 @@
         <select name="expeditionQuest" id="expeditionQuest">
             <option value="">{{localizeKM "kingdom.expeditions.targetQuestNone"}}</option>
             {{#each quests}}
-            <option value="{{id}}">{{label}}</option>
+            <option value="{{id}}" {{#if (eq id ../selectedQuestId)}}selected{{/if}}>{{label}}</option>
             {{/each}}
         </select>
         <p class="km-hint">{{localizeKM "kingdom.expeditions.targetQuestHint"}}</p>

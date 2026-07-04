@@ -80,3 +80,10 @@ fun translateExpeditionActivities() {
 
 fun getExpeditionActivities(): Array<ExpeditionActivityData> =
     translatedExpeditionActivities
+
+/**
+ * Get the localized name for an expedition activity by its ID.
+ * Returns the ID if not found (fallback for display).
+ */
+fun getExpeditionActivityName(activityId: String): String =
+    translatedExpeditionActivities.find { it.id == activityId }?.name ?: activityId

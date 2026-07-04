@@ -1906,7 +1906,8 @@
         "approvedSuffix": "has been dispatched on the expedition.",
         "approvedMessage": "Approved! The selected companion has been assigned to the expedition.",
         "declinedMessage": "Declined. The companions remain available.",
-        "sendElsewhereMessage": "Sent on a different expedition. They will return later."
+        "sendElsewhereMessage": "Sent on a different expedition. They will return later.",
+        "proposalPitch": "{name} volunteers to pursue {activity} ({tier}, {days} days, costs {rp} RP)"
       },
       "firstRun": {
         "dontShowAgain": "Don't show this again",
@@ -1959,6 +1960,22 @@
           "failure": "The expedition fell short of its goals. The companion returns wiser for the attempt.",
           "criticalFailure": "The expedition ended in disaster. The companion barely escaped with their life."
         }
+      },
+      "questDeadline": {
+        "offerTitle": "Quest Deadline Approaching",
+        "offerBody": "The quest {name} is nearing its deadline.",
+        "failNow": "Fail Quest Now",
+        "extendTurns": "Extend by {turns} Turns"
+      },
+      "warThreatArrival": {
+        "offerTitle": "War Threat Arrived",
+        "offerBody": "The war threat {name} has arrived at the kingdom's borders!",
+        "spawnEvent": "Spawn Kingdom Event",
+        "queueEncounter": "Queue Encounter at Linked Hex",
+        "dismiss": "Dismiss",
+        "spawnedEvent": "Spawned kingdom event for threat {name}.",
+        "queuedEncounter": "Encounter queued for hex {hexKey} linked to threat {name}.",
+        "dismissed": "War threat {name} arrival dismissed."
       }
     },
     "displayBars": {

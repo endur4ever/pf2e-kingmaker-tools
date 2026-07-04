@@ -15,6 +15,8 @@ import at.posselt.pfrpg2e.camping.askDc
 import at.posselt.pfrpg2e.kingdom.CompanionAutonomy
 import at.posselt.pfrpg2e.kingdom.getKingdom
 import at.posselt.pfrpg2e.kingdom.getKingdomActors
+import at.posselt.pfrpg2e.kingdom.computeAutonomousProposal
+import at.posselt.pfrpg2e.expedition.getExpeditionActivityName
 import at.posselt.pfrpg2e.settings.Pfrpg2eKingdomCampingWeatherSettings
 import at.posselt.pfrpg2e.camping.calculateDailyPreparationSeconds
 import at.posselt.pfrpg2e.camping.calculateRestDurationSeconds
@@ -474,6 +476,10 @@ private suspend fun completeDailyPreparations(
             val allCompanions = kingdom.companions ?: return@buildPromise
             val volunteers = CompanionAutonomy.selectAutonomousCompanions(allCompanions.toList())
             if (volunteers.isNotEmpty()) {
+                val topPick = volunteers.first()
+                val proposal = computeAutonomousProposal(topPick, kingdom.companionPersonalQuests ?: emptyArray())
+                // Resolve localized activity name for the proposal pitch
+                val activityName = getExpeditionActivityName(proposal.activityId)
                 val volunteerData = volunteers.map { companion ->
                     val discoveryRank = when (companion.discoveryStatus) {
                         "established", "trusted", "bonded" -> true
@@ -492,6 +498,15 @@ private suspend fun completeDailyPreparations(
                         "volunteers" to volunteerData,
                         "actorUuid" to kingdomActor.uuid,
                         "isGM" to true,
+                        "proposal" to js.objects.recordOf(
+                            "name" to topPick.name,
+                            "activity" to activityName,
+                            "activityId" to proposal.activityId,
+                            "targetQuestId" to (proposal.targetQuestId ?: ""),
+                            "tier" to proposal.tier,
+                            "totalDays" to proposal.totalDays,
+                            "rpCost" to proposal.rpCost,
+                        ),
                     )
                 )
             } else {

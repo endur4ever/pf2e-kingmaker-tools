@@ -19,5 +19,7 @@ data class HexContent(
     val travelModifier: Int? = null,
     val linkedQuestId: String? = null,
     val linkedUuid: String? = null,
+    /** War threat this content marks on the map (arrival offers can queue an encounter here). */
+    val linkedWarThreatId: String? = null,
     val icon: String? = null,
 )

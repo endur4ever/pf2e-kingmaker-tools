@@ -9,6 +9,9 @@ import at.posselt.pfrpg2e.data.events.KingdomEventTrait
 import at.posselt.pfrpg2e.kingdom.dialogs.AddExpeditionDialog
 import at.posselt.pfrpg2e.kingdom.dialogs.AddQuest
 import at.posselt.pfrpg2e.kingdom.dialogs.AddWarThreat
+import at.posselt.pfrpg2e.kingdom.launchExpedition
+import at.posselt.pfrpg2e.kingdom.buildExpeditionDestinationOptions
+import at.posselt.pfrpg2e.kingdom.logExpeditionLaunched
 import at.posselt.pfrpg2e.settings.Pfrpg2eKingdomCampingWeatherSettings
 import at.posselt.pfrpg2e.kingdom.dialogs.pickEventSettlement
 import at.posselt.pfrpg2e.kingdom.dialogs.pickLeader
@@ -302,36 +305,39 @@ private val buttons = listOf(
         val decline = button.dataset["decline"] == "true"
 
         if (approve) {
-            // Approve: assign the top-ranked volunteer to a new expedition
+            // Approve: assign the top-ranked volunteer to a new expedition with a concrete proposal
             val kingdom = actor.getKingdom() ?: return@ChatButton
             val companions = kingdom.companions ?: return@ChatButton
-            val volunteers = at.posselt.pfrpg2e.kingdom.CompanionAutonomy.selectAutonomousCompanions(companions.toList())
+            val volunteers = CompanionAutonomy.selectAutonomousCompanions(companions.toList())
             val topPick = volunteers.firstOrNull()
             if (topPick != null) {
                 val key = topPick.actorUuid ?: topPick.name
+                val proposal = computeAutonomousProposal(topPick, kingdom.companionPersonalQuests ?: emptyArray())
                 AddExpeditionDialog(
                     companions = companions,
                     preselectedId = key,
+                    preselectedActivityId = proposal.activityId,
+                    preselectedQuestId = proposal.targetQuestId,
                     quests = kingdom.companionPersonalQuests ?: emptyArray(),
                     factions = kingdom.groups,
                     destinations = buildExpeditionDestinationOptions(kingdom),
                 ) { expedition ->
                     buildPromise {
                         val current = actor.getKingdom() ?: return@buildPromise
-                        current.companionExpeditions = (current.companionExpeditions ?: emptyArray()) + expedition
                         val updatedComps = (current.companions ?: emptyArray()).copyOf()
-                        expedition.companionIds.forEach { cid ->
-                            updatedComps.find { (it.actorUuid ?: it.name) == cid }?.expeditionStatus = "onExpedition"
-                        }
-                        current.companions = updatedComps
-                        actor.setKingdom(current)
-                        logExpeditionLaunched(expedition, updatedComps)
-                        postChatTemplate(
-                            templatePath = "chatmessages/companion-autonomy-approved.hbs",
-                            templateContext = js.objects.recordOf(
-                                "name" to topPick.name,
+                        if (launchExpedition(current, expedition, updatedComps)) {
+                            current.companions = updatedComps
+                            actor.setKingdom(current)
+                            logExpeditionLaunched(expedition, updatedComps)
+                            postChatTemplate(
+                                templatePath = "chatmessages/companion-autonomy-approved.hbs",
+                                templateContext = js.objects.recordOf(
+                                    "name" to topPick.name,
+                                )
                             )
-                        )
+                        } else {
+                            ui.notifications.warn(t("kingdom.expeditions.tooMany"))
+                        }
                     }
                 }.launch()
             }
@@ -340,22 +346,28 @@ private val buttons = listOf(
         } else if (sendElsewhere) {
             val kingdom = actor.getKingdom() ?: return@ChatButton
             val companions = kingdom.companions ?: return@ChatButton
+            val volunteers = CompanionAutonomy.selectAutonomousCompanions(companions.toList())
+            val topPick = volunteers.firstOrNull()
+            val proposal = topPick?.let { computeAutonomousProposal(it, kingdom.companionPersonalQuests ?: emptyArray()) }
             AddExpeditionDialog(
                 companions = companions,
+                preselectedId = topPick?.let { it.actorUuid ?: it.name },
+                preselectedActivityId = proposal?.activityId,
+                preselectedQuestId = proposal?.targetQuestId,
                 quests = kingdom.companionPersonalQuests ?: emptyArray(),
                 factions = kingdom.groups,
                 destinations = buildExpeditionDestinationOptions(kingdom),
             ) { expedition ->
                 buildPromise {
                     val current = actor.getKingdom() ?: return@buildPromise
-                    current.companionExpeditions = (current.companionExpeditions ?: emptyArray()) + expedition
                     val updatedComps = (current.companions ?: emptyArray()).copyOf()
-                    expedition.companionIds.forEach { cid ->
-                        updatedComps.find { (it.actorUuid ?: it.name) == cid }?.expeditionStatus = "onExpedition"
+                    if (launchExpedition(current, expedition, updatedComps)) {
+                        current.companions = updatedComps
+                        actor.setKingdom(current)
+                        logExpeditionLaunched(expedition, updatedComps)
+                    } else {
+                        ui.notifications.warn(t("kingdom.expeditions.tooMany"))
                     }
-                    current.companions = updatedComps
-                    actor.setKingdom(current)
-                    logExpeditionLaunched(expedition, updatedComps)
                 }
             }.launch()
         }
