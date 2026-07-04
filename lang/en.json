@@ -1948,6 +1948,17 @@
       "pacingAlert": {
         "title": "Pacing Advisory",
         "hint": "Advisory only — adjust the campaign's pressure curve if this looks off."
+      },
+      "expeditionRecap": {
+        "title": "Companion Expedition Complete: {title}",
+        "expedition": "Expedition",
+        "companion": "Companion",
+        "flavor": {
+          "criticalSuccess": "The expedition was a resounding success. Tales of the companion's exploits will be told for seasons.",
+          "success": "The expedition completed successfully. The companion returns with stories to share.",
+          "failure": "The expedition fell short of its goals. The companion returns wiser for the attempt.",
+          "criticalFailure": "The expedition ended in disaster. The companion barely escaped with their life."
+        }
       }
     },
     "displayBars": {

@@ -25,7 +25,6 @@ import at.posselt.pfrpg2e.companion.selectRewardQuest
 import at.posselt.pfrpg2e.companion.shouldOfferLevelUp
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.pruneResolvedExpeditions
 import at.posselt.pfrpg2e.settings.Pfrpg2eKingdomCampingWeatherSettings
-import at.posselt.pfrpg2e.utils.escapeHtml
 import at.posselt.pfrpg2e.utils.fromUuidOfTypes
 import at.posselt.pfrpg2e.utils.postChatMessage
 import at.posselt.pfrpg2e.utils.postChatTemplate
@@ -142,9 +141,12 @@ suspend fun offerExpeditionResolution(
     val kingdom = actor.getKingdom() ?: return
     actor.setKingdom(kingdom)
 
-    // Post the full expedition-result offer card via postChatTemplate.
-    // Renders degree styling, accrued results, and GM-only offer buttons.
-    val companionName = escapeHtml(
+    // Get GM user IDs for whispering
+    val gmUserIds = game.users.filter { it.isGM }.mapNotNull { it.id }.toTypedArray()
+
+    // Post the full expedition-result offer card WHISPERED to GMs only.
+    // Renders degree styling, accrued results, GM notes, and GM-only offer buttons.
+    val companionName = (
         companion.actorUuid?.let { uuid ->
             fromUuidOfTypes<PF2ECharacter>(uuid)?.name
                 ?: fromUuidOfTypes<PF2ENpc>(uuid)?.name
@@ -189,35 +191,66 @@ suspend fun offerExpeditionResolution(
     val offerInjury = hasInjuries
     val offerFactionStanding = hasFactionStanding
 
-    postChatTemplate(
-        templatePath = "chatmessages/expedition-result.hbs",
-        templateContext = recordOf(
+    // Build the GM-only offer card context (no isGM flag needed since it's whispered)
+    val offerContext = recordOf(
+        "title" to expedition.title,
+        "companionName" to companionName,
+        "isCriticalSuccess" to isCriticalSuccess,
+        "isSuccess" to isSuccess,
+        "isFailure" to isFailure,
+        "isCriticalFailure" to isCriticalFailure,
+        "accruedXp" to expedition.accruedXp,
+        "accruedInfluenceDelta" to result.influenceDelta,
+        "lootTier" to result.lootTier,
+        "gmNotes" to result.gmNotes,
+        "rewardApplied" to expedition.rewardApplied,
+        "expeditionId" to expedition.id,
+        "actorUuid" to actor.uuid,
+        "companionId" to companion.actorUuid,
+        "companionActorUuid" to companion.actorUuid,
+        "targetLevel" to targetLevel,
+        "offerInjury" to offerInjury,
+        "offerFactionStanding" to offerFactionStanding,
+        "offerWarThreat" to offerWarThreat,
+        "offerDiplomacyQuest" to offerDiplomacyQuest,
+        "factionName" to (expedition.targetFactionName ?: ""),
+        "offerReward" to offerReward,
+        "offerLevelUp" to offerLevelUp,
+    )
+
+    // Post GM-whispered full offer card
+    if (gmUserIds.isNotEmpty()) {
+        postChatTemplate(
+            templatePath = "chatmessages/expedition-result.hbs",
+            templateContext = offerContext,
+            whisper = gmUserIds,
+        )
+    }
+
+    // Post public player-safe recap ONLY when expedition.visibleToPlayers is true
+    if (expedition.visibleToPlayers) {
+        val flavor = when {
+            isCriticalSuccess -> t("chatMessages.expeditionRecap.flavor.criticalSuccess")
+            isSuccess -> t("chatMessages.expeditionRecap.flavor.success")
+            isCriticalFailure -> t("chatMessages.expeditionRecap.flavor.criticalFailure")
+            else -> t("chatMessages.expeditionRecap.flavor.failure")
+        }
+        val recapContext = recordOf(
             "title" to expedition.title,
             "companionName" to companionName,
             "isCriticalSuccess" to isCriticalSuccess,
-            "isSuccess" to isSuccess,
-            "isFailure" to isFailure,
+            // Exclusive flags: the recap prints each degree as its own line, so a crit must
+            // not also light the plain success/failure line (offer card keeps inclusive flags).
+            "isSuccess" to (degree == DegreeOfSuccess.SUCCESS),
+            "isFailure" to (degree == DegreeOfSuccess.FAILURE),
             "isCriticalFailure" to isCriticalFailure,
-            "accruedXp" to expedition.accruedXp,
-            "accruedInfluenceDelta" to result.influenceDelta,
-            "lootTier" to result.lootTier,
-            "gmNotes" to result.gmNotes,
-            "rewardApplied" to expedition.rewardApplied,
-            "isGM" to game.user.isGM,
-            "expeditionId" to expedition.id,
-            "actorUuid" to actor.uuid,
-            "companionId" to companion.actorUuid,
-            "companionActorUuid" to companion.actorUuid,
-            "targetLevel" to targetLevel,
-            "offerInjury" to offerInjury,
-            "offerFactionStanding" to offerFactionStanding,
-            "offerWarThreat" to offerWarThreat,
-            "offerDiplomacyQuest" to offerDiplomacyQuest,
-            "factionName" to (expedition.targetFactionName ?: ""),
-            "offerReward" to offerReward,
-            "offerLevelUp" to offerLevelUp,
-        ),
-    )
+            "flavor" to flavor,
+        )
+        postChatTemplate(
+            templatePath = "chatmessages/expedition-recap.hbs",
+            templateContext = recapContext,
+        )
+    }
 }
 
 /**

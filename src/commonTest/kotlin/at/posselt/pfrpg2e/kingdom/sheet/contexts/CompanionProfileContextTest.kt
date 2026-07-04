@@ -176,4 +176,29 @@ class CompanionProfileContextTest {
         assertEquals(3000, xpForLevel(3))
         assertEquals(10000, xpForLevel(10))
     }
+
+    @Test
+    fun `player view blanks expedition DC but GM sees it`() {
+        val companion = RawCharacter("Amiri").apply { actorUuid = "uuid-1" }
+        val expeditions = listOf(
+            js("{ id: 'exp1', title: 'Test', companionIds: ['uuid-1'], status: 'resolved', daysRemaining: 0, totalDays: 5, dc: 18, tier: 'standard' }").unsafeCast<RawCompanionExpedition>(),
+        )
+
+        val gmCtx = buildCompanionProfileContext("form", companion, emptyList<CompanionPersonalQuest>(), isGM = true, expeditions = expeditions)
+        assertEquals(18, gmCtx.pastExpeditions[0].dc)
+
+        val playerCtx = buildCompanionProfileContext("form", companion, emptyList<CompanionPersonalQuest>(), isGM = false, expeditions = expeditions)
+        assertEquals(0, playerCtx.pastExpeditions[0].dc)
+    }
+
+    @Test
+    fun `plot hook is GM-only on the profile`() {
+        val companion = RawCharacter("Amiri").apply { plotHook = "Secretly hunts her old tribe" }
+
+        val gmCtx = buildCompanionProfileContext("form", companion, emptyList<CompanionPersonalQuest>(), isGM = true)
+        assertEquals("Secretly hunts her old tribe", gmCtx.plotHook)
+
+        val playerCtx = buildCompanionProfileContext("form", companion, emptyList<CompanionPersonalQuest>(), isGM = false)
+        assertEquals(null, playerCtx.plotHook)
+    }
 }

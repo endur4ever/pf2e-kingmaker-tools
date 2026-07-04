@@ -157,7 +157,8 @@ fun buildCompanionProfileContext(
                 selected = stage == status,
             )
         }.toTypedArray(),
-        plotHook = companion.plotHook,
+        // Plot hooks are GM-authored narrative triggers; never expose to players.
+        plotHook = if (isGM) companion.plotHook else null,
         personalQuests = visibleQuests.map { quest -> questSummary(quest, isGM, localize) }.toTypedArray(),
         activeQuestCount = visibleQuests.count { it.status == "active" },
         isGM = isGM,
@@ -190,7 +191,8 @@ fun buildCompanionProfileContext(
                 daysRemaining = exp.daysRemaining,
                 totalDays = exp.totalDays,
                 progressPercent = progress,
-                dc = exp.dc,
+                // GM-only fields are blanked for the player-facing read-only profile (no info leak).
+                dc = if (isGM) exp.dc else 0,
                 tier = exp.tier,
                 tierLabel = tierLabel,
                 isInProgress = exp.status == "inProgress",
@@ -221,7 +223,8 @@ fun buildCompanionProfileContext(
                 daysRemaining = exp.daysRemaining,
                 totalDays = exp.totalDays,
                 progressPercent = progress,
-                dc = exp.dc,
+                // GM-only fields are blanked for the player-facing read-only profile (no info leak).
+                dc = if (isGM) exp.dc else 0,
                 tier = exp.tier,
                 tierLabel = tierLabel,
                 isInProgress = exp.status == "inProgress",

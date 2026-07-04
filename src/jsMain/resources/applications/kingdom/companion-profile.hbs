@@ -103,7 +103,7 @@
                     <span class="km-cp-expedition-days">{{this.daysRemaining}} / {{this.totalDays}} {{localizeKM "kingdom.companion.days"}}</span>
                 </div>
                 <div class="km-cp-expedition-meta">
-                    <span>DC {{this.dc}}</span>
+                    {{#if this.dc}}<span>DC {{this.dc}}</span>{{/if}}
                     <span class="km-cp-badge">{{this.statusLabel}}</span>
                 </div>
             </div>
