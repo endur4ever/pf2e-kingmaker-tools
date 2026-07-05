@@ -54,6 +54,8 @@ external interface AddExpeditionContext : HandlebarsRenderContext {
     val destinationSettlements: Array<ExpeditionDestinationOption>
     val destinationHexes: Array<ExpeditionDestinationOption>
     val destinationHubs: Array<ExpeditionDestinationOption>
+    val destinationExplored: Array<ExpeditionDestinationOption>
+    val destinationUncharted: Array<ExpeditionDestinationOption>
     val hasDestinations: Boolean
     val selectedActivityId: String
     val selectedQuestId: String
@@ -219,6 +221,8 @@ class AddExpeditionDialog(
             destinationSettlements = destinations.settlements,
             destinationHexes = destinations.hexes,
             destinationHubs = destinations.hubs,
+            destinationExplored = destinations.explored,
+            destinationUncharted = destinations.uncharted,
             hasDestinations = !destinations.isEmpty(),
             selectedActivityId = preselectedActivityId ?: "",
             selectedQuestId = preselectedQuestId ?: "",

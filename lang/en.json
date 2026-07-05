@@ -1097,6 +1097,8 @@
         "destinationSettlements": "Settlements",
         "destinationHexes": "Claimed Hexes",
         "destinationHubs": "Faction Trade Hubs",
+        "destinationExplored": "Explored Hexes",
+        "destinationUncharted": "Uncharted Wilderness",
         "standingDelta": "Faction standing change from this expedition",
         "tooMany": "Too many active expeditions (max 3). Resolve or cancel one before launching another.",
         "cancelConfirm": "Cancel this expedition? The companions will return immediately with no rewards.",

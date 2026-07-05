@@ -29,11 +29,17 @@ class ExpeditionDestinationOptions(
     val hubs: Array<ExpeditionDestinationOption>,
     /** Settlement hexes: travel time is measured from the NEAREST of these. */
     val originHexKeys: Array<String>,
+    /** Explored-but-unclaimed hexes — the frontier the party already knows. */
+    val explored: Array<ExpeditionDestinationOption> = emptyArray(),
+    /** Every remaining map hex — expeditions (especially scouting) go where nobody has. */
+    val uncharted: Array<ExpeditionDestinationOption> = emptyArray(),
 ) {
-    fun isEmpty(): Boolean = settlements.isEmpty() && hexes.isEmpty() && hubs.isEmpty()
+    fun isEmpty(): Boolean =
+        settlements.isEmpty() && hexes.isEmpty() && hubs.isEmpty() && explored.isEmpty() && uncharted.isEmpty()
 
     fun labelFor(key: String): String? =
-        (settlements.asSequence() + hexes.asSequence() + hubs.asSequence())
+        (settlements.asSequence() + hexes.asSequence() + hubs.asSequence() +
+            explored.asSequence() + uncharted.asSequence())
             .find { it.key == key }?.label
 
     companion object {
@@ -62,9 +68,10 @@ fun buildExpeditionDestinationOptions(kingdom: KingdomData): ExpeditionDestinati
         .toTypedArray()
 
     val taken = (settlementOptions.map { it.key } + hubOptions.map { it.key }).toSet()
-    val hexOptions = runCatching {
+
+    fun stateHexes(predicate: (com.foundryvtt.kingmaker.HexState) -> Boolean) = runCatching {
         kingmaker.state.hexes.asSequence()
-            .filter { (_, hex) -> hex.claimed == true }
+            .filter { (_, hex) -> predicate(hex) }
             .mapNotNull { (key, _) ->
                 if (key in taken) return@mapNotNull null
                 val intKey = key.toIntOrNull() ?: return@mapNotNull null
@@ -79,11 +86,34 @@ fun buildExpeditionDestinationOptions(kingdom: KingdomData): ExpeditionDestinati
             .toList()
     }.getOrDefault(emptyList()).toTypedArray()
 
+    val hexOptions = stateHexes { it.claimed == true }
+    val exploredOptions = stateHexes { it.claimed != true && it.explored == true }
+
+    // Everything else on the map: expeditions — scouting above all — go where nobody has.
+    // The kingmaker state record is sparse (only hexes with any state), so the full map
+    // comes from the region model; exclude anything already listed above.
+    val listed = taken + hexOptions.map { it.key } + exploredOptions.map { it.key }
+    val unchartedOptions = runCatching {
+        kingmaker.region.hexes.contents
+            .mapNotNull { hex ->
+                val key = hex.key.toString()
+                if (key in listed) return@mapNotNull null
+                val coord = formatHexKeyLabel(key) ?: return@mapNotNull null
+                val name = hex.name
+                val label = if (name.isNotBlank() && name != coord) "$name ($coord)" else coord
+                ExpeditionDestinationOption(key = key, label = label)
+            }
+            .sortedBy { it.label }
+            .toList()
+    }.getOrDefault(emptyList()).toTypedArray()
+
     return ExpeditionDestinationOptions(
         settlements = settlementOptions,
         hexes = hexOptions,
         hubs = hubOptions,
         originHexKeys = settlementOptions.map { it.key }.toTypedArray(),
+        explored = exploredOptions,
+        uncharted = unchartedOptions,
     )
 }
 

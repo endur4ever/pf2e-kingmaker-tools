@@ -84,6 +84,20 @@
                 {{/each}}
             </optgroup>
             {{/if}}
+            {{#if destinationExplored.length}}
+            <optgroup label="{{localizeKM 'kingdom.expeditions.destinationExplored'}}">
+                {{#each destinationExplored}}
+                <option value="{{key}}">{{label}}</option>
+                {{/each}}
+            </optgroup>
+            {{/if}}
+            {{#if destinationUncharted.length}}
+            <optgroup label="{{localizeKM 'kingdom.expeditions.destinationUncharted'}}">
+                {{#each destinationUncharted}}
+                <option value="{{key}}">{{label}}</option>
+                {{/each}}
+            </optgroup>
+            {{/if}}
         </select>
         <p class="km-hint">{{localizeKM "kingdom.expeditions.destinationHint"}}</p>
     </div>
