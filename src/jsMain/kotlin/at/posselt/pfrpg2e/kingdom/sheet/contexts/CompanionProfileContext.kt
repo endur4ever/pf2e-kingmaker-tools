@@ -78,6 +78,12 @@ external interface CompanionProfileContext : HandlebarsRenderContext {
     val currentExpeditions: Array<CompanionExpeditionSummaryContext>
     val pastExpeditions: Array<CompanionExpeditionSummaryContext>
     val canSendOnExpedition: Boolean
+
+    // Career ledger (durable history)
+    val careerExpeditions: Int
+    val careerTriumphs: Int
+    val careerScars: Int
+    val hasCareerExpeditions: Boolean
 }
 
 private fun questSummary(
@@ -137,6 +143,12 @@ fun buildCompanionProfileContext(
     val xpPercent = if (level > 0) ((xp * 100) / xpForLevel(level)).coerceIn(0, 100) else 0
     val expeditionStatus = companion.expeditionStatus
     val canSendOnExpedition = isGM && expeditionStatus == "available" && companion.injuryDaysRemaining == null
+
+    // Career ledger (nullable for back-compat, treat null as 0)
+    val careerExpeditions = companion.careerExpeditions ?: 0
+    val careerTriumphs = companion.careerTriumphs ?: 0
+    val careerScars = companion.careerScars ?: 0
+    val hasCareerExpeditions = careerExpeditions > 0
 
     return CompanionProfileContext(
         partId = partId,
@@ -233,5 +245,9 @@ fun buildCompanionProfileContext(
             )
         }.toTypedArray(),
         canSendOnExpedition = canSendOnExpedition,
+        careerExpeditions = careerExpeditions,
+        careerTriumphs = careerTriumphs,
+        careerScars = careerScars,
+        hasCareerExpeditions = hasCareerExpeditions,
     )
 }

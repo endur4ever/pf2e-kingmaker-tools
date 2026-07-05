@@ -34,6 +34,7 @@ import at.posselt.pfrpg2e.kingdom.tickShipments
 import at.posselt.pfrpg2e.kingdom.ShipmentTickInput
 import at.posselt.pfrpg2e.kingdom.sheet.calculateProjectedResources
 import at.posselt.pfrpg2e.kingdom.data.RawCaravanShipment
+import at.posselt.pfrpg2e.kingdom.data.RawExpeditionChronicleEntry
 import at.posselt.pfrpg2e.kingdom.data.RawGroup
 import at.posselt.pfrpg2e.kingdom.computeCaravanRoute
 import at.posselt.pfrpg2e.kingdom.map.KingmakerHexGridProvider
@@ -432,7 +433,9 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
         caravanEvents = caravanEvents,
         shipmentEvents = shipmentEvents,
         campaignClocks = tickResult.clockEvents.map { it.label },
-        tributeRp = tributeRp
+        tributeRp = tributeRp,
+        expeditionChronicle = kingdom.expeditionChronicle?.toList() ?: emptyList(),
+        turn = currentTurn,
     )
 
     val warPressureNow = kingdom.warPressure?.currentPressure
@@ -494,6 +497,24 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
             templatePath = "chatmessages/clock-tick.hbs",
             templateContext = clockContext,
         )
+    }
+
+    // Post war threat arrival offer cards for newly triggered threats (roadmap #12 payoff)
+    if (tickResult.newlyTriggeredThreats.isNotEmpty()) {
+        for (threat in tickResult.newlyTriggeredThreats) {
+            // Find linked hex content for the "Queue encounter" button
+            val hasLinkedHex = kingdom.hexContents?.any { it.linkedWarThreatId == threat.id } == true
+            val offerContext = js("{}")
+            offerContext.threatId = threat.id
+            offerContext.threatName = threat.name
+            offerContext.actorUuid = actor.uuid
+            offerContext.hasLinkedHex = hasLinkedHex
+            offerContext.isGM = game.user.isGM
+            postChatTemplate(
+                templatePath = "chatmessages/war-threat-arrival-offer.hbs",
+                templateContext = offerContext,
+            )
+        }
     }
 
     // Post any pacing advisories that fired this turn to chat

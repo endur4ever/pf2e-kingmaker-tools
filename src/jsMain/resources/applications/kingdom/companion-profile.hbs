@@ -63,6 +63,13 @@
             {{/if}}
         </div>
 
+        {{#if hasCareerExpeditions}}
+        <div class="km-cp-career">
+            <label>{{localizeKM "kingdom.companion.careerLabel"}}</label>
+            <span class="km-cp-badge">{{localizeKM "kingdom.companion.careerSummary" count=careerExpeditions triumphs=careerTriumphs scars=careerScars}}</span>
+        </div>
+        {{/if}}
+
         {{#if isGM}}
         <div class="km-cp-discovery-control">
             <label for="discoveryStatus">{{localizeKM "kingdom.companion.discoveryStatus"}}</label>

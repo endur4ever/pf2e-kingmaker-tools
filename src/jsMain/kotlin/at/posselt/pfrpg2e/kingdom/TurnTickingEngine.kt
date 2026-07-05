@@ -22,6 +22,12 @@ import at.posselt.pfrpg2e.kingdom.data.RawArmyDeployment
 import at.posselt.pfrpg2e.kingdom.data.RawArmyBattle
 import at.posselt.pfrpg2e.kingdom.data.RawWarPressure
 import at.posselt.pfrpg2e.kingdom.data.RawWarThreat
+import at.posselt.pfrpg2e.kingdom.detectNewlyTriggeredThreats
+import at.posselt.pfrpg2e.kingdom.WarThreatSnapshot
+
+/** Convert [RawWarThreat] array to [WarThreatSnapshot] array for pure detection logic. */
+private fun Array<RawWarThreat>.toThreatSnapshots(): Array<WarThreatSnapshot> =
+    this.unsafeCast<Array<WarThreatSnapshot>>()
 
 /** Persisted [RawArmyBattle.status] for battles archived at end of turn (not part of [BattleStatus]). */
 const val ARCHIVED_BATTLE_STATUS = "archived"
@@ -69,6 +75,8 @@ data class TickResult(
 	val warThreatOffers: Int = 0,
 	val diplomacyQuestOffers: Int = 0,
 	val questDeadlineReached: List<String> = emptyList(),
+	/** Threats that were newly triggered (arrived) this tick, for GM offer cards. */
+	val newlyTriggeredThreats: Array<RawWarThreat> = emptyArray(),
 )
 
 /**
@@ -276,6 +284,15 @@ object TurnTickingEngine {
 		// 11) Tick war threats (roadmap #12): ETA countdown, escalation, expiry/soft-pause
 		val tickedThreats = tickWarThreats(warThreats, currentTurn)
 
+		// Detect newly triggered threats (arrived this tick) for GM offer cards
+		val newlyTriggeredSnapshots = detectNewlyTriggeredThreats(
+			warThreats.toThreatSnapshots(),
+			tickedThreats.toThreatSnapshots(),
+			currentTurn
+		)
+		val newlyTriggeredIds = newlyTriggeredSnapshots.map { it.id }.toSet()
+		val newlyTriggered = tickedThreats.filter { it.id in newlyTriggeredIds }
+
 		// 12) Recalculate war pressure from active threats minus supporting armies
 		val newWarPressure = if (warThreats.isNotEmpty() || armyDeployments.isNotEmpty() || warPressure != null) {
 			recalculateWarPressure(tickedThreats, armyDeployments, warPressure)
@@ -395,6 +412,7 @@ object TurnTickingEngine {
 				warThreatOffers = warThreatOffers,
 				diplomacyQuestOffers = diplomacyQuestOffers,
 				questDeadlineReached = deadlineReached,
+				newlyTriggeredThreats = newlyTriggered.toTypedArray(),
 			)
 	}
 

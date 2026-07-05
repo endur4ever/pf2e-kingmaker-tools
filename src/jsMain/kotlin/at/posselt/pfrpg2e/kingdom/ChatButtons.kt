@@ -186,6 +186,60 @@ private val buttons = listOf(
             }
         }.launch()
     },
+    ChatButton("km-offer-war-threat-arrival") { game, actor, event, button ->
+        // GM-confirmed offer for a war threat that has arrived (triggered this turn).
+        // Buttons: [Spawn kingdom event], [Queue encounter at linked hex], [Dismiss].
+        // Idempotent: each button checks if the action was already taken via offerConsumed flag.
+        if (!game.user.isGM) return@ChatButton
+        val action = button.dataset["action"] ?: return@ChatButton
+        val threatId = button.dataset["threatId"] ?: return@ChatButton
+        actor.getKingdom()?.let { kingdom ->
+            val threat = kingdom.warThreats?.find { it.id == threatId } ?: return@ChatButton
+            if (threat.offerConsumed == true) return@ChatButton
+
+            when (action) {
+                "spawnEvent" -> {
+                    // Spawn a generic ongoing kingdom event for this war threat arrival
+                    val eventId = "war-threat-arrival"
+                    val existingEvent = kingdom.getOngoingEvents().find { it.event.id == eventId }
+                    if (existingEvent == null) {
+                        val ongoingEvent = RawOngoingKingdomEvent(
+                            stage = 0,
+                            id = eventId,
+                        )
+                        kingdom.ongoingEvents = kingdom.ongoingEvents + ongoingEvent
+                        val updatedThreat = threat.copyWith(offerConsumed = true)
+                        kingdom.warThreats = kingdom.warThreats?.map {
+                            if (it.id == threatId) updatedThreat else it
+                        }?.toTypedArray() ?: emptyArray()
+                        actor.setKingdom(kingdom)
+                        postChatMessage(t("chatMessages.warThreatArrival.spawnedEvent", recordOf("name" to threat.name)))
+                    }
+                }
+                "queueEncounter" -> {
+                    // Queue an encounter at the hex linked to this threat
+                    val hexContent = kingdom.hexContents?.find { it.linkedWarThreatId == threatId }
+                    if (hexContent != null) {
+                        val updatedThreat = threat.copyWith(offerConsumed = true)
+                        kingdom.warThreats = kingdom.warThreats?.map {
+                            if (it.id == threatId) updatedThreat else it
+                        }?.toTypedArray() ?: emptyArray()
+                        actor.setKingdom(kingdom)
+                        postChatMessage(t("chatMessages.warThreatArrival.queuedEncounter", recordOf("name" to threat.name, "hex" to hexContent.hexKey)))
+                    }
+                }
+                "dismiss" -> {
+                    // Mark the offer as consumed to prevent re-posting
+                    val updatedThreat = threat.copyWith(offerConsumed = true)
+                    kingdom.warThreats = kingdom.warThreats?.map {
+                        if (it.id == threatId) updatedThreat else it
+                    }?.toTypedArray() ?: emptyArray()
+                    actor.setKingdom(kingdom)
+                    postChatMessage(t("chatMessages.warThreatArrival.dismissed", recordOf("name" to threat.name)))
+                }
+            }
+        }
+    },
     ChatButton("km-offer-diplomacy-quest") { game, actor, event, button ->
         // GM-confirmed offer from a faction-standing threshold crossing (#1 → #2).
         // Opens the AddQuest dialog prefilled with the faction as giver.

@@ -73,11 +73,12 @@ fun recalculateWarPressure(
 
 // ── threat clock ──
 
-private fun RawWarThreat.copyWith(
+fun RawWarThreat.copyWith(
     escalationLevel: Int = this.escalationLevel,
     eta: Int? = this.eta,
     status: String = this.status,
     triggeredTurn: Int? = this.triggeredTurn,
+    offerConsumed: Boolean? = this.offerConsumed,
 ): RawWarThreat = RawWarThreat(
     id = id,
     name = name,
@@ -93,6 +94,7 @@ private fun RawWarThreat.copyWith(
     pauseOnExpiry = pauseOnExpiry,
     status = status,
     triggeredTurn = triggeredTurn,
+    offerConsumed = offerConsumed,
 )
 
 /**
@@ -122,6 +124,7 @@ fun tickWarThreat(threat: RawWarThreat, currentTurn: Int): RawWarThreat {
             eta = newEta,
             status = if (threat.pauseOnExpiry) WarThreatStatus.ACTIVE.value else WarThreatStatus.EXPIRED.value,
             triggeredTurn = currentTurn,
+            offerConsumed = false,
         )
     } else {
         threat.copyWith(escalationLevel = newEscalation, eta = newEta)

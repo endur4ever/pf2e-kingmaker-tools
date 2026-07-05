@@ -1,6 +1,8 @@
 package at.posselt.pfrpg2e.kingdom
 
+import at.posselt.pfrpg2e.kingdom.data.RawExpeditionChronicleEntry
 import at.posselt.pfrpg2e.kingdom.data.RawTurnRecord
+import at.posselt.pfrpg2e.kingdom.data.createRawExpeditionChronicleEntry
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -230,5 +232,76 @@ class TurnHistoryTest {
             "Shipments: Shipment lost: Gold Shipment | " +
             "Campaign Clocks: Troll Invasion Escalation"
         assertEquals(expected, result)
+    }
+
+    @Test
+    fun `formatTurnGazette includes expedition section for matching turn`() {
+        val chronicle = listOf(
+            createRawExpeditionChronicleEntry(
+                title = "Scout the Wilds", companionNames = "Amiri", activityId = "scout",
+                outcomeDegree = "criticalSuccess", lootRp = 10, factionStandingDelta = 0,
+                targetFactionName = null, turn = 5, appliedAt = "2026-06-15T10:00:00Z"
+            ),
+            createRawExpeditionChronicleEntry(
+                title = "Hunt for Food", companionNames = "Valeros", activityId = "hunt",
+                outcomeDegree = "success", lootRp = 5, factionStandingDelta = 0,
+                targetFactionName = null, turn = 5, appliedAt = "2026-06-15T11:00:00Z"
+            ),
+            createRawExpeditionChronicleEntry(
+                title = "Old Expedition", companionNames = "Seelah", activityId = "scout",
+                outcomeDegree = "failure", lootRp = 0, factionStandingDelta = 0,
+                targetFactionName = null, turn = 3, appliedAt = "2026-06-10T10:00:00Z"
+            ),
+        )
+        val result = formatTurnGazette(
+            activities = emptyList(),
+            sizeChange = 0,
+            currentSize = 5,
+            expeditionChronicle = chronicle,
+            turn = 5,
+        )
+        assertTrue(result!!.contains("Expeditions:"))
+        assertTrue(result.contains("🏆 Scout the Wilds — Amiri (+10 RP)"))
+        assertTrue(result.contains("✅ Hunt for Food — Valeros (+5 RP)"))
+        assertFalse(result.contains("Old Expedition"))
+    }
+
+    @Test
+    fun `formatTurnGazette expedition section shows faction standing for diplomacy`() {
+        val chronicle = listOf(
+            createRawExpeditionChronicleEntry(
+                title = "Broker Peace", companionNames = "Amiri", activityId = "diplomacy",
+                outcomeDegree = "success", lootRp = 0, factionStandingDelta = 4,
+                targetFactionName = "Pitax", turn = 5, appliedAt = "2026-06-15T10:00:00Z"
+            ),
+        )
+        val result = formatTurnGazette(
+            activities = emptyList(),
+            sizeChange = 0,
+            currentSize = 5,
+            expeditionChronicle = chronicle,
+            turn = 5,
+        )
+        assertTrue(result!!.contains("Expeditions:"))
+        assertTrue(result.contains("✅ Broker Peace — Amiri (Pitax: +4)"))
+    }
+
+    @Test
+    fun `formatTurnGazette no expedition section when no entries for turn`() {
+        val chronicle = listOf(
+            createRawExpeditionChronicleEntry(
+                title = "Old Expedition", companionNames = "Seelah", activityId = "scout",
+                outcomeDegree = "failure", lootRp = 0, factionStandingDelta = 0,
+                targetFactionName = null, turn = 3, appliedAt = "2026-06-10T10:00:00Z"
+            ),
+        )
+        val result = formatTurnGazette(
+            activities = emptyList(),
+            sizeChange = 0,
+            currentSize = 5,
+            expeditionChronicle = chronicle,
+            turn = 5,
+        )
+        assertEquals(null, result)
     }
 }

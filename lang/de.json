@@ -927,7 +927,27 @@
             "failed": "Failed",
             "abandoned": "Abandoned"
           }
-        }
+        },
+        "level": "Level",
+        "xp": "XP",
+        "injured": "Verletzt",
+        "days": "Tage",
+        "cannotDeleteOnExpedition": "This companion is currently on an expedition. Resolve or recall it before removing the companion.",
+        "sendOnExpedition": "Send on Expedition",
+        "recallFromExpedition": "Recall from Expedition",
+        "noExpeditions": "Keine Expeditions-Historie.",
+        "currentExpeditions": "Current Expeditions",
+        "pastExpeditions": "Past Expeditions",
+        "expeditionStatusLabel": "Expedition Status",
+        "expeditionStatus": {
+          "available": "Idle",
+          "onExpedition": "On Expedition",
+          "onExpeditionDays": "{title}, returns in {days}d",
+          "unavailable": "Recovering",
+          "recoveringDays": "Recovering ({days}d)"
+        },
+        "careerLabel": "Karriere",
+        "careerSummary": "Veteran von {count} {count, plural, =1 {Expedition} other {Expeditionen}} — {triumphs} {triumphs, plural, =1 {Erfolg} other {Erfolge}}, {scars} {scars, plural, =1 {Narbe} other {Narben}}"
       },
       "reduceDCToBuildLumberStructures": "Reduce DC for building Structures made out of Lumber by 2",
       "expandMagicUse": "Expand Magic Use",

@@ -108,6 +108,31 @@ class TurnTickingEngineTest {
     }
 
     @Test
+    fun testNewlyTriggeredWarThreatsOnExpiry() {
+        val threat = RawWarThreat(
+            id = "w1", name = "Goblin Horde", description = "", enemyFaction = null,
+            escalationLevel = 2, maxEscalation = 3, eta = 1,
+            targetSettlementSceneId = null, targetHexLocation = null,
+            linkedQuestId = null, linkedEventId = null, pauseOnExpiry = true,
+            status = "active", triggeredTurn = null, offerConsumed = null,
+        )
+        val result = TurnTickingEngine.tick(
+            fame = fame(), resourcePoints = resourcePoints(), resourceDice = resourcePoints(),
+            consumption = consumption(), commodities = commodities(), storage = storage(),
+            councilCooldowns = null, modifiers = emptyArray(),
+            warThreats = arrayOf(threat), armyDeployments = emptyArray(),
+            warPressure = null, currentTurn = 2,
+        )
+        // Escalation 2 -> 3 (max). Since pauseOnExpiry = true, status stays active, but triggeredTurn becomes 2, offerConsumed becomes false.
+        assertEquals(1, result.warThreats.size)
+        assertEquals(3, result.warThreats[0].escalationLevel)
+        assertEquals(2, result.warThreats[0].triggeredTurn)
+        assertEquals(false, result.warThreats[0].offerConsumed)
+        assertEquals(1, result.newlyTriggeredThreats.size)
+        assertEquals("w1", result.newlyTriggeredThreats[0].id)
+    }
+
+    @Test
     fun testNoWarDataLeavesPressureNull() {
         val result = tick()
         assertNull(result.warPressure)

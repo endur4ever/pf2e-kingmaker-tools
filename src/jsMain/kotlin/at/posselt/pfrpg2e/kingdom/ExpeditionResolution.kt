@@ -14,6 +14,8 @@ import at.posselt.pfrpg2e.data.kingdom.shouldOfferWarThreat
 import at.posselt.pfrpg2e.fromOrdinal
 import at.posselt.pfrpg2e.kingdom.data.RawCharacter
 import at.posselt.pfrpg2e.kingdom.data.RawCompanionExpedition
+import at.posselt.pfrpg2e.kingdom.data.RawExpeditionChronicleEntry
+import at.posselt.pfrpg2e.kingdom.data.createRawExpeditionChronicleEntry
 import at.posselt.pfrpg2e.kingdom.data.RawFactionStandingEntry
 import at.posselt.pfrpg2e.companion.accruedExpeditionXp
 import at.posselt.pfrpg2e.companion.applyExpeditionParticipantReward
@@ -24,6 +26,7 @@ import at.posselt.pfrpg2e.companion.personalQuestCompletionSnapshot
 import at.posselt.pfrpg2e.companion.selectRewardQuest
 import at.posselt.pfrpg2e.companion.shouldOfferLevelUp
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.pruneResolvedExpeditions
+import at.posselt.pfrpg2e.kingdom.sheet.contexts.pruneExpeditionChronicle
 import at.posselt.pfrpg2e.settings.Pfrpg2eKingdomCampingWeatherSettings
 import at.posselt.pfrpg2e.utils.fromUuidOfTypes
 import at.posselt.pfrpg2e.utils.postChatMessage
@@ -419,5 +422,40 @@ suspend fun applyExpeditionRewardToKingdom(
     kingdom.companionExpeditions = kingdom.companionExpeditions?.map {
         if (it.id == expedition.id) expedition else it
     }?.toTypedArray()?.let { pruneResolvedExpeditions(it) }
+
+    // ---- DURABLE HISTORY: expedition chronicle + companion career ledgers ----
+    // Build companion names string for the chronicle
+    val companionNames = expedition.companionIds
+        .mapNotNull { pid ->
+            kingdom.companions?.find { (it.actorUuid ?: it.name) == pid }?.name
+        }
+        .joinToString(", ")
+
+    // Career ledger bumps for EVERY participant
+    val isCriticalSuccess = expedition.outcomeDegree == "criticalSuccess"
+    val hasInjuries = expedition.accruedInjuries.isNotEmpty()
+    for (participantId in expedition.companionIds) {
+        val companion = kingdom.companions?.find { (it.actorUuid ?: it.name) == participantId } ?: continue
+        companion.careerExpeditions = (companion.careerExpeditions ?: 0) + 1
+        if (isCriticalSuccess) companion.careerTriumphs = (companion.careerTriumphs ?: 0) + 1
+        if (hasInjuries) companion.careerScars = (companion.careerScars ?: 0) + 1
+    }
+
+    // Append chronicle entry (newest last, capped at ~100)
+    val chronicleEntry = createRawExpeditionChronicleEntry(
+        title = expedition.title,
+        companionNames = companionNames,
+        activityId = expedition.activityId,
+        outcomeDegree = expedition.outcomeDegree ?: "failure",
+        lootRp = lootRp,
+        factionStandingDelta = factionDelta,
+        targetFactionName = targetFactionName,
+        turn = kingdom.currentTurn ?: 0,
+        appliedAt = kotlin.js.Date().toISOString(),
+    )
+    kingdom.expeditionChronicle = pruneExpeditionChronicle(
+        (kingdom.expeditionChronicle ?: emptyArray()) + chronicleEntry,
+    )
+
     return true
 }

@@ -46,6 +46,15 @@ external interface RawCharacter {
     var expeditionStatus: String
     /** Days remaining until injury heals (null when not injured). Default null. */
     var injuryDaysRemaining: Int?
+
+    /** Total expeditions this companion has participated in (career counter). Nullable for back-compat. */
+    var careerExpeditions: Int?
+
+    /** Critical successes (triumphs) across all expeditions. Nullable for back-compat. */
+    var careerTriumphs: Int?
+
+    /** Expeditions that accrued injuries (scars). Nullable for back-compat. */
+    var careerScars: Int?
 }
 
 /**
@@ -55,5 +64,5 @@ fun RawCharacter(
     name: String,
     actorUuid: String? = null,
 ): RawCharacter =
-    js("{ name: name, actorUuid: actorUuid, speed: 0, traveling: false, active: true, role: 'companion', plotHook: '', influence: 0, campAvailable: true, discoveryStatus: 'unknown', personalQuestIds: [], level: 1, xp: 0, expeditionStatus: 'available', injuryDaysRemaining: null }")
+    js("{ name: name, actorUuid: actorUuid, speed: 0, traveling: false, active: true, role: 'companion', plotHook: '', influence: 0, campAvailable: true, discoveryStatus: 'unknown', personalQuestIds: [], level: 1, xp: 0, expeditionStatus: 'available', injuryDaysRemaining: null, careerExpeditions: null, careerTriumphs: null, careerScars: null }")
         .unsafeCast<RawCharacter>()

@@ -27,4 +27,6 @@ external interface RawWarThreat {
 
     var status: String
     var triggeredTurn: Int?
+    /** Whether the GM offer card for this threat's arrival has been consumed (idempotency guard). */
+    var offerConsumed: Boolean?
 }

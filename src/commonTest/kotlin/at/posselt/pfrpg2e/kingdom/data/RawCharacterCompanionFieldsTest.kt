@@ -62,4 +62,24 @@ class RawCharacterCompanionFieldsTest {
         assertEquals("companion", c.role)
         assertTrue(c.active)
     }
+
+    @Test
+    fun `factory includes career ledger defaults`() {
+        val c = RawCharacter("Amiri")
+        assertNull(c.careerExpeditions)
+        assertNull(c.careerTriumphs)
+        assertNull(c.careerScars)
+    }
+
+    @Test
+    fun `career ledger fields can be set and read back`() {
+        val c = RawCharacter("Amiri").apply {
+            careerExpeditions = 5
+            careerTriumphs = 2
+            careerScars = 1
+        }
+        assertEquals(5, c.careerExpeditions)
+        assertEquals(2, c.careerTriumphs)
+        assertEquals(1, c.careerScars)
+    }
 }

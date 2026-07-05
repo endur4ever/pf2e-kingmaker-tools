@@ -3,6 +3,7 @@ package at.posselt.pfrpg2e.kingdom.sheet.contexts
 import at.posselt.pfrpg2e.kingdom.KingdomData
 import at.posselt.pfrpg2e.kingdom.data.RawCompanionExpedition
 import at.posselt.pfrpg2e.kingdom.data.RawCharacter
+import at.posselt.pfrpg2e.kingdom.data.RawExpeditionChronicleEntry
 import kotlinx.js.JsPlainObject
 
 @JsPlainObject
@@ -159,4 +160,18 @@ fun pruneResolvedExpeditions(
     if (terminal.size <= cap) return expeditions
     val keep = terminal.takeLast(cap).toSet()
     return expeditions.filter { it.status != "resolved" && it.status != "cancelled" || it in keep }.toTypedArray()
+}
+
+/**
+ * Cap unbounded growth of the expedition chronicle: keep the most recent [cap]
+ * entries, dropping oldest. Pure helper for commonTest + jsTest.
+ */
+const val MAX_EXPEDITION_CHRONICLE_ENTRIES = 100
+
+fun pruneExpeditionChronicle(
+    chronicle: Array<RawExpeditionChronicleEntry>?,
+    cap: Int = MAX_EXPEDITION_CHRONICLE_ENTRIES,
+): Array<RawExpeditionChronicleEntry>? {
+    if (chronicle == null || chronicle.isEmpty()) return null
+    return if (chronicle.size > cap) chronicle.sliceArray(chronicle.size - cap until chronicle.size) else chronicle
 }

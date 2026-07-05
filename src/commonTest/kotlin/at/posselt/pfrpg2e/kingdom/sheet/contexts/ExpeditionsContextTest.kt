@@ -2,9 +2,12 @@ package at.posselt.pfrpg2e.kingdom.sheet.contexts
 
 import at.posselt.pfrpg2e.kingdom.data.RawCharacter
 import at.posselt.pfrpg2e.kingdom.data.RawCompanionExpedition
+import at.posselt.pfrpg2e.kingdom.data.RawExpeditionChronicleEntry
+import at.posselt.pfrpg2e.kingdom.data.createRawExpeditionChronicleEntry
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class ExpeditionsContextTest {
@@ -95,6 +98,60 @@ class ExpeditionsContextTest {
     fun `pruneResolvedExpeditions is a no-op under the cap`() {
         val es = arrayOf(exp("r1", status = "resolved"), exp("a1", status = "inProgress"))
         assertEquals(2, pruneResolvedExpeditions(es, cap = 50).size)
+    }
+
+    @Test
+    fun `pruneExpeditionChronicle caps at max entries dropping oldest`() {
+        val entries = (1..105).map { i ->
+            createRawExpeditionChronicleEntry(
+                title = "Exp $i", companionNames = "C", activityId = "scout",
+                outcomeDegree = "success", lootRp = 0, factionStandingDelta = 0,
+                targetFactionName = null, turn = i, appliedAt = "2026-06-15T10:00:00Z"
+            )
+        }.toTypedArray()
+
+        val pruned = pruneExpeditionChronicle(entries, cap = 100)!!
+        assertEquals(100, pruned.size)
+        assertEquals("Exp 6", pruned[0].title) // oldest 5 dropped
+        assertEquals("Exp 105", pruned[99].title) // newest kept
+    }
+
+    @Test
+    fun `pruneExpeditionChronicle no-op under cap`() {
+        val entries = (1..50).map { i ->
+            createRawExpeditionChronicleEntry(
+                title = "Exp $i", companionNames = "C", activityId = "scout",
+                outcomeDegree = "success", lootRp = 0, factionStandingDelta = 0,
+                targetFactionName = null, turn = i, appliedAt = "2026-06-15T10:00:00Z"
+            )
+        }.toTypedArray()
+
+        val pruned = pruneExpeditionChronicle(entries, cap = 100)!!
+        assertEquals(50, pruned.size)
+    }
+
+    @Test
+    fun `pruneExpeditionChronicle null or empty returns null`() {
+        assertNull(pruneExpeditionChronicle(null))
+        assertNull(pruneExpeditionChronicle(emptyArray()))
+    }
+
+    @Test
+    fun `createRawExpeditionChronicleEntry creates valid entry`() {
+        val entry = createRawExpeditionChronicleEntry(
+            title = "Scout the Wilds", companionNames = "Amiri, Valeros", activityId = "scout",
+            outcomeDegree = "criticalSuccess", lootRp = 10, factionStandingDelta = 2,
+            targetFactionName = "Pitax", turn = 5, appliedAt = "2026-06-15T10:00:00Z"
+        )
+        assertEquals("Scout the Wilds", entry.title)
+        assertEquals("Amiri, Valeros", entry.companionNames)
+        assertEquals("scout", entry.activityId)
+        assertEquals("criticalSuccess", entry.outcomeDegree)
+        assertEquals(10, entry.lootRp)
+        assertEquals(2, entry.factionStandingDelta)
+        assertEquals("Pitax", entry.targetFactionName)
+        assertEquals(5, entry.turn)
+        assertEquals("2026-06-15T10:00:00Z", entry.appliedAt)
     }
 
     private fun diplomacyExp(delta: Int, rewardApplied: Boolean): RawCompanionExpedition =

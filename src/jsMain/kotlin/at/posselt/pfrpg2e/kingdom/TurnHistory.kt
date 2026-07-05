@@ -1,5 +1,6 @@
 package at.posselt.pfrpg2e.kingdom
 
+import at.posselt.pfrpg2e.kingdom.data.RawExpeditionChronicleEntry
 import at.posselt.pfrpg2e.kingdom.data.RawTurnRecord
 
 /**
@@ -58,6 +59,11 @@ fun buildTurnRecord(
     ruinStrife = ruinStrife,
 )
 
+/**
+ * Build a one-line gazette summary for the monthly kingdom journal.
+ * [expeditionChronicle] and [turn] are used to include expeditions that were
+ * applied during this turn (they resolve on the DAILY tick, not the turn tick).
+ */
 fun formatTurnGazette(
     activities: List<String>,
     sizeChange: Int,
@@ -66,6 +72,8 @@ fun formatTurnGazette(
     shipmentEvents: List<CaravanEvent> = emptyList(),
     campaignClocks: List<String> = emptyList(),
     tributeRp: Int = 0,
+    expeditionChronicle: List<RawExpeditionChronicleEntry> = emptyList(),
+    turn: Int = 0,
 ): String? {
     val gazetteEvents = mutableListOf<String>()
 
@@ -108,6 +116,25 @@ fun formatTurnGazette(
 
     if (campaignClocks.isNotEmpty()) {
         gazetteEvents.add("Campaign Clocks: " + campaignClocks.joinToString(", "))
+    }
+
+    // Expeditions section: filter chronicle entries for this turn
+    val turnExpeditions = expeditionChronicle.filter { it.turn == turn }
+    if (turnExpeditions.isNotEmpty()) {
+        val expeditionLines = turnExpeditions.map { entry ->
+            val outcomeLabel = when (entry.outcomeDegree) {
+                "criticalSuccess" -> "🏆"
+                "success" -> "✅"
+                "failure" -> "❌"
+                "criticalFailure" -> "💀"
+                else -> entry.outcomeDegree
+            }
+            val lootSuffix = if (entry.lootRp > 0) " (+${entry.lootRp} RP)" else ""
+            val factionSuffix = if (entry.factionStandingDelta != 0 && entry.targetFactionName != null)
+                " (${entry.targetFactionName}: ${if (entry.factionStandingDelta > 0) "+" else ""}${entry.factionStandingDelta})" else ""
+            "$outcomeLabel ${entry.title} — ${entry.companionNames}$lootSuffix$factionSuffix"
+        }
+        gazetteEvents.add("Expeditions: " + expeditionLines.joinToString("; "))
     }
 
     return if (gazetteEvents.isNotEmpty()) gazetteEvents.joinToString(" | ") else null

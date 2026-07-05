@@ -63,6 +63,61 @@ external interface RawCompanionExpedition {
 }
 
 /**
+ * Immutable record of an applied expedition reward — the durable "gazette" entry
+ * that survives pruning of raw expedition rows. Appended once per expedition when its
+ * reward is applied via [applyExpeditionRewardToKingdom]. Capped at ~100 entries
+ * on the kingdom's [KingdomData.expeditionChronicle].
+ */
+@JsExport
+external interface RawExpeditionChronicleEntry {
+    /** Title of the expedition activity (copied from expedition.title). */
+    var title: String
+    /** Comma-separated names of all companion participants. */
+    var companionNames: String
+    /** Activity ID (e.g., "scout", "hunt", "diplomacy"). */
+    var activityId: String
+    /** Degree of success: "criticalSuccess" | "success" | "failure" | "criticalFailure". */
+    var outcomeDegree: String
+    /** Resource points awarded from loot tier. */
+    var lootRp: Int
+    /** Faction standing delta applied (non-zero only for diplomacy). */
+    var factionStandingDelta: Int
+    /** Target faction name if diplomacy; null otherwise. */
+    var targetFactionName: String?
+    /** Kingdom turn number when the reward was applied (kingdom.currentTurn at that moment). */
+    var turn: Int
+    /** ISO timestamp of when the reward was applied. */
+    var appliedAt: String
+}
+
+/**
+ * Creates a [RawExpeditionChronicleEntry] with sensible defaults.
+ */
+fun createRawExpeditionChronicleEntry(
+    title: String,
+    companionNames: String,
+    activityId: String,
+    outcomeDegree: String,
+    lootRp: Int,
+    factionStandingDelta: Int,
+    targetFactionName: String?,
+    turn: Int,
+    appliedAt: String,
+): RawExpeditionChronicleEntry {
+    val obj = js("{ }").unsafeCast<RawExpeditionChronicleEntry>()
+    obj.title = title
+    obj.companionNames = companionNames
+    obj.activityId = activityId
+    obj.outcomeDegree = outcomeDegree
+    obj.lootRp = lootRp
+    obj.factionStandingDelta = factionStandingDelta
+    obj.targetFactionName = targetFactionName
+    obj.turn = turn
+    obj.appliedAt = appliedAt
+    return obj
+}
+
+/**
  * Creates a [RawCompanionExpedition] with sensible defaults.
  */
 fun createRawCompanionExpedition(

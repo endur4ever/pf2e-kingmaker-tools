@@ -671,6 +671,7 @@
         "targetLevelMax": "Level Match Tolerance Max",
         "targetLevelMin": "Level Match Tolerance Min"
       },
+
       "turnWizard": {
         "title": "Kingdom Turn Assistant",
         "openButton": "Turn Assistant",
@@ -981,6 +982,8 @@
         "noCompanions": "No companions or NPCs in the roster yet. Add them on the Roster tab."
       },
       "companion": {
+        "careerLabel": "Expedition Record",
+        "careerSummary": "Veteran of {count} expeditions ({triumphs} triumphs, {scars} scars)",
         "profile": "Companion Profile",
         "influence": "Influence",
         "campAvailable": "Available at Camp",
