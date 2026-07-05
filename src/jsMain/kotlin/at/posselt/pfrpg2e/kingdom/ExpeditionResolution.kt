@@ -29,6 +29,7 @@ import at.posselt.pfrpg2e.kingdom.sheet.contexts.pruneResolvedExpeditions
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.pruneExpeditionChronicle
 import at.posselt.pfrpg2e.settings.Pfrpg2eKingdomCampingWeatherSettings
 import at.posselt.pfrpg2e.utils.fromUuidOfTypes
+import at.posselt.pfrpg2e.utils.escapeHtml
 import at.posselt.pfrpg2e.utils.postChatMessage
 import at.posselt.pfrpg2e.utils.postChatTemplate
 import at.posselt.pfrpg2e.utils.t
@@ -146,6 +147,23 @@ suspend fun offerExpeditionResolution(
 
     // Get GM user IDs for whispering
     val gmUserIds = game.users.filter { it.isGM }.mapNotNull { it.id }.toTypedArray()
+
+    // Homecoming chat beat
+    val companions = kingdom.companions ?: emptyArray()
+    val nameByKey = companions.associateBy({ it.actorUuid ?: it.name }, { it.name })
+    val names = expedition.companionIds.mapNotNull { nameByKey[it] }.joinToString(", ").ifBlank { companion.name }
+
+    val escapeTitle = escapeHtml(expedition.title)
+    val escapeNames = escapeHtml(names)
+    val homecomingMessage = t(
+        "kingdom.expeditions.homecoming",
+        recordOf("names" to escapeNames, "title" to escapeTitle)
+    )
+    if (expedition.visibleToPlayers) {
+        postChatMessage(homecomingMessage)
+    } else {
+        postChatMessage(homecomingMessage, whisper = gmUserIds)
+    }
 
     // Post the full expedition-result offer card WHISPERED to GMs only.
     // Renders degree styling, accrued results, GM notes, and GM-only offer buttons.

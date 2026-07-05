@@ -3,6 +3,9 @@ package at.posselt.pfrpg2e.kingdom
 import at.posselt.pfrpg2e.kingdom.data.RawCharacter
 import at.posselt.pfrpg2e.kingdom.data.RawCompanionExpedition
 import at.posselt.pfrpg2e.utils.escapeHtml
+import at.posselt.pfrpg2e.utils.t
+import at.posselt.pfrpg2e.utils.postChatMessage
+import js.objects.recordOf
 import com.foundryvtt.core.helpers.SimpleCalendarDate
 import com.foundryvtt.core.helpers.simpleCalendarOrNull
 import kotlinx.coroutines.await
@@ -19,6 +22,20 @@ suspend fun logExpeditionLaunched(expedition: RawCompanionExpedition, companions
         title = "Expedition: ${escapeHtml(expedition.title)}",
         content = "${escapeHtml(names)} set out; expected back in ${expedition.totalDays} days.",
     )
+
+    // Sendoff chat beat
+    val escapeTitle = escapeHtml(expedition.title)
+    val escapeNames = escapeHtml(names)
+    val sendoffMessage = t(
+        "kingdom.expeditions.sendoff",
+        recordOf("names" to escapeNames, "title" to escapeTitle, "days" to expedition.totalDays.toString())
+    )
+    if (expedition.visibleToPlayers) {
+        postChatMessage(sendoffMessage)
+    } else {
+        val gmUserIds = com.foundryvtt.core.game.users.filter { it.isGM }.mapNotNull { it.id }.toTypedArray()
+        postChatMessage(sendoffMessage, whisper = gmUserIds)
+    }
 }
 
 suspend fun logToCalendar(title: String, content: String, date: SimpleCalendarDate? = null) {
