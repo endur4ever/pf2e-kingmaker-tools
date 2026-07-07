@@ -12,6 +12,8 @@ external interface RawHexContent {
     var gmNotes: String
     var playerText: String
     var suppressesEncounters: Boolean?
+    /** GM queued an encounter here (war-threat arrival offer); cleared manually once run. */
+    var pendingEncounter: Boolean?
     var travelModifier: Int?
     var linkedQuestId: String?       // legacy single-quest link (kept for back-compat)
     var linkedUuid: String?          // legacy single-document link (kept for back-compat)

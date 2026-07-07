@@ -501,19 +501,25 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
 
     // Post war threat arrival offer cards for newly triggered threats (roadmap #12 payoff)
     if (tickResult.newlyTriggeredThreats.isNotEmpty()) {
-        for (threat in tickResult.newlyTriggeredThreats) {
-            // Find linked hex content for the "Queue encounter" button
-            val hasLinkedHex = kingdom.hexContents?.any { it.linkedWarThreatId == threat.id } == true
-            val offerContext = js("{}")
-            offerContext.threatId = threat.id
-            offerContext.threatName = threat.name
-            offerContext.actorUuid = actor.uuid
-            offerContext.hasLinkedHex = hasLinkedHex
-            offerContext.isGM = game.user.isGM
-            postChatTemplate(
-                templatePath = "chatmessages/war-threat-arrival-offer.hbs",
-                templateContext = offerContext,
-            )
+        // GM-whispered: the card carries GM-only offer buttons and leaks linked-hex existence,
+        // so it must never render on player clients (baked isGM was evaluated on the POSTING
+        // client and shipped true to everyone).
+        val gmUserIds = game.users.filter { it.isGM }.mapNotNull { it.id }.toTypedArray()
+        if (gmUserIds.isNotEmpty()) {
+            for (threat in tickResult.newlyTriggeredThreats) {
+                // Find linked hex content for the "Queue encounter" button
+                val hasLinkedHex = kingdom.hexContents?.any { it.linkedWarThreatId == threat.id } == true
+                val offerContext = js("{}")
+                offerContext.threatId = threat.id
+                offerContext.threatName = threat.name
+                offerContext.actorUuid = actor.uuid
+                offerContext.hasLinkedHex = hasLinkedHex
+                postChatTemplate(
+                    templatePath = "chatmessages/war-threat-arrival-offer.hbs",
+                    templateContext = offerContext,
+                    whisper = gmUserIds,
+                )
+            }
         }
     }
 

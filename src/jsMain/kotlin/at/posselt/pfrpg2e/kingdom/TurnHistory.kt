@@ -1,5 +1,6 @@
 package at.posselt.pfrpg2e.kingdom
 
+
 import at.posselt.pfrpg2e.kingdom.data.RawExpeditionChronicleEntry
 import at.posselt.pfrpg2e.kingdom.data.RawTurnRecord
 
@@ -134,6 +135,8 @@ fun formatTurnGazette(
                 " (${entry.targetFactionName}: ${if (entry.factionStandingDelta > 0) "+" else ""}${entry.factionStandingDelta})" else ""
             "$outcomeLabel ${entry.title} — ${entry.companionNames}$lootSuffix$factionSuffix"
         }
+        // Whole-gazette localization is deferred (all other lines are hardcoded English + emoji);
+        // localizing only this prefix is inconsistent and t() does not resolve in the test harness.
         gazetteEvents.add("Expeditions: " + expeditionLines.joinToString("; "))
     }
 

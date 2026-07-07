@@ -73,7 +73,8 @@ class AddExpeditionDialog(
     private val quests: Array<CompanionPersonalQuest> = emptyArray(),
     private val factions: Array<RawGroup> = emptyArray(),
     private val destinations: ExpeditionDestinationOptions = ExpeditionDestinationOptions.empty(),
-    private val onAdd: suspend (RawCompanionExpedition) -> Unit,
+    /** Return true when the expedition actually launched; false keeps the dialog open (e.g. cap hit). */
+    private val onAdd: suspend (RawCompanionExpedition) -> Boolean,
 ) : SimpleApp<AddExpeditionContext>(
     title = t("kingdom.expeditions.addExpedition"),
     template = "applications/kingdom/add-expedition.hbs",
@@ -174,8 +175,10 @@ class AddExpeditionDialog(
                     it.gmNotes = gmNotes
                 }
 
-                onAdd(expedition)
-                close()
+                // A blocked launch (concurrency cap) keeps the form open with all GM input intact.
+                if (onAdd(expedition)) {
+                    close()
+                }
             }
 
             "cancel" -> close()

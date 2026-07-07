@@ -8,6 +8,7 @@ import at.posselt.pfrpg2e.utils.postChatMessage
 import js.objects.recordOf
 import com.foundryvtt.core.helpers.SimpleCalendarDate
 import com.foundryvtt.core.helpers.simpleCalendarOrNull
+import com.foundryvtt.core.game
 import kotlinx.coroutines.await
 
 /**
@@ -17,24 +18,29 @@ import kotlinx.coroutines.await
  */
 suspend fun logExpeditionLaunched(expedition: RawCompanionExpedition, companions: Array<RawCharacter>) {
     val nameByKey = companions.associateBy({ it.actorUuid ?: it.name }, { it.name })
-    val names = expedition.companionIds.mapNotNull { nameByKey[it] }.joinToString(", ").ifBlank { "Companions" }
+    val names = expedition.companionIds.mapNotNull { nameByKey[it] }.joinToString(", ")
+        .ifBlank { t("kingdom.expeditions.companionsFallback") }
+    val days = expedition.totalDays
+
+    // The calendar note is rendered as HTML by Simple Calendar — escape there only.
     logToCalendar(
         title = "Expedition: ${escapeHtml(expedition.title)}",
-        content = "${escapeHtml(names)} set out; expected back in ${expedition.totalDays} days.",
+        content = "${escapeHtml(names)} set out; expected back in $days days.",
     )
 
-    // Sendoff chat beat
-    val escapeTitle = escapeHtml(expedition.title)
-    val escapeNames = escapeHtml(names)
+    // Sendoff chat beat: raw values — postChatMessage escapes the final message exactly
+    // once (pre-escaping double-escaped '&' in names). Public when visibleToPlayers.
     val sendoffMessage = t(
         "kingdom.expeditions.sendoff",
-        recordOf("names" to escapeNames, "title" to escapeTitle, "days" to expedition.totalDays.toString())
+        recordOf("names" to names, "title" to expedition.title, "days" to days),
     )
     if (expedition.visibleToPlayers) {
         postChatMessage(sendoffMessage)
     } else {
-        val gmUserIds = com.foundryvtt.core.game.users.filter { it.isGM }.mapNotNull { it.id }.toTypedArray()
-        postChatMessage(sendoffMessage, whisper = gmUserIds)
+        val gmUserIds = game.users.filter { it.isGM }.mapNotNull { it.id }.toTypedArray()
+        if (gmUserIds.isNotEmpty()) {
+            postChatMessage(sendoffMessage, whisper = gmUserIds)
+        }
     }
 }
 

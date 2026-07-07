@@ -3,7 +3,7 @@
     <p>{{localizeKM "chatMessages.companionAutonomy.offerBody"}}</p>
     {{#if proposal}}
     <div class="km-autonomy-proposal">
-        <p>{{localizeKM "chatMessages.companionAutonomy.proposalPitch" proposal}}</p>
+        <p>{{localizeKM "chatMessages.companionAutonomy.proposalPitch" name=proposal.name activity=proposal.activity tier=proposal.tier days=proposal.totalDays rp=proposal.rpCost}}</p>
     </div>
     {{/if}}
     <ul class="km-companion-autonomy-list">
@@ -28,6 +28,9 @@
     <button type="button"
             class="km-offer-companion-autonomy"
             data-kingdom-actor-uuid="{{actorUuid}}"
+            data-volunteer-key="{{proposal.volunteerKey}}"
+            data-activity-id="{{proposal.activityId}}"
+            data-quest-id="{{proposal.targetQuestId}}"
             data-approve="true">
         {{localizeKM "chatMessages.companionAutonomy.offerApprove"}}
     </button>

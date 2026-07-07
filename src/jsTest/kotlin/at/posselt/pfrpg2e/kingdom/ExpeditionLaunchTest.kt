@@ -98,4 +98,58 @@ class ExpeditionLaunchTest {
         // should not deduct cost
         assertEquals(10, kingdom.resourcePoints.now)
     }
+
+    // ── Review-gap tests: blocked-launch invariants + RP floor + name-keyed companions ──
+
+    @Test
+    fun testBlockedLaunchLeavesEverythingUntouched() {
+        // 3 in-flight expeditions = at cap; the 4th launch must not mutate ANYTHING.
+        val inFlight = arrayOf(
+            js("{ id: 'a', title: 'A', tier: 'standard', companionIds: [], status: 'inProgress' }").unsafeCast<RawCompanionExpedition>(),
+            js("{ id: 'b', title: 'B', tier: 'standard', companionIds: [], status: 'inProgress' }").unsafeCast<RawCompanionExpedition>(),
+            js("{ id: 'c', title: 'C', tier: 'standard', companionIds: [], status: 'awaitingResolution' }").unsafeCast<RawCompanionExpedition>(),
+        )
+        val kingdom = k(expeditions = inFlight, rp = 10)
+        val comp = c("comp-1", "Amiri")
+        val launched = launchExpedition(kingdom, e("perilous", arrayOf("comp-1")), arrayOf(comp))
+        assertFalse(launched)
+        assertEquals(3, kingdom.companionExpeditions?.size) // expedition NOT added
+        assertEquals(10, kingdom.resourcePoints.now)        // cost NOT deducted
+        assertEquals("available", comp.expeditionStatus)    // companion NOT flipped
+        assertNull(kingdom.companions)                      // companions array untouched
+    }
+
+    @Test
+    fun testLaunchCostFloorsAtZero() {
+        // rp=1, standard cost=2: launch succeeds and RP floors at 0 (never negative).
+        val kingdom = k(rp = 1)
+        val comp = c("comp-1", "Amiri")
+        val launched = launchExpedition(kingdom, e("standard", arrayOf("comp-1")), arrayOf(comp))
+        assertTrue(launched)
+        assertEquals(0, kingdom.resourcePoints.now)
+    }
+
+    @Test
+    fun testNameKeyedCompanionGetsFlipped() {
+        // Unlinked companions are keyed by NAME (actorUuid null) — the status flip must match them.
+        val kingdom = k()
+        val comp = js("{ actorUuid: null, name: 'Nameless', expeditionStatus: 'available', active: true }")
+            .unsafeCast<RawCharacter>()
+        val launched = launchExpedition(kingdom, e("routine", arrayOf("Nameless")), arrayOf(comp))
+        assertTrue(launched)
+        assertEquals("onExpedition", kingdom.companions?.first()?.expeditionStatus)
+    }
+
+    @Test
+    fun testResolvedExpeditionsDoNotCountTowardCap() {
+        val terminal = arrayOf(
+            js("{ id: 'a', title: 'A', tier: 'standard', companionIds: [], status: 'resolved' }").unsafeCast<RawCompanionExpedition>(),
+            js("{ id: 'b', title: 'B', tier: 'standard', companionIds: [], status: 'resolved' }").unsafeCast<RawCompanionExpedition>(),
+            js("{ id: 'c', title: 'C', tier: 'standard', companionIds: [], status: 'cancelled' }").unsafeCast<RawCompanionExpedition>(),
+        )
+        val kingdom = k(expeditions = terminal, rp = 10)
+        val comp = c("comp-1", "Amiri")
+        assertTrue(launchExpedition(kingdom, e("standard", arrayOf("comp-1")), arrayOf(comp)))
+        assertEquals(4, kingdom.companionExpeditions?.size)
+    }
 }

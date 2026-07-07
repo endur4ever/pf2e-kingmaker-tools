@@ -1048,6 +1048,7 @@ class KingdomSheet(
             }
 
             "add-expedition" -> buildPromise {
+                if (!game.user.isGM) return@buildPromise
                 val kingdom = getKingdom()
                 val comps = kingdom.companions ?: emptyArray()
                 AddExpeditionDialog(
@@ -1062,13 +1063,16 @@ class KingdomSheet(
                         current.companions = updatedComps
                         actor.setKingdom(current)
                         logExpeditionLaunched(expedition, updatedComps)
+                        true
                     } else {
                         ui.notifications.warn(t("kingdom.expeditions.tooMany"))
+                        false
                     }
                 }.launch()
             }
 
             "cancel-expedition" -> buildPromise {
+                if (!game.user.isGM) return@buildPromise
                 val expeditionId = target.dataset["expeditionId"] ?: return@buildPromise
                 val kingdom = getKingdom()
                 if (confirm(t("kingdom.expeditions.cancelConfirm"))) {
@@ -1095,6 +1099,7 @@ class KingdomSheet(
             }
 
             "resolve-expedition" -> buildPromise {
+                if (!game.user.isGM) return@buildPromise
                 val expeditionId = target.dataset["expeditionId"] ?: return@buildPromise
                 val kingdom = getKingdom()
                 val expedition = kingdom.companionExpeditions?.find { it.id == expeditionId } ?: return@buildPromise

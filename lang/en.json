@@ -1099,11 +1099,10 @@
         "destinationHubs": "Faction Trade Hubs",
         "destinationExplored": "Explored Hexes",
         "destinationUncharted": "Uncharted Wilderness",
+        "companionsFallback": "Companions",
         "standingDelta": "Faction standing change from this expedition",
         "tooMany": "Too many active expeditions (max 3). Resolve or cancel one before launching another.",
         "cancelConfirm": "Cancel this expedition? The companions will return immediately with no rewards.",
-        "sendoff": "{names} set out on {title} — expected back in {days} days.",
-        "homecoming": "{names} return from {title}.",
         "legendaryReward": "Legendary Reward",
         "majorReward": "Major Reward",
         "minorReward": "Minor Reward",
@@ -1920,7 +1919,7 @@
         "approvedMessage": "Approved! The selected companion has been assigned to the expedition.",
         "declinedMessage": "Declined. The companions remain available.",
         "sendElsewhereMessage": "Sent on a different expedition. They will return later.",
-        "proposalPitch": "{name} volunteers to pursue {activity} ({tier}, {days} days, costs {rp} RP)"
+        "proposalPitch": "{name} volunteers to pursue {activity} ({tier}, at least {days} days plus travel, costs {rp} RP)"
       },
       "firstRun": {
         "dontShowAgain": "Don't show this again",
@@ -1990,7 +1989,8 @@
         "dismiss": "Dismiss",
         "spawnedEvent": "Spawned kingdom event for threat {name}.",
         "queuedEncounter": "Encounter queued for hex {hexKey} linked to threat {name}.",
-        "dismissed": "War threat {name} arrival dismissed."
+        "dismissed": "War threat {name} arrival dismissed.",
+        "eventMissing": "The war-threat-arrival kingdom event definition is missing — cannot spawn an event."
       }
     },
     "displayBars": {
@@ -5698,6 +5698,25 @@
           },
           "criticalFailure": {
             "msg": "<p>The assassins slay the NPC and escape. If the NPC was a leader, that leadership role is now vacant. @gain2d4Unrest and @gain1d4Decay.</p>"
+          }
+        }
+      },
+      "war-threat-arrival": {
+        "name": "War Threat Arrives",
+        "description": "<p>A hostile force your scouts have long tracked has reached the kingdom's borders. Its vanguard probes your defenses while the main body encamps within striking distance.</p>",
+        "resolution": "Resolve with a success on the check as your defenders blunt the incursion. The GM may instead (or additionally) run the queued encounter at the linked hex to play the arrival out at the table.",
+        "stage-0": {
+          "criticalSuccess": {
+            "msg": "<p>Your defenders rout the vanguard and scatter the encampment before it can dig in. The threat is broken. @lose1d4Unrest</p>"
+          },
+          "success": {
+            "msg": "<p>The border holds; the hostile force withdraws to lick its wounds. The threat is contained.</p>"
+          },
+          "failure": {
+            "msg": "<p>Raids slip past your patrols. @gain1d4Unrest as border settlements bear the brunt.</p>"
+          },
+          "criticalFailure": {
+            "msg": "<p>Your defenses are overrun at the border. @gain2d4Unrest and the GM may escalate the linked encounter.</p>"
           }
         }
       },

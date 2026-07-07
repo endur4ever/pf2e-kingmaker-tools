@@ -244,15 +244,17 @@ class CompanionProfileDialog(
                         factions = kingdom.groups,
                         destinations = buildExpeditionDestinationOptions(kingdom),
                     ) { expedition ->
-                        val current = kingdomActor.getKingdom() ?: return@AddExpeditionDialog
+                        val current = kingdomActor.getKingdom() ?: return@AddExpeditionDialog false
                         val updatedComps = (current.companions ?: emptyArray()).copyOf()
                         if (launchExpedition(current, expedition, updatedComps)) {
                             current.companions = updatedComps
                             kingdomActor.setKingdom(current)
                             logExpeditionLaunched(expedition, updatedComps)
                             render()
+                            true
                         } else {
                             ui.notifications.warn(t("kingdom.expeditions.tooMany"))
+                            false
                         }
                     }.launch()
                 }

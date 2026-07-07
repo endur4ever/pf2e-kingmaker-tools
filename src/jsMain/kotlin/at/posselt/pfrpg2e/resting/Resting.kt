@@ -499,6 +499,7 @@ private suspend fun completeDailyPreparations(
                         "actorUuid" to kingdomActor.uuid,
                         "isGM" to true,
                         "proposal" to js.objects.recordOf(
+                            "volunteerKey" to (topPick.actorUuid ?: topPick.name),
                             "name" to topPick.name,
                             "activity" to activityName,
                             "activityId" to proposal.activityId,

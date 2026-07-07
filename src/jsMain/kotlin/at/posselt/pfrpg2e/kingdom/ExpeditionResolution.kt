@@ -153,15 +153,15 @@ suspend fun offerExpeditionResolution(
     val nameByKey = companions.associateBy({ it.actorUuid ?: it.name }, { it.name })
     val names = expedition.companionIds.mapNotNull { nameByKey[it] }.joinToString(", ").ifBlank { companion.name }
 
-    val escapeTitle = escapeHtml(expedition.title)
-    val escapeNames = escapeHtml(names)
+    // Raw values: postChatMessage escapes the final message exactly once (no pre-escaping,
+    // which double-escaped '&' in companion names).
     val homecomingMessage = t(
         "kingdom.expeditions.homecoming",
-        recordOf("names" to escapeNames, "title" to escapeTitle)
+        recordOf("names" to names, "title" to expedition.title)
     )
     if (expedition.visibleToPlayers) {
         postChatMessage(homecomingMessage)
-    } else {
+    } else if (gmUserIds.isNotEmpty()) {
         postChatMessage(homecomingMessage, whisper = gmUserIds)
     }
 
@@ -422,7 +422,9 @@ suspend fun applyExpeditionRewardToKingdom(
         if (group != null) {
             group.standing = applyStandingDelta(group.standing, factionDelta)
             group.standingLog = (group.standingLog ?: emptyArray()) + RawFactionStandingEntry(
-                turn = kingdom.currentTurn ?: 0,
+                // +1 for the same reason as the chronicle stamp: applied during turn N,
+                // reported by the record built with the incremented turn number.
+                turn = (kingdom.currentTurn ?: 0) + 1,
                 delta = factionDelta,
                 reason = "kingdom.factionStanding.expedition",
             )
@@ -442,38 +444,54 @@ suspend fun applyExpeditionRewardToKingdom(
     }?.toTypedArray()?.let { pruneResolvedExpeditions(it) }
 
     // ---- DURABLE HISTORY: expedition chronicle + companion career ledgers ----
-    // Build companion names string for the chronicle
+    recordExpeditionInHistory(kingdom, expedition, lootRp)
+
+    return true
+}
+
+/**
+ * Record an expedition into the durable history: bump every participant's career ledger and
+ * append a chronicle entry (capped). Shared by BOTH terminal paths — reward apply and the
+ * injury offer (which consumes the reward path) — so no resolved expedition vanishes from
+ * history. careerScars is NOT counted here: a scar is recorded only when an injury is
+ * actually APPLIED (km-offer-injury), not merely offered.
+ *
+ * The chronicle turn is stamped currentTurn + 1: entries are written DURING turn N but the
+ * End Turn record that reports them is built with the incremented turn number, so +1 makes
+ * the gazette filter actually match.
+ */
+fun recordExpeditionInHistory(
+    kingdom: KingdomData,
+    expedition: RawCompanionExpedition,
+    lootRp: Int,
+) {
+    // Fall back to the stored participant id when the roster lookup misses, so the durable
+    // record always names every participant even after a companion is deleted.
     val companionNames = expedition.companionIds
-        .mapNotNull { pid ->
-            kingdom.companions?.find { (it.actorUuid ?: it.name) == pid }?.name
+        .map { pid ->
+            kingdom.companions?.find { (it.actorUuid ?: it.name) == pid }?.name ?: pid
         }
         .joinToString(", ")
 
-    // Career ledger bumps for EVERY participant
     val isCriticalSuccess = expedition.outcomeDegree == "criticalSuccess"
-    val hasInjuries = expedition.accruedInjuries.isNotEmpty()
     for (participantId in expedition.companionIds) {
         val companion = kingdom.companions?.find { (it.actorUuid ?: it.name) == participantId } ?: continue
         companion.careerExpeditions = (companion.careerExpeditions ?: 0) + 1
         if (isCriticalSuccess) companion.careerTriumphs = (companion.careerTriumphs ?: 0) + 1
-        if (hasInjuries) companion.careerScars = (companion.careerScars ?: 0) + 1
     }
 
-    // Append chronicle entry (newest last, capped at ~100)
     val chronicleEntry = createRawExpeditionChronicleEntry(
         title = expedition.title,
         companionNames = companionNames,
         activityId = expedition.activityId,
         outcomeDegree = expedition.outcomeDegree ?: "failure",
         lootRp = lootRp,
-        factionStandingDelta = factionDelta,
-        targetFactionName = targetFactionName,
-        turn = kingdom.currentTurn ?: 0,
+        factionStandingDelta = expedition.factionStandingDelta,
+        targetFactionName = expedition.targetFactionName,
+        turn = (kingdom.currentTurn ?: 0) + 1,
         appliedAt = kotlin.js.Date().toISOString(),
     )
     kingdom.expeditionChronicle = pruneExpeditionChronicle(
         (kingdom.expeditionChronicle ?: emptyArray()) + chronicleEntry,
     )
-
-    return true
 }

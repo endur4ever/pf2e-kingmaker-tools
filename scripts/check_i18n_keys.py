@@ -27,6 +27,17 @@ Usage:  python3 scripts/check_i18n_keys.py
 """
 import json, re, glob, os, sys
 
+
+def _reject_duplicate_keys(pairs):
+    """json object_pairs_hook: duplicate keys silently shadow each other (last wins in JS
+    and Python alike), which shipped a dead sendoff/homecoming pair once — fail loudly."""
+    seen = {}
+    for key, value in pairs:
+        if key in seen:
+            raise SystemExit(f"[i18n] FAILED: duplicate key '{key}' within one object — the first occurrence is dead text")
+        seen[key] = value
+    return seen
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 NS = "pf2e-kingmaker-tools"
 LANG = os.path.join(ROOT, "lang", "en.json")
@@ -63,7 +74,7 @@ CATALOG_KEY_ALLOWLIST = {
 
 def load_root():
     with open(LANG, encoding="utf-8") as f:
-        data = json.load(f)
+        data = json.load(f, object_pairs_hook=_reject_duplicate_keys)
     return data[NS]
 
 
@@ -116,7 +127,7 @@ def collect_catalog_keys():
     for f in glob.glob(os.path.join(DATA_DIR, "**/*.json"), recursive=True):
         try:
             with open(f, encoding="utf-8") as fh:
-                doc = json.load(fh)
+                doc = json.load(fh, object_pairs_hook=_reject_duplicate_keys)
         except (ValueError, OSError):
             continue
         rel = os.path.relpath(f, ROOT)

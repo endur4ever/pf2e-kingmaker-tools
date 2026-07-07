@@ -199,33 +199,48 @@ private val buttons = listOf(
 
             when (action) {
                 "spawnEvent" -> {
-                    // Spawn a generic ongoing kingdom event for this war threat arrival
+                    // Spawn the war-threat-arrival kingdom event. Guarded through getEvent():
+                    // pushing an id the event registry can't resolve would create an invisible
+                    // ongoing entry that also desyncs km-resolve-event's index-based lookup.
                     val eventId = "war-threat-arrival"
-                    val existingEvent = kingdom.getOngoingEvents().find { it.event.id == eventId }
-                    if (existingEvent == null) {
-                        val ongoingEvent = RawOngoingKingdomEvent(
+                    val event = kingdom.getEvent(eventId)
+                    if (event == null) {
+                        ui.notifications.error(t("chatMessages.warThreatArrival.eventMissing"))
+                        return@ChatButton
+                    }
+                    val ongoingEvent = if (KingdomEventTrait.SETTLEMENT.value in event.traits) {
+                        val settlements = kingdom.getAllSettlements(game).allSettlements
+                        val pick = pickEventSettlement(settlements)
+                        RawOngoingKingdomEvent(
                             stage = 0,
                             id = eventId,
+                            settlementSceneId = pick.settlementId,
+                            secretLocation = pick.secretLocation,
                         )
-                        kingdom.ongoingEvents = kingdom.ongoingEvents + ongoingEvent
-                        val updatedThreat = threat.copyWith(offerConsumed = true)
-                        kingdom.warThreats = kingdom.warThreats?.map {
-                            if (it.id == threatId) updatedThreat else it
-                        }?.toTypedArray() ?: emptyArray()
-                        actor.setKingdom(kingdom)
-                        postChatMessage(t("chatMessages.warThreatArrival.spawnedEvent", recordOf("name" to threat.name)))
+                    } else {
+                        RawOngoingKingdomEvent(stage = 0, id = eventId)
                     }
+                    kingdom.ongoingEvents = kingdom.ongoingEvents + ongoingEvent
+                    val updatedThreat = threat.copyWith(offerConsumed = true)
+                    kingdom.warThreats = kingdom.warThreats?.map {
+                        if (it.id == threatId) updatedThreat else it
+                    }?.toTypedArray() ?: emptyArray()
+                    actor.setKingdom(kingdom)
+                    postChatMessage(t("chatMessages.warThreatArrival.spawnedEvent", recordOf("name" to threat.name)))
                 }
                 "queueEncounter" -> {
-                    // Queue an encounter at the hex linked to this threat
+                    // Queue an encounter at the hex linked to this threat: persist a pending
+                    // flag on the hex content so the offer actually leaves durable state behind
+                    // (previously it only posted a chat line and consumed the offer).
                     val hexContent = kingdom.hexContents?.find { it.linkedWarThreatId == threatId }
                     if (hexContent != null) {
+                        hexContent.pendingEncounter = true
                         val updatedThreat = threat.copyWith(offerConsumed = true)
                         kingdom.warThreats = kingdom.warThreats?.map {
                             if (it.id == threatId) updatedThreat else it
                         }?.toTypedArray() ?: emptyArray()
                         actor.setKingdom(kingdom)
-                        postChatMessage(t("chatMessages.warThreatArrival.queuedEncounter", recordOf("name" to threat.name, "hex" to hexContent.hexKey)))
+                        postChatMessage(t("chatMessages.warThreatArrival.queuedEncounter", recordOf("name" to threat.name, "hexKey" to hexContent.hexKey)))
                     }
                 }
                 "dismiss" -> {
@@ -316,9 +331,20 @@ private val buttons = listOf(
                         ?.expeditionStatus = "available"
                 }
 
+            // A scar is recorded when an injury is actually APPLIED — only for the injured
+            // companion (the career ledger deliberately does not count waived offers).
+            companion.careerScars = (companion.careerScars ?: 0) + 1
+
+            // This path consumes the reward flow, so record durable history here too —
+            // unless Apply Reward already ran and recorded it (guard on rewardApplied).
+            val alreadyRecorded = expedition.rewardApplied
+
             // Mark expedition as resolved since injury was applied.
             expedition.status = "resolved"
             expedition.rewardApplied = true
+            if (!alreadyRecorded) {
+                recordExpeditionInHistory(kingdom, expedition, lootRp = 0)
+            }
 
             kingdom.companionExpeditions = kingdom.companionExpeditions?.map {
                 if (it.id == expeditionId) expedition else it
@@ -362,36 +388,41 @@ private val buttons = listOf(
             // Approve: assign the top-ranked volunteer to a new expedition with a concrete proposal
             val kingdom = actor.getKingdom() ?: return@ChatButton
             val companions = kingdom.companions ?: return@ChatButton
-            val volunteers = CompanionAutonomy.selectAutonomousCompanions(companions.toList())
-            val topPick = volunteers.firstOrNull()
+            // Honor the PITCHED identity embedded in the offer card: recomputing at click time
+            // can resolve a different volunteer/quest than the one the GM read and approved.
+            val pinnedKey = button.dataset["volunteerKey"]?.takeIf { it.isNotBlank() }
+            val topPick = pinnedKey?.let { pk -> companions.find { (it.actorUuid ?: it.name) == pk } }
+                ?: CompanionAutonomy.selectAutonomousCompanions(companions.toList()).firstOrNull()
             if (topPick != null) {
                 val key = topPick.actorUuid ?: topPick.name
                 val proposal = computeAutonomousProposal(topPick, kingdom.companionPersonalQuests ?: emptyArray())
+                val pinnedActivityId = button.dataset["activityId"]?.takeIf { it.isNotBlank() } ?: proposal.activityId
+                val pinnedQuestId = button.dataset["questId"]?.takeIf { it.isNotBlank() } ?: proposal.targetQuestId
                 AddExpeditionDialog(
                     companions = companions,
                     preselectedId = key,
-                    preselectedActivityId = proposal.activityId,
-                    preselectedQuestId = proposal.targetQuestId,
+                    preselectedActivityId = pinnedActivityId,
+                    preselectedQuestId = pinnedQuestId,
                     quests = kingdom.companionPersonalQuests ?: emptyArray(),
                     factions = kingdom.groups,
                     destinations = buildExpeditionDestinationOptions(kingdom),
                 ) { expedition ->
-                    buildPromise {
-                        val current = actor.getKingdom() ?: return@buildPromise
-                        val updatedComps = (current.companions ?: emptyArray()).copyOf()
-                        if (launchExpedition(current, expedition, updatedComps)) {
-                            current.companions = updatedComps
-                            actor.setKingdom(current)
-                            logExpeditionLaunched(expedition, updatedComps)
-                            postChatTemplate(
-                                templatePath = "chatmessages/companion-autonomy-approved.hbs",
-                                templateContext = js.objects.recordOf(
-                                    "name" to topPick.name,
-                                )
+                    val current = actor.getKingdom() ?: return@AddExpeditionDialog false
+                    val updatedComps = (current.companions ?: emptyArray()).copyOf()
+                    if (launchExpedition(current, expedition, updatedComps)) {
+                        current.companions = updatedComps
+                        actor.setKingdom(current)
+                        logExpeditionLaunched(expedition, updatedComps)
+                        postChatTemplate(
+                            templatePath = "chatmessages/companion-autonomy-approved.hbs",
+                            templateContext = js.objects.recordOf(
+                                "name" to topPick.name,
                             )
-                        } else {
-                            ui.notifications.warn(t("kingdom.expeditions.tooMany"))
-                        }
+                        )
+                        true
+                    } else {
+                        ui.notifications.warn(t("kingdom.expeditions.tooMany"))
+                        false
                     }
                 }.launch()
             }
@@ -412,16 +443,16 @@ private val buttons = listOf(
                 factions = kingdom.groups,
                 destinations = buildExpeditionDestinationOptions(kingdom),
             ) { expedition ->
-                buildPromise {
-                    val current = actor.getKingdom() ?: return@buildPromise
-                    val updatedComps = (current.companions ?: emptyArray()).copyOf()
-                    if (launchExpedition(current, expedition, updatedComps)) {
-                        current.companions = updatedComps
-                        actor.setKingdom(current)
-                        logExpeditionLaunched(expedition, updatedComps)
-                    } else {
-                        ui.notifications.warn(t("kingdom.expeditions.tooMany"))
-                    }
+                val current = actor.getKingdom() ?: return@AddExpeditionDialog false
+                val updatedComps = (current.companions ?: emptyArray()).copyOf()
+                if (launchExpedition(current, expedition, updatedComps)) {
+                    current.companions = updatedComps
+                    actor.setKingdom(current)
+                    logExpeditionLaunched(expedition, updatedComps)
+                    true
+                } else {
+                    ui.notifications.warn(t("kingdom.expeditions.tooMany"))
+                    false
                 }
             }.launch()
         }
