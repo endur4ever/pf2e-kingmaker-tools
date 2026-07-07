@@ -3,6 +3,8 @@ package at.posselt.pfrpg2e.kingdom
 import at.posselt.pfrpg2e.actor.hasAttribute
 import at.posselt.pfrpg2e.actor.rollCheck
 import at.posselt.pfrpg2e.camping.ExpeditionResolverEngine
+import at.posselt.pfrpg2e.expedition.getExpeditionActivities
+import at.posselt.pfrpg2e.expedition.getOutcome
 import at.posselt.pfrpg2e.companion.companionDiscoveryThresholds
 import at.posselt.pfrpg2e.data.actor.Skill
 import at.posselt.pfrpg2e.data.checks.DegreeOfSuccess
@@ -21,6 +23,8 @@ import at.posselt.pfrpg2e.companion.accruedExpeditionXp
 import at.posselt.pfrpg2e.companion.applyExpeditionParticipantReward
 import at.posselt.pfrpg2e.companion.applyPersonalQuestReward
 import at.posselt.pfrpg2e.companion.canApplyExpeditionReward
+import at.posselt.pfrpg2e.companion.expeditionActivityReward
+import at.posselt.pfrpg2e.companion.expeditionActivitySkills
 import at.posselt.pfrpg2e.companion.lootTierToResourcePoints
 import at.posselt.pfrpg2e.companion.personalQuestCompletionSnapshot
 import at.posselt.pfrpg2e.companion.selectRewardQuest
@@ -40,6 +44,7 @@ import com.foundryvtt.pf2e.actor.PF2ENpc
 import com.foundryvtt.pf2e.actor.PF2EParty
 import js.objects.recordOf
 import kotlinx.coroutines.await
+import kotlin.math.roundToInt
 
 /**
  * Impure wrapper that rolls the resolution check at the edge of an expedition
@@ -76,12 +81,17 @@ suspend fun offerExpeditionResolution(
         fromUuidOfTypes<PF2ECharacter>(it)
     }
 
+    // Roll the activity's OWN declared skills (diplomacy -> Diplomacy, hunt -> Survival, ...) in
+    // catalog order, falling back to the generic exploration trio when the activity declares no
+    // usable skill or the actor lacks them all.
+    val activity = getExpeditionActivities().find { it.id == expedition.activityId }
+    val activitySkills = activity?.skills?.map { it.name }?.let { expeditionActivitySkills(it) } ?: emptyList()
+    val skillCandidates = (activitySkills + listOf(Skill.NATURE, Skill.SURVIVAL, Skill.ATHLETICS)).distinct()
+
     val degree: DegreeOfSuccess = if (linkedActor != null) {
-        // Linked: roll the participant's best exploration skill check.
-        // Try Nature → Survival → Athletics; if none resolve, fall back
+        // Linked: roll the participant's best matching skill check; if none resolve, fall back
         // to a flat d20 + level modifier.
-        val skill = listOf(Skill.NATURE, Skill.SURVIVAL, Skill.ATHLETICS)
-            .firstOrNull { linkedActor.hasAttribute(it) }
+        val skill = skillCandidates.firstOrNull { linkedActor.hasAttribute(it) }
         // bandBonus is a circumstance BONUS on the roll, modelled as a lower effective DC
         // (consistent with the unlinked d20Resolve(modifier = bandBonus) path).
         val promise = skill?.let { linkedActor.rollCheck(it, dc - bandBonus, rollMode = RollMode.GMROLL) }
@@ -113,13 +123,24 @@ suspend fun offerExpeditionResolution(
         degree = degree,
     )
 
+    // Activity-specific reward layer (hunt->food, craft->lumber/ore, train->xp mult, rest->heal,
+    // scout->intel, treasure-hunt->loot swing). Pure; accrued here, spent at reward apply.
+    val activityReward = expeditionActivityReward(expedition.activityId, expedition.tier, degree)
+
     // When companion leveling is disabled, zero out XP so the reward offer shows 0
     // and clicking "Apply Reward" gives no XP. Expeditions still resolve for flavor.
     val levelingEnabled = Pfrpg2eKingdomCampingWeatherSettings.getEnableCompanionLeveling()
-    expedition.accruedXp = accruedExpeditionXp(result.xpAwarded, levelingEnabled)
+    val multipliedXp = (result.xpAwarded * activityReward.xpMultiplier).roundToInt()
+    expedition.accruedXp = accruedExpeditionXp(multipliedXp, levelingEnabled)
     expedition.accruedInfluenceDelta = result.influenceDelta
     expedition.accruedInjuries = result.injuryConditions
-    expedition.lootTier = result.lootTier
+    expedition.lootTier = activityReward.lootTierOverride ?: result.lootTier
+    expedition.accruedFood = activityReward.commodities["food"]
+    expedition.accruedLumber = activityReward.commodities["lumber"]
+    expedition.accruedOre = activityReward.commodities["ore"]
+    expedition.accruedInjuryDaysReduction = activityReward.injuryDaysReduction.takeIf { it > 0 }
+    expedition.accruedIntelGmNote = activityReward.intelNoteKey
+    expedition.accruedBonusLootRp = activityReward.bonusLootRp.takeIf { it > 0 }
     expedition.outcomeDegree = degree.value
     // Diplomacy expeditions move their target faction's standing on resolution; every other
     // activity leaves it at 0. Application happens when the GM applies the reward.
@@ -129,7 +150,9 @@ suspend fun offerExpeditionResolution(
     } else {
         0
     }
-    var gmNotes = result.gmNotes
+    // Prefer the activity catalog's per-degree outcome text (already localized) over the engine
+    // placeholder; fall back to the engine note when the activity has none.
+    var gmNotes = activity?.getOutcome(degree)?.message?.takeIf { it.isNotBlank() } ?: result.gmNotes
     if (expedition.activityId == "personal-quest" && degree == DegreeOfSuccess.CRITICAL_FAILURE) {
         val complicationText = t("kingdom.companion.quest.complication")
         gmNotes = if (gmNotes.isNotBlank()) {
@@ -405,11 +428,45 @@ suspend fun applyExpeditionRewardToKingdom(
         }
     }
 
-    // Loot tier -> kingdom resource points.
-    val lootRp = lootTierToResourcePoints(expedition.lootTier)
+    // Loot tier -> kingdom resource points (+ treasure-hunt jackpot bonus).
+    val lootRp = lootTierToResourcePoints(expedition.lootTier) + (expedition.accruedBonusLootRp ?: 0)
     if (lootRp > 0) {
         kingdom.resourcePoints.now = (kingdom.resourcePoints.now + lootRp).coerceAtLeast(0)
         postChatMessage(t("kingdom.expeditionLootApplied", recordOf("rp" to lootRp)))
+    }
+
+    // Activity commodity grants -> kingdom stores (hunt: food; craft: lumber/ore). Small.
+    val food = expedition.accruedFood ?: 0
+    val lumber = expedition.accruedLumber ?: 0
+    val ore = expedition.accruedOre ?: 0
+    if (food > 0 || lumber > 0 || ore > 0) {
+        val now = kingdom.commodities.now
+        now.food = (now.food + food).coerceAtLeast(0)
+        now.lumber = (now.lumber + lumber).coerceAtLeast(0)
+        now.ore = (now.ore + ore).coerceAtLeast(0)
+        postChatMessage(t("kingdom.expeditionCommoditiesApplied", recordOf("food" to food, "lumber" to lumber, "ore" to ore)))
+    }
+
+    // Rest: shave recovery days off every injured companion kingdom-wide (a recuperation mission).
+    val healDays = expedition.accruedInjuryDaysReduction ?: 0
+    if (healDays > 0) {
+        kingdom.companions?.forEach { c ->
+            val remaining = c.injuryDaysRemaining
+            if (remaining != null) {
+                val reduced = remaining - healDays
+                c.injuryDaysRemaining = if (reduced <= 0) null else reduced
+                if (reduced <= 0) {
+                    c.expeditionStatus = "available"
+                    c.campAvailable = true
+                }
+            }
+        }
+        postChatMessage(t("kingdom.expeditionRestHealed", recordOf("days" to healDays)))
+    }
+
+    // Scout intel: a GM-facing narrative note (i18n key resolved here).
+    expedition.accruedIntelGmNote?.let { key ->
+        postChatMessage(t(key))
     }
 
     // Diplomacy standing -> target faction (mirrors the manual faction-adjust apply path:

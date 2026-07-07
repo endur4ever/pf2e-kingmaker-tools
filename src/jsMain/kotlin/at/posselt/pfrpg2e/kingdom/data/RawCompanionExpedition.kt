@@ -60,6 +60,20 @@ external interface RawCompanionExpedition {
     var rewardApplied: Boolean
     /** ISO timestamp of creation. */
     var createdAt: String?
+
+    // ── Activity-specific accrued rewards (populated at resolution, spent at reward apply) ──
+    /** Food commodity from a successful hunt. */
+    var accruedFood: Int?
+    /** Lumber commodity from a successful craft. */
+    var accruedLumber: Int?
+    /** Ore commodity from a successful craft. */
+    var accruedOre: Int?
+    /** Days to shave off injured companions' recovery (successful rest). */
+    var accruedInjuryDaysReduction: Int?
+    /** i18n key for a GM intel note (successful scout). */
+    var accruedIntelGmNote: String?
+    /** Bonus resource points on top of loot (treasure-hunt crit). */
+    var accruedBonusLootRp: Int?
 }
 
 /**

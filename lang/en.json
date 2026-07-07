@@ -737,6 +737,8 @@
       "companionRecovered": "{name} has recovered from their injuries.",
       "expeditionRewardApplied": "Expedition rewards for {name} have been applied.",
       "expeditionLootApplied": "Recovered {rp} resource points from the expedition's haul.",
+      "expeditionCommoditiesApplied": "The expedition brought home commodities: {food} food, {lumber} lumber, {ore} ore.",
+      "expeditionRestHealed": "The recuperation expedition shaved {days} day(s) off recovering companions.",
       "expeditionFactionStandingApplied": "Diplomacy expedition shifted {name}'s standing by {delta}.",
       "expeditionFactionStandingMissing": "Faction \"{name}\" no longer exists, so the expedition's standing change ({delta}) was not applied — adjust it manually if needed.",
       "expeditionBatchResolved": "Resolved {count} expedition rewards.",
@@ -1099,6 +1101,11 @@
         "destinationHubs": "Faction Trade Hubs",
         "destinationExplored": "Explored Hexes",
         "destinationUncharted": "Uncharted Wilderness",
+        "intel": {
+          "routine": "Scouts return with a rough sketch of the nearby trails and a rumor or two — enough for the GM to seed a minor lead.",
+          "standard": "Scouts map the region in detail: a hidden cache, a wary neighbor, and the lay of the land. The GM gains a solid hook.",
+          "perilous": "Scouts penetrate deep and return with hard intelligence — an enemy's strength, a secret way, a looming threat. The GM gains a major revelation."
+        },
         "companionsFallback": "Companions",
         "standingDelta": "Faction standing change from this expedition",
         "tooMany": "Too many active expeditions (max 3). Resolve or cancel one before launching another.",
