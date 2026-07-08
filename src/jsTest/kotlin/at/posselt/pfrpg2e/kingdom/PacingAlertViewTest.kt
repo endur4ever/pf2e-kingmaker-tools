@@ -6,6 +6,7 @@ import at.posselt.pfrpg2e.kingdom.data.RawPacingAlert
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class PacingAlertViewTest {
@@ -73,5 +74,36 @@ class PacingAlertViewTest {
             arrayOf(alert("a", PacingAlertType.STAGNATION, PacingAlertSeverity.WARNING, turnCreated = 1))
         )
         assertEquals(PacingAlertType.STAGNATION.i18nKey, view.alerts.single().messageKey)
+    }
+
+    @Test
+    fun preservesRelatedEntityIdInViewModel() {
+        val relatedEntityId = "settlement-456"
+        val rawAlert = RawPacingAlert(
+            id = "alert-1",
+            type = PacingAlertType.LOOT_IMBALANCE.value,
+            severity = PacingAlertSeverity.WARNING.value,
+            message = PacingAlertType.LOOT_IMBALANCE.i18nKey,
+            turnCreated = 5,
+            relatedEntityId = relatedEntityId,
+        )
+        val view = buildPacingAlertView(arrayOf(rawAlert))
+        assertEquals(1, view.alerts.size)
+        assertEquals(relatedEntityId, view.alerts.single().relatedEntityId)
+    }
+
+    @Test
+    fun nullRelatedEntityIdDefaultsToNullInViewModel() {
+        val rawAlert = RawPacingAlert(
+            id = "alert-2",
+            type = PacingAlertType.LEVEL_MISMATCH.value,
+            severity = PacingAlertSeverity.WARNING.value,
+            message = PacingAlertType.LEVEL_MISMATCH.i18nKey,
+            turnCreated = 3,
+            relatedEntityId = null,
+        )
+        val view = buildPacingAlertView(arrayOf(rawAlert))
+        assertEquals(1, view.alerts.size)
+        assertNull(view.alerts.single().relatedEntityId)
     }
 }

@@ -16,6 +16,7 @@ suspend fun postPacingAlertChat(alert: RawPacingAlert) {
     context.message = t(alert.message)
     context.severity = alert.severity
     context.severityLabel = PacingAlertSeverity.fromString(alert.severity)?.let { t(it.i18nKey) } ?: alert.severity
+    context.relatedEntityId = alert.relatedEntityId
     postChatTemplate(
         templatePath = "chatmessages/pacing-alert.hbs",
         templateContext = context,

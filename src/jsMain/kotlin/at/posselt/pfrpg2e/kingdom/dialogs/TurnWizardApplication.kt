@@ -434,14 +434,15 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
 
         // Loot imbalance — highest settlement item-purchase level vs the target level.
         if (kingdom.settings.pacingLootImbalanceEnabled()) {
-            val maxItemAccess = settlements.allSettlements.maxOfOrNull { it.itemPurchaseLevel }
-            if (maxItemAccess != null) {
+            val offendingSettlement = settlements.allSettlements.maxByOrNull { it.itemPurchaseLevel }
+            if (offendingSettlement != null) {
                 val lootTrack = trackLootImbalance(
-                    itemAccessLevel = maxItemAccess,
+                    itemAccessLevel = offendingSettlement.itemPurchaseLevel,
                     partyLevel = targetLevel,
                     range = kingdom.settings.pacingLootImbalanceRange(),
                     previousSeverity = kingdom.pacingLastLootImbalance,
                     turn = currentTurn,
+                    relatedEntityId = offendingSettlement.id,
                 )
                 kingdom.pacingLastLootImbalance = lootTrack.severity
                 lootTrack.alert?.let { firedPacingAlerts.add(it) }

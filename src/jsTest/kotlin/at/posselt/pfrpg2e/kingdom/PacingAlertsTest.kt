@@ -255,6 +255,26 @@ class PacingAlertsTest {
     }
 
     @Test
+    fun lootImbalancePropagatesRelatedEntityId() {
+        val settlementId = "settlement-123"
+        val alert = evaluateLootImbalance(
+            itemAccessLevel = 9, partyLevel = 5, range = 2, turn = 1,
+            relatedEntityId = settlementId,
+        )
+        assertNotNull(alert)
+        assertEquals(settlementId, alert.relatedEntityId)
+
+        // Track function should also propagate it
+        val track = trackLootImbalance(
+            itemAccessLevel = 9, partyLevel = 5, range = 2,
+            previousSeverity = null, turn = 1,
+            relatedEntityId = settlementId,
+        )
+        assertNotNull(track.alert)
+        assertEquals(settlementId, track.alert.relatedEntityId)
+    }
+
+    @Test
     fun turnGapTrackerFiresOnlyAtExactCrossings() {
         // below threshold: silent
         assertNull(trackTurnGap(turnsSinceLastEvent = 9, maxTurnGap = 10, turn = 1))

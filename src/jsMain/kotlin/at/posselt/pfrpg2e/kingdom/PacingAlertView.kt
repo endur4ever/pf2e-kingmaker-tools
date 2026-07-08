@@ -21,6 +21,7 @@ data class PacingAlertItemView(
     val messageKey: String,
     val turnCreated: Int,
     val isCritical: Boolean,
+    val relatedEntityId: String? = null,
 )
 
 data class PacingAlertView(
@@ -41,6 +42,7 @@ fun buildPacingAlertView(alerts: Array<RawPacingAlert>?): PacingAlertView {
                 messageKey = it.message,
                 turnCreated = it.turnCreated,
                 isCritical = it.severity == PacingAlertSeverity.CRITICAL.value,
+                relatedEntityId = it.relatedEntityId,
             )
         }
     return PacingAlertView(

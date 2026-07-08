@@ -2,5 +2,12 @@
 <div class="km-pacing-alert km-pacing-alert--{{severity}}">
     <p><strong>{{severityLabel}}</strong></p>
     <p>{{message}}</p>
+    {{#if relatedEntityId}}
+        <p class="km-pacing-alert__jump">
+            <button type="button" data-action="view-settlement" data-id="{{relatedEntityId}}">
+                <i class="fa-solid fa-location-dot"></i> {{localizeKM "chatMessages.pacingAlert.jumpToSettlement"}}
+            </button>
+        </p>
+    {{/if}}
     <p class="km-pacing-alert__hint"><em>{{localizeKM "chatMessages.pacingAlert.hint"}}</em></p>
 </div>

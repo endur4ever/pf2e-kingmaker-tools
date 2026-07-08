@@ -20,6 +20,7 @@ external interface PacingAlertItemContext {
     val message: String
     val turnCreated: Int
     val isCritical: Boolean
+    val relatedEntityId: String?
 }
 
 @JsPlainObject
@@ -40,6 +41,7 @@ fun buildPacingAlertContext(view: PacingAlertView): PacingAlertContext {
             message = t(item.messageKey),
             turnCreated = item.turnCreated,
             isCritical = item.isCritical,
+            relatedEntityId = item.relatedEntityId,
         )
     }.toTypedArray()
     return PacingAlertContext(

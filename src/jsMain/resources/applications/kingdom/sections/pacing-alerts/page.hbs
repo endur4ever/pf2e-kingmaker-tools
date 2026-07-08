@@ -25,6 +25,11 @@
                             </div>
                             <p class="km-pacing-alert-card__message">{{this.message}}</p>
                         </div>
+                        {{#if this.relatedEntityId}}
+                            <button type="button" class="km-pacing-alert-card__jump" data-action="view-settlement" data-id="{{this.relatedEntityId}}" title="{{localizeKM "pacingAlerts.jumpToSettlement"}}">
+                                <i class="fa-solid fa-location-dot"></i>
+                            </button>
+                        {{/if}}
                         {{#if ../isGM}}
                             <button type="button" class="km-pacing-alert-card__dismiss" data-action="dismiss-pacing-alert" data-id="{{this.id}}" title="{{localizeKM "pacingAlerts.dismiss"}}">
                                 <i class="fa-solid fa-xmark"></i>

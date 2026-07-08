@@ -1982,7 +1982,8 @@
       },
       "pacingAlert": {
         "title": "Pacing Advisory",
-        "hint": "Advisory only — adjust the campaign's pressure curve if this looks off."
+        "hint": "Advisory only — adjust the campaign's pressure curve if this looks off.",
+        "jumpToSettlement": "Jump to Settlement"
       },
       "expeditionRecap": {
         "title": "Companion Expedition Complete: {title}",
@@ -7040,7 +7041,8 @@
       "empty": "No pacing concerns — the campaign looks balanced.",
       "turnLabel": "Turn",
       "dismiss": "Dismiss",
-      "clearAll": "Clear All"
+      "clearAll": "Clear All",
+      "jumpToSettlement": "Jump to Settlement"
     },
     "turnWizard": {
       "checklist": {
