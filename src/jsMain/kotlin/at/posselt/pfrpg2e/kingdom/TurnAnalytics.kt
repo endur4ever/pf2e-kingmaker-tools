@@ -31,6 +31,7 @@ fun extractSeries(history: Array<RawTurnRecord>, metric: String, limit: Int?): L
             "fame" -> record.fame.toDouble()
             "xpAwarded" -> record.xpAwarded?.toDouble()
             "warPressure" -> record.warPressure?.toDouble()
+            "pressurePerTurn" -> record.pressurePerTurn?.toDouble()
             "level" -> record.level?.toDouble()
             "size" -> record.size?.toDouble()
             "ruinCorruption" -> record.ruinCorruption?.toDouble()

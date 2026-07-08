@@ -17,7 +17,8 @@ class TurnAnalyticsTest {
         consumption: Int = 0,
         level: Int? = null,
         size: Int? = null,
-        ruinCorruption: Int? = null
+        ruinCorruption: Int? = null,
+        pressurePerTurn: Int? = null
     ): RawTurnRecord = buildTurnRecord(
         turn = turn,
         timestamp = "2026-06-16T19:00:00Z",
@@ -27,34 +28,45 @@ class TurnAnalyticsTest {
         unrest = unrest,
         level = level,
         size = size,
-        ruinCorruption = ruinCorruption
+        ruinCorruption = ruinCorruption,
+        pressurePerTurn = pressurePerTurn
     )
 
     @Test
     fun testExtractSeries() {
         val history = arrayOf(
-            testRecord(1, unrest = 2, fame = 10, level = 1),
-            testRecord(2, unrest = 4, fame = 12, level = null),
-            testRecord(3, unrest = 1, fame = 15, level = 2)
+            testRecord(1, unrest = 2, fame = 10, level = 1, pressurePerTurn = 5),
+            testRecord(2, unrest = 4, fame = 12, level = null, pressurePerTurn = -2),
+            testRecord(3, unrest = 1, fame = 15, level = 2, pressurePerTurn = 0),
+            testRecord(4, unrest = 3, fame = 18, level = 2, pressurePerTurn = null)
         )
 
         val unrestSeries = extractSeries(history, "unrest", limit = null)
-        assertEquals(3, unrestSeries.size)
+        assertEquals(4, unrestSeries.size)
         assertEquals(Pair(1, 2.0), unrestSeries[0])
         assertEquals(Pair(2, 4.0), unrestSeries[1])
         assertEquals(Pair(3, 1.0), unrestSeries[2])
+        assertEquals(Pair(4, 3.0), unrestSeries[3])
 
         // Check nullable filtering
         val levelSeries = extractSeries(history, "level", limit = null)
-        assertEquals(2, levelSeries.size)
+        assertEquals(3, levelSeries.size)
         assertEquals(Pair(1, 1.0), levelSeries[0])
         assertEquals(Pair(3, 2.0), levelSeries[1])
+        assertEquals(Pair(4, 2.0), levelSeries[2])
+
+        // Check pressurePerTurn series (handles null values gracefully)
+        val pressurePerTurnSeries = extractSeries(history, "pressurePerTurn", limit = null)
+        assertEquals(3, pressurePerTurnSeries.size)
+        assertEquals(Pair(1, 5.0), pressurePerTurnSeries[0])
+        assertEquals(Pair(2, -2.0), pressurePerTurnSeries[1])
+        assertEquals(Pair(3, 0.0), pressurePerTurnSeries[2])
 
         // Check limit/windowing
         val windowedUnrest = extractSeries(history, "unrest", limit = 2)
         assertEquals(2, windowedUnrest.size)
-        assertEquals(Pair(2, 4.0), windowedUnrest[0])
-        assertEquals(Pair(3, 1.0), windowedUnrest[1])
+        assertEquals(Pair(3, 1.0), windowedUnrest[0])
+        assertEquals(Pair(4, 3.0), windowedUnrest[1])
     }
 
     @Test

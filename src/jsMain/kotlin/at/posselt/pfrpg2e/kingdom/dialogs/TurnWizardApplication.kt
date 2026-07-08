@@ -470,6 +470,7 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
     )
 
     val warPressureNow = kingdom.warPressure?.currentPressure
+    val warPressurePerTurn = kingdom.warPressure?.pressurePerTurn
     kingdom.turnHistory = appendTurnRecord(
         history = kingdom.turnHistory,
         record = buildTurnRecord(
@@ -482,6 +483,7 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
             xpAwarded = tickResult.xpAwarded,
             clockEvents = clockEventNames,
             warPressure = warPressureNow,
+            pressurePerTurn = warPressurePerTurn,
             level = kingdom.level,
             size = realm.size,
             ruinCorruption = kingdom.ruin.corruption.value,

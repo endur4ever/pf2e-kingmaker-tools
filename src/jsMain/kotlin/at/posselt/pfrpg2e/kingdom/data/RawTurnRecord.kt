@@ -20,6 +20,7 @@ external interface RawTurnRecord {
     var xpAwarded: Int?
     var clockEvents: Array<String>?
     var warPressure: Int?
+    var pressurePerTurn: Int?
     var notes: String?
     var level: Int?
     var size: Int?
