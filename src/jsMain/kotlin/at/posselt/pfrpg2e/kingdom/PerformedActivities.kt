@@ -49,6 +49,16 @@ suspend fun KingdomActor.toggleActivityPerformed(activityId: String) {
     setAppFlag(TURN_WIZARD_STATE, state)
 }
 
+/**
+ * Restore the ENTIRE turn-wizard-state flag (performed-activity counts + checklist etc.) from a
+ * pre-tick snapshot — used by undo-end-turn so per-phase activity caps come back exactly. A null
+ * snapshot means there was no flag before the turn, so nothing to restore.
+ */
+suspend fun KingdomActor.restoreTurnWizardState(state: Any?) {
+    if (state == null) return
+    setAppFlag(TURN_WIZARD_STATE, state)
+}
+
 /** Clears all performed counts, preserving any other turn-wizard state. Called at End Turn. */
 suspend fun KingdomActor.clearPerformedActivities() {
     val state = getAppFlag<KingdomActor, dynamic>(TURN_WIZARD_STATE) ?: return

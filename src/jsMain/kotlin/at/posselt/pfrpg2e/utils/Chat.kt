@@ -104,11 +104,14 @@ fun bindChatClick(
         .mapNotNull { document.getElementById(it) }
         .forEach { elem ->
             elem.addEventListener("click", { event ->
-                val target = event.target
-                if (target is HTMLElement && target.matches(targetSelector)) {
-                    target.closest(parentSelector)
+                // Resolve descendant clicks (e.g. a click on the <i> icon INSIDE a button) up to
+                // the matching button; closest() returns the element itself when it already matches,
+                // so this is safe for text-only buttons too.
+                val clicked = (event.target as? HTMLElement)?.closest(targetSelector)?.takeIfInstance<HTMLElement>()
+                if (clicked != null) {
+                    clicked.closest(parentSelector)
                         ?.takeIfInstance<HTMLElement>()
-                        ?.let { callback(event, target, it) }
+                        ?.let { callback(event, clicked, it) }
                 }
             })
         }

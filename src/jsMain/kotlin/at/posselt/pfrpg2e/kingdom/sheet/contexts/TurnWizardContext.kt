@@ -64,6 +64,7 @@ external interface TurnWizardContext : ValidatedHandlebarsContext {
     val canCommit: Boolean
     /** Whether an undo snapshot exists for the most recent End Turn. */
     val hasUndoSnapshot: Boolean
+    val snapshotTurn: Int
     /** Actor UUID for the kingdom, used by the undo button data attribute. */
     val actorUuid: String
 }

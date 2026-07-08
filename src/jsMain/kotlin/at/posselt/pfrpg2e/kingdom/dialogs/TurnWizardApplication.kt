@@ -6,6 +6,8 @@ import com.foundryvtt.core.abstract.DatabaseUpdateOperation
 import at.posselt.pfrpg2e.kingdom.KingdomActor
 import at.posselt.pfrpg2e.kingdom.KingdomData
 import at.posselt.pfrpg2e.kingdom.clearPerformedActivities
+import at.posselt.pfrpg2e.kingdom.restoreTurnWizardState
+import com.foundryvtt.pf2e.item.PF2EItem
 import at.posselt.pfrpg2e.kingdom.getPerformedActivities
 import at.posselt.pfrpg2e.kingdom.getActivity
 import at.posselt.pfrpg2e.kingdom.formatTurnGazette
@@ -186,9 +188,18 @@ fun runKingdomTurnTick(kingdom: KingdomData, storage: CommodityStorage, currentT
     )
 
 suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData): TickResult {
-    // Capture snapshot BEFORE any mutations — enables "undo-end-turn" (exact revert).
+    // Capture snapshot BEFORE any mutations — enables "undo-end-turn" (exact revert). Must cover
+    // EVERYTHING End Turn mutates, not just the kingdom flag: the turn-wizard-state flag (performed
+    // activity counts, cleared below) and the ids of shipment items added to the party inventory
+    // (collected during delivery and written back into the snapshot afterward).
     val snapshotTurn = (kingdom.currentTurn ?: 0) + 1
-    val snapshot = deepClone(kingdom).let { EndTurnSnapshot(kingdom = it, snapshotTurn = snapshotTurn) }
+    val deliveredItemIds = mutableListOf<String>()
+    val snapshot = EndTurnSnapshot(
+        kingdom = deepClone(kingdom),
+        snapshotTurn = snapshotTurn,
+        turnWizardState = actor.getAppFlag<KingdomActor, Any?>("turn-wizard-state")?.let { deepClone(it) },
+        deliveredItemIds = emptyArray(),
+    )
     actor.setAppFlag("lastTurnSnapshot", snapshot)
 
     val currentTurn = snapshotTurn
@@ -354,10 +365,17 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
             itemData.system.bulk.value = shipment.itemBulk
             itemData.system.price.value.gp = shipment.itemPriceGp
             actor.addToInventory(itemData.unsafeCast<com.foundryvtt.core.AnyObject>()).await()
+                ?.id?.let { deliveredItemIds.add(it) }
         }
 
         // Save remaining in-transit shipments
         kingdom.shipments = shipmentResult.remaining.toTypedArray()
+
+        // Record delivered item ids into the snapshot so undo can remove them (no double-deliver).
+        if (deliveredItemIds.isNotEmpty()) {
+            snapshot.deliveredItemIds = deliveredItemIds.toTypedArray()
+            actor.setAppFlag("lastTurnSnapshot", snapshot)
+        }
         shipmentEvents = shipmentResult.events
 
         // Generate chat logs
@@ -543,6 +561,7 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
     endTurnContext.actorUuid = actor.uuid
     // Snapshot exists after End Turn (unless undone), so the chat card can show the undo button.
     endTurnContext.hasUndoSnapshot = true
+    endTurnContext.snapshotTurn = snapshotTurn
     endTurnContext.standingChanges = tickResult.changes
         .filter { it.category == "factionStanding" }
         .map { change ->
@@ -574,6 +593,44 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
     )
 
     return tickResult
+}
+
+/**
+ * Revert the most recent End Turn from the `lastTurnSnapshot` flag. Restores the kingdom AND the
+ * turn-wizard-state flag (performed-activity counts) AND deletes the party-inventory items that
+ * shipment delivery created this turn, so the revert is EXACT and re-running End Turn cannot
+ * double-deliver. Does NOT un-post chat messages or un-log the calendar (documented limitation).
+ * Returns true if an undo happened. Callers must GM-gate.
+ */
+suspend fun undoEndTurn(game: Game, actor: KingdomActor): Boolean {
+    val snap = actor.getAppFlag<KingdomActor, Any?>("lastTurnSnapshot")?.unsafeCast<EndTurnSnapshot>() ?: return false
+    // The erased external-interface cast can't detect a malformed flag; validate shape (undefined == null in JS).
+    val d = snap.asDynamic()
+    if (d.kingdom == null || d.snapshotTurn == null) {
+        actor.unsetAppFlag("lastTurnSnapshot")
+        return false
+    }
+    val kingdom = actor.getKingdom() ?: return false
+    // Only the most recent End Turn is undoable.
+    if ((kingdom.currentTurn ?: 0) != snap.snapshotTurn) return false
+
+    actor.setKingdom(deepClone(snap.kingdom))
+    actor.restoreTurnWizardState(snap.turnWizardState)
+    snap.deliveredItemIds?.takeIf { it.isNotEmpty() }?.let { ids ->
+        actor.deleteEmbeddedDocuments<PF2EItem>("Item", ids).await()
+    }
+    actor.unsetAppFlag("lastTurnSnapshot")
+
+    val gmUserIds = game.users.filter { it.isGM }.mapNotNull { it.id }.toTypedArray()
+    val ctx = js("{}")
+    ctx.turn = snap.snapshotTurn
+    ctx.kingdomName = snap.kingdom.name
+    if (gmUserIds.isNotEmpty()) {
+        postChatTemplate(templatePath = "chatmessages/end-turn-undo.hbs", templateContext = ctx, whisper = gmUserIds)
+    } else {
+        postChatMessage(t("chatMessages.endTurn.endTurnUndone", recordOf("turn" to snap.snapshotTurn.toString())))
+    }
+    return true
 }
 
 class TurnWizardApplication(
@@ -659,6 +716,15 @@ class TurnWizardApplication(
             ?.addEventListener("click", {
                 buildPromise {
                     cancel()
+                }
+            })
+
+        htmlElement.querySelector("button[data-action='undo-end-turn']")
+            ?.addEventListener("click", {
+                buildPromise {
+                    if (game.user.isGM && undoEndTurn(game, kingdomActor)) {
+                        render()
+                    }
                 }
             })
     }
@@ -966,6 +1032,8 @@ class TurnWizardApplication(
                 showPreview = showPreview,
                 canCommit = canCommit,
                             hasUndoSnapshot = actor?.getAppFlag<KingdomActor, Any>("lastTurnSnapshot") != null,
+                            snapshotTurn = actor?.getAppFlag<KingdomActor, Any?>("lastTurnSnapshot")
+                                ?.unsafeCast<EndTurnSnapshot>()?.snapshotTurn ?: 0,
                             actorUuid = actor?.uuid ?: "",
             )
         }

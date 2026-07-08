@@ -745,7 +745,7 @@
       "companionQuestFailed": "Personal Quest Failed: {name} ran out of time to complete '{quest}'.",
       "sessionPrep": {
         "title": "Session Prep",
-        "help": "A read-only snapshot to prep before play: open quests, deadlines, unresolved events, hex hooks, and companion moments. GM-only sections are hidden from players.",
+        "help": "A read-only snapshot to prep before play: open quests, deadlines, unresolved events, hex hooks, companion moments, and pending encounters. GM-only sections are hidden from players.",
         "emptyAll": "Nothing to prepare — the kingdom is quiet for now.",
         "openQuests": "Open Quests",
         "noOpenQuests": "No open quests",
@@ -760,6 +760,10 @@
         "noCompanionMoments": "No active companion moments",
         "companionExpeditions": "Companion Expeditions",
         "noCompanionExpeditions": "No active companion expeditions",
+        "pendingEncounters": "Pending Encounters",
+        "noPendingEncounters": "No pending encounters",
+        "markAsRun": "Mark as Run",
+        "markAsRunTooltip": "Mark this queued encounter as run",
         "generateNarrative": "Generate Narrative",
         "generateNarrativeTooltip": "Generate a narrative recap of the session prep data",
         "narrativeEmpty": "No session prep data available to generate a narrative from.",
@@ -1898,6 +1902,8 @@
         "warThreatName": "{{group}} Aggression",
         "diplomacyQuestTitle": "Diplomatic Accord with {{group}}",
         "undoEndTurn": "Undo Last End Turn",
+        "undoStale": "This undo is out of date — another End Turn has happened since. Only the most recent End Turn can be undone.",
+        "undoNothing": "Nothing to undo — no End Turn snapshot is available.",
         "endTurnUndone": "Turn {turn} end reverted; kingdom state restored.",
         "endTurnUndoneTooltip": "Reverts kingdom state (RP, fame, commodities, unrest, quests, threats, clocks) to before End Turn. Does NOT remove chat messages or calendar notes."
       },
@@ -2000,7 +2006,8 @@
         "spawnedEvent": "Spawned kingdom event for threat {name}.",
         "queuedEncounter": "Encounter queued for hex {hexKey} linked to threat {name}.",
         "dismissed": "War threat {name} arrival dismissed.",
-        "eventMissing": "The war-threat-arrival kingdom event definition is missing — cannot spawn an event."
+        "eventMissing": "The war-threat-arrival kingdom event definition is missing — cannot spawn an event.",
+        "markedAsRun": "Pending encounter at hex {hexKey} marked as run."
       }
     },
     "displayBars": {

@@ -20,6 +20,7 @@ import at.posselt.pfrpg2e.kingdom.data.RawCompanionExpedition
 import at.posselt.pfrpg2e.kingdom.structures.StructureActor
 import at.posselt.pfrpg2e.kingdom.structures.validateUsingSchema
 import at.posselt.pfrpg2e.kingdom.data.EndTurnSnapshot
+import at.posselt.pfrpg2e.kingdom.dialogs.undoEndTurn
 import at.posselt.pfrpg2e.takeIfInstance
 import at.posselt.pfrpg2e.utils.bindChatClick
 import at.posselt.pfrpg2e.utils.buildPromise
@@ -489,33 +490,36 @@ private val buttons = listOf(
         }
     },
     ChatButton("km-undo-end-turn") { game, actor, event, button ->
-        // GM-only: revert the most recent End Turn using the exact snapshot.
+        // GM-only: revert the most recent End Turn via the shared undoEndTurn (restores kingdom +
+        // turn-wizard-state + deletes delivered shipment items, so undo is exact and re-running
+        // End Turn cannot double-deliver).
         if (!game.user.isGM) return@ChatButton
-        val snap = actor.getAppFlag<KingdomActor, dynamic>("lastTurnSnapshot") as? EndTurnSnapshot
-        if (snap == null) return@ChatButton
-        val kingdom = actor.getKingdom() ?: return@ChatButton
-        // Only allow undo if exactly one End Turn has happened since the snapshot.
-        val currentTurn = kingdom.currentTurn ?: 0
-        if (currentTurn != snap.snapshotTurn) return@ChatButton
-
-        // Restore the exact pre-End-Turn kingdom state.
-        val restoredKingdom = deepClone(snap.kingdom)
-        actor.setKingdom(restoredKingdom)
-        actor.unsetAppFlag("lastTurnSnapshot")
-
-        // Post a chat notice (GM-only whisper so players don't see the undo button).
-        val gmUserIds = game.users.filter { it.isGM }.mapNotNull { it.id }.toTypedArray()
-        if (gmUserIds.isNotEmpty()) {
-            val context = js("{}")
-            context.turn = currentTurn
-            context.kingdomName = restoredKingdom.name
-            postChatTemplate(
-                templatePath = "chatmessages/end-turn-undo.hbs",
-                templateContext = context,
-                whisper = gmUserIds,
-            )
-        } else {
-            postChatMessage(t("chatMessages.endTurn.endTurnUndone", recordOf("turn" to currentTurn.toString())))
+        val snap = actor.getAppFlag<KingdomActor, Any?>("lastTurnSnapshot")?.unsafeCast<EndTurnSnapshot>()
+        if (snap == null) {
+            ui.notifications.warn(t("chatMessages.endTurn.undoNothing"))
+            return@ChatButton
+        }
+        // A stale card (from an older End Turn) carries a different snapshot-turn than the live
+        // snapshot; clicking it would revert the LATEST turn, not the one the card shows — refuse.
+        val cardTurn = button.dataset["snapshotTurn"]?.toIntOrNull()
+        if (cardTurn != null && cardTurn != snap.snapshotTurn) {
+            ui.notifications.warn(t("chatMessages.endTurn.undoStale"))
+            return@ChatButton
+        }
+        if (!undoEndTurn(game, actor)) {
+            ui.notifications.warn(t("chatMessages.endTurn.undoStale"))
+        }
+    },
+    ChatButton("km-mark-pending-encounter-run") { game, actor, event, button ->
+        // GM-only: mark a queued war-threat encounter as run.
+        if (!game.user.isGM) return@ChatButton
+        val hexContentId = button.dataset["hexContentId"] ?: return@ChatButton
+        actor.getKingdom()?.let { kingdom ->
+            val hexContent = kingdom.hexContents?.find { it.id == hexContentId } ?: return@ChatButton
+            val threatName = kingdom.warThreats?.find { it.id == hexContent.linkedWarThreatId }?.name ?: "Unknown Threat"
+            hexContent.pendingEncounter = false
+            actor.setKingdom(kingdom)
+            postChatMessage(t("chatMessages.warThreatArrival.markedAsRun", recordOf("hexKey" to hexContent.hexKey)))
         }
     },
 )

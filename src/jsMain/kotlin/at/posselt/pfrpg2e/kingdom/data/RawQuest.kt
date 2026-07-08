@@ -48,6 +48,10 @@ external interface EndTurnSnapshot {
     var kingdom: KingdomData
     /** The turn number this snapshot was ending when the snapshot was taken (snapshotTurn == currentTurn at snapshot time). */
     var snapshotTurn: Int
+    /** The turn-wizard-state flag (performed-activity counts etc.) deep-cloned pre-tick; restored on undo. */
+    var turnWizardState: Any?
+    /** Ids of party-inventory items created by shipment delivery this turn; deleted on undo to avoid duplication. */
+    var deliveredItemIds: Array<String>?
 }
 
 @JsPlainObject
