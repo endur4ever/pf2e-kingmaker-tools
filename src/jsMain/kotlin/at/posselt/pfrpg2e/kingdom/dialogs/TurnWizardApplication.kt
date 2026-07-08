@@ -1031,10 +1031,10 @@ class TurnWizardApplication(
                 previewChanges = previewChanges,
                 showPreview = showPreview,
                 canCommit = canCommit,
-                            hasUndoSnapshot = actor?.getAppFlag<KingdomActor, Any>("lastTurnSnapshot") != null,
-                            snapshotTurn = actor?.getAppFlag<KingdomActor, Any?>("lastTurnSnapshot")
-                                ?.unsafeCast<EndTurnSnapshot>()?.snapshotTurn ?: 0,
-                            actorUuid = actor?.uuid ?: "",
+                hasUndoSnapshot = actor?.getAppFlag<KingdomActor, Any>("lastTurnSnapshot") != null,
+                snapshotTurn = actor?.getAppFlag<KingdomActor, Any?>("lastTurnSnapshot")
+                    ?.unsafeCast<EndTurnSnapshot>()?.snapshotTurn ?: 0,
+                actorUuid = actor?.uuid ?: "",
             )
         }
         

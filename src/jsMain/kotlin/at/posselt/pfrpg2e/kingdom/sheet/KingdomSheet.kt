@@ -1464,40 +1464,42 @@ class KingdomSheet(
             }
 
             "export-session-prep-to-journal" -> buildPromise {
-                try {
-                    val kingdom = getKingdom()
-                    val view = buildSessionPrepView(
-                        quests = kingdom.quests,
-                        clocks = kingdom.campaignClocks,
-                        events = kingdom.campaignKingdomEvents,
-                        hexContents = kingdom.hexContents,
-                        companionQuests = kingdom.companionPersonalQuests,
-                        isGM = game.user.isGM,
-                        turnHistory = kingdom.turnHistory,
-                        companionExpeditions = kingdom.companionExpeditions,
-                        companions = kingdom.companions,
-                    )
-                    val folder = SessionPrepJournalExporter.export(game, view)
-                    ui.notifications.info(t("kingdom.sessionPrep.exportSuccess", recordOf("folder" to folder)))
-                } catch (e: Throwable) {
-                    ui.notifications.error("Export failed: ${e.message}")
-                }
-            }
+                            try {
+                                val kingdom = getKingdom()
+                                val view = buildSessionPrepView(
+                                    quests = kingdom.quests,
+                                    clocks = kingdom.campaignClocks,
+                                    events = kingdom.campaignKingdomEvents,
+                                    hexContents = kingdom.hexContents,
+                                    companionQuests = kingdom.companionPersonalQuests,
+                                    isGM = game.user.isGM,
+                                    turnHistory = kingdom.turnHistory,
+                                    companionExpeditions = kingdom.companionExpeditions,
+                                    companions = kingdom.companions,
+                                    warThreats = kingdom.warThreats,
+                                )
+                                val folder = SessionPrepJournalExporter.export(game, view)
+                                ui.notifications.info(t("kingdom.sessionPrep.exportSuccess", recordOf("folder" to folder)))
+                            } catch (e: Throwable) {
+                                ui.notifications.error("Export failed: ${e.message}")
+                            }
+                        }
 
-            "generate-session-prep-narrative" -> buildPromise {
-                try {
-                    val kingdom = getKingdom()
-                    val view = buildSessionPrepView(
-                        quests = kingdom.quests,
-                        clocks = kingdom.campaignClocks,
-                        events = kingdom.campaignKingdomEvents,
-                        hexContents = kingdom.hexContents,
-                        companionQuests = kingdom.companionPersonalQuests,
-                        isGM = game.user.isGM,
-                        turnHistory = kingdom.turnHistory,
-                        companionExpeditions = kingdom.companionExpeditions,
-                        companions = kingdom.companions,
-                    )
+                        "generate-session-prep-narrative" -> buildPromise {
+                            try {
+                                val kingdom = getKingdom()
+                                val view = buildSessionPrepView(
+                                    quests = kingdom.quests,
+                                    clocks = kingdom.campaignClocks,
+                                    events = kingdom.campaignKingdomEvents,
+                                    hexContents = kingdom.hexContents,
+                                    companionQuests = kingdom.companionPersonalQuests,
+                                    isGM = game.user.isGM,
+                                    turnHistory = kingdom.turnHistory,
+                                    companionExpeditions = kingdom.companionExpeditions,
+                                    companions = kingdom.companions,
+                                    warThreats = kingdom.warThreats,
+                                )
                     val html = SessionPrepNarrativeGenerator.generate(view)
                     if (html.isBlank()) {
                         ui.notifications.info(t("kingdom.sessionPrep.narrativeEmpty"))
@@ -3199,6 +3201,7 @@ class KingdomSheet(
                     turnHistory = kingdom.turnHistory,
                     companionExpeditions = kingdom.companionExpeditions,
                     companions = kingdom.companions,
+                    warThreats = kingdom.warThreats,
                 )
             ),
             showDetailedMatrix = showDetailedMatrix,

@@ -77,6 +77,7 @@ suspend fun syncHexContentMarkers(game: Game, kingdomActor: KingdomActor) {
             val vis = HexContentVisibility.fromString(it.visibility)
             vis == HexContentVisibility.HIDDEN
         }
+        val hasPendingEncounter = hexContents.any { it.pendingEncounter == true }
 
         // Pick the first content for the marker label
         val bestContent = hexContents.firstOrNull() ?: continue
@@ -87,8 +88,9 @@ suspend fun syncHexContentMarkers(game: Game, kingdomActor: KingdomActor) {
             "${bestContent.name} +${hexContents.size - 1}"
         }
 
-        // Determine marker color based on visibility
+        // Determine marker color based on visibility and pending encounter
         val (fillColor, strokeColor) = when {
+            hasPendingEncounter -> Pair("#d94a2b", "#a0321a") // Red for pending encounter
             hasVisibleContent -> Pair("#4a90d9", "#2a6099")
             hasHiddenContent -> Pair("#666666", "#444444")
             else -> Pair("#888888", "#666666")

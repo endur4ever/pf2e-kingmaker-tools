@@ -49,6 +49,7 @@ external interface SessionPrepContext {
     val companionMoments: Array<SessionPrepEntryContext>
     val companionExpeditions: Array<SessionPrepEntryContext>
     val recentTurns: Array<TurnRecentEntryContext>
+    val pendingEncounters: Array<SessionPrepEntryContext>
     val isGM: Boolean
     val hasAnything: Boolean
     val totalCount: Int
@@ -95,6 +96,7 @@ fun buildSessionPrepContext(view: SessionPrepView): SessionPrepContext =
         companionMoments = view.companionMoments.toContexts(),
         companionExpeditions = view.companionExpeditions.toContexts(),
         recentTurns = view.recentTurns.toTurnContexts(),
+        pendingEncounters = view.pendingEncounters.toContexts(),
         isGM = view.isGM,
         hasAnything = view.hasAnything,
         totalCount = view.totalCount,

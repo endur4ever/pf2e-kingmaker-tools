@@ -63,10 +63,11 @@ data class SessionPrepView(
     val companionExpeditions: List<SessionPrepEntry>,
     val recentTurns: List<TurnRecentEntry>,
     val isGM: Boolean,
+    val pendingEncounters: List<SessionPrepEntry> = emptyList(),
 ) {
     val totalCount: Int
         get() = openQuests.size + activeClocks.size + unresolvedEvents.size +
-            hexHooks.size + companionMoments.size + companionExpeditions.size + recentTurns.size
+            hexHooks.size + companionMoments.size + companionExpeditions.size + recentTurns.size + pendingEncounters.size
 
     val hasAnything: Boolean
         get() = totalCount > 0
@@ -121,6 +122,20 @@ private fun buildHexHooks(hexContents: Array<RawHexContent>?, isGM: Boolean): Li
                 id = hex.id,
                 name = hex.name,
                 detail = hex.hexKey,
+            )
+        }
+
+private fun buildPendingEncounters(hexContents: Array<RawHexContent>?, warThreats: Array<dynamic>?): List<SessionPrepEntry> =
+    (hexContents ?: emptyArray())
+        .filter { it.pendingEncounter == true }
+        .map { hex ->
+            val matchingThreat = warThreats?.find { threat -> (threat.id as? String) == hex.linkedWarThreatId }
+            val threatName = if (matchingThreat != null) (matchingThreat.name as? String) else null
+                ?: "Unknown Threat"
+            SessionPrepEntry(
+                id = hex.id,
+                name = hex.name,
+                detail = "${hex.hexKey} — $threatName",
             )
         }
 
@@ -193,6 +208,7 @@ fun buildSessionPrepView(
     turnHistory: Array<RawTurnRecord>? = null,
     companionExpeditions: Array<RawCompanionExpedition>? = null,
     companions: Array<RawCharacter>? = null,
+    warThreats: Array<dynamic>? = null,
 ): SessionPrepView = SessionPrepView(
     openQuests = buildOpenQuests(quests),
     // Campaign clocks + unresolved events are GM-facing prep; withheld from players.
@@ -203,6 +219,8 @@ fun buildSessionPrepView(
     companionExpeditions = buildCompanionExpeditions(companionExpeditions, companions, isGM),
     // Recent turns are GM-only, like activeClocks.
     recentTurns = if (isGM) buildRecentTurns(turnHistory) else emptyList(),
+    // Pending encounters are GM-only.
+    pendingEncounters = if (isGM) buildPendingEncounters(hexContents, warThreats) else emptyList(),
     isGM = isGM,
 )
 

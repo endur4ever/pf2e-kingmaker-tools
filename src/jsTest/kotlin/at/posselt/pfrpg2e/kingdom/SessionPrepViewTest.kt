@@ -4,6 +4,7 @@ import at.posselt.pfrpg2e.campaign.CampaignClock
 import at.posselt.pfrpg2e.companion.CompanionPersonalQuest
 import at.posselt.pfrpg2e.data.hex.HexContentType
 import at.posselt.pfrpg2e.data.hex.HexContentVisibility
+import at.posselt.pfrpg2e.kingdom.data.RawWarThreat
 import at.posselt.pfrpg2e.kingdom.data.createRawCompanionExpedition
 import at.posselt.pfrpg2e.kingdom.data.RawHexContent
 import at.posselt.pfrpg2e.kingdom.data.RawQuest
@@ -48,6 +49,13 @@ class SessionPrepViewTest {
         e.name = name
         e.status = status
         return e
+    }
+
+    private fun warThreat(id: String, name: String): dynamic {
+        val wt = js("({})")
+        wt.id = id
+        wt.name = name
+        return wt
     }
 
     private fun hex(id: String, visibility: HexContentVisibility, name: String = id, hexKey: String = "0,0") =
@@ -96,6 +104,115 @@ class SessionPrepViewTest {
         warPressure = warPressure,
         notes = notes,
     )
+
+    @Test
+    fun pendingEncountersListedForGm() {
+        val hexContent = hex("h1", HexContentVisibility.DISCOVERED, name = "Bandit Camp", hexKey = "1,2").also {
+            it.pendingEncounter = true
+            it.linkedWarThreatId = "wt1"
+        }
+        val threat = warThreat("wt1", "Ironfang Legion")
+        val view = buildSessionPrepView(
+            quests = null,
+            clocks = emptyArray(),
+            events = null,
+            hexContents = arrayOf(hexContent),
+            companionQuests = null,
+            isGM = true,
+            warThreats = arrayOf(threat),
+        )
+        assertEquals(listOf("h1"), view.pendingEncounters.map { it.id })
+        assertEquals("1,2 — Ironfang Legion", view.pendingEncounters.single().detail)
+        // 1 pending encounter + 1 hex hook (since hex is DISCOVERED and GM sees it)
+        assertEquals(2, view.totalCount)
+    }
+
+    @Test
+    fun pendingEncountersWithUnknownThreat() {
+        val hexContent = hex("h1", HexContentVisibility.DISCOVERED, name = "Bandit Camp", hexKey = "1,2").also {
+            it.pendingEncounter = true
+            it.linkedWarThreatId = "wt1"
+        }
+        // No war threats provided
+        val view = buildSessionPrepView(
+            quests = null,
+            clocks = emptyArray(),
+            events = null,
+            hexContents = arrayOf(hexContent),
+            companionQuests = null,
+            isGM = true,
+            warThreats = null,
+        )
+        assertEquals(listOf("h1"), view.pendingEncounters.map { it.id })
+        assertEquals("1,2 — Unknown Threat", view.pendingEncounters.single().detail)
+    }
+
+    @Test
+    fun pendingEncountersExcludedWhenNotPending() {
+        val hexContent = hex("h1", HexContentVisibility.DISCOVERED, name = "Bandit Camp", hexKey = "1,2").also {
+            it.pendingEncounter = false
+            it.linkedWarThreatId = "wt1"
+        }
+        val threat = warThreat("wt1", "Ironfang Legion")
+        val view = buildSessionPrepView(
+            quests = null,
+            clocks = emptyArray(),
+            events = null,
+            hexContents = arrayOf(hexContent),
+            companionQuests = null,
+            isGM = true,
+            warThreats = arrayOf(threat),
+        )
+        assertTrue(view.pendingEncounters.isEmpty())
+    }
+
+    @Test
+    fun pendingEncountersFilteredForPlayers() {
+        val hexContent = hex("h1", HexContentVisibility.DISCOVERED, name = "Bandit Camp", hexKey = "1,2").also {
+            it.pendingEncounter = true
+            it.linkedWarThreatId = "wt1"
+        }
+        val threat = warThreat("wt1", "Ironfang Legion")
+        val view = buildSessionPrepView(
+            quests = null,
+            clocks = emptyArray(),
+            events = null,
+            hexContents = arrayOf(hexContent),
+            companionQuests = null,
+            isGM = false,
+            warThreats = arrayOf(threat),
+        )
+        assertTrue(view.pendingEncounters.isEmpty())
+        assertFalse(view.isGM)
+    }
+
+    @Test
+    fun pendingEncountersWithMultipleHexes() {
+        val hex1 = hex("h1", HexContentVisibility.DISCOVERED, name = "Bandit Camp", hexKey = "1,2").also {
+            it.pendingEncounter = true
+            it.linkedWarThreatId = "wt1"
+        }
+        val hex2 = hex("h2", HexContentVisibility.HIDDEN, name = "Goblin Lair", hexKey = "3,4").also {
+            it.pendingEncounter = true
+            it.linkedWarThreatId = "wt2"
+        }
+        val threat1 = warThreat("wt1", "Ironfang Legion")
+        val threat2 = warThreat("wt2", "Goblin Horde")
+        val view = buildSessionPrepView(
+            quests = null,
+            clocks = emptyArray(),
+            events = null,
+            hexContents = arrayOf(hex1, hex2),
+            companionQuests = null,
+            isGM = true,
+            warThreats = arrayOf(threat1, threat2),
+        )
+        assertEquals(listOf("h1", "h2"), view.pendingEncounters.map { it.id })
+        assertEquals("1,2 — Ironfang Legion", view.pendingEncounters.first().detail)
+        assertEquals("3,4 — Goblin Horde", view.pendingEncounters.last().detail)
+        // 2 pending encounters + 2 hex hooks (both visible to GM)
+        assertEquals(4, view.totalCount)
+    }
 
     @Test
     fun nullInputsProduceEmptyView() {
@@ -218,7 +335,7 @@ class SessionPrepViewTest {
         )
         assertEquals(10, view.recentTurns.size)
         // Should contain turns 3-12 (the last 10)
-        assertEquals(listOf(12, 11, 10, 9, 8, 7, 6, 5, 4, 3), 
+        assertEquals(listOf(12, 11, 10, 9, 8, 7, 6, 5, 4, 3),
             view.recentTurns.map { it.turn })
         // Turns 1 and 2 should be dropped
         assertFalse(view.recentTurns.any { it.turn == 1 || it.turn == 2 })
@@ -245,9 +362,9 @@ class SessionPrepViewTest {
         )
         assertEquals(5, view.recentTurns.size)
         // Most recent turn (5) should be first, oldest (1) should be last
-        assertEquals(listOf(5, 4, 3, 2, 1), 
+        assertEquals(listOf(5, 4, 3, 2, 1),
             view.recentTurns.map { it.turn })
-        assertEquals(listOf(50, 40, 30, 20, 10), 
+        assertEquals(listOf(50, 40, 30, 20, 10),
             view.recentTurns.map { it.fame })
     }
 
