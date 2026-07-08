@@ -49,6 +49,8 @@ data class WarPressureView(
     val atRuinThreshold: Boolean,
     val unrestModifier: Int,
     val consumptionModifier: Int,
+    /** Projection forecast (advanced mode only). Null in basic mode or when pressurePerTurn <= 0. */
+    val projection: WarPressureProjection?,
 )
 
 data class ArmyPressureView(
@@ -69,7 +71,7 @@ private fun RawWarThreat.toView(deployments: Array<RawArmyDeployment>): WarThrea
         description = description,
         enemyFaction = enemyFaction,
         escalationLevel = escalationLevel,
-        maxEscalation = maxEscalation,
+        maxEscalation = max,
         escalationPercent = (escalationLevel * 100 / max).coerceIn(0, 100),
         eta = eta,
         status = status,
@@ -89,7 +91,7 @@ private fun RawArmyDeployment.toView(): ArmyDeploymentView = ArmyDeploymentView(
     garrisonedSettlementId = garrisonedSettlementId,
 )
 
-private fun RawWarPressure.toView(): WarPressureView = WarPressureView(
+private fun RawWarPressure.toView(projection: WarPressureProjection? = null): WarPressureView = WarPressureView(
     currentPressure = currentPressure,
     pressurePercent = currentPressure.coerceIn(0, 100),
     pressurePerTurn = pressurePerTurn,
@@ -99,20 +101,65 @@ private fun RawWarPressure.toView(): WarPressureView = WarPressureView(
     atRuinThreshold = currentPressure >= ruinThreshold,
     unrestModifier = unrestModifier,
     consumptionModifier = consumptionModifier,
+    projection = projection,
 )
 
+/**
+ * Builds the Army & War Pressure view model from raw kingdom data.
+ *
+ * @param threats Array of raw war threats (nullable)
+ * @param deployments Array of army deployments (nullable)
+ * @param pressure Current war pressure state (nullable)
+ * @param settings Kingdom settings (for mode selection)
+ * @param currentTurn Current kingdom turn number (for projection calculations)
+ * @return The view model for the army pressure board
+ */
 fun buildArmyPressureView(
     threats: Array<RawWarThreat>?,
     deployments: Array<RawArmyDeployment>?,
     pressure: RawWarPressure?,
     settings: KingdomSettings,
+    currentTurn: Int = 0,
 ): ArmyPressureView {
     val deploymentArray = deployments ?: emptyArray()
+    val threatArray = threats ?: emptyArray()
+
+    // Compute projection only in advanced mode
+    val projection = if (settings.armyPressureBoardModeOrDefault() == "advanced" && pressure != null) {
+        projectWarPressure(
+            currentPressure = pressure.currentPressure,
+            pressurePerTurn = pressure.pressurePerTurn,
+            unrestThreshold = pressure.unrestThreshold,
+            ruinThreshold = pressure.ruinThreshold,
+            threats = threatArray.map { it.toSnapshot() },
+            currentTurn = currentTurn,
+        )
+    } else {
+        null
+    }
+
     return ArmyPressureView(
         enabled = settings.isArmyPressureBoardEnabled(),
         showThreatDistance = settings.shouldShowThreatDistance(),
-        threats = (threats ?: emptyArray()).map { it.toView(deploymentArray) },
+        threats = threatArray.map { it.toView(deploymentArray) },
         deployments = deploymentArray.map { it.toView() },
-        pressure = pressure?.toView(),
+        pressure = pressure?.toView(projection),
     )
+}
+
+/**
+ * Converts a RawWarThreat to a WarThreatSnapshot for projection calculations.
+ */
+private fun RawWarThreat.toSnapshot(): WarThreatSnapshot {
+    val id = this.id
+    val name = this.name
+    val escalationLevel = this.escalationLevel
+    val maxEscalation = this.maxEscalation
+    val eta = this.eta
+    val pauseOnExpiry = this.pauseOnExpiry
+    val status = this.status
+    val triggeredTurn = this.triggeredTurn
+    val offerConsumed = this.offerConsumed
+    val obj = js("{ id: id, name: name, escalationLevel: escalationLevel, maxEscalation: maxEscalation, eta: eta, pauseOnExpiry: pauseOnExpiry, status: status, triggeredTurn: triggeredTurn, offerConsumed: offerConsumed }")
+    return obj.unsafeCast<WarThreatSnapshot>()
 }

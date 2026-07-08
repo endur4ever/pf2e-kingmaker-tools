@@ -16,6 +16,7 @@ import at.posselt.pfrpg2e.data.checks.RollMode
 import at.posselt.pfrpg2e.fromCamelCase
 import at.posselt.pfrpg2e.kingdom.AutomateResources
 import at.posselt.pfrpg2e.kingdom.KingdomSettings
+import at.posselt.pfrpg2e.kingdom.armyPressureBoardModeOrDefault
 import at.posselt.pfrpg2e.kingdom.pacingMaxTurnGap
 import at.posselt.pfrpg2e.kingdom.pacingMinUnrestDelta
 import at.posselt.pfrpg2e.kingdom.pacingLevelMismatchRange
@@ -553,6 +554,21 @@ class KingdomSettingsApplication(
                             label = t("kingdom.enableCalendarMonthEndTurn"),
                             value = settings.enableCalendarMonthEndTurn == true,
                             help = t("kingdom.enableCalendarMonthEndTurnHelp"),
+                        ),
+                    ),
+                ),
+                Section(
+                    legend = t("armyPressure.settings"),
+                    formRows = listOf(
+                        Select(
+                            name = "armyPressureBoardMode",
+                            label = t("armyPressure.boardMode"),
+                            value = settings.armyPressureBoardModeOrDefault(),
+                            options = listOf(
+                                SelectOption(t("armyPressure.modeBasic"), "basic"),
+                                SelectOption(t("armyPressure.modeAdvanced"), "advanced"),
+                            ),
+                            stacked = false,
                         ),
                     ),
                 ),

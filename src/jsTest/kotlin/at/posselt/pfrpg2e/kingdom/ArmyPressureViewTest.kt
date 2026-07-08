@@ -110,4 +110,59 @@ class ArmyPressureViewTest {
         assertTrue(view.threats[0].hasAssignedArmies)
         assertFalse(view.threats[0].canResolveBattle)
     }
+
+    @Test
+    fun advancedModeIncludesProjection() {
+        val threat = RawWarThreat(
+            id = "w1", name = "Goblin Horde", description = "raiders", enemyFaction = null,
+            escalationLevel = 1, maxEscalation = 4, eta = 2,
+            targetSettlementSceneId = null, targetHexLocation = null,
+            linkedQuestId = null, linkedEventId = null, pauseOnExpiry = false,
+            status = "active", triggeredTurn = null,
+        )
+        val pressure = RawWarPressure(
+            currentPressure = 30, pressurePerTurn = 5, unrestModifier = 0, consumptionModifier = 0,
+            unrestThreshold = 50, ruinThreshold = 75, lastChange = 0,
+        )
+        val settingsObj = settings(enabled = true, showDistance = false)
+        settingsObj.armyPressureBoardMode = "advanced"
+
+        val view = buildArmyPressureView(
+            arrayOf(threat),
+            emptyArray(),
+            pressure,
+            settingsObj,
+            currentTurn = 1,
+        )
+
+        assertNotNull(view.pressure)
+        val proj = view.pressure!!.projection
+        assertNotNull(proj)
+        assertEquals(4, proj.turnsUntilUnrestThreshold) // (50-30)/5 = 4
+        assertEquals(9, proj.turnsUntilRuinThreshold) // (75-30)/5 = 9
+        assertEquals(1, proj.threatArrivals.size)
+        assertEquals("w1", proj.threatArrivals[0].threatId)
+        assertEquals(2, proj.threatArrivals[0].turnsUntilArrival)
+    }
+
+    @Test
+    fun basicModeExcludesProjection() {
+        val pressure = RawWarPressure(
+            currentPressure = 30, pressurePerTurn = 5, unrestModifier = 0, consumptionModifier = 0,
+            unrestThreshold = 50, ruinThreshold = 75, lastChange = 0,
+        )
+        val settingsObj = settings(enabled = true, showDistance = false)
+        settingsObj.armyPressureBoardMode = "basic"
+
+        val view = buildArmyPressureView(
+            emptyArray(),
+            emptyArray(),
+            pressure,
+            settingsObj,
+            currentTurn = 1,
+        )
+
+        assertNotNull(view.pressure)
+        assertNull(view.pressure!!.projection)
+    }
 }

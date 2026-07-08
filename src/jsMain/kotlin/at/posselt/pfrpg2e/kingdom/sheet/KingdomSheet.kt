@@ -3197,6 +3197,7 @@ class KingdomSheet(
                     deployments = kingdom.armyDeployments,
                     pressure = kingdom.warPressure,
                     settings = kingdom.settings,
+                    currentTurn = kingdom.currentTurn ?: 0,
                 )
             ),
             pacingAlertContext = buildPacingAlertContext(

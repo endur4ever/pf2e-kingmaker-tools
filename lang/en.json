@@ -6958,6 +6958,7 @@
       "eta": "ETA",
       "target": "Target",
       "status": "Status",
+      "turns": "Turns",
       "noThreats": "No active threats.",
       "deployments": "Army Deployments",
       "deployArmy": "Deploy Army",
@@ -6976,7 +6977,19 @@
       "maxEscalation": "Max Escalation",
       "etaHelp": "Turns until arrival (0 = unknown/arrived).",
       "pauseOnExpiry": "Pause on Escalation",
-      "pauseOnExpiryHelp": "When escalation maxes out, hold for GM confirmation instead of auto-triggering the invasion."
+      "pauseOnExpiryHelp": "When escalation maxes out, hold for GM confirmation instead of auto-triggering the invasion.",
+      "settings": "Army & War Pressure Settings",
+      "boardMode": "Board Mode",
+      "modeBasic": "Basic",
+      "modeAdvanced": "Advanced",
+      "forecast": "Pressure Forecast",
+      "forecastUnrest": "Unrest threshold in {turns} turns",
+      "forecastUnrestStable": "Pressure stable — never reaches unrest threshold",
+      "forecastRuin": "Ruin threshold in {turns} turns",
+      "forecastRuinStable": "Pressure stable — never reaches ruin threshold",
+      "threatArrivals": "Threat Arrivals",
+      "threatArrivesIn": "arrives in {turns} turns",
+      "threatArrivingNow": "Arriving now"
     },
     "warThreatStatus": {
       "active": "Active",

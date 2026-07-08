@@ -1,6 +1,7 @@
 package at.posselt.pfrpg2e.kingdom.sheet.contexts
 
 import at.posselt.pfrpg2e.kingdom.ArmyPressureView
+import at.posselt.pfrpg2e.kingdom.ThreatArrival
 import at.posselt.pfrpg2e.kingdom.data.ArmyDeploymentStatus
 import at.posselt.pfrpg2e.kingdom.data.WarThreatStatus
 import at.posselt.pfrpg2e.utils.t
@@ -40,6 +41,20 @@ external interface ArmyDeploymentContext {
 }
 
 @JsPlainObject
+external interface ThreatArrivalContext {
+    val threatId: String
+    val threatName: String
+    val turnsUntilArrival: Int?
+}
+
+@JsPlainObject
+external interface WarPressureProjectionContext {
+    val turnsUntilUnrestThreshold: Int?
+    val turnsUntilRuinThreshold: Int?
+    val threatArrivals: Array<ThreatArrivalContext>
+}
+
+@JsPlainObject
 external interface ArmyPressureMeterContext {
     val currentPressure: Int
     val pressurePercent: Int
@@ -50,6 +65,8 @@ external interface ArmyPressureMeterContext {
     val atRuinThreshold: Boolean
     val unrestModifier: Int
     val consumptionModifier: Int
+    /** Projection forecast (advanced mode only). */
+    val projection: WarPressureProjectionContext?
 }
 
 @JsPlainObject
@@ -102,6 +119,19 @@ fun buildArmyPressureContext(view: ArmyPressureView): ArmyPressureContext {
             atRuinThreshold = pv.atRuinThreshold,
             unrestModifier = pv.unrestModifier,
             consumptionModifier = pv.consumptionModifier,
+            projection = pv.projection?.let { proj ->
+                WarPressureProjectionContext(
+                    turnsUntilUnrestThreshold = proj.turnsUntilUnrestThreshold,
+                    turnsUntilRuinThreshold = proj.turnsUntilRuinThreshold,
+                    threatArrivals = proj.threatArrivals.map { ta ->
+                        ThreatArrivalContext(
+                            threatId = ta.threatId,
+                            threatName = ta.threatName,
+                            turnsUntilArrival = ta.turnsUntilArrival,
+                        )
+                    }.toTypedArray(),
+                )
+            },
         )
     }
     return ArmyPressureContext(
