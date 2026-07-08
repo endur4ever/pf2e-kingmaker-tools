@@ -124,6 +124,9 @@ class KingdomSettingsDataModel(
                     .toRecord()
             }
             string("realmSceneId", nullable = true)
+            // Without this, the Board Mode select is stripped by DataModel.toObject() on save and
+            // the advanced army-pressure forecast could never be enabled through the settings UI.
+            string("armyPressureBoardMode", nullable = true)
         }
     }
 }

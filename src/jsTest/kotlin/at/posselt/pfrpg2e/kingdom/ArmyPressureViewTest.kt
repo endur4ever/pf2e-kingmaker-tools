@@ -48,6 +48,9 @@ class ArmyPressureViewTest {
         assertEquals(60, view.pressure!!.currentPressure)
         assertTrue(view.pressure!!.atUnrestThreshold)
         assertFalse(view.pressure!!.atRuinThreshold)
+        // Board mode left unset (null) -> armyPressureBoardModeOrDefault() = "basic" -> no forecast.
+        // Guards the migration default: old kingdoms (field absent) must not compute a projection.
+        assertNull(view.pressure!!.projection)
     }
 
     @Test
@@ -142,7 +145,9 @@ class ArmyPressureViewTest {
         assertEquals(9, proj.turnsUntilRuinThreshold) // (75-30)/5 = 9
         assertEquals(1, proj.threatArrivals.size)
         assertEquals("w1", proj.threatArrivals[0].threatId)
-        assertEquals(2, proj.threatArrivals[0].turnsUntilArrival)
+        // Invasion (max escalation) trigger: eta=2 to the border + (maxEscalation 4 - escalationLevel 1)
+        // escalations, overlapping the border tick by 1 = 2 + 3 - 1 = 4 turns (matches tickWarThreat).
+        assertEquals(4, proj.threatArrivals[0].turnsUntilArrival)
     }
 
     @Test

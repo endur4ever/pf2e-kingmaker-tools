@@ -6991,8 +6991,10 @@
       "forecast": "Pressure Forecast",
       "forecastUnrest": "Unrest threshold in {turns} turns",
       "forecastUnrestStable": "Pressure stable — never reaches unrest threshold",
+      "forecastUnrestBreached": "Unrest threshold already breached",
       "forecastRuin": "Ruin threshold in {turns} turns",
       "forecastRuinStable": "Pressure stable — never reaches ruin threshold",
+      "forecastRuinBreached": "Ruin threshold already breached",
       "threatArrivals": "Threat Arrivals",
       "threatArrivesIn": "arrives in {turns} turns",
       "threatArrivingNow": "Arriving now"

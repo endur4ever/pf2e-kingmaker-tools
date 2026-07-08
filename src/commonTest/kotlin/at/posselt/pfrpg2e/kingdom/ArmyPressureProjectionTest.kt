@@ -115,7 +115,26 @@ class ArmyPressureProjectionTest {
         )
         assertEquals(1, projection.threatArrivals.size)
         assertEquals("Goblin Horde", projection.threatArrivals[0].threatName)
-        assertEquals(5, projection.threatArrivals[0].turnsUntilArrival)
+        // "Arrival" = the invasion trigger (max escalation). eta=5 to the border, then
+        // (maxEscalation 3 - escalationLevel 0) escalations, overlapping the border tick by 1:
+        // 5 + 3 - 1 = 7 turns, matching tickWarThreat.
+        assertEquals(7, projection.threatArrivals[0].turnsUntilArrival)
+    }
+
+    @Test
+    fun combinesEtaAndPartialEscalationForArrival() {
+        // eta=5, already escalated once (level 1 of 3): 2 escalations remain.
+        // 5 (border) + 2 (escalations) - 1 (overlap tick) = 6 turns to invasion.
+        val threats = listOf(threatSnapshot(eta = 5, escalationLevel = 1, maxEscalation = 3))
+        val projection = projectWarPressure(
+            currentPressure = 0,
+            pressurePerTurn = 5,
+            unrestThreshold = 50,
+            ruinThreshold = 75,
+            threats = threats,
+            currentTurn = 1
+        )
+        assertEquals(6, projection.threatArrivals[0].turnsUntilArrival)
     }
 
     @Test
@@ -149,7 +168,7 @@ class ArmyPressureProjectionTest {
     }
 
     @Test
-    fun etaZeroMeansArrivingNow() {
+    fun etaZeroCountsRemainingEscalationTurns() {
         val threats = listOf(threatSnapshot(eta = 0))
         val projection = projectWarPressure(
             currentPressure = 0,
@@ -159,12 +178,12 @@ class ArmyPressureProjectionTest {
             threats = threats,
             currentTurn = 1
         )
-        // ETA 0 means arriving now, which we represent as null (stable)
-        assertNull(projection.threatArrivals[0].turnsUntilArrival)
+        // At the border (eta 0) but not yet escalated: (maxEscalation 3 - escalationLevel 0) = 3 turns to invasion.
+        assertEquals(3, projection.threatArrivals[0].turnsUntilArrival)
     }
 
     @Test
-    fun etaNegativeMeansAlreadyArrived() {
+    fun etaNegativeCountsRemainingEscalationTurns() {
         val threats = listOf(threatSnapshot(eta = -1))
         val projection = projectWarPressure(
             currentPressure = 0,
@@ -174,8 +193,8 @@ class ArmyPressureProjectionTest {
             threats = threats,
             currentTurn = 1
         )
-        // ETA negative means already arrived
-        assertNull(projection.threatArrivals[0].turnsUntilArrival)
+        // Past the border (negative eta) behaves like the border: 3 escalation turns remain to invasion.
+        assertEquals(3, projection.threatArrivals[0].turnsUntilArrival)
     }
 
     @Test

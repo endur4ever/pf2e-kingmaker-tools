@@ -9,7 +9,7 @@ package at.posselt.pfrpg2e.kingdom
 data class ThreatArrival(
     val threatId: String,
     val threatName: String,
-    /** Turns until this threat arrives (escalates to max). Null = never/stable. */
+    /** Turns until this threat reaches max escalation (the invasion trigger). Null = already at max escalation (arriving now). */
     val turnsUntilArrival: Int?,
 )
 
@@ -62,30 +62,26 @@ fun projectWarPressure(
         }
     }
 
-    // Per-threat arrival forecasts
+    // Per-threat arrival forecasts.
+    // "Arrival" = the invasion trigger: the threat reaches max escalation, at which point
+    // tickWarThreat records triggeredTurn and the arrival chat fires. This mirrors the real tick
+    // model (ArmyWarPressure.tickWarThreat): each turn ETA counts down, and the tick that zeroes
+    // ETA also performs the FIRST escalation (hence the -1 overlap); once at/past the border
+    // (eta <= 0 or unknown) it is a pure escalation countdown of (maxEscalation - escalationLevel).
     val threatArrivals = threats
         .filter { it.status == "active" }
         .map { threat ->
+            val remainingEscalations = threat.maxEscalation - threat.escalationLevel
             val eta = threat.eta
             val turnsUntilArrival = when {
-                eta != null -> {
-                    // If ETA is known and > 0, that's the direct count
-                    if (eta > 0) eta
-                    else 0 // ETA <= 0 means arriving now/already arrived
-                }
-                else -> {
-                    // ETA unknown: compute from escalation progress
-                    // Threat escalates each turn once ETA reaches 0 or is unknown
-                    // It reaches maxEscalation in (maxEscalation - escalationLevel) turns
-                    val remainingEscalations = threat.maxEscalation - threat.escalationLevel
-                    if (remainingEscalations > 0) remainingEscalations
-                    else 0 // Already at max escalation
-                }
+                remainingEscalations <= 0 -> null // already at max escalation -> arriving now / triggered
+                eta != null && eta > 0 -> eta + remainingEscalations - 1
+                else -> remainingEscalations // at/past the border: pure escalation countdown
             }
             ThreatArrival(
                 threatId = threat.id,
                 threatName = threat.name,
-                turnsUntilArrival = if (turnsUntilArrival > 0) turnsUntilArrival else null,
+                turnsUntilArrival = turnsUntilArrival,
             )
         }
 

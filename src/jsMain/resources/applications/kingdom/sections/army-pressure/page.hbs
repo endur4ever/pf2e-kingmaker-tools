@@ -25,10 +25,17 @@
                     <section class="km-pressure-forecast">
                         <h3>{{localizeKM "armyPressure.forecast"}}</h3>
                         <div class="km-pressure-forecast-content">
-                            {{#if armyPressureContext.pressure.projection.turnsUntilUnrestThreshold}}
+                            {{! turnsUntil* is 0 when ALREADY breached and null when it never reaches; }}
+                            {{! Handlebars {{#if}} treats 0 as falsy, so distinguish the three states explicitly. }}
+                            {{#if (gt armyPressureContext.pressure.projection.turnsUntilUnrestThreshold 0)}}
                                 <p class="km-pressure-forecast-item">
                                     <i class="fa-solid fa-exclamation-triangle"></i>
                                     {{localizeKM "armyPressure.forecastUnrest" turns=armyPressureContext.pressure.projection.turnsUntilUnrestThreshold}}
+                                </p>
+                            {{else if (eq armyPressureContext.pressure.projection.turnsUntilUnrestThreshold 0)}}
+                                <p class="km-pressure-forecast-item km-pressure-breached">
+                                    <i class="fa-solid fa-exclamation-triangle"></i>
+                                    {{localizeKM "armyPressure.forecastUnrestBreached"}}
                                 </p>
                             {{else}}
                                 <p class="km-pressure-forecast-item km-stable">
@@ -36,32 +43,39 @@
                                     {{localizeKM "armyPressure.forecastUnrestStable"}}
                                 </p>
                             {{/if}}
-                            {{#if armyPressureContext.pressure.projection.turnsUntilRuinThreshold}}
+                            {{#if (gt armyPressureContext.pressure.projection.turnsUntilRuinThreshold 0)}}
                                 <p class="km-pressure-forecast-item">
                                     <i class="fa-solid fa-skull-crossbones"></i>
                                     {{localizeKM "armyPressure.forecastRuin" turns=armyPressureContext.pressure.projection.turnsUntilRuinThreshold}}
                                 </p>
+                            {{else if (eq armyPressureContext.pressure.projection.turnsUntilRuinThreshold 0)}}
+                                <p class="km-pressure-forecast-item km-pressure-breached">
+                                    <i class="fa-solid fa-skull-crossbones"></i>
+                                    {{localizeKM "armyPressure.forecastRuinBreached"}}
+                                </p>
                             {{else}}
-                                {{#if armyPressureContext.pressure.projection.turnsUntilUnrestThreshold}}
-                                    <p class="km-pressure-forecast-item km-stable">
-                                        <i class="fa-solid fa-check-circle"></i>
-                                        {{localizeKM "armyPressure.forecastRuinStable"}}
-                                    </p>
-                                {{/if}}
+                                <p class="km-pressure-forecast-item km-stable">
+                                    <i class="fa-solid fa-check-circle"></i>
+                                    {{localizeKM "armyPressure.forecastRuinStable"}}
+                                </p>
                             {{/if}}
-                            {{#if armyPressureContext.pressure.projection.threatArrivals.length}}
-                                <h4 class="km-pressure-threat-arrivals-label">{{localizeKM "armyPressure.threatArrivals"}}</h4>
-                                <ul class="km-pressure-threat-arrivals-list">
-                                {{#each armyPressureContext.pressure.projection.threatArrivals}}
-                                    <li class="km-pressure-threat-arrival-item">
-                                        {{#if this.turnsUntilArrival}}
-                                            {{localizeKM "armyPressure.threatArrivesIn" turns=this.turnsUntilArrival}}: {{this.threatName}}
-                                        {{else}}
-                                            {{localizeKM "armyPressure.threatArrivingNow"}}: {{this.threatName}}
-                                        {{/if}}
-                                    </li>
-                                {{/each}}
-                                </ul>
+                            {{! Per-threat ETAs honour the GM's showThreatDistance fog-of-war toggle, }}
+                            {{! matching the basic-mode threats table (must not leak hidden ETAs to players). }}
+                            {{#if armyPressureContext.showThreatDistance}}
+                                {{#if armyPressureContext.pressure.projection.threatArrivals.length}}
+                                    <h4 class="km-pressure-threat-arrivals-label">{{localizeKM "armyPressure.threatArrivals"}}</h4>
+                                    <ul class="km-pressure-threat-arrivals-list">
+                                    {{#each armyPressureContext.pressure.projection.threatArrivals}}
+                                        <li class="km-pressure-threat-arrival-item">
+                                            {{#if this.turnsUntilArrival}}
+                                                {{localizeKM "armyPressure.threatArrivesIn" turns=this.turnsUntilArrival}}: {{this.threatName}}
+                                            {{else}}
+                                                {{localizeKM "armyPressure.threatArrivingNow"}}: {{this.threatName}}
+                                            {{/if}}
+                                        </li>
+                                    {{/each}}
+                                    </ul>
+                                {{/if}}
                             {{/if}}
                         </div>
                     </section>
