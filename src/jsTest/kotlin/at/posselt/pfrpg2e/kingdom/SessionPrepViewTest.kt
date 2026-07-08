@@ -148,6 +148,29 @@ class SessionPrepViewTest {
     }
 
     @Test
+    fun pendingEncountersWithMatchedButNamelessThreat() {
+        // The linked threat IS found by id, but has no name (null/blank). The fallback must still
+        // apply — regression guard for the elvis-precedence bug that rendered "1,2 — null".
+        val hexContent = hex("h1", HexContentVisibility.DISCOVERED, name = "Bandit Camp", hexKey = "1,2").also {
+            it.pendingEncounter = true
+            it.linkedWarThreatId = "wt1"
+        }
+        val namelessThreat: dynamic = js("({})")
+        namelessThreat.id = "wt1" // matches linkedWarThreatId but carries no name
+        val view = buildSessionPrepView(
+            quests = null,
+            clocks = emptyArray(),
+            events = null,
+            hexContents = arrayOf(hexContent),
+            companionQuests = null,
+            isGM = true,
+            warThreats = arrayOf(namelessThreat),
+        )
+        assertEquals(listOf("h1"), view.pendingEncounters.map { it.id })
+        assertEquals("1,2 — Unknown Threat", view.pendingEncounters.single().detail)
+    }
+
+    @Test
     fun pendingEncountersExcludedWhenNotPending() {
         val hexContent = hex("h1", HexContentVisibility.DISCOVERED, name = "Bandit Camp", hexKey = "1,2").also {
             it.pendingEncounter = false

@@ -510,18 +510,9 @@ private val buttons = listOf(
             ui.notifications.warn(t("chatMessages.endTurn.undoStale"))
         }
     },
-    ChatButton("km-mark-pending-encounter-run") { game, actor, event, button ->
-        // GM-only: mark a queued war-threat encounter as run.
-        if (!game.user.isGM) return@ChatButton
-        val hexContentId = button.dataset["hexContentId"] ?: return@ChatButton
-        actor.getKingdom()?.let { kingdom ->
-            val hexContent = kingdom.hexContents?.find { it.id == hexContentId } ?: return@ChatButton
-            val threatName = kingdom.warThreats?.find { it.id == hexContent.linkedWarThreatId }?.name ?: "Unknown Threat"
-            hexContent.pendingEncounter = false
-            actor.setKingdom(kingdom)
-            postChatMessage(t("chatMessages.warThreatArrival.markedAsRun", recordOf("hexKey" to hexContent.hexKey)))
-        }
-    },
+    // NOTE: "mark pending encounter as run" is handled by the kingdom sheet's _onClickAction
+    // ("mark-pending-encounter-run"), because the button only ever renders in the Session Prep
+    // sheet DOM — a ChatButton (bound to the #chat sidebar) never receives its click.
 )
 
 fun bindChatButtons(game: Game) {

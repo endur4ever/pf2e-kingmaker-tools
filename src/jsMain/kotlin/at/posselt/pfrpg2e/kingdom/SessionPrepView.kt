@@ -130,7 +130,10 @@ private fun buildPendingEncounters(hexContents: Array<RawHexContent>?, warThreat
         .filter { it.pendingEncounter == true }
         .map { hex ->
             val matchingThreat = warThreats?.find { threat -> (threat.id as? String) == hex.linkedWarThreatId }
-            val threatName = if (matchingThreat != null) (matchingThreat.name as? String) else null
+            // Parenthesize the if-expression so the elvis applies to the whole result: a threat that
+            // IS matched but has a null/blank name must still fall back, not render "null".
+            val threatName = (if (matchingThreat != null) (matchingThreat.name as? String) else null)
+                ?.takeIf { it.isNotBlank() }
                 ?: "Unknown Threat"
             SessionPrepEntry(
                 id = hex.id,

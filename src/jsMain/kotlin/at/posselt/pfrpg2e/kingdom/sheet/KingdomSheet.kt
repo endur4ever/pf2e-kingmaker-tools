@@ -649,6 +649,18 @@ class KingdomSheet(
                 actor.setKingdom(kingdom)
             }
 
+            "mark-pending-encounter-run" -> buildPromise {
+                // GM-only: clear a queued war-threat encounter. setKingdom re-fires the actor-update
+                // hook that re-syncs HexContentSync markers, so the map "!" marker clears too.
+                if (!game.user.isGM) return@buildPromise
+                val hexContentId = target.dataset["hexContentId"] ?: return@buildPromise
+                val kingdom = getKingdom()
+                val hexContent = kingdom.hexContents?.find { it.id == hexContentId } ?: return@buildPromise
+                hexContent.pendingEncounter = false
+                actor.setKingdom(kingdom)
+                postChatMessage(t("chatMessages.warThreatArrival.markedAsRun", recordOf("hexKey" to hexContent.hexKey)))
+            }
+
             "resolve-battle" -> buildPromise {
                 val threatId = target.dataset["threatId"]
                 val kingdom = getKingdom()
