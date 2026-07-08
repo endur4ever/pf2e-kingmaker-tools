@@ -76,3 +76,15 @@
     {{/each}}
 </ul>
 {{/if}}
+{{#if hasUndoSnapshot}}
+<hr>
+<p class="km-undo-section">
+    <button type="button"
+            class="km-undo-end-turn"
+            data-action="undo-end-turn"
+            data-kingdom-actor-uuid="{{actorUuid}}"
+            title="{{localizeKM 'chatMessages.endTurn.endTurnUndoneTooltip'}}">
+        <i class="fa-solid fa-rotate-left"></i> {{localizeKM "chatMessages.endTurn.undoEndTurn"}}
+    </button>
+</p>
+{{/if}}

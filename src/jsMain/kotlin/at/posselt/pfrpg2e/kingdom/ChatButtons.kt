@@ -19,19 +19,23 @@ import at.posselt.pfrpg2e.kingdom.sheet.executeResourceButton
 import at.posselt.pfrpg2e.kingdom.data.RawCompanionExpedition
 import at.posselt.pfrpg2e.kingdom.structures.StructureActor
 import at.posselt.pfrpg2e.kingdom.structures.validateUsingSchema
+import at.posselt.pfrpg2e.kingdom.data.EndTurnSnapshot
 import at.posselt.pfrpg2e.takeIfInstance
 import at.posselt.pfrpg2e.utils.bindChatClick
 import at.posselt.pfrpg2e.utils.buildPromise
 import at.posselt.pfrpg2e.utils.deserializeB64Json
 import at.posselt.pfrpg2e.utils.launch
+import at.posselt.pfrpg2e.utils.getAppFlag
 import at.posselt.pfrpg2e.utils.postChatMessage
 import at.posselt.pfrpg2e.utils.postChatTemplate
 import at.posselt.pfrpg2e.utils.t
+import at.posselt.pfrpg2e.utils.unsetAppFlag
 import at.posselt.pfrpg2e.utils.typeSafeUpdate
 import com.foundryvtt.core.Game
 import com.foundryvtt.core.helpers.TypedHooks
 import com.foundryvtt.core.helpers.onRenderChatLog
 import com.foundryvtt.core.ui
+import com.foundryvtt.core.utils.deepClone
 import io.github.uuidjs.uuid.v4
 import js.array.tupleOf
 import js.objects.recordOf
@@ -482,6 +486,36 @@ private val buttons = listOf(
                     postChatMessage(t("chatMessages.questDeadline.extended", recordOf("name" to quest.title, "turns" to extendTurns.toString())))
                 }
             }
+        }
+    },
+    ChatButton("km-undo-end-turn") { game, actor, event, button ->
+        // GM-only: revert the most recent End Turn using the exact snapshot.
+        if (!game.user.isGM) return@ChatButton
+        val snap = actor.getAppFlag<KingdomActor, dynamic>("lastTurnSnapshot") as? EndTurnSnapshot
+        if (snap == null) return@ChatButton
+        val kingdom = actor.getKingdom() ?: return@ChatButton
+        // Only allow undo if exactly one End Turn has happened since the snapshot.
+        val currentTurn = kingdom.currentTurn ?: 0
+        if (currentTurn != snap.snapshotTurn) return@ChatButton
+
+        // Restore the exact pre-End-Turn kingdom state.
+        val restoredKingdom = deepClone(snap.kingdom)
+        actor.setKingdom(restoredKingdom)
+        actor.unsetAppFlag("lastTurnSnapshot")
+
+        // Post a chat notice (GM-only whisper so players don't see the undo button).
+        val gmUserIds = game.users.filter { it.isGM }.mapNotNull { it.id }.toTypedArray()
+        if (gmUserIds.isNotEmpty()) {
+            val context = js("{}")
+            context.turn = currentTurn
+            context.kingdomName = restoredKingdom.name
+            postChatTemplate(
+                templatePath = "chatmessages/end-turn-undo.hbs",
+                templateContext = context,
+                whisper = gmUserIds,
+            )
+        } else {
+            postChatMessage(t("chatMessages.endTurn.endTurnUndone", recordOf("turn" to currentTurn.toString())))
         }
     },
 )

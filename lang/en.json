@@ -1896,7 +1896,10 @@
         "raiseWarThreat": "Raise War Threat",
         "offerDiplomacyQuest": "Offer Diplomacy Quest",
         "warThreatName": "{{group}} Aggression",
-        "diplomacyQuestTitle": "Diplomatic Accord with {{group}}"
+        "diplomacyQuestTitle": "Diplomatic Accord with {{group}}",
+        "undoEndTurn": "Undo Last End Turn",
+        "endTurnUndone": "Turn {turn} end reverted; kingdom state restored.",
+        "endTurnUndoneTooltip": "Reverts kingdom state (RP, fame, commodities, unrest, quests, threats, clocks) to before End Turn. Does NOT remove chat messages or calendar notes."
       },
       "expeditionResult": {
         "title": "Companion Expedition: {title}",

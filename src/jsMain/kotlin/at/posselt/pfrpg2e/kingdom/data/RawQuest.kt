@@ -1,5 +1,6 @@
 package at.posselt.pfrpg2e.kingdom.data
 
+import at.posselt.pfrpg2e.kingdom.KingdomData
 import kotlinx.js.JsPlainObject
 
 @JsPlainObject
@@ -35,6 +36,18 @@ external interface RawQuestCompletionSnapshot {
     var luxuries: Int
     var ore: Int
     var stone: Int
+}
+
+/**
+ * Snapshot of the entire kingdom state captured at the start of an End Turn, so a later
+ * "undo-end-turn" can restore it exactly. Stored as an app-flag on the KingdomActor.
+ */
+@JsPlainObject
+external interface EndTurnSnapshot {
+    /** The kingdom data deep-cloned before any End Turn mutations. */
+    var kingdom: KingdomData
+    /** The turn number this snapshot was ending when the snapshot was taken (snapshotTurn == currentTurn at snapshot time). */
+    var snapshotTurn: Int
 }
 
 @JsPlainObject

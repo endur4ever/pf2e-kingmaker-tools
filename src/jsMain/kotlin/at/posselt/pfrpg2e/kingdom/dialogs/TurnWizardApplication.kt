@@ -83,6 +83,8 @@ import at.posselt.pfrpg2e.utils.setAppFlag
 import at.posselt.pfrpg2e.utils.unsetAppFlag
 import at.posselt.pfrpg2e.utils.buildPromise
 import at.posselt.pfrpg2e.utils.postChatTemplate
+import at.posselt.pfrpg2e.kingdom.data.EndTurnSnapshot
+import com.foundryvtt.core.utils.deepClone
 import com.foundryvtt.core.Game
 import com.foundryvtt.core.game
 import com.foundryvtt.core.applications.api.ApplicationRenderOptions
@@ -184,7 +186,12 @@ fun runKingdomTurnTick(kingdom: KingdomData, storage: CommodityStorage, currentT
     )
 
 suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData): TickResult {
-    val currentTurn = (kingdom.currentTurn ?: 0) + 1
+    // Capture snapshot BEFORE any mutations — enables "undo-end-turn" (exact revert).
+    val snapshotTurn = (kingdom.currentTurn ?: 0) + 1
+    val snapshot = deepClone(kingdom).let { EndTurnSnapshot(kingdom = it, snapshotTurn = snapshotTurn) }
+    actor.setAppFlag("lastTurnSnapshot", snapshot)
+
+    val currentTurn = snapshotTurn
     kingdom.currentTurn = currentTurn
 
     val performed = actor.getPerformedActivities()
@@ -534,6 +541,8 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
     endTurnContext.fame = kingdom.fame.now
     endTurnContext.maximumFamePoints = kingdom.settings.maximumFamePoints
     endTurnContext.actorUuid = actor.uuid
+    // Snapshot exists after End Turn (unless undone), so the chat card can show the undo button.
+    endTurnContext.hasUndoSnapshot = true
     endTurnContext.standingChanges = tickResult.changes
         .filter { it.category == "factionStanding" }
         .map { change ->
@@ -955,7 +964,9 @@ class TurnWizardApplication(
                 activityCaps = activityCaps,
                 previewChanges = previewChanges,
                 showPreview = showPreview,
-                canCommit = canCommit
+                canCommit = canCommit,
+                            hasUndoSnapshot = actor?.getAppFlag<KingdomActor, Any>("lastTurnSnapshot") != null,
+                            actorUuid = actor?.uuid ?: "",
             )
         }
         
