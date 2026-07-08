@@ -510,6 +510,14 @@ private val buttons = listOf(
             ui.notifications.warn(t("chatMessages.endTurn.undoStale"))
         }
     },
+    // Jump-to-settlement on the pacing-alert CHAT card. It MUST be a ChatButton (bound to #chat by
+    // CSS class) — the sheet-panel copy uses data-action/_onClickAction, but that only fires inside
+    // the sheet DOM, so a chat-card button needs its own class-based handler here. data-id is the
+    // settlement's scene id (Settlement.id == sceneId), matching the sheet's game.scenes.get(id).view().
+    ChatButton("km-view-settlement") { game, actor, event, button ->
+        val id = button.dataset["id"] ?: return@ChatButton
+        game.scenes.get(id)?.view()
+    },
     // NOTE: "mark pending encounter as run" is handled by the kingdom sheet's _onClickAction
     // ("mark-pending-encounter-run"), because the button only ever renders in the Session Prep
     // sheet DOM — a ChatButton (bound to the #chat sidebar) never receives its click.
