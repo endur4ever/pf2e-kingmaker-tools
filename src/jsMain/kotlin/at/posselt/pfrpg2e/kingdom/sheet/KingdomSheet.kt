@@ -1846,30 +1846,54 @@ class KingdomSheet(
             }
 
             "gain-fame" -> buildPromise {
+                if (!game.user.isGM) return@buildPromise
+                if (actor.isUpkeepStepDone("gain-fame")) {
+                    ui.notifications.info(t("kingdom.turnWizard.upkeepStepAlreadyDone"))
+                    return@buildPromise
+                }
                 actor.getKingdom()?.let { kingdom ->
                     actor.upkeepGainFame(kingdom)
                     actor.setKingdom(kingdom)
+                    actor.markUpkeepStepDone("gain-fame")
                 }
             }
 
             "adjust-unrest" -> buildPromise {
+                if (!game.user.isGM) return@buildPromise
+                if (actor.isUpkeepStepDone("adjust-unrest")) {
+                    ui.notifications.info(t("kingdom.turnWizard.upkeepStepAlreadyDone"))
+                    return@buildPromise
+                }
                 actor.getKingdom()?.let { kingdom ->
                     actor.upkeepAdjustUnrest(game, kingdom)
                     actor.setKingdom(kingdom)
+                    actor.markUpkeepStepDone("adjust-unrest")
                 }
             }
 
             "collect-resources" -> buildPromise {
+                if (!game.user.isGM) return@buildPromise
+                if (actor.isUpkeepStepDone("collect-resources")) {
+                    ui.notifications.info(t("kingdom.turnWizard.upkeepStepAlreadyDone"))
+                    return@buildPromise
+                }
                 actor.getKingdom()?.let { kingdom ->
                     actor.upkeepCollectResources(game, kingdom)
                     actor.setKingdom(kingdom)
+                    actor.markUpkeepStepDone("collect-resources")
                 }
             }
 
             "pay-consumption" -> buildPromise {
+                if (!game.user.isGM) return@buildPromise
+                if (actor.isUpkeepStepDone("pay-consumption")) {
+                    ui.notifications.info(t("kingdom.turnWizard.upkeepStepAlreadyDone"))
+                    return@buildPromise
+                }
                 actor.getKingdom()?.let { kingdom ->
                     actor.upkeepPayConsumption(game, kingdom)
                     actor.setKingdom(kingdom)
+                    actor.markUpkeepStepDone("pay-consumption")
                 }
             }
 

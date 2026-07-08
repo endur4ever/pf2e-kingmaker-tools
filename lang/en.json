@@ -679,6 +679,7 @@
         "runUpkeep": "Run Upkeep",
         "upkeepSummary": "Upkeep Phase Summary",
         "upkeepAlreadyDone": "All Upkeep checklist steps are already satisfied.",
+        "upkeepStepAlreadyDone": "This upkeep step is already done this turn — uncheck it in the Turn Wizard to re-run.",
         "checklist": {
           "gainFame": "Gain 1 Fame point",
           "adjustUnrest": "Adjust Unrest",

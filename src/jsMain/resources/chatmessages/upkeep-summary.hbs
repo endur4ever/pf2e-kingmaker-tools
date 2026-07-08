@@ -11,10 +11,10 @@
             <b>{{localizeKM "kingdom.collecting"}}</b>:
             <ul>
                 <li><b>{{localizeKM "kingdom.resourcePoints"}}</b>: +{{rpCollected}} ({{localizeKM "kingdom.current"}}: {{rpNow}})</li>
-                <li><b>{{localizeKM "kingdom.ore"}}</b>: +{{oreCollected}}</li>
-                <li><b>{{localizeKM "kingdom.lumber"}}</b>: +{{lumberCollected}}</li>
-                <li><b>{{localizeKM "kingdom.stone"}}</b>: +{{stoneCollected}}</li>
-                <li><b>{{localizeKM "kingdom.luxuries"}}</b>: +{{luxuriesCollected}}</li>
+                <li><b>{{localizeKM "kingdom.ore"}}</b>: {{#if (gt oreCollected 0)}}+{{/if}}{{oreCollected}}</li>
+                <li><b>{{localizeKM "kingdom.lumber"}}</b>: {{#if (gt lumberCollected 0)}}+{{/if}}{{lumberCollected}}</li>
+                <li><b>{{localizeKM "kingdom.stone"}}</b>: {{#if (gt stoneCollected 0)}}+{{/if}}{{stoneCollected}}</li>
+                <li><b>{{localizeKM "kingdom.luxuries"}}</b>: {{#if (gt luxuriesCollected 0)}}+{{/if}}{{luxuriesCollected}}</li>
             </ul>
         </li>
     {{/if}}
