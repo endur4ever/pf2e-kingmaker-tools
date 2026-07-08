@@ -38,6 +38,7 @@ suspend fun collectResources(
     settlements: List<Settlement>,
     expressionContext: ExpressionContext,
     modifiers: List<Modifier>,
+    suppressChat: Boolean = false,
 ): Income {
     val income = calculateIncome(
         realmData = realmData,
@@ -47,17 +48,19 @@ suspend fun collectResources(
     val ore = calculateModifierResource(modifiers, expressionContext, ModifierSelector.ORE)
     val stone = calculateModifierResource(modifiers, expressionContext, ModifierSelector.STONE)
     val lumber = calculateModifierResource(modifiers, expressionContext, ModifierSelector.LUMBER)
-    val rolledRp = roll(income.resourcePointsFormula, flavor = t("kingdom.gainingResourcePoints"))
-    postChatTemplate(
-        templatePath = "chatmessages/collect-resources.hbs",
-        templateContext = CollectResources(
-            rp = rolledRp,
-            ore = income.ore + ore,
-            stone = income.stone + stone,
-            lumber = income.lumber + lumber,
-            luxuries = income.luxuries,
-        ),
-    )
+    val rolledRp = roll(income.resourcePointsFormula, flavor = t("kingdom.gainingResourcePoints"), toChat = !suppressChat)
+    if (!suppressChat) {
+        postChatTemplate(
+            templatePath = "chatmessages/collect-resources.hbs",
+            templateContext = CollectResources(
+                rp = rolledRp,
+                ore = income.ore + ore,
+                stone = income.stone + stone,
+                lumber = income.lumber + lumber,
+                luxuries = income.luxuries,
+            ),
+        )
+    }
     return income
         .copy(
             resourcePoints = income.resourcePoints + rolledRp + kingdomData.resourcePoints.now,

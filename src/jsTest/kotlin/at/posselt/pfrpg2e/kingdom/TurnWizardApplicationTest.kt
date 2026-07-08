@@ -197,4 +197,11 @@ class TurnWizardApplicationTest {
         val context = TurnWizardApplication.buildContext(kingdom)
         assertTrue(context.canCommit)
     }
+
+    @Test
+    fun testWizardContextIncludesIsGm() {
+        val kingdom = createTestKingdom()
+        val context = TurnWizardApplication.buildContext(kingdom)
+        assertFalse(context.isGM)
+    }
 }

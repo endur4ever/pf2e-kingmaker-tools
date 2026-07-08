@@ -654,6 +654,9 @@
         "previewButton": "Preview Turn",
         "journalSummary": "Turn summary written to journal"
       },
+      "fame": "Ruhm",
+      "current": "Aktuell",
+      "available": "Verfügbar",
       "exportToJournal": "Export to Journal",
       "exportToWorldAnvil": "Export for World Anvil",
       "exportToWorldAnvilTooltip": "Export kingdom data as BBCode/HTML files for manual import into World Anvil",

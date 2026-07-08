@@ -242,6 +242,10 @@ import at.posselt.pfrpg2e.app.jsonFilePicker
 import at.posselt.pfrpg2e.kingdom.sheet.KingdomJournalExporter
 import at.posselt.pfrpg2e.kingdom.sheet.ObsidianImporter
 import at.posselt.pfrpg2e.kingdom.sheet.WorldAnvilExporter
+import at.posselt.pfrpg2e.kingdom.sheet.upkeepGainFame
+import at.posselt.pfrpg2e.kingdom.sheet.upkeepAdjustUnrest
+import at.posselt.pfrpg2e.kingdom.sheet.upkeepCollectResources
+import at.posselt.pfrpg2e.kingdom.sheet.upkeepPayConsumption
 import at.posselt.pfrpg2e.utils.TableAndDraw
 import at.posselt.pfrpg2e.utils.buildPromise
 import at.posselt.pfrpg2e.utils.d20Check
@@ -1843,71 +1847,28 @@ class KingdomSheet(
 
             "gain-fame" -> buildPromise {
                 actor.getKingdom()?.let { kingdom ->
-                    kingdom.fame.now = (kingdom.fame.now + 1).coerceIn(0, kingdom.settings.maximumFamePoints)
-                    postChatMessage(t("kingdom.gaining1Fame"))
+                    actor.upkeepGainFame(kingdom)
                     actor.setKingdom(kingdom)
                 }
             }
 
             "adjust-unrest" -> buildPromise {
                 actor.getKingdom()?.let { kingdom ->
-                    val settlements = kingdom.getAllSettlements(game)
-                    val allFeatures = kingdom.getExplodedFeatures()
-                    val chosenFeatures = kingdom.getChosenFeatures(allFeatures)
-                    val chosenFeats = kingdom.getChosenFeats(chosenFeatures)
-                    kingdom.unrest = adjustUnrest(
-                        kingdom = kingdom,
-                        settlements = settlements.allSettlements,
-                        chosenFeats = chosenFeats,
-                    )
+                    actor.upkeepAdjustUnrest(game, kingdom)
                     actor.setKingdom(kingdom)
                 }
             }
 
             "collect-resources" -> buildPromise {
                 actor.getKingdom()?.let { kingdom ->
-                    val realm = game.getRealmData(actor, kingdom)
-                    val settlements = kingdom.getAllSettlements(game)
-                    val allFeatures = kingdom.getExplodedFeatures()
-                    val chosenFeatures = kingdom.getChosenFeatures(allFeatures)
-                    val chosenFeats = kingdom.getChosenFeats(chosenFeatures)
-                    val resources = collectResources(
-                        kingdomData = kingdom,
-                        realmData = realm,
-                        resourceDice = kingdom.getResourceDiceAmount(
-                            chosenFeats,
-                            settlements.allSettlements,
-                            kingdomLevel = kingdom.level,
-                        ),
-                        increaseGainedLuxuries = chosenFeats.sumOf { it.feat.increaseGainedLuxuriesOncePerTurnBy ?: 0 },
-                        settlements = settlements.allSettlements,
-                        expressionContext = kingdom.createSimpleContext(settlements),
-                        modifiers = kingdom.createModifiers(settlements),
-                    )
-                    kingdom.resourcePoints.now = resources.resourcePoints
-                    kingdom.resourceDice.now = resources.resourceDice
-                    kingdom.commodities.now.lumber = resources.lumber
-                    kingdom.commodities.now.luxuries = resources.luxuries
-                    kingdom.commodities.now.stone = resources.stone
-                    kingdom.commodities.now.ore = resources.ore
+                    actor.upkeepCollectResources(game, kingdom)
                     actor.setKingdom(kingdom)
                 }
             }
 
             "pay-consumption" -> buildPromise {
                 actor.getKingdom()?.let { kingdom ->
-                    val realm = game.getRealmData(actor, kingdom)
-                    val settlements = kingdom.getAllSettlements(game)
-                    kingdom.commodities.now.food = payConsumption(
-                        kingdomActor = actor,
-                        settlements = settlements.allSettlements,
-                        realmData = realm,
-                        armyConsumption = kingdom.consumption.armies,
-                        availableFood = kingdom.commodities.now.food,
-                        now = kingdom.consumption.now,
-                        expressionContext = kingdom.createSimpleContext(settlements),
-                        modifiers = kingdom.createModifiers(settlements),
-                    )
+                    actor.upkeepPayConsumption(game, kingdom)
                     actor.setKingdom(kingdom)
                 }
             }

@@ -35,6 +35,10 @@ import at.posselt.pfrpg2e.kingdom.tickCaravans
 import at.posselt.pfrpg2e.kingdom.tickShipments
 import at.posselt.pfrpg2e.kingdom.ShipmentTickInput
 import at.posselt.pfrpg2e.kingdom.sheet.calculateProjectedResources
+import at.posselt.pfrpg2e.kingdom.sheet.upkeepGainFame
+import at.posselt.pfrpg2e.kingdom.sheet.upkeepAdjustUnrest
+import at.posselt.pfrpg2e.kingdom.sheet.upkeepCollectResources
+import at.posselt.pfrpg2e.kingdom.sheet.upkeepPayConsumption
 import at.posselt.pfrpg2e.kingdom.data.RawCaravanShipment
 import at.posselt.pfrpg2e.kingdom.data.RawExpeditionChronicleEntry
 import at.posselt.pfrpg2e.kingdom.data.RawGroup
@@ -89,6 +93,7 @@ import at.posselt.pfrpg2e.kingdom.data.EndTurnSnapshot
 import com.foundryvtt.core.utils.deepClone
 import com.foundryvtt.core.Game
 import com.foundryvtt.core.game
+import com.foundryvtt.core.ui
 import com.foundryvtt.core.applications.api.ApplicationRenderOptions
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.asList
@@ -704,6 +709,15 @@ class TurnWizardApplication(
                     previewTurn()
                 }
             })
+
+        htmlElement.querySelector("button[data-action='run-upkeep']")
+            ?.addEventListener("click", {
+                buildPromise {
+                    if (game.user.isGM) {
+                        runUpkeepBatch()
+                    }
+                }
+            })
             
         htmlElement.querySelector("button[data-action='commit-turn']")
             ?.addEventListener("click", {
@@ -784,6 +798,121 @@ class TurnWizardApplication(
         } finally {
             sheetRenderInFlight = false
         }
+    }
+
+    private suspend fun runUpkeepBatch() {
+        val kingdom = kingdomActor.getKingdom() ?: return
+        var state = kingdomActor.getAppFlag<KingdomActor, dynamic>("turn-wizard-state")
+        if (state == null) {
+            state = js("{ checklist: [], showPreview: false }")
+        }
+        if (state.checklist == null) {
+            state.checklist = emptyArray<String>()
+        }
+        val checklistArray = state.checklist.unsafeCast<Array<String>>()
+        val checkedItems = checklistArray.toMutableSet()
+
+        val runFame = "gain-fame" !in checkedItems
+        val runUnrest = "adjust-unrest" !in checkedItems
+        val runResources = "collect-resources" !in checkedItems
+        val runConsumption = "pay-consumption" !in checkedItems
+
+        if (!runFame && !runUnrest && !runResources && !runConsumption) {
+            ui.notifications.info(t("kingdom.turnWizard.upkeepAlreadyDone"))
+            return
+        }
+
+        val clonedKingdom = deepClone(kingdom)
+
+        val oldFame = kingdom.fame.now
+        val oldUnrest = kingdom.unrest
+        val oldRp = kingdom.resourcePoints.now
+        val oldOre = kingdom.commodities.now.ore
+        val oldLumber = kingdom.commodities.now.lumber
+        val oldStone = kingdom.commodities.now.stone
+        val oldLuxuries = kingdom.commodities.now.luxuries
+        val oldFood = kingdom.commodities.now.food
+
+        var fameDelta = 0
+        var unrestDelta = 0
+        var rpCollected = 0
+        var oreCollected = 0
+        var lumberCollected = 0
+        var stoneCollected = 0
+        var luxuriesCollected = 0
+        var consumptionPaidAmount = 0
+
+        if (runFame) {
+            fameDelta = kingdomActor.upkeepGainFame(clonedKingdom, suppressChat = true)
+            checkedItems.add("gain-fame")
+        }
+        if (runUnrest) {
+            unrestDelta = kingdomActor.upkeepAdjustUnrest(game, clonedKingdom, suppressChat = true)
+            checkedItems.add("adjust-unrest")
+        }
+        if (runResources) {
+            val income = kingdomActor.upkeepCollectResources(game, clonedKingdom, suppressChat = true)
+            rpCollected = income.resourcePoints - oldRp
+            oreCollected = income.ore - oldOre
+            lumberCollected = income.lumber - oldLumber
+            stoneCollected = income.stone - oldStone
+            luxuriesCollected = income.luxuries - oldLuxuries
+            checkedItems.add("collect-resources")
+        }
+        if (runConsumption) {
+            val foodDiff = kingdomActor.upkeepPayConsumption(game, clonedKingdom, suppressChat = true)
+            consumptionPaidAmount = foodDiff
+            checkedItems.add("pay-consumption")
+        }
+
+        kingdomActor.setKingdom(clonedKingdom)
+
+        val isStrict = kingdom.settings.enableStrictPhaseGating == true
+        var finalChecklist = checkedItems.toList()
+        if (isStrict) {
+            // Respect strict Checklist sequence ordering if strict phase gating is enabled
+            val sequence = strictChecklistSequence
+            val indexOrder = sequence.associateWith { sequence.indexOf(it) }
+            // Ensure checked items are fully compliant with checklist toggling rules
+            // We can just sort them by sequence index to keep clean ordering
+            val sequenceSet = sequence.toSet()
+            finalChecklist = finalChecklist.filter { it in sequenceSet }.sortedBy { indexOrder[it] ?: 999 } +
+                             finalChecklist.filter { it !in sequenceSet }
+        }
+        state.checklist = finalChecklist.toTypedArray()
+
+        val updateData = js("{}")
+        updateData["flags.${Config.moduleId}.turn-wizard-state"] = state
+        kingdomActor.update(updateData, js("{ render: false }").unsafeCast<DatabaseUpdateOperation>()).await()
+
+        val summaryContext = js("{}")
+        summaryContext.fameGained = runFame
+        summaryContext.fameDelta = fameDelta
+        summaryContext.fameNow = clonedKingdom.fame.now
+
+        summaryContext.unrestAdjusted = runUnrest
+        summaryContext.unrestDelta = unrestDelta
+        summaryContext.unrestNow = clonedKingdom.unrest
+
+        summaryContext.resourcesCollected = runResources
+        summaryContext.rpCollected = rpCollected
+        summaryContext.rpNow = clonedKingdom.resourcePoints.now
+        summaryContext.oreCollected = oreCollected
+        summaryContext.lumberCollected = lumberCollected
+        summaryContext.stoneCollected = stoneCollected
+        summaryContext.luxuriesCollected = luxuriesCollected
+
+        summaryContext.consumptionPaid = runConsumption
+        summaryContext.consumptionPaidAmount = consumptionPaidAmount
+        summaryContext.foodNow = clonedKingdom.commodities.now.food
+
+        postChatTemplate(
+            templatePath = "chatmessages/upkeep-summary.hbs",
+            templateContext = summaryContext,
+        )
+
+        refreshKingdomSheets()
+        render()
     }
 
     private suspend fun previewTurn() {
@@ -1035,6 +1164,7 @@ class TurnWizardApplication(
                 snapshotTurn = actor?.getAppFlag<KingdomActor, Any?>("lastTurnSnapshot")
                     ?.unsafeCast<EndTurnSnapshot>()?.snapshotTurn ?: 0,
                 actorUuid = actor?.uuid ?: "",
+                isGM = runCatching { game.user.isGM }.getOrDefault(false),
             )
         }
         

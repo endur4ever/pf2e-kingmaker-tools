@@ -676,6 +676,9 @@
         "title": "Kingdom Turn Assistant",
         "openButton": "Turn Assistant",
         "checklistTitle": "Pre-Turn Checklist",
+        "runUpkeep": "Run Upkeep",
+        "upkeepSummary": "Upkeep Phase Summary",
+        "upkeepAlreadyDone": "All Upkeep checklist steps are already satisfied.",
         "checklist": {
           "gainFame": "Gain 1 Fame point",
           "adjustUnrest": "Adjust Unrest",
@@ -723,6 +726,9 @@
         "previewButton": "Preview Turn",
         "journalSummary": "Turn summary written to journal"
       },
+      "fame": "Fame",
+      "current": "Current",
+      "available": "Available",
       "exportToJournal": "Export to Journal",
       "exportToWorldAnvil": "Export for World Anvil",
       "exportToWorldAnvilTooltip": "Export kingdom data as BBCode/HTML files for manual import into World Anvil",

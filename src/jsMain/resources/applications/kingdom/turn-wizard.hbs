@@ -16,6 +16,14 @@
   {{!-- Checklist Section --}}
   <fieldset class="km-turn-wizard-section">
     <legend>{{localizeKM "kingdom.turnWizard.checklistTitle"}}</legend>
+    {{#if isGM}}
+      <button type="button"
+              data-action="run-upkeep"
+              class="km-run-upkeep-btn"
+              style="margin-bottom: 12px; width: 100%; font-weight: bold; background-color: #3b5a75; color: white; border: 1px solid #2f455c; border-radius: 4px; padding: 6px 12px; cursor: pointer;">
+          <i class="fa-solid fa-play"></i> {{localizeKM "kingdom.turnWizard.runUpkeep"}}
+      </button>
+    {{/if}}
     <ul class="km-checklist-list" style="list-style: none; padding-left: 0;">
       {{#each checklist}}
       <li class="km-checklist-item {{#if highlight}}km-highlight{{/if}}" style="margin-bottom: 8px; padding: 4px; border-radius: 4px; {{#if highlight}}background-color: rgba(255, 0, 0, 0.1); border: 1px solid rgba(255, 0, 0, 0.3);{{/if}}">

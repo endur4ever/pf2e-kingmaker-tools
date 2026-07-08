@@ -67,4 +67,5 @@ external interface TurnWizardContext : ValidatedHandlebarsContext {
     val snapshotTurn: Int
     /** Actor UUID for the kingdom, used by the undo button data attribute. */
     val actorUuid: String
+    val isGM: Boolean
 }

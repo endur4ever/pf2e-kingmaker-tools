@@ -33,6 +33,7 @@ suspend fun adjustUnrest(
     kingdom: KingdomData,
     settlements: List<Settlement>,
     chosenFeats: List<ChosenFeat>,
+    suppressChat: Boolean = false,
 ): Int {
     val chosenFeatures = kingdom.getChosenFeatures(kingdom.getExplodedFeatures())
     val unrest = calculateUnrest(kingdom.atWar, settlements, kingdom.vacancies(
@@ -40,32 +41,40 @@ suspend fun adjustUnrest(
         bonusFeats = kingdom.bonusFeats,
         government = kingdom.government,
     ))
-    val ruler = if (unrest.rulerVacant) roll(formula = "1d4", flavor = t("kingdom.rulerVacantGainingUnrest")) else 0
+    val ruler = if (unrest.rulerVacant) roll(formula = "1d4", flavor = t("kingdom.rulerVacantGainingUnrest"), toChat = !suppressChat) else 0
     val newUnrest = unrest.war + unrest.secondaryTerritory + unrest.overcrowded + ruler
     return if (kingdom.level >= 20 && newUnrest > 0) {
-        postChatMessage(t("kingdom.ignoringUnrestIncrease"))
+        if (!suppressChat) {
+            postChatMessage(t("kingdom.ignoringUnrestIncrease"))
+        }
         kingdom.unrest
     } else {
-        postChatTemplate(
-            templatePath = "chatmessages/unrest.hbs",
-            templateContext = ChatUnrestContext(
-                overcrowded = unrest.overcrowded,
-                secondary = unrest.secondaryTerritory,
-                atWar = unrest.war,
-                rulerVacant = ruler,
-                total = newUnrest,
-            ),
-        )
+        if (!suppressChat) {
+            postChatTemplate(
+                templatePath = "chatmessages/unrest.hbs",
+                templateContext = ChatUnrestContext(
+                    overcrowded = unrest.overcrowded,
+                    secondary = unrest.secondaryTerritory,
+                    atWar = unrest.war,
+                    rulerVacant = ruler,
+                    total = newUnrest,
+                ),
+            )
+        }
         val totalUnrest = newUnrest + kingdom.unrest
         if (totalUnrest >= 10) {
-            roll(formula = "1d10", flavor = t("kingdom.gainingPointsToRuins"))
-            if (roll(formula = "1d20", flavor = t("kingdom.losingHexOnFlatCheck")) >= 11) {
-                postChatMessage(t("kingdom.loseHexOfChoice"))
+            roll(formula = "1d10", flavor = t("kingdom.gainingPointsToRuins"), toChat = !suppressChat)
+            if (roll(formula = "1d20", flavor = t("kingdom.losingHexOnFlatCheck"), toChat = !suppressChat) >= 11) {
+                if (!suppressChat) {
+                    postChatMessage(t("kingdom.loseHexOfChoice"))
+                }
             }
         }
         val anarchyAt = calculateAnarchy(chosenFeats)
         if (totalUnrest >= anarchyAt) {
-            postChatMessage(t("kingdom.fallsIntoAnarchy"))
+            if (!suppressChat) {
+                postChatMessage(t("kingdom.fallsIntoAnarchy"))
+            }
         }
         min(anarchyAt, totalUnrest)
     }

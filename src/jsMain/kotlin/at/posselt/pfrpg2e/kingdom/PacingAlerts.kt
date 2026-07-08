@@ -41,6 +41,34 @@ private fun alert(
     relatedEntityId = relatedEntityId,
 )
 
+/** Settlement item access far above the party's level — breaks wealth-by-level. */
+fun evaluateLootImbalance(
+    itemAccessLevel: Int,
+    partyLevel: Int,
+    range: Int,
+    turn: Int,
+    relatedEntityId: String? = null,
+): RawPacingAlert? {
+    val diff = itemAccessLevel - partyLevel
+    if (diff <= range) return null
+    val severity = if (diff > range * 2) PacingAlertSeverity.CRITICAL else PacingAlertSeverity.WARNING
+    return alert(PacingAlertType.LOOT_IMBALANCE, severity, turn, relatedEntityId)
+}
+
+/** Like [trackLevelMismatch] but for settlement item access (fires only on severity change). */
+fun trackLootImbalance(
+    itemAccessLevel: Int,
+    partyLevel: Int,
+    range: Int,
+    previousSeverity: String?,
+    turn: Int,
+    relatedEntityId: String? = null,
+): PacingStateTrack =
+    trackSeverityChange(
+        evaluateLootImbalance(itemAccessLevel, partyLevel, range, turn, relatedEntityId),
+        previousSeverity,
+    )
+
 /** Kingdom level too far from the chapter/threat target level. */
 fun evaluateLevelMismatch(kingdomLevel: Int, targetLevel: Int, range: Int, turn: Int): RawPacingAlert? {
     val diff = abs(kingdomLevel - targetLevel)
