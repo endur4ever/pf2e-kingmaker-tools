@@ -9,6 +9,8 @@ import at.posselt.pfrpg2e.kingdom.data.RawResources
 import at.posselt.pfrpg2e.kingdom.RawCouncilCooldowns
 import at.posselt.pfrpg2e.kingdom.data.RawCurrentCommodities
 import at.posselt.pfrpg2e.kingdom.data.RawWarThreat
+import at.posselt.pfrpg2e.kingdom.data.RawArmyDeployment
+import at.posselt.pfrpg2e.kingdom.data.RawWarPressure
 import at.posselt.pfrpg2e.kingdom.data.RawFactionStandingEntry
 import at.posselt.pfrpg2e.kingdom.data.RawGroup
 import at.posselt.pfrpg2e.campaign.jsObject
@@ -137,6 +139,154 @@ class TurnTickingEngineTest {
         val result = tick()
         assertNull(result.warPressure)
         assertEquals(0, result.warThreats.size)
+    }
+
+    // ── War-pressure modifiers (unrest/consumption/ruin) ──────────────────
+
+    @Test
+    fun testWarPressureUnrestModifierAppliedWhenThresholdCrossed() {
+        // Default unrestThreshold = 50. Create pressure >= 50.
+        // 11 threats * 5 = 55 pressure per turn, crosses 50 threshold
+        val manyThreats = Array(11) { i ->
+            RawWarThreat(
+                id = "w$i", name = "Threat $i", description = "", enemyFaction = null,
+                escalationLevel = 0, maxEscalation = 3, eta = 0,
+                targetSettlementSceneId = null, targetHexLocation = null,
+                linkedQuestId = null, linkedEventId = null, pauseOnExpiry = false,
+                status = "active", triggeredTurn = null,
+            )
+        }
+        val result = TurnTickingEngine.tick(
+            fame = fame(), resourcePoints = resourcePoints(), resourceDice = resourcePoints(),
+            consumption = consumption(), commodities = commodities(), storage = storage(),
+            councilCooldowns = null, modifiers = emptyArray(),
+            warThreats = manyThreats, armyDeployments = emptyArray(),
+            warPressure = null, currentTurn = 1,
+        )
+        // Pressure should be 55 (11*5=55 < 100)
+        assertNotNull(result.warPressure)
+        assertEquals(55, result.warPressure!!.currentPressure)
+        assertEquals(1, result.warPressure!!.unrestModifier)
+        // Unrest change should include the war pressure modifier
+        val unrestChange = result.changes.find { it.category == "unrest" && it.field == "warPressure" }
+        assertNotNull(unrestChange)
+        assertEquals(1, unrestChange.newValue)
+        assertEquals(1, result.totalUnrestChange)
+    }
+
+    @Test
+    fun testWarPressureUnrestModifierNotAppliedBelowThreshold() {
+        // 5 threats * 5 = 25 pressure, below default threshold of 50
+        val threats = Array(5) { i ->
+            RawWarThreat(
+                id = "w$i", name = "Threat $i", description = "", enemyFaction = null,
+                escalationLevel = 0, maxEscalation = 3, eta = 0,
+                targetSettlementSceneId = null, targetHexLocation = null,
+                linkedQuestId = null, linkedEventId = null, pauseOnExpiry = false,
+                status = "active", triggeredTurn = null,
+            )
+        }
+        val result = TurnTickingEngine.tick(
+            fame = fame(), resourcePoints = resourcePoints(), resourceDice = resourcePoints(),
+            consumption = consumption(), commodities = commodities(), storage = storage(),
+            councilCooldowns = null, modifiers = emptyArray(),
+            warThreats = threats, armyDeployments = emptyArray(),
+            warPressure = null, currentTurn = 1,
+        )
+        assertNotNull(result.warPressure)
+        assertEquals(25, result.warPressure!!.currentPressure)
+        assertEquals(0, result.warPressure!!.unrestModifier)
+        val unrestChange = result.changes.find { it.category == "unrest" && it.field == "warPressure" }
+        assertNull(unrestChange, "No unrest change should be recorded when below threshold")
+        assertEquals(0, result.totalUnrestChange)
+    }
+
+    @Test
+    fun testWarPressureConsumptionModifierApplied() {
+        // 1 active threat, 2 deployed armies -> pressurePerTurn = 5 - 4 = 1, pressure = 1
+        // But consumptionModifier = armyCount = 2
+        val threat = RawWarThreat(
+            id = "w1", name = "Goblin Horde", description = "", enemyFaction = null,
+            escalationLevel = 0, maxEscalation = 3, eta = 0,
+            targetSettlementSceneId = null, targetHexLocation = null,
+            linkedQuestId = null, linkedEventId = null, pauseOnExpiry = false,
+            status = "active", triggeredTurn = null,
+        )
+        val deployment1 = RawArmyDeployment(
+            id = "d1", armyActorUuid = "Actor.1", armyName = "1st Legion", armyType = "infantry",
+            assignedThreatId = "w1", garrisonedSettlementId = null, status = "deployed", deployedTurn = 0,
+        )
+        val deployment2 = RawArmyDeployment(
+            id = "d2", armyActorUuid = "Actor.2", armyName = "2nd Legion", armyType = "cavalry",
+            assignedThreatId = "w1", garrisonedSettlementId = null, status = "deployed", deployedTurn = 0,
+        )
+        val result = TurnTickingEngine.tick(
+            fame = fame(), resourcePoints = resourcePoints(), resourceDice = resourcePoints(),
+            consumption = consumption(now = 3, next = 4, armies = 5),
+            commodities = commodities(), storage = storage(),
+            councilCooldowns = null, modifiers = emptyArray(),
+            warThreats = arrayOf(threat), armyDeployments = arrayOf(deployment1, deployment2),
+            warPressure = null, currentTurn = 1,
+        )
+        assertNotNull(result.warPressure)
+        assertEquals(2, result.warPressure!!.consumptionModifier)
+        // consumption.now was advanced from next (4), then +2 from consumptionModifier = 6
+        assertEquals(6, result.consumption.now)
+        val consumptionChange = result.changes.find { it.category == "consumption" && it.field == "warPressure" }
+        assertNotNull(consumptionChange)
+        assertEquals(2, consumptionChange.newValue)
+    }
+
+    @Test
+    fun testWarPressureRuinThresholdCrossedIncrementsWarThreatOffers() {
+        // Default ruinThreshold = 75. Create pressure that crosses 75 this tick.
+        // 16 threats * 5 = 80 pressure, crosses 75
+        val manyThreats = Array(16) { i ->
+            RawWarThreat(
+                id = "w$i", name = "Threat $i", description = "", enemyFaction = null,
+                escalationLevel = 0, maxEscalation = 3, eta = 0,
+                targetSettlementSceneId = null, targetHexLocation = null,
+                linkedQuestId = null, linkedEventId = null, pauseOnExpiry = false,
+                status = "active", triggeredTurn = null,
+            )
+        }
+        val result = TurnTickingEngine.tick(
+            fame = fame(), resourcePoints = resourcePoints(), resourceDice = resourcePoints(),
+            consumption = consumption(), commodities = commodities(), storage = storage(),
+            councilCooldowns = null, modifiers = emptyArray(),
+            warThreats = manyThreats, armyDeployments = emptyArray(),
+            warPressure = null, currentTurn = 1,
+        )
+        assertNotNull(result.warPressure)
+        assertTrue(result.warPressure!!.currentPressure >= 75)
+        // warThreatOffers should be incremented for ruin threshold crossing
+        assertEquals(1, result.warThreatOffers)
+    }
+
+    @Test
+    fun testWarPressureRuinThresholdNotCrossedWhenAlreadyAbove() {
+        // Start with pressure already above ruin threshold
+        val existingPressure = RawWarPressure(
+            currentPressure = 80, pressurePerTurn = 0, unrestModifier = 1, consumptionModifier = 0,
+            unrestThreshold = 50, ruinThreshold = 75, lastChange = null,
+        )
+        val threat = RawWarThreat(
+            id = "w1", name = "Goblin Horde", description = "", enemyFaction = null,
+            escalationLevel = 0, maxEscalation = 3, eta = 0,
+            targetSettlementSceneId = null, targetHexLocation = null,
+            linkedQuestId = null, linkedEventId = null, pauseOnExpiry = false,
+            status = "active", triggeredTurn = null,
+        )
+        val result = TurnTickingEngine.tick(
+            fame = fame(), resourcePoints = resourcePoints(), resourceDice = resourcePoints(),
+            consumption = consumption(), commodities = commodities(), storage = storage(),
+            councilCooldowns = null, modifiers = emptyArray(),
+            warThreats = arrayOf(threat), armyDeployments = emptyArray(),
+            warPressure = existingPressure, currentTurn = 1,
+        )
+        // Pressure stays above ruin threshold but didn't CROSS it this tick
+        assertNotNull(result.warPressure)
+        assertEquals(0, result.warThreatOffers, "No offer should be fired when already above ruin threshold")
     }
 
     // ── Solution counters ──────────────────────────────────────────────
@@ -684,6 +834,9 @@ class TurnTickingEngineTest {
         assertEquals(previewResult.warThreats[0].escalationLevel, commitResult.warThreats[0].escalationLevel)
         assertEquals(previewResult.armyDeployments.size, commitResult.armyDeployments.size)
         assertEquals(previewResult.warPressure?.currentPressure, commitResult.warPressure?.currentPressure)
+        assertEquals(previewResult.warPressure?.unrestModifier, commitResult.warPressure?.unrestModifier)
+        assertEquals(previewResult.warPressure?.consumptionModifier, commitResult.warPressure?.consumptionModifier)
+        assertEquals(previewResult.warThreatOffers, commitResult.warThreatOffers)
     }
 
     // ── RP-to-XP conversion ────────────────────────────────────────────

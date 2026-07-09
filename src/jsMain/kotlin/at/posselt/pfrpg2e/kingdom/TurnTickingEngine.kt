@@ -32,6 +32,46 @@ private fun Array<RawWarThreat>.toThreatSnapshots(): Array<WarThreatSnapshot> =
 /** Persisted [RawArmyBattle.status] for battles archived at end of turn (not part of [BattleStatus]). */
 const val ARCHIVED_BATTLE_STATUS = "archived"
 
+/**
+ * War-pressure modifiers applied at end turn.
+ *
+ * The war-pressure track computes [unrestModifier] (1 when pressure >= unrestThreshold)
+ * and [consumptionModifier] (count of deployed armies). These are applied here in the
+ * shared tick path so preview/commit parity is maintained.
+ *
+ * IMPORTANT: [consumptionModifier] equals the count of supporting armies, while
+ * [RawConsumption.armies] tracks the *sum of each army's consumption value* (auto-calculated
+ * from tokens via [ArmyConsumption.updateArmyConsumption]). They measure different things:
+ * - consumptionModifier = number of deployed armies (war footing headcount)
+ * - RawConsumption.armies = total food cost of those armies
+ *
+ * Both are applied. If auto-calculation is off, armies may be 0 while consumptionModifier > 0,
+ * representing the logistical overhead of maintaining a war footing even without token data.
+ */
+private data class WarPressureModifiers(
+    val unrestDelta: Int,
+    val consumptionDelta: Int,
+    val ruinThresholdCrossed: Boolean,
+)
+
+/** Compute war-pressure modifiers to apply this tick. Pure, no side effects. */
+private fun computeWarPressureModifiers(
+    newWarPressure: RawWarPressure?,
+    previousWarPressure: RawWarPressure?,
+): WarPressureModifiers {
+    val pressure = newWarPressure ?: return WarPressureModifiers(0, 0, false)
+    val prev = previousWarPressure
+
+    val unrestDelta = pressure.unrestModifier
+    val consumptionDelta = pressure.consumptionModifier
+
+    // Ruin threshold: crossed this tick if pressure >= ruinThreshold now but was < ruinThreshold before
+    val ruinThresholdCrossed = pressure.currentPressure >= pressure.ruinThreshold &&
+        (prev?.currentPressure ?: 0) < (prev?.ruinThreshold ?: pressure.ruinThreshold)
+
+    return WarPressureModifiers(unrestDelta, consumptionDelta, ruinThresholdCrossed)
+}
+
 /** Default number of turns to extend a quest deadline when GM clicks [Extend]. */
 const val DEFAULT_QUEST_EXTEND_TURNS = 2
 
@@ -200,7 +240,7 @@ object TurnTickingEngine {
 		}
 
 		// 5) Advance consumption: next -> now
-		val newConsumption = consumption.endTurn()
+		var newConsumption = consumption.endTurn()
 		if (newConsumption.now != consumption.now) {
 			changes += TickChange("consumption", "now", consumption.now, newConsumption.now)
 		}
@@ -281,6 +321,10 @@ object TurnTickingEngine {
 		val (updatedQuests, deadlineReached, questChanges) = tickQuests(campaignQuests, kingdomLevel)
 		changes += questChanges
 
+		// Track offer counters early so war-pressure ruin threshold can increment them.
+		var warThreatOffers = 0
+		var diplomacyQuestOffers = 0
+
 		// 11) Tick war threats (roadmap #12): ETA countdown, escalation, expiry/soft-pause
 		val tickedThreats = tickWarThreats(warThreats, currentTurn)
 
@@ -301,6 +345,29 @@ object TurnTickingEngine {
 		}
 		if (newWarPressure != null && (newWarPressure.lastChange ?: 0) != 0) {
 			changes += TickChange("warPressure", "currentPressure", warPressure?.currentPressure, newWarPressure.currentPressure)
+		}
+
+		// 12b) Apply war-pressure modifiers (unrest/consumption/ruin) in the shared tick path
+		// so preview/commit parity is maintained.
+		val wpModifiers = computeWarPressureModifiers(newWarPressure, warPressure)
+		var totalUnrestChange = clockResult.totalUnrestChange
+		if (wpModifiers.unrestDelta > 0) {
+			totalUnrestChange += wpModifiers.unrestDelta
+			changes += TickChange("unrest", "warPressure", null, wpModifiers.unrestDelta)
+		}
+		// Apply consumption modifier to the current turn's consumption (consumption.now was
+		// already set to the previous consumption.next by endTurn() in step 5).
+		// Note: consumptionModifier tracks deployed army COUNT (war footing overhead),
+		// while RawConsumption.armies tracks the sum of each army's consumption value.
+		// Both are applied; they represent different cost categories.
+		if (wpModifiers.consumptionDelta > 0) {
+			newConsumption = RawConsumption.copy(newConsumption, now = newConsumption.now + wpModifiers.consumptionDelta)
+			changes += TickChange("consumption", "warPressure", null, wpModifiers.consumptionDelta)
+		}
+		// Ruin threshold crossed: fire a GM offer (same pattern as warThreatOffers).
+		// The actual offer card is posted in performEndTurn when warThreatOffers > 0.
+		if (wpModifiers.ruinThresholdCrossed) {
+			warThreatOffers++
 		}
 
 		// 13) RP-to-XP conversion: convert current RP into XP based on rate and limit
@@ -351,8 +418,6 @@ object TurnTickingEngine {
 		// 17) Faction standing drift — applies a signed delta to every group's
 		// standing once per turn, then checks attitude threshold crossings to
 		// determine whether a war-threat or diplomacy-quest hook should fire.
-		var warThreatOffers = 0
-		var diplomacyQuestOffers = 0
 		val driftedGroups = if (factionStandingDriftPerTurn != 0 && groups.isNotEmpty()) {
 			groups.map { group ->
 				val before = group.standing
@@ -387,33 +452,33 @@ object TurnTickingEngine {
 		}
 
 		return TickResult(
-				supernaturalSolutions = 0,
-				creativeSolutions = 0,
-				fame = fameAfterAutoGain,
-				resourcePoints = newResourcePoints,
-				resourceDice = newResourceDice,
-				consumption = newConsumption,
-				commodities = newCommodities,
-				councilCooldowns = newCooldowns,
-				modifiers = newModifiers,
-				changes = changes,
-				clockEvents = clockResult.events,
-				updatedClocks = clockResult.updatedClocks,
-				totalUnrestChange = clockResult.totalUnrestChange,
-				campaignQuests = updatedQuests,
-				warThreats = tickedThreats,
-				armyDeployments = armyDeployments,
-				warPressure = newWarPressure,
-				xpAwarded = xpAwarded,
-				bonusResourceDice = 0,
-				activeBattles = archivedBattles,
-				groups = driftedGroups,
-				factionStandingDrift = factionStandingDriftPerTurn != 0,
-				warThreatOffers = warThreatOffers,
-				diplomacyQuestOffers = diplomacyQuestOffers,
-				questDeadlineReached = deadlineReached,
-				newlyTriggeredThreats = newlyTriggered.toTypedArray(),
-			)
+					supernaturalSolutions = 0,
+					creativeSolutions = 0,
+					fame = fameAfterAutoGain,
+					resourcePoints = newResourcePoints,
+					resourceDice = newResourceDice,
+					consumption = newConsumption,
+					commodities = newCommodities,
+					councilCooldowns = newCooldowns,
+					modifiers = newModifiers,
+					changes = changes,
+					clockEvents = clockResult.events,
+					updatedClocks = clockResult.updatedClocks,
+					totalUnrestChange = totalUnrestChange,
+					campaignQuests = updatedQuests,
+					warThreats = tickedThreats,
+					armyDeployments = armyDeployments,
+					warPressure = newWarPressure,
+					xpAwarded = xpAwarded,
+					bonusResourceDice = 0,
+					activeBattles = archivedBattles,
+					groups = driftedGroups,
+					factionStandingDrift = factionStandingDriftPerTurn != 0,
+					warThreatOffers = warThreatOffers,
+					diplomacyQuestOffers = diplomacyQuestOffers,
+					questDeadlineReached = deadlineReached,
+					newlyTriggeredThreats = newlyTriggered.toTypedArray(),
+				)
 	}
 
 	/**
