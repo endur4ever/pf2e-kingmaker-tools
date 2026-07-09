@@ -341,11 +341,15 @@ fun tickRound(
 
 /**
  * Calculates the modifier to the attack roll based on the battlefield terrain.
- * Difficult terrains (forest, swamp, mountains, mountain) impose a -2 penalty.
+ * Difficult terrains impose a -2 penalty. This accepts BOTH vocabularies that reach it:
+ * the SettlementTerrain values on the settlement path (forest/swamp/mountains/plains) and
+ * the raw pf2e-kingmaker hex terrain ids on the hex path. The module's marsh terrain id is
+ * "wetlands" (distinct from the rarer "swamp"), so both must map to the same penalty — otherwise
+ * the map's most common difficult terrain would silently behave like open plains.
  */
 fun getTerrainModifier(terrain: String?): Int {
     return when (terrain?.lowercase()) {
-        "forest", "swamp", "mountain", "mountains" -> -2
+        "forest", "swamp", "wetlands", "mountain", "mountains" -> -2
         else -> 0
     }
 }

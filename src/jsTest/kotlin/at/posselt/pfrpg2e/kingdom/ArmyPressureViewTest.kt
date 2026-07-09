@@ -54,6 +54,29 @@ class ArmyPressureViewTest {
     }
 
     @Test
+    fun resolvesGarrisonSettlementNameFromMap() {
+        // Covers the garrison display path: garrisonedSettlementId is resolved to a name via
+        // settlementNames, and an unknown id degrades gracefully to null (not a crash / stale id).
+        val garrisoned = RawArmyDeployment(
+            id = "d1", armyActorUuid = "Actor.x", armyName = "Home Guard", armyType = "infantry",
+            assignedThreatId = null, garrisonedSettlementId = "s1", status = "deployed", deployedTurn = 0,
+        )
+        val unknownGarrison = RawArmyDeployment(
+            id = "d2", armyActorUuid = "Actor.y", armyName = "Free Company", armyType = "infantry",
+            assignedThreatId = null, garrisonedSettlementId = "missing", status = "deployed", deployedTurn = 0,
+        )
+        val view = buildArmyPressureView(
+            null, arrayOf(garrisoned, unknownGarrison), null,
+            settings(enabled = true, showDistance = false),
+            settlementNames = mapOf("s1" to "Ironhaven"),
+        )
+        val resolved = view.deployments.first { it.garrisonedSettlementId == "s1" }
+        assertEquals("Ironhaven", resolved.garrisonedSettlementName)
+        val unresolved = view.deployments.first { it.garrisonedSettlementId == "missing" }
+        assertNull(unresolved.garrisonedSettlementName)
+    }
+
+    @Test
     fun emptyWhenNoWarData() {
         val view = buildArmyPressureView(null, null, null, settings(enabled = false, showDistance = true))
         assertFalse(view.enabled)

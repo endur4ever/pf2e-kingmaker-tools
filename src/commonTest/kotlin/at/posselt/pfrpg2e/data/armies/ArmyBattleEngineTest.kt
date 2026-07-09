@@ -838,6 +838,7 @@ class TerrainModifierTest {
     fun getTerrainModifierValues() {
         assertEquals(-2, getTerrainModifier("forest"))
         assertEquals(-2, getTerrainModifier("swamp"))
+        assertEquals(-2, getTerrainModifier("wetlands")) // pf2e-kingmaker's common marsh hex id
         assertEquals(-2, getTerrainModifier("mountain"))
         assertEquals(-2, getTerrainModifier("mountains"))
         assertEquals(0, getTerrainModifier("plains"))
