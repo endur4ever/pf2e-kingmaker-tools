@@ -2029,7 +2029,15 @@ class KingdomSheet(
             }
 
             "end-turn" -> buildPromise {
+                if (!game.user.isGM) {
+                    ui.notifications.warn(t("kingdom.turn.endTurnGmOnly"))
+                    return@buildPromise
+                }
                 actor.getKingdom()?.let { kingdom ->
+                    val nextTurn = (kingdom.currentTurn ?: 0) + 1
+                    if (!confirm(t("kingdom.turn.confirmEndTurn", recordOf("turn" to nextTurn)))) {
+                        return@buildPromise
+                    }
                     performEndTurn(game, actor, kingdom)
                 }
             }

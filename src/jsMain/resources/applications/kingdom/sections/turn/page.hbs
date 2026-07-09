@@ -455,7 +455,9 @@
                 <button type="button" {{#unless canLevelUp}}disabled{{/unless}} data-action="level-up">{{localizeKM
                         "kingdom.levelUp"}}</button>
                 <button type="button" data-action="open-turn-wizard"><i class="fas fa-magic"></i> {{localizeKM "kingdom.turnWizard.openButton"}}</button>
-                <button type="button" data-action="end-turn">{{localizeKM "kingdom.endTurn"}}</button>
+                {{#if isGM}}
+                    <button type="button" data-action="end-turn">{{localizeKM "kingdom.endTurn"}}</button>
+                {{/if}}
             </p>
         </section>
     </div>
