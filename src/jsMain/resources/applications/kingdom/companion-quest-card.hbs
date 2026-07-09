@@ -18,7 +18,7 @@
         <span class="km-cpq-hidden"><i class="fa-solid fa-eye-slash"></i> {{localizeKM "kingdom.companion.gmOnly"}}</span>
         {{/unless}}
     </div>
-    {{#if isGM}}
+    {{#if ../isGM}}
     <div class="km-cpq-actions">
         <button type="button" data-action="toggle-quest-visibility" data-quest-id="{{id}}"
                 title="{{#if visibleToPlayers}}{{localizeKM 'kingdom.companion.quest.hide'}}{{else}}{{localizeKM 'kingdom.companion.quest.reveal'}}{{/if}}">
