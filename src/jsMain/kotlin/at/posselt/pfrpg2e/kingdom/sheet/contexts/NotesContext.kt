@@ -14,13 +14,15 @@ external interface NotesContext {
     var gm: String
 }
 
-suspend fun RawNotes.toContext(): NotesContext {
+suspend fun RawNotes.toContext(isGM: Boolean): NotesContext {
     val pub = TextEditor.enrichHTML(public).await()
-    val private = TextEditor.enrichHTML(gm).await()
+    // GM-only fields are blanked for players at context-build time (no info leak; mirrors ExpeditionsContext.kt:116).
+    val gmRaw = if (isGM) gm else ""
+    val gmEnriched = if (isGM) TextEditor.enrichHTML(gm).await() else ""
     return NotesContext(
         rawPublic = public,
-        rawGm = gm,
+        rawGm = gmRaw,
         public = pub,
-        gm = private,
+        gm = gmEnriched,
     )
 }

@@ -2818,7 +2818,7 @@ class KingdomSheet(
         val enabledHeartlands = kingdom.getHeartlands().filter { it.id !in heartlandBlacklist }
         val enabledCharters = kingdom.getCharters().filter { it.id !in charterBlacklist }
         val enabledGovernments = kingdom.getGovernments().filter { it.id !in governmentBlacklist }
-        val notesContext = kingdom.notes.toContext()
+        val notesContext = kingdom.notes.toContext(isGM)
         val government = kingdom.getChosenGovernment()
         val heartland = kingdom.getChosenHeartland()
         val charter = kingdom.getChosenCharter()
