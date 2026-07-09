@@ -94,6 +94,7 @@ import at.posselt.pfrpg2e.kingdom.dialogs.KingdomSettingsApplication
 import at.posselt.pfrpg2e.kingdom.dialogs.MilestoneManagement
 import at.posselt.pfrpg2e.kingdom.dialogs.StructureBrowser
 import at.posselt.pfrpg2e.kingdom.dialogs.DeployArmy
+import at.posselt.pfrpg2e.kingdom.dialogs.DeploySettlementOption
 import at.posselt.pfrpg2e.kingdom.dialogs.ResolveBattle
 import at.posselt.pfrpg2e.kingdom.dialogs.addSettlementBlockDialog
 import at.posselt.pfrpg2e.kingdom.dialogs.armyBrowser
@@ -214,6 +215,7 @@ import at.posselt.pfrpg2e.kingdom.data.WarThreatStatus
 import at.posselt.pfrpg2e.kingdom.data.RawWarThreat
 import at.posselt.pfrpg2e.kingdom.BattleArmyInfo
 import at.posselt.pfrpg2e.kingdom.createArmyBattle
+import at.posselt.pfrpg2e.kingdom.resolveBattleTerrain
 import at.posselt.pfrpg2e.data.armies.ArmyType
 import at.posselt.pfrpg2e.data.armies.BattleStatus
 import com.foundryvtt.pf2e.actor.PF2EArmy
@@ -625,7 +627,9 @@ class KingdomSheet(
                     val threats = (kingdom.warThreats ?: emptyArray())
                         .filter { it.status == WarThreatStatus.ACTIVE.value }
                         .map { DeployThreatOption(it.id, it.name) }
-                    DeployArmy(armies, threats, deployedTurn = kingdom.currentTurn ?: 0) { deployment ->
+                    val settlements = kingdom.getAllSettlements(game).allSettlements
+                        .map { DeploySettlementOption(it.id, it.name) }
+                    DeployArmy(armies, threats, settlements, deployedTurn = kingdom.currentTurn ?: 0) { deployment ->
                         buildPromise {
                             val current = getKingdom()
                             current.armyDeployments = (current.armyDeployments ?: emptyArray()) + deployment
@@ -693,10 +697,16 @@ class KingdomSheet(
                             ui.notifications.warn(t("armyPressure.noArmiesAvailable"))
                             return@buildPromise
                         }
+                        val terrain = resolveBattleTerrain(
+                            targetSettlementSceneId = threat.targetSettlementSceneId,
+                            targetHexLocation = threat.targetHexLocation,
+                            settlements = kingdom.settlements,
+                        )
                         val created = createArmyBattle(
                             id = "battle-${kotlin.js.Date().getTime().toLong()}",
                             threat = threat,
                             attackers = infos,
+                            terrain = terrain,
                         )
                         kingdom.activeBattles = (kingdom.activeBattles ?: emptyArray()) + created
                         actor.setKingdom(kingdom)
@@ -2865,6 +2875,14 @@ class KingdomSheet(
                 leaderActors.resolve(Leader.COUNSELOR) != null &&
                 kingdom.commodities.now.food >= 3 &&
                 cooldowns.feast <= 0
+        val auditCooldownTurns = cooldowns.audit
+        val scryingCooldownTurns = cooldowns.scrying
+        val lockdownCooldownTurns = cooldowns.lockdown
+        val feastCooldownTurns = cooldowns.feast
+        val auditAffordable = true
+        val scryingAffordable = kingdom.resourcePoints.now >= 4
+        val lockdownAffordable = kingdom.resourcePoints.now >= 2
+        val feastAffordable = kingdom.commodities.now.food >= 3
         val ongoingEvents = kingdom.getOngoingEvents().toContext(
             openedDetails = openedDetails,
             isGM = isGM,
@@ -3140,6 +3158,14 @@ class KingdomSheet(
             canScrying = canScrying,
             canLockdown = canLockdown,
             canFeast = canFeast,
+            auditCooldownTurns = auditCooldownTurns,
+            scryingCooldownTurns = scryingCooldownTurns,
+            lockdownCooldownTurns = lockdownCooldownTurns,
+            feastCooldownTurns = feastCooldownTurns,
+            auditAffordable = auditAffordable,
+            scryingAffordable = scryingAffordable,
+            lockdownAffordable = lockdownAffordable,
+            feastAffordable = feastAffordable,
             activeQuests = activeQuests,
             completedQuests = completedQuests,
             rosterContext = (kingdom.companions ?: emptyArray()).map { character ->
@@ -3183,6 +3209,7 @@ class KingdomSheet(
                     pressure = kingdom.warPressure,
                     settings = kingdom.settings,
                     currentTurn = kingdom.currentTurn ?: 0,
+                    settlementNames = settlements.allSettlements.associate { it.id to it.name },
                 )
             ),
             pacingAlertContext = buildPacingAlertContext(

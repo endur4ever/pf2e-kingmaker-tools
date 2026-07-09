@@ -37,6 +37,7 @@ data class ArmyDeploymentView(
     val status: String,
     val assignedThreatId: String?,
     val garrisonedSettlementId: String?,
+    val garrisonedSettlementName: String?,
 )
 
 data class WarPressureView(
@@ -82,13 +83,14 @@ private fun RawWarThreat.toView(deployments: Array<RawArmyDeployment>): WarThrea
     )
 }
 
-private fun RawArmyDeployment.toView(): ArmyDeploymentView = ArmyDeploymentView(
+private fun RawArmyDeployment.toView(settlementNames: Map<String, String>): ArmyDeploymentView = ArmyDeploymentView(
     id = id,
     armyName = armyName,
     armyType = armyType,
     status = status,
     assignedThreatId = assignedThreatId,
     garrisonedSettlementId = garrisonedSettlementId,
+    garrisonedSettlementName = garrisonedSettlementId?.let { settlementNames[it] },
 )
 
 private fun RawWarPressure.toView(projection: WarPressureProjection? = null): WarPressureView = WarPressureView(
@@ -112,6 +114,7 @@ private fun RawWarPressure.toView(projection: WarPressureProjection? = null): Wa
  * @param pressure Current war pressure state (nullable)
  * @param settings Kingdom settings (for mode selection)
  * @param currentTurn Current kingdom turn number (for projection calculations)
+ * @param settlementNames Map of settlement scene ID to settlement name
  * @return The view model for the army pressure board
  */
 fun buildArmyPressureView(
@@ -120,6 +123,7 @@ fun buildArmyPressureView(
     pressure: RawWarPressure?,
     settings: KingdomSettings,
     currentTurn: Int = 0,
+    settlementNames: Map<String, String> = emptyMap(),
 ): ArmyPressureView {
     val deploymentArray = deployments ?: emptyArray()
     val threatArray = threats ?: emptyArray()
@@ -142,7 +146,7 @@ fun buildArmyPressureView(
         enabled = settings.isArmyPressureBoardEnabled(),
         showThreatDistance = settings.shouldShowThreatDistance(),
         threats = threatArray.map { it.toView(deploymentArray) },
-        deployments = deploymentArray.map { it.toView() },
+        deployments = deploymentArray.map { it.toView(settlementNames) },
         pressure = pressure?.toView(projection),
     )
 }

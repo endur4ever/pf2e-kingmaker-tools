@@ -38,6 +38,8 @@ external interface ArmyDeploymentContext {
     val status: String
     val statusLabel: String
     val assignedThreatId: String?
+    val garrisonedSettlementId: String?
+    val garrisonedSettlementName: String?
 }
 
 @JsPlainObject
@@ -106,6 +108,8 @@ fun buildArmyPressureContext(view: ArmyPressureView): ArmyPressureContext {
             status = dv.status,
             statusLabel = ArmyDeploymentStatus.fromString(dv.status)?.let { t(it.i18nKey) } ?: dv.status,
             assignedThreatId = dv.assignedThreatId,
+            garrisonedSettlementId = dv.garrisonedSettlementId,
+            garrisonedSettlementName = dv.garrisonedSettlementName,
         )
     }.toTypedArray()
     val pressure = view.pressure?.let { pv ->

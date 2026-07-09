@@ -84,3 +84,14 @@
 .km-deployment-status-destroyed { background: rgba(122, 34, 34, 0.18); }
 
 .km-army-row-actions { white-space: nowrap; }
+
+.km-army-garrison {
+    font-size: var(--font-size-11);
+    color: var(--color-text-light-5);
+    margin-top: 0.1rem;
+    opacity: 0.8;
+}
+
+.km-army-garrison i {
+    margin-right: 0.15rem;
+}

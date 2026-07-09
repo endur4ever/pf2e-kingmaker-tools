@@ -13,6 +13,7 @@ import at.posselt.pfrpg2e.fromCamelCase
 import at.posselt.pfrpg2e.kingdom.data.RawArmyBattle
 import at.posselt.pfrpg2e.kingdom.data.RawBattleArmy
 import at.posselt.pfrpg2e.kingdom.data.RawWarThreat
+import at.posselt.pfrpg2e.kingdom.structures.RawSettlement
 
 /**
  * Pure mapping between the persisted [RawArmyBattle] (JS-interop, phase 1) and
@@ -63,6 +64,7 @@ fun toBattleState(battle: RawArmyBattle): BattleState = BattleState(
     armies = (battle.attackers + battle.defenders).map { toBattleArmyState(it) },
     log = battle.log.toList(),
     status = BattleStatus.fromString(battle.status) ?: BattleStatus.ACTIVE,
+    terrain = battle.terrain,
 )
 
 /**
@@ -112,6 +114,7 @@ fun updateRawBattle(battle: RawArmyBattle, state: BattleState): RawArmyBattle {
         defenders = newDefenders,
         log = state.log.toTypedArray(),
         status = determineBattleStatus(state, attackerCount).value,
+        terrain = state.terrain,
     )
 }
 
@@ -148,6 +151,7 @@ fun createArmyBattle(
     id: String,
     threat: RawWarThreat,
     attackers: List<BattleArmyInfo>,
+    terrain: String?,
 ): RawArmyBattle {
     val attackerArmies = attackers.map { info ->
         val maxHp = getArmyHitPoints(info.name)
@@ -176,10 +180,32 @@ fun createArmyBattle(
         threatId = threat.id,
         name = threat.name,
         round = 0,
-        terrain = null,
+        terrain = terrain,
         attackers = attackerArmies,
         defenders = arrayOf(defender),
         log = emptyArray(),
         status = BattleStatus.ACTIVE.value,
     )
+}
+
+/**
+ * Resolves the terrain of the battle target.
+ */
+fun resolveBattleTerrain(
+    targetSettlementSceneId: String?,
+    targetHexLocation: String?,
+    settlements: Array<RawSettlement>,
+): String? {
+    if (targetSettlementSceneId != null) {
+        val s = settlements.find { it.sceneId == targetSettlementSceneId }
+        if (s?.terrain != null) return s.terrain
+    }
+    if (targetHexLocation != null) {
+        val keyInt = targetHexLocation.toIntOrNull()
+        if (keyInt != null) {
+            val hex = runCatching { com.foundryvtt.kingmaker.kingmaker.region.hexes.find { it.key == keyInt } }.getOrNull()
+            if (hex?.terrain?.id != null) return hex.terrain.id
+        }
+    }
+    return null
 }

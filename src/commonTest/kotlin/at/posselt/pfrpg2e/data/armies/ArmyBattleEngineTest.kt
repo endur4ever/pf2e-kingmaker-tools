@@ -831,3 +831,49 @@ class ConditionRecoveryTest {
         assertTrue(result.conditions.isEmpty())
     }
 }
+
+class TerrainModifierTest {
+
+    @Test
+    fun getTerrainModifierValues() {
+        assertEquals(-2, getTerrainModifier("forest"))
+        assertEquals(-2, getTerrainModifier("swamp"))
+        assertEquals(-2, getTerrainModifier("mountain"))
+        assertEquals(-2, getTerrainModifier("mountains"))
+        assertEquals(0, getTerrainModifier("plains"))
+        assertEquals(0, getTerrainModifier("hills"))
+        assertEquals(0, getTerrainModifier(null))
+    }
+
+    @Test
+    fun terrainPenaltyAppliedDuringTick() {
+        val battle = BattleState(
+            round = 1,
+            armies = listOf(
+                testArmy(name = "Attacker", attackBonus = 9, ac = 16),
+                testArmy(name = "Defender", hp = 4, ac = 16),
+            ),
+            terrain = "forest"
+        )
+        // forest gives -2 penalty. attackBonus effectively 7. roll 8 + 7 = 15 vs 16 AC -> failure (no damage)
+        val actions = listOf(BattleAction(actorIndex = 0, targetIndex = 1, roll = 8))
+        val result = tickRound(battle, actions)
+        assertEquals(4, result.armies[1].currentHp) // no damage
+    }
+
+    @Test
+    fun noTerrainPenaltyInEasyTerrain() {
+        val battle = BattleState(
+            round = 1,
+            armies = listOf(
+                testArmy(name = "Attacker", attackBonus = 9, ac = 16),
+                testArmy(name = "Defender", hp = 4, ac = 16),
+            ),
+            terrain = "plains"
+        )
+        // plains gives 0 penalty. attackBonus effectively 9. roll 8 + 9 = 17 vs 16 AC -> success -> 1 damage
+        val actions = listOf(BattleAction(actorIndex = 0, targetIndex = 1, roll = 8))
+        val result = tickRound(battle, actions)
+        assertEquals(3, result.armies[1].currentHp) // 1 damage
+    }
+}

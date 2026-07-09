@@ -39,10 +39,17 @@ data class DeployThreatOption(
     val name: String,
 )
 
+/** A settlement option that an army can garrison. */
+data class DeploySettlementOption(
+    val id: String,
+    val name: String,
+)
+
 @JsPlainObject
 external interface DeployArmyFormData {
     var armyActorUuid: String
     var assignedThreatId: String?
+    var garrisonedSettlementId: String?
 }
 
 @JsExport
@@ -55,6 +62,7 @@ class DeployArmyDataModel(
         fun defineSchema() = buildSchema {
             string("armyActorUuid")
             string("assignedThreatId", nullable = true)
+            string("garrisonedSettlementId", nullable = true)
         }
     }
 }
@@ -70,6 +78,7 @@ external interface DeployArmyFormContext : ValidatedHandlebarsContext, SectionsC
 class DeployArmy(
     private val armies: List<DeployableArmyOption>,
     private val threats: List<DeployThreatOption>,
+    private val settlements: List<DeploySettlementOption>,
     private val deployedTurn: Int = 0,
     private val onSave: (RawArmyDeployment) -> Unit,
 ) : FormApp<DeployArmyFormContext, DeployArmyFormData>(
@@ -83,6 +92,7 @@ class DeployArmy(
     private var data: DeployArmyFormData = DeployArmyFormData(
         armyActorUuid = armies.firstOrNull()?.uuid ?: "",
         assignedThreatId = null,
+        garrisonedSettlementId = null,
     )
 
     override fun _preparePartContext(
@@ -94,6 +104,8 @@ class DeployArmy(
         val armyOptions = armies.map { SelectOption("${it.name} (${it.typeLabel})", it.uuid) }
         val threatOptions = listOf(SelectOption(t("armyPressure.noThreatAssignment"), "")) +
             threats.map { SelectOption(it.name, it.id) }
+        val settlementOptions = listOf(SelectOption(t("armyPressure.noGarrisonAssignment"), "")) +
+            settlements.map { SelectOption(it.name, it.id) }
         DeployArmyFormContext(
             partId = parent.partId,
             isFormValid = isFormValid,
@@ -117,6 +129,15 @@ class DeployArmy(
                             stacked = false,
                             help = t("armyPressure.assignThreatHelp"),
                         ),
+                        Select(
+                            name = "garrisonedSettlementId",
+                            label = t("armyPressure.garrisonSettlement"),
+                            value = data.garrisonedSettlementId ?: "",
+                            options = settlementOptions,
+                            required = false,
+                            stacked = false,
+                            help = t("armyPressure.garrisonSettlementHelp"),
+                        ),
                     )
                 )
             )
@@ -138,7 +159,7 @@ class DeployArmy(
                     armyName = army.name,
                     armyType = army.typeLabel,
                     assignedThreatId = data.assignedThreatId?.ifBlank { null },
-                    garrisonedSettlementId = null,
+                    garrisonedSettlementId = data.garrisonedSettlementId?.ifBlank { null },
                     status = ArmyDeploymentStatus.DEPLOYED.value,
                     deployedTurn = deployedTurn,
                 )

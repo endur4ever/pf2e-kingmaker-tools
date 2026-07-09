@@ -9,6 +9,7 @@ import at.posselt.pfrpg2e.data.armies.getArmyAttackBonus
 import at.posselt.pfrpg2e.kingdom.data.RawArmyBattle
 import at.posselt.pfrpg2e.kingdom.data.RawBattleArmy
 import at.posselt.pfrpg2e.kingdom.data.RawWarThreat
+import at.posselt.pfrpg2e.kingdom.structures.RawSettlement
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -289,6 +290,7 @@ class ResolveBattleTest {
             id = "battle-1",
             threat = threat,
             attackers = listOf(BattleArmyInfo(uuid = "Actor.a", name = "1st Legion", level = 4)),
+            terrain = "swamp",
         )
         assertEquals("w1", battle.threatId)
         assertEquals(BattleStatus.ACTIVE.value, battle.status)
@@ -300,5 +302,17 @@ class ResolveBattleTest {
         // escalation 0 is clamped to a level-1 enemy army
         assertEquals(1, battle.defenders[0].level)
         assertEquals(0, battle.round)
+        assertEquals("swamp", battle.terrain)
+    }
+
+    @Test
+    fun resolveBattleTerrainResolvesFromSettlement() {
+        val rawSettlement = js("{ sceneId: 'scene-1', terrain: 'forest' }").unsafeCast<RawSettlement>()
+        val resolved = resolveBattleTerrain(
+            targetSettlementSceneId = "scene-1",
+            targetHexLocation = null,
+            settlements = arrayOf(rawSettlement),
+        )
+        assertEquals("forest", resolved)
     }
 }

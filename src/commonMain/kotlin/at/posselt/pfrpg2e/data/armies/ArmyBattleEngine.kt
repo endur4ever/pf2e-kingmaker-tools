@@ -81,6 +81,7 @@ data class BattleState(
     val armies: List<BattleArmyState>,
     val log: List<String> = emptyList(),
     val status: BattleStatus = BattleStatus.ACTIVE,
+    val terrain: String? = null,
 )
 
 /**
@@ -307,9 +308,10 @@ fun tickRound(
         if (ArmyCondition.DESTROYED in target.conditions) continue
 
         val mods = conditionEffects(actor.conditions)
-        val effectiveActor = if (mods.attackPenalty != 0 || mods.acPenalty != 0) {
+        val terrainMod = getTerrainModifier(battle.terrain)
+        val effectiveActor = if (mods.attackPenalty != 0 || mods.acPenalty != 0 || terrainMod != 0) {
             actor.copy(
-                attackBonus = actor.attackBonus - mods.attackPenalty,
+                attackBonus = actor.attackBonus - mods.attackPenalty + terrainMod,
                 ac = actor.ac - mods.acPenalty,
             )
         } else {
@@ -335,6 +337,17 @@ fun tickRound(
         armies = armies,
         log = logs,
     )
+}
+
+/**
+ * Calculates the modifier to the attack roll based on the battlefield terrain.
+ * Difficult terrains (forest, swamp, mountains, mountain) impose a -2 penalty.
+ */
+fun getTerrainModifier(terrain: String?): Int {
+    return when (terrain?.lowercase()) {
+        "forest", "swamp", "mountain", "mountains" -> -2
+        else -> 0
+    }
 }
 
 /**
