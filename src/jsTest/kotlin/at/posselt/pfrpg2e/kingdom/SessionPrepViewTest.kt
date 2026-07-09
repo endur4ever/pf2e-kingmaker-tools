@@ -92,6 +92,12 @@ class SessionPrepViewTest {
         xpAwarded: Int? = null,
         clockEvents: Array<String>? = null,
         notes: String? = null,
+        level: Int? = null,
+        size: Int? = null,
+        ruinCorruption: Int? = null,
+        ruinCrime: Int? = null,
+        ruinDecay: Int? = null,
+        ruinStrife: Int? = null,
     ) = RawTurnRecord(
         turn = turn,
         timestamp = timestamp,
@@ -103,6 +109,12 @@ class SessionPrepViewTest {
         clockEvents = clockEvents,
         warPressure = warPressure,
         notes = notes,
+        level = level,
+        size = size,
+        ruinCorruption = ruinCorruption,
+        ruinCrime = ruinCrime,
+        ruinDecay = ruinDecay,
+        ruinStrife = ruinStrife,
     )
 
     @Test
@@ -325,8 +337,42 @@ class SessionPrepViewTest {
     }
 
     @Test
-    fun recentTurnsGmFilter() {
-        // When isGM = false, recentTurns should be empty regardless of turnHistory
+    fun recentTurnsPlayerSafe() {
+        // When isGM = false, recentTurns should show player-safe slice (no clockEvents, no warPressure)
+        val turnHistory = arrayOf(
+            turnRecord(
+                turn = 1,
+                fame = 10,
+                resourcePoints = 100,
+                consumption = 50,
+                unrest = 2,
+                clockEvents = arrayOf("Clock 1", "Clock 2"),
+                warPressure = 150,
+                notes = "Public gazette note",
+                level = 3,
+                size = 12,
+                ruinCorruption = 1,
+                ruinCrime = 0,
+                ruinDecay = 2,
+                ruinStrife = 0,
+            ),
+            turnRecord(
+                turn = 2,
+                fame = 20,
+                resourcePoints = 120,
+                consumption = 60,
+                unrest = 3,
+                clockEvents = arrayOf("Clock 3"),
+                warPressure = 200,
+                notes = "Another public note",
+                level = 4,
+                size = 14,
+                ruinCorruption = 1,
+                ruinCrime = 1,
+                ruinDecay = 2,
+                ruinStrife = 1,
+            ),
+        )
         val view = buildSessionPrepView(
             quests = null,
             clocks = emptyArray(),
@@ -334,13 +380,67 @@ class SessionPrepViewTest {
             hexContents = null,
             companionQuests = null,
             isGM = false,
-            turnHistory = arrayOf(
-                turnRecord(turn = 1, fame = 10),
-                turnRecord(turn = 2, fame = 20),
-            )
+            turnHistory = turnHistory,
         )
-        assertTrue(view.recentTurns.isEmpty())
+
+        // Player should see the recent turns (not empty)
+        assertEquals(2, view.recentTurns.size)
+        // GM-only fields must be null/empty for players
+        assertTrue(view.recentTurns.all { it.clockEvents == null || it.clockEvents!!.isEmpty() },
+            "Player view must not include clockEvents (secret clock progress)")
+        assertTrue(view.recentTurns.all { it.warPressure == null },
+            "Player view must not include warPressure")
+        // Public fields must be present
+        assertEquals(listOf(2, 1), view.recentTurns.map { it.turn }) // reversed order
+        assertEquals(listOf(20, 10), view.recentTurns.map { it.fame })
+        assertEquals(listOf(120, 100), view.recentTurns.map { it.resourcePoints })
+        assertEquals(listOf(60, 50), view.recentTurns.map { it.consumption })
+        assertEquals(listOf(3, 2), view.recentTurns.map { it.unrest })
+        assertEquals(listOf("Another public note", "Public gazette note"), view.recentTurns.map { it.notes })
+        // Kingdom stats deltas
+        assertEquals(listOf(4, 3), view.recentTurns.map { it.level })
+        assertEquals(listOf(14, 12), view.recentTurns.map { it.size })
+        assertEquals(listOf(1, 1), view.recentTurns.map { it.ruinCorruption })
+        assertEquals(listOf(1, 0), view.recentTurns.map { it.ruinCrime })
+        assertEquals(listOf(2, 2), view.recentTurns.map { it.ruinDecay })
+        assertEquals(listOf(1, 0), view.recentTurns.map { it.ruinStrife })
         assertFalse(view.isGM)
+    }
+
+    @Test
+    fun recentTurnsGmFull() {
+        // When isGM = true, recentTurns should include ALL fields (clockEvents, warPressure)
+        val turnHistory = arrayOf(
+            turnRecord(
+                turn = 1,
+                fame = 10,
+                clockEvents = arrayOf("Clock 1"),
+                warPressure = 150,
+            ),
+            turnRecord(
+                turn = 2,
+                fame = 20,
+                clockEvents = arrayOf("Clock 2", "Clock 3"),
+                warPressure = 200,
+            ),
+        )
+        val view = buildSessionPrepView(
+            quests = null,
+            clocks = emptyArray(),
+            events = null,
+            hexContents = null,
+            companionQuests = null,
+            isGM = true,
+            turnHistory = turnHistory,
+        )
+
+        assertEquals(2, view.recentTurns.size)
+        // GM sees clockEvents and warPressure
+        assertEquals(listOf("Clock 2", "Clock 3"), view.recentTurns[0].clockEvents?.toList())
+        assertEquals(listOf("Clock 1"), view.recentTurns[1].clockEvents?.toList())
+        assertEquals(200, view.recentTurns[0].warPressure)
+        assertEquals(150, view.recentTurns[1].warPressure)
+        assertTrue(view.isGM)
     }
 
     @Test

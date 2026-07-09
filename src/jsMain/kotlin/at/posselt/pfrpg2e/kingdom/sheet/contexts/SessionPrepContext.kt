@@ -38,6 +38,12 @@ external interface TurnRecentEntryContext {
     val hasWarPressure: Boolean
     val notes: String?
     val hasNotes: Boolean
+    val level: Int?
+    val size: Int?
+    val ruinCorruption: Int?
+    val ruinCrime: Int?
+    val ruinDecay: Int?
+    val ruinStrife: Int?
 }
 
 @JsPlainObject
@@ -84,6 +90,12 @@ private fun List<TurnRecentEntry>.toTurnContexts(): Array<TurnRecentEntryContext
             hasWarPressure = entry.warPressure != null,
             notes = entry.notes,
             hasNotes = !entry.notes.isNullOrBlank(),
+            level = entry.level,
+            size = entry.size,
+            ruinCorruption = entry.ruinCorruption,
+            ruinCrime = entry.ruinCrime,
+            ruinDecay = entry.ruinDecay,
+            ruinStrife = entry.ruinStrife,
         )
     }.toTypedArray()
 

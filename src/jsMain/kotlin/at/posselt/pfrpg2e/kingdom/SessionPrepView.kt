@@ -52,6 +52,12 @@ data class TurnRecentEntry(
     val clockEvents: Array<String>?,
     val warPressure: Int?,
     val notes: String?,
+    val level: Int? = null,
+    val size: Int? = null,
+    val ruinCorruption: Int? = null,
+    val ruinCrime: Int? = null,
+    val ruinDecay: Int? = null,
+    val ruinStrife: Int? = null,
 )
 
 data class SessionPrepView(
@@ -220,8 +226,8 @@ fun buildSessionPrepView(
     hexHooks = buildHexHooks(hexContents, isGM),
     companionMoments = buildCompanionMoments(companionQuests, isGM),
     companionExpeditions = buildCompanionExpeditions(companionExpeditions, companions, isGM),
-    // Recent turns are GM-only, like activeClocks.
-    recentTurns = if (isGM) buildRecentTurns(turnHistory) else emptyList(),
+    // Recent turns: GM sees full detail (clocks, warPressure); players see safe slice.
+    recentTurns = if (isGM) buildRecentTurns(turnHistory) else buildRecentTurnsPlayer(turnHistory),
     // Pending encounters are GM-only.
     pendingEncounters = if (isGM) buildPendingEncounters(hexContents, warThreats) else emptyList(),
     isGM = isGM,
@@ -243,5 +249,37 @@ private fun buildRecentTurns(turnHistory: Array<RawTurnRecord>?): List<TurnRecen
                 clockEvents = record.clockEvents,
                 warPressure = record.warPressure,
                 notes = record.notes,
+                level = record.level,
+                size = record.size,
+                ruinCorruption = record.ruinCorruption,
+                ruinCrime = record.ruinCrime,
+                ruinDecay = record.ruinDecay,
+                ruinStrife = record.ruinStrife,
+            )
+        }
+
+/** Player-safe recent turns: omits clockEvents (secret clock progress) and warPressure. */
+private fun buildRecentTurnsPlayer(turnHistory: Array<RawTurnRecord>?): List<TurnRecentEntry> =
+    (turnHistory ?: emptyArray())
+        .takeLast(10)
+        .reversed()
+        .map { record ->
+            TurnRecentEntry(
+                turn = record.turn,
+                timestamp = record.timestamp,
+                fame = record.fame,
+                resourcePoints = record.resourcePoints,
+                consumption = record.consumption,
+                unrest = record.unrest,
+                xpAwarded = record.xpAwarded,
+                clockEvents = null,
+                warPressure = null,
+                notes = record.notes,
+                level = record.level,
+                size = record.size,
+                ruinCorruption = record.ruinCorruption,
+                ruinCrime = record.ruinCrime,
+                ruinDecay = record.ruinDecay,
+                ruinStrife = record.ruinStrife,
             )
         }
