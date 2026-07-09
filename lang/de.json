@@ -998,6 +998,27 @@
           "help": "Requires Counselor. Cost: 3 Food. Adds a +1 status modifier to all Loyalty ability checks for 1 turn, and reduces Unrest by 1. (Cooldown: 4 turns)"
         }
       },
+      "turnGazette": {
+        "tribute": "Tribut: +{tributeRp} FP von Vasallenstaaten gesammelt",
+        "activities": "Aktivitäten: {activities}",
+        "expansion": "Expansion: {sizeChange} Hex(e) beansprucht (Größe: {currentSize})",
+        "caravanDeliveredRd": "Karawane angekommen: {summary} (+{bonusResourceDice} RW)",
+        "caravanDeliveredAmount": "Karawane angekommen: {summary} (geliefert {deliveredAmount})",
+        "caravanRaided": "Karawane überfallen: {summary} (verloren {cargoLost})",
+        "caravanLost": "Karawane verloren: {summary}",
+        "caravans": "Karawanen: {list}",
+        "shipmentArrived": "Lieferung angekommen: {summary}",
+        "shipmentRaided": "Lieferung überfallen: {summary} (verloren {cargoLost})",
+        "shipmentLost": "Lieferung verloren: {summary}",
+        "shipments": "Lieferungen: {list}",
+        "campaignClocks": "Kampagnen-Uhren: {clocks}",
+        "expeditionCriticalSuccess": "🏆 {title} — {companionNames}{loot}{faction}",
+        "expeditionSuccess": "✅ {title} — {companionNames}{loot}{faction}",
+        "expeditionFailure": "❌ {title} — {companionNames}{loot}{faction}",
+        "expeditionCriticalFailure": "💀 {title} — {companionNames}{loot}{faction}",
+        "expeditionOther": "{outcomeLabel} {title} — {companionNames}{loot}{faction}",
+        "expeditions": "Expeditionen: {list}"
+      },
       "xpRules": "XP Rules",
       "xpRulesHelp": "Adds additional milestones, gain XP buttons and increases XP for claiming hexes and converting XP based on kingdom level",
       "vkCharterExtraSkills": "V&K: Extra Charter Skill",

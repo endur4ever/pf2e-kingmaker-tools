@@ -468,6 +468,7 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
         tributeRp = tributeRp,
         expeditionChronicle = kingdom.expeditionChronicle?.toList() ?: emptyList(),
         turn = currentTurn,
+        localize = ::t,
     )
 
     val warPressureNow = kingdom.warPressure?.currentPressure

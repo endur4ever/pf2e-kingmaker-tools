@@ -3,6 +3,7 @@ package at.posselt.pfrpg2e.kingdom
 
 import at.posselt.pfrpg2e.kingdom.data.RawExpeditionChronicleEntry
 import at.posselt.pfrpg2e.kingdom.data.RawTurnRecord
+import com.foundryvtt.core.AnyObject
 
 /**
  * Pure logic for turn-history recording (gap analysis item 2).
@@ -77,72 +78,139 @@ fun formatTurnGazette(
     tributeRp: Int = 0,
     expeditionChronicle: List<RawExpeditionChronicleEntry> = emptyList(),
     turn: Int = 0,
+    localize: (key: String, data: AnyObject) -> String = ::defaultLocalize,
 ): String? {
     val gazetteEvents = mutableListOf<String>()
 
     if (tributeRp > 0) {
-        gazetteEvents.add("Tribute: +$tributeRp RP collected from vassal states")
+        val data = js("{}")
+        data.tributeRp = tributeRp
+        gazetteEvents.add(localize("kingdom.turnGazette.tribute", data.unsafeCast<AnyObject>()))
     }
 
     if (activities.isNotEmpty()) {
-        gazetteEvents.add("Activities: " + activities.joinToString(", "))
+        val data = js("{}")
+        data.activities = activities.joinToString(", ")
+        gazetteEvents.add(localize("kingdom.turnGazette.activities", data.unsafeCast<AnyObject>()))
     }
 
     if (sizeChange > 0) {
-        gazetteEvents.add("Expansion: Claimed $sizeChange hex(es) (Size: $currentSize)")
+        val data = js("{}")
+        data.sizeChange = sizeChange
+        data.currentSize = currentSize
+        gazetteEvents.add(localize("kingdom.turnGazette.expansion", data.unsafeCast<AnyObject>()))
     }
 
     val caravanGazetteList = caravanEvents.map { event ->
+        val data = js("{}")
+        data.summary = event.summary
         when (event.kind) {
             CaravanEventKind.DELIVERED -> {
-                val reward = if (event.bonusResourceDice > 0) " (+${event.bonusResourceDice} RD)" else " (delivered ${event.deliveredAmount})"
-                "Caravan delivered: ${event.summary}$reward"
+                if (event.bonusResourceDice > 0) {
+                    data.bonusResourceDice = event.bonusResourceDice
+                    localize("kingdom.turnGazette.caravanDeliveredRd", data.unsafeCast<AnyObject>())
+                } else {
+                    data.deliveredAmount = event.deliveredAmount
+                    localize("kingdom.turnGazette.caravanDeliveredAmount", data.unsafeCast<AnyObject>())
+                }
             }
-            CaravanEventKind.RAIDED -> "Caravan raided: ${event.summary} (lost ${event.cargoLost})"
-            CaravanEventKind.LOST -> "Caravan lost: ${event.summary}"
+            CaravanEventKind.RAIDED -> {
+                data.cargoLost = event.cargoLost
+                localize("kingdom.turnGazette.caravanRaided", data.unsafeCast<AnyObject>())
+            }
+            CaravanEventKind.LOST -> {
+                localize("kingdom.turnGazette.caravanLost", data.unsafeCast<AnyObject>())
+            }
         }
     }
     if (caravanGazetteList.isNotEmpty()) {
-        gazetteEvents.add("Caravans: " + caravanGazetteList.joinToString("; "))
+        val data = js("{}")
+        data.list = caravanGazetteList.joinToString("; ")
+        gazetteEvents.add(localize("kingdom.turnGazette.caravans", data.unsafeCast<AnyObject>()))
     }
 
     val shipmentGazetteList = shipmentEvents.map { event ->
+        val data = js("{}")
+        data.summary = event.summary
         when (event.kind) {
-            CaravanEventKind.DELIVERED -> "Shipment arrived: ${event.summary}"
-            CaravanEventKind.RAIDED -> "Shipment raided: ${event.summary} (lost ${event.cargoLost})"
-            CaravanEventKind.LOST -> "Shipment lost: ${event.summary}"
+            CaravanEventKind.DELIVERED -> {
+                localize("kingdom.turnGazette.shipmentArrived", data.unsafeCast<AnyObject>())
+            }
+            CaravanEventKind.RAIDED -> {
+                data.cargoLost = event.cargoLost
+                localize("kingdom.turnGazette.shipmentRaided", data.unsafeCast<AnyObject>())
+            }
+            CaravanEventKind.LOST -> {
+                localize("kingdom.turnGazette.shipmentLost", data.unsafeCast<AnyObject>())
+            }
         }
     }
     if (shipmentGazetteList.isNotEmpty()) {
-        gazetteEvents.add("Shipments: " + shipmentGazetteList.joinToString("; "))
+        val data = js("{}")
+        data.list = shipmentGazetteList.joinToString("; ")
+        gazetteEvents.add(localize("kingdom.turnGazette.shipments", data.unsafeCast<AnyObject>()))
     }
 
     if (campaignClocks.isNotEmpty()) {
-        gazetteEvents.add("Campaign Clocks: " + campaignClocks.joinToString(", "))
+        val data = js("{}")
+        data.clocks = campaignClocks.joinToString(", ")
+        gazetteEvents.add(localize("kingdom.turnGazette.campaignClocks", data.unsafeCast<AnyObject>()))
     }
 
     // Expeditions section: filter chronicle entries for this turn
     val turnExpeditions = expeditionChronicle.filter { it.turn == turn }
     if (turnExpeditions.isNotEmpty()) {
         val expeditionLines = turnExpeditions.map { entry ->
-            val outcomeLabel = when (entry.outcomeDegree) {
-                "criticalSuccess" -> "🏆"
-                "success" -> "✅"
-                "failure" -> "❌"
-                "criticalFailure" -> "💀"
-                else -> entry.outcomeDegree
-            }
-            val lootSuffix = if (entry.lootRp > 0) " (+${entry.lootRp} RP)" else ""
-            val factionSuffix = if (entry.factionStandingDelta != 0 && entry.targetFactionName != null)
+            val data = js("{}")
+            data.title = entry.title
+            data.companionNames = entry.companionNames
+            data.loot = if (entry.lootRp > 0) " (+${entry.lootRp} RP)" else ""
+            data.faction = if (entry.factionStandingDelta != 0 && entry.targetFactionName != null)
                 " (${entry.targetFactionName}: ${if (entry.factionStandingDelta > 0) "+" else ""}${entry.factionStandingDelta})" else ""
-            "$outcomeLabel ${entry.title} — ${entry.companionNames}$lootSuffix$factionSuffix"
+
+            when (entry.outcomeDegree) {
+                "criticalSuccess" -> localize("kingdom.turnGazette.expeditionCriticalSuccess", data.unsafeCast<AnyObject>())
+                "success" -> localize("kingdom.turnGazette.expeditionSuccess", data.unsafeCast<AnyObject>())
+                "failure" -> localize("kingdom.turnGazette.expeditionFailure", data.unsafeCast<AnyObject>())
+                "criticalFailure" -> localize("kingdom.turnGazette.expeditionCriticalFailure", data.unsafeCast<AnyObject>())
+                else -> {
+                    data.outcomeLabel = entry.outcomeDegree
+                    localize("kingdom.turnGazette.expeditionOther", data.unsafeCast<AnyObject>())
+                }
+            }
         }
-        // Whole-gazette localization is deferred (all other lines are hardcoded English + emoji);
-        // localizing only this prefix is inconsistent and t() does not resolve in the test harness.
-        gazetteEvents.add("Expeditions: " + expeditionLines.joinToString("; "))
+        val data = js("{}")
+        data.list = expeditionLines.joinToString("; ")
+        gazetteEvents.add(localize("kingdom.turnGazette.expeditions", data.unsafeCast<AnyObject>()))
     }
 
     return if (gazetteEvents.isNotEmpty()) gazetteEvents.joinToString(" | ") else null
+}
+
+fun defaultLocalize(key: String, data: AnyObject): String {
+    val dyn = data.asDynamic()
+    return when (key) {
+        "kingdom.turnGazette.tribute" -> "Tribute: +${dyn.tributeRp} RP collected from vassal states"
+        "kingdom.turnGazette.activities" -> "Activities: ${dyn.activities}"
+        "kingdom.turnGazette.expansion" -> "Expansion: Claimed ${dyn.sizeChange} hex(es) (Size: ${dyn.currentSize})"
+        "kingdom.turnGazette.caravanDeliveredRd" -> "Caravan delivered: ${dyn.summary} (+${dyn.bonusResourceDice} RD)"
+        "kingdom.turnGazette.caravanDeliveredAmount" -> "Caravan delivered: ${dyn.summary} (delivered ${dyn.deliveredAmount})"
+        "kingdom.turnGazette.caravanRaided" -> "Caravan raided: ${dyn.summary} (lost ${dyn.cargoLost})"
+        "kingdom.turnGazette.caravanLost" -> "Caravan lost: ${dyn.summary}"
+        "kingdom.turnGazette.caravans" -> "Caravans: ${dyn.list}"
+        "kingdom.turnGazette.shipmentArrived" -> "Shipment arrived: ${dyn.summary}"
+        "kingdom.turnGazette.shipmentRaided" -> "Shipment raided: ${dyn.summary} (lost ${dyn.cargoLost})"
+        "kingdom.turnGazette.shipmentLost" -> "Shipment lost: ${dyn.summary}"
+        "kingdom.turnGazette.shipments" -> "Shipments: ${dyn.list}"
+        "kingdom.turnGazette.campaignClocks" -> "Campaign Clocks: ${dyn.clocks}"
+        "kingdom.turnGazette.expeditionCriticalSuccess" -> "🏆 ${dyn.title} — ${dyn.companionNames}${dyn.loot}${dyn.faction}"
+        "kingdom.turnGazette.expeditionSuccess" -> "✅ ${dyn.title} — ${dyn.companionNames}${dyn.loot}${dyn.faction}"
+        "kingdom.turnGazette.expeditionFailure" -> "❌ ${dyn.title} — ${dyn.companionNames}${dyn.loot}${dyn.faction}"
+        "kingdom.turnGazette.expeditionCriticalFailure" -> "💀 ${dyn.title} — ${dyn.companionNames}${dyn.loot}${dyn.faction}"
+        "kingdom.turnGazette.expeditionOther" -> "${dyn.outcomeLabel} ${dyn.title} — ${dyn.companionNames}${dyn.loot}${dyn.faction}"
+        "kingdom.turnGazette.expeditions" -> "Expeditions: ${dyn.list}"
+        else -> key
+    }
 }
 
 /**

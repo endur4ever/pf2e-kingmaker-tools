@@ -304,4 +304,15 @@ class TurnHistoryTest {
         )
         assertEquals(null, result)
     }
+
+    @Test
+    fun formatTurnGazetteUsesCustomLocalizer() {
+        val result = formatTurnGazette(
+            activities = listOf("Build Road"),
+            sizeChange = 0,
+            currentSize = 5,
+            localize = { key, _ -> "CUSTOM-$key" }
+        )
+        assertEquals("CUSTOM-kingdom.turnGazette.activities", result)
+    }
 }
