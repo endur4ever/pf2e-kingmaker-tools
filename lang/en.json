@@ -1161,6 +1161,7 @@
         "title": "Council Missions",
         "ready": "Ready",
         "cooldown": "Cooldown ({turns} {turns, plural, =1 {turn} other {turns}})",
+        "unavailable": "Unavailable",
         "audit": {
           "btn": "Espionage Audit (+10 RP)",
           "chat": "Treasurer performs Espionage Audit, gaining +10 RP.",

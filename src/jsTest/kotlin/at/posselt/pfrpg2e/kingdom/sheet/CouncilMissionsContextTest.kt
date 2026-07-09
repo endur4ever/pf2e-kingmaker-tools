@@ -147,4 +147,68 @@ class CouncilMissionsContextTest {
         assertFalse(status.canLockdown)
         assertFalse(status.canFeast)
     }
+
+    @Test
+    fun testMissionsBlockedByVacancyDespitePresentLeaders() {
+        // The seats are marked VACANT even though a leader actor is present, so canX must be false
+        // via the !resolveVacancy term (NOT the null-leader term — testMissionsBlockedByVacancies
+        // above only exercises the null path). Guards against dropping the vacancy check.
+        val kingdom = createTestKingdom(enableCouncilMissions = true, rp = 10, food = 5)
+        val leaderActors = LeaderActors(
+            treasurer = mockLeader("Treasurer"),
+            magister = mockLeader("Magister"),
+            warden = mockLeader("Warden"),
+            counselor = mockLeader("Counselor")
+        )
+        val vacancies = Vacancies(treasurer = true, magister = true, warden = true, counselor = true)
+
+        val status = deriveCouncilMissionsStatus(kingdom, leaderActors, vacancies)
+
+        assertFalse(status.canAudit)
+        assertFalse(status.canScrying)
+        assertFalse(status.canLockdown)
+        assertFalse(status.canFeast)
+        // Affordability is independent of vacancy — the resources are still there.
+        assertTrue(status.scryingAffordable)
+        assertTrue(status.lockdownAffordable)
+        assertTrue(status.feastAffordable)
+    }
+
+    @Test
+    fun testAffordabilityBoundaries() {
+        val present = LeaderActors(
+            treasurer = mockLeader("T"), magister = mockLeader("M"),
+            warden = mockLeader("W"), counselor = mockLeader("C")
+        )
+        val vac = Vacancies()
+        // Exactly enough: scrying needs 4 RP, lockdown 2 RP, feast 3 food (>= boundaries).
+        val exact = deriveCouncilMissionsStatus(createTestKingdom(rp = 4, food = 3), present, vac)
+        assertTrue(exact.scryingAffordable)   // 4 >= 4
+        assertTrue(exact.lockdownAffordable)  // 4 >= 2
+        assertTrue(exact.feastAffordable)     // 3 >= 3
+        // One below the scrying/feast thresholds; lockdown still met at 3 RP.
+        val short = deriveCouncilMissionsStatus(createTestKingdom(rp = 3, food = 2), present, vac)
+        assertFalse(short.scryingAffordable)  // 3 < 4
+        assertTrue(short.lockdownAffordable)  // 3 >= 2
+        assertFalse(short.feastAffordable)    // 2 < 3
+        // Lockdown boundary: exactly 2 RP passes, 1 RP fails.
+        assertTrue(deriveCouncilMissionsStatus(createTestKingdom(rp = 2, food = 0), present, vac).lockdownAffordable)
+        assertFalse(deriveCouncilMissionsStatus(createTestKingdom(rp = 1, food = 0), present, vac).lockdownAffordable)
+    }
+
+    @Test
+    fun testMasterToggleDisablesAllMissions() {
+        // enableCouncilMissions = false must block every mission even with leaders present + affordable.
+        val present = LeaderActors(
+            treasurer = mockLeader("T"), magister = mockLeader("M"),
+            warden = mockLeader("W"), counselor = mockLeader("C")
+        )
+        val status = deriveCouncilMissionsStatus(
+            createTestKingdom(enableCouncilMissions = false, rp = 10, food = 5), present, Vacancies()
+        )
+        assertFalse(status.canAudit)
+        assertFalse(status.canScrying)
+        assertFalse(status.canLockdown)
+        assertFalse(status.canFeast)
+    }
 }

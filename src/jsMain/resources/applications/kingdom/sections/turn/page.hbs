@@ -131,10 +131,12 @@
                         {{localizeKM "kingdom.councilMissions.audit.btn"}}
                     </button>
                     <div class="km-mission-info">
-                        {{#if councilCooldowns.audit}}
-                            <span class="km-cooldown">{{localizeKM "kingdom.councilMissions.cooldown" turns=councilCooldowns.audit}}</span>
-                        {{else}}
+                        {{#if (gt auditCooldownTurns 0)}}
+                            <span class="km-cooldown">{{localizeKM "kingdom.councilMissions.cooldown" turns=auditCooldownTurns}}</span>
+                        {{else if canAudit}}
                             <span class="km-ready">{{localizeKM "kingdom.councilMissions.ready"}}</span>
+                        {{else}}
+                            <span class="km-cooldown">{{localizeKM "kingdom.councilMissions.unavailable"}}</span>
                         {{/if}}
                     </div>
                     <div class="km-tooltip">
@@ -147,10 +149,12 @@
                         {{localizeKM "kingdom.councilMissions.scrying.btn"}}
                     </button>
                     <div class="km-mission-info">
-                        {{#if councilCooldowns.scrying}}
-                            <span class="km-cooldown">{{localizeKM "kingdom.councilMissions.cooldown" turns=councilCooldowns.scrying}}</span>
-                        {{else}}
+                        {{#if (gt scryingCooldownTurns 0)}}
+                            <span class="km-cooldown">{{localizeKM "kingdom.councilMissions.cooldown" turns=scryingCooldownTurns}}</span>
+                        {{else if canScrying}}
                             <span class="km-ready">{{localizeKM "kingdom.councilMissions.ready"}}</span>
+                        {{else}}
+                            <span class="km-cooldown">{{localizeKM "kingdom.councilMissions.unavailable"}}</span>
                         {{/if}}
                     </div>
                     <div class="km-tooltip">
@@ -163,10 +167,12 @@
                         {{localizeKM "kingdom.councilMissions.lockdown.btn"}}
                     </button>
                     <div class="km-mission-info">
-                        {{#if councilCooldowns.lockdown}}
-                            <span class="km-cooldown">{{localizeKM "kingdom.councilMissions.cooldown" turns=councilCooldowns.lockdown}}</span>
-                        {{else}}
+                        {{#if (gt lockdownCooldownTurns 0)}}
+                            <span class="km-cooldown">{{localizeKM "kingdom.councilMissions.cooldown" turns=lockdownCooldownTurns}}</span>
+                        {{else if canLockdown}}
                             <span class="km-ready">{{localizeKM "kingdom.councilMissions.ready"}}</span>
+                        {{else}}
+                            <span class="km-cooldown">{{localizeKM "kingdom.councilMissions.unavailable"}}</span>
                         {{/if}}
                     </div>
                     <div class="km-tooltip">
@@ -179,10 +185,12 @@
                         {{localizeKM "kingdom.councilMissions.feast.btn"}}
                     </button>
                     <div class="km-mission-info">
-                        {{#if councilCooldowns.feast}}
-                            <span class="km-cooldown">{{localizeKM "kingdom.councilMissions.cooldown" turns=councilCooldowns.feast}}</span>
-                        {{else}}
+                        {{#if (gt feastCooldownTurns 0)}}
+                            <span class="km-cooldown">{{localizeKM "kingdom.councilMissions.cooldown" turns=feastCooldownTurns}}</span>
+                        {{else if canFeast}}
                             <span class="km-ready">{{localizeKM "kingdom.councilMissions.ready"}}</span>
+                        {{else}}
+                            <span class="km-cooldown">{{localizeKM "kingdom.councilMissions.unavailable"}}</span>
                         {{/if}}
                     </div>
                     <div class="km-tooltip">
