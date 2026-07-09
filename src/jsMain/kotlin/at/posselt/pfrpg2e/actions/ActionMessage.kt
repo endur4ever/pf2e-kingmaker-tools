@@ -6,4 +6,5 @@ import kotlinx.js.JsPlainObject
 external interface ActionMessage {
     val action: String
     val data: Any?
+    val senderId: String?
 }
