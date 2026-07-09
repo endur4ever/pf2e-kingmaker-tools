@@ -1,0 +1,27 @@
+<h3>{{localizeKM "kingdom.turnWizard.recapTitle" turn=turn}}</h3>
+<p><b>{{localizeKM "kingdom.turnWizard.recapDeltas"}}</b></p>
+<ul>
+    <li><b>{{localizeKM "kingdom.fame"}}</b>: {{fameDelta}} ({{localizeKM "kingdom.current"}}: {{fameNow}})</li>
+    <li><b>{{localizeKM "kingdom.resourcePoints"}}</b>: {{rpDelta}} ({{localizeKM "kingdom.current"}}: {{rpNow}})</li>
+    <li><b>{{localizeKM "kingdom.unrest"}}</b>: {{unrestDelta}} ({{localizeKM "kingdom.current"}}: {{unrestNow}})</li>
+    {{#if hasWarPressure}}
+        <li><b>{{localizeKM "kingdom.turnWizard.recapWarPressure"}}</b>: {{warPressureDelta}} ({{localizeKM "kingdom.current"}}: {{warPressureNow}})</li>
+    {{/if}}
+    {{#if xpAwarded}}
+        <li><b>{{localizeKM "kingdom.turnWizard.recapXpAwarded"}}</b>: +{{xpAwarded}} XP</li>
+    {{/if}}
+</ul>
+
+{{#if notesList}}
+    <p><b>{{localizeKM "kingdom.turnWizard.recapNotes"}}</b></p>
+    <ul>
+        {{#each notesList}}
+            <li>{{this}}</li>
+        {{/each}}
+    </ul>
+{{else}}
+    {{#if notes}}
+        <p><b>{{localizeKM "kingdom.turnWizard.recapNotes"}}</b></p>
+        <p>{{notes}}</p>
+    {{/if}}
+{{/if}}

@@ -113,6 +113,7 @@ import at.posselt.pfrpg2e.kingdom.dialogs.RosterAddDialog
 import at.posselt.pfrpg2e.kingdom.dialogs.AddExpeditionDialog
 import at.posselt.pfrpg2e.kingdom.dialogs.RosterEditDialog
 import at.posselt.pfrpg2e.kingdom.dialogs.TurnWizardApplication
+import at.posselt.pfrpg2e.kingdom.dialogs.postLastTurnRecap
 import at.posselt.pfrpg2e.kingdom.dialogs.performEndTurn
 import at.posselt.pfrpg2e.kingdom.data.RawCharacter
 import at.posselt.pfrpg2e.kingdom.getActiveLeader
@@ -1993,6 +1994,8 @@ class KingdomSheet(
 
             "open-turn-wizard" -> buildPromise {
                 TurnWizardApplication(actor).render(true)
+                // GM-only, GM-whispered recap of the previous turn; idempotent per turn.
+                postLastTurnRecap(game, actor)
             }
 
             "settlement-size-info" -> buildPromise {

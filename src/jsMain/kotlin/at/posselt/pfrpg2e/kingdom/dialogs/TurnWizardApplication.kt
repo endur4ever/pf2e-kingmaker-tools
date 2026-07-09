@@ -69,6 +69,7 @@ import at.posselt.pfrpg2e.kingdom.data.ChosenFeature
 import at.posselt.pfrpg2e.kingdom.data.RawPacingAlert
 import at.posselt.pfrpg2e.kingdom.data.RawTurnRecord
 import at.posselt.pfrpg2e.kingdom.appendTurnRecord
+import at.posselt.pfrpg2e.kingdom.computeLastTurnRecap
 import at.posselt.pfrpg2e.kingdom.buildTurnRecord
 import at.posselt.pfrpg2e.data.kingdom.structures.CommodityStorage
 import at.posselt.pfrpg2e.data.kingdom.attitudeFor
@@ -639,6 +640,43 @@ suspend fun undoEndTurn(game: Game, actor: KingdomActor): Boolean {
         postChatMessage(t("chatMessages.endTurn.endTurnUndone", recordOf("turn" to snap.snapshotTurn.toString())))
     }
     return true
+}
+
+private fun signedDelta(n: Int): String = if (n > 0) "+$n" else n.toString()
+
+/**
+ * Posts a GM-whispered "Last Turn Recap" chat card summarizing the most recent turn's stat deltas
+ * and gazette notes. Fired when the Turn Wizard opens (the card's trigger). Idempotent per turn via
+ * the "lastRecapTurn" app-flag, so re-opening the wizard for the same turn does not re-post. GM-only
+ * and GM-whispered (nothing reaches players); skipped when there is no history or no GM users.
+ */
+suspend fun postLastTurnRecap(game: Game, actor: KingdomActor) {
+    if (!game.user.isGM) return
+    val kingdom = actor.getKingdom() ?: return
+    val recap = computeLastTurnRecap(kingdom.turnHistory) ?: return
+    if (actor.getAppFlag<KingdomActor, Int?>("lastRecapTurn") == recap.turn) return
+    val gmUserIds = game.users.filter { it.isGM }.mapNotNull { it.id }.toTypedArray()
+    if (gmUserIds.isEmpty()) return
+    val ctx = js("{}")
+    ctx.turn = recap.turn
+    ctx.fameDelta = signedDelta(recap.fameDelta)
+    ctx.fameNow = recap.fameNow
+    ctx.rpDelta = signedDelta(recap.rpDelta)
+    ctx.rpNow = recap.rpNow
+    ctx.unrestDelta = signedDelta(recap.unrestDelta)
+    ctx.unrestNow = recap.unrestNow
+    ctx.hasWarPressure = recap.hasWarPressure
+    ctx.warPressureDelta = signedDelta(recap.warPressureDelta)
+    ctx.warPressureNow = recap.warPressureNow
+    ctx.xpAwarded = recap.xpAwarded
+    val noteLines = recap.notes?.split(" | ")?.map { it.trim() }?.filter { it.isNotBlank() } ?: emptyList()
+    if (noteLines.isNotEmpty()) ctx.notesList = noteLines.toTypedArray()
+    postChatTemplate(
+        templatePath = "chatmessages/last-turn-recap.hbs",
+        templateContext = ctx,
+        whisper = gmUserIds,
+    )
+    actor.setAppFlag("lastRecapTurn", recap.turn)
 }
 
 class TurnWizardApplication(

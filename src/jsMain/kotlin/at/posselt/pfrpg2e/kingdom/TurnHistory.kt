@@ -145,3 +145,48 @@ fun formatTurnGazette(
     return if (gazetteEvents.isNotEmpty()) gazetteEvents.joinToString(" | ") else null
 }
 
+/**
+ * A GM-facing recap of the most recently completed turn: the change vs the prior turn for the key
+ * economy stats plus the gazette notes. Pure so it is unit-testable; [postLastTurnRecap]
+ * (TurnWizardApplication) renders it into the last-turn-recap chat card and GM-whispers it.
+ */
+data class LastTurnRecap(
+    val turn: Int,
+    val fameDelta: Int,
+    val fameNow: Int,
+    val rpDelta: Int,
+    val rpNow: Int,
+    val unrestDelta: Int,
+    val unrestNow: Int,
+    val hasWarPressure: Boolean,
+    val warPressureDelta: Int,
+    val warPressureNow: Int,
+    val xpAwarded: Int?,
+    val notes: String?,
+)
+
+/**
+ * Builds a recap of the latest turn record vs the one before it. Deltas are 0 when there is no
+ * prior record (the first recorded turn). Returns null when there is no history to recap.
+ */
+fun computeLastTurnRecap(history: Array<RawTurnRecord>?): LastTurnRecap? {
+    val latest = history?.lastOrNull() ?: return null
+    val previous = history.getOrNull(history.size - 2)
+    fun delta(current: Int, prior: Int?): Int = current - (prior ?: current)
+    val warPressureNow = latest.warPressure
+    return LastTurnRecap(
+        turn = latest.turn,
+        fameDelta = delta(latest.fame, previous?.fame),
+        fameNow = latest.fame,
+        rpDelta = delta(latest.resourcePoints, previous?.resourcePoints),
+        rpNow = latest.resourcePoints,
+        unrestDelta = delta(latest.unrest, previous?.unrest),
+        unrestNow = latest.unrest,
+        hasWarPressure = warPressureNow != null,
+        warPressureDelta = if (warPressureNow != null) delta(warPressureNow, previous?.warPressure) else 0,
+        warPressureNow = warPressureNow ?: 0,
+        xpAwarded = latest.xpAwarded,
+        notes = latest.notes,
+    )
+}
+
