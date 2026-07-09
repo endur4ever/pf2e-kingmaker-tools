@@ -1909,7 +1909,18 @@ class KingdomSheet(
             }
 
             "council-mission-audit" -> buildPromise {
+                if (!game.user.isGM) return@buildPromise
                 actor.getKingdom()?.let { kingdom ->
+                    val chosenFeatures = kingdom.getChosenFeatures(kingdom.getExplodedFeatures())
+                    val vacancies = kingdom.vacancies(
+                        choices = chosenFeatures,
+                        bonusFeats = kingdom.bonusFeats,
+                        government = kingdom.government,
+                    )
+                    val leaderActors = kingdom.parseLeaderActors()
+                    val status = deriveCouncilMissionsStatus(kingdom, leaderActors, vacancies)
+                    if (!status.canAudit) return@buildPromise
+
                     val cooldowns = kingdom.councilCooldowns ?: RawCouncilCooldowns(0, 0, 0, 0)
                     cooldowns.audit = 4
                     kingdom.councilCooldowns = cooldowns
@@ -1920,7 +1931,18 @@ class KingdomSheet(
             }
 
             "council-mission-scrying" -> buildPromise {
+                if (!game.user.isGM) return@buildPromise
                 actor.getKingdom()?.let { kingdom ->
+                    val chosenFeatures = kingdom.getChosenFeatures(kingdom.getExplodedFeatures())
+                    val vacancies = kingdom.vacancies(
+                        choices = chosenFeatures,
+                        bonusFeats = kingdom.bonusFeats,
+                        government = kingdom.government,
+                    )
+                    val leaderActors = kingdom.parseLeaderActors()
+                    val status = deriveCouncilMissionsStatus(kingdom, leaderActors, vacancies)
+                    if (!status.canScrying) return@buildPromise
+
                     val cooldowns = kingdom.councilCooldowns ?: RawCouncilCooldowns(0, 0, 0, 0)
                     cooldowns.scrying = 3
                     kingdom.councilCooldowns = cooldowns
@@ -1945,12 +1967,22 @@ class KingdomSheet(
             }
 
             "council-mission-lockdown" -> buildPromise {
+                if (!game.user.isGM) return@buildPromise
                 actor.getKingdom()?.let { kingdom ->
+                    val chosenFeatures = kingdom.getChosenFeatures(kingdom.getExplodedFeatures())
+                    val vacancies = kingdom.vacancies(
+                        choices = chosenFeatures,
+                        bonusFeats = kingdom.bonusFeats,
+                        government = kingdom.government,
+                    )
+                    val leaderActors = kingdom.parseLeaderActors()
+                    val status = deriveCouncilMissionsStatus(kingdom, leaderActors, vacancies)
+                    if (!status.canLockdown) return@buildPromise
+
                     val cooldowns = kingdom.councilCooldowns ?: RawCouncilCooldowns(0, 0, 0, 0)
                     cooldowns.lockdown = 5
                     kingdom.councilCooldowns = cooldowns
                     kingdom.resourcePoints.now -= 2
-                    val chosenFeatures = kingdom.getChosenFeatures(kingdom.getExplodedFeatures())
                     val chosenFeats = kingdom.getChosenFeats(chosenFeatures)
                     kingdom.unrest = kingdom.addUnrest(-2, chosenFeats)
                     actor.setKingdom(kingdom)
@@ -1959,7 +1991,18 @@ class KingdomSheet(
             }
 
             "council-mission-feast" -> buildPromise {
+                if (!game.user.isGM) return@buildPromise
                 actor.getKingdom()?.let { kingdom ->
+                    val chosenFeatures = kingdom.getChosenFeatures(kingdom.getExplodedFeatures())
+                    val vacancies = kingdom.vacancies(
+                        choices = chosenFeatures,
+                        bonusFeats = kingdom.bonusFeats,
+                        government = kingdom.government,
+                    )
+                    val leaderActors = kingdom.parseLeaderActors()
+                    val status = deriveCouncilMissionsStatus(kingdom, leaderActors, vacancies)
+                    if (!status.canFeast) return@buildPromise
+
                     val cooldowns = kingdom.councilCooldowns ?: RawCouncilCooldowns(0, 0, 0, 0)
                     cooldowns.feast = 4
                     kingdom.councilCooldowns = cooldowns
@@ -1978,7 +2021,6 @@ class KingdomSheet(
                         requiresTranslation = false,
                     )
                     kingdom.modifiers = kingdom.modifiers + modifier
-                    val chosenFeatures = kingdom.getChosenFeatures(kingdom.getExplodedFeatures())
                     val chosenFeats = kingdom.getChosenFeats(chosenFeatures)
                     kingdom.unrest = kingdom.addUnrest(-1, chosenFeats)
                     actor.setKingdom(kingdom)
@@ -2859,33 +2901,19 @@ class KingdomSheet(
             chosenFeatures = chosenFeatures,
         )
         val cooldowns = kingdom.councilCooldowns ?: RawCouncilCooldowns(0, 0, 0, 0)
-        val canAudit = kingdom.settings.enableCouncilMissions &&
-                !vacancies.resolveVacancy(Leader.TREASURER) &&
-                leaderActors.resolve(Leader.TREASURER) != null &&
-                cooldowns.audit <= 0
-        val canScrying = kingdom.settings.enableCouncilMissions &&
-                !vacancies.resolveVacancy(Leader.MAGISTER) &&
-                leaderActors.resolve(Leader.MAGISTER) != null &&
-                kingdom.resourcePoints.now >= 4 &&
-                cooldowns.scrying <= 0
-        val canLockdown = kingdom.settings.enableCouncilMissions &&
-                !vacancies.resolveVacancy(Leader.WARDEN) &&
-                leaderActors.resolve(Leader.WARDEN) != null &&
-                kingdom.resourcePoints.now >= 2 &&
-                cooldowns.lockdown <= 0
-        val canFeast = kingdom.settings.enableCouncilMissions &&
-                !vacancies.resolveVacancy(Leader.COUNSELOR) &&
-                leaderActors.resolve(Leader.COUNSELOR) != null &&
-                kingdom.commodities.now.food >= 3 &&
-                cooldowns.feast <= 0
-        val auditCooldownTurns = cooldowns.audit
-        val scryingCooldownTurns = cooldowns.scrying
-        val lockdownCooldownTurns = cooldowns.lockdown
-        val feastCooldownTurns = cooldowns.feast
-        val auditAffordable = true
-        val scryingAffordable = kingdom.resourcePoints.now >= 4
-        val lockdownAffordable = kingdom.resourcePoints.now >= 2
-        val feastAffordable = kingdom.commodities.now.food >= 3
+        val status = deriveCouncilMissionsStatus(kingdom, leaderActors, vacancies)
+        val canAudit = status.canAudit
+        val canScrying = status.canScrying
+        val canLockdown = status.canLockdown
+        val canFeast = status.canFeast
+        val auditCooldownTurns = status.auditCooldownTurns
+        val scryingCooldownTurns = status.scryingCooldownTurns
+        val lockdownCooldownTurns = status.lockdownCooldownTurns
+        val feastCooldownTurns = status.feastCooldownTurns
+        val auditAffordable = status.auditAffordable
+        val scryingAffordable = status.scryingAffordable
+        val lockdownAffordable = status.lockdownAffordable
+        val feastAffordable = status.feastAffordable
         val ongoingEvents = kingdom.getOngoingEvents().toContext(
             openedDetails = openedDetails,
             isGM = isGM,
