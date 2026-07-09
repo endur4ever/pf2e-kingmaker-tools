@@ -540,7 +540,9 @@
       "filterByHexStateHelp": "When enabled, Combat-category encounters are suppressed while the party is in a claimed and cleared hex (per-region opt-in still applies).",
       "encounterCuratorRumorSource": "Curated Encounter",
       "encounterNoKingdom": "No kingdom actor found to attach the quest to.",
-      "encounterRumorConverted": "Rumor converted into a kingdom quest."
+      "encounterRumorConverted": "Rumor converted into a kingdom quest.",
+      "encounterSuppressed": "Encounter suppressed: {reason}",
+      "encounterSuppressedTitle": "Encounter Suppressed"
     },
     "settlementNav": {
       "status": "Status",
