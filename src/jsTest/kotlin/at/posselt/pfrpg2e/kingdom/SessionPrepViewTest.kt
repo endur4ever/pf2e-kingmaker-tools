@@ -92,6 +92,7 @@ class SessionPrepViewTest {
         xpAwarded: Int? = null,
         clockEvents: Array<String>? = null,
         notes: String? = null,
+        playerNotes: String? = null,
         level: Int? = null,
         size: Int? = null,
         ruinCorruption: Int? = null,
@@ -109,6 +110,7 @@ class SessionPrepViewTest {
         clockEvents = clockEvents,
         warPressure = warPressure,
         notes = notes,
+        playerNotes = playerNotes,
         level = level,
         size = size,
         ruinCorruption = ruinCorruption,
@@ -348,7 +350,8 @@ class SessionPrepViewTest {
                 unrest = 2,
                 clockEvents = arrayOf("Clock 1", "Clock 2"),
                 warPressure = 150,
-                notes = "Public gazette note",
+                notes = "Activities: Claim Hex | Campaign Clocks: Secret Ritual advances",
+                playerNotes = "Activities: Claim Hex",
                 level = 3,
                 size = 12,
                 ruinCorruption = 1,
@@ -364,7 +367,8 @@ class SessionPrepViewTest {
                 unrest = 3,
                 clockEvents = arrayOf("Clock 3"),
                 warPressure = 200,
-                notes = "Another public note",
+                notes = "Expansion: 1 hex | Campaign Clocks: Doom Clock 3 of 6",
+                playerNotes = "Expansion: 1 hex",
                 level = 4,
                 size = 14,
                 ruinCorruption = 1,
@@ -396,7 +400,13 @@ class SessionPrepViewTest {
         assertEquals(listOf(120, 100), view.recentTurns.map { it.resourcePoints })
         assertEquals(listOf(60, 50), view.recentTurns.map { it.consumption })
         assertEquals(listOf(3, 2), view.recentTurns.map { it.unrest })
-        assertEquals(listOf("Another public note", "Public gazette note"), view.recentTurns.map { it.notes })
+        // The player sees the PLAYER-SAFE notes (record.playerNotes), never the full gazette (record.notes)
+        // which bakes in "Campaign Clocks: <secret labels>". Regression guard for the notes side-channel leak.
+        assertEquals(listOf("Expansion: 1 hex", "Activities: Claim Hex"), view.recentTurns.map { it.notes })
+        assertTrue(view.recentTurns.none { (it.notes ?: "").contains("Campaign Clocks") },
+            "Player view must not leak secret campaign-clock progress through notes")
+        assertTrue(view.recentTurns.none { (it.notes ?: "").contains("Secret Ritual") || (it.notes ?: "").contains("Doom Clock") },
+            "Player view must not leak secret clock labels through notes")
         // Kingdom stats deltas
         assertEquals(listOf(4, 3), view.recentTurns.map { it.level })
         assertEquals(listOf(14, 12), view.recentTurns.map { it.size })

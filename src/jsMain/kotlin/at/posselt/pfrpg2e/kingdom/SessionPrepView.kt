@@ -274,7 +274,9 @@ private fun buildRecentTurnsPlayer(turnHistory: Array<RawTurnRecord>?): List<Tur
                 xpAwarded = record.xpAwarded,
                 clockEvents = null,
                 warPressure = null,
-                notes = record.notes,
+                // Player-safe notes: omits secret campaign-clock progress that the full gazette
+                // (record.notes) bakes in. Legacy records (null playerNotes) show no notes.
+                notes = record.playerNotes,
                 level = record.level,
                 size = record.size,
                 ruinCorruption = record.ruinCorruption,

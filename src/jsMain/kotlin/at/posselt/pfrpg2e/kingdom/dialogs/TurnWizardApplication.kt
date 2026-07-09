@@ -470,6 +470,20 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
         turn = currentTurn,
         localize = ::t,
     )
+    // Player-safe gazette: identical EXCEPT the secret campaign-clock progress is dropped, so the
+    // player Recent-Turns timeline can show the public notes without leaking GM-only clock labels.
+    val playerTurnNotes = formatTurnGazette(
+        activities = activitySummaries,
+        sizeChange = sizeChange,
+        currentSize = realm.size,
+        caravanEvents = caravanEvents,
+        shipmentEvents = shipmentEvents,
+        campaignClocks = emptyList(),
+        tributeRp = tributeRp,
+        expeditionChronicle = kingdom.expeditionChronicle?.toList() ?: emptyList(),
+        turn = currentTurn,
+        localize = ::t,
+    )
 
     val warPressureNow = kingdom.warPressure?.currentPressure
     val warPressurePerTurn = kingdom.warPressure?.pressurePerTurn
@@ -493,6 +507,7 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
             ruinDecay = kingdom.ruin.decay.value,
             ruinStrife = kingdom.ruin.strife.value,
             notes = turnNotes,
+            playerNotes = playerTurnNotes,
         ),
     )
 

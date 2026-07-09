@@ -22,6 +22,9 @@ external interface RawTurnRecord {
     var warPressure: Int?
     var pressurePerTurn: Int?
     var notes: String?
+    /** Player-safe gazette: the same notes minus GM-only segments (secret campaign-clock progress).
+     * Nullable for migration: legacy records have none, so the player recap simply shows no notes. */
+    var playerNotes: String?
     var level: Int?
     var size: Int?
     var ruinCorruption: Int?
