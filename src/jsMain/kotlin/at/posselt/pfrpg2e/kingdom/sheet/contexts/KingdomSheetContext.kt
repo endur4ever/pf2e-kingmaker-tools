@@ -94,6 +94,14 @@ external interface KingdomSheetContext : ValidatedHandlebarsContext {
     val canScrying: Boolean
     val canLockdown: Boolean
     val canFeast: Boolean
+    val auditCooldownTurns: Int
+    val scryingCooldownTurns: Int
+    val lockdownCooldownTurns: Int
+    val feastCooldownTurns: Int
+    val auditAffordable: Boolean
+    val scryingAffordable: Boolean
+    val lockdownAffordable: Boolean
+    val feastAffordable: Boolean
     val rosterContext: RosterContext
     val partyInfluenceContext: PartyInfluenceContext
     val armyPressureContext: ArmyPressureContext
