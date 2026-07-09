@@ -140,6 +140,7 @@ fun main() {
                     "kingdom-session-prep" to "applications/kingdom/sections/session-prep/page.hbs",
                     "kingdom-analytics" to "applications/kingdom/sections/analytics/page.hbs",
                     "kingdom-expeditions" to "applications/kingdom/sections/expeditions/page.hbs",
+                    "kingdom-campaign" to "applications/kingdom/sections/clocks/page.hbs",
                     "kingdom-metric-chart" to "applications/kingdom/sections/analytics/metric-chart.hbs",
                     "kingdom-character-sheet" to "applications/kingdom/sections/character-sheet/page.hbs",
                     "kingdom-character-sheet-creation" to "applications/kingdom/sections/character-sheet/creation.hbs",

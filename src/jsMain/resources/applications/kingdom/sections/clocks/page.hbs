@@ -1,5 +1,5 @@
 <aside class="km-kingdom-sheet-sidebar km-kingdom-sheet-sidebar-clocks"
-       {{#if (ne currentNavEntry 'clock')}}hidden{{/if}}>
+       {{#if (ne currentNavEntry 'campaign')}}hidden{{/if}}>
     <div>
         <h3>{{localizeKM "kingdom.clocks.title"}}</h3>
         {{#if isGM}}
@@ -44,7 +44,7 @@
         {{/if}}
     </div>
 </aside>
-<div class="km-kingdom-sheet-content km-kingdom-sheet-content-clocks" {{#if (ne currentNavEntry 'clock')}}hidden{{/if}}>
+<div class="km-kingdom-sheet-content km-kingdom-sheet-content-clocks" {{#if (ne currentNavEntry 'campaign')}}hidden{{/if}}>
     <section class="km-kingdom-sheet-section">
         <h2>{{localizeKM "kingdom.clocks.title"}}</h2>
         {{#if campaignClocks.hasActiveClocks}}
@@ -83,4 +83,70 @@
             <p>{{localizeKM "kingdom.clocks.noClocks"}}</p>
         {{/if}}
     </section>
+
+    {{#if armyPressureContext.enabled}}
+    <section class="km-kingdom-sheet-section km-kingdom-sheet-section-war-pressure">
+        <h2>{{localizeKM "armyPressure.title"}}</h2>
+        {{#if armyPressureContext.pressure}}
+        <div class="km-pressure-meter">
+            <div class="km-pressure-bar">
+                <div class="km-pressure-fill
+                            {{#if armyPressureContext.pressure.atUnrestThreshold}}km-pressure-unrest{{/if}}
+                            {{#if armyPressureContext.pressure.atRuinThreshold}}km-pressure-ruin{{/if}}"
+                     style="width: {{armyPressureContext.pressure.pressurePercent}}%;">
+                </div>
+            </div>
+            <div class="km-pressure-labels">
+                <span>{{armyPressureContext.pressure.currentPressure}} / {{armyPressureContext.pressure.ruinThreshold}}</span>
+                <span class="km-pressure-per-turn">{{localizeKM "armyPressure.perTurn" perTurn=armyPressureContext.pressure.pressurePerTurn}}</span>
+            </div>
+            <div class="km-pressure-thresholds">
+                <span class="{{#if armyPressureContext.pressure.atUnrestThreshold}}km-active{{/if}}">
+                    {{localizeKM "armyPressure.unrestThreshold"}}: {{armyPressureContext.pressure.unrestThreshold}}
+                </span>
+                <span class="{{#if armyPressureContext.pressure.atRuinThreshold}}km-active{{/if}}">
+                    {{localizeKM "armyPressure.ruinThreshold"}}: {{armyPressureContext.pressure.ruinThreshold}}
+                </span>
+            </div>
+            {{#if armyPressureContext.pressure.projection}}
+            <div class="km-pressure-projection">
+                <h4>{{localizeKM "armyPressure.projection"}}</h4>
+                <p>{{localizeKM "armyPressure.unrestIn" turns=armyPressureContext.pressure.projection.turnsUntilUnrestThreshold}}</p>
+                <p>{{localizeKM "armyPressure.ruinIn" turns=armyPressureContext.pressure.projection.turnsUntilRuinThreshold}}</p>
+                {{#if armyPressureContext.pressure.projection.threatArrivals.length}}
+                <ul>
+                    {{#each armyPressureContext.pressure.projection.threatArrivals}}
+                    <li>{{threatName}} — {{localizeKM "armyPressure.threatArrivesIn" turns=turnsUntilArrival}}</li>
+                    {{/each}}
+                </ul>
+                {{/if}}
+            </div>
+            {{/if}}
+        </div>
+        {{/if}}
+        {{#if armyPressureContext.hasThreats}}
+        <div class="km-threats-summary">
+            <h3>{{localizeKM "armyPressure.activeThreats" count=armyPressureContext.threats.length}}</h3>
+            <ul>
+                {{#each armyPressureContext.threats}}
+                <li>
+                    {{name}} ({{statusLabel}})
+                    {{#if eta}}— {{localizeKM "armyPressure.threatArrivesIn" turns=eta}}{{/if}}
+                </li>
+                {{/each}}
+            </ul>
+        </div>
+        {{/if}}
+        {{#if armyPressureContext.hasDeployments}}
+        <div class="km-deployments-summary">
+            <h3>{{localizeKM "armyPressure.activeDeployments" count=armyPressureContext.deployments.length}}</h3>
+            <ul>
+                {{#each armyPressureContext.deployments}}
+                <li>{{armyName}} ({{statusLabel}})</li>
+                {{/each}}
+            </ul>
+        </div>
+        {{/if}}
+    </section>
+    {{/if}}
 </div>

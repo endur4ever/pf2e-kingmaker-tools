@@ -6989,6 +6989,11 @@
       "current": "Pressure",
       "perTurn": "Per Turn",
       "unrest": "Unrest",
+      "unrestThreshold": "Unrest Threshold",
+      "ruinThreshold": "Ruin Threshold",
+      "projection": "Pressure Forecast",
+      "unrestIn": "Unrest threshold in {turns} turns",
+      "ruinIn": "Ruin threshold in {turns} turns",
       "threats": "War Threats",
       "addThreat": "Add Threat",
       "threatName": "Threat",
@@ -7032,7 +7037,9 @@
       "forecastRuinBreached": "Ruin threshold already breached",
       "threatArrivals": "Threat Arrivals",
       "threatArrivesIn": "arrives in {turns} turns",
-      "threatArrivingNow": "Arriving now"
+      "threatArrivingNow": "Arriving now",
+      "activeThreats": "Active Threats ({count})",
+      "activeDeployments": "Active Deployments ({count})"
     },
     "warThreatStatus": {
       "active": "Active",
