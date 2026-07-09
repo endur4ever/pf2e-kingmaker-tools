@@ -662,6 +662,7 @@
         "fame": "Fame",
         "xpAwarded": "XP Awarded",
         "warPressure": "War Pressure",
+        "pressurePerTurn": "War Pressure Rate",
         "level": "Kingdom Level",
         "size": "Kingdom Size",
         "ruinCorruption": "Ruin: Corruption",
