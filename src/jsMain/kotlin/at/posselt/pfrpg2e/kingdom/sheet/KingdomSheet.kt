@@ -2906,7 +2906,6 @@ class KingdomSheet(
                 "fame" to "kingdom.analytics.fame",
                 "xpAwarded" to "kingdom.analytics.xpAwarded",
                 "warPressure" to "kingdom.analytics.warPressure",
-                "pressurePerTurn" to "kingdom.analytics.pressurePerTurn",
                 "level" to "kingdom.analytics.level",
                 "size" to "kingdom.analytics.size",
                 "ruinCorruption" to "kingdom.analytics.ruinCorruption",
