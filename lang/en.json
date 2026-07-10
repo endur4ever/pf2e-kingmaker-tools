@@ -890,6 +890,14 @@
         "group": "Delete faction {name}? This also destroys its entire standing history and cannot be undone.",
         "event": "Delete ongoing event {name}? This cannot be undone."
       },
+      "warfare": {
+        "mired": "Mired",
+        "pinned": "Pinned",
+        "weary": "Weary",
+        "damaged": "Damaged",
+        "routed": "Routed",
+        "destroyed": "Destroyed"
+      },
       "deleteSettlementScene": "Delete Scene",
       "overview": "Overview",
       "detailedMatrix": "Detailed Matrix",
@@ -7076,6 +7084,11 @@
       "chatTitle": "{{battleName}} — Round {{round}}",
       "victory": "Victory! The kingdom's armies have defeated the threat.",
       "defeat": "Defeat… the kingdom's armies have been destroyed.",
+      "recovers": "{name} recovers from {condition}.",
+      "recoversMiredSuccess": "{name} recovers from mired (roll {roll} >= 10).",
+      "recoversMiredFail": "{name} fails to recover from mired (roll {roll} < 10).",
+      "recoversPinnedSuccess": "{name} recovers from pinned (roll {roll} >= 10).",
+      "recoversPinnedFail": "{name} fails to recover from pinned (roll {roll} < 10).",
       "levelUpOffer": {
         "title": "{{name}} Ready to Level Up!",
         "description": "{{name}} has earned {{xp}} XP (threshold: {{threshold}}). Level up to {{level}}?",

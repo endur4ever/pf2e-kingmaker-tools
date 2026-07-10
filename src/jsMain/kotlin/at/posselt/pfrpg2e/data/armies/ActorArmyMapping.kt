@@ -55,7 +55,7 @@ object ActorArmyMapping {
         val lowSave = (dyn.system?.attributes?.lowSave?.value as Int?) ?: getArmyLowSave(level)
 
         // Rout threshold: maxHp / 4 rounded up (workbook default)
-        val routThreshold = ((maxHp + 3) / 4).coerceAtLeast(0)
+        val routThreshold = ((maxHp + 3) / 4 + getArmyRoutThresholdModifier(name)).coerceAtLeast(0)
 
         return BattleArmyState(
             name = name,
@@ -66,7 +66,7 @@ object ActorArmyMapping {
             attackBonus = attackBonus,
             ac = ac,
             routThreshold = routThreshold,
-            moraleBonus = 0,
+            moraleBonus = (dyn.system?.attributes?.morale?.value as Int?) ?: (dyn.system?.attributes?.morale as Int?) ?: 0,
             xp = 0,
             highSave = highSave,
             lowSave = lowSave,

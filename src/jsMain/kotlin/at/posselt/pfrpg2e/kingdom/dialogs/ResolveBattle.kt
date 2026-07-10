@@ -7,6 +7,9 @@ import at.posselt.pfrpg2e.data.armies.ArmyCondition
 import at.posselt.pfrpg2e.data.armies.BattleAction
 import at.posselt.pfrpg2e.data.armies.BattleStatus
 import at.posselt.pfrpg2e.data.armies.tickRound
+import at.posselt.pfrpg2e.data.armies.recoverConditions
+import at.posselt.pfrpg2e.kingdom.determineBattleStatus
+import js.objects.recordOf
 import at.posselt.pfrpg2e.data.checks.RollMode
 import at.posselt.pfrpg2e.kingdom.awardVictoryXp
 import at.posselt.pfrpg2e.kingdom.data.RawArmyBattle
@@ -59,6 +62,7 @@ external interface BattleArmyDisplay {
     var maxHp: Int
     var conditions: String
     var isDestroyed: Boolean
+    var isRouted: Boolean
 }
 
 @JsPlainObject
@@ -142,26 +146,74 @@ class ResolveBattle(
         val defender = state.armies.getOrNull(selectedDefenderIndex)
         if (attacker == null || defender == null ||
             ArmyCondition.DESTROYED in attacker.conditions ||
-            ArmyCondition.DESTROYED in defender.conditions
+            ArmyCondition.ROUTED in attacker.conditions ||
+            ArmyCondition.DESTROYED in defender.conditions ||
+            ArmyCondition.ROUTED in defender.conditions
         ) {
             return
         }
 
         val attackerRoll = roll("1d20", toChat = false)
         val defenderRoll = roll("1d20", toChat = false)
-        // One engine tick resolves the exchange: the strike and the
-        // counter-strike. tickRound skips actions whose actor or target was
-        // destroyed earlier in the same round.
+        val attackerMoraleRoll = roll("1d20", toChat = false)
+        val defenderMoraleRoll = roll("1d20", toChat = false)
+
         val newState = tickRound(
             state,
             listOf(
-                BattleAction(selectedAttackerIndex, selectedDefenderIndex, attackerRoll),
-                BattleAction(selectedDefenderIndex, selectedAttackerIndex, defenderRoll),
+                BattleAction(
+                    actorIndex = selectedAttackerIndex,
+                    targetIndex = selectedDefenderIndex,
+                    roll = attackerRoll,
+                    moraleRoll = attackerMoraleRoll
+                ),
+                BattleAction(
+                    actorIndex = selectedDefenderIndex,
+                    targetIndex = selectedAttackerIndex,
+                    roll = defenderRoll,
+                    moraleRoll = defenderMoraleRoll
+                ),
             ),
         )
 
-        var updated = updateRawBattle(currentBattle, newState)
-        var roundLog = newState.log.drop(state.log.size)
+        val attackerCount = currentBattle.attackers.size
+        val nextStatus = determineBattleStatus(newState, attackerCount)
+        val finalState = if (nextStatus != BattleStatus.ACTIVE) {
+            val newLogs = newState.log.toMutableList()
+            val recoveredArmies = newState.armies.map { army ->
+                val miredRoll = if (ArmyCondition.MIRED in army.conditions) roll("1d20", toChat = false) else 10
+                val pinnedRoll = if (ArmyCondition.PINNED in army.conditions) roll("1d20", toChat = false) else 10
+                val recovered = recoverConditions(army, miredRoll, pinnedRoll)
+                
+                if (ArmyCondition.WEARY in army.conditions) {
+                    newLogs.add(t("warBattle.recovers", recordOf("name" to army.name, "condition" to t("kingdom.warfare.weary"))))
+                }
+                if (ArmyCondition.ROUTED in army.conditions) {
+                    newLogs.add(t("warBattle.recovers", recordOf("name" to army.name, "condition" to t("kingdom.warfare.routed"))))
+                }
+                if (ArmyCondition.MIRED in army.conditions) {
+                    if (miredRoll >= 10) {
+                        newLogs.add(t("warBattle.recoversMiredSuccess", recordOf("name" to army.name, "roll" to miredRoll.toString())))
+                    } else {
+                        newLogs.add(t("warBattle.recoversMiredFail", recordOf("name" to army.name, "roll" to miredRoll.toString())))
+                    }
+                }
+                if (ArmyCondition.PINNED in army.conditions) {
+                    if (pinnedRoll >= 10) {
+                        newLogs.add(t("warBattle.recoversPinnedSuccess", recordOf("name" to army.name, "roll" to pinnedRoll.toString())))
+                    } else {
+                        newLogs.add(t("warBattle.recoversPinnedFail", recordOf("name" to army.name, "roll" to pinnedRoll.toString())))
+                    }
+                }
+                recovered
+            }
+            newState.copy(armies = recoveredArmies, log = newLogs)
+        } else {
+            newState
+        }
+
+        var updated = updateRawBattle(currentBattle, finalState)
+        var roundLog = finalState.log.drop(state.log.size)
         if (updated.status == BattleStatus.VICTORY.value) {
             val rewarded = awardVictoryXp(updated.attackers, updated.defenders)
             updated.attackers.zip(rewarded).forEach { (before, after) ->
@@ -174,11 +226,15 @@ class ResolveBattle(
         currentBattle = updated
 
         // Keep selections on living armies for the next round
-        if (ArmyCondition.DESTROYED.value in (updated.attackers.getOrNull(selectedAttackerIndex)?.conditions ?: emptyArray())) {
+        if (ArmyCondition.DESTROYED.value in (updated.attackers.getOrNull(selectedAttackerIndex)?.conditions ?: emptyArray()) ||
+            ArmyCondition.ROUTED.value in (updated.attackers.getOrNull(selectedAttackerIndex)?.conditions ?: emptyArray())
+        ) {
             selectedAttackerIndex = firstAliveIndex(updated.attackers, offset = 0)
         }
         val defenderLocal = selectedDefenderIndex - updated.attackers.size
-        if (ArmyCondition.DESTROYED.value in (updated.defenders.getOrNull(defenderLocal)?.conditions ?: emptyArray())) {
+        if (ArmyCondition.DESTROYED.value in (updated.defenders.getOrNull(defenderLocal)?.conditions ?: emptyArray()) ||
+            ArmyCondition.ROUTED.value in (updated.defenders.getOrNull(defenderLocal)?.conditions ?: emptyArray())
+        ) {
             selectedDefenderIndex = firstAliveIndex(updated.defenders, offset = updated.attackers.size)
         }
 
@@ -212,7 +268,10 @@ external interface ChatBattleContext {
 }
 
 private fun firstAliveIndex(armies: Array<RawBattleArmy>, offset: Int): Int {
-    val local = armies.indexOfFirst { ArmyCondition.DESTROYED.value !in it.conditions }
+    val local = armies.indexOfFirst {
+        ArmyCondition.DESTROYED.value !in it.conditions &&
+        ArmyCondition.ROUTED.value !in it.conditions
+    }
     return offset + local.coerceAtLeast(0)
 }
 
@@ -222,6 +281,7 @@ private fun RawBattleArmy.toDisplay(index: Int): BattleArmyDisplay = BattleArmyD
     level = level,
     currentHp = currentHp,
     maxHp = maxHp,
-    conditions = conditions.joinToString(", "),
+    conditions = conditions.map { t("kingdom.warfare.$it") }.joinToString(", "),
     isDestroyed = ArmyCondition.DESTROYED.value in conditions,
+    isRouted = ArmyCondition.ROUTED.value in conditions,
 )

@@ -93,6 +93,7 @@ data class BattleAction(
     val actorIndex: Int,          // index into BattleState.armies
     val targetIndex: Int,         // index into BattleState.armies
     val roll: Int,                // the d20 result (1-20), supplied by UI
+    val moraleRoll: Int? = null,  // the morale check d20 roll, if needed
 )
 
 // ---------------------------------------------------------------------------
@@ -302,12 +303,35 @@ fun tickRound(
     val logs = battle.log.toMutableList()
 
     for (action in actions) {
-        val actor = armies[action.actorIndex]
-        val target = armies[action.targetIndex]
+        var actor = armies[action.actorIndex]
+        var target = armies[action.targetIndex]
 
-        // Skip destroyed armies
+        // Skip destroyed or routed armies
         if (ArmyCondition.DESTROYED in actor.conditions) continue
+        if (ArmyCondition.ROUTED in actor.conditions) continue
         if (ArmyCondition.DESTROYED in target.conditions) continue
+        if (ArmyCondition.ROUTED in target.conditions) continue
+
+        // At the start of its turn, if HP is <= routThreshold, attempt Morale check
+        if (actor.currentHp <= actor.routThreshold) {
+            val moraleRoll = action.moraleRoll
+            if (moraleRoll != null) {
+                val (newConds, moraleLog) = moraleCheck(
+                    roll = moraleRoll,
+                    dc = 10,
+                    moraleBonus = actor.moraleBonus,
+                    currentConditions = actor.conditions,
+                    armyName = actor.name
+                )
+                actor = actor.copy(conditions = newConds)
+                armies[action.actorIndex] = actor
+                logs.add(moraleLog)
+            }
+        }
+
+        // Skip if routed or destroyed by morale check
+        if (ArmyCondition.DESTROYED in actor.conditions) continue
+        if (ArmyCondition.ROUTED in actor.conditions) continue
 
         val mods = conditionEffects(actor.conditions)
         val terrainMod = getTerrainModifier(battle.terrain)

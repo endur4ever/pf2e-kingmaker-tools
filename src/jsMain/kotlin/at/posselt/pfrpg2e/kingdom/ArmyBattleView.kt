@@ -130,13 +130,13 @@ suspend fun toBattleState(battle: RawArmyBattle): BattleState = BattleState(
 fun determineBattleStatus(state: BattleState, attackerCount: Int): BattleStatus {
     val attackers = state.armies.take(attackerCount)
     val defenders = state.armies.drop(attackerCount)
-    val allDefendersDestroyed = defenders.isNotEmpty() &&
-        defenders.all { ArmyCondition.DESTROYED in it.conditions }
-    val allAttackersDestroyed = attackers.isNotEmpty() &&
-        attackers.all { ArmyCondition.DESTROYED in it.conditions }
+    val allDefendersDefeated = defenders.isNotEmpty() &&
+        defenders.all { ArmyCondition.DESTROYED in it.conditions || ArmyCondition.ROUTED in it.conditions }
+    val allAttackersDefeated = attackers.isNotEmpty() &&
+        attackers.all { ArmyCondition.DESTROYED in it.conditions || ArmyCondition.ROUTED in it.conditions }
     return when {
-        allDefendersDestroyed -> BattleStatus.VICTORY
-        allAttackersDestroyed -> BattleStatus.DEFEAT
+        allDefendersDefeated -> BattleStatus.VICTORY
+        allAttackersDefeated -> BattleStatus.DEFEAT
         else -> BattleStatus.ACTIVE
     }
 }

@@ -10,7 +10,7 @@
                 <h2>{{localizeKM "warBattle.attackers"}}</h2>
                 <select name="selectedAttackerIndex">
                     {{#each attackers}}
-                        {{#unless isDestroyed}}
+                        {{#unless (or isDestroyed isRouted)}}
                             <option value="{{index}}" {{#if (eq index ../selectedAttackerIndex)}}selected{{/if}}>
                                 {{name}} (Lv {{level}}, HP {{currentHp}}/{{maxHp}})
                             </option>
@@ -23,7 +23,7 @@
                 <h2>{{localizeKM "warBattle.defenders"}}</h2>
                 <select name="selectedDefenderIndex">
                     {{#each defenders}}
-                        {{#unless isDestroyed}}
+                        {{#unless (or isDestroyed isRouted)}}
                             <option value="{{index}}" {{#if (eq index ../selectedDefenderIndex)}}selected{{/if}}>
                                 {{name}} (Lv {{level}}, HP {{currentHp}}/{{maxHp}})
                             </option>

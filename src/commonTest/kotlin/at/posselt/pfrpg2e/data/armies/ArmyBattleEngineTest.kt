@@ -510,6 +510,55 @@ class TickRoundTest {
         assertEquals("Battle started.", result.log[0])
         assertTrue(result.log[1].contains("hits"))
     }
+
+    @Test
+    fun moraleCheckPassedDuringTick() {
+        val battle = BattleState(
+            round = 1,
+            armies = listOf(
+                testArmy(name = "Attacker", hp = 4, currentHp = 1, routThreshold = 1, attackBonus = 9),
+                testArmy(name = "Defender", hp = 4, ac = 16),
+            ),
+        )
+        // moraleRoll = 10, passes (10 + 0 >= 10), strikes defender
+        val actions = listOf(BattleAction(actorIndex = 0, targetIndex = 1, roll = 15, moraleRoll = 10))
+        val result = tickRound(battle, actions)
+        assertEquals(3, result.armies[1].currentHp) // Hit resolves
+        assertFalse(ArmyCondition.ROUTED in result.armies[0].conditions)
+        assertTrue(result.log.any { it.contains("passes") })
+    }
+
+    @Test
+    fun moraleCheckFailedDuringTick() {
+        val battle = BattleState(
+            round = 1,
+            armies = listOf(
+                testArmy(name = "Attacker", hp = 4, currentHp = 1, routThreshold = 1, attackBonus = 9),
+                testArmy(name = "Defender", hp = 4, ac = 16),
+            ),
+        )
+        // moraleRoll = 1 (fails vs DC 10), becomes ROUTED, strike skipped!
+        val actions = listOf(BattleAction(actorIndex = 0, targetIndex = 1, roll = 15, moraleRoll = 1))
+        val result = tickRound(battle, actions)
+        assertEquals(4, result.armies[1].currentHp) // No strike
+        assertTrue(ArmyCondition.ROUTED in result.armies[0].conditions)
+        assertTrue(result.log.any { it.contains("fails") })
+    }
+
+    @Test
+    fun alreadyRoutedArmySkipped() {
+        val battle = BattleState(
+            round = 1,
+            armies = listOf(
+                testArmy(name = "Attacker", hp = 4, conditions = setOf(ArmyCondition.ROUTED), attackBonus = 9),
+                testArmy(name = "Defender", hp = 4, ac = 16),
+            ),
+        )
+        // Already routed, no moraleRoll or no success -> skipped
+        val actions = listOf(BattleAction(actorIndex = 0, targetIndex = 1, roll = 15))
+        val result = tickRound(battle, actions)
+        assertEquals(4, result.armies[1].currentHp) // No strike
+    }
 }
 
 // ---------------------------------------------------------------------------
