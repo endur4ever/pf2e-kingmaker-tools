@@ -96,6 +96,7 @@ import at.posselt.pfrpg2e.kingdom.dialogs.StructureBrowser
 import at.posselt.pfrpg2e.kingdom.dialogs.DeployArmy
 import at.posselt.pfrpg2e.kingdom.dialogs.DeploySettlementOption
 import at.posselt.pfrpg2e.kingdom.dialogs.ResolveBattle
+import at.posselt.pfrpg2e.kingdom.data.RawArmyBattle
 import at.posselt.pfrpg2e.kingdom.dialogs.addSettlementBlockDialog
 import at.posselt.pfrpg2e.kingdom.dialogs.armyBrowser
 import at.posselt.pfrpg2e.kingdom.dialogs.armyTacticsBrowser
@@ -242,6 +243,7 @@ import at.posselt.pfrpg2e.kingdom.structures.levelUpTo
 import at.posselt.pfrpg2e.kingdom.vacancies
 import at.posselt.pfrpg2e.settings.pfrpg2eKingdomCampingWeather
 import at.posselt.pfrpg2e.app.confirm
+import at.posselt.pfrpg2e.app.confirmDelete
 import at.posselt.pfrpg2e.takeIfInstance
 import at.posselt.pfrpg2e.app.jsonFilePicker
 import at.posselt.pfrpg2e.kingdom.sheet.KingdomJournalExporter
@@ -552,8 +554,12 @@ class KingdomSheet(
                 val featId = target.dataset["id"]
                 if (featId != null) {
                     val kingdom = getKingdom()
-                    kingdom.bonusFeats = kingdom.bonusFeats.filter { it.id != featId }.toTypedArray()
-                    actor.setKingdom(kingdom)
+                    val feat = kingdom.bonusFeats.find { it.id == featId }
+                    val featName = feat?.id ?: featId
+                    if (confirmDelete("kingdom.confirmDelete.bonusFeat", featName)) {
+                        kingdom.bonusFeats = kingdom.bonusFeats.filter { it.id != featId }.toTypedArray()
+                        actor.setKingdom(kingdom)
+                    }
                 }
             }
 
@@ -600,13 +606,17 @@ class KingdomSheet(
             "delete-war-threat" -> buildPromise {
                 val threatId = target.dataset["id"]
                 val kingdom = getKingdom()
-                kingdom.warThreats = (kingdom.warThreats ?: emptyArray()).filter { it.id != threatId }.toTypedArray()
-                kingdom.warPressure = recalculateWarPressure(
-                    kingdom.warThreats ?: emptyArray(),
-                    kingdom.armyDeployments ?: emptyArray(),
-                    kingdom.warPressure,
-                )
-                actor.setKingdom(kingdom)
+                val threat = (kingdom.warThreats ?: emptyArray()).find { it.id == threatId }
+                val threatName = threat?.name ?: threatId
+                if (confirmDelete("kingdom.confirmDelete.warThreat", threatName)) {
+                    kingdom.warThreats = (kingdom.warThreats ?: emptyArray()).filter { it.id != threatId }.toTypedArray()
+                    kingdom.warPressure = recalculateWarPressure(
+                        kingdom.warThreats ?: emptyArray(),
+                        kingdom.armyDeployments ?: emptyArray(),
+                        kingdom.warPressure,
+                    )
+                    actor.setKingdom(kingdom)
+                }
             }
 
             "deploy-army" -> buildPromise {
@@ -738,6 +748,12 @@ class KingdomSheet(
                                 )
                             }
                             actor.setKingdom(current)
+
+                            // Dispatch syncBattleOutcome to sync HP/conditions/XP to PF2EArmy actors
+                            dispatcher.dispatch(
+                                js("({ action: 'syncBattleOutcome', data: { battle: updated, kingdomActorUuid: actor.uuid } })")
+                                    .unsafeCast<at.posselt.pfrpg2e.actions.ActionMessage>()
+                            )
                         }
                     }.launch()
                 }
@@ -930,9 +946,12 @@ class KingdomSheet(
                 val questId = target.dataset["id"]
                 if (questId != null) {
                     val kingdom = getKingdom()
-                    val quests = kingdom.quests ?: emptyArray()
-                    kingdom.quests = quests.filter { it.id != questId }.toTypedArray()
-                    actor.setKingdom(kingdom)
+                    val quest = (kingdom.quests ?: emptyArray()).find { it.id == questId }
+                    val questName = quest?.title ?: questId
+                    if (confirmDelete("kingdom.confirmDelete.quest", questName)) {
+                        kingdom.quests = (kingdom.quests ?: emptyArray()).filter { it.id != questId }.toTypedArray()
+                        actor.setKingdom(kingdom)
+                    }
                 }
             }
 

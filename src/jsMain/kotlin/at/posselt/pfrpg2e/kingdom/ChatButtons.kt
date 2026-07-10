@@ -2,7 +2,11 @@ package at.posselt.pfrpg2e.kingdom
 
 import at.posselt.pfrpg2e.companion.LevelUpResult
 import at.posselt.pfrpg2e.companion.applyCompanionXp
+import at.posselt.pfrpg2e.data.armies.BattleArmyState
+import at.posselt.pfrpg2e.data.armies.applyLevelUp
+import at.posselt.pfrpg2e.data.armies.xpThresholdForLevel
 import at.posselt.pfrpg2e.utils.fromUuidOfTypes
+import com.foundryvtt.pf2e.actor.PF2EArmy
 import com.foundryvtt.pf2e.actor.PF2ECharacter
 import kotlin.math.min
 import at.posselt.pfrpg2e.data.events.KingdomEventTrait
@@ -32,6 +36,7 @@ import at.posselt.pfrpg2e.utils.postChatTemplate
 import at.posselt.pfrpg2e.utils.t
 import at.posselt.pfrpg2e.utils.unsetAppFlag
 import at.posselt.pfrpg2e.utils.typeSafeUpdate
+import at.posselt.pfrpg2e.utils.setAppFlag
 import com.foundryvtt.core.Game
 import com.foundryvtt.core.helpers.TypedHooks
 import com.foundryvtt.core.helpers.onRenderChatLog
@@ -488,6 +493,57 @@ private val buttons = listOf(
                 }
             }
         }
+    },
+    ChatButton("km-offer-army-levelup") { game, actor, event, button ->
+        // GM-confirmed: apply level-up to the PF2EArmy actor.
+        if (!game.user.isGM) return@ChatButton
+        val approve = button.dataset["approve"] == "true"
+        val decline = button.dataset["decline"] == "true"
+        val armyActorUuid = button.dataset["armyActorUuid"] ?: return@ChatButton
+        val armyName = button.dataset["armyName"] ?: ""
+        val targetLevel = button.dataset["targetLevel"]?.toIntOrNull() ?: return@ChatButton
+
+        if (decline) {
+            postChatMessage(t("warBattle.levelUpOffer.dismissed", recordOf("name" to armyName)))
+            return@ChatButton
+        }
+        if (!approve) return@ChatButton
+
+        val armyActor = fromUuidOfTypes<PF2EArmy>(armyActorUuid) ?: return@ChatButton
+
+        // Apply level-up: increase level, HP, and carry over excess XP
+        val currentLevel = armyActor.system.details.level.value
+        val currentXp = armyActor.getAppFlag<PF2EArmy, Int>("xp") ?: 0
+        val threshold = xpThresholdForLevel(currentLevel)
+        if (currentXp < threshold || currentLevel >= 20) return@ChatButton
+
+        val (leveledUp, remainingXp) = applyLevelUp(
+            BattleArmyState(
+                name = armyActor.name,
+                level = currentLevel,
+                currentHp = armyActor.system.attributes.hp.value,
+                maxHp = armyActor.system.attributes.hp.max,
+                conditions = emptySet(),
+                attackBonus = 0,
+                ac = armyActor.system.attributes.ac.value,
+                routThreshold = 0,
+                xp = currentXp,
+            ),
+            currentXp,
+            threshold,
+        )
+
+        // Update actor level
+        armyActor.typeSafeUpdate {
+            system.details.level.value = leveledUp.level
+            system.attributes.hp.value = leveledUp.currentHp
+            system.attributes.hp.max = leveledUp.maxHp
+        }
+
+        // Persist remaining XP
+        armyActor.setAppFlag("xp", remainingXp)
+
+        postChatMessage(t("warBattle.levelUpOffer.leveledUp", recordOf("name" to armyName, "level" to leveledUp.level)))
     },
     ChatButton("km-undo-end-turn") { game, actor, event, button ->
         // GM-only: revert the most recent End Turn via the shared undoEndTurn (restores kingdom +

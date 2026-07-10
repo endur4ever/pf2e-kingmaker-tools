@@ -881,6 +881,15 @@
       "fishingFleets": "Fishing Fleets",
       "deleteSettlement": "Delete Settlement {name}",
       "confirmDeleteSettlement": "Do really you want to delete settlement {name} and its scene?",
+      "confirmDelete": {
+        "bonusFeat": "Delete bonus feat {name}? This cannot be undone.",
+        "warThreat": "Delete war threat {name}? This cannot be undone.",
+        "quest": "Delete quest {name}? This cannot be undone.",
+        "companion": "Delete companion {name}? This cannot be undone.",
+        "modifier": "Delete modifier {name}? This cannot be undone.",
+        "group": "Delete faction {name}? This also destroys its entire standing history and cannot be undone.",
+        "event": "Delete ongoing event {name}? This cannot be undone."
+      },
       "deleteSettlementScene": "Delete Scene",
       "overview": "Overview",
       "detailedMatrix": "Detailed Matrix",
@@ -7066,7 +7075,15 @@
       "battleLog": "Battle Log",
       "chatTitle": "{{battleName}} — Round {{round}}",
       "victory": "Victory! The kingdom's armies have defeated the threat.",
-      "defeat": "Defeat… the kingdom's armies have been destroyed."
+      "defeat": "Defeat… the kingdom's armies have been destroyed.",
+      "levelUpOffer": {
+        "title": "{{name}} Ready to Level Up!",
+        "description": "{{name}} has earned {{xp}} XP (threshold: {{threshold}}). Level up to {{level}}?",
+        "levelUp": "Level Up",
+        "dismiss": "Dismiss",
+        "leveledUp": "{{name}} leveled up to level {{level}}!",
+        "dismissed": "{{name}} level-up offer dismissed."
+      }
     },
     "pacingAlertType": {
       "levelMismatch": "The party's level has drifted far from the chapter's intended level. Consider adjusting encounter difficulty or rewards.",

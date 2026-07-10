@@ -16,6 +16,7 @@ import at.posselt.pfrpg2e.kingdom.data.RawBattleArmy
 import at.posselt.pfrpg2e.kingdom.data.RawWarThreat
 import at.posselt.pfrpg2e.kingdom.structures.RawSettlement
 import at.posselt.pfrpg2e.utils.fromUuidTypeSafe
+import at.posselt.pfrpg2e.utils.getAppFlag
 import com.foundryvtt.core.utils.fromUuid
 import com.foundryvtt.pf2e.actor.PF2EArmy
 import kotlinx.coroutines.await
@@ -80,7 +81,11 @@ suspend fun toBattleArmyStateFromActor(raw: RawBattleArmy): BattleArmyState {
     if (uuid.isBlank()) {
         return toBattleArmyState(raw)
     }
-    val actor = fromUuid(uuid).await()?.unsafeCast<PF2EArmy>()
+    val actor = if (js("typeof fromUuid") != "undefined") {
+        fromUuid(uuid).await()?.unsafeCast<PF2EArmy>()
+    } else {
+        null
+    }
     if (actor == null) {
         return toBattleArmyState(raw)
     }
@@ -208,9 +213,15 @@ suspend fun createArmyBattle(
     val attackerArmies = attackers.map { info ->
         val uuid = info.uuid
         if (uuid.isNotBlank()) {
-            val actor = fromUuid(uuid).await()?.unsafeCast<PF2EArmy>()
+            val actor = if (js("typeof fromUuid") != "undefined") {
+                fromUuid(uuid).await()?.unsafeCast<PF2EArmy>()
+            } else {
+                null
+            }
             if (actor != null) {
                 val state = ActorArmyMapping.toBattleArmyStateFromActorData(actor)
+                // Read persisted XP from actor flag (module flag "xp")
+                val persistedXp = actor.getAppFlag<PF2EArmy, Int>("xp") ?: 0
                 RawBattleArmy(
                     armyActorUuid = uuid,
                     name = state.name,
@@ -218,7 +229,7 @@ suspend fun createArmyBattle(
                     currentHp = state.currentHp,
                     maxHp = state.maxHp,
                     conditions = emptyArray(),
-                    xp = 0,
+                    xp = persistedXp,
                 )
             } else {
                 // Actor not found or not a PF2EArmy — fall back to workbook

@@ -7,6 +7,7 @@ import com.foundryvtt.core.*
 import com.foundryvtt.core.applications.api.*
 import com.foundryvtt.core.applications.ux.FormDataExtended
 import js.objects.ReadonlyRecord
+import js.objects.recordOf
 import js.objects.unsafeJso
 import kotlinx.coroutines.await
 import org.w3c.dom.HTMLFormElement
@@ -24,6 +25,21 @@ suspend fun confirm(message: String) =
     } catch (_: Throwable) {
         false
     }
+
+/**
+ * Shared confirmation dialog for destructive delete/remove actions on the kingdom sheet.
+ * Uses i18n keys under `kingdom.confirmDelete.*` with `{name}` interpolation.
+ * Returns true if the user confirmed, false if cancelled or dismissed.
+ */
+suspend fun confirmDelete(
+    i18nKey: String,
+    name: String,
+    extraContext: Map<String, String> = emptyMap()
+): Boolean {
+    val vars = recordOf("name" to name)
+    extraContext.forEach { (k, v) -> vars[k] = v }
+    return confirm(t(i18nKey, vars))
+}
 
 /**
  * Typesafe wrapper around the insanity that is DialogV2

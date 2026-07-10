@@ -9,6 +9,7 @@ import at.posselt.pfrpg2e.actions.handlers.LearnSpecialRecipeHandler
 import at.posselt.pfrpg2e.actions.handlers.OpenCampingSheetHandler
 import at.posselt.pfrpg2e.actions.handlers.OpenKingdomSheetHandler
 import at.posselt.pfrpg2e.actions.handlers.SyncActivitiesHandler
+import at.posselt.pfrpg2e.actions.handlers.SyncBattleOutcomeHandler
 import at.posselt.pfrpg2e.actor.partyMembers
 import at.posselt.pfrpg2e.camping.CampingActor
 import at.posselt.pfrpg2e.camping.beginRest
@@ -91,6 +92,7 @@ fun main() {
                 AddHuntAndGatherResultHandler(),
                 OpenCampingSheetHandler(game = game),
                 SyncActivitiesHandler(game = game),
+                SyncBattleOutcomeHandler(game = game),
                 ClearMealEffectsHandler(),
                 LearnSpecialRecipeHandler(),
                 ApplyMealEffectsHandler(game = game),
