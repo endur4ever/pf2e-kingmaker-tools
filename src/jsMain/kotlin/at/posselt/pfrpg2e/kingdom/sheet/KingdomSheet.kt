@@ -1065,11 +1065,24 @@ class KingdomSheet(
             "resolve-all-expeditions" -> buildPromise {
                 if (!game.user.isGM) return@buildPromise
                 val kingdom = getKingdom()
-                val pending = (kingdom.companionExpeditions ?: emptyArray()).filter { it.status == "awaitingResolution" }
+                val expeditions = kingdom.companionExpeditions ?: emptyArray()
+                val awaitingResolution = expeditions.filter { it.status == "awaitingResolution" }
+                val inProgress = expeditions.filter { it.status == "inProgress" }
                 var resolved = 0
-                for (exp in pending) {
+
+                // First, apply rewards for expeditions already awaiting resolution
+                for (exp in awaitingResolution) {
                     if (applyExpeditionRewardToKingdom(kingdom, exp)) resolved++
                 }
+
+                // Then, force-resolve in-progress expeditions (early resolution)
+                for (exp in inProgress) {
+                    val leadCompanionId = exp.companionIds.firstOrNull() ?: continue
+                    val leadCompanion = kingdom.companions?.find { (it.actorUuid ?: it.name) == leadCompanionId } ?: continue
+                    resolveExpeditionCore(game, actor, kingdom, exp, leadCompanion)
+                    resolved++
+                }
+
                 if (resolved > 0) {
                     actor.setKingdom(kingdom)
                     postChatMessage(t("kingdom.expeditionBatchResolved", recordOf("count" to resolved)))

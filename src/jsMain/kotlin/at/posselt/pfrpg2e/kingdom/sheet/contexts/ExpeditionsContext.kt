@@ -45,6 +45,7 @@ external interface ExpeditionsContext {
     val isGM: Boolean
     val hasExpeditions: Boolean
     val hasAwaitingResolution: Boolean
+    val hasInProgress: Boolean
 }
 
 fun Array<RawCompanionExpedition>.toExpeditionsContext(
@@ -122,6 +123,7 @@ fun Array<RawCompanionExpedition>.toExpeditionsContext(
         isGM = isGM,
         hasExpeditions = items.isNotEmpty(),
         hasAwaitingResolution = items.any { it.isAwaitingResolution },
+        hasInProgress = items.any { it.isInProgress },
     )
 }
 
