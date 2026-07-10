@@ -607,7 +607,7 @@ class KingdomSheet(
                 val threatId = target.dataset["id"]
                 val kingdom = getKingdom()
                 val threat = (kingdom.warThreats ?: emptyArray()).find { it.id == threatId }
-                val threatName = threat?.name ?: threatId
+                val threatName = threat?.name ?: threatId ?: "Unknown"
                 if (confirmDelete("kingdom.confirmDelete.warThreat", threatName)) {
                     kingdom.warThreats = (kingdom.warThreats ?: emptyArray()).filter { it.id != threatId }.toTypedArray()
                     kingdom.warPressure = recalculateWarPressure(
@@ -1035,8 +1035,13 @@ class KingdomSheet(
                     } else if (kingdom.companionHasActivePersonalQuests(index)) {
                         ui.notifications.warn(t("kingdom.companion.cannotDeleteHasQuests"))
                     } else {
-                        kingdom.companions = (kingdom.companions ?: emptyArray()).filterIndexed { i, _ -> i != index }.toTypedArray()
-                        actor.setKingdom(kingdom)
+                        val companion = kingdom.companions?.getOrNull(index)
+                        if (companion != null) {
+                            if (confirmDelete("kingdom.confirmDelete.companion", companion.name)) {
+                                kingdom.companions = (kingdom.companions ?: emptyArray()).filterIndexed { i, _ -> i != index }.toTypedArray()
+                                actor.setKingdom(kingdom)
+                            }
+                        }
                     }
                 }
             }
@@ -1185,8 +1190,18 @@ class KingdomSheet(
             "delete-modifier" -> buildPromise {
                 val index = target.dataset["index"]?.toInt() ?: 0
                 val kingdom = getKingdom()
-                kingdom.modifiers = kingdom.modifiers.filterIndexed { idx, _ -> idx != index }.toTypedArray()
-                actor.setKingdom(kingdom)
+                val modifier = kingdom.modifiers.getOrNull(index)
+                if (modifier != null) {
+                    val modifierName = if (modifier.requiresTranslation == true) {
+                        modifier.buttonLabel?.let { t(it) } ?: t(modifier.name)
+                    } else {
+                        modifier.name
+                    }
+                    if (confirmDelete("kingdom.confirmDelete.modifier", modifierName)) {
+                        kingdom.modifiers = kingdom.modifiers.filterIndexed { idx, _ -> idx != index }.toTypedArray()
+                        actor.setKingdom(kingdom)
+                    }
+                }
             }
 
             "add-group" -> buildPromise {
@@ -1208,8 +1223,13 @@ class KingdomSheet(
             "delete-group" -> buildPromise {
                 val index = target.dataset["index"]?.toInt() ?: 0
                 val kingdom = getKingdom()
-                kingdom.groups = kingdom.groups.filterIndexed { idx, _ -> idx != index }.toTypedArray()
-                actor.setKingdom(kingdom)
+                val group = kingdom.groups.getOrNull(index)
+                if (group != null) {
+                    if (confirmDelete("kingdom.confirmDelete.group", group.name)) {
+                        kingdom.groups = kingdom.groups.filterIndexed { idx, _ -> idx != index }.toTypedArray()
+                        actor.setKingdom(kingdom)
+                    }
+                }
             }
 
             "annex-group" -> buildPromise {
