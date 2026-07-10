@@ -71,6 +71,8 @@ data class BattleArmyState(
     val routThreshold: Int,       // absolute HP value (e.g. 2 means rout at ≤2 HP)
     val moraleBonus: Int = 0,
     val xp: Int = 0,
+    val highSave: Int = 10,
+    val lowSave: Int = 4,
 )
 
 /**
@@ -359,6 +361,12 @@ fun getTerrainModifier(terrain: String?): Int {
  */
 fun getArmyAc(level: Int): Int =
     armyStatistics.find { it.level == level }?.ac ?: 16
+
+fun getArmyHighSave(level: Int): Int =
+    armyStatistics.find { it.level == level }?.highSave ?: 10
+
+fun getArmyLowSave(level: Int): Int =
+    armyStatistics.find { it.level == level }?.lowSave ?: 4
 
 /**
  * Looks up the base attack bonus for an army from its level using the workbook table.

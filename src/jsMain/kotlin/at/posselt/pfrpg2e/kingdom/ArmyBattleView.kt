@@ -1,5 +1,6 @@
 package at.posselt.pfrpg2e.kingdom
 
+import at.posselt.pfrpg2e.data.armies.ActorArmyMapping
 import at.posselt.pfrpg2e.data.armies.ArmyCondition
 import at.posselt.pfrpg2e.data.armies.BattleArmyState
 import at.posselt.pfrpg2e.data.armies.BattleState
@@ -14,6 +15,10 @@ import at.posselt.pfrpg2e.kingdom.data.RawArmyBattle
 import at.posselt.pfrpg2e.kingdom.data.RawBattleArmy
 import at.posselt.pfrpg2e.kingdom.data.RawWarThreat
 import at.posselt.pfrpg2e.kingdom.structures.RawSettlement
+import at.posselt.pfrpg2e.utils.fromUuidTypeSafe
+import com.foundryvtt.core.utils.fromUuid
+import com.foundryvtt.pf2e.actor.PF2EArmy
+import kotlinx.coroutines.await
 
 /**
  * Pure mapping between the persisted [RawArmyBattle] (JS-interop, phase 1) and
@@ -45,6 +50,10 @@ fun routThresholdFor(name: String, maxHp: Int): Int =
  * Builds the engine state for one army. AC and attack bonus are derived from
  * the army's level via the workbook statistics table; unknown condition
  * strings are ignored.
+ *
+ * This is the fallback path used when no PF2EArmy actor is linked (or the actor
+ * cannot be resolved). For actors with a valid [RawBattleArmy.armyActorUuid],
+ * prefer [toBattleArmyStateFromActor] which reads stats from the actor sheet.
  */
 fun toBattleArmyState(raw: RawBattleArmy): BattleArmyState = BattleArmyState(
     name = raw.name,
@@ -58,10 +67,51 @@ fun toBattleArmyState(raw: RawBattleArmy): BattleArmyState = BattleArmyState(
     xp = raw.xp,
 )
 
+/**
+ * Resolves a [RawBattleArmy] to a [BattleArmyState] by fetching the linked
+ * PF2EArmy actor (if any) and reading its sheet stats (HP, AC, strikes, level, saves).
+ * Falls back to the workbook level-table if the UUID is blank, the actor is missing,
+ * or the actor is not a PF2EArmy.
+ *
+ * This is a suspend function because it performs an async `fromUuid` lookup.
+ */
+suspend fun toBattleArmyStateFromActor(raw: RawBattleArmy): BattleArmyState {
+    val uuid = raw.armyActorUuid
+    if (uuid.isBlank()) {
+        return toBattleArmyState(raw)
+    }
+    val actor = fromUuid(uuid).await()?.unsafeCast<PF2EArmy>()
+    if (actor == null) {
+        return toBattleArmyState(raw)
+    }
+    val state = ActorArmyMapping.toBattleArmyStateFromActorData(actor)
+    // CRITICAL: Merge sheet-based attributes with the raw battle record state.
+    // HP, conditions, and XP are dynamic and must come from the battle record.
+    return state.copy(
+        currentHp = raw.currentHp,
+        conditions = raw.conditions.mapNotNull { fromCamelCase<ArmyCondition>(it) }.toSet(),
+        xp = raw.xp,
+    )
+}
+
+/**
+ * Synchronous version for tests and non-actor paths. Uses the workbook fallback
+ * for stats. Prefer [toBattleArmyStateFromActor] in production code when an
+ * actor UUID is available.
+ */
+fun toBattleArmyState(raw: RawBattleArmy, useActor: Boolean): BattleArmyState =
+    if (useActor && raw.armyActorUuid.isNotBlank()) {
+        // This path is not actually synchronous; callers should use the suspend version.
+        // We fall back to workbook to keep the signature compatible.
+        toBattleArmyState(raw)
+    } else {
+        toBattleArmyState(raw)
+    }
+
 /** Builds the engine [BattleState] from a persisted battle (attackers first). */
-fun toBattleState(battle: RawArmyBattle): BattleState = BattleState(
+suspend fun toBattleState(battle: RawArmyBattle): BattleState = BattleState(
     round = battle.round,
-    armies = (battle.attackers + battle.defenders).map { toBattleArmyState(it) },
+    armies = (battle.attackers + battle.defenders).map { toBattleArmyStateFromActor(it) },
     log = battle.log.toList(),
     status = BattleStatus.fromString(battle.status) ?: BattleStatus.ACTIVE,
     terrain = battle.terrain,
@@ -144,26 +194,58 @@ fun awardVictoryXp(
 /**
  * Creates a new battle for [threat]: the kingdom's assigned deployments form
  * the attacker side and the threat itself fields a single enemy army at its
- * current escalation level (at least 1). HP comes from the workbook basic-army
- * table (default 4 when the name is unknown).
+ * current escalation level (at least 1). For attackers with an [armyActorUuid],
+ * fetches the PF2EArmy actor and reads HP, AC, and attack bonus from the sheet.
+ * Falls back to the workbook basic-army table (default 4 HP) when the name is
+ * unknown or the actor cannot be resolved.
  */
-fun createArmyBattle(
+suspend fun createArmyBattle(
     id: String,
     threat: RawWarThreat,
     attackers: List<BattleArmyInfo>,
     terrain: String?,
 ): RawArmyBattle {
     val attackerArmies = attackers.map { info ->
-        val maxHp = getArmyHitPoints(info.name)
-        RawBattleArmy(
-            armyActorUuid = info.uuid,
-            name = info.name,
-            level = info.level,
-            currentHp = maxHp,
-            maxHp = maxHp,
-            conditions = emptyArray(),
-            xp = 0,
-        )
+        val uuid = info.uuid
+        if (uuid.isNotBlank()) {
+            val actor = fromUuid(uuid).await()?.unsafeCast<PF2EArmy>()
+            if (actor != null) {
+                val state = ActorArmyMapping.toBattleArmyStateFromActorData(actor)
+                RawBattleArmy(
+                    armyActorUuid = uuid,
+                    name = state.name,
+                    level = state.level,
+                    currentHp = state.currentHp,
+                    maxHp = state.maxHp,
+                    conditions = emptyArray(),
+                    xp = 0,
+                )
+            } else {
+                // Actor not found or not a PF2EArmy — fall back to workbook
+                val maxHp = getArmyHitPoints(info.name)
+                RawBattleArmy(
+                    armyActorUuid = uuid,
+                    name = info.name,
+                    level = info.level,
+                    currentHp = maxHp,
+                    maxHp = maxHp,
+                    conditions = emptyArray(),
+                    xp = 0,
+                )
+            }
+        } else {
+            // No actor UUID — fall back to workbook
+            val maxHp = getArmyHitPoints(info.name)
+            RawBattleArmy(
+                armyActorUuid = uuid,
+                name = info.name,
+                level = info.level,
+                currentHp = maxHp,
+                maxHp = maxHp,
+                conditions = emptyArray(),
+                xp = 0,
+            )
+        }
     }.toTypedArray()
     val defenderMaxHp = getArmyHitPoints(threat.name)
     val defender = RawBattleArmy(
@@ -187,6 +269,8 @@ fun createArmyBattle(
         status = BattleStatus.ACTIVE.value,
     )
 }
+
+
 
 /**
  * Resolves the terrain of the battle target.

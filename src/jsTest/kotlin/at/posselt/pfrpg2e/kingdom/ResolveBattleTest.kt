@@ -14,6 +14,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.promise
 
 private fun rawBattleArmy(
     name: String = "1st Legion",
@@ -54,6 +56,8 @@ private fun rawArmyBattle(
 )
 
 class ResolveBattleTest {
+    private fun runTest(block: suspend () -> Unit): dynamic = @Suppress("DELICATE_API_TRANSITIONAL_MINI_MARKER") GlobalScope.promise { block() }
+
     @Test
     fun rawArmyBattleRoundIncrements() {
         val battle = rawArmyBattle(round = 3)
@@ -163,7 +167,7 @@ class ResolveBattleTest {
     // ── Raw ↔ engine mapping (ArmyBattleView) ────────────────────────────
 
     @Test
-    fun toBattleStateOrdersAttackersFirst() {
+    fun toBattleStateOrdersAttackersFirst() = runTest {
         val battle = rawArmyBattle(
             attackers = arrayOf(rawBattleArmy(name = "1st Legion"), rawBattleArmy(name = "2nd Legion")),
             defenders = arrayOf(rawBattleArmy(name = "Goblin Scouts")),
@@ -206,7 +210,7 @@ class ResolveBattleTest {
     )
 
     @Test
-    fun determineBattleStatusVictoryWhenAllDefendersDestroyed() {
+    fun determineBattleStatusVictoryWhenAllDefendersDestroyed() = runTest {
         val state = toBattleState(rawArmyBattle()).copy(
             armies = listOf(engineArmy("a", destroyed = false), engineArmy("d", destroyed = true)),
         )
@@ -214,7 +218,7 @@ class ResolveBattleTest {
     }
 
     @Test
-    fun determineBattleStatusDefeatWhenAllAttackersDestroyed() {
+    fun determineBattleStatusDefeatWhenAllAttackersDestroyed() = runTest {
         val state = toBattleState(rawArmyBattle()).copy(
             armies = listOf(engineArmy("a", destroyed = true), engineArmy("d", destroyed = false)),
         )
@@ -222,7 +226,7 @@ class ResolveBattleTest {
     }
 
     @Test
-    fun determineBattleStatusActiveWhileBothSidesLive() {
+    fun determineBattleStatusActiveWhileBothSidesLive() = runTest {
         val state = toBattleState(rawArmyBattle()).copy(
             armies = listOf(engineArmy("a", destroyed = false), engineArmy("d", destroyed = false)),
         )
@@ -230,7 +234,7 @@ class ResolveBattleTest {
     }
 
     @Test
-    fun updateRawBattlePreservesIdentityAndRecomputesStatus() {
+    fun updateRawBattlePreservesIdentityAndRecomputesStatus() = runTest {
         val battle = rawArmyBattle(
             attackers = arrayOf(rawBattleArmy(name = "1st Legion", xp = 15)),
             defenders = arrayOf(rawBattleArmy(name = "Goblin Scouts")),
@@ -278,7 +282,7 @@ class ResolveBattleTest {
     }
 
     @Test
-    fun createArmyBattleBuildsBothSidesFromThreat() {
+    fun createArmyBattleBuildsBothSidesFromThreat() = runTest {
         val threat = RawWarThreat(
             id = "w1", name = "Goblin Horde", description = "raiders", enemyFaction = null,
             escalationLevel = 0, maxEscalation = 4, eta = 2,

@@ -1,11 +1,14 @@
 package at.posselt.pfrpg2e.kingdom
 
+import at.posselt.pfrpg2e.data.armies.ActorArmyMapping
+import at.posselt.pfrpg2e.data.armies.BattleArmyState
 import at.posselt.pfrpg2e.kingdom.data.RawArmyBattle
 import at.posselt.pfrpg2e.kingdom.data.RawBattleArmy
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 private fun battleArmy(
     name: String = "1st Legion",
@@ -148,5 +151,122 @@ class ArmyBattleDataModelsTest {
         assertEquals("defeat", defeat.status)
         val retreat = armyBattle(status = "retreat")
         assertEquals("retreat", retreat.status)
+    }
+
+    // ── ActorArmyMapping tests ──────────────────────────────────────────────
+
+    @Test
+    fun actorArmyMappingUsesActorStatsForCustomArmy() {
+        // Fixture: a custom PF2EArmy with 60 HP, AC 22, attack +15, level 5
+        val actorData = js(
+            """
+            {
+              "name": "1st Legion",
+              "system": {
+                "details": { "level": { "value": 5 } },
+                "attributes": {
+                  "hp": { "value": 60, "max": 60 },
+                  "ac": { "value": 22 }
+                },
+                "items": [
+                  { "system": { "bonus": { "value": 15 } } }
+                ]
+              }
+            }
+            """
+        ).unsafeCast<Any>()
+
+        val state = ActorArmyMapping.toBattleArmyStateFromActorData(actorData)
+
+        assertEquals("1st Legion", state.name)
+        assertEquals(5, state.level)
+        assertEquals(60, state.maxHp)
+        assertEquals(60, state.currentHp)
+        assertEquals(22, state.ac)
+        assertEquals(15, state.attackBonus)
+        // Rout threshold = ceil(60/4) = 15
+        assertEquals(15, state.routThreshold)
+    }
+
+    @Test
+    fun actorArmyMappingFallsBackToWorkbookForMissingFields() {
+        // Fixture: minimal actor data (only name and level)
+        val actorData = js(
+            """
+            {
+              "name": "Test Army",
+              "system": {
+                "details": { "level": { "value": 3 } },
+                "attributes": {},
+                "items": []
+              }
+            }
+            """
+        ).unsafeCast<Any>()
+
+        val state = ActorArmyMapping.toBattleArmyStateFromActorData(actorData)
+
+        assertEquals("Test Army", state.name)
+        assertEquals(3, state.level)
+        // Should fall back to workbook HP for unknown army name (default 4)
+        assertEquals(4, state.maxHp)
+        assertEquals(4, state.currentHp)
+        // Should fall back to workbook AC for level 3
+        assertEquals(19, state.ac)  // getArmyAc(3) = 19
+        // Should fall back to workbook attack for level 3
+        assertEquals(12, state.attackBonus)  // getArmyAttackBonus(3) = 12
+    }
+
+    @Test
+    fun actorArmyMappingPicksBestStrikeBonus() {
+        val actorData = js(
+            """
+            {
+              "name": "Elite Guard",
+              "system": {
+                "details": { "level": { "value": 5 } },
+                "attributes": {
+                  "hp": { "value": 20, "max": 20 },
+                  "ac": { "value": 20 }
+                },
+                "items": [
+                  { "system": { "bonus": { "value": 10 } } },
+                  { "system": { "bonus": { "value": 18 } } },
+                  { "system": { "bonus": { "value": 14 } } }
+                ]
+              }
+            }
+            """
+        ).unsafeCast<Any>()
+
+        val state = ActorArmyMapping.toBattleArmyStateFromActorData(actorData)
+
+        assertEquals(18, state.attackBonus)  // Best of 10, 18, 14
+    }
+
+    @Test
+    fun actorArmyMappingHandlesCurrentHpLessThanMax() {
+        val actorData = js(
+            """
+            {
+              "name": "Wounded Army",
+              "system": {
+                "details": { "level": { "value": 1 } },
+                "attributes": {
+                  "hp": { "value": 2, "max": 10 },
+                  "ac": { "value": 16 }
+                },
+                "items": [
+                  { "system": { "bonus": { "value": 9 } } }
+                ]
+              }
+            }
+            """
+        ).unsafeCast<Any>()
+
+        val state = ActorArmyMapping.toBattleArmyStateFromActorData(actorData)
+
+        assertEquals(10, state.maxHp)
+        assertEquals(2, state.currentHp)
     }
 }
