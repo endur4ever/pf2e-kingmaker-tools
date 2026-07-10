@@ -190,6 +190,8 @@ import at.posselt.pfrpg2e.kingdom.launchExpedition
 import at.posselt.pfrpg2e.kingdom.applyExpeditionRewardToKingdom
 import at.posselt.pfrpg2e.kingdom.buildExpeditionDestinationOptions
 import at.posselt.pfrpg2e.kingdom.logExpeditionLaunched
+import at.posselt.pfrpg2e.kingdom.resolveExpeditionCore
+import at.posselt.pfrpg2e.kingdom.data.RawCompanionExpedition
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.MAX_CONCURRENT_EXPEDITIONS
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.activeExpeditionCount
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.companionHasActiveExpedition
@@ -1130,17 +1132,13 @@ class KingdomSheet(
                 val expeditionId = target.dataset["expeditionId"] ?: return@buildPromise
                 val kingdom = getKingdom()
                 val expedition = kingdom.companionExpeditions?.find { it.id == expeditionId } ?: return@buildPromise
-                expedition.status = "resolved"
-                // Release companions
-                val companionIds = expedition.companionIds
-                kingdom.companions = (kingdom.companions ?: emptyArray()).map { c ->
-                    val key = c.actorUuid ?: c.name
-                    if (key in companionIds) {
-                        c.expeditionStatus = "available"
-                    }
-                    c
-                }.toTypedArray()
-                actor.setKingdom(kingdom)
+                // Only resolve if still in progress (early resolve) or awaiting resolution (re-trigger offer)
+                if (expedition.status !in setOf("inProgress", "awaitingResolution")) return@buildPromise
+                // Find the lead companion (first in companionIds) to make the check
+                val leadCompanionId = expedition.companionIds.firstOrNull() ?: return@buildPromise
+                val leadCompanion = kingdom.companions?.find { (it.actorUuid ?: it.name) == leadCompanionId } ?: return@buildPromise
+                // Roll, accrue, post offer card, set status to awaitingResolution
+                resolveExpeditionCore(game, actor, kingdom, expedition, leadCompanion)
             }
 
             "add-modifier" -> buildPromise {

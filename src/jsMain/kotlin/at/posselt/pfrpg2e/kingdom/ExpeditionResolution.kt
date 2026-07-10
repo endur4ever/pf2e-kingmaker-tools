@@ -47,34 +47,24 @@ import kotlinx.coroutines.await
 import kotlin.math.roundToInt
 
 /**
- * Impure wrapper that rolls the resolution check at the edge of an expedition
- * completion, accrues the result onto the expedition record (XP, influence,
- * loot, injuries, degree), sets status to `awaitingResolution`,
- * and persists via [setKingdom].
+ * Core resolution logic shared by auto-resolve (daily tick) and manual resolve (GM button).
+ * Rolls the check, calls the engine, accrues results, posts homecoming + offer card,
+ * and sets status to "awaitingResolution". Does NOT apply rewards or release companions —
+ * that happens when the GM clicks the offer button.
  *
- * Multi-companion expeditions: the LEAD companion (first of `companionIds`) makes the
- * check on the party's behalf; every participant then shares the accrued reward when
- * the GM applies it (see [applyExpeditionRewardToKingdom]'s participant loop).
- *
- * This function does NOT mutate the companion's level / XP / conditions —
- * that happens only when the GM clicks the offer button (next task).
- *
- * Resolution flow:
- * 1. Resolve the participant's statistic (linked actor → [rollCheck] on a
- *    relevant skill; unlinked → flat d20 + level as proficiency proxy).
- * 2. Apply a +0..+2 influence circumstance bonus by discovery band:
- *    unknown → +0, introduced/established → +1, trusted/bonded → +2.
- * 3. Convert the roll result to [DegreeOfSuccess] via [fromOrdinal].
- * 4. Hand (baseInfluence, tier, degree) to [ExpeditionResolverEngine.resolve].
- * 5. Write accrued* + outcomeDegree onto the record.
- * 6. Set status, persist, and post a minimal degree-of-success chat line.
+ * @param game The Foundry Game instance.
+ * @param actor The kingdom actor (PF2EParty).
+ * @param kingdom The kingdom data (already cloned via getKingdom()).
+ * @param expedition The expedition to resolve.
+ * @param companion The lead companion (first in companionIds) who makes the check.
  */
-suspend fun offerExpeditionResolution(
+internal suspend fun resolveExpeditionCore(
     game: Game,
     actor: PF2EParty,
-    companion: RawCharacter,
+    kingdom: KingdomData,
     expedition: RawCompanionExpedition,
-) {
+    companion: RawCharacter,
+): DegreeOfSuccess {
     val dc = expedition.dc
     val bandBonus = influenceBandBonus(companion.discoveryStatus)
     val linkedActor = companion.actorUuid?.let {
@@ -165,7 +155,6 @@ suspend fun offerExpeditionResolution(
     expedition.status = "awaitingResolution"
 
     // Persist the accrued result.
-    val kingdom = actor.getKingdom() ?: return
     actor.setKingdom(kingdom)
 
     // Get GM user IDs for whispering
@@ -295,6 +284,41 @@ suspend fun offerExpeditionResolution(
             templateContext = recapContext,
         )
     }
+
+    return degree
+}
+
+/**
+ * Impure wrapper that rolls the resolution check at the edge of an expedition
+ * completion, accrues the result onto the expedition record (XP, influence,
+ * loot, injuries, degree), sets status to `awaitingResolution`,
+ * and persists via [setKingdom].
+ *
+ * Multi-companion expeditions: the LEAD companion (first of `companionIds`) makes the
+ * check on the party's behalf; every participant then shares the accrued reward when
+ * the GM applies it (see [applyExpeditionRewardToKingdom]'s participant loop).
+ *
+ * This function does NOT mutate the companion's level / XP / conditions —
+ * that happens only when the GM clicks the offer button (next task).
+ *
+ * Resolution flow:
+ * 1. Resolve the participant's statistic (linked actor → [rollCheck] on a
+ *    relevant skill; unlinked → flat d20 + level as proficiency proxy).
+ * 2. Apply a +0..+2 influence circumstance bonus by discovery band:
+ *    unknown → +0, introduced/established → +1, trusted/bonded → +2.
+ * 3. Convert the roll result to [DegreeOfSuccess] via [fromOrdinal].
+ * 4. Hand (baseInfluence, tier, degree) to [ExpeditionResolverEngine.resolve].
+ * 5. Write accrued* + outcomeDegree onto the record.
+ * 6. Set status, persist, and post a minimal degree-of-success chat line.
+ */
+suspend fun offerExpeditionResolution(
+    game: Game,
+    actor: PF2EParty,
+    companion: RawCharacter,
+    expedition: RawCompanionExpedition,
+) {
+    val kingdom = actor.getKingdom() ?: return
+    resolveExpeditionCore(game, actor, kingdom, expedition, companion)
 }
 
 /**
