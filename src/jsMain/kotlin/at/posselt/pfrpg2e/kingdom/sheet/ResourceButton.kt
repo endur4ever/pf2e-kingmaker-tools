@@ -21,6 +21,8 @@ import at.posselt.pfrpg2e.kingdom.getOngoingEvents
 import at.posselt.pfrpg2e.kingdom.getRealmData
 import at.posselt.pfrpg2e.kingdom.resources.calculateStorage
 import at.posselt.pfrpg2e.kingdom.setKingdom
+import at.posselt.pfrpg2e.kingdom.sheet.Resource
+import at.posselt.pfrpg2e.kingdom.sheet.ResourceMode
 import at.posselt.pfrpg2e.localization.Translatable
 import at.posselt.pfrpg2e.lowercaseFirst
 import at.posselt.pfrpg2e.toCamelCase
@@ -36,61 +38,15 @@ import kotlinx.html.ButtonType
 import kotlinx.html.classes
 import kotlinx.html.dom.create
 import kotlinx.html.js.button
+import kotlin.math.abs
+import kotlin.text.Regex
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.get
-import kotlin.math.abs
-
-enum class ResourceMode : Translatable, ValueEnum {
-    GAIN,
-    LOSE;
-
-    companion object {
-        fun fromString(value: String) = fromCamelCase<ResourceMode>(value)
-    }
-
-    override val i18nKey = "resourceButton.mode.$value"
-
-    override val value: String
-        get() = toCamelCase()
-}
-
-enum class Resource : Translatable, ValueEnum {
-    RESOURCE_DICE,
-    CRIME,
-    EVENT,
-    DECAY,
-    CORRUPTION,
-    CONSUMPTION,
-    STRIFE,
-    RESOURCE_POINTS,
-    FOOD,
-    LUXURIES,
-    UNREST,
-    ORE,
-    LUMBER,
-    FAME,
-    STONE,
-    XP,
-    SUPERNATURAL_SOLUTION,
-    CREATIVE_SOLUTION,
-    ROLLED_RESOURCE_DICE;
-
-    companion object {
-        fun fromString(value: String) = entries.find { it.value == value }
-    }
-
-    override val value: String
-        get() = toCamelCase()
-
-    override val i18nKey = "resourceButton.resource.$value"
-
-    val i18nKeyExpression = "resourceButton.resourceExpression.$value"
-}
 
 private val fromStringRegex = Regex(
     "@(?<mode>gain|lose)" +
             "(?<multiple>Multiple)?" +
-            "(?<value>[0-9rd+]+)" +
+            "(?<value>[0-9rd+\\-]+)" +
             "(?<resource>${
                 Resource.entries
                     .joinToString("|") { if (it == Resource.EVENT) "[a-zA-Z]+Event" else it.value.uppercaseFirst() }
@@ -185,30 +141,15 @@ data class ResourceButton(
     }
 
     fun toHtml(events: Array<RawKingdomEvent>): String {
-        val isEvent = resource == Resource.EVENT
-        val isRd = value.contains("rd")
-        val isDiceExpression = value.contains("d")
-        val resourceKey = if (isEvent) {
-            "resourceButton.resource.${Resource.EVENT.value}"
-        } else if (isRd) {
-            "resourceButton.resourceDice.${resource.value}"
-        } else if (isDiceExpression) {
-            resource.i18nKeyExpression
-        } else {
-            resource.i18nKey
-        }
+        val labelKey = resolveResourceButtonLabelKey(value, resource)
         val label = t(
-            resourceKey, recordOf(
-                // TODO: this does not support RD expressions like 1d4rd
-                (if (isDiceExpression && !isRd) "expression" else "count") to if (isRd) value.replace(
-                    "rd",
-                    ""
-                ) else value,
+            labelKey.i18nKey, recordOf(
+                labelKey.interpolationVar to labelKey.interpolationValue,
                 "mode" to mode.value,
                 "multiple" to multiple.toString(),
                 "turn" to turn.value,
                 "location" to "button",
-                "eventName" to if (isEvent) {
+                "eventName" to if (resource == Resource.EVENT) {
                     events.find { it.id == value }
                         ?.name
                         ?: throw IllegalStateException("Event with id $value does not exist, check your event buttons")
