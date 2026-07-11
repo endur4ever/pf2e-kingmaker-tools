@@ -7089,6 +7089,10 @@
       "recoversMiredFail": "{name} fails to recover from mired (roll {roll} < 10).",
       "recoversPinnedSuccess": "{name} recovers from pinned (roll {roll} >= 10).",
       "recoversPinnedFail": "{name} fails to recover from pinned (roll {roll} < 10).",
+      "moraleCheckPass": "{name} passes the morale check (roll {roll} + {bonus} = {total} vs DC {dc}) and recovers.",
+      "moraleCheckFail": "{name} fails the morale check (roll {roll} + {bonus} = {total} vs DC {dc}) and becomes routed!",
+      "conditionWearyPenalty": "{name} is weary and takes a –1 penalty to attack rolls and AC.",
+      "conditionPinnedNoStrike": "{name} is pinned and cannot strike!",
       "levelUpOffer": {
         "title": "{{name}} Ready to Level Up!",
         "description": "{{name}} has earned {{xp}} XP (threshold: {{threshold}}). Level up to {{level}}?",

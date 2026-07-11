@@ -204,6 +204,19 @@ fun applyDamage(army: BattleArmyState, damage: Int): BattleArmyState {
 }
 
 /**
+ * Result of a morale check.
+ */
+data class MoraleCheckResult(
+    val conditions: Set<ArmyCondition>,
+    val success: Boolean,
+    val roll: Int,
+    val moraleBonus: Int,
+    val total: Int,
+    val dc: Int,
+    val armyName: String,
+)
+
+/**
  * Performs a morale check.
  *
  * Rout rule (Kingmaker workbook):
@@ -212,15 +225,15 @@ fun applyDamage(army: BattleArmyState, damage: Int): BattleArmyState {
  *   On failure, the army gains the ROUTED condition.
  *   On success, the army removes ROUTED (it recovers its nerve).
  *
- * This function takes the roll result as input and returns the updated
- * set of conditions plus a log line.
+ * This function takes the roll result as input and returns structured data
+ * for the caller to log and update state.
  *
  * @param roll              natural d20 result (1-20)
  * @param dc                the morale DC to beat (typically 10)
  * @param moraleBonus       the army's morale bonus/penalty
  * @param currentConditions the army's current conditions
  * @param armyName          for the log line
- * @return pair of (new conditions, log line)
+ * @return [MoraleCheckResult] with updated conditions and roll details
  */
 fun moraleCheck(
     roll: Int,
@@ -228,19 +241,24 @@ fun moraleCheck(
     moraleBonus: Int,
     currentConditions: Set<ArmyCondition>,
     armyName: String,
-): Pair<Set<ArmyCondition>, String> {
+): MoraleCheckResult {
     val total = roll + moraleBonus
     val success = total >= dc
     val newConditions = currentConditions.toMutableSet()
-    val log: String
     if (success) {
         newConditions.remove(ArmyCondition.ROUTED)
-        log = "$armyName passes the morale check (roll $roll + $moraleBonus = $total vs DC $dc) and recovers."
     } else {
         newConditions.add(ArmyCondition.ROUTED)
-        log = "$armyName fails the morale check (roll $roll + $moraleBonus = $total vs DC $dc) and becomes routed!"
     }
-    return Pair(newConditions, log)
+    return MoraleCheckResult(
+        conditions = newConditions,
+        success = success,
+        roll = roll,
+        moraleBonus = moraleBonus,
+        total = total,
+        dc = dc,
+        armyName = armyName,
+    )
 }
 
 /**
@@ -279,16 +297,13 @@ fun conditionEffects(conditions: Set<ArmyCondition>): ConditionModifiers {
  *
  * For each action:
  *   1. Look up actor and target from [BattleState.armies].
- *   2. Apply condition effects to get effective attack bonus.
- *   3. Resolve the strike.
- *   4. Apply damage to the target.
- *   5. Append log lines.
+ *   2. At start of turn, if HP <= routThreshold, attempt Morale check.
+ *   3. Apply condition effects to get effective attack bonus/AC.
+ *   4. Resolve the strike (PINNED armies cannot strike).
+ *   5. Apply damage to the target.
+ *   6. Append log lines.
  *
  * After all actions, the round counter increments.
- *
- * This function does NOT handle morale checks or rout-threshold checks —
- * those are separate explicit calls so the UI can present them at the
- * correct time (start of turn).
  *
  * @param battle  the current battle state
  * @param actions the list of actions to resolve this round
@@ -316,16 +331,20 @@ fun tickRound(
         if (actor.currentHp <= actor.routThreshold) {
             val moraleRoll = action.moraleRoll
             if (moraleRoll != null) {
-                val (newConds, moraleLog) = moraleCheck(
+                val result = moraleCheck(
                     roll = moraleRoll,
                     dc = 10,
                     moraleBonus = actor.moraleBonus,
                     currentConditions = actor.conditions,
-                    armyName = actor.name
+                    armyName = actor.name,
                 )
-                actor = actor.copy(conditions = newConds)
+                actor = actor.copy(conditions = result.conditions)
                 armies[action.actorIndex] = actor
-                logs.add(moraleLog)
+                // Log will be localized by the UI layer; store structured data in log
+                logs.add(
+                    if (result.success) "MORALE_PASS:${result.armyName}:${result.roll}:${result.moraleBonus}:${result.total}:${result.dc}"
+                    else "MORALE_FAIL:${result.armyName}:${result.roll}:${result.moraleBonus}:${result.total}:${result.dc}"
+                )
             }
         }
 
@@ -335,6 +354,18 @@ fun tickRound(
 
         val mods = conditionEffects(actor.conditions)
         val terrainMod = getTerrainModifier(battle.terrain)
+
+        // Log condition effects
+        if (mods.attackPenalty != 0 || mods.acPenalty != 0) {
+            logs.add("COND_WEARY:${actor.name}")
+        }
+        if (!mods.canStrike) {
+            logs.add("COND_PINNED:${actor.name}")
+        }
+        if (!mods.canAdvance) {
+            logs.add("COND_MIRED:${actor.name}")
+        }
+
         val effectiveActor = if (mods.attackPenalty != 0 || mods.acPenalty != 0 || terrainMod != 0) {
             actor.copy(
                 attackBonus = actor.attackBonus - mods.attackPenalty + terrainMod,

@@ -213,7 +213,7 @@ class ResolveBattle(
         }
 
         var updated = updateRawBattle(currentBattle, finalState)
-        var roundLog = finalState.log.drop(state.log.size)
+        var roundLog = finalState.log.drop(state.log.size).map { localizeBattleLogEntry(it) }
         if (updated.status == BattleStatus.VICTORY.value) {
             val rewarded = awardVictoryXp(updated.attackers, updated.defenders)
             updated.attackers.zip(rewarded).forEach { (before, after) ->
@@ -256,6 +256,63 @@ class ResolveBattle(
         BattleStatus.VICTORY.value -> t("warBattle.victory")
         BattleStatus.DEFEAT.value -> t("warBattle.defeat")
         else -> null
+    }
+}
+
+/**
+ * Localizes structured log entries from the battle engine.
+ * Engine log prefixes: MORALE_PASS, MORALE_FAIL, COND_WEARY, COND_PINNED, COND_MIRED
+ */
+private fun localizeBattleLogEntry(entry: String): String {
+    return if (entry.startsWith("MORALE_PASS:")) {
+        val parts = entry.split(":")
+        if (parts.size >= 6) {
+            val name = parts[1]
+            val roll = parts[2].toIntOrNull() ?: 0
+            val bonus = parts[3].toIntOrNull() ?: 0
+            val total = parts[4].toIntOrNull() ?: 0
+            val dc = parts[5].toIntOrNull() ?: 10
+            t("warBattle.moraleCheckPass", recordOf(
+                "name" to name,
+                "roll" to roll.toString(),
+                "bonus" to bonus.toString(),
+                "total" to total.toString(),
+                "dc" to dc.toString(),
+            ))
+        } else {
+            entry
+        }
+    } else if (entry.startsWith("MORALE_FAIL:")) {
+        val parts = entry.split(":")
+        if (parts.size >= 6) {
+            val name = parts[1]
+            val roll = parts[2].toIntOrNull() ?: 0
+            val bonus = parts[3].toIntOrNull() ?: 0
+            val total = parts[4].toIntOrNull() ?: 0
+            val dc = parts[5].toIntOrNull() ?: 10
+            t("warBattle.moraleCheckFail", recordOf(
+                "name" to name,
+                "roll" to roll.toString(),
+                "bonus" to bonus.toString(),
+                "total" to total.toString(),
+                "dc" to dc.toString(),
+            ))
+        } else {
+            entry
+        }
+    } else if (entry.startsWith("COND_WEARY:")) {
+        val name = entry.substringAfter(":")
+        t("warBattle.conditionWearyPenalty", recordOf("name" to name))
+    } else if (entry.startsWith("COND_PINNED:")) {
+        val name = entry.substringAfter(":")
+        t("warBattle.conditionPinnedNoStrike", recordOf("name" to name))
+    } else if (entry.startsWith("COND_MIRED:")) {
+        // MIRED prevents advance but there's no advance action in current flow
+        // Still log it for completeness
+        val name = entry.substringAfter(":")
+        "$name is mired and cannot advance."
+    } else {
+        entry
     }
 }
 

@@ -4,6 +4,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import at.posselt.pfrpg2e.kingdom.determineBattleStatus
+import at.posselt.pfrpg2e.data.armies.BattleStatus
 
 /**
  * Comprehensive tests for [ArmyBattleEngine] — the pure-deterministic battle engine.
@@ -255,43 +257,45 @@ class MoraleCheckTest {
     @Test
     fun successRemovesRouted() {
         val conditions = setOf(ArmyCondition.ROUTED)
-        val (newCond, log) = moraleCheck(roll = 10, dc = 10, moraleBonus = 0, currentConditions = conditions, armyName = "Infantry")
-        assertFalse(ArmyCondition.ROUTED in newCond)
-        assertTrue(log.contains("passes"))
+        val result = moraleCheck(roll = 10, dc = 10, moraleBonus = 0, currentConditions = conditions, armyName = "Infantry")
+        assertFalse(ArmyCondition.ROUTED in result.conditions)
+        assertTrue(result.success)
     }
 
     @Test
     fun failureAddsRouted() {
         val conditions = emptySet<ArmyCondition>()
-        val (newCond, log) = moraleCheck(roll = 5, dc = 10, moraleBonus = 0, currentConditions = conditions, armyName = "Infantry")
-        assertTrue(ArmyCondition.ROUTED in newCond)
-        assertTrue(log.contains("fails"))
-        assertTrue(log.contains("routed"))
+        val result = moraleCheck(roll = 5, dc = 10, moraleBonus = 0, currentConditions = conditions, armyName = "Infantry")
+        assertTrue(ArmyCondition.ROUTED in result.conditions)
+        assertFalse(result.success)
     }
 
     @Test
     fun exactDcIsSuccess() {
         // roll 7 + bonus 3 = 10 vs DC 10 → success
         val conditions = setOf(ArmyCondition.ROUTED)
-        val (newCond, _) = moraleCheck(roll = 7, dc = 10, moraleBonus = 3, currentConditions = conditions, armyName = "Cavalry")
-        assertFalse(ArmyCondition.ROUTED in newCond)
+        val result = moraleCheck(roll = 7, dc = 10, moraleBonus = 3, currentConditions = conditions, armyName = "Cavalry")
+        assertFalse(ArmyCondition.ROUTED in result.conditions)
+        assertTrue(result.success)
     }
 
     @Test
     fun oneBelowDcIsFailure() {
         // roll 6 + bonus 3 = 9 vs DC 10 → failure
         val conditions = emptySet<ArmyCondition>()
-        val (newCond, _) = moraleCheck(roll = 6, dc = 10, moraleBonus = 3, currentConditions = conditions, armyName = "Cavalry")
-        assertTrue(ArmyCondition.ROUTED in newCond)
+        val result = moraleCheck(roll = 6, dc = 10, moraleBonus = 3, currentConditions = conditions, armyName = "Cavalry")
+        assertTrue(ArmyCondition.ROUTED in result.conditions)
+        assertFalse(result.success)
     }
 
     @Test
     fun logContainsRollDetails() {
-        val (_, log) = moraleCheck(roll = 15, dc = 10, moraleBonus = 2, currentConditions = emptySet(), armyName = "Scouts")
-        assertTrue(log.contains("15"))
-        assertTrue(log.contains("2"))
-        assertTrue(log.contains("17"))  // total
-        assertTrue(log.contains("10"))  // DC
+        val result = moraleCheck(roll = 15, dc = 10, moraleBonus = 2, currentConditions = emptySet(), armyName = "Scouts")
+        assertEquals(15, result.roll)
+        assertEquals(2, result.moraleBonus)
+        assertEquals(17, result.total)
+        assertEquals(10, result.dc)
+        assertEquals("Scouts", result.armyName)
     }
 }
 
@@ -525,7 +529,7 @@ class TickRoundTest {
         val result = tickRound(battle, actions)
         assertEquals(3, result.armies[1].currentHp) // Hit resolves
         assertFalse(ArmyCondition.ROUTED in result.armies[0].conditions)
-        assertTrue(result.log.any { it.contains("passes") })
+        assertTrue(result.log.any { it.startsWith("MORALE_PASS:") })
     }
 
     @Test
@@ -542,7 +546,7 @@ class TickRoundTest {
         val result = tickRound(battle, actions)
         assertEquals(4, result.armies[1].currentHp) // No strike
         assertTrue(ArmyCondition.ROUTED in result.armies[0].conditions)
-        assertTrue(result.log.any { it.contains("fails") })
+        assertTrue(result.log.any { it.startsWith("MORALE_FAIL:") })
     }
 
     @Test
@@ -558,6 +562,107 @@ class TickRoundTest {
         val actions = listOf(BattleAction(actorIndex = 0, targetIndex = 1, roll = 15))
         val result = tickRound(battle, actions)
         assertEquals(4, result.armies[1].currentHp) // No strike
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Round-flow integration tests (rout trigger, condition effects, recovery)
+// ---------------------------------------------------------------------------
+
+class RoundFlowIntegrationTest {
+
+    /**
+     * Scripted battle demonstrating an army routing instead of grinding to 0 HP.
+     *
+     * Scenario: Attacker (4 HP, routThreshold=1) vs Defender (4 HP).
+     * Round 1: Attacker at 1 HP (<= routThreshold), morale check fails -> ROUTED.
+     * Attacker skips strike. Defender counter-strikes but misses.
+     * Round 2: Attacker is ROUTED, battle ends with DEFEAT for attackers.
+     * Army routed at 1 HP instead of being destroyed at 0 HP.
+     */
+    @Test
+    fun armyRoutsInsteadOfGrindingToZeroHp() {
+        val battle = BattleState(
+            round = 1,
+            armies = listOf(
+                testArmy(name = "Attacker", hp = 4, currentHp = 1, routThreshold = 1, attackBonus = 9, moraleBonus = 0),
+                testArmy(name = "Defender", hp = 4, ac = 16, attackBonus = 9, moraleBonus = 0),
+            ),
+        )
+
+        // Round 1: Attacker moraleRoll=1 (fails vs DC 10), becomes ROUTED, strike skipped
+        // Defender roll=5 (misses)
+        val actions1 = listOf(
+            BattleAction(actorIndex = 0, targetIndex = 1, roll = 15, moraleRoll = 1),
+            BattleAction(actorIndex = 1, targetIndex = 0, roll = 5),
+        )
+        val result1 = tickRound(battle, actions1)
+
+        // Attacker should be ROUTED at 1 HP (not destroyed at 0 HP)
+        assertTrue(ArmyCondition.ROUTED in result1.armies[0].conditions)
+        assertEquals(1, result1.armies[0].currentHp)
+        assertFalse(ArmyCondition.DESTROYED in result1.armies[0].conditions)
+        assertEquals(4, result1.armies[1].currentHp) // Defender untouched (attacker routed, defender missed)
+        assertTrue(result1.log.any { it.startsWith("MORALE_FAIL:") })
+
+        // Round 2: Attacker is ROUTED, should be skipped. Defender acts.
+        // But determineBattleStatus would already show DEFEAT since all attackers are routed.
+        // Verify the battle status would be DEFEAT
+        val attackerCount = 1
+        val status = determineBattleStatus(result1, attackerCount)
+        assertEquals(BattleStatus.DEFEAT, status)
+    }
+
+    @Test
+    fun wearyConditionAppliesPenalty() {
+        val battle = BattleState(
+            round = 1,
+            armies = listOf(
+                testArmy(name = "Weary Attacker", conditions = setOf(ArmyCondition.WEARY), attackBonus = 9, ac = 16),
+                testArmy(name = "Defender", hp = 4, ac = 16),
+            ),
+        )
+        // WEARY gives -1 to attack. Roll 15 + 9 - 1 = 23 vs AC 16 = SUCCESS (1 damage)
+        // Without WEARY: 15 + 9 = 24 vs 16 = CRITICAL_SUCCESS (2 damage)
+        val actions = listOf(BattleAction(actorIndex = 0, targetIndex = 1, roll = 15))
+        val result = tickRound(battle, actions)
+
+        assertEquals(3, result.armies[1].currentHp) // 1 damage (SUCCESS not CRITICAL_SUCCESS)
+        assertTrue(result.log.any { it.startsWith("COND_WEARY:") })
+    }
+
+    @Test
+    fun pinnedConditionPreventsStrike() {
+        val battle = BattleState(
+            round = 1,
+            armies = listOf(
+                testArmy(name = "Pinned Attacker", conditions = setOf(ArmyCondition.PINNED), attackBonus = 9),
+                testArmy(name = "Defender", hp = 4, ac = 16),
+            ),
+        )
+        // Even natural 20 should not work when pinned
+        val actions = listOf(BattleAction(actorIndex = 0, targetIndex = 1, roll = 20))
+        val result = tickRound(battle, actions)
+
+        assertEquals(4, result.armies[1].currentHp) // No damage
+        assertTrue(result.log.any { it.startsWith("COND_PINNED:") })
+        assertTrue(result.log.any { it.contains("pinned and cannot strike") })
+    }
+
+    @Test
+    fun miredConditionPreventsAdvance() {
+        val battle = BattleState(
+            round = 1,
+            armies = listOf(
+                testArmy(name = "Mired Army", conditions = setOf(ArmyCondition.MIRED)),
+                testArmy(name = "Other", hp = 4),
+            ),
+        )
+        // MIRED prevents advance - logged but no advance action in current flow
+        val actions = listOf(BattleAction(actorIndex = 0, targetIndex = 1, roll = 15))
+        val result = tickRound(battle, actions)
+
+        assertTrue(result.log.any { it.startsWith("COND_MIRED:") })
     }
 }
 
