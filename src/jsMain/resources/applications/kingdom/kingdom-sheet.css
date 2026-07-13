@@ -2012,6 +2012,18 @@
         margin-bottom: .3em;
         color: var(--secondary-km, #ee9b3a);
     }
+
+    .km-analytics-player-note {
+        width: 100%;
+        margin-top: .5em;
+        padding: .5em .75em;
+        font-size: var(--font-size-12);
+        color: var(--secondary-km, #ee9b3a);
+        background: rgba(238, 155, 58, 0.1);
+        border: 1px solid rgba(238, 155, 58, 0.3);
+        border-radius: 4px;
+        font-style: italic;
+    }
 }
 
 /* Hex content manager — linked references (quests / documents / war threat) */

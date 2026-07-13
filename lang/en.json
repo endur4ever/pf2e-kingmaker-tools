@@ -672,7 +672,8 @@
         "ruinDecay": "Ruin: Decay",
         "ruinStrife": "Ruin: Strife",
         "targetLevelMax": "Level Match Tolerance Max",
-        "targetLevelMin": "Level Match Tolerance Min"
+        "targetLevelMin": "Level Match Tolerance Min",
+        "playerViewNote": "Player view — showing unrest, fame, RP, kingdom size, and level trends only. GM-only series (consumption, XP, war pressure, ruin) are hidden."
       },
 
       "turnWizard": {

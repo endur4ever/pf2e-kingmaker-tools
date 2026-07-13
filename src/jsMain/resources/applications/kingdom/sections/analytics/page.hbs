@@ -2,6 +2,9 @@
     <div class="km-kingdom-sheet-sub-content km-analytics">
         <header class="km-analytics-header">
             <h2><i class="fa-solid fa-chart-line"></i> {{localizeKM "kingdom.analytics.title"}}</h2>
+            {{#unless analyticsContext.isGM}}
+            <p class="km-analytics-player-note">{{localizeKM "kingdom.analytics.playerViewNote"}}</p>
+            {{/unless}}
             <div class="km-analytics-window-selector">
                 <span>{{localizeKM "kingdom.analytics.timeWindow"}}:</span>
                 <button type="button" class="km-window-btn {{#if (eq analyticsContext.windowSize 10)}}active{{/if}}" data-action="change-analytics-window" data-window="10">10 {{localizeKM "kingdom.analytics.turns"}}</button>

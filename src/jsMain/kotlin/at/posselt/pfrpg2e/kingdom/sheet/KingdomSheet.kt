@@ -1541,6 +1541,7 @@ class KingdomSheet(
             }
 
             "export-session-prep-to-journal" -> buildPromise {
+                            if (!game.user.isGM) return@buildPromise
                             try {
                                 val kingdom = getKingdom()
                                 val view = buildSessionPrepView(
@@ -1549,7 +1550,7 @@ class KingdomSheet(
                                     events = kingdom.campaignKingdomEvents,
                                     hexContents = kingdom.hexContents,
                                     companionQuests = kingdom.companionPersonalQuests,
-                                    isGM = game.user.isGM,
+                                    isGM = true,
                                     turnHistory = kingdom.turnHistory,
                                     companionExpeditions = kingdom.companionExpeditions,
                                     companions = kingdom.companions,
@@ -1563,6 +1564,7 @@ class KingdomSheet(
                         }
 
                         "generate-session-prep-narrative" -> buildPromise {
+                            if (!game.user.isGM) return@buildPromise
                             try {
                                 val kingdom = getKingdom()
                                 val view = buildSessionPrepView(
@@ -1571,7 +1573,7 @@ class KingdomSheet(
                                     events = kingdom.campaignKingdomEvents,
                                     hexContents = kingdom.hexContents,
                                     companionQuests = kingdom.companionPersonalQuests,
-                                    isGM = game.user.isGM,
+                                    isGM = true,
                                     turnHistory = kingdom.turnHistory,
                                     companionExpeditions = kingdom.companionExpeditions,
                                     companions = kingdom.companions,
@@ -3006,7 +3008,7 @@ class KingdomSheet(
         val hasData = history.isNotEmpty()
 
         val seriesList = if (hasData) {
-            val metrics = listOf(
+            val allMetrics = listOf(
                 "unrest" to "kingdom.analytics.unrest",
                 "resourcePoints" to "kingdom.analytics.resourcePoints",
                 "consumption" to "kingdom.analytics.consumption",
@@ -3021,6 +3023,11 @@ class KingdomSheet(
                 "ruinDecay" to "kingdom.analytics.ruinDecay",
                 "ruinStrife" to "kingdom.analytics.ruinStrife"
             )
+
+            // Player-safe series: only unrest, fame, resourcePoints (RP), size, level
+            // Mirrors the player-safe Recent Turns timeline (commit 654d3b98).
+            val playerSafeKeys = setOf("unrest", "fame", "resourcePoints", "size", "level")
+            val metrics = if (isGM) allMetrics else allMetrics.filter { (key, _) -> key in playerSafeKeys }
 
             metrics.mapNotNull { (key, labelKey) ->
                 val series = extractSeries(history, key, limit = if (analyticsWindowSize > 0) analyticsWindowSize else null)
@@ -3343,12 +3350,6 @@ class KingdomSheet(
         val tradeAgreements = kingdom.groups.count { it.relations == Relations.TRADE_AGREEMENT.value }
         val isGM = game.user.isGM
         return MainNavEntry.entries
-            .filter { entry ->
-                when (entry) {
-                    MainNavEntry.ANALYTICS -> isGM
-                    else -> true
-                }
-            }
             .map {
                 val postfix = when (it) {
                     MainNavEntry.TRADE_AGREEMENTS -> " ($tradeAgreements)"

@@ -4,12 +4,14 @@
             <h2><i class="fa-solid fa-clipboard-list"></i> {{localizeKM "kingdom.sessionPrep.title"}}</h2>
             <div class="km-session-prep-actions">
                 <span class="km-session-prep-total">{{sessionPrepContext.totalCount}}</span>
-                <button type="button" class="km-session-prep-export" data-action="export-session-prep-to-journal" title="{{localizeKM "kingdom.sessionPrep.exportToJournalTooltip"}}">
+                {{#if sessionPrepContext.isGM}}
+                <button type="button" class="km-session-prep-export" data-action="export-session-prep-to-journal" title="{{localizeKM \"kingdom.sessionPrep.exportToJournalTooltip\"}}">
                     <i class="fa-solid fa-book"></i> {{localizeKM "kingdom.sessionPrep.exportToJournal"}}
                 </button>
-                <button type="button" class="km-session-prep-generate" data-action="generate-session-prep-narrative" title="{{localizeKM "kingdom.sessionPrep.generateNarrativeTooltip"}}">
+                <button type="button" class="km-session-prep-generate" data-action="generate-session-prep-narrative" title="{{localizeKM \"kingdom.sessionPrep.generateNarrativeTooltip\"}}">
                     <i class="fa-solid fa-feather"></i> {{localizeKM "kingdom.sessionPrep.generateNarrative"}}
                 </button>
+                {{/if}}
             </div>
         </header>
 
@@ -36,36 +38,36 @@
         </section>
 
         {{#if sessionPrepContext.isGM}}
-            <section class="km-session-prep-section">
-                <h3><i class="fa-solid fa-hourglass-half"></i> {{localizeKM "kingdom.sessionPrep.activeClocks"}} <span class="km-session-prep-count">{{sessionPrepContext.activeClocks.length}}</span></h3>
-                {{#if sessionPrepContext.activeClocks.length}}
-                    <ul class="km-session-prep-list">
-                        {{#each sessionPrepContext.activeClocks}}
-                            <li class="km-session-prep-item">
-                                <span class="km-session-prep-item__name">{{this.name}}</span>
-                                {{#if this.hasTurns}}<span class="km-session-prep-item__turns">{{this.turnsRemaining}} {{localizeKM "kingdom.sessionPrep.turnsRemaining"}}</span>{{/if}}
-                            </li>
-                        {{/each}}
-                    </ul>
-                {{else}}
-                    <p class="km-session-prep-empty">{{localizeKM "kingdom.sessionPrep.noActiveClocks"}}</p>
-                {{/if}}
-            </section>
+        <section class="km-session-prep-section">
+            <h3><i class="fa-solid fa-hourglass-half"></i> {{localizeKM "kingdom.sessionPrep.activeClocks"}} <span class="km-session-prep-count">{{sessionPrepContext.activeClocks.length}}</span></h3>
+            {{#if sessionPrepContext.activeClocks.length}}
+                <ul class="km-session-prep-list">
+                    {{#each sessionPrepContext.activeClocks}}
+                        <li class="km-session-prep-item">
+                            <span class="km-session-prep-item__name">{{this.name}}</span>
+                            {{#if this.hasTurns}}<span class="km-session-prep-item__turns">{{this.turnsRemaining}} {{localizeKM "kingdom.sessionPrep.turnsRemaining"}}</span>{{/if}}
+                        </li>
+                    {{/each}}
+                </ul>
+            {{else}}
+                <p class="km-session-prep-empty">{{localizeKM "kingdom.sessionPrep.noActiveClocks"}}</p>
+            {{/if}}
+        </section>
 
-            <section class="km-session-prep-section">
-                <h3><i class="fa-solid fa-bolt"></i> {{localizeKM "kingdom.sessionPrep.unresolvedEvents"}} <span class="km-session-prep-count">{{sessionPrepContext.unresolvedEvents.length}}</span></h3>
-                {{#if sessionPrepContext.unresolvedEvents.length}}
-                    <ul class="km-session-prep-list">
-                        {{#each sessionPrepContext.unresolvedEvents}}
-                            <li class="km-session-prep-item">
-                                <span class="km-session-prep-item__name">{{this.name}}</span>
-                            </li>
-                        {{/each}}
-                    </ul>
-                {{else}}
-                    <p class="km-session-prep-empty">{{localizeKM "kingdom.sessionPrep.noUnresolvedEvents"}}</p>
-                {{/if}}
-            </section>
+        <section class="km-session-prep-section">
+            <h3><i class="fa-solid fa-bolt"></i> {{localizeKM "kingdom.sessionPrep.unresolvedEvents"}} <span class="km-session-prep-count">{{sessionPrepContext.unresolvedEvents.length}}</span></h3>
+            {{#if sessionPrepContext.unresolvedEvents.length}}
+                <ul class="km-session-prep-list">
+                    {{#each sessionPrepContext.unresolvedEvents}}
+                        <li class="km-session-prep-item">
+                            <span class="km-session-prep-item__name">{{this.name}}</span>
+                        </li>
+                    {{/each}}
+                </ul>
+            {{else}}
+                <p class="km-session-prep-empty">{{localizeKM "kingdom.sessionPrep.noUnresolvedEvents"}}</p>
+            {{/if}}
+        </section>
         {{/if}}
 
         <section class="km-session-prep-section">
@@ -164,7 +166,7 @@
                         <li class="km-session-prep-item km-pending-encounter-item">
                             <span class="km-session-prep-item__name">{{this.name}}</span>
                             {{#if this.hasDetail}}<span class="km-session-prep-item__detail">{{this.detail}}</span>{{/if}}
-                            <button type="button" class="km-session-prep-item__action km-mark-pending-encounter-run" data-action="mark-pending-encounter-run" data-hex-content-id="{{this.id}}" title="{{localizeKM "kingdom.sessionPrep.markAsRunTooltip"}}">{{localizeKM "kingdom.sessionPrep.markAsRun"}}</button>
+                            <button type="button" class="km-session-prep-item__action km-mark-pending-encounter-run" data-action="mark-pending-encounter-run" data-hex-content-id="{{this.id}}" title="{{localizeKM \"kingdom.sessionPrep.markAsRunTooltip\"}}">{{localizeKM "kingdom.sessionPrep.markAsRun"}}</button>
                         </li>
                     {{/each}}
                 </ul>
