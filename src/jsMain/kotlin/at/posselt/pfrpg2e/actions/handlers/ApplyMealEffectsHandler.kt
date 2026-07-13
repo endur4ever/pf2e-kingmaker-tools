@@ -35,7 +35,7 @@ external interface ApplyMealEffects {
     val campingActorUuid: String
 }
 
-class ApplyMealEffectsHandler(val game: Game) : ActionHandler("applyMealEffects") {
+class ApplyMealEffectsHandler(val game: Game) : ActionHandler("applyMealEffects", originatorPolicy = OriginatorPolicy.ANY) {
     override suspend fun execute(action: ActionMessage, dispatcher: ActionDispatcher) {
         val data = action.data.unsafeCast<ApplyMealEffects>()
         val campingActor = fromUuidTypeSafe<CampingActor>(data.campingActorUuid)

@@ -39,7 +39,7 @@ external interface RandomEncounterContext {
 
 class SyncActivitiesHandler(
     private val game: Game,
-) : ActionHandler("syncActivities") {
+) : ActionHandler("syncActivities", originatorPolicy = OriginatorPolicy.GM_ONLY) {
     override suspend fun execute(action: ActionMessage, dispatcher: ActionDispatcher) {
         val data = action.data.unsafeCast<SyncActivitiesAction>()
         val campingActor = fromUuidTypeSafe<CampingActor>(data.campingActorUuid)

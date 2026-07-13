@@ -683,6 +683,8 @@ class KingdomSheet(
             }
 
             "resolve-battle" -> buildPromise {
+                // GM-only: resolve a war threat battle.
+                if (!game.user.isGM) return@buildPromise
                 val threatId = target.dataset["threatId"]
                 val kingdom = getKingdom()
                 val threat = (kingdom.warThreats ?: emptyArray()).find { it.id == threatId }

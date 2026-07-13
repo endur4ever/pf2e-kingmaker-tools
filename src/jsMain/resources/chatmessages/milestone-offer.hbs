@@ -1,0 +1,22 @@
+<h2>{{localizeKM "chatMessages.milestone.offerTitle"}}</h2>
+<div class="km-milestone-offer">
+    <p>{{localizeKM "chatMessages.milestone.offerBody" name=milestoneName xp=milestoneXp}}</p>
+</div>
+<hr>
+<h3>{{localizeKM "chatMessages.milestone.gmActions"}}</h3>
+<div class="km-milestone-offers">
+    <button type="button"
+            class="km-offer-milestone"
+            data-kingdom-actor-uuid="{{actorUuid}}"
+            data-milestone-id="{{milestoneId}}"
+            data-action="award">
+        {{localizeKM "chatMessages.milestone.award"}}
+    </button>
+    <button type="button"
+            class="km-offer-milestone"
+            data-kingdom-actor-uuid="{{actorUuid}}"
+            data-milestone-id="{{milestoneId}}"
+            data-action="dismiss">
+        {{localizeKM "chatMessages.milestone.dismiss"}}
+    </button>
+</div>

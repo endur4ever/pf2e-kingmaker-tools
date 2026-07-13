@@ -295,6 +295,7 @@ fun CampingData.resetDowntimeHours() {
     downtimeHoursSpent?.let { spent ->
         js.objects.Object.keys(spent).forEach { spent[it] = 0 }
     }
+    secondsSpentForcedMarching = 0
 }
 
 fun CampingData.campingActivitiesWithId() =

@@ -29,7 +29,7 @@ external interface SyncBattleOutcomeAction {
 
 class SyncBattleOutcomeHandler(
     private val game: Game,
-) : ActionHandler("syncBattleOutcome") {
+) : ActionHandler("syncBattleOutcome", originatorPolicy = OriginatorPolicy.GM_ONLY) {
     override suspend fun execute(action: ActionMessage, dispatcher: ActionDispatcher) {
         val data = action.data.unsafeCast<SyncBattleOutcomeAction>()
         val kingdomActor = fromUuidTypeSafe<KingdomActor>(data.kingdomActorUuid) ?: return

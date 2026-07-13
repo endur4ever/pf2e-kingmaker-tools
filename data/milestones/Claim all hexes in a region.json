@@ -1,0 +1,7 @@
+{
+  "id": "claim-all-hexes-in-a-region",
+  "name": "milestones.claim-all-hexes-in-a-region.name",
+  "xp": 200,
+  "enabledOnFirstRun": false,
+  "isCultMilestone": false
+}

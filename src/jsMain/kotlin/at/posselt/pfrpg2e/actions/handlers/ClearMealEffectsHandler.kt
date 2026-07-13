@@ -15,7 +15,7 @@ external interface ClearMealEffectsMessage {
     val campingActorUuid: String
 }
 
-class ClearMealEffectsHandler : ActionHandler("clearMealEffects") {
+class ClearMealEffectsHandler : ActionHandler("clearMealEffects", originatorPolicy = OriginatorPolicy.GM_ONLY) {
     override suspend fun execute(action: ActionMessage, dispatcher: ActionDispatcher) {
         val data = action.data.unsafeCast<ClearMealEffectsMessage>()
         val campingActor = fromUuidTypeSafe<CampingActor>(data.campingActorUuid)
