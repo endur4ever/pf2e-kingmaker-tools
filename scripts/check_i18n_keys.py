@@ -2,8 +2,8 @@
 """
 i18n key guard for pf2e-kingmaker-tools.
 
-This module localizes via **i18next** (see src/.../utils/Localization.kt), which
-resolves a key like "a.b.c" by walking the NESTED object a -> b -> c under the
+This module localizes via **i18next** (see src/.../utils/Localization.kt),
+which resolves a key like "a.b.c" by walking the NESTED object a -> b -> c under the
 `pf2e-kingmaker-tools` namespace in lang/en.json. Several mistakes break this and
 render the raw key in the UI; this script fails (exit 1) on any of them so any
 contributor — human or agent — gets immediate feedback instead of shipping raw
@@ -22,10 +22,15 @@ Checks:
      called from initLocalization() never populates its cache, so its catalog comes
      back EMPTY at runtime (this is exactly how the Launch Expedition activity
      dropdown shipped empty: translateExpeditionActivities was never wired in).
+  5. CROSS-LANGUAGE PARITY (--parity): all lang/*.json files must have exactly the
+     same set of nested keys as en.json. Placeholder names in values must match.
 
-Usage:  python3 scripts/check_i18n_keys.py
+Usage:
+  python3 scripts/check_i18n_keys.py           # runs checks 1-4 (default)
+  python3 scripts/check_i18n_keys.py --parity  # runs check 5 only
+  python3 scripts/check_i18n_keys.py --all     # runs checks 1-5
 """
-import json, re, glob, os, sys
+import json, re, glob, os, sys, argparse
 
 
 def _reject_duplicate_keys(pairs):
@@ -173,7 +178,127 @@ def collect_translate_defs():
     return defs
 
 
+def load_lang_file(path):
+    """Load a language file and return its nested namespace dict."""
+    with open(path, encoding="utf-8") as f:
+        data = json.load(f, object_pairs_hook=_reject_duplicate_keys)
+    return data.get(NS, {})
+
+
+def get_all_keys(d, prefix=""):
+    """Returns a set of all nested keys as dotted paths."""
+    keys = set()
+    for k, v in d.items():
+        path = f"{prefix}.{k}" if prefix else k
+        if isinstance(v, dict):
+            keys.update(get_all_keys(v, path))
+        else:
+            keys.add(path)
+    return keys
+
+
+def get_placeholders(value):
+    """Extract placeholder names from a string.
+    Handles both simple {name} and ICU message format {name, plural, ...}.
+    Returns just the placeholder name (before any comma).
+    Ignores nested braces inside ICU format (those are literal text)."""
+    placeholders = set()
+    i = 0
+    while i < len(value):
+        if value[i] == '{':
+            # Find the matching closing brace at the same nesting level
+            j = i + 1
+            depth = 1
+            while j < len(value) and depth > 0:
+                if value[j] == '{':
+                    depth += 1
+                elif value[j] == '}':
+                    depth -= 1
+                j += 1
+            if depth == 0:
+                content = value[i+1:j-1].strip()
+                # In ICU format, the placeholder name is before the first comma
+                name = content.split(",")[0].strip()
+                placeholders.add(name)
+                i = j
+            else:
+                i += 1
+        else:
+            i += 1
+    return placeholders
+
+
+def check_parity():
+    """Check 5: cross-language parity against en.json."""
+    problems = 0
+    en = load_lang_file(LANG)
+    en_keys = get_all_keys(en)
+    
+    lang_dir = os.path.join(ROOT, "lang")
+    lang_files = sorted([
+        f for f in os.listdir(lang_dir)
+        if f.endswith(".json") and f != "en.json" and not f.endswith(".bak")
+    ])
+    
+    for lang_file in lang_files:
+        lang_path = os.path.join(lang_dir, lang_file)
+        lang_data = load_lang_file(lang_path)
+        lang_keys = get_all_keys(lang_data)
+        
+        missing = en_keys - lang_keys
+        extra = lang_keys - en_keys
+        
+        if missing:
+            problems += len(missing)
+            print(f"[i18n] {lang_file}: {len(missing)} MISSING key(s) vs en.json:")
+            for k in sorted(missing):
+                print(f"    ✗ {k}")
+        
+        if extra:
+            problems += len(extra)
+            print(f"[i18n] {lang_file}: {len(extra)} EXTRA key(s) not in en.json:")
+            for k in sorted(extra):
+                print(f"    ✗ {k}")
+        
+        # Check placeholder parity for shared keys
+        shared = en_keys & lang_keys
+        for key in shared:
+            en_val = get_value_by_key(en, key)
+            lang_val = get_value_by_key(lang_data, key)
+            if en_val and lang_val:
+                en_ph = get_placeholders(en_val)
+                lang_ph = get_placeholders(lang_val)
+                if en_ph != lang_ph:
+                    problems += 1
+                    print(f"[i18n] {lang_file}: PLACEHOLDER MISMATCH for '{key}':")
+                    print(f"    en:    {en_ph}")
+                    print(f"    {lang_file[:5]}: {lang_ph}")
+    
+    if problems == 0:
+        print("[i18n] PARITY OK — all language files have identical key sets and placeholder names.")
+    return problems
+
+
+def get_value_by_key(d, key):
+    """Get a nested value by dotted key path."""
+    cur = d
+    for part in key.split("."):
+        if isinstance(cur, dict) and part in cur:
+            cur = cur[part]
+        else:
+            return None
+    return cur if isinstance(cur, str) else None
+
+
 def main():
+    parser = argparse.ArgumentParser(description="i18n key guard for pf2e-kingmaker-tools")
+    parser.add_argument("--parity", action="store_true", help="Run cross-language parity check only")
+    parser.add_argument("--all", action="store_true", help="Run all checks (1-5)")
+    args = parser.parse_args()
+    
+    if args.parity:
+        return check_parity()
+    
     root = load_root()
     problems = 0
 
@@ -238,6 +363,13 @@ def main():
         return 1
     print("[i18n] OK — no flat-dotted keys; all code, template, and catalog keys resolve; "
           "all translators wired.")
+    
+    # Run parity check if --all specified
+    if args.all:
+        parity_problems = check_parity()
+        if parity_problems:
+            return 1
+    
     return 0
 
 
