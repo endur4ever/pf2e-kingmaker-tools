@@ -3,59 +3,123 @@
     "expeditionActivities": {
       "diplomacy": {
         "name": "Broker Diplomacy",
-        "criticalSuccess": { "message": "The envoy returns with a signed accord and the goodwill of a distant power, a generous gift in hand." },
-        "success": { "message": "Talks went well; the companion returns with a useful understanding and a token of friendship." },
-        "failure": { "message": "The negotiations stalled. No harm done, but the time was spent for little gain." },
-        "criticalFailure": { "message": "A diplomatic blunder soured the room; the companion limps home weary and bruised, the relationship strained." }
+        "criticalSuccess": {
+          "message": "The envoy returns with a signed accord and the goodwill of a distant power, a generous gift in hand."
+        },
+        "success": {
+          "message": "Talks went well; the companion returns with a useful understanding and a token of friendship."
+        },
+        "failure": {
+          "message": "The negotiations stalled. No harm done, but the time was spent for little gain."
+        },
+        "criticalFailure": {
+          "message": "A diplomatic blunder soured the room; the companion limps home weary and bruised, the relationship strained."
+        }
       },
       "treasure-hunt": {
         "name": "Treasure Hunt",
-        "criticalSuccess": { "message": "An old map paid off. The companion hauls back a major find from a forgotten cache." },
-        "success": { "message": "Careful searching turned up a worthwhile haul of coin and curios." },
-        "failure": { "message": "The trail went cold. The companion returns empty-handed but unharmed." },
-        "criticalFailure": { "message": "A trapped vault nearly claimed them; they escape with nothing but fresh wounds." }
+        "criticalSuccess": {
+          "message": "An old map paid off. The companion hauls back a major find from a forgotten cache."
+        },
+        "success": {
+          "message": "Careful searching turned up a worthwhile haul of coin and curios."
+        },
+        "failure": {
+          "message": "The trail went cold. The companion returns empty-handed but unharmed."
+        },
+        "criticalFailure": {
+          "message": "A trapped vault nearly claimed them; they escape with nothing but fresh wounds."
+        }
       },
       "personal-quest": {
         "name": "Pursue Personal Quest",
-        "criticalSuccess": { "message": "The companion resolves their personal quest in spectacular fashion, returning changed and emboldened." },
-        "success": { "message": "The companion makes real progress on what matters to them and comes back the better for it." },
-        "failure": { "message": "The quest eludes them this time, though they return whole and undeterred." },
-        "criticalFailure": { "message": "The pursuit ended badly; the companion returns shaken and hurt, the matter worse than before." }
+        "criticalSuccess": {
+          "message": "The companion resolves their personal quest in spectacular fashion, returning changed and emboldened."
+        },
+        "success": {
+          "message": "The companion makes real progress on what matters to them and comes back the better for it."
+        },
+        "failure": {
+          "message": "The quest eludes them this time, though they return whole and undeterred."
+        },
+        "criticalFailure": {
+          "message": "The pursuit ended badly; the companion returns shaken and hurt, the matter worse than before."
+        }
       },
       "hunt": {
         "name": "Hunt and Forage",
-        "criticalSuccess": { "message": "A legendary kill. The companion returns laden with provisions and a trophy worth boasting of." },
-        "success": { "message": "Good hunting fills the larder; the companion returns with ample game." },
-        "failure": { "message": "The game was scarce. The companion returns tired and empty-handed." },
-        "criticalFailure": { "message": "The hunt turned on them; the companion staggers back mauled and exhausted." }
+        "criticalSuccess": {
+          "message": "A legendary kill. The companion returns laden with provisions and a trophy worth boasting of."
+        },
+        "success": {
+          "message": "Good hunting fills the larder; the companion returns with ample game."
+        },
+        "failure": {
+          "message": "The game was scarce. The companion returns tired and empty-handed."
+        },
+        "criticalFailure": {
+          "message": "The hunt turned on them; the companion staggers back mauled and exhausted."
+        }
       },
       "rest": {
         "name": "Rest and Recover",
-        "criticalSuccess": { "message": "True respite. The companion returns fully restored and remarkably refreshed." },
-        "success": { "message": "A quiet stretch of downtime leaves the companion rested and ready." },
-        "failure": { "message": "Rest was fitful and interrupted; little was gained." },
-        "criticalFailure": { "message": "Rest went wrong; illness or mishap leaves the companion worse off than when they left." }
+        "criticalSuccess": {
+          "message": "True respite. The companion returns fully restored and remarkably refreshed."
+        },
+        "success": {
+          "message": "A quiet stretch of downtime leaves the companion rested and ready."
+        },
+        "failure": {
+          "message": "Rest was fitful and interrupted; little was gained."
+        },
+        "criticalFailure": {
+          "message": "Rest went wrong; illness or mishap leaves the companion worse off than when they left."
+        }
       },
       "scout": {
         "name": "Scout the Region",
-        "criticalSuccess": { "message": "The companion maps the region in exacting detail, returning with invaluable intelligence." },
-        "success": { "message": "The companion returns with a solid lay of the land and useful notes." },
-        "failure": { "message": "Fog and dead ends; the companion learns little of value." },
-        "criticalFailure": { "message": "Lost and harried, the companion barely finds their way home, battered and spent." }
+        "criticalSuccess": {
+          "message": "The companion maps the region in exacting detail, returning with invaluable intelligence."
+        },
+        "success": {
+          "message": "The companion returns with a solid lay of the land and useful notes."
+        },
+        "failure": {
+          "message": "Fog and dead ends; the companion learns little of value."
+        },
+        "criticalFailure": {
+          "message": "Lost and harried, the companion barely finds their way home, battered and spent."
+        }
       },
       "craft": {
         "name": "Craft and Tinker",
-        "criticalSuccess": { "message": "A masterwork takes shape. The companion returns with a finely made piece and coin to spare." },
-        "success": { "message": "Steady work yields a solid, useful creation." },
-        "failure": { "message": "The project did not come together; materials and time spent for nothing." },
-        "criticalFailure": { "message": "A workshop mishap. The companion returns injured, the work ruined." }
+        "criticalSuccess": {
+          "message": "A masterwork takes shape. The companion returns with a finely made piece and coin to spare."
+        },
+        "success": {
+          "message": "Steady work yields a solid, useful creation."
+        },
+        "failure": {
+          "message": "The project did not come together; materials and time spent for nothing."
+        },
+        "criticalFailure": {
+          "message": "A workshop mishap. The companion returns injured, the work ruined."
+        }
       },
       "train": {
         "name": "Train and Drill",
-        "criticalSuccess": { "message": "Intense drilling pays off; the companion returns sharper and more capable than ever." },
-        "success": { "message": "Diligent practice leaves the companion measurably improved." },
-        "failure": { "message": "Training plateaued; the companion returns no worse, but no better." },
-        "criticalFailure": { "message": "An overzealous regimen backfired; the companion returns strained and hurting." }
+        "criticalSuccess": {
+          "message": "Intense drilling pays off; the companion returns sharper and more capable than ever."
+        },
+        "success": {
+          "message": "Diligent practice leaves the companion measurably improved."
+        },
+        "failure": {
+          "message": "Training plateaued; the companion returns no worse, but no better."
+        },
+        "criticalFailure": {
+          "message": "An overzealous regimen backfired; the companion returns strained and hurting."
+        }
       }
     },
     "moduleName": "Kingdom Building, Camping & Weather",
@@ -675,7 +739,6 @@
         "targetLevelMin": "Level Match Tolerance Min",
         "playerViewNote": "Player view — showing unrest, fame, RP, kingdom size, and level trends only. GM-only series (consumption, XP, war pressure, ruin) are hidden."
       },
-
       "turnWizard": {
         "title": "Kingdom Turn Assistant",
         "openButton": "Turn Assistant",
@@ -2070,6 +2133,13 @@
         "dismissed": "War threat {name} arrival dismissed.",
         "eventMissing": "The war-threat-arrival kingdom event definition is missing — cannot spawn an event.",
         "markedAsRun": "Pending encounter at hex {hexKey} marked as run."
+      },
+      "milestone": {
+        "award": "MISSING: chatMessages.milestone.award",
+        "dismiss": "MISSING: chatMessages.milestone.dismiss",
+        "gmActions": "MISSING: chatMessages.milestone.gmActions",
+        "offerBody": "MISSING: chatMessages.milestone.offerBody",
+        "offerTitle": "MISSING: chatMessages.milestone.offerTitle"
       }
     },
     "displayBars": {
@@ -2383,7 +2453,6 @@
       "blindroll": "Blind Roll",
       "selfroll": "Self Roll"
     },
-
     "kingdomEventTrait": {
       "downtime": "Downtime",
       "leadership": "Leadership",
@@ -3413,6 +3482,12 @@
       },
       "win-your-first-war-encounter": {
         "name": "Win your first War Encounter (V&K)"
+      },
+      "claim-all-hexes-in-a-region": {
+        "name": "MISSING: milestones.claim-all-hexes-in-a-region.name"
+      },
+      "connect-settlement-to-capital-via-roads": {
+        "name": "MISSING: milestones.connect-settlement-to-capital-via-roads.name"
       }
     },
     "charters": {
@@ -5706,6 +5781,23 @@
         "criticalFailure": {
           "msg": "<p>You accidentally form incorrect assumptions about your military tactics. The next time you roll a failure on an Army activity this Kingdom turn, it becomes a critical failure instead.</p>"
         }
+      },
+      "improve-settlement": {
+        "criticalFailure": {
+          "msg": "MISSING: activities.improve-settlement.criticalFailure.msg"
+        },
+        "criticalSuccess": {
+          "msg": "MISSING: activities.improve-settlement.criticalSuccess.msg"
+        },
+        "description": "MISSING: activities.improve-settlement.description",
+        "failure": {
+          "msg": "MISSING: activities.improve-settlement.failure.msg"
+        },
+        "special": "MISSING: activities.improve-settlement.special",
+        "success": {
+          "msg": "MISSING: activities.improve-settlement.success.msg"
+        },
+        "title": "MISSING: activities.improve-settlement.title"
       }
     },
     "events": {
