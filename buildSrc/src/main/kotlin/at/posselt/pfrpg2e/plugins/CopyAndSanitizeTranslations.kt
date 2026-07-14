@@ -41,9 +41,11 @@ abstract class CopyAndSanitizeTranslations : DefaultTask() {
         val into = into.get().asFile.toPath()
         val folder = into.resolve(Paths.get(targetFolderName.get()))
         Files.createDirectories(folder)
+        // Only copy the 8 known language files to avoid picking up stray .json files
+        val knownLangs = setOf("en.json", "de.json", "fr.json", "it.json", "pl.json", "pt-BR.json", "ru.json", "zh-Hans.json")
         Files.walk(source)
             .parallel()
-            .filter { it.isRegularFile() && it.fileName.toString().endsWith(".json") }
+            .filter { it.isRegularFile() && knownLangs.contains(it.fileName.toString()) }
             .forEach {
                 val target = folder.resolve(it.fileName)
                 transformAndWrite(it, target)
