@@ -1,0 +1,32 @@
+{
+  "id": "aiudara-gate",
+  "name": "structures.aiudara-gate.name",
+  "notes": "structures.aiudara-gate.notes",
+  "traits": [
+    "building",
+    "gate"
+  ],
+  "affectsDowntime": false,
+  "level": 10,
+  "construction": {
+    "rp": 30,
+    "stone": 10,
+    "lumber": 4,
+    "luxuries": 2,
+    "skills": [
+      {
+        "skill": "magic",
+        "proficiencyRank": 2
+      }
+    ],
+    "dc": 27
+  },
+  "lots": 1,
+  "activityBonusRules": [
+    {
+      "value": 3,
+      "activity": "relocate-capital"
+    }
+  ],
+  "upgradeFrom": []
+}

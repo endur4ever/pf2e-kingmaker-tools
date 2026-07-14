@@ -3438,6 +3438,18 @@
       }
     },
     "structures": {
+      "aiudara-gate": {
+        "name": "Aiudara Gate",
+        "notes": "Allows teleporting between settlements without delay. Kingdom activities performed in a gated town are also considered performed in all its counterparts."
+      },
+      "temple": {
+        "name": "Temple",
+        "notes": "Provides a +1 status bonus to perform rituals. While in a settlement with a Temple, you gain a +1 item bonus to Lore and Religion checks made to Recall Knowledge while Investigating, and to all faith-themed checks made while Researching."
+      },
+      "cathedral": {
+        "name": "Cathedral",
+        "notes": "Provides a +2 status bonus to perform rituals. While in a settlement with a Cathedral, you gain a +3 item bonus to Lore and Religion checks made to Recall Knowledge while Investigating, and to all faith-themed checks made while Researching."
+      },
       "academy": {
         "name": "Academy",
         "notes": "While in a settlement with an Academy, you gain a +2 item bonus to Lore checks made to Recall Knowledge while Investigate, to all checks made while Researching, and to Decipher Writing."
@@ -3477,10 +3489,6 @@
       },
       "castle": {
         "name": "Castle"
-      },
-      "cathedral": {
-        "name": "Cathedral",
-        "notes": "While in a settlement with a cathedral, you gain a +3 item bonus to Lore and Religion checks made to Recall Knowledge while Investigating, and to all faith-themed checks made while Researching."
       },
       "cemetery": {
         "name": "Cemetery"
@@ -3729,9 +3737,6 @@
       "tavern-world-class": {
         "name": "Tavern, World-Class",
         "notes": "If you attempt a Performance check to Earn Income in a settlement with a world-class tavern, you gain a +3 item bonus to the check. All checks made to Gather Information in a settlement with a world-class tavern gain a +3 item bonus."
-      },
-      "temple": {
-        "name": "Temple"
       },
       "tenement": {
         "name": "Tenement"
