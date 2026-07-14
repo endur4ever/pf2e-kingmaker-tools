@@ -85,7 +85,11 @@
       "obsidianJournalFolder": "Obsidian Export Folder",
       "obsidianJournalFolderHelp": "The name of the Journal Folder where exported Kingdom summaries will be stored.",
       "obsidianOverwrite": "Overwrite Kingdom Summary",
-      "obsidianOverwriteHelp": "If enabled, overwrites the single 'Kingdom Summary' journal entry on each export. If disabled, creates a historical entry per turn (e.g. 'Kingdom Summary - Turn X')."
+      "obsidianOverwriteHelp": "If enabled, overwrites the single 'Kingdom Summary' journal entry on each export. If disabled, creates a historical entry per turn (e.g. 'Kingdom Summary - Turn X').",
+      "companionAutonomyEnabled": "Gefährte Autonomy",
+      "companionAutonomyEnabledHelp": "If enabled, when making camp, eligible gefährtes will volunteer for expeditions autonomously. The GM receives an angebot card to approve or decline.",
+      "enableCompanionLeveling": "Enable Gefährte Leveling",
+      "enableCompanionLevelingHelp": "If disabled, gefährtes do not gain levels from expedition XP. Useful for campaigns that prefer meilenstein-based gefährte advancement."
     },
     "applications": {
       "apply": "Apply",
@@ -478,7 +482,9 @@
       "filterByHexStateHelp": "When enabled, Combat-category encounters are suppressed while the party is in a claimed and cleared hex (per-region opt-in still applies).",
       "encounterCuratorRumorSource": "Curated Encounter",
       "encounterNoKingdom": "No kingdom actor found to attach the quest to.",
-      "encounterRumorConverted": "Rumor converted into a kingdom quest."
+      "encounterRumorConverted": "Rumor converted into a kingdom quest.",
+      "encounterSuppressed": "Encounter suppressed: {reason}",
+      "encounterSuppressedTitle": "Encounter Suppressed"
     },
     "settlementNav": {
       "status": "Status",
@@ -568,7 +574,8 @@
       "campaign": "Campaign",
       "armyPressure": "Army & Pressure",
       "pacing": "Pacing",
-      "analytics": "Analytics"
+      "analytics": "Analytics",
+      "expeditions": "Expeditions"
     },
     "addSettlementBlock": {
       "title": "Add Settlement Block",
@@ -606,7 +613,9 @@
         "ruinDecay": "Ruin: Decay",
         "ruinStrife": "Ruin: Strife",
         "targetLevelMax": "Level Match Tolerance Max",
-        "targetLevelMin": "Level Match Tolerance Min"
+        "targetLevelMin": "Level Match Tolerance Min",
+        "playerViewNote": "Player view — showing unruhe, fame, RP, königreich size, and level trends only. GM-only series (consumption, XP, war druck, ruinenen) are hidden.",
+        "pressurePerTurn": "War Druck Rate"
       },
       "turnWizard": {
         "title": "Kingdom Turn Assistant",
@@ -630,7 +639,11 @@
           "regionPhase": "Region Phase",
           "commercePhase": "Commerce Phase",
           "armyPhase": "Army Phase",
-          "checkEvents": "Check Ongoing Events"
+          "checkEvents": "Check Ongoing Events",
+          "companionsInjured": "Gefährtes injured",
+          "expeditionsAwaiting": "Expeditions awaiting resolution",
+          "questsFailing": "Quests failing this zug",
+          "warThreatsMax": "War bedrohungs at maximum escalation"
         },
         "stateTitle": "Kingdom State",
         "state": {
@@ -655,12 +668,14 @@
           "changeRp": "RP: {old} → {new}",
           "changeFame": "Fame: {old} → {new}",
           "changeConsumption": "Consumption: {old} → {new}",
-          "expiredModifiers": "{count} modifier(s) expired"
+          "expiredModifiers": "{count} modifier(s) expired",
+          "tributeRp": "Vassal Tribute: +{amount} RP"
         },
         "commit": "Complete Turn",
         "cancel": "Cancel",
         "previewButton": "Preview Turn",
-        "journalSummary": "Turn summary written to journal"
+        "journalSummary": "Turn summary written to journal",
+        "upkeepStepAlreadyDone": "This upkeep step is already done this zug — uncheck it in the Zug Wizard to re-run."
       },
       "fame": "Ruhm",
       "current": "Aktuell",
@@ -697,7 +712,13 @@
         "exportSuccess": "Successfully exported Session Prep to Journal folder: {folder}!",
         "recentTurns": "Recent Turns",
         "noRecentTurns": "No turn history recorded yet",
-        "turnLabel": "Turn"
+        "turnLabel": "Turn",
+        "companionExpeditions": "Gefährte Expeditions",
+        "markAsRun": "Mark as Run",
+        "markAsRunTooltip": "Mark this queued encounter as run",
+        "noCompanionExpeditions": "No active gefährte expeditions",
+        "noPendingEncounters": "No pending encounters",
+        "pendingEncounters": "Pending Encounters"
       },
       "quests": {
         "addQuest": "Add Quest",
@@ -737,7 +758,9 @@
           "visibilityVisible": "Nur sichtbare",
           "visibilityHidden": "Nur verborgene",
           "clear": "Filter zurücksetzen",
-          "noMatches": "Keine Quests entsprechen den aktuellen Filtern."
+          "noMatches": "Keine Quests entsprechen den aktuellen Filtern.",
+          "category": "Filter by category",
+          "categoryAll": "All categories"
         },
         "completed": "Quest Completed",
         "flavorTextCompleted": "Completion Story / Details",
@@ -765,9 +788,19 @@
           "ore": "Ore Reward",
           "luxuries": "Luxuries Reward",
           "rewardOther": "Other / Custom Reward",
-          "rewardOtherHelp": "Freeform bounty text for rewards that aren't tracked resources — a magic item, a title, a favor, land, etc."
+          "rewardOtherHelp": "Freeform bounty text for rewards that aren't tracked resources — a magic item, a title, a favor, land, etc.",
+          "category": "Quest Category"
         },
-        "optional": "Optional"
+        "optional": "Optional",
+        "category": {
+          "companion": "Gefährte",
+          "main_story": "Main Story",
+          "mythic": "Mythic",
+          "side": "Side Quest"
+        },
+        "reopenQuest": "Reopen Quest (undo completion)",
+        "reopenStale": "Quest \"{name}\" was completed on an earlier zug; königreich resources may have changed since, so the reversal is approximate — verify RP/unruhe/commodities.",
+        "reopened": "Quest \"{name}\" reopened; its completion rewards were reversed."
       },
       "settlementLayoutTypeHelp": "Rigid: Predefined layout like in rules, allows to level up settlements and place settlement blocks automatically. Free Form: Manually copy settlement tiles anywhere on the scene",
       "canLevelUpTo": "Level Up To: {target}",
@@ -954,7 +987,10 @@
             "completed": "Completed",
             "failed": "Failed",
             "abandoned": "Abandoned"
-          }
+          },
+          "complication": "Complication: A significant setback has occurred in this personal quest.",
+          "reopen": "Reopen Quest (undo completion)",
+          "xp": "XP Reward"
         },
         "level": "Level",
         "xp": "XP",
@@ -1013,7 +1049,8 @@
           "btn": "Feast of Plenty (-3 Food)",
           "chat": "Counselor organizes a Feast of Plenty, reducing Unrest by 1 and granting a +1 status bonus to Loyalty checks for 1 turn.",
           "help": "Requires Counselor. Cost: 3 Food. Adds a +1 status modifier to all Loyalty ability checks for 1 turn, and reduces Unrest by 1. (Cooldown: 4 turns)"
-        }
+        },
+        "unavailable": "Unavailable"
       },
       "turnGazette": {
         "tribute": "Tribut: +{tributeRp} FP von Vasallenstaaten gesammelt",
@@ -1194,7 +1231,6 @@
       "uploadCampingJson": "Upload Camping JSON File",
       "manageActivities": "Manage Activities",
       "resourceDice": "Resource Dice",
-      "bonusResourceDice": "Bonus Resource Dice",
       "luxurySources": "Luxury Sources",
       "quarries": "Quarries",
       "mines": "Mines",
@@ -1497,7 +1533,9 @@
       },
       "factionStanding": {
         "drift": "Passive Standing Drift",
-        "allianceChange": "Treaty Level Changed"
+        "allianceChange": "Treaty Level Changed",
+        "annexation": "Annexed Vassal State",
+        "expedition": "Diplomacy Expedition"
       },
       "newSettlement": "New Settlement",
       "addCurrentScene": "Add Current Scene",
@@ -1577,7 +1615,13 @@
         "customHexHelp": "Optional: a realm-map hex key (e.g. 5015) for a location not in the list above, such as a distant city. Overrides the dropdown when filled.",
         "pickOriginDest": "Pick or enter both an origin and a destination hex.",
         "noShipmentLocations": "Give at least one settlement or trade-partner faction a realm-map hex first (then you can also enter a custom hex for the other end).",
-        "partyLocation": "The Party (current location)"
+        "partyLocation": "The Party (current location)",
+        "caravanWarOfferPressOn": "Press On (Raid DC +4)",
+        "caravanWarOfferRecall": "Recall Caravan",
+        "overCapacity": "This shipment is {bulk} Bulk, over this caravan's {capacity}-Bulk capacity. Pick a larger caravan or reduce the quantity.",
+        "typeWithCapacity": "{type} — up to {bulk} Bulk",
+        "warDeclaredOffer": "War has broken out with {partner}. This caravan is still in transit and now faces a higher chance of being raided. Recall it to safety, or press on and accept the increased Raid DC.",
+        "warOfferTitle": "War Declared — Caravan at Risk"
       },
       "creation": "Creation",
       "bonus": "Bonus",
@@ -1738,7 +1782,103 @@
       "delete": "Delete",
       "feat": "Feat",
       "turn": {
-        "next": "Next"
+        "next": "Next",
+        "confirmEndTurn": "Are you sure you want to end zug {turn}? This will advance the königreich to the next zug. You can undo this with \"Undo Last End Zug\" if needed.",
+        "endTurnGmOnly": "Only the GM can end the königreich zug."
+      },
+      "annexConfirm": "Are you sure you want to annex the vassal state of {name}? This will clear their tribute treaty, increase Unruhe by 2, and beanspruchen their trade hub hexfeldfeld.",
+      "annexTooltip": "Annex Vassal State",
+      "companionInjured": "{name} was injured on the expedition.",
+      "companionLeveledUp": "{name} has leveled up to Level {level}!",
+      "companionQuestFailed": "Personal Quest Failed: {name} ran out of time to complete '{quest}'.",
+      "companionRecovered": "{name} has recovered from their injuries.",
+      "expedition": {
+        "status": {
+          "awaitingResolution": "Awaiting Resolution",
+          "cancelled": "Cancelled",
+          "inProgress": "In Progress",
+          "resolved": "Resolved"
+        },
+        "tier": {
+          "perilous": "Perilous",
+          "routine": "Routine",
+          "standard": "Standard"
+        }
+      },
+      "expeditionBatchResolved": "Resolved {count} expedition rewards.",
+      "expeditionCommoditiesApplied": "The expedition brought home commodities: {food} food, {lumber} lumber, {ore} ore.",
+      "expeditionFactionStandingApplied": "Diplomacy expedition shifted {name}'s standing by {delta}.",
+      "expeditionFactionStandingMissing": "Faction \"{name}\" no longer exists, so the expedition's standing change ({delta}) was not applied — adjust it manually if needed.",
+      "expeditionLootApplied": "Recovered {rp} ressourcenpunkte from the expedition's haul.",
+      "expeditionRestHealed": "The recuperation expedition shaved {days} day(s) off recovering gefährtes.",
+      "expeditionRewardApplied": "Expedition rewards for {name} have been applied.",
+      "expeditions": {
+        "activities": {
+          "clearMonsters": "Clear Monsters",
+          "escortCaravan": "Escort Caravan",
+          "exploreFrontier": "Explore Frontier",
+          "huntGame": "Hunt Game",
+          "mapsRoutes": "Map Routes",
+          "protectSettlement": "Protect Siedlung",
+          "recoverArtifact": "Recover Artifact",
+          "scoutRuins": "Scout Ruinenens"
+        },
+        "activity": "Aktivität",
+        "addExpedition": "Launch Expedition",
+        "cancel": "Cancel",
+        "cancelConfirm": "Cancel this expedition? The gefährtes will rezug immediately with no rewards.",
+        "companions": "Gefährtes",
+        "companionsFallback": "Gefährtes",
+        "companionsHint": "Choose which gefährtes are setting out on this expedition.",
+        "daysRemaining": "Days Remaining",
+        "destination": "Destination",
+        "destinationExplored": "Explored Hexfeldfeldes",
+        "destinationHexes": "Beanspruchened Hexfeldfeldes",
+        "destinationHint": "Optional: round-trip travel from your nearest siedlung is added to the duration. Diplomacy missions sent to a faction's trade hub target that faction automatically.",
+        "destinationHubs": "Faction Trade Hubs",
+        "destinationNone": "— None (abstract) —",
+        "destinationSettlements": "Siedlungs",
+        "destinationUncharted": "Uncharted Wilderness",
+        "diplomacyRequiresFaction": "A diplomacy expedition needs a target faction — pick one before launching.",
+        "failure": "Fehlschlag (No Reward)",
+        "homecoming": "{names} rezuged from {title}.",
+        "influence": "Influence",
+        "intel": {
+          "perilous": "Scouts penetrate deep and rezug with hard intelligence — an enemy's strength, a secret way, a looming bedrohung. The GM gains a major revelation.",
+          "routine": "Scouts rezug with a rough sketch of the nearby trails and a rumor or two — enough for the GM to seed a minor lead.",
+          "standard": "Scouts map the region in detail: a hidden cache, a wary neighbor, and the lay of the land. The GM gains a solid hook."
+        },
+        "launch": "Launch",
+        "legendaryReward": "Legendary Reward",
+        "loot": "Loot",
+        "majorReward": "Major Reward",
+        "minorReward": "Minor Reward",
+        "noExpeditions": "No expeditions are currently active.",
+        "notes": "GM Notes",
+        "notesPlaceholder": "Any private notes about this expedition...",
+        "resolution": "Resolution",
+        "resolve": "Resolve",
+        "resolveAll": "Resolve All",
+        "selectActivity": "Select an aktivität...",
+        "sendoff": "Setting out on {title}: {names} — expected back in {days} days.",
+        "standingDelta": "Faction standing change from this expedition",
+        "targetFaction": "Target Faction",
+        "targetFactionHint": "Only used by diplomacy expeditions: the faction whose standing shifts when the reward is applied.",
+        "targetFactionNone": "— None —",
+        "targetQuest": "Target Personal Quest",
+        "targetQuestHint": "For a personal-quest expedition, pick which quest it completes (so the reward lands on the right one).",
+        "targetQuestNone": "— None —",
+        "tier": "Tier",
+        "tierHint": "Routine (2 days, DC 14) / Standard (3 days, DC 18) / Perilous (5 days, DC 22)",
+        "tiers": {
+          "perilous": "Perilous",
+          "routine": "Routine",
+          "standard": "Standard"
+        },
+        "title": "Expeditions",
+        "tooMany": "Too many active expeditions (max 3). Resolve or cancel one before launching another.",
+        "visibleToPlayers": "Visible to Players",
+        "xp": "XP"
       }
     },
     "chatMessages": {
@@ -1756,7 +1896,12 @@
         "raiseWarThreat": "Raise War Threat",
         "offerDiplomacyQuest": "Offer Diplomacy Quest",
         "warThreatName": "{{group}} Aggression",
-        "diplomacyQuestTitle": "Diplomatic Accord with {{group}}"
+        "diplomacyQuestTitle": "Diplomatic Accord with {{group}}",
+        "endTurnUndone": "Zug {turn} end reverted; königreich state restored.",
+        "endTurnUndoneTooltip": "Reverts königreich state (RP, fame, commodities, unruhe, quests, bedrohungs, clocks) to before End Zug. Does NOT remove chat nachrichts or calendar notes.",
+        "undoEndTurn": "Undo Last End Zug",
+        "undoNothing": "Nothing to undo — no End Zug snapshot is available.",
+        "undoStale": "This undo is out of date — another End Zug has happened since. Only the most recent End Zug can be undone."
       },
       "firstRun": {
         "dontShowAgain": "Don't show this again",
@@ -1797,7 +1942,82 @@
       },
       "pacingAlert": {
         "title": "Pacing Advisory",
-        "hint": "Advisory only — adjust the campaign's pressure curve if this looks off."
+        "hint": "Advisory only — adjust the campaign's pressure curve if this looks off.",
+        "jumpToSettlement": "Jump to Siedlung"
+      },
+      "annexation": {
+        "body": "The vassal state of {name} has been formally annexed into the königreich.",
+        "hexClaimed": "Beanspruchened Hexfeldfeld",
+        "title": "Vassal State Annexed",
+        "unrestReason": "Annexation integration"
+      },
+      "companionAutonomy": {
+        "approvedMessage": "Approved! The selected gefährte has been assigned to the expedition.",
+        "approvedSuffix": "has been dispatched on the expedition.",
+        "approvedTitle": "Expedition Approved",
+        "declinedMessage": "Declined. The gefährtes remain available.",
+        "discoveryTag": "Established+",
+        "gmActions": "SL-Aktionen",
+        "influenceLabel": "Influence",
+        "noEligible": "No eligible gefährtes available for autonomous expedition.",
+        "offerApprove": "Approve",
+        "offerBody": "The following gefährtes have volunteered for an expedition:",
+        "offerDecline": "Decline",
+        "offerSendElsewhere": "Send on Different Expedition",
+        "offerTitle": "Gefährte Volunteers for Expedition",
+        "personalQuestTag": "Personal Quest",
+        "proposalPitch": "{name} volunteers to pursue {activity} ({tier}, at least {days} days plus travel, costs {rp} RP)",
+        "sendElsewhereMessage": "Sent on a different expedition. They will rezug later."
+      },
+      "expeditionRecap": {
+        "companion": "Gefährte",
+        "expedition": "Expedition",
+        "flavor": {
+          "criticalFailure": "The expedition ended in disaster. The gefährte barely escaped with their life.",
+          "criticalSuccess": "The expedition was a resounding erfolg. Tales of the gefährte's exploits will be told for seasons.",
+          "failure": "The expedition fell short of its goals. The gefährte rezugs wiser for the attempt.",
+          "success": "The expedition completed erfolgfully. The gefährte rezugs with stories to share."
+        },
+        "title": "Gefährte Expedition Complete: {title}"
+      },
+      "expeditionResult": {
+        "applyInjury": "Apply Injury",
+        "applyReward": "Apply Reward",
+        "companionLevelUp": "Level Up Gefährte",
+        "expedition": "Expedition",
+        "gmActions": "SL-Aktionen",
+        "influenceGained": "Influence Gained",
+        "lootTier": "Loot Tier",
+        "resolved": "This expedition has been resolved.",
+        "title": "Gefährte Expedition: {title}",
+        "xpGained": "XP Gained"
+      },
+      "milestone": {
+        "award": "MISSING: chatNachrichts.meilenstein.verleihen",
+        "dismiss": "MISSING: chatNachrichts.meilenstein.schließen",
+        "gmActions": "MISSING: chatNachrichts.meilenstein.SL-Aktionen",
+        "offerBody": "MISSING: chatNachrichts.meilenstein.Angebotstext",
+        "offerTitle": "MISSING: chatNachrichts.meilenstein.Angebotstitel"
+      },
+      "questDeadline": {
+        "extendTurns": "Extend by {turns} Zugs",
+        "extended": "Quest \"{name}\" extended by {turns} zugs.",
+        "failNow": "Fail Quest Now",
+        "failed": "Quest \"{name}\" has failed — its deadline passed.",
+        "offerBody": "The quest {name} is nearing its deadline.",
+        "offerTitle": "Quest Deadline Approaching"
+      },
+      "warThreatArrival": {
+        "dismiss": "Schließen",
+        "dismissed": "War bedrohung {name} arrival schließened.",
+        "eventMissing": "The war-bedrohung-arrival königreich ereignis definition is missing — cannot spawn an ereignis.",
+        "markedAsRun": "Pending encounter at hexfeldfeld {hexKey} marked as run.",
+        "offerBody": "The war bedrohung {name} has arrived at the königreich's borders!",
+        "offerTitle": "War Bedrohung Arrived",
+        "queueEncounter": "Queue Encounter at Linked Hexfeldfeld",
+        "queuedEncounter": "Encounter queued for hexfeldfeld {hexKey} linked to bedrohung {name}.",
+        "spawnEvent": "Spawn Königreich Ereignis",
+        "spawnedEvent": "Spawned königreich ereignis for bedrohung {name}."
       }
     },
     "displayBars": {
@@ -3140,6 +3360,12 @@
       },
       "win-your-first-war-encounter": {
         "name": "Win your first War Encounter (V&K)"
+      },
+      "claim-all-hexes-in-a-region": {
+        "name": "MISSING: meilensteins.beanspruchen-all-hexfeldfeldes-in-a-region.name"
+      },
+      "connect-settlement-to-capital-via-roads": {
+        "name": "MISSING: meilensteins.verbinden-siedlung-to-hauptstadt-via-straßes.name"
       }
     },
     "charters": {
@@ -3458,7 +3684,8 @@
         "notes": "If you attempt a Performance check to Earn Income in a settlement with a world-class tavern, you gain a +3 item bonus to the check. All checks made to Gather Information in a settlement with a world-class tavern gain a +3 item bonus."
       },
       "temple": {
-        "name": "Temple"
+        "name": "Temple",
+        "notes": "Provides a +1 status bonus to perform rituals. While in a siedlung with a Temple, you gain a +1 item bonus to Lore and Religion checks made to Recall Knowledge while Investigating, and to all faith-themed checks made while Researching."
       },
       "tenement": {
         "name": "Tenement"
@@ -3502,6 +3729,10 @@
       },
       "waterfront": {
         "name": "Waterfront"
+      },
+      "aiudara-gate": {
+        "name": "Aiudara Gate",
+        "notes": "Allows teleporting between siedlungs without delay. Königreich activities performed in a gated town are also considered performed in all its counterparts."
       }
     },
     "heartlands": {
@@ -5428,6 +5659,23 @@
         "criticalFailure": {
           "msg": "<p>You accidentally form incorrect assumptions about your military tactics. The next time you roll a failure on an Army activity this Kingdom turn, it becomes a critical failure instead.</p>"
         }
+      },
+      "improve-settlement": {
+        "criticalFailure": {
+          "msg": "MISSING: activities.verbessern-siedlung.criticalFehlschlag.msg"
+        },
+        "criticalSuccess": {
+          "msg": "MISSING: activities.verbessern-siedlung.criticalErfolg.msg"
+        },
+        "description": "MISSING: activities.verbessern-siedlung.beschreibung",
+        "failure": {
+          "msg": "MISSING: activities.verbessern-siedlung.fehlschlag.msg"
+        },
+        "special": "MISSING: activities.verbessern-siedlung.spezial",
+        "success": {
+          "msg": "MISSING: activities.verbessern-siedlung.erfolg.msg"
+        },
+        "title": "MISSING: activities.verbessern-siedlung.titel"
       }
     },
     "events": {
@@ -6696,6 +6944,25 @@
             "msg": "<p>After sending representatives, the immigrant decides not to build a home in your settlement after all, disappointing the local aristocracy. @gain1Unrest</p>"
           }
         }
+      },
+      "war-threat-arrival": {
+        "description": "<p>A hostile force your scouts have long tracked has reached the königreich's borders. Its vanguard probes your defenses while the main body encamps within striking distance.</p>",
+        "name": "War Bedrohung Arrives",
+        "resolution": "Resolve with a erfolg on the check as your defenders blunt the incursion. The GM may instead (or additionally) run the queued encounter at the linked hexfeldfeld to play the arrival out at the table.",
+        "stage-0": {
+          "criticalFailure": {
+            "msg": "<p>Your defenses are overrun at the border. @gain2d4Unruhe and the GM may escalate the linked encounter.</p>"
+          },
+          "criticalSuccess": {
+            "msg": "<p>Your defenders rout the vanguard and scatter the encampment before it can dig in. The bedrohung is broken. @lose1d4Unruhe</p>"
+          },
+          "failure": {
+            "msg": "<p>Raids slip past your patrols. @gain1d4Unruhe as border siedlungs bear the brunt.</p>"
+          },
+          "success": {
+            "msg": "<p>The border holds; the hostile force withdraws to lick its wounds. The bedrohung is contained.</p>"
+          }
+        }
       }
     },
     "hexContentType": {
@@ -6749,7 +7016,29 @@
       "maxEscalation": "Max Escalation",
       "etaHelp": "Turns until arrival (0 = unknown/arrived).",
       "pauseOnExpiry": "Pause on Escalation",
-      "pauseOnExpiryHelp": "When escalation maxes out, hold for GM confirmation instead of auto-triggering the invasion."
+      "pauseOnExpiryHelp": "When escalation maxes out, hold for GM confirmation instead of auto-triggering the invasion.",
+      "activeDeployments": "Active Entsendungs ({count})",
+      "activeThreats": "Active Bedrohungs ({count})",
+      "boardMode": "Board Mode",
+      "forecast": "Druck Prognose",
+      "forecastRuin": "Ruinenen threshold in {turns} zugs",
+      "forecastRuinBreached": "Ruinenen threshold already breached",
+      "forecastRuinStable": "Druck stable — never reaches ruinenen threshold",
+      "forecastUnrest": "Unruhe threshold in {turns} zugs",
+      "forecastUnrestBreached": "Unruhe threshold already breached",
+      "forecastUnrestStable": "Druck stable — never reaches unruhe threshold",
+      "modeAdvanced": "Advanced",
+      "modeBasic": "Basic",
+      "projection": "Druck Prognose",
+      "ruinIn": "Ruinenen threshold in {turns} zugs",
+      "ruinThreshold": "Ruinenen Threshold",
+      "settings": "Army & War Druck Settings",
+      "threatArrivals": "Bedrohung Arrivals",
+      "threatArrivesIn": "arrives in {turns} zugs",
+      "threatArrivingNow": "Arriving now",
+      "turns": "Zugs",
+      "unrestIn": "Unruhe threshold in {turns} zugs",
+      "unrestThreshold": "Unruhe Threshold"
     },
     "warThreatStatus": {
       "active": "Active",
@@ -6787,7 +7076,11 @@
         "dismiss": "Verwerfen",
         "leveledUp": "{{name}} ist auf Stufe {{level}} aufgestiegen!",
         "dismissed": "Stufenaufstieg-Angebot für {{name}} verworfen."
-      }
+      },
+      "conditionPinnedNoStrike": "{name} is pinned and cannot strike!",
+      "conditionWearyPenalty": "{name} is weary and takes a –1 penalty to attack rolls and AC.",
+      "moraleCheckFail": "{name} fails the morale check (roll {roll} + {bonus} = {total} vs DC {dc}) and becomes routed!",
+      "moraleCheckPass": "{name} passes the morale check (roll {roll} + {bonus} = {total} vs DC {dc}) and recovers."
     },
     "pacingAlertType": {
       "levelMismatch": "The party's level has drifted far from the chapter's intended level. Consider adjusting encounter difficulty or rewards.",
@@ -6805,7 +7098,137 @@
       "empty": "No pacing concerns — the campaign looks balanced.",
       "turnLabel": "Turn",
       "dismiss": "Dismiss",
-      "clearAll": "Clear All"
+      "clearAll": "Clear All",
+      "jumpToSettlement": "Jump to Siedlung"
+    },
+    "expeditionActivities": {
+      "craft": {
+        "criticalFailure": {
+          "message": "A workshop mishap. The gefährte rezugs injured, the work ruinenened."
+        },
+        "criticalSuccess": {
+          "message": "A masterwork takes shape. The gefährte rezugs with a finely made piece and coin to spare."
+        },
+        "failure": {
+          "message": "The project did not come together; materials and time spent for nothing."
+        },
+        "name": "Craft and Tinker",
+        "success": {
+          "message": "Steady work yields a solid, useful creation."
+        }
+      },
+      "diplomacy": {
+        "criticalFailure": {
+          "message": "A diplomatic blunder soured the room; the gefährte limps home weary and bruised, the relationship strained."
+        },
+        "criticalSuccess": {
+          "message": "The envoy rezugs with a signed accord and the goodwill of a distant power, a generous gift in hand."
+        },
+        "failure": {
+          "message": "The negotiations stalled. No harm done, but the time was spent for little gain."
+        },
+        "name": "Broker Diplomacy",
+        "success": {
+          "message": "Talks went well; the gefährte rezugs with a useful understanding and a token of friendship."
+        }
+      },
+      "hunt": {
+        "criticalFailure": {
+          "message": "The hunt zuged on them; the gefährte staggers back mauled and exhausted."
+        },
+        "criticalSuccess": {
+          "message": "A legendary kill. The gefährte rezugs laden with provisions and a trophy worth boasting of."
+        },
+        "failure": {
+          "message": "The game was scarce. The gefährte rezugs tired and empty-handed."
+        },
+        "name": "Hunt and Forage",
+        "success": {
+          "message": "Good hunting fills the larder; the gefährte rezugs with ample game."
+        }
+      },
+      "personal-quest": {
+        "criticalFailure": {
+          "message": "The pursuit ended badly; the gefährte rezugs shaken and hurt, the matter worse than before."
+        },
+        "criticalSuccess": {
+          "message": "The gefährte resolves their personal quest in spectacular fashion, rezuging changed and emboldened."
+        },
+        "failure": {
+          "message": "The quest eludes them this time, though they rezug whole and undeterred."
+        },
+        "name": "Pursue Personal Quest",
+        "success": {
+          "message": "The gefährte makes real progress on what matters to them and comes back the better for it."
+        }
+      },
+      "rest": {
+        "criticalFailure": {
+          "message": "Rest went wrong; illness or mishap leaves the gefährte worse off than when they left."
+        },
+        "criticalSuccess": {
+          "message": "True respite. The gefährte rezugs fully restored and remarkably refreshed."
+        },
+        "failure": {
+          "message": "Rest was fitful and interrupted; little was gained."
+        },
+        "name": "Rest and Recover",
+        "success": {
+          "message": "A quiet stretch of downtime leaves the gefährte rested and ready."
+        }
+      },
+      "scout": {
+        "criticalFailure": {
+          "message": "Lost and harried, the gefährte barely finds their way home, battered and spent."
+        },
+        "criticalSuccess": {
+          "message": "The gefährte maps the region in exacting detail, rezuging with invaluable intelligence."
+        },
+        "failure": {
+          "message": "Fog and dead ends; the gefährte learns little of value."
+        },
+        "name": "Scout the Region",
+        "success": {
+          "message": "The gefährte rezugs with a solid lay of the land and useful notes."
+        }
+      },
+      "train": {
+        "criticalFailure": {
+          "message": "An overzealous regimen backfired; the gefährte rezugs strained and hurting."
+        },
+        "criticalSuccess": {
+          "message": "Intense drilling pays off; the gefährte rezugs sharper and more capable than ever."
+        },
+        "failure": {
+          "message": "Training plateaued; the gefährte rezugs no worse, but no better."
+        },
+        "name": "Train and Drill",
+        "success": {
+          "message": "Diligent practice leaves the gefährte measurably verbessernd."
+        }
+      },
+      "treasure-hunt": {
+        "criticalFailure": {
+          "message": "A trapped vault nearly beanspruchened them; they escape with nothing but fresh wounds."
+        },
+        "criticalSuccess": {
+          "message": "An old map paid off. The gefährte hauls back a major find from a forgotten cache."
+        },
+        "failure": {
+          "message": "The trail went cold. The gefährte rezugs empty-handed but unharmed."
+        },
+        "name": "Treasure Hunt",
+        "success": {
+          "message": "Careful searching zuged up a worthwhile haul of coin and curios."
+        }
+      }
+    },
+    "turnWizard": {
+      "checklist": {
+        "companionsInjured": "Gefährtes injured/unavailable",
+        "expeditionsAwaitingResolution": "Expeditions awaiting resolution",
+        "warThreatsMaxEscalation": "War bedrohungs at max escalation"
+      }
     }
   }
 }
