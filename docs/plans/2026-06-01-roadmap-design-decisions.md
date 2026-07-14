@@ -158,3 +158,28 @@ No published PF2e Kingmaker feat modifies settlement item levels. The structure-
 | 7 | Injury/weather tick | Keep in TurnTickingEngine (already implemented) |
 | 8 | Companion sync | Keep write-only, remove dead setAppFlag writes |
 | 9 | Feats → item levels | Structure-only, no feat involvement (rules-correct, YAGNI) |
+| 10 | Leadership role model | PF2e 8 roles (Ruler, Counselor, Emissary, General, Magister, Treasurer, Viceroy, Warden) — `src/commonMain/kotlin/at/posselt/pfrpg2e/data/kingdom/leaders/Leader.kt`; PF1e 11-role list (adds Grand Diplomat, High Priest, Marshal, Spymaster) REJECTED for this module, only as homebrew-profile variant |
+
+---
+
+### Decision 10: Leadership Role Model — PF2e 8 Roles vs PF1e 11 Roles
+
+**Date:** 2026-07-14
+**Status:** Resolved by implementation
+**Sources:** [`docs/kingmaker-ap-gap-analysis-2026-06-13.md`](../kingmaker-ap-gap-analysis-2026-06-13.md) Section C, [`docs/kingmaker-workbook-notebooklm-missing-features-report.md`](../kingmaker-workbook-notebooklm-missing-features-report.md) item 9, `src/commonMain/kotlin/at/posselt/pfrpg2e/data/kingdom/leaders/Leader.kt`
+
+**Context:** NotebookLM-driven gap scans and the workbook/NotebookLM missing-features report (item 9) repeatedly flag an 11-role leadership list (Ruler, Counselor, General, Grand Diplomat, High Priest, Magister, Marshal, Spymaster, Treasurer, Viceroy, Warden) as a missing feature. The codebase implements exactly the PF2e 8-role model (Ruler, Counselor, Emissary, General, Magister, Treasurer, Viceroy, Warden) with vacancy penalties defined in `Leader.kt`. Grep finds no Spymaster, Grand Diplomat, High Priest, or Marshal symbols anywhere in the Kotlin source.
+
+| # | Option | Trade-off |
+|---|--------|-----------|
+| A | Add the 4 extra roles to the core Leader enum | Violates PF2e Kingmaker rules; adds roles with no mechanical definitions (vacancy penalties, key abilities, activity caps) |
+| B | Keep the PF2e 8-role model as the sole built-in option; the 11-role list is a PF1e variant that would only return via a homebrew rules profile | Rules-correct for PF2e; stops false gap reports; preserves extension path for PF1e-flavor campaigns |
+
+**Decision: B — Keep PF2e 8 roles, reject PF1e 11 roles for core module.**
+
+The PF2e Kingmaker rules define exactly 8 leadership roles. The 11-role list originates from PF1e Kingmaker (and possibly V&K house-rule notes). Implementing it in the core module would require inventing vacancy penalties, key abilities, and activity caps for roles that have no PF2e definition. The correct path is to keep the 8-role enum as the single built-in model and, if a group wants PF1e flavor, deliver the 11-role variant through the homebrew rules profile system (Decision 1). This decision is recorded to stop the recurring false flag in NotebookLM scans and the gap-analysis report item 9.
+
+Cross-references:
+- `docs/kingmaker-ap-gap-analysis-2026-06-13.md` Section C — "Leadership 8 vs 11 roles — decision"
+- `docs/kingmaker-workbook-notebooklm-missing-features-report.md` item 9 — "Leadership Model Reconciliation"
+- `src/commonMain/kotlin/at/posselt/pfrpg2e/data/kingdom/leaders/Leader.kt` — the 8-role enum implementation

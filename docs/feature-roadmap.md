@@ -1,16 +1,16 @@
 # Kingmaker Campaign Automation Feature Roadmap
 
 Created: 2026-05-31
-Status updated: 2026-06-16
+Status updated: 2026-07-14
 Repo: `/home/grego/code/pf2e-kingmaker-tools`
 
 ## Goal
 
 Capture suggested future features for automating more of a Kingmaker campaign, including homebrew support, before any implementation starts.
 
-## Status summary (2026-06-17)
+## Status summary (2026-07-14)
 
-**All 13 features in the original backlog and all 5 new backlog features are now fully implemented** and verified against the codebase and the Hermes kanban board (`~/.hermes/kanban/boards/pf2e-kingmaker-tools`).
+**All 13 features in the original backlog and all 8 new backlog features are now fully implemented** and verified against the codebase and the Hermes kanban board (`~/.hermes/kanban/boards/pf2e-kingmaker-tools`).
 Each feature section is annotated with its implementing files. There are no blocked or remaining items left in the backlogs.
 
 Legend: ✅ Implemented · 🟡 Partial · 🚧 In progress · 📝 Plan written · ⛔ Blocked · ⬜ Not started
@@ -454,12 +454,12 @@ write a `docs/plans/` doc before implementing any of these.
    (the kingdom currently uses a single Commodity pool, so settlement transfers are
    logistics-risk only) and a real claimed-hex route-safety modifier for the raid DC.
 5. ✅ **Player-facing collaborative kingdom view.** Permission-filtered read-only sheet access for players, character-owned active leader selection gating, and roll/assurance button checks. Shipped in `KingdomSheet.kt`, `KingdomCheckDialog.kt`, `check.hbs`, and `Leaders.kt`.
-6. ⬜ **Chronological Kingdom Event Log & Gazette.** Generate a player-facing campaign journal or gazette summarizing all kingdom achievements, builds, claims, diplomatic treaties, and events (e.g. "In Turn 12, Calistril: Built a Mill, Claimed Hex 0204, signed Sylvan Alliance treaty").
-7. ⬜ **Hex-based Resource Worksite & Yield Calculator.** Integrate worksite building (Mines, Lumber Camps, Quarries) with hex content discovery to automatically calculate and project commodity storage increments and resource dice pools for each turn.
+6. ✅ **Chronological Kingdom Event Log & Gazette.** `formatTurnGazette` in `kingdom/TurnHistory.kt` + journal export from Session Prep (`kingdom/SessionPrepView.kt` → `SessionPrepNarrativeGenerator.kt`).
+7. ✅ **Hex-based Resource Worksite & Yield Calculator.** `calculateProjectedResources` in `kingdom/sheet/CalculateIncome.kt` + tests in `CalculateIncomeTest.kt`.
 8. ⬜ **Vassal State, Settlement Annexation, & Tribute Tracking.** Automate diplomacy-based or conquest-based integration of adjacent territories, calculating monthly tribute, unrest penalties, and structural changes on annexation.
-9. ⬜ **Caravan Route Safety Overlays & Threat Indicators.** Draw visual path safety indicators (risk levels, raid modifiers) on the scene map based on the number of claimed/cleared hexes along the active route.
+9. ✅ **Caravan Route Safety Overlays & Threat Indicators.** `syncCaravanRoutes` in `kingdom/map/HexGridSync.kt` + `CaravanRouteSafetyTest.kt`.
 
-
+## Decisions resolved by implementation
 ## Decisions resolved by implementation
 
 The original "Open decisions for Gregory" have effectively been answered by shipped code;
@@ -472,3 +472,4 @@ recorded here for history:
 - Hex content/discovery syncs to Foundry **scene drawings** (`explored`/`cleared` states).
 - Session prep produces both **structured aggregation** and a **narrative prose** layer,
   with journal recap export.
+- **Leadership roles** — PF2e 8-role model (Ruler, Counselor, Emissary, General, Magister, Treasurer, Viceroy, Warden) is intentional; the PF1e 11-role list (Spymaster, Grand Diplomat, High Priest, Marshal) is rejected for this module and would only return as a homebrew-profile variant. Cross-referenced in `docs/kingmaker-ap-gap-analysis-2026-06-13.md` (section C) and `docs/kingmaker-workbook-notebooklm-missing-features-report.md` (item 9).

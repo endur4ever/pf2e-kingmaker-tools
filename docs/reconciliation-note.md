@@ -60,6 +60,18 @@ The audit found the project in good shape: ~155 of ~310 tracked items are proper
 
 ---
 
+## Since-Shipped Gaps (Annotated 2026-07-14)
+
+The following gaps from the original audit have since been shipped in code. They are annotated here with one-line pointers to the implementing files.
+
+| Original Gap | Status | Implementation |
+|--------------|--------|----------------|
+| **Fame/Infamy auto-add at turn start** (Gap 1) | ✅ Shipped | `TurnTickingEngine.kt` advances fame `next→now`; `KingdomSheet.kt` has `gain-fame` button for manual +1 |
+| **Water-adjacent Mill consumption reduction** (Gap G1 in Appendix C) | ✅ Shipped | `WaterAdjacency.kt` consumed by `modifiers/evaluation/EvaluateStructures.kt` |
+| **No-roll camping downtime fix** (from `docs/todo.md`) | ✅ Shipped | No-roll activities (e.g., Enhance Weapons) charge 2h downtime at commit; sheet shows hours spent and disables at 8h |
+
+---
+
 ## Appendix B: Urban Grid Template Reconciliation (2026-06-01)
 
 A vertical reconciliation of the workbook's **Urban Grid Template** sheet was performed alongside this audit. 11 gaps were identified; 7 resolved with code and tests, 4 remain open.
