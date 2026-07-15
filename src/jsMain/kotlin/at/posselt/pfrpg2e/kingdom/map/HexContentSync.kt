@@ -173,15 +173,17 @@ fun registerHexContentSync(game: Game) {
 
     TypedHooks.onUpdateScene { _, _, _, _ ->
         buildPromise {
-            val kingdomActor = game.getKingdomActors().firstOrNull() ?: return@buildPromise
-            syncHexContentMarkers(game, kingdomActor)
+            game.getKingdomActors().forEach { kingdomActor ->
+                syncHexContentMarkers(game, kingdomActor)
+            }
         }
     }
 
     TypedHooks.onCanvasReady { _ ->
         buildPromise {
-            val kingdomActor = game.getKingdomActors().firstOrNull() ?: return@buildPromise
-            syncHexContentMarkers(game, kingdomActor)
+            game.getKingdomActors().forEach { kingdomActor ->
+                syncHexContentMarkers(game, kingdomActor)
+            }
         }
     }
 }

@@ -16,6 +16,7 @@ import at.posselt.pfrpg2e.kingdom.CompanionAutonomy
 import at.posselt.pfrpg2e.kingdom.getKingdom
 import at.posselt.pfrpg2e.kingdom.getKingdomActors
 import at.posselt.pfrpg2e.kingdom.computeAutonomousProposal
+import at.posselt.pfrpg2e.macros.chooseParty
 import at.posselt.pfrpg2e.expedition.getExpeditionActivityName
 import at.posselt.pfrpg2e.settings.Pfrpg2eKingdomCampingWeatherSettings
 import at.posselt.pfrpg2e.camping.calculateDailyPreparationSeconds
@@ -471,7 +472,15 @@ private suspend fun completeDailyPreparations(
     // Companion autonomy: if enabled, post an offer card with volunteering companions
     if (Pfrpg2eKingdomCampingWeatherSettings.getCompanionAutonomyEnabled()) {
         buildPromise {
-            val kingdomActor = game.getKingdomActors().firstOrNull() ?: return@buildPromise
+            val kingdomActors = game.getKingdomActors()
+            if (kingdomActors.size > 1) {
+                console.warn("[km] Companion autonomy: multiple kingdom actors exist (${kingdomActors.size}). Using the configured party actor (\"The Party\" convention).")
+            }
+            val kingdomActor = try {
+                chooseParty(game)
+            } catch (e: Exception) {
+                kingdomActors.firstOrNull() ?: return@buildPromise
+            }
             val kingdom = kingdomActor.getKingdom() ?: return@buildPromise
             val allCompanions = kingdom.companions ?: return@buildPromise
             val volunteers = CompanionAutonomy.selectAutonomousCompanions(allCompanions.toList())

@@ -280,7 +280,7 @@ fun main() {
                     syncSettlementMarkers(game)
                     syncZoneLabels(game)
                     at.posselt.pfrpg2e.kingdom.map.syncExpeditionMarkers(game)
-                    game.getKingdomActors().firstOrNull()?.let { actor ->
+                    game.getKingdomActors().forEach { actor ->
                         at.posselt.pfrpg2e.kingdom.map.syncHexContentMarkers(game, actor)
                     }
                 }

@@ -63,3 +63,21 @@ autonomous worker and your workspace does not contain this repo's `build.gradle.
 - Every `.hbs` ApplicationV2 part must render a **single root element**.
 - Prefer small, verified changes; do not replace working files with stubs.
 - After changes: `./gradlew assemble` must succeed and `jsTest` must stay green.
+
+## Packs consistency (LevelDB)
+
+Packs under `packs/` are LevelDB databases. Each pack directory contains:
+- `CURRENT` — a text file naming the active manifest (e.g. `MANIFEST-002281`)
+- `MANIFEST-*` — the active manifest (referenced by `CURRENT`) and stale manifests
+- `*.ldb` — LevelDB data files
+- `LOCK`, `LOG*`, `lost/` — runtime files (gitignored)
+
+**Rule:** `packs/` is the shipped source of truth. The file named in `CURRENT` **must exist and be tracked**. Stale `MANIFEST-*` and `*.ldb` files not referenced by `CURRENT` must not linger untracked (they indicate a pack edit that wasn't committed).
+
+**Guard script:** `scripts/check_packs_consistency.py` verifies this. It runs in CI and fails with exact `git add` / `git clean` remediation lines. Before committing any pack edit, run it locally:
+
+```bash
+python3 scripts/check_packs_consistency.py
+```
+
+If it fails, stage the file `CURRENT` points to (or clean the stale file if `CURRENT` points elsewhere). Never `gitignore` `MANIFEST-*` wholesale — the active manifest must ship.
