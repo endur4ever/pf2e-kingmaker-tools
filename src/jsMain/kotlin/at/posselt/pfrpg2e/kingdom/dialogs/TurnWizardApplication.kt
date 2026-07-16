@@ -34,6 +34,7 @@ import at.posselt.pfrpg2e.kingdom.caravanRdPerCommodity
 import at.posselt.pfrpg2e.kingdom.tickCaravans
 import at.posselt.pfrpg2e.kingdom.tickShipments
 import at.posselt.pfrpg2e.kingdom.ShipmentTickInput
+import at.posselt.pfrpg2e.kingdom.sheet.ProjectedResources
 import at.posselt.pfrpg2e.kingdom.sheet.calculateProjectedResources
 import at.posselt.pfrpg2e.kingdom.sheet.upkeepGainFame
 import at.posselt.pfrpg2e.kingdom.sheet.upkeepAdjustUnrest
@@ -114,6 +115,17 @@ fun TickChange.toDisplayString(): String {
             params["amount"] = newValue.toString()
             t("kingdom.turnWizard.preview.tributeRp", params.unsafeCast<com.foundryvtt.core.AnyObject>())
         }
+        category == "projectedResources" -> {
+            val params = js("{}")
+            params["commodity"] = when (field) {
+                "lumber" -> t("kingdom.lumber")
+                "luxuries" -> t("kingdom.luxuries")
+                "ore" -> t("kingdom.ore")
+                "stone" -> t("kingdom.stone")
+                else -> field
+            }
+            t("kingdom.turn.commodityCappedByStorage", params.unsafeCast<com.foundryvtt.core.AnyObject>())
+        }
         category == "resourcePoints" && field == "now" -> {
             val params = js("{}")
             params["old"] = oldValue.toString()
@@ -153,6 +165,13 @@ fun TickChange.toDisplayString(): String {
         }
     }
 }
+
+private fun ProjectedResources.storageCapPreviewChanges(): List<TickChange> = listOfNotNull(
+    if (lumberCappedByStorage) TickChange("projectedResources", "lumber", null, null) else null,
+    if (luxuriesCappedByStorage) TickChange("projectedResources", "luxuries", null, null) else null,
+    if (oreCappedByStorage) TickChange("projectedResources", "ore", null, null) else null,
+    if (stoneCappedByStorage) TickChange("projectedResources", "stone", null, null) else null,
+)
 
 /**
  * Single source of truth for assembling [TurnTickingEngine.tick] arguments from a kingdom
@@ -528,12 +547,12 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
             expressionContext = expressionContext,
             modifiers = modifiers,
         )
-        kingdom.commodities.next.ore = projected.ore
-        kingdom.commodities.next.stone = projected.stone
-        kingdom.commodities.next.lumber = projected.lumber
-        kingdom.commodities.next.luxuries = projected.luxuries
+        kingdom.commodities.next.ore = projected.income.ore
+        kingdom.commodities.next.stone = projected.income.stone
+        kingdom.commodities.next.lumber = projected.income.lumber
+        kingdom.commodities.next.luxuries = projected.income.luxuries
         kingdom.commodities.next.food = 0
-        kingdom.resourceDice.next = projected.resourceDice
+        kingdom.resourceDice.next = projected.income.resourceDice
     }
 
     actor.setKingdom(kingdom)
@@ -986,8 +1005,26 @@ class TurnWizardApplication(
         val storage = calculateStorage(realm, settlements.allSettlements)
         // Simulate the same upcoming turn End Turn will tick into, without persisting the increment.
         val tickResult = runKingdomTurnTick(kingdom, storage, (kingdom.currentTurn ?: 0) + 1)
-        
-        cachedChanges = tickResult.changes.toTypedArray()
+
+        val storageCapChanges = if (kingdom.settings.automateResources != "manual") {
+            val allFeatures = kingdom.getExplodedFeatures()
+            val chosenFeatures = kingdom.getChosenFeatures(allFeatures)
+            val chosenFeats = kingdom.getChosenFeats(chosenFeatures)
+            val expressionContext = kingdom.createSimpleContext(settlements)
+            val modifiers = kingdom.createModifiers(settlements)
+            calculateProjectedResources(
+                kingdomData = kingdom,
+                realmData = realm,
+                chosenFeats = chosenFeats,
+                settlements = settlements.allSettlements,
+                expressionContext = expressionContext,
+                modifiers = modifiers,
+            ).storageCapPreviewChanges()
+        } else {
+            emptyList()
+        }
+
+        cachedChanges = (tickResult.changes + storageCapChanges).toTypedArray()
         render()
     }
 

@@ -349,6 +349,14 @@
             padding: 0.2rem 0;
         }
 
+        .km-storage-cap-hint {
+            color: var(--color-level-warning, #885600);
+            cursor: help;
+            font-size: 0.75em;
+            margin-left: 0.2rem;
+            vertical-align: middle;
+        }
+
         .km-unrest-ruin {
             border-radius: 0;
             border: 0;

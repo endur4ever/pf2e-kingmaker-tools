@@ -3582,12 +3582,12 @@ class KingdomSheet(
                     expressionContext = expressionContext,
                     modifiers = modifiers,
                 )
-                kingdom.commodities.next.ore = projected.ore
-                kingdom.commodities.next.stone = projected.stone
-                kingdom.commodities.next.lumber = projected.lumber
-                kingdom.commodities.next.luxuries = projected.luxuries
+                kingdom.commodities.next.ore = projected.income.ore
+                kingdom.commodities.next.stone = projected.income.stone
+                kingdom.commodities.next.lumber = projected.income.lumber
+                kingdom.commodities.next.luxuries = projected.income.luxuries
                 kingdom.commodities.next.food = 0
-                kingdom.resourceDice.next = projected.resourceDice
+                kingdom.resourceDice.next = projected.income.resourceDice
             }
 
             beforeKingdomUpdate(previousKingdom, kingdom)

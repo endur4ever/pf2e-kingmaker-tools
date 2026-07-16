@@ -99,25 +99,45 @@
                 <td>{{> formElement commoditiesContext.now.lumber }}</td>
                 <td>/</td>
                 <td class="km-capacity">{{ commoditiesContext.capacity.lumber }}</td>
-                <td>{{> formElement commoditiesContext.next.lumber }}</td>
+                <td>
+                    {{> formElement commoditiesContext.next.lumber }}
+                    {{#if commoditiesContext.cappedByStorage.lumber}}
+                        <i class="fa-solid fa-boxes-stacked km-storage-cap-hint" title="{{localizeKM "kingdom.turn.cappedByStorage"}}"></i>
+                    {{/if}}
+                </td>
             </tr>
             <tr>
                 <td>{{> formElement commoditiesContext.now.stone }}</td>
                 <td>/</td>
                 <td class="km-capacity">{{ commoditiesContext.capacity.stone }}</td>
-                <td>{{> formElement commoditiesContext.next.stone }}</td>
+                <td>
+                    {{> formElement commoditiesContext.next.stone }}
+                    {{#if commoditiesContext.cappedByStorage.stone}}
+                        <i class="fa-solid fa-boxes-stacked km-storage-cap-hint" title="{{localizeKM "kingdom.turn.cappedByStorage"}}"></i>
+                    {{/if}}
+                </td>
             </tr>
             <tr>
                 <td>{{> formElement commoditiesContext.now.ore }}</td>
                 <td>/</td>
                 <td class="km-capacity">{{ commoditiesContext.capacity.ore }}</td>
-                <td>{{> formElement commoditiesContext.next.ore }}</td>
+                <td>
+                    {{> formElement commoditiesContext.next.ore }}
+                    {{#if commoditiesContext.cappedByStorage.ore}}
+                        <i class="fa-solid fa-boxes-stacked km-storage-cap-hint" title="{{localizeKM "kingdom.turn.cappedByStorage"}}"></i>
+                    {{/if}}
+                </td>
             </tr>
             <tr>
                 <td>{{> formElement commoditiesContext.now.luxuries }}</td>
                 <td>/</td>
                 <td class="km-capacity">{{ commoditiesContext.capacity.luxuries }}</td>
-                <td>{{> formElement commoditiesContext.next.luxuries }}</td>
+                <td>
+                    {{> formElement commoditiesContext.next.luxuries }}
+                    {{#if commoditiesContext.cappedByStorage.luxuries}}
+                        <i class="fa-solid fa-boxes-stacked km-storage-cap-hint" title="{{localizeKM "kingdom.turn.cappedByStorage"}}"></i>
+                    {{/if}}
+                </td>
             </tr>
         </table>
         <h3>{{localizeKM "kingdom.solutions"}}</h3>

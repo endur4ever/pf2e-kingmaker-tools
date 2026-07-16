@@ -7,12 +7,18 @@ import at.posselt.pfrpg2e.data.kingdom.structures.CommodityStorage
 import at.posselt.pfrpg2e.kingdom.KingdomData
 import at.posselt.pfrpg2e.kingdom.RawFeat
 import at.posselt.pfrpg2e.kingdom.data.ChosenFeat
+import at.posselt.pfrpg2e.kingdom.data.RawCommodities
+import at.posselt.pfrpg2e.kingdom.data.RawCurrentCommodities
+import at.posselt.pfrpg2e.kingdom.data.endTurn
 import at.posselt.pfrpg2e.kingdom.modifiers.Modifier
 import at.posselt.pfrpg2e.kingdom.modifiers.expressions.ExpressionContext
+import at.posselt.pfrpg2e.kingdom.resources.calculateStorage
 import at.posselt.pfrpg2e.data.kingdom.KingdomSkillRanks
 import at.posselt.pfrpg2e.data.kingdom.leaders.Vacancies
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class CalculateIncomeTest {
 
@@ -20,12 +26,27 @@ class CalculateIncomeTest {
         level: Int = 1,
         resourceDiceNow: Int = 0,
         bonusResourceDice: Int = 0,
-        settlementsGenerateRd: Boolean = false
+        settlementsGenerateRd: Boolean = false,
+        foodNow: Int = 0,
+        lumberNow: Int = 0,
+        luxuriesNow: Int = 0,
+        oreNow: Int = 0,
+        stoneNow: Int = 0,
     ): KingdomData {
         return js("""{
             level: level,
             resourceDice: { now: resourceDiceNow },
             bonusResourceDice: bonusResourceDice,
+            commodities: {
+                now: {
+                    food: foodNow,
+                    lumber: lumberNow,
+                    luxuries: luxuriesNow,
+                    ore: oreNow,
+                    stone: stoneNow
+                },
+                next: { food: 0, lumber: 0, luxuries: 0, ore: 0, stone: 0 }
+            },
             settings: {
                 settlementsGenerateRd: settlementsGenerateRd
             }
@@ -150,7 +171,7 @@ class CalculateIncomeTest {
         // No modifier additions
         val modifiers = emptyList<Modifier>()
 
-        val income = calculateProjectedResources(
+        val projected = calculateProjectedResources(
             kingdomData = kingdomData,
             realmData = realmData,
             chosenFeats = chosenFeats,
@@ -160,15 +181,80 @@ class CalculateIncomeTest {
         )
 
         // Resource dice = 4 + level 10 = 14
-        assertEquals(14, income.resourceDice)
+        assertEquals(14, projected.income.resourceDice)
         // Lumber from worksite = 3
-        assertEquals(3, income.lumber)
+        assertEquals(3, projected.income.lumber)
         // Ore from worksite = 3
-        assertEquals(3, income.ore)
+        assertEquals(3, projected.income.ore)
         // Stone from worksite = 3
-        assertEquals(3, income.stone)
+        assertEquals(3, projected.income.stone)
         // Luxuries = worksite 2 + chosen feat increase 2 = 4
-        assertEquals(4, income.luxuries)
+        assertEquals(4, projected.income.luxuries)
+        assertFalse(projected.oreCappedByStorage)
+    }
+
+    @Test
+    fun testCalculateProjectedResourcesCapsGainByRemainingStorage() {
+        val kingdomData = createMockKingdomData(
+            level = 1,
+            oreNow = 3,
+        )
+        val realmData = RealmData(
+            // A territory stores four commodities. With three ore already stored, only one of the
+            // three projected ore can be retained at end turn.
+            size = 1,
+            worksites = RealmData.WorkSites(
+                farmlands = RealmData.WorkSite(quantity = 0, resources = 0),
+                lumberCamps = RealmData.WorkSite(quantity = 0, resources = 0),
+                mines = RealmData.WorkSite(quantity = 1, resources = 2),
+                quarries = RealmData.WorkSite(quantity = 0, resources = 0),
+                luxurySources = RealmData.WorkSite(quantity = 0, resources = 0),
+            ),
+        )
+        val expressionContext = ExpressionContext(
+            usedSkill = null,
+            ranks = KingdomSkillRanks(),
+            leader = null,
+            activity = null,
+            phase = null,
+            level = 1,
+            unrest = 0,
+            rollOptions = emptySet(),
+            vacancies = Vacancies(),
+            structure = null,
+            anarchyAt = 20,
+            atWar = false,
+            eventTraits = emptySet(),
+            settlementEvents = emptySet(),
+            eventLeader = null,
+            event = null,
+            structures = emptySet(),
+            waterBorders = 0,
+        )
+
+        val projected = calculateProjectedResources(
+            kingdomData = kingdomData,
+            realmData = realmData,
+            chosenFeats = emptyList(),
+            settlements = emptyList(),
+            expressionContext = expressionContext,
+            modifiers = emptyList(),
+        )
+
+        assertEquals(1, projected.income.ore)
+        assertTrue(projected.oreCappedByStorage)
+        assertFalse(projected.lumberCappedByStorage)
+
+        val rawEndTurn = RawCurrentCommodities(
+            now = RawCommodities(food = 0, lumber = 0, luxuries = 0, ore = 3, stone = 0),
+            next = RawCommodities(food = 0, lumber = 0, luxuries = 0, ore = 3, stone = 0),
+        ).endTurn(calculateStorage(realmData, emptyList()))
+        val automatedEndTurn = RawCurrentCommodities(
+            now = RawCommodities(food = 0, lumber = 0, luxuries = 0, ore = 3, stone = 0),
+            next = RawCommodities(food = 0, lumber = 0, luxuries = 0, ore = projected.income.ore, stone = 0),
+        ).endTurn(calculateStorage(realmData, emptyList()))
+        assertEquals(rawEndTurn.now.ore, 3 + projected.income.ore)
+        assertEquals(rawEndTurn.now.ore, automatedEndTurn.now.ore)
     }
 
     @Test
@@ -226,7 +312,7 @@ class CalculateIncomeTest {
             waterBorders = 0
         )
 
-        val income = calculateProjectedResources(
+        val projected = calculateProjectedResources(
             kingdomData = kingdomData,
             realmData = realmData,
             chosenFeats = emptyList(),
@@ -236,6 +322,6 @@ class CalculateIncomeTest {
         )
 
         // 4 base + 1 level, current resourceDice.now (1) excluded
-        assertEquals(5, income.resourceDice)
+        assertEquals(5, projected.income.resourceDice)
     }
 }

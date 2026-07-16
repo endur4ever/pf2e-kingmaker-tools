@@ -1999,6 +1999,8 @@
       "feat": "Feat",
       "turn": {
         "next": "Next",
+        "cappedByStorage": "Capped by storage capacity",
+        "commodityCappedByStorage": "{commodity} is capped by storage capacity",
         "endTurnGmOnly": "Only the GM can end the kingdom turn.",
         "confirmEndTurn": "Are you sure you want to end turn {turn}? This will advance the kingdom to the next turn. You can undo this with \"Undo Last End Turn\" if needed."
       }
