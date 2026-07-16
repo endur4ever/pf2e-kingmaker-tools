@@ -30,7 +30,7 @@ class AnalyticsContextTest {
 
     @Test
     fun `GM gets all metrics`() {
-        val filtered = allMetrics.filter { isGM = true }
+        val filtered = filterAnalyticsMetricsForUser(allMetrics, isGM = true)
         assertEquals(allMetrics.size, filtered.size)
         // Verify all expected keys are present
         val keys = filtered.map { it.first }.toSet()
@@ -51,7 +51,7 @@ class AnalyticsContextTest {
 
     @Test
     fun `Player gets only safe metrics`() {
-        val filtered = allMetrics.filter { isGM = false }
+        val filtered = filterAnalyticsMetricsForUser(allMetrics, isGM = false)
         // Player-safe: unrest, fame, resourcePoints, size, level = 5 metrics
         assertEquals(5, filtered.size)
         val keys = filtered.map { it.first }.toSet()

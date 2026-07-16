@@ -55,6 +55,7 @@ import at.posselt.pfrpg2e.kingdom.pacingChapterTargetLevel
 import at.posselt.pfrpg2e.kingdom.pacingLevelMismatchRange
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.AnalyticsContext
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.MetricPointContext
+import at.posselt.pfrpg2e.kingdom.sheet.contexts.filterAnalyticsMetricsForUser
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.MetricSeriesContext
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.ThresholdLineContext
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.toDashboardContext
@@ -3026,10 +3027,8 @@ class KingdomSheet(
                 "ruinStrife" to "kingdom.analytics.ruinStrife"
             )
 
-            // Player-safe series: only unrest, fame, resourcePoints (RP), size, level
-            // Mirrors the player-safe Recent Turns timeline (commit 654d3b98).
-            val playerSafeKeys = setOf("unrest", "fame", "resourcePoints", "size", "level")
-            val metrics = if (isGM) allMetrics else allMetrics.filter { (key, _) -> key in playerSafeKeys }
+            // Player-safe series filtering (extracted + unit-tested in AnalyticsContext.kt).
+            val metrics = filterAnalyticsMetricsForUser(allMetrics, isGM)
 
             metrics.mapNotNull { (key, labelKey) ->
                 val series = extractSeries(history, key, limit = if (analyticsWindowSize > 0) analyticsWindowSize else null)

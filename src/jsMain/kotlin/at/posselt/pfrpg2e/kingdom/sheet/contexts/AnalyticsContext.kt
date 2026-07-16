@@ -40,3 +40,16 @@ external interface AnalyticsContext {
     var hasData: Boolean
     var isGM: Boolean
 }
+
+/**
+ * Metric keys visible to players (mirrors the player-safe Recent Turns timeline, commit 654d3b98).
+ * GM-only series (consumption, ruin internals, war pressure, xp) are excluded for non-GMs.
+ */
+val analyticsPlayerSafeMetricKeys = setOf("unrest", "fame", "resourcePoints", "size", "level")
+
+/** GM sees every metric; a non-GM sees only [analyticsPlayerSafeMetricKeys]. */
+fun <T> filterAnalyticsMetricsForUser(
+    allMetrics: List<Pair<String, T>>,
+    isGM: Boolean,
+): List<Pair<String, T>> =
+    if (isGM) allMetrics else allMetrics.filter { (key, _) -> key in analyticsPlayerSafeMetricKeys }

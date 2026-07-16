@@ -203,6 +203,9 @@ external interface CampingData {
     /** Suppress Combat encounters in claimed+cleared hexes when enabled. */
     var filterByHexState: Boolean?
 
+    /** Auto-succeed campsite preparation & cooking in claimed hexes (house rule) when enabled. */
+    var autoSucceedInClaimedHexes: Boolean?
+
     /** Rumors accumulated this camping session. */
     var rumors: Array<RawRumor>?
 
@@ -339,10 +342,6 @@ fun CampingActivity.parseResult() =
 
 fun CampingActivityWithId.checkPerformed() =
     result != null && actorUuid != null
-
-const val prepareCampsiteId = "prepare-campsite"
-const val cookMealId = "cook-meal"
-const val learnFromACompanionId = "learn-from-a-companion"
 
 /** Default number of watch slots shown when first opening the Set Watches section. */
 const val defaultNumberOfWatches = 3

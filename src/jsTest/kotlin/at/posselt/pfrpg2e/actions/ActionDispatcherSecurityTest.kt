@@ -1,8 +1,17 @@
 package at.posselt.pfrpg2e.actions
 
 import at.posselt.pfrpg2e.actions.handlers.ActionHandler
+import at.posselt.pfrpg2e.actions.handlers.AddHuntAndGatherResultHandler
+import at.posselt.pfrpg2e.actions.handlers.ApplyMealEffectsHandler
+import at.posselt.pfrpg2e.actions.handlers.ClearMealEffectsHandler
 import at.posselt.pfrpg2e.actions.handlers.ExecutionMode
+import at.posselt.pfrpg2e.actions.handlers.GainProvisionsHandler
+import at.posselt.pfrpg2e.actions.handlers.LearnSpecialRecipeHandler
+import at.posselt.pfrpg2e.actions.handlers.OpenCampingSheetHandler
+import at.posselt.pfrpg2e.actions.handlers.OpenKingdomSheetHandler
 import at.posselt.pfrpg2e.actions.handlers.OriginatorPolicy
+import at.posselt.pfrpg2e.actions.handlers.SyncActivitiesHandler
+import at.posselt.pfrpg2e.actions.handlers.SyncBattleOutcomeHandler
 import com.foundryvtt.core.AnyObject
 import com.foundryvtt.core.Game
 import kotlin.test.Test
@@ -96,5 +105,50 @@ class ActionDispatcherSecurityTest {
 
         dispatcher.dispatch(action, receivedViaSocket = true)
         assertEquals(1, handler.executedCount)
+    }
+
+    /** A handler that opts into nothing — proves the default is deny-by-default (fail-closed). */
+    private class DefaultPolicyHandler : ActionHandler("defaultPolicyAction") {
+        override suspend fun execute(action: ActionMessage, dispatcher: ActionDispatcher) {}
+    }
+
+    @Test
+    fun testOriginatorPolicyIsDenyByDefault() {
+        // A newly-added handler that does not set originatorPolicy must be GM_ONLY, so the
+        // socket-authorization control stays fail-CLOSED (regression guard for t_000fd424).
+        assertEquals(OriginatorPolicy.GM_ONLY, DefaultPolicyHandler().originatorPolicy)
+    }
+
+    @Test
+    fun testEveryHandlerHasExpectedOriginatorPolicy() {
+        // Constructing a handler only stores its constructor args; no game logic runs, so a
+        // bare fake Game is safe. This map is the reviewed classification: player-originated
+        // camping flows = ANY; GM broadcasts and kingdom/army mutations = GM_ONLY.
+        val game = js("({})").unsafeCast<Game>()
+        val expected: List<Pair<String, OriginatorPolicy>> = listOf(
+            // player-collaborative camping flows — must stay ANY or player camping breaks
+            AddHuntAndGatherResultHandler().action to OriginatorPolicy.ANY,
+            ApplyMealEffectsHandler(game).action to OriginatorPolicy.ANY,
+            ClearMealEffectsHandler().action to OriginatorPolicy.ANY,
+            GainProvisionsHandler().action to OriginatorPolicy.ANY,
+            LearnSpecialRecipeHandler().action to OriginatorPolicy.ANY,
+            SyncActivitiesHandler(game).action to OriginatorPolicy.ANY,
+            // GM-only: sheet-push broadcasts + kingdom/army mutation
+            OpenCampingSheetHandler(game).action to OriginatorPolicy.GM_ONLY,
+            OpenKingdomSheetHandler(game).action to OriginatorPolicy.GM_ONLY,
+            SyncBattleOutcomeHandler(game).action to OriginatorPolicy.GM_ONLY,
+        )
+        val actual: List<Pair<String, OriginatorPolicy>> = listOf(
+            AddHuntAndGatherResultHandler(),
+            ApplyMealEffectsHandler(game),
+            ClearMealEffectsHandler(),
+            GainProvisionsHandler(),
+            LearnSpecialRecipeHandler(),
+            SyncActivitiesHandler(game),
+            OpenCampingSheetHandler(game),
+            OpenKingdomSheetHandler(game),
+            SyncBattleOutcomeHandler(game),
+        ).map { it.action to it.originatorPolicy }
+        assertEquals(expected, actual)
     }
 }

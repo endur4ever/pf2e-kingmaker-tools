@@ -257,24 +257,6 @@ private fun checkEncounterHexFilter(
 }
 
 /**
- * Gets the party's current hex key from the token position on the active hex-grid scene.
- * Returns null if no active scene, not a hex grid, or party token not found.
- */
-private fun getPartyCurrentHexKey(game: Game, actor: CampingActor): String? {
-    val scene = game.scenes.active
-    if (scene == null || !scene.grid.isHexagonal) return null
-    val token = scene.tokens.contents.find { it.actorId == actor.id } ?: return null
-    val grid = scene.grid
-    val center = Point(
-        x = token.x + grid.sizeX / 2.0,
-        y = token.y + grid.sizeY / 2.0,
-    )
-    val offset = grid.getOffset(center)
-    // Kingmaker hex keys are "i*1000 + j" as strings (see HexGridSync.kt)
-    return (offset.i * 1000 + offset.j).toString()
-}
-
-/**
  * Whispers a GM-only notification that an encounter was suppressed.
  */
 private suspend fun whisperEncounterSuppressed(game: Game, actor: CampingActor, reason: String) {
