@@ -2003,7 +2003,8 @@
         "commodityCappedByStorage": "{commodity} is capped by storage capacity",
         "endTurnGmOnly": "Only the GM can end the kingdom turn.",
         "confirmEndTurn": "Are you sure you want to end turn {turn}? This will advance the kingdom to the next turn. You can undo this with \"Undo Last End Turn\" if needed."
-      }
+      },
+      "activityLockedUntilTurn": "Available again on turn {turn}"
     },
     "chatMessages": {
       "annexation": {
@@ -4096,7 +4097,7 @@
       "clandestine-business": {
         "title": "Clandestine Business",
         "description": "<p>You know there are criminals in your kingdom, and they know you know. You encourage them to send kickbacks in the form of resources and Commodities to the government, but the common citizens will be more than upset if they find out! This starts as a basic check against your Control DC, but every subsequent Kingdom turn you pursue Clandestine Business, the DC increases by 2. Every Kingdom turn that passes without Clandestine Business reduces the DC by 1 (until you reach your Control DC).</p>",
-        "automationNotes": "DC increase from previous turns is not implemented",
+        "automationNotes": "The DC climbs by 2 each consecutive Kingdom turn you pursue this activity and drops by 1 each turn you skip it (down to the base Control DC). Tracked automatically.",
         "criticalSuccess": {
           "msg": "<p>@gain2RolledResourceDice. In addition, you @gain1d4Luxuries. The public is none the wiser.</p>"
         },
@@ -4498,7 +4499,7 @@
       "false-victory": {
         "title": "False Victory",
         "description": "<p>Your contacts with the criminal underworld and your knack for dodging punishment and claiming responsibility for victories you had no direct role in can be harnessed to engineer false victories to trick the kingdom’s citizens into thinking their leaders are doing more than they actually are to create a safe place to live. Such attempts are not without risks, though, for if things backfire, you can cause problems where none existed in the first place. When setting up a false victory, attempt a basic Intrigue check.</p>",
-        "automationNotes": "Critical Failure timeout is not implemented",
+        "automationNotes": "Failure locks this activity out on your next Kingdom turn; Critical Failure locks it for 6 Kingdom turns. Tracked automatically.",
         "criticalSuccess": {
           "msg": "<p>At the end of this Kingdom turn’s Event Phase, roll again on the random kingdom events table. Rumors of this event being resolved spread throughout your kingdom. You don’t gain any of the benefits of resolving this false victory, but instead @lose1d6Unrest and one Ruin of your choice by 1</p> <ul><li>@lose1Corruption</li><li>@lose1Crime</li><li>@lose1Decay</li><li>@lose1Strife</li></ul><p>If you randomly roll that same random kingdom event at any time during the next four kingdom turns, you can attempt an Intrigue check with a +1 circumstance bonus to resolve it rather than the normal check to resolve it.</p>",
           "modifiers": {
@@ -4599,7 +4600,7 @@
       "garrison-army": {
         "title": "Garrison Army",
         "description": "<p>You move an army into a fortification and assign them to guard it. In order to garrison, the army must be located in a hex that contains a Refuge, Settlement, or Work Site. If you’re garrisoning the army in a Refuge hex, attempt a basic Defense check. If you’re garrisoning the army in a settlement, attempt a basic Politics check. If you’re garrisoning the army in a Work Site hex, attempt a basic Engineering check. This check’s DC increases by 5 if the hex is not part of your kingdom, or by 10 if the location is part of an enemy kingdom.</p>",
-        "automationNotes": "Critical Failure timeout is not implemented",
+        "automationNotes": "Critical Failure locks this activity out for 4 Kingdom turns. Tracked automatically (as a single kingdom-wide lockout rather than per-army-per-location).",
         "requirement": "The army is in the same hex as a Refuge, Settlement, or Work Site.",
         "modifiers": {
           "outsideKingdom": {
@@ -4950,7 +4951,7 @@
       "preventative-measures": {
         "title": "Preventative Measures",
         "description": "<p>You help to organize magical defenses and resources to combat potential upcoming disasters or dangers to the kingdom. Attempt a basic Magic check to determine how effective the magical preparations are.</p>",
-        "automationNotes": "Critical Failure timeout of 1 turn is not tracked",
+        "automationNotes": "Critical Failure locks this activity out on your next Kingdom turn. Tracked automatically.",
         "criticalSuccess": {
           "msg": "<p>The next time during this Kingdom turn that you attempt a Kingdom skill check to resolve a dangerous event, you gain a +2 circumstance bonus to the check and, unless you roll a critical failure, the result is improved one degree. If you reach the end of this Kingdom turn and haven’t had a dangerous event, you may decrease one Ruin of your choice by 1</p> <ul><li>@lose1Corruption</li><li>@lose1Crime</li><li>@lose1Decay</li><li>@lose1Strife</li></ul>",
           "modifiers": {
@@ -4976,7 +4977,7 @@
       "process-hidden-fees": {
         "title": "Process Hidden Fees",
         "description": "<p>With your aid, you can process additional taxes, fees, and payments. Attempt a basic Trade check to determine what sorts of additional resources you gather.</p>",
-        "automationNotes": "Failure and Critical Failure timeout of 1 turn is not tracked",
+        "automationNotes": "Failure or Critical Failure locks this activity out on your next Kingdom turn. Tracked automatically.",
         "criticalSuccess": {
           "msg": "<p>@gain2ResourceDiceNextTurn</p>"
         },
@@ -5377,7 +5378,7 @@
       "request-foreign-aid-vk": {
         "title": "Request Foreign Aid (V&K)",
         "description": "<p>When disaster strikes, you send out a call for help to another nation with whom you have diplomatic relations. The DC of this check starts at the other group’s Negotiation DC +2, but every subsequent Kingdom turn you Request Foreign Aid from the same group, the DC increases by 2. Every Kingdom turn that passes without Requesting Foreign Aid from that Group reduces the DC by 1 (until you reach the other group’s Negotiation DC +2). You may only attempt to request Foreign Aid with a given group once per Kingdom turn regardless of the number of leaders pursuing activities.</p>",
-        "automationNotes": "DC increases are not tracked and circumstance bonuses are not applied after, but before the roll",
+        "automationNotes": "The DC climbs by 2 each consecutive Kingdom turn you request aid and drops by 1 each turn you skip it (tracked automatically, kingdom-wide rather than per-group). Circumstance bonuses are still applied before the roll.",
         "requirement": "You have diplomatic relations with the group you are requesting aid from.",
         "criticalSuccess": {
           "msg": "<p>Your ally’s aid grants a +4 circumstance bonus to any one Kingdom skill check attempted during the remainder of this Kingdom turn. You can choose to apply this bonus to any Kingdom skill check after the die is rolled, but must do so before the result is known. In addition, @gain2RolledResourceDice; this RP does not accrue into XP at the end of the turn if you don’t spend it.</p>",
@@ -5523,7 +5524,7 @@
       "send-diplomatic-envoy": {
         "title": "Send Diplomatic Envoy",
         "description": "<p>You send emissaries to another group to foster positive relations and communication. The DC of this check is the group’s Negotiation DC (see the sidebar on page 519). Attempts to Send a Diplomatic Envoy to a nation with which your kingdom is at war take a –4 circumstance penalty to the check and have the result worsened one degree. At the GM’s option, some wars might be so heated that this activity has no chance of success.</p>",
-        "automationNotes": "Group is not tracked plus on a Critical Failure, the 2 turn timeout is not tracked",
+        "automationNotes": "Critical Failure locks this activity out for 2 Kingdom turns (tracked automatically). The target group's diplomatic-relation state is still tracked manually.",
         "modifiers": {
           "atWar": {
             "name": "At War with Group",
@@ -5603,7 +5604,7 @@
         "title": "Supernatural Solution",
         "description": "<p>Your spellcasters try to resolve issues when mundane solutions just aren’t enough. Attempt a basic check.</p>",
         "special": "You cannot influence a check with Supernatural Solution and Creative Solution simultaneously.",
-        "automationNotes": "2 turn timeout on a Critical Failure is not tracked",
+        "automationNotes": "Critical Failure locks this activity out for 2 Kingdom turns. Tracked automatically.",
         "criticalSuccess": {
           "msg": "<p>You can call upon your spellcasters’ supernatural solution to aid in resolving any Kingdom skill check made during the remainder of this Kingdom turn @gain1SupernaturalSolution. Do so just before a Kingdom skill check is rolled (by yourself or any other PC). Attempt a Magic check against the same DC in addition to the Kingdom skill check, and take whichever of the two results you prefer. If you don’t use your Supernatural Solution by the end of this Kingdom turn, this benefit ends and you gain 10XP instead.</p>"
         },
@@ -5620,7 +5621,7 @@
       "supplementary-hunting": {
         "title": "Supplementary Hunting",
         "description": "<p>Following your advice, rural-dwelling citizens work to supplement stores of food and resources through hunting and trapping. Attempt a basic Wilderness check to gather excess livestock from the local wildlife, ranches, and farms to generate food commodities.</p>",
-        "automationNotes": "Failure and Critical Failure timeout of 1 turn is not tracked",
+        "automationNotes": "Failure or Critical Failure locks this activity out on your next Kingdom turn. Tracked automatically.",
         "criticalSuccess": {
           "msg": "<p>@gain1d4Food, @gain1Luxuries, and @gain1ResourceDiceNextTurn</p>"
         },

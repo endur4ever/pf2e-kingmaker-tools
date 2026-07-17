@@ -185,10 +185,21 @@ external interface RawCouncilCooldowns {
     var feast: Int
 }
 
+/** Persisted per-activity timeout/escalating-DC state; see [ActivityUsage]. */
+@JsPlainObject
+external interface RawActivityBlock {
+    var activityId: String
+    var lockedUntilTurn: Int?
+    var dcBump: Int?
+    var usedThisTurn: Boolean?
+}
+
 @JsPlainObject
 external interface KingdomData {
     var name: String
     var councilCooldowns: RawCouncilCooldowns?
+    /** Per-activity timeout/escalating-DC usage state (nullable for migration safety). */
+    var activityUsage: Array<RawActivityBlock>?
     var quests: Array<RawQuest>?
     var atWar: Boolean
     var fame: RawFame

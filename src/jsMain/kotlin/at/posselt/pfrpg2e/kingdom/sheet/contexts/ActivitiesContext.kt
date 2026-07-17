@@ -5,6 +5,9 @@ import at.posselt.pfrpg2e.data.kingdom.KingdomSkillRanks
 import at.posselt.pfrpg2e.data.kingdom.leaders.Leader
 import at.posselt.pfrpg2e.kingdom.KingdomData
 import at.posselt.pfrpg2e.kingdom.RawActivity
+import at.posselt.pfrpg2e.kingdom.activityLockedUntil
+import at.posselt.pfrpg2e.kingdom.activityUsages
+import at.posselt.pfrpg2e.kingdom.isActivityLocked
 import at.posselt.pfrpg2e.kingdom.availableSkills
 import at.posselt.pfrpg2e.kingdom.canBePerformed
 import at.posselt.pfrpg2e.kingdom.data.ChosenFeat
@@ -201,7 +204,12 @@ private suspend fun toActivityContext(
     val activePhase = if (isStrict) getActivePhaseForGating(checkedItems) else null
     val phaseGated = isActivityPhaseGated(activity.phase, checkedItems, isStrict)
 
-    val disabled = baseDisabled || anarchyGated || phaseGated
+    val currentTurn = kingdom.currentTurn ?: 0
+    val activityUsages = kingdom.activityUsages()
+    val timeoutLocked = isActivityLocked(activityUsages, activity.id, currentTurn)
+    val timeoutUntilTurn = activityLockedUntil(activityUsages, activity.id)
+
+    val disabled = baseDisabled || anarchyGated || phaseGated || timeoutLocked
     val disabledReason = if (phaseGated) {
         val phaseLabel = t("kingdomPhase.${activity.phase}")
         val activePhaseLabel = t("kingdomPhase.${activePhase!!.value}")
@@ -211,6 +219,10 @@ private suspend fun toActivityContext(
         t("kingdom.activityPhaseGated", params.unsafeCast<com.foundryvtt.core.AnyObject>())
     } else if (anarchyGated) {
         t("kingdom.activityDisabledDuringAnarchy")
+    } else if (timeoutLocked) {
+        val params = js("{}")
+        params["turn"] = timeoutUntilTurn
+        t("kingdom.activityLockedUntilTurn", params.unsafeCast<com.foundryvtt.core.AnyObject>())
     } else {
         null
     }

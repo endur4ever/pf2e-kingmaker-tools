@@ -15,7 +15,11 @@ import at.posselt.pfrpg2e.kingdom.generateRollMeta
 import at.posselt.pfrpg2e.kingdom.getActivity
 import at.posselt.pfrpg2e.kingdom.getEvent
 import at.posselt.pfrpg2e.kingdom.getEvents
+import at.posselt.pfrpg2e.kingdom.activityTracksUsage
+import at.posselt.pfrpg2e.kingdom.activityUsages
 import at.posselt.pfrpg2e.kingdom.getKingdom
+import at.posselt.pfrpg2e.kingdom.recordActivityUse
+import at.posselt.pfrpg2e.kingdom.toRawActivityBlocks
 import at.posselt.pfrpg2e.kingdom.modifiers.DowngradeResult
 import at.posselt.pfrpg2e.kingdom.modifiers.Note
 import at.posselt.pfrpg2e.kingdom.modifiers.UpgradeResult
@@ -198,6 +202,20 @@ suspend fun rollCheck(
             notes = serializeB64Json(notes.map { it.serialize() }.toTypedArray()),
         )
         postComplexDegreeOfSuccess(context, changed)
+    }
+    // Persist per-activity timeout / escalating-DC usage state (RAW lockouts + climbing DC).
+    // Runs after any degree adjustment so the lockout reflects the final result. Locks self-expire
+    // against kingdom.currentTurn; the dcBump climb is settled at end-turn in TurnTickingEngine.
+    if (activity != null && activityTracksUsage(activity.id)) {
+        kingdomActor.getKingdom()?.let { k ->
+            k.activityUsage = recordActivityUse(
+                k.activityUsages(),
+                activity.id,
+                changed,
+                k.currentTurn ?: 0,
+            ).toRawActivityBlocks()
+            kingdomActor.setKingdom(k)
+        }
     }
     return changed
 }

@@ -188,6 +188,7 @@ fun runKingdomTurnTick(kingdom: KingdomData, storage: CommodityStorage, currentT
         commodities = kingdom.commodities,
         storage = storage,
         councilCooldowns = kingdom.councilCooldowns,
+        activityUsage = kingdom.activityUsage ?: emptyArray(),
         modifiers = kingdom.modifiers,
         campaignClocks = kingdom.campaignClocks,
         campaignQuests = kingdom.campaignQuests ?: emptyArray(),
@@ -259,6 +260,7 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
     kingdom.consumption = tickResult.consumption
     kingdom.commodities = tickResult.commodities
     kingdom.councilCooldowns = tickResult.councilCooldowns
+    kingdom.activityUsage = tickResult.activityUsage
     kingdom.modifiers = tickResult.modifiers
     kingdom.campaignQuests = tickResult.campaignQuests
     kingdom.warThreats = tickResult.warThreats

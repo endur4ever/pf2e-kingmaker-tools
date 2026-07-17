@@ -41,6 +41,8 @@ import at.posselt.pfrpg2e.kingdom.expandMagicActivities
 import at.posselt.pfrpg2e.kingdom.getAllActivities
 import at.posselt.pfrpg2e.kingdom.getAllSettlements
 import at.posselt.pfrpg2e.kingdom.getExplodedFeatures
+import at.posselt.pfrpg2e.kingdom.activityDcBump
+import at.posselt.pfrpg2e.kingdom.activityUsages
 import at.posselt.pfrpg2e.kingdom.getKingdom
 import at.posselt.pfrpg2e.kingdom.getOwnedLeaderRoles
 import at.posselt.pfrpg2e.kingdom.getRealmData
@@ -885,7 +887,7 @@ suspend fun kingdomCheckDialog(
             } else {
                 null
             }
-            val dc = overrideDc ?: (activity.resolveDc(
+            val baseDc = overrideDc ?: (activity.resolveDc(
                 kingdomLevel = kingdom.level,
                 realm = realm,
                 rulerVacant = vacancies.ruler,
@@ -893,6 +895,14 @@ suspend fun kingdomCheckDialog(
                 groupDc = group?.negotiationDC,
                 eventModifier = event?.event?.modifier
             ) ?: 0)
+            // Escalating-DC activities (Clandestine Business, Request Foreign Aid V&K) raise their
+            // DC by 2 each consecutive Kingdom turn used; the accumulated bump is shown here so the
+            // player sees the real (raised) DC before rolling. The override still wins if set.
+            val dc = if (overrideDc != null) {
+                baseDc
+            } else {
+                baseDc + activityDcBump(kingdom.activityUsages(), activity.id)
+            }
             val skills = getValidActivitySkills(
                 ranks = kingdom.parseSkillRanks(
                     chosenFeatures,

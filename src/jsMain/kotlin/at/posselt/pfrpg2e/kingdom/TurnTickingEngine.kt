@@ -98,6 +98,7 @@ data class TickResult(
 	val consumption: RawConsumption,
 	val commodities: RawCurrentCommodities,
 	val councilCooldowns: RawCouncilCooldowns?,
+	val activityUsage: Array<RawActivityBlock> = emptyArray(),
 	val modifiers: Array<RawModifier>,
 	val changes: List<TickChange>,
 	val clockEvents: Array<ClockTickEvent> = emptyArray(),
@@ -171,6 +172,7 @@ object TurnTickingEngine {
 		commodities: RawCurrentCommodities,
 		storage: CommodityStorage,
 		councilCooldowns: RawCouncilCooldowns?,
+		activityUsage: Array<RawActivityBlock> = emptyArray(),
 		modifiers: Array<RawModifier>,
 		campaignClocks: Array<CampaignClock> = emptyArray(),
 		campaignQuests: Array<dynamic> = emptyArray(),
@@ -272,6 +274,11 @@ object TurnTickingEngine {
 		} else {
 			null
 		}
+
+		// 7.5) Settle escalating-DC activity usage (+2 if used this turn, else −1; drop idle entries).
+		// Timeout lockouts self-expire against currentTurn, so no per-turn decrement is needed here.
+		val newActivityUsage = tickActivityUsages(activityUsage.toActivityUsages(), currentTurn)
+			.toRawActivityBlocks()
 
 		// 8) Tick down modifier durations
 		var expiredCount = 0
@@ -460,6 +467,7 @@ object TurnTickingEngine {
 					consumption = newConsumption,
 					commodities = newCommodities,
 					councilCooldowns = newCooldowns,
+					activityUsage = newActivityUsage,
 					modifiers = newModifiers,
 					changes = changes,
 					clockEvents = clockResult.events,
