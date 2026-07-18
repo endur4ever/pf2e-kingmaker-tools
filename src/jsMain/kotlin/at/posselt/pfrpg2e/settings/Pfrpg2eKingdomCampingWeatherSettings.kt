@@ -680,6 +680,12 @@ object Pfrpg2eKingdomCampingWeatherSettings {
             hint = t("settings.companionAutonomyEnabledHelp"),
             default = false,
         )
+        game.settings.registerScalar<String>(
+            key = "dismissedCalendarWarnings",
+            name = "Dismissed Calendar Warnings",
+            default = "",
+            hidden = true,
+        )
     }
 
     suspend fun setEnableCompanionLeveling(value: Boolean) =
@@ -693,6 +699,17 @@ object Pfrpg2eKingdomCampingWeatherSettings {
 
     fun getCompanionAutonomyEnabled(): Boolean =
         game.settings.getBoolean("companionAutonomyEnabled")
+
+    /**
+     * Comma-separated set of one-time calendar-integration warning keys that have already been
+     * shown to the GM (e.g. the missing-compat-bridge notice). Persisted so each warning fires
+     * exactly once per world. Hidden, world-scoped.
+     */
+    suspend fun setDismissedCalendarWarnings(value: String) =
+        game.settings.setString("dismissedCalendarWarnings", value)
+
+    fun getDismissedCalendarWarnings(): String =
+        game.settings.getNullableString("dismissedCalendarWarnings") ?: ""
 }
 
 

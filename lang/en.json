@@ -2007,6 +2007,8 @@
       "activityLockedUntilTurn": "Available again on turn {turn}"
     },
     "chatMessages": {
+      "calendarBridgeMissing": "<strong>Kingmaker Tools:</strong> Seasons &amp; Stars is active, but the <em>Simple Calendar Compatibility Bridge</em> module is not. Calendar notes (expeditions, weather, end-of-turn and camp summaries) are being silently skipped. Install <a href=\"{url}\">the compatibility bridge</a> (package id <code>{packageId}</code>) to enable them. This notice appears only once.",
+      "calendarTimeAdvanceFailed": "<strong>Kingmaker Tools:</strong> The world clock could not be advanced during rest &mdash; usually a misconfigured Seasons &amp; Stars calendar (a \"Calendar not found\" fallback). Time did not advance; re-select your calendar in the Seasons &amp; Stars settings, or check the console for details. This notice appears only once.",
       "annexation": {
         "title": "Vassal State Annexed",
         "body": "The vassal state of {name} has been formally annexed into the kingdom.",

@@ -30,6 +30,7 @@ import at.posselt.pfrpg2e.kingdom.getKingdomActors
 import at.posselt.pfrpg2e.kingdom.armies.createArmyCompendiumEntries
 import at.posselt.pfrpg2e.kingdom.armies.registerArmyConsumptionHooks
 import at.posselt.pfrpg2e.kingdom.bindChatButtons
+import at.posselt.pfrpg2e.kingdom.warnIfCalendarNotesUnsupported
 import at.posselt.pfrpg2e.kingdom.registerContextMenus
 import at.posselt.pfrpg2e.kingdom.map.registerHexGridSync
 import at.posselt.pfrpg2e.kingdom.map.registerHexContentSync
@@ -258,6 +259,12 @@ fun main() {
         // S&S's setup-time restore — otherwise dates, weather seasons and calendar logging are wrong.
         TypedHooks.onReady {
             at.posselt.pfrpg2e.utils.fixSeasonsStarsActiveCalendar()
+        }
+
+        // Insulated: Seasons & Stars without the Simple Calendar Compatibility Bridge silently
+        // drops all our calendar notes. Warn the GM once (own onReady so it always runs).
+        TypedHooks.onReady {
+            buildPromise { game.warnIfCalendarNotesUnsupported() }
         }
 
         TypedHooks.onReady {

@@ -15,6 +15,7 @@ import at.posselt.pfrpg2e.camping.askDc
 import at.posselt.pfrpg2e.kingdom.CompanionAutonomy
 import at.posselt.pfrpg2e.kingdom.getKingdom
 import at.posselt.pfrpg2e.kingdom.getKingdomActors
+import at.posselt.pfrpg2e.kingdom.warnCalendarTimeAdvanceFailed
 import at.posselt.pfrpg2e.kingdom.computeAutonomousProposal
 import at.posselt.pfrpg2e.macros.chooseParty
 import at.posselt.pfrpg2e.expedition.getExpeditionActivityName
@@ -383,7 +384,10 @@ private suspend fun beginRest(
         camping.watchSecondsRemaining = watchDurationSeconds - randomEncounterAt
         campingActor.setCamping(camping)
         game.time.advance(randomEncounterAt)
-            .catch { console.error("[km] camping watch: failed to advance world time", it) }
+            .catch {
+                console.error("[km] camping watch: failed to advance world time", it)
+                buildPromise { game.warnCalendarTimeAdvanceFailed() }
+            }
     } else {
         camping.watchSecondsRemaining = watchDurationSeconds
         completeDailyPreparations(game, dispatcher, campingActor, camping, party)
@@ -467,7 +471,10 @@ private suspend fun completeDailyPreparations(
     // Seasons & Stars calendar can never abort or block the camp reset + healing above.
     buildPromise { logToCalendar(title = "Camp Rest Completed", content = summaryContent) }
     game.time.advance(secondsToAdvance)
-        .catch { console.error("[km] camping rest: failed to advance world time", it) }
+        .catch {
+            console.error("[km] camping rest: failed to advance world time", it)
+            buildPromise { game.warnCalendarTimeAdvanceFailed() }
+        }
 
     // Companion autonomy: if enabled, post an offer card with volunteering companions
     if (Pfrpg2eKingdomCampingWeatherSettings.getCompanionAutonomyEnabled()) {
