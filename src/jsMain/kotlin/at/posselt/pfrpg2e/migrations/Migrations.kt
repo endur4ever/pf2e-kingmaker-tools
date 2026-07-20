@@ -32,6 +32,14 @@ import at.posselt.pfrpg2e.migrations.migrations.Migration37
 import at.posselt.pfrpg2e.migrations.migrations.Migration38
 import at.posselt.pfrpg2e.migrations.migrations.Migration39
 import at.posselt.pfrpg2e.migrations.migrations.Migration40
+import at.posselt.pfrpg2e.migrations.migrations.Migration41
+import at.posselt.pfrpg2e.migrations.migrations.Migration42
+import at.posselt.pfrpg2e.migrations.migrations.Migration43
+import at.posselt.pfrpg2e.migrations.migrations.Migration44
+import at.posselt.pfrpg2e.migrations.migrations.Migration45
+import at.posselt.pfrpg2e.migrations.migrations.Migration46
+import at.posselt.pfrpg2e.migrations.migrations.Migration47
+import at.posselt.pfrpg2e.migrations.migrations.Migration48
 import at.posselt.pfrpg2e.settings.pfrpg2eKingdomCampingWeather
 import at.posselt.pfrpg2e.utils.isFirstGM
 import at.posselt.pfrpg2e.utils.openJournal
@@ -61,7 +69,7 @@ private suspend fun createBackups(
     )
 }
 
-private val migrations = listOf(
+internal val migrations = listOf(
     Migration17(),
     Migration18(),
     Migration19(),
@@ -86,6 +94,18 @@ private val migrations = listOf(
     Migration38(),
     Migration39(),
     Migration40(),
+    // Migrations 41-48 were authored as classes but never registered here, so they never ran on
+    // existing worlds — new fields (accessGrants, bankedBonuses, autoSucceedInClaimedHexes,
+    // companion session ids, etc.) were left un-backfilled. Registered so the multi-version upgrade
+    // path actually applies them. MigrationChainTest guards contiguity so this can't regress.
+    Migration41(),
+    Migration42(),
+    Migration43(),
+    Migration44(),
+    Migration45(),
+    Migration46(),
+    Migration47(),
+    Migration48(),
 )
 
 private val latestMigrationVersion = migrations.maxOfOrNull { it.version }!!
