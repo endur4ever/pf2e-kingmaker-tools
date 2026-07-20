@@ -686,6 +686,12 @@ object Pfrpg2eKingdomCampingWeatherSettings {
             default = "",
             hidden = true,
         )
+        game.settings.registerScalar<Boolean>(
+            key = "enableForagingModifiers",
+            name = t("settings.enableForagingModifiers"),
+            hint = t("settings.enableForagingModifiersHelp"),
+            default = true,
+        )
     }
 
     suspend fun setEnableCompanionLeveling(value: Boolean) =
@@ -710,6 +716,12 @@ object Pfrpg2eKingdomCampingWeatherSettings {
 
     fun getDismissedCalendarWarnings(): String =
         game.settings.getNullableString("dismissedCalendarWarnings") ?: ""
+
+    suspend fun setEnableForagingModifiers(value: Boolean) =
+        game.settings.setBoolean("enableForagingModifiers", value)
+
+    fun getEnableForagingModifiers(): Boolean =
+        try { game.settings.getBoolean("enableForagingModifiers") } catch (_: Throwable) { true }
 }
 
 

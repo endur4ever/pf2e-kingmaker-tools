@@ -188,6 +188,8 @@
       "climate": "Climate",
       "climateButton": "Customize Climate",
       "enableWeather": "Enable Weather",
+      "enableForagingModifiers": "Vary foraging by terrain, season & weather",
+      "enableForagingModifiersHelp": "When enabled, Hunt & Gather yields are scaled (±50% max) by the current hex terrain, the season, and the weather — forest/swamp/water forage richer, desert/mountain leaner, deep winter and snow lean. Off restores flat RAW yields.",
       "enableWeatherSoundFx": "Enable Ambient Weather Sounds",
       "enableWeatherSoundFxHelp": "If enabled, will play rain and snow tracks from the official module. You can override this behavior by creating playlists named like \"weather.blizzard\" or \"weather.rain\".",
       "weatherRollMode": "Weather Roll Mode",
@@ -468,6 +470,10 @@
       "zone": "Zone {id}",
       "basicIngredients": "Basic Ingredients",
       "specialIngredients": "Special Ingredients",
+      "foraging": {
+        "bountiful": "The land provides — rich terrain and fair conditions make for a bountiful forage.",
+        "lean": "Lean pickings — poor terrain or harsh weather thin out the forage."
+      },
       "rations": "Rations",
       "consumingFood": "Consuming Food",
       "missingFood": "Missing the following ingredients:",

@@ -93,6 +93,11 @@ import at.posselt.pfrpg2e.data.hex.HexContent
 import at.posselt.pfrpg2e.data.hex.HexContentType
 import at.posselt.pfrpg2e.data.hex.HexContentVisibility
 import at.posselt.pfrpg2e.data.regions.Terrain
+import at.posselt.pfrpg2e.data.regions.getSeasonForMonth
+import at.posselt.pfrpg2e.camping.dialogs.RegionSetting
+import at.posselt.pfrpg2e.settings.Pfrpg2eKingdomCampingWeatherSettings
+import at.posselt.pfrpg2e.utils.getCurrentMonth
+import at.posselt.pfrpg2e.weather.getCurrentWeatherType
 import at.posselt.pfrpg2e.kingdom.getKingdom
 import at.posselt.pfrpg2e.kingdom.getKingdomActors
 
@@ -617,6 +622,20 @@ class CampingSheet(
         return DegreeOfSuccess.SUCCESS
     }
 
+    /**
+     * Foraging-yield modifier for Hunt & Gather derived from the party's surroundings — the current
+     * region's terrain, the current season and the current weather. Neutral (no change) when the
+     * "vary foraging by terrain/season/weather" toggle is off, restoring flat RAW yields.
+     */
+    private fun resolveForagingModifier(region: RegionSetting): ForagingModifier {
+        if (!Pfrpg2eKingdomCampingWeatherSettings.getEnableForagingModifiers()) return ForagingModifier.NEUTRAL
+        return foragingYieldModifier(
+            terrain = fromCamelCase<Terrain>(region.terrain),
+            season = getSeasonForMonth(game.getCurrentMonth().ordinal),
+            weather = game.getCurrentWeatherType(),
+        )
+    }
+
     private suspend fun rollRecipeCheck(recipeId: String) {
         // the following lines should all be non-null if everything went right
         val camping = actor.getCamping()
@@ -719,6 +738,7 @@ class CampingSheet(
                     zoneDc = campingCheckData.region.zoneDc,
                     regionLevel = campingCheckData.region.level,
                     campingActor = actor,
+                    foraging = resolveForagingModifier(campingCheckData.region),
                 )
             } else if (activity.isDiscoverSpecialMeal() && recipe != null) {
                 postDiscoverSpecialMeal(
