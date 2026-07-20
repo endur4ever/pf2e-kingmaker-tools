@@ -5,6 +5,7 @@ import at.posselt.pfrpg2e.companion.CompanionPersonalQuest
 import at.posselt.pfrpg2e.companion.MAX_COMPANION_INFLUENCE
 import at.posselt.pfrpg2e.companion.clampInfluence
 import at.posselt.pfrpg2e.companion.companionDiscoveryStages
+import at.posselt.pfrpg2e.companion.canAttemptCompanionInteraction
 import at.posselt.pfrpg2e.companion.influenceBarPercent
 import at.posselt.pfrpg2e.companion.normalizeDiscoveryStatus
 import at.posselt.pfrpg2e.kingdom.data.RawCharacter
@@ -84,6 +85,10 @@ external interface CompanionProfileContext : HandlebarsRenderContext {
     val careerTriumphs: Int
     val careerScars: Int
     val hasCareerExpeditions: Boolean
+
+    // House-rule once-per-camping-session caps: true when the attempt was already used this session.
+    val influenceAttemptUsedThisSession: Boolean
+    val discoveryAttemptUsedThisSession: Boolean
 }
 
 private fun questSummary(
@@ -130,6 +135,7 @@ fun buildCompanionProfileContext(
     isGM: Boolean,
     expeditions: List<RawCompanionExpedition> = emptyList(),
     localize: (String) -> String = { it },
+    currentSessionId: String? = null,
 ): CompanionProfileContext {
     val influence = clampInfluence(companion.influence)
     val status = normalizeDiscoveryStatus(companion.discoveryStatus)
@@ -249,5 +255,9 @@ fun buildCompanionProfileContext(
         careerTriumphs = careerTriumphs,
         careerScars = careerScars,
         hasCareerExpeditions = hasCareerExpeditions,
+        influenceAttemptUsedThisSession =
+            !canAttemptCompanionInteraction(companion.lastInfluenceAttemptSessionId, currentSessionId),
+        discoveryAttemptUsedThisSession =
+            !canAttemptCompanionInteraction(companion.lastDiscoveryAttemptSessionId, currentSessionId),
     )
 }

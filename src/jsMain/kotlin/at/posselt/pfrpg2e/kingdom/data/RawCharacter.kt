@@ -55,6 +55,12 @@ external interface RawCharacter {
 
     /** Expeditions that accrued injuries (scars). Nullable for back-compat. */
     var careerScars: Int?
+
+    /** Camping-session id of this companion's last Influence attempt (house-rule once-per-session cap). Nullable. */
+    var lastInfluenceAttemptSessionId: String?
+
+    /** Camping-session id of this companion's last Discover attempt (house-rule once-per-session cap). Nullable. */
+    var lastDiscoveryAttemptSessionId: String?
 }
 
 /**
@@ -64,5 +70,5 @@ fun RawCharacter(
     name: String,
     actorUuid: String? = null,
 ): RawCharacter =
-    js("{ name: name, actorUuid: actorUuid, speed: 0, traveling: false, active: true, role: 'companion', plotHook: '', influence: 0, campAvailable: true, discoveryStatus: 'unknown', personalQuestIds: [], level: 1, xp: 0, expeditionStatus: 'available', injuryDaysRemaining: null, careerExpeditions: null, careerTriumphs: null, careerScars: null }")
+    js("{ name: name, actorUuid: actorUuid, speed: 0, traveling: false, active: true, role: 'companion', plotHook: '', influence: 0, campAvailable: true, discoveryStatus: 'unknown', personalQuestIds: [], level: 1, xp: 0, expeditionStatus: 'available', injuryDaysRemaining: null, careerExpeditions: null, careerTriumphs: null, careerScars: null, lastInfluenceAttemptSessionId: null, lastDiscoveryAttemptSessionId: null }")
         .unsafeCast<RawCharacter>()

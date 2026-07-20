@@ -1,6 +1,8 @@
 package at.posselt.pfrpg2e.companion
 
 import at.posselt.pfrpg2e.companion.applyCompanionXp
+import at.posselt.pfrpg2e.camping.getCampingActors
+import at.posselt.pfrpg2e.camping.getCamping
 import at.posselt.pfrpg2e.settings.Pfrpg2eKingdomCampingWeatherSettings
 import at.posselt.pfrpg2e.app.HandlebarsRenderContext
 import at.posselt.pfrpg2e.app.forms.SimpleApp
@@ -54,6 +56,41 @@ class CompanionProfileDialog(
         val ids = companion.personalQuestIds.toSet()
         val key = companionKey(companion)
         return all.filter { it.id in ids || it.companionId == key }
+    }
+
+    /**
+     * Durable id of the current camping session, or null when there is no camp. Reuses the camping
+     * system's own per-session marker (dailyPrepsAtTime, the world-time stamp of the last daily
+     * preparations) so the once-per-session cap and the camping oncePerSession reset can't drift.
+     */
+    private fun currentCampingSessionId(): String? =
+        game.getCampingActors().firstOrNull()?.getCamping()?.dailyPrepsAtTime?.toString()
+
+    /**
+     * House-rule once-per-camping-session gate for a companion Influence/Discover attempt. Blocks
+     * (with a warning) when [getLast] already equals the current session id; otherwise applies
+     * [block] and records the current session id via [setLast]. GM only, like [mutate].
+     */
+    private fun attemptOncePerSession(
+        getLast: (RawCharacter) -> String?,
+        setLast: (RawCharacter, String?) -> Unit,
+        warnKey: String,
+        block: (RawCharacter) -> Unit,
+    ) {
+        if (!game.user.isGM) return
+        val sessionId = currentCampingSessionId()
+        buildPromise {
+            val kingdom = kingdomActor.getKingdom() ?: return@buildPromise
+            val companion = kingdom.companions?.getOrNull(companionIndex) ?: return@buildPromise
+            if (!canAttemptCompanionInteraction(getLast(companion), sessionId)) {
+                ui.notifications.warn(t(warnKey))
+                return@buildPromise
+            }
+            block(companion)
+            setLast(companion, sessionId)
+            kingdomActor.setKingdom(kingdom)
+            render()
+        }
     }
 
     /** Re-read kingdom, mutate companion + quests via [block], persist, and re-render. GM only. */
@@ -225,8 +262,17 @@ class CompanionProfileDialog(
                 }
             }
 
-            "influence-increase" -> mutate { c, _ -> c.influence = clampInfluence(c.influence + 1) }
+            // Influencing a companion is the once-per-camping-session "Influence attempt" (house rule).
+            "influence-increase" -> attemptOncePerSession(
+                getLast = { it.lastInfluenceAttemptSessionId },
+                setLast = { c, s -> c.lastInfluenceAttemptSessionId = s },
+                warnKey = "kingdom.companion.influenceAttemptUsed",
+            ) { c -> c.influence = clampInfluence(c.influence + 1) }
+            // Decrease is an uncapped correction, not an attempt.
             "influence-decrease" -> mutate { c, _ -> c.influence = clampInfluence(c.influence - 1) }
+            // GM override: clear the recorded attempt so another Influence attempt is allowed this session.
+            "reset-influence-attempt" -> mutate { c, _ -> c.lastInfluenceAttemptSessionId = null }
+            "reset-discovery-attempt" -> mutate { c, _ -> c.lastDiscoveryAttemptSessionId = null }
 
             "toggle-camp-available" -> mutate { c, _ -> c.campAvailable = !c.campAvailable }
 
@@ -265,7 +311,12 @@ class CompanionProfileDialog(
                 val select = element.querySelector("select[name='discoveryStatus']") as? HTMLSelectElement
                 val value = select?.value ?: return
                 if (value in companionDiscoveryStages) {
-                    mutate { c, _ -> c.discoveryStatus = value }
+                    // Changing discovery status is the once-per-camping-session "Discover attempt".
+                    attemptOncePerSession(
+                        getLast = { it.lastDiscoveryAttemptSessionId },
+                        setLast = { c, s -> c.lastDiscoveryAttemptSessionId = s },
+                        warnKey = "kingdom.companion.discoveryAttemptUsed",
+                    ) { c -> c.discoveryStatus = value }
                 }
             }
         }
@@ -297,6 +348,7 @@ class CompanionProfileDialog(
                 isGM = game.user.isGM,
                 expeditions = expeditions,
                 localize = { t(it) },
+                currentSessionId = currentCampingSessionId(),
             )
         }
     }

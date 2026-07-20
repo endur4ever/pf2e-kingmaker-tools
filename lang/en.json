@@ -1093,6 +1093,9 @@
         "noCompanions": "No companions or NPCs in the roster yet. Add them on the Roster tab."
       },
       "companion": {
+        "influenceAttemptUsed": "Already made an Influence attempt this camping session (house rule). Use \"Allow another\" to override.",
+        "discoveryAttemptUsed": "Already made a Discover attempt this camping session (house rule). Use \"Allow another\" to override.",
+        "allowAnother": "Allow another attempt this session (GM)",
         "careerLabel": "Expedition Record",
         "careerSummary": "Veteran of {count} expeditions ({triumphs} triumphs, {scars} scars)",
         "profile": "Companion Profile",

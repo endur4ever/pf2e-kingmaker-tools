@@ -23,7 +23,12 @@
         {{#if isGM}}
         <div class="km-cp-influence-controls">
             <button type="button" data-action="influence-decrease" title="-1"><i class="fa-solid fa-minus"></i></button>
-            <button type="button" data-action="influence-increase" title="+1"><i class="fa-solid fa-plus"></i></button>
+            <button type="button" data-action="influence-increase"
+                    title="{{#if influenceAttemptUsedThisSession}}{{localizeKM "kingdom.companion.influenceAttemptUsed"}}{{else}}+1{{/if}}"
+                    {{#if influenceAttemptUsedThisSession}}disabled{{/if}}><i class="fa-solid fa-plus"></i></button>
+            {{#if influenceAttemptUsedThisSession}}
+            <button type="button" data-action="reset-influence-attempt" title="{{localizeKM "kingdom.companion.allowAnother"}}"><i class="fa-solid fa-rotate-left"></i></button>
+            {{/if}}
         </div>
         {{/if}}
     </section>
@@ -78,7 +83,12 @@
                 <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
                 {{/each}}
             </select>
-            <button type="button" data-action="set-discovery">{{localizeKM "applications.save"}}</button>
+            <button type="button" data-action="set-discovery"
+                    title="{{#if discoveryAttemptUsedThisSession}}{{localizeKM "kingdom.companion.discoveryAttemptUsed"}}{{/if}}"
+                    {{#if discoveryAttemptUsedThisSession}}disabled{{/if}}>{{localizeKM "applications.save"}}</button>
+            {{#if discoveryAttemptUsedThisSession}}
+            <button type="button" data-action="reset-discovery-attempt">{{localizeKM "kingdom.companion.allowAnother"}}</button>
+            {{/if}}
         </div>
         {{/if}}
     </section>
