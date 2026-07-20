@@ -70,6 +70,7 @@ import at.posselt.pfrpg2e.kingdom.data.ChosenFeature
 import at.posselt.pfrpg2e.kingdom.data.RawPacingAlert
 import at.posselt.pfrpg2e.kingdom.data.RawTurnRecord
 import at.posselt.pfrpg2e.kingdom.appendTurnRecord
+import at.posselt.pfrpg2e.kingdom.detectAndOfferMilestones
 import at.posselt.pfrpg2e.kingdom.computeLastTurnRecap
 import at.posselt.pfrpg2e.kingdom.buildTurnRecord
 import at.posselt.pfrpg2e.data.kingdom.structures.CommodityStorage
@@ -593,6 +594,11 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
             }
         }
     }
+
+    // Auto-detect the two house-rule milestones (road-to-capital, region fully claimed) from live
+    // hex state and post a GM-confirmed award offer for any newly-earned one. Read-only detection;
+    // never auto-awards.
+    detectAndOfferMilestones(game, actor, kingdom)
 
     // Post any pacing advisories that fired this turn to chat
     firedPacingAlerts.forEach { alert -> postPacingAlertChat(alert) }

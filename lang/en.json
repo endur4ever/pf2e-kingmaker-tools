@@ -2149,11 +2149,13 @@
         "markedAsRun": "Pending encounter at hex {hexKey} marked as run."
       },
       "milestone": {
-        "award": "MISSING: chatMessages.milestone.award",
-        "dismiss": "MISSING: chatMessages.milestone.dismiss",
-        "gmActions": "MISSING: chatMessages.milestone.gmActions",
-        "offerBody": "MISSING: chatMessages.milestone.offerBody",
-        "offerTitle": "MISSING: chatMessages.milestone.offerTitle"
+        "award": "Award milestone",
+        "dismiss": "Dismiss",
+        "gmActions": "GM: award or dismiss this milestone.",
+        "offerBody": "The kingdom has reached a milestone: <strong>{name}</strong> (+{xp} XP). Award it?",
+        "offerTitle": "Milestone reached!",
+        "awarded": "Milestone awarded: {name} (+{xp} XP).",
+        "dismissed": "Milestone offer dismissed: {name}."
       }
     },
     "displayBars": {
@@ -3498,10 +3500,10 @@
         "name": "Win your first War Encounter (V&K)"
       },
       "claim-all-hexes-in-a-region": {
-        "name": "MISSING: milestones.claim-all-hexes-in-a-region.name"
+        "name": "Claim all hexes in a region"
       },
       "connect-settlement-to-capital-via-roads": {
-        "name": "MISSING: milestones.connect-settlement-to-capital-via-roads.name"
+        "name": "Connect a settlement to your capital via roads"
       }
     },
     "charters": {

@@ -24,6 +24,8 @@ import at.posselt.pfrpg2e.kingdom.data.RawCompanionExpedition
 import at.posselt.pfrpg2e.kingdom.structures.StructureActor
 import at.posselt.pfrpg2e.kingdom.structures.validateUsingSchema
 import at.posselt.pfrpg2e.kingdom.data.EndTurnSnapshot
+import at.posselt.pfrpg2e.kingdom.data.MilestoneChoice
+import at.posselt.pfrpg2e.kingdom.sheet.beforeKingdomUpdate
 import at.posselt.pfrpg2e.kingdom.dialogs.undoEndTurn
 import at.posselt.pfrpg2e.takeIfInstance
 import at.posselt.pfrpg2e.utils.bindChatClick
@@ -565,6 +567,41 @@ private val buttons = listOf(
         if (!undoEndTurn(game, actor)) {
             ui.notifications.warn(t("chatMessages.endTurn.undoStale"))
         }
+    },
+    ChatButton("km-offer-milestone") { game, actor, _, button ->
+        // GM-confirmed award for an auto-detected milestone (road-to-capital / region-claimed).
+        // Awarding flips its MilestoneChoice to completed — seeding a completed=false entry first for
+        // kingdoms that never carried the choice — then runs beforeKingdomUpdate so the milestone-XP
+        // delta and level-threshold handling apply exactly the same way the sheet does. Idempotent:
+        // an already-completed milestone is a no-op, so the offer can be clicked only once to effect.
+        if (!game.user.isGM) return@ChatButton
+        val action = button.dataset["action"] ?: return@ChatButton
+        val milestoneId = button.dataset["milestoneId"] ?: return@ChatButton
+        val kingdom = actor.getKingdom() ?: return@ChatButton
+        val milestone = kingdom.getMilestones().find { it.id == milestoneId } ?: return@ChatButton
+        if (action == "dismiss") {
+            postChatMessage(t("chatMessages.milestone.dismissed", recordOf("name" to milestone.name)))
+            return@ChatButton
+        }
+        if (action != "award") return@ChatButton
+        val existing = kingdom.milestones.find { it.id == milestoneId }
+        if (existing?.completed == true) return@ChatButton
+        if (existing == null) {
+            kingdom.milestones = kingdom.milestones + MilestoneChoice(
+                id = milestoneId,
+                completed = false,
+                enabled = true,
+            )
+        }
+        val previous = deepClone(kingdom)
+        kingdom.milestones = kingdom.milestones.map {
+            if (it.id == milestoneId) MilestoneChoice.copy(it, completed = true, enabled = true) else it
+        }.toTypedArray()
+        beforeKingdomUpdate(previous, kingdom)
+        actor.setKingdom(kingdom)
+        postChatMessage(
+            t("chatMessages.milestone.awarded", recordOf("name" to milestone.name, "xp" to milestone.xp)),
+        )
     },
     // Jump-to-settlement on the pacing-alert CHAT card. It MUST be a ChatButton (bound to #chat by
     // CSS class) — the sheet-panel copy uses data-action/_onClickAction, but that only fires inside
