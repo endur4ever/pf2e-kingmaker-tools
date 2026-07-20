@@ -100,7 +100,7 @@
                         <tbody>
                         {{#each armyPressureContext.threats}}
                             <tr>
-                                <td><strong>{{this.name}}</strong>{{#if this.enemyFaction}} <span class="km-threat-faction">({{this.enemyFaction}})</span>{{/if}}</td>
+                                <td><strong>{{this.name}}</strong>{{#if this.hiddenFromPlayers}} <i class="fa-solid fa-eye-slash km-threat-hidden" title="{{localizeKM "armyPressure.hiddenFromPlayers"}}"></i>{{/if}}{{#if this.enemyFaction}} <span class="km-threat-faction">({{this.enemyFaction}})</span>{{/if}}</td>
                                 <td>
                                     <div class="km-escalation-bar"><div class="km-escalation-fill" style="width: {{this.escalationPercent}}%"></div></div>
                                     {{this.escalationLevel}}/{{this.maxEscalation}}

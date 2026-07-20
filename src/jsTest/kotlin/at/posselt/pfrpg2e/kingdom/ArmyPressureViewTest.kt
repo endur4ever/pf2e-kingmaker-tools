@@ -193,4 +193,42 @@ class ArmyPressureViewTest {
         assertNotNull(view.pressure)
         assertNull(view.pressure!!.projection)
     }
+
+    private fun visibilityThreat(id: String, visible: Boolean?) = RawWarThreat(
+        id = id, name = "Threat $id", description = "d", enemyFaction = null,
+        escalationLevel = 1, maxEscalation = 4, eta = 2,
+        targetSettlementSceneId = null, targetHexLocation = "0101",
+        linkedQuestId = null, linkedEventId = null, pauseOnExpiry = false,
+        status = "active", triggeredTurn = null, visibleToPlayers = visible,
+    )
+
+    @Test
+    fun playerViewExcludesHiddenThreatsEntirely() {
+        val threats = arrayOf(
+            visibilityThreat("visible", visible = true),
+            visibilityThreat("hidden", visible = false),
+            visibilityThreat("legacy", visible = null),  // migration-default: treated as visible
+        )
+        val playerView = buildArmyPressureView(
+            threats, null, null, settings(enabled = true, showDistance = true), isGM = false,
+        )
+        val ids = playerView.threats.map { it.id }.toSet()
+        // Zero hidden-threat data reaches a non-GM view — excluded at the source, not just in the UI.
+        assertEquals(setOf("visible", "legacy"), ids)
+        assertTrue(playerView.threats.none { it.hiddenFromPlayers })
+    }
+
+    @Test
+    fun gmViewKeepsHiddenThreatsWithABadge() {
+        val threats = arrayOf(
+            visibilityThreat("visible", visible = true),
+            visibilityThreat("hidden", visible = false),
+        )
+        val gmView = buildArmyPressureView(
+            threats, null, null, settings(enabled = true, showDistance = true), isGM = true,
+        )
+        assertEquals(2, gmView.threats.size)
+        assertTrue(gmView.threats.first { it.id == "hidden" }.hiddenFromPlayers)
+        assertFalse(gmView.threats.first { it.id == "visible" }.hiddenFromPlayers)
+    }
 }

@@ -28,6 +28,8 @@ data class WarThreatView(
     val pauseOnExpiry: Boolean,
     val hasAssignedArmies: Boolean = false,
     val canResolveBattle: Boolean = false,
+    /** GM-only badge: this threat is hidden from players (never true in a player-facing view). */
+    val hiddenFromPlayers: Boolean = false,
 )
 
 data class ArmyDeploymentView(
@@ -62,7 +64,7 @@ data class ArmyPressureView(
     val pressure: WarPressureView?,
 )
 
-private fun RawWarThreat.toView(deployments: Array<RawArmyDeployment>): WarThreatView {
+private fun RawWarThreat.toView(deployments: Array<RawArmyDeployment>, isGM: Boolean): WarThreatView {
     val max = if (maxEscalation > 0) maxEscalation else 1
     val assigned = deployments.any { it.assignedThreatId == id }
     val active = status == WarThreatStatus.ACTIVE.value
@@ -80,8 +82,14 @@ private fun RawWarThreat.toView(deployments: Array<RawArmyDeployment>): WarThrea
         pauseOnExpiry = pauseOnExpiry,
         hasAssignedArmies = assigned,
         canResolveBattle = active && assigned,
+        // Only the GM view ever sees a hidden threat, flagged for the badge. visibleToPlayers is
+        // nullable for migration safety; null/true = visible, so only an explicit false hides it.
+        hiddenFromPlayers = isGM && visibleToPlayers == false,
     )
 }
+
+/** A threat is hidden from players only when its flag is explicitly false (null/true = visible). */
+private fun RawWarThreat.isVisibleToPlayers(): Boolean = visibleToPlayers != false
 
 private fun RawArmyDeployment.toView(settlementNames: Map<String, String>): ArmyDeploymentView = ArmyDeploymentView(
     id = id,
@@ -124,11 +132,13 @@ fun buildArmyPressureView(
     settings: KingdomSettings,
     currentTurn: Int = 0,
     settlementNames: Map<String, String> = emptyMap(),
+    isGM: Boolean = true,
 ): ArmyPressureView {
     val deploymentArray = deployments ?: emptyArray()
     val threatArray = threats ?: emptyArray()
 
-    // Compute projection only in advanced mode
+    // Projection (war-pressure math) always runs over EVERY threat — hidden threats are real, just
+    // unseen — so fog-of-war never changes the mechanics.
     val projection = if (settings.armyPressureBoardModeOrDefault() == "advanced" && pressure != null) {
         projectWarPressure(
             currentPressure = pressure.currentPressure,
@@ -142,10 +152,14 @@ fun buildArmyPressureView(
         null
     }
 
+    // Fog-of-war at the SOURCE: a non-GM view never carries hidden-threat data at all (the
+    // NotesContext leak lesson — exclude here, never merely hide in the template).
+    val displayThreats = if (isGM) threatArray.toList() else threatArray.filter { it.isVisibleToPlayers() }
+
     return ArmyPressureView(
         enabled = settings.isArmyPressureBoardEnabled(),
         showThreatDistance = settings.shouldShowThreatDistance(),
-        threats = threatArray.map { it.toView(deploymentArray) },
+        threats = displayThreats.map { it.toView(deploymentArray, isGM) },
         deployments = deploymentArray.map { it.toView(settlementNames) },
         pressure = pressure?.toView(projection),
     )

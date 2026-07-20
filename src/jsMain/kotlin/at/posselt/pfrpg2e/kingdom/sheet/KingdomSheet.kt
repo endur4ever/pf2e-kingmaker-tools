@@ -3308,6 +3308,7 @@ class KingdomSheet(
                     settings = kingdom.settings,
                     currentTurn = kingdom.currentTurn ?: 0,
                     settlementNames = settlements.allSettlements.associate { it.id to it.name },
+                    isGM = isGM,
                 )
             ),
             pacingAlertContext = buildPacingAlertContext(

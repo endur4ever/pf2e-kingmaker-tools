@@ -29,4 +29,7 @@ external interface RawWarThreat {
     var triggeredTurn: Int?
     /** Whether the GM offer card for this threat's arrival has been consumed (idempotency guard). */
     var offerConsumed: Boolean?
+
+    /** Player-board visibility (house rule). Nullable for migration safety; null/true = visible. */
+    var visibleToPlayers: Boolean?
 }

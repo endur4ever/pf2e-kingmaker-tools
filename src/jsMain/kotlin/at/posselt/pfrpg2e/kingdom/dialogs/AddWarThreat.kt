@@ -34,6 +34,7 @@ external interface WarThreatFormData {
     var eta: Int?
     var targetHexLocation: String?
     var pauseOnExpiry: Boolean
+    var visibleToPlayers: Boolean
 }
 
 @JsExport
@@ -51,6 +52,7 @@ class WarThreatDataModel(
             int("eta", nullable = true)
             string("targetHexLocation", nullable = true)
             boolean("pauseOnExpiry")
+            boolean("visibleToPlayers")
         }
     }
 }
@@ -87,6 +89,7 @@ class AddWarThreat(
         eta = existing?.eta,
         targetHexLocation = existing?.targetHexLocation,
         pauseOnExpiry = existing?.pauseOnExpiry ?: false,
+        visibleToPlayers = existing?.visibleToPlayers ?: true,
     )
 
     override fun _preparePartContext(
@@ -109,6 +112,7 @@ class AddWarThreat(
                         NumberInput(name = "eta", label = t("armyPressure.eta"), value = data.eta ?: 0, stacked = false, help = t("armyPressure.etaHelp")),
                         TextInput(name = "targetHexLocation", label = t("armyPressure.target"), value = data.targetHexLocation ?: "", required = false, stacked = false),
                         CheckboxInput(name = "pauseOnExpiry", label = t("armyPressure.pauseOnExpiry"), value = data.pauseOnExpiry, help = t("armyPressure.pauseOnExpiryHelp"), stacked = false),
+                        CheckboxInput(name = "visibleToPlayers", label = t("armyPressure.visibleToPlayers"), value = data.visibleToPlayers, help = t("armyPressure.visibleToPlayersHelp"), stacked = false),
                     )
                 )
             )
@@ -139,6 +143,7 @@ class AddWarThreat(
                     pauseOnExpiry = data.pauseOnExpiry,
                     status = existing?.status ?: "active",
                     triggeredTurn = existing?.triggeredTurn,
+                    visibleToPlayers = data.visibleToPlayers,
                 )
                 close()
                 onSave(threat)

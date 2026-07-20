@@ -28,6 +28,7 @@ external interface ArmyThreatContext {
     val targetHexLocation: String?
     val pauseOnExpiry: Boolean
     val canResolveBattle: Boolean
+    val hiddenFromPlayers: Boolean
 }
 
 @JsPlainObject
@@ -98,6 +99,7 @@ fun buildArmyPressureContext(view: ArmyPressureView): ArmyPressureContext {
             targetHexLocation = tv.targetHexLocation,
             pauseOnExpiry = tv.pauseOnExpiry,
             canResolveBattle = tv.canResolveBattle,
+            hiddenFromPlayers = tv.hiddenFromPlayers,
         )
     }.toTypedArray()
     val deployments = view.deployments.map { dv ->
