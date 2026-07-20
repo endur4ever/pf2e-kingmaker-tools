@@ -110,6 +110,25 @@ internal val migrations = listOf(
 
 private val latestMigrationVersion = migrations.maxOfOrNull { it.version }!!
 
+/** The current (latest) schema version this module migrates to. */
+fun currentSchemaVersion(): Int = latestMigrationVersion
+
+/**
+ * Run the kingdom migration chain on STANDALONE data (e.g. an imported JSON payload) — applies every
+ * migration newer than [fromVersion] in order, mutating [kingdom] in place. Reuses the exact same
+ * migration list the world-level flow uses, without touching world state or the schemaVersion
+ * setting. Callers must have already established that [fromVersion] is at/above the oldest supported
+ * version (see [OLDEST_SUPPORTED_SCHEMA_VERSION]).
+ */
+suspend fun Game.migrateKingdomDataFrom(fromVersion: Int, kingdom: dynamic) {
+    migrations.filter { it.version > fromVersion }.forEach { it.migrateKingdom(this, kingdom) }
+}
+
+/** Camping counterpart of [migrateKingdomDataFrom]. */
+suspend fun Game.migrateCampingDataFrom(fromVersion: Int, camping: dynamic) {
+    migrations.filter { it.version > fromVersion }.forEach { it.migrateCamping(this, camping) }
+}
+
 suspend fun Game.fixSchemaVersionV13() {
     val schemaVersion = settings.pfrpg2eKingdomCampingWeather.getSchemaVersion()
     val hasKingdomData = getKingdomActors().isNotEmpty()

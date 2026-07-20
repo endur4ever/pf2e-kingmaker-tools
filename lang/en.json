@@ -1458,6 +1458,13 @@
       "confirmDeleteCamping": "Do you really want to erase all camping data from actor {actorName}?",
       "uploadKingdomJson": "Upload Kingdom JSON File",
       "uploadCampingJson": "Upload Camping JSON File",
+      "import": {
+        "parseError": "Import failed: the file is not valid JSON.",
+        "wrongKind": "Import failed: this file is not the expected kind (kingdom vs camping).",
+        "newerVersion": "Import failed: this file was exported from a newer module version than you have installed.",
+        "noVersionStamp": "This file has no version stamp (or is very old). Imported data may need manual review and will NOT be migrated. Import anyway?",
+        "success": "Import successful."
+      },
       "manageActivities": "Manage Activities",
       "resourceDice": "Resource Dice",
       "luxurySources": "Luxury Sources",
