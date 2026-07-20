@@ -2,13 +2,19 @@ package at.posselt.pfrpg2e.kingdom.dialogs
 
 import at.posselt.pfrpg2e.app.CrudApplication
 import at.posselt.pfrpg2e.app.CrudData
+import at.posselt.pfrpg2e.app.jsonFilePicker
+import at.posselt.pfrpg2e.homebrew.HomebrewProfileImportExport
 import at.posselt.pfrpg2e.homebrew.HomebrewProfileRegistry
+import at.posselt.pfrpg2e.homebrew.HomebrewRegistryImport
 import at.posselt.pfrpg2e.homebrew.HomebrewRulesProfile
 import at.posselt.pfrpg2e.homebrew.HomebrewRules
 import at.posselt.pfrpg2e.kingdom.KingdomActor
 import at.posselt.pfrpg2e.utils.buildPromise
+import at.posselt.pfrpg2e.utils.downloadJson
 import at.posselt.pfrpg2e.utils.t
 import com.foundryvtt.core.Game
+import com.foundryvtt.core.ui
+import js.objects.recordOf
 import com.foundryvtt.core.AnyObject
 import com.foundryvtt.core.abstract.DataModel
 import com.foundryvtt.core.abstract.DocumentConstructionContext
@@ -70,38 +76,38 @@ class HomebrewProfileManagerApplication(
         undefined
     }
 
+    // "Add" imports a profile from a JSON file (mirrors the gear-settings manager). Profiles are
+    // authored by importing a shared/backed-up file rather than a blank stub the old edit couldn't fill.
     override fun addEntry(): Promise<Void> = buildPromise {
-        // Create a new profile with a temporary id, to be replaced on submit
-        val now = Date().toISOString()
-        val newProfile = HomebrewRulesProfile(
-            id = "new-profile-${Date.now().toLong()}",
-            name = t("kingdom.newProfile"),
-            version = 1,
-            isActive = false,
-            createdAt = now,
-            updatedAt = now,
-            description = null,
-            rules = HomebrewRules() // Uses default constructor which provides sensible defaults
+        val json = jsonFilePicker(
+            title = t("kingdom.importHomebrewProfile"),
+            label = t("kingdom.homebrewProfileJson"),
         )
-        // Add the new profile to the registry
-        workingRegistry = workingRegistry.copy(
-            profiles = workingRegistry.profiles + newProfile
-        )
-        // Save the registry to game settings
-        game.settings.set("pfrpg2eKingdom", "homebrew.profileRegistry", workingRegistry.toJson())
+        when (val result = HomebrewProfileImportExport.importInto(workingRegistry, json, activate = true)) {
+            is HomebrewRegistryImport.Invalid -> ui.notifications.error(result.message)
+            is HomebrewRegistryImport.Valid -> {
+                workingRegistry = result.registry
+                game.settings.set("pfrpg2eKingdom", "homebrew.profileRegistry", workingRegistry.toJson())
+                ui.notifications.info(
+                    t("kingdom.homebrewImported", recordOf("name" to (result.imported.firstOrNull()?.name ?: ""))),
+                )
+            }
+        }
         render()
         undefined
     }
 
+    // "Edit" exports the profile as a downloadable versioned JSON file (mirrors the gear manager).
     override fun editEntry(id: String) = buildPromise {
-        // Find the profile to edit
-        val profileOption = workingRegistry.profiles.find { it.id == id }
-        if (profileOption != null) {
-            // For now, we just render again - in a full implementation we'd open a dialog to edit the profile
-            render()
+        val profile = workingRegistry.profiles.find { it.id == id }
+        if (profile == null) {
+            ui.notifications.error(t("kingdom.homebrewProfileNotFound"))
+        } else {
+            downloadJson(
+                JSON.parse(HomebrewProfileImportExport.exportProfile(profile)),
+                "homebrew-profile-$id.json",
+            )
         }
-        // Save the registry to game settings (even if we didn't change anything, it's okay)
-        game.settings.set("pfrpg2eKingdom", "homebrew.profileRegistry", workingRegistry.toJson())
         undefined
     }
 
