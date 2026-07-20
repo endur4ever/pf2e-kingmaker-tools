@@ -75,6 +75,7 @@ external interface CampingSettings {
     var autoApplyFatigued: Boolean
     var resetTimeTrackingAfterOneDay: Boolean
     var hexSizeInMiles: Int
+    var autoSucceedInClaimedHexes: Boolean
 }
 
 @JsExport
@@ -106,6 +107,7 @@ class CampingSettingsDataModel(
             int("minimumSubsistence")
             boolean("autoApplyFatigued")
             boolean("resetTimeTrackingAfterOneDay")
+            boolean("autoSucceedInClaimedHexes")
         }
     }
 }
@@ -173,6 +175,7 @@ class CampingSettingsApplication(
             autoApplyFatigued = camping.autoApplyFatigued,
             resetTimeTrackingAfterOneDay = camping.resetTimeTrackingAfterOneDay,
             hexSizeInMiles = camping.hexSizeInMiles,
+            autoSucceedInClaimedHexes = camping.autoSucceedInClaimedHexes ?: false,
         )
     }
 
@@ -274,6 +277,12 @@ class CampingSettingsApplication(
                             name = "ignoreSkillRequirements",
                             label = t("camping.ignoreSkillRequirements"),
                             value = settings.ignoreSkillRequirements,
+                        ),
+                        CheckboxInput(
+                            name = "autoSucceedInClaimedHexes",
+                            label = t("camping.autoSucceedInClaimedHexes"),
+                            value = settings.autoSucceedInClaimedHexes,
+                            help = t("camping.autoSucceedInClaimedHexesHelp"),
                         ),
                         Select(
                             name = "huntAndGatherTargetActorUuid",
@@ -419,6 +428,7 @@ class CampingSettingsApplication(
                             hexSizeInMiles.set(settings.hexSizeInMiles)
                             autoApplyFatigued.set( settings.autoApplyFatigued)
                             resetTimeTrackingAfterOneDay.set( settings.resetTimeTrackingAfterOneDay)
+                            autoSucceedInClaimedHexes.set(settings.autoSucceedInClaimedHexes)
                         }
                     }
                     close()

@@ -600,6 +600,23 @@ class CampingSheet(
         )
     }
 
+    /**
+     * House rule (t_24158c4b): when the "auto-succeed in claimed hexes" toggle is on and the party's
+     * current hex is claimed, Prepare Campsite and Cook Meal skip the roll and take the plain success
+     * outcome (degree-dependent crit extras use the plain-success row). Ingredient costs are still
+     * paid downstream — only the ROLL is waived. Returns [DegreeOfSuccess.SUCCESS] (and posts the
+     * explanatory chat line) when it applies, or null to fall through to the normal roll.
+     */
+    private suspend fun autoSuccessInOwnLandsResult(
+        camping: CampingData,
+        activityId: String,
+    ): DegreeOfSuccess? {
+        if (camping.autoSucceedInClaimedHexes != true) return null
+        if (!autoSucceedInClaimedHexes(true, isPartyHexClaimed(game, actor), activityId)) return null
+        postChatMessage(t("camping.autoSuccessInOwnLands"), isHtml = true)
+        return DegreeOfSuccess.SUCCESS
+    }
+
     private suspend fun rollRecipeCheck(recipeId: String) {
         // the following lines should all be non-null if everything went right
         val camping = actor.getCamping()
@@ -620,18 +637,19 @@ class CampingSheet(
         val mealToCook = parsed.results.find { it.recipe.id == recipeId }
         checkNotNull(mealToCook) { "Could not find meal with id $recipeId" }
 
-        val result = cook.campingActivityCheck(
-            data = CampingCheckData(
-                region = region,
-                activityData = activityData,
-                skill = ParsedCampingSkill(
-                    attribute = mealToCook.selectedSkill,
-                    dcType = DcType.STATIC,
-                    dc = mealToCook.dc
-                )
-            ),
-            overrideDc = mealToCook.dc,
-        )
+        val result = autoSuccessInOwnLandsResult(camping, cookMealId)
+            ?: cook.campingActivityCheck(
+                data = CampingCheckData(
+                    region = region,
+                    activityData = activityData,
+                    skill = ParsedCampingSkill(
+                        attribute = mealToCook.selectedSkill,
+                        dcType = DcType.STATIC,
+                        dc = mealToCook.dc
+                    )
+                ),
+                overrideDc = mealToCook.dc,
+            )
         val existing = camping.cooking.results[recipeId]
         if (existing == null) {
             camping.cooking.results[recipeId] = CookingResult(
@@ -683,10 +701,11 @@ class CampingSheet(
 
         // if it's a recipe we need to know the dc
         val recipe = if (activity.isDiscoverSpecialMeal()) askRecipe(camping) else null
-        checkActor.campingActivityCheck(
-            data = campingCheckData,
-            overrideDc = recipe?.cookingLoreDC,
-        )?.let { result ->
+        (autoSuccessInOwnLandsResult(camping, activityId)
+            ?: checkActor.campingActivityCheck(
+                data = campingCheckData,
+                overrideDc = recipe?.cookingLoreDC,
+            ))?.let { result ->
             camping.campingActivities[activityId]?.result = result.toCamelCase()
             if (!activity.isPrepareCampsite()) {
                 camping.spendDowntimeHours(actorUuid, CampingActivityScheduler.DOWNTIME_HOURS_PER_ACTIVITY)
