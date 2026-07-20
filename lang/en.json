@@ -4104,6 +4104,11 @@
         }
       },
       "cleanse-item": {
+        "structure": {
+          "shrine": "Shrine",
+          "temple": "Temple",
+          "cathedral": "Cathedral"
+        },
         "title": "Cleanse Item",
         "description": "<p>You attempt to cleanse a cursed or corrupted item by performing a kingdom-scale magical counteract check.</p>",
         "special": "Use a Magic check. The counteract level is half the kingdom level, rounded up. The DC is the item level + 10. Items of levels 1-5 require 1 Luxuries and a Shrine; levels 6-10 require 2 Luxuries and a Temple; levels 11-15 require 4 Luxuries and a Temple; levels 16-20 require 8 Luxuries and a Cathedral.",
