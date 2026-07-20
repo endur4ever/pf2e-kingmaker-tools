@@ -209,6 +209,8 @@ external interface TravelRouteUiContext {
     val estimatedDuration: String
     val path: Array<String>
     val modifiers: Array<String>
+    /** Non-null when the route's day count exceeds the party's durable days of food. */
+    val foodWarning: String?
 }
 
 @Suppress("unused")
@@ -247,6 +249,10 @@ external interface CampingSheetContext : ValidatedHandlebarsContext {
     var recipes: Array<RecipeContext>
     var totalFoodCost: FoodCost
     var availableFood: FoodCost
+    /** Durable days-of-food forecast label ("3", or "∞" when nobody is eating). */
+    var foodDaysDisplay: String
+    /** Whether tonight's meal is covered by current rations + provisions. */
+    var foodTonightCovered: Boolean
     var canRollEncounter: Boolean
     var sheetBackground: String
     var travelStartHexSelect: FormElementContext?
@@ -1292,6 +1298,19 @@ class CampingSheet(
         }
         val totalFood = camping.getTotalCarriedFood(actor, foodItems)
         val availableFood = buildFoodCost(totalFood, items = foodItems)
+        // Food forecast (read-only, derived): rations are durable, provisions are tonight-only.
+        // dailyConsumers = the camp roster (characters + companions present); RAW baseline is one
+        // ration per consumer per day (mealCostRations defaults to 1) — the plain-meal fallback.
+        val totalProvisions = camping.getTotalProvisions(actor, foodItems)
+        val foodForecast = computeFoodForecast(
+            FoodForecastInput(
+                rations = (totalFood.rations - totalProvisions).coerceAtLeast(0),
+                provisions = totalProvisions,
+                dailyConsumers = actors.size,
+            )
+        )
+        val foodDaysDisplay =
+            if (foodForecast.daysOfFood >= Int.MAX_VALUE / 2) "∞" else foodForecast.daysOfFood.toString()
         val parsedCookingChoices = camping.findCookingChoices(
             charactersInCampByUuid = charactersByUuid,
             recipesById = camping.getAllRecipes().associateBy { it.id },
@@ -1610,12 +1629,26 @@ class CampingSheet(
                     routeModifiersList.add(t("camping.riverCount", recordOf("count" to riverCrossings.toString())))
                 }
                 
+                // Route-vs-provisions advisory (display-only): compare the route's whole-day count
+                // against the party's durable days of food. Provisions are excluded (wiped each rest).
+                val routeDays = kotlin.math.ceil(route.estimatedDurationSeconds / 86400.0).toInt()
+                val routeFoodWarning = if (foodForecast.daysOfFood < Int.MAX_VALUE / 2
+                    && routeDays > foodForecast.daysOfFood
+                ) {
+                    t(
+                        "camping.routeExceedsFood",
+                        recordOf("days" to routeDays, "food" to foodForecast.daysOfFood),
+                    )
+                } else {
+                    null
+                }
                 travelRouteContext = TravelRouteUiContext(
                     totalCost = route.totalCost,
                     totalDistance = path.size,
                     estimatedDuration = formatSeconds(route.estimatedDurationSeconds.toInt()),
                     path = route.path.toTypedArray(),
-                    modifiers = routeModifiersList.toTypedArray()
+                    modifiers = routeModifiersList.toTypedArray(),
+                    foodWarning = routeFoodWarning,
                 )
             } else {
                 travelPathError = t("camping.noPathFound")
@@ -1625,6 +1658,8 @@ class CampingSheet(
         CampingSheetContext(
             canRollEncounter = currentRegion?.rollTableUuid != null,
             availableFood = availableFood,
+            foodDaysDisplay = foodDaysDisplay,
+            foodTonightCovered = foodForecast.tonightCovered,
             totalFoodCost = calculateTotalFoodCost(
                 actorMeals = parsedCookingChoices.meals
                     .filter { it.name in uncookedMeals || it.id == "rationsOrSubsistence" },

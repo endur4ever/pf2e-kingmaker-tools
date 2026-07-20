@@ -160,6 +160,10 @@
                 data-action="next-section"
                 type="button"><i class="fa-solid fa-chevron-right"></i></button>
         <div {{#unless eatingSection}}hidden{{/unless}} class="km-camping-eating-total">
+            <span class="km-food-days{{#unless foodTonightCovered}} km-food-days-warn{{/unless}}"
+                  title="{{localizeKM "camping.foodDaysHelp"}}">
+                <b>{{localizeKM "camping.foodDays"}}:</b> {{foodDaysDisplay}}
+            </span>
             <span>
                 {{> foodCost availableFood hideEmpty=false title="camping.available"}}
             </span>
@@ -183,6 +187,9 @@
                         </div>
                         {{#if travelRoute}}
                             <div class="km-route-details">
+                                {{#if travelRoute.foodWarning}}
+                                <div class="km-route-food-warning"><i class="fa-solid fa-triangle-exclamation"></i> {{travelRoute.foodWarning}}</div>
+                                {{/if}}
                                 <div class="km-row km-route-summary">
                                     <div><b>{{localizeKM "camping.totalCost"}}:</b> {{travelRoute.totalCost}} {{localizeKM "camping.hoursSymbol"}}</div>
                                     <div><b>{{localizeKM "camping.estimatedDuration"}}:</b> {{travelRoute.estimatedDuration}}</div>

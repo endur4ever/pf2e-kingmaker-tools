@@ -604,3 +604,19 @@ suspend fun CampingData.getTotalCarriedFood(
         it.getTotalCarriedFood(foodItems = foodItems)
     }.sum()
 }
+
+/** Provisions this actor carries — the tonight-only food stock (wiped every rest per RAW). */
+fun PF2EActor.getCarriedProvisions(foodItems: FoodItems): Int =
+    consumableQuantityByName(foodItems.provisions.name!!)
+
+/**
+ * Provisions carried across camp actors + party. Separated from durable rations for the food
+ * forecast: provisions are wiped every rest ([removeProvisions]) so they only cover tonight.
+ */
+suspend fun CampingData.getTotalProvisions(
+    party: PF2EParty?,
+    foodItems: FoodItems,
+): Int = coroutineScope {
+    val actors = getActorsInCamp() + (party?.let { listOf(it) } ?: emptyList())
+    actors.sumOf { it.getCarriedProvisions(foodItems) }
+}
