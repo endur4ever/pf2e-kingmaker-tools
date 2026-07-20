@@ -8,7 +8,8 @@ import kotlinx.js.JsPlainObject
  *
  * - [kind] `sellToPartner` — carries Commodities to a trade-partner Group, delivers RP on arrival.
  *   `buyFromPartner` — carries RP to a partner, delivers Commodities on arrival.
- *   `settlementTransfer` — moves Commodities between two of the kingdom's own settlements.
+ *   (The `settlementTransfer` kind was retired: inter-settlement transfers fight the single global
+ *   commodity pool — rejected in the 2026-07-09 gap analysis. Migration44 remaps stray values.)
  * - [cargoCommodity]/[cargoAmount] describe a Commodity cargo (food|lumber|stone|ore|luxuries);
  *   [cargoRp] is used instead for an RP cargo (`buyFromPartner`).
  * - [etaTurns] is the full route length in turns; [turnsRemaining] counts down to 0 (arrival).

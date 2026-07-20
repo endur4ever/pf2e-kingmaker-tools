@@ -28,7 +28,7 @@ import kotlin.js.Promise
 data class CaravanHexOption(val hexKey: String, val label: String)
 
 /** A trade-partner faction with a map location a caravan can be sent to. */
-data class CaravanPartnerOption(val name: String, val hexKey: String, val label: String)
+data class CaravanPartnerOption(val name: String, val hexKey: String, val label: String, val atWar: Boolean = false)
 
 /** What the dispatch dialog hands back; the sheet computes the route/ETA and persists the caravan. */
 data class CaravanDispatchRequest(

@@ -30,6 +30,7 @@ import at.posselt.pfrpg2e.kingdom.CaravanEventKind
 import at.posselt.pfrpg2e.kingdom.CaravanEvent
 import at.posselt.pfrpg2e.kingdom.CaravanTickInput
 import at.posselt.pfrpg2e.kingdom.caravanRaidDc
+import at.posselt.pfrpg2e.kingdom.caravanBonusRdCap
 import at.posselt.pfrpg2e.kingdom.caravanRdPerCommodity
 import at.posselt.pfrpg2e.kingdom.tickCaravans
 import at.posselt.pfrpg2e.kingdom.tickShipments
@@ -317,7 +318,8 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
                     raidRoll = kotlin.random.Random.nextInt(1, 21),
                     rdPerCommodity = caravanRdPerCommodity(partner?.standing, partner?.allianceLevel),
                 )
-            }
+            },
+            bonusRdCap = caravanBonusRdCap(kingdom.level),
         )
         kingdom.caravans = caravanResult.remaining.toTypedArray()
         caravanEvents = caravanResult.events
@@ -343,8 +345,19 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
                     t("kingdom.caravans.chatLost", recordOf("summary" to event.summary))
             }
         }
-        if (caravanLines.isNotEmpty()) {
-            val body = caravanLines.joinToString("") { "<li>$it</li>" }
+        val allCaravanLines = if (caravanResult.bonusResourceDiceCapped) {
+            caravanLines + t(
+                "kingdom.caravans.chatRdCapped",
+                recordOf(
+                    "earned" to caravanResult.uncappedBonusResourceDice.toString(),
+                    "cap" to caravanResult.bonusResourceDice.toString(),
+                ),
+            )
+        } else {
+            caravanLines
+        }
+        if (allCaravanLines.isNotEmpty()) {
+            val body = allCaravanLines.joinToString("") { "<li>$it</li>" }
             postChatMessage("<h3>${t("kingdom.caravans.title")}</h3><ul>$body</ul>", isHtml = true)
         }
     }

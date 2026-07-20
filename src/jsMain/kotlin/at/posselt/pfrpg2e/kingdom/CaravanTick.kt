@@ -13,7 +13,11 @@ import kotlin.math.roundToInt
  *  2. advances one step toward its destination;
  *  3. on arrival delivers — a `sellToPartner` caravan grants bonus Resource Dice (RAW Trade
  *     Commodities: ~1 RD per Commodity, scaled by the partner's standing/alliance), while a
- *     `settlementTransfer`/`buyFromPartner` caravan delivers Commodities to the kingdom pool.
+ *     `buyFromPartner` caravan delivers Commodities to the kingdom pool.
+ *
+ * (The `settlementTransfer` kind was retired — inter-settlement transfers were rejected in the
+ * 2026-07-09 gap analysis because they fight the single global commodity pool; Migration44 maps any
+ * stray persisted value to `sellToPartner`.)
  *
  * The raid roll, DC, and per-commodity RD rate are injected per caravan so this is fully
  * deterministic and unit-testable; the Foundry-coupled caller (performEndTurn) rolls the dice,
@@ -52,6 +56,10 @@ data class CaravanTickResult(
     val bonusResourceDice: Int,
     val deliveredCommodities: Map<String, Int>,
     val events: List<CaravanEvent>,
+    /** True when the per-turn arbitrage cap trimmed [bonusResourceDice] below what sales earned. */
+    val bonusResourceDiceCapped: Boolean = false,
+    /** What sales earned before the cap (== [bonusResourceDice] when the cap didn't bind). */
+    val uncappedBonusResourceDice: Int = bonusResourceDice,
 )
 
 data class ShipmentTickInput(
@@ -133,7 +141,7 @@ private fun RawCaravan.advanced(cargoAmount: Int, turnsRemaining: Int): RawCarav
         status = status,
     )
 
-fun tickCaravans(inputs: List<CaravanTickInput>): CaravanTickResult {
+fun tickCaravans(inputs: List<CaravanTickInput>, bonusRdCap: Int? = null): CaravanTickResult {
     val remaining = mutableListOf<RawCaravan>()
     val events = mutableListOf<CaravanEvent>()
     val deliveredCommodities = mutableMapOf<String, Int>()
@@ -191,11 +199,17 @@ fun tickCaravans(inputs: List<CaravanTickInput>): CaravanTickResult {
         }
     }
 
+    // HOLE B: cap the per-turn bonus RD from sales so buy-low/sell-high can't be a self-reinforcing
+    // RP loop. Applied to the turn total (not per caravan) so many small sales can't slip under it;
+    // the caller surfaces the cap in the delivery chat when it binds.
+    val cappedBonusRd = if (bonusRdCap != null) capCaravanBonusRd(bonusRd, bonusRdCap) else bonusRd
     return CaravanTickResult(
         remaining = remaining,
-        bonusResourceDice = bonusRd,
+        bonusResourceDice = cappedBonusRd,
         deliveredCommodities = deliveredCommodities,
         events = events,
+        bonusResourceDiceCapped = cappedBonusRd < bonusRd,
+        uncappedBonusResourceDice = bonusRd,
     )
 }
 

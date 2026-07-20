@@ -142,6 +142,7 @@ import at.posselt.pfrpg2e.kingdom.getRealmData
 import at.posselt.pfrpg2e.kingdom.getUnclaimedWorksites
 import at.posselt.pfrpg2e.kingdom.computeCaravanEtaTurns
 import at.posselt.pfrpg2e.kingdom.caravanPurchaseCost
+import at.posselt.pfrpg2e.kingdom.canDispatchCaravanTo
 import at.posselt.pfrpg2e.kingdom.data.RawCaravan
 import at.posselt.pfrpg2e.kingdom.map.KingmakerHexGridProvider
 import at.posselt.pfrpg2e.kingdom.dialogs.CaravanDispatchDialog
@@ -2188,13 +2189,18 @@ class KingdomSheet(
                 }.getOrDefault(emptyList())
                 val partners = kingdom.groups
                     .filter { !it.hexKey.isNullOrBlank() }
-                    .map { CaravanPartnerOption(name = it.name, hexKey = it.hexKey!!, label = it.name) }
+                    .map { CaravanPartnerOption(name = it.name, hexKey = it.hexKey!!, label = it.name, atWar = it.atWar) }
+                // HOLE A embargo: partners at war are not dispatchable (SelectOption has no disabled
+                // state, so they're filtered out of the list rather than shown greyed); the callback
+                // also guards, so war declared while the dialog is open still blocks the dispatch.
+                val dispatchablePartners = partners.filter { canDispatchCaravanTo(it.atWar) }
                 when {
                     claimedHexes.isEmpty() -> ui.notifications.warn(t("kingdom.caravans.noOriginHexes"))
                     partners.isEmpty() -> ui.notifications.warn(t("kingdom.caravans.noPartners"))
+                    dispatchablePartners.isEmpty() -> ui.notifications.warn(t("kingdom.caravans.allPartnersEmbargoed"))
                     else -> CaravanDispatchDialog(
                         hexes = claimedHexes,
-                        partners = partners,
+                        partners = dispatchablePartners,
                         commodities = listOf("food", "lumber", "stone", "ore", "luxuries"),
                     ) { req ->
                         buildPromise {
@@ -2209,6 +2215,12 @@ class KingdomSheet(
                             } else {
                                 val etaTurns = eta
                                 val partner = current.groups.find { it.name == req.partnerName }
+                                if (!canDispatchCaravanTo(partner?.atWar == true)) {
+                                    // War declared against this partner since the dialog opened — no
+                                    // silent trade with a besieging faction.
+                                    ui.notifications.warn(t("kingdom.caravans.allPartnersEmbargoed"))
+                                    return@buildPromise
+                                }
                                 val originLabel = claimedHexes.find { it.hexKey == req.originHexKey }?.label
                                     ?: req.originHexKey
                                 fun makeCaravan(kind: String, cargoRp: Int?) = RawCaravan(
