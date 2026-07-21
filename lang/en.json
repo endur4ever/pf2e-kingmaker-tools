@@ -7203,7 +7203,9 @@
       "threatArrivesIn": "arrives in {turns} turns",
       "threatArrivingNow": "Arriving now",
       "activeThreats": "Active Threats ({count})",
-      "activeDeployments": "Active Deployments ({count})"
+          "activeDeployments": "Active Deployments ({count})",
+          "removeDeployment": "Remove Deployment",
+          "removeDeploymentConfirm": "Remove the destroyed army deployment for \"{name}\"? This cannot be undone."
     },
     "warThreatStatus": {
       "active": "Active",

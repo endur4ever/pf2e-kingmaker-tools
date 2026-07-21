@@ -1,7 +1,11 @@
 package at.posselt.pfrpg2e.kingdom
 
+import at.posselt.pfrpg2e.data.armies.ArmyCondition
+import at.posselt.pfrpg2e.data.armies.BattleStatus
 import at.posselt.pfrpg2e.kingdom.data.ArmyDeploymentStatus
+import at.posselt.pfrpg2e.kingdom.data.RawArmyBattle
 import at.posselt.pfrpg2e.kingdom.data.RawArmyDeployment
+import at.posselt.pfrpg2e.kingdom.data.RawBattleArmy
 import at.posselt.pfrpg2e.kingdom.data.RawWarThreat
 import at.posselt.pfrpg2e.kingdom.data.WarThreatStatus
 import kotlin.test.Test
@@ -24,11 +28,56 @@ private fun threat(
     triggeredTurn = triggeredTurn,
 )
 
-private fun deployment(status: ArmyDeploymentStatus = ArmyDeploymentStatus.DEPLOYED): RawArmyDeployment =
-    RawArmyDeployment(
-        id = "d1", armyActorUuid = "Actor.x", armyName = "1st Legion", armyType = "infantry",
-        assignedThreatId = null, garrisonedSettlementId = null, status = status.value, deployedTurn = 0,
-    )
+private fun deployment(
+    id: String = "d1",
+    armyActorUuid: String = "Actor.x",
+    armyName: String = "1st Legion",
+    armyType: String = "infantry",
+    assignedThreatId: String? = null,
+    garrisonedSettlementId: String? = null,
+    status: ArmyDeploymentStatus = ArmyDeploymentStatus.DEPLOYED,
+    deployedTurn: Int = 0,
+): RawArmyDeployment = RawArmyDeployment(
+    id = id, armyActorUuid = armyActorUuid, armyName = armyName, armyType = armyType,
+    assignedThreatId = assignedThreatId, garrisonedSettlementId = garrisonedSettlementId,
+    status = status.value, deployedTurn = deployedTurn,
+)
+
+private fun battleArmy(
+    uuid: String = "Actor.x",
+    name: String = "1st Legion",
+    conditions: Array<String> = emptyArray(),
+): RawBattleArmy = RawBattleArmy(
+    armyActorUuid = uuid,
+    name = name,
+    level = 4,
+    currentHp = 20,
+    maxHp = 20,
+    conditions = conditions,
+    xp = 0,
+)
+
+private fun rawArmyBattle(
+    id: String = "battle-1",
+    threatId: String = "w1",
+    name: String = "Skirmish",
+    round: Int = 1,
+    terrain: String? = "forest",
+    attackers: Array<RawBattleArmy> = arrayOf(battleArmy()),
+    defenders: Array<RawBattleArmy> = arrayOf(battleArmy("Enemy", "Goblin Scouts")),
+    log: Array<String> = arrayOf("Battle begins."),
+    status: String = BattleStatus.ACTIVE.value,
+): RawArmyBattle = RawArmyBattle(
+    id = id,
+    threatId = threatId,
+    name = name,
+    round = round,
+    terrain = terrain,
+    attackers = attackers,
+    defenders = defenders,
+    log = log,
+    status = status,
+)
 
 class WarPressureCalculationTest {
     @Test
@@ -65,8 +114,103 @@ class WarPressureCalculationTest {
 
     @Test
     fun consumptionModifierTracksSupportingArmies() {
-        val p = recalculateWarPressure(arrayOf(threat()), arrayOf(deployment(), deployment(ArmyDeploymentStatus.BATTLE)), null)
+        val p = recalculateWarPressure(arrayOf(threat()), arrayOf(deployment(), deployment(status = ArmyDeploymentStatus.BATTLE)), null)
         assertEquals(2, p.consumptionModifier)
+    }
+
+    @Test
+    fun destroyedAndRetreatedArmiesDoNotReducePressure() {
+        // 1 threat = +5/turn, 4 armies but only 2 are supporting (DEPLOYED + BATTLE)
+        val deploys = arrayOf(
+            deployment(),                                    // DEPLOYED
+            deployment(status = ArmyDeploymentStatus.BATTLE),         // BATTLE
+            deployment(status = ArmyDeploymentStatus.DESTROYED),      // DESTROYED - should NOT count
+            deployment(status = ArmyDeploymentStatus.RETREATED),      // RETREATED - should NOT count
+        )
+        val p = recalculateWarPressure(arrayOf(threat()), deploys, null)
+        // pressurePerTurn = 1*5 - 2*2 = +1
+        assertEquals(1, p.pressurePerTurn)
+        assertEquals(2, p.consumptionModifier)
+    }
+
+    @Test
+    fun transitionDeploymentToBattleOnlyAffectsAssignedDeployed() {
+        val deploys = arrayOf(
+            deployment(id = "d1", assignedThreatId = "w1", status = ArmyDeploymentStatus.DEPLOYED),
+            deployment(id = "d2", assignedThreatId = "w1", status = ArmyDeploymentStatus.BATTLE),
+            deployment(id = "d3", assignedThreatId = "w2", status = ArmyDeploymentStatus.DEPLOYED),
+        )
+        val updated = transitionDeploymentToBattle(deploys, "w1")
+        assertEquals(ArmyDeploymentStatus.BATTLE.value, updated[0].status)
+        assertEquals(ArmyDeploymentStatus.BATTLE.value, updated[1].status)
+        assertEquals(ArmyDeploymentStatus.DEPLOYED.value, updated[2].status)
+    }
+
+    @Test
+    fun updateDeploymentStatusesAfterBattleDestroyedBecomesDestroyed() {
+        val deploys = arrayOf(
+            deployment(id = "d1", assignedThreatId = "w1", status = ArmyDeploymentStatus.BATTLE),
+        )
+        val battle = rawArmyBattle(
+            attackers = arrayOf(
+                battleArmy("Actor.x", "1st Legion", arrayOf("destroyed")),
+            ),
+        )
+
+        val updated = updateDeploymentStatusesAfterBattle(deploys, battle)
+
+        assertEquals(ArmyDeploymentStatus.DESTROYED.value, updated[0].status)
+    }
+
+    @Test
+    fun updateDeploymentStatusesAfterBattleRoutedBecomesRetreated() {
+        val deploys = arrayOf(
+            deployment(id = "d1", assignedThreatId = "w1", status = ArmyDeploymentStatus.BATTLE),
+        )
+        val battle = rawArmyBattle(
+            attackers = arrayOf(
+                battleArmy("Actor.x", "1st Legion", arrayOf("routed")),
+            ),
+        )
+
+        val updated = updateDeploymentStatusesAfterBattle(deploys, battle)
+
+        assertEquals(ArmyDeploymentStatus.RETREATED.value, updated[0].status)
+    }
+
+    @Test
+    fun updateDeploymentStatusesAfterBattleSurvivingReturnsToDeployed() {
+        val deploys = arrayOf(
+            deployment(id = "d1", assignedThreatId = "w1", status = ArmyDeploymentStatus.BATTLE),
+        )
+        val battle = rawArmyBattle(
+            attackers = arrayOf(
+                battleArmy("Actor.x", "1st Legion", emptyArray()),
+            ),
+        )
+
+        val updated = updateDeploymentStatusesAfterBattle(deploys, battle)
+
+        assertEquals(ArmyDeploymentStatus.DEPLOYED.value, updated[0].status)
+    }
+
+    @Test
+    fun updateDeploymentStatusesAfterBattleIgnoresNonBattleDeployments() {
+        val deploys = arrayOf(
+            deployment(id = "d1", assignedThreatId = "w1", status = ArmyDeploymentStatus.DEPLOYED),
+            deployment(id = "d2", assignedThreatId = "w1", status = ArmyDeploymentStatus.BATTLE),
+        )
+        val battle = rawArmyBattle(
+            attackers = arrayOf(
+                battleArmy("Actor.x", "1st Legion"),
+                battleArmy("Actor.y", "2nd Legion"),
+            ),
+        )
+
+        val updated = updateDeploymentStatusesAfterBattle(deploys, battle)
+
+        assertEquals(ArmyDeploymentStatus.DEPLOYED.value, updated[0].status)
+        assertEquals(ArmyDeploymentStatus.DEPLOYED.value, updated[1].status)
     }
 }
 

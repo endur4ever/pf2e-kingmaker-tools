@@ -150,7 +150,15 @@
                                 </td>
                                 <td>{{this.armyType}}</td>
                                 <td><span class="km-deployment-status km-deployment-status-{{this.status}}">{{this.statusLabel}}</span></td>
-                                {{#if ../isGM}}<td class="km-army-row-actions"><button type="button" data-action="recall-army" data-id="{{this.id}}"><i class="fa-solid fa-arrow-rotate-left"></i></button></td>{{/if}}
+                                {{#if ../isGM}}
+                                    <td class="km-army-row-actions">
+                                        {{#if (eq this.status "destroyed")}}
+                                            <button type="button" data-action="remove-deployment" data-id="{{this.id}}" data-tooltip="{{localizeKM "armyPressure.removeDeployment"}}"><i class="fa-solid fa-trash"></i></button>
+                                        {{else}}
+                                            <button type="button" data-action="recall-army" data-id="{{this.id}}"><i class="fa-solid fa-arrow-rotate-left"></i></button>
+                                        {{/if}}
+                                    </td>
+                                {{/if}}
                             </tr>
                         {{/each}}
                         </tbody>

@@ -1,6 +1,8 @@
 package at.posselt.pfrpg2e.kingdom
 
+import at.posselt.pfrpg2e.data.armies.ArmyCondition
 import at.posselt.pfrpg2e.kingdom.data.ArmyDeploymentStatus
+import at.posselt.pfrpg2e.kingdom.data.RawArmyBattle
 import at.posselt.pfrpg2e.kingdom.data.RawArmyDeployment
 import at.posselt.pfrpg2e.kingdom.data.RawWarPressure
 import at.posselt.pfrpg2e.kingdom.data.RawWarThreat
@@ -41,7 +43,10 @@ private fun activeThreatCount(threats: Array<RawWarThreat>): Int =
 
 private fun supportingArmyCount(deployments: Array<RawArmyDeployment>): Int =
     deployments.count {
-        it.status == ArmyDeploymentStatus.DEPLOYED.value || it.status == ArmyDeploymentStatus.BATTLE.value
+        val status = it.status
+        // Only DEPLOYED and BATTLE armies count toward pressure reduction.
+        // DESTROYED and RETREATED armies no longer contribute (they are effectively removed from the field).
+        status == ArmyDeploymentStatus.DEPLOYED.value || status == ArmyDeploymentStatus.BATTLE.value
     }
 
 /**
@@ -130,6 +135,59 @@ fun tickWarThreat(threat: RawWarThreat, currentTurn: Int): RawWarThreat {
         threat.copyWith(escalationLevel = newEscalation, eta = newEta)
     }
 }
+
+/**
+ * Updates army deployment statuses based on the outcome of a resolved battle.
+ * Call this after a battle reaches VICTORY or DEFEAT to transition deployments:
+ * - Armies that were in BATTLE and survive (not DESTROYED/ROUTED) -> back to DEPLOYED
+ * - Armies that were in BATTLE and are ROUTED -> RETREATED
+ * - Armies that were in BATTLE and are DESTROYED -> DESTROYED
+ *
+ * This operates on the raw deployment array and the battle's final engine state
+ * to determine per-army outcomes. Returns the updated deployments array.
+ */
+fun updateDeploymentStatusesAfterBattle(
+    deployments: Array<RawArmyDeployment>,
+    battle: RawArmyBattle,
+): Array<RawArmyDeployment> {
+    // Build a lookup from armyActorUuid to deployment for attackers (kingdom armies)
+    val deploymentByUuid = deployments.associateBy { it.armyActorUuid }
+    val attackerCount = battle.attackers.size
+
+    return deployments.map { deployment ->
+        val uuid = deployment.armyActorUuid
+        // Only transition deployments that are currently in BATTLE status
+        if (deployment.status != ArmyDeploymentStatus.BATTLE.value) return@map deployment
+
+        // Find this army in the battle's final state (attackers only, since deployments are kingdom armies)
+        val battleArmyIndex = battle.attackers.indexOfFirst { it.armyActorUuid == uuid }
+        if (battleArmyIndex < 0) return@map deployment // Not found in battle, keep as-is
+
+        val finalConditions = battle.attackers[battleArmyIndex].conditions
+        val isDestroyed = ArmyCondition.DESTROYED.value in finalConditions
+        val isRouted = ArmyCondition.ROUTED.value in finalConditions
+
+        val newStatus = when {
+            isDestroyed -> ArmyDeploymentStatus.DESTROYED.value
+            isRouted -> ArmyDeploymentStatus.RETREATED.value
+            else -> ArmyDeploymentStatus.DEPLOYED.value
+        }
+        RawArmyDeployment.copy(deployment, status = newStatus)
+    }.toTypedArray()
+}
+
+/**
+ * Transitions a deployment to BATTLE status when a battle is created for its assigned threat.
+ * Call this from the battle-creation flow.
+ */
+fun transitionDeploymentToBattle(deployments: Array<RawArmyDeployment>, threatId: String): Array<RawArmyDeployment> =
+    deployments.map { deployment ->
+        if (deployment.assignedThreatId == threatId && deployment.status == ArmyDeploymentStatus.DEPLOYED.value) {
+            RawArmyDeployment.copy(deployment, status = ArmyDeploymentStatus.BATTLE.value)
+        } else {
+            deployment
+        }
+    }.toTypedArray()
 
 fun tickWarThreats(threats: Array<RawWarThreat>, currentTurn: Int): Array<RawWarThreat> =
     threats.map { tickWarThreat(it, currentTurn) }.toTypedArray()

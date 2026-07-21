@@ -224,6 +224,9 @@ import at.posselt.pfrpg2e.kingdom.createArmyBattle
 import at.posselt.pfrpg2e.kingdom.resolveBattleTerrain
 import at.posselt.pfrpg2e.data.armies.ArmyType
 import at.posselt.pfrpg2e.data.armies.BattleStatus
+import at.posselt.pfrpg2e.data.armies.ArmyCondition
+import at.posselt.pfrpg2e.kingdom.transitionDeploymentToBattle
+import at.posselt.pfrpg2e.kingdom.updateDeploymentStatusesAfterBattle
 import com.foundryvtt.pf2e.actor.PF2EArmy
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.CompanionRef
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.PartyMemberRef
@@ -672,6 +675,25 @@ class KingdomSheet(
                 actor.setKingdom(kingdom)
             }
 
+            "remove-deployment" -> buildPromise {
+                // GM-only: remove a destroyed army deployment (cleanup)
+                if (!game.user.isGM) return@buildPromise
+                val deploymentId = target.dataset["id"]
+                val kingdom = getKingdom()
+                val deployment = (kingdom.armyDeployments ?: emptyArray()).find { it.id == deploymentId }
+                if (deployment == null) return@buildPromise
+                val confirmed = confirmDelete("armyPressure.removeDeploymentConfirm", deployment.armyName)
+                if (!confirmed) return@buildPromise
+                kingdom.armyDeployments = (kingdom.armyDeployments ?: emptyArray())
+                    .filter { it.id != deploymentId }.toTypedArray()
+                kingdom.warPressure = recalculateWarPressure(
+                    kingdom.warThreats ?: emptyArray(),
+                    kingdom.armyDeployments ?: emptyArray(),
+                    kingdom.warPressure,
+                )
+                actor.setKingdom(kingdom)
+            }
+
             "mark-pending-encounter-run" -> buildPromise {
                 // GM-only: clear a queued war-threat encounter. setKingdom re-fires the actor-update
                 // hook that re-syncs HexContentSync markers, so the map "!" marker clears too.
@@ -725,6 +747,12 @@ class KingdomSheet(
                             attackers = infos,
                             terrain = terrain,
                         )
+                        // Transition assigned deployments to BATTLE status
+                        val threatIdNonNull = threatId ?: return@buildPromise
+                        kingdom.armyDeployments = transitionDeploymentToBattle(
+                            kingdom.armyDeployments ?: emptyArray(),
+                            threatIdNonNull,
+                        )
                         kingdom.activeBattles = (kingdom.activeBattles ?: emptyArray()) + created
                         actor.setKingdom(kingdom)
                         created
@@ -735,16 +763,25 @@ class KingdomSheet(
                             current.activeBattles = (current.activeBattles ?: emptyArray())
                                 .map { if (it.id == updated.id) updated else it }
                                 .toTypedArray()
-                            if (updated.status == BattleStatus.VICTORY.value) {
-                                current.warThreats = (current.warThreats ?: emptyArray())
-                                    .map {
-                                        if (it.id == updated.threatId) {
-                                            RawWarThreat.copy(it, status = WarThreatStatus.DEFEATED.value)
-                                        } else {
-                                            it
+                            val isTerminal = updated.status == BattleStatus.VICTORY.value ||
+                                updated.status == BattleStatus.DEFEAT.value
+                            if (isTerminal) {
+                                // Update deployment statuses based on battle outcome
+                                current.armyDeployments = updateDeploymentStatusesAfterBattle(
+                                    current.armyDeployments ?: emptyArray(),
+                                    updated,
+                                )
+                                if (updated.status == BattleStatus.VICTORY.value) {
+                                    current.warThreats = (current.warThreats ?: emptyArray())
+                                        .map {
+                                            if (it.id == updated.threatId) {
+                                                RawWarThreat.copy(it, status = WarThreatStatus.DEFEATED.value)
+                                            } else {
+                                                it
+                                            }
                                         }
-                                    }
-                                    .toTypedArray()
+                                        .toTypedArray()
+                                }
                                 current.warPressure = recalculateWarPressure(
                                     current.warThreats ?: emptyArray(),
                                     current.armyDeployments ?: emptyArray(),
