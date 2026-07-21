@@ -1,17 +1,18 @@
 package at.posselt.pfrpg2e.kingdom
 
-import at.posselt.pfrpg2e.camping.HexGridProvider
-import at.posselt.pfrpg2e.camping.TravelPlan
-import at.posselt.pfrpg2e.camping.TravelRoute
-import at.posselt.pfrpg2e.camping.TravelRouteService
+import at.posselt.pfrpg2e.camping.routing.TravelProvider
+import at.posselt.pfrpg2e.camping.routing.TravelPlan
+import at.posselt.pfrpg2e.camping.routing.TravelRoute
+import at.posselt.pfrpg2e.camping.routing.TravelRouter
+import at.posselt.pfrpg2e.data.regions.Terrain
 import kotlin.math.ceil
 
 /**
  * Caravan routing for the commodity market. Reuses the camping route planner
- * ([TravelRouteService], Dijkstra over the hex grid) to find the shortest realm-map route between
+ * ([TravelRouter], Dijkstra over the hex grid) to find the shortest realm-map route between
  * two hexes, and converts that route's cost into whole kingdom turns of travel.
  *
- * The grid topology comes from a [HexGridProvider] — `KingmakerHexGridProvider` in production, or a
+ * The grid topology comes from a [TravelProvider] — `KingmakerHexGridProvider` in production, or a
  * hand-built fake in tests — so the routing/ETA logic here is fully unit-testable.
  */
 
@@ -46,13 +47,28 @@ fun caravanEtaTurns(routeCost: Double, costPerTurn: Double = CARAVAN_COST_PER_TU
     if (routeCost <= 0.0) 1 else maxOf(1, ceil(routeCost / costPerTurn).toInt())
 
 /**
- * Default caravan travel plan: plain per-hex cost, no party/terrain/weather bonuses yet.
- * Road/river cost modifiers are a later refinement (see docs/plans caravan plan).
+ * Caravan travel plan with terrain and infrastructure modifiers.
+ * Roads reduce cost (RAW-ish: -1 per hex), unbridged rivers add cost (+1), terrain applies multipliers.
+ * These values mirror the camping travel system's defaults.
  */
 fun caravanTravelPlan(): TravelPlan = TravelPlan(
     partySpeedMultiplier = 1.0,
-    terrainModifiers = emptyMap(),
-    infrastructureModifiers = emptyMap(),
+    terrainModifiers = mapOf(
+        Terrain.PLAINS to 0.0,
+        Terrain.HILLS to 0.5,
+        Terrain.FOREST to 1.0,
+        Terrain.MOUNTAIN to 2.0,
+        Terrain.SWAMP to 1.5,
+        Terrain.DESERT to 1.0,
+        Terrain.AQUATIC to 2.0,
+        Terrain.URBAN to -0.5,
+        Terrain.DUNGEON to 2.0,
+    ),
+    infrastructureModifiers = mapOf(
+        "road" to -1.0,
+        "river" to 1.0,
+        "bridge" to 0.0,
+    ),
     weatherModifier = 1.0,
 )
 
@@ -62,16 +78,16 @@ fun caravanTravelPlan(): TravelPlan = TravelPlan(
  * is normalized to null here.
  */
 fun computeCaravanRoute(
-    provider: HexGridProvider,
+    provider: TravelProvider,
     originHexKey: String,
     destHexKey: String,
     plan: TravelPlan = caravanTravelPlan(),
-): TravelRoute? = TravelRouteService(provider).calculateRoute(originHexKey, destHexKey, plan)
+): TravelRoute? = TravelRouter(provider).calculateRoute(originHexKey, destHexKey, plan)
     ?.takeIf { it.totalCost.isFinite() }
 
 /** Convenience: shortest-route ETA in kingdom turns, or null if unreachable. */
 fun computeCaravanEtaTurns(
-    provider: HexGridProvider,
+    provider: TravelProvider,
     originHexKey: String,
     destHexKey: String,
     costPerTurn: Double = CARAVAN_COST_PER_TURN,
