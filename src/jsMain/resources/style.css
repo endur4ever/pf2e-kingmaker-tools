@@ -15,6 +15,7 @@
 @import "./applications/kingdom/companion-relationship.css";
 @import "./applications/kingdom/sections/expeditions/expeditions.css";
 @import "./applications/kingdom/clocks.css";
+@import "./applications/kingdom/quest-generator.css";
 @import "./applications/kingdom/structure-browser.css";
 @import "./applications/kingdom/settlement.css";
 @import "./applications/settings/actor-actions.css";

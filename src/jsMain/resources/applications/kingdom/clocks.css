@@ -111,3 +111,21 @@
 .km-kingdom-sheet-content-clocks {
     padding: 8px;
 }
+
+/* Responsive: let clock headers wrap and tighten cards on narrow widths. */
+@media (max-width: 768px) {
+    .km-clock-card {
+        padding: 6px;
+    }
+}
+
+@media (max-width: 480px) {
+    .km-clock-header {
+        flex-wrap: wrap;
+        gap: 4px;
+    }
+
+    .km-clock-label {
+        font-size: 1em;
+    }
+}

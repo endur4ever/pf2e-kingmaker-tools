@@ -318,3 +318,12 @@
   font-size: 0.95em;
   padding: 0.5em 1.2em;
 }
+
+/* Responsive: the 280px event-card minimum can exceed a phone's content width;
+   collapse to one fluid column and give the list more vertical room. */
+@media (max-width: 480px) {
+  .km-qg-events-grid {
+    grid-template-columns: minmax(0, 1fr);
+    max-height: 240px;
+  }
+}

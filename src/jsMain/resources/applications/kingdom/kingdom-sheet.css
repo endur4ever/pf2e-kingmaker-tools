@@ -2223,6 +2223,49 @@ fieldset.km-hex-editor-links {
 }
 
 /* ============================================================================
+   Shared responsive utilities (all kingdom sections).
+   ============================================================================ */
+
+/* Wide tables (settlements Detailed Matrix, army threats/deployments,
+   modifiers) scroll inside their own container so the PAGE never scrolls
+   horizontally on narrow widths. */
+.km-table-scroll {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Generic empty state for legacy tabs (events, modifiers, settlements) —
+   mirrors .km-empty-quests / .km-empty-roster on the newer tabs. */
+.km-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
+    color: #777;
+    text-align: center;
+    border: 2px dashed rgba(120, 120, 120, 0.15);
+    border-radius: 8px;
+
+    i {
+        font-size: 2.5em;
+        margin-bottom: 10px;
+        opacity: 0.5;
+    }
+
+    p {
+        font-size: 1.05em;
+        margin: 0;
+    }
+
+    button {
+        margin-top: 12px;
+        width: auto;
+    }
+}
+
+/* ============================================================================
    Mobile / small-screen layout.
    The desktop sheet is a fixed-width sidebar (256–300px) + content flex row
    sized to `calc(100vh - 220px)`. On a phone that collapses into two cramped

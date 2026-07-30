@@ -95,3 +95,34 @@
 .km-army-garrison i {
     margin-right: 0.15rem;
 }
+
+/* Responsive (follows kingdom-sheet.css's 768/480 approach): tighten table
+   cells and let row actions wrap; the tables themselves scroll inside
+   .km-table-scroll wrappers (template) so the page never scrolls sideways. */
+@media (max-width: 768px) {
+    .km-army-table th,
+    .km-army-table td {
+        padding: 0.2rem 0.35rem;
+        font-size: var(--font-size-12);
+    }
+
+    .km-escalation-bar {
+        width: 40px;
+    }
+}
+
+@media (max-width: 480px) {
+    .km-army-pressure {
+        padding: 0.25rem;
+        gap: 0.75rem;
+    }
+
+    .km-army-table th,
+    .km-army-table td {
+        padding: 0.15rem 0.25rem;
+    }
+
+    .km-army-row-actions {
+        white-space: normal;
+    }
+}

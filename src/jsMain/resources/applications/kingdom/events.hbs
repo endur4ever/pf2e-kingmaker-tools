@@ -72,6 +72,13 @@
                 </div>
             </details>
         </li>
+    {{else}}
+        <li class="km-kingdom-event">
+            <div class="km-empty-state">
+                <i class="fa-regular fa-calendar"></i>
+                <p>{{localizeKM "kingdom.emptyEvents"}}</p>
+            </div>
+        </li>
     {{/each}}
 </ul>
 

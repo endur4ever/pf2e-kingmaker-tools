@@ -1782,6 +1782,10 @@
         "annexation": "Annexed Vassal State"
       },
       "newSettlement": "New Settlement",
+      "emptySettlements": "No settlements yet — found your first by clicking New Settlement, or add the current scene.",
+      "emptyModifiers": "No active modifiers. Temporary bonuses and penalties to kingdom checks appear here.",
+      "emptyModifiersCta": "Add Modifier",
+      "emptyEvents": "No active events. Ongoing kingdom events appear here when they trigger.",
       "addCurrentScene": "Add Current Scene",
       "settlementSize": "Settlement Size",
       "view": "View",

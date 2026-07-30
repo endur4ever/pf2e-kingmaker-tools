@@ -114,3 +114,38 @@
         }
     }
 }
+/* Responsive: 4-column structure grid steps down to 2 then 1; below 480px the
+   fixed 240px filter sidebar stacks above the vertically-scrolling list. */
+@media (max-width: 768px) {
+    .km-structure-browser .km-structures {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .km-structure-browser .km-structure-filters {
+        width: 200px;
+        min-width: 200px;
+    }
+}
+
+@media (max-width: 480px) {
+    .km-structure-browser .km-browser {
+        flex-direction: column;
+        height: auto;
+        overflow-y: auto;
+    }
+
+    .km-structure-browser .km-structure-filters {
+        width: auto;
+        min-width: 0;
+        height: auto;
+    }
+
+    .km-structure-browser .km-structure-list {
+        height: auto;
+    }
+
+    .km-structure-browser .km-structures {
+        grid-template-columns: minmax(0, 1fr);
+        height: auto;
+    }
+}

@@ -88,6 +88,7 @@
                     {{#if isGM}}<button type="button" data-action="add-war-threat"><i class="fa-solid fa-plus"></i> {{localizeKM "armyPressure.addThreat"}}</button>{{/if}}
                 </h3>
                 {{#if armyPressureContext.hasThreats}}
+                    <div class="km-table-scroll">
                     <table class="km-army-table">
                         <thead><tr>
                             <th>{{localizeKM "armyPressure.threatName"}}</th>
@@ -119,6 +120,7 @@
                         {{/each}}
                         </tbody>
                     </table>
+                    </div>
                 {{else}}
                     <p class="km-army-empty">{{localizeKM "armyPressure.noThreats"}}</p>
                 {{/if}}
@@ -130,6 +132,7 @@
                     {{#if isGM}}<button type="button" data-action="deploy-army"><i class="fa-solid fa-plus"></i> {{localizeKM "armyPressure.deployArmy"}}</button>{{/if}}
                 </h3>
                 {{#if armyPressureContext.hasDeployments}}
+                    <div class="km-table-scroll">
                     <table class="km-army-table">
                         <thead><tr>
                             <th>{{localizeKM "armyPressure.armyName"}}</th>
@@ -163,6 +166,7 @@
                         {{/each}}
                         </tbody>
                     </table>
+                    </div>
                 {{else}}
                     <p class="km-army-empty">{{localizeKM "armyPressure.noDeployments"}}</p>
                 {{/if}}

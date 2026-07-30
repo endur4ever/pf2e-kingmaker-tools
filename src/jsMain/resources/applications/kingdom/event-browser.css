@@ -59,3 +59,20 @@ ul.km-add-events {
         }
     }
 }
+/* Responsive: tighten event rows and let summaries/trait chips wrap. */
+@media (max-width: 768px) {
+    ul.km-add-events details {
+        padding: 0.5em 0.6em;
+    }
+}
+
+@media (max-width: 480px) {
+    ul.km-add-events details summary {
+        flex-wrap: wrap;
+        gap: 0.3em;
+    }
+
+    ul.km-add-events details .km-event-traits {
+        flex-wrap: wrap;
+    }
+}

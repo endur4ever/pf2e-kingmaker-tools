@@ -129,3 +129,27 @@
         }
     }
 }
+
+/* Responsive: the inspect-settlement window is pinned full-screen at 768px by
+   kingdom-sheet.css; inside it, make the nav a scrollable strip and tighten
+   content/table padding. */
+@media (max-width: 768px) {
+    .km-inspect-settlement .km-settlement-nav ul {
+        justify-content: flex-start;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        flex-wrap: nowrap;
+    }
+
+    .km-inspect-settlement .km-settlement-content {
+        padding: 0.5em;
+    }
+}
+
+@media (max-width: 480px) {
+    .km-inspect-settlement .km-population-table th,
+    .km-inspect-settlement .km-population-table td {
+        padding: 0.25em 0.35em;
+        font-size: var(--font-size-12);
+    }
+}

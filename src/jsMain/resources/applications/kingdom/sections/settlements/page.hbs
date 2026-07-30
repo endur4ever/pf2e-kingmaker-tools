@@ -14,7 +14,11 @@
                 <button type="button" data-action="toggle-settlements-view" data-view="matrix" {{#if showDetailedMatrix}}class="km-active"{{/if}}>{{localizeKM "kingdom.detailedMatrix"}}</button>
             </div>
 
+            {{#if settlements.length}}
             {{#if showDetailedMatrix}}
+            {{!-- One column per settlement (~25 stat rows): scrolls in its own
+                  container so the page never scrolls horizontally. --}}
+            <div class="km-table-scroll">
             <table class="km-settlements-matrix">
                 <thead>
                 <tr>
@@ -137,6 +141,7 @@
                 {{/each}}
                 </tbody>
             </table>
+            </div>
             {{else}}
             <table>
                 <thead>
@@ -178,6 +183,13 @@
                 {{/each}}
                 </tbody>
             </table>
+            {{/if}}
+            {{else}}
+            <div class="km-empty-state">
+                <i class="fa-solid fa-city"></i>
+                <p>{{localizeKM "kingdom.emptySettlements"}}</p>
+                <button type="button" data-action="create-settlement">{{localizeKM "kingdom.newSettlement"}}</button>
+            </div>
             {{/if}}
         </section>
     </div>

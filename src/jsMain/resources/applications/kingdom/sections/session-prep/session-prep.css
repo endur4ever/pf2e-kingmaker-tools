@@ -214,3 +214,23 @@
     opacity: 0.75;
     margin-top: 0.1rem;
 }
+
+/* Responsive: wrap the header/action rows and tighten padding on narrow widths. */
+@media (max-width: 768px) {
+    .km-session-prep {
+        padding: 0.5rem;
+    }
+
+    .km-session-prep-header,
+    .km-session-prep-actions {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .km-session-prep {
+        padding: 0.25rem;
+        font-size: 0.95em;
+    }
+}
