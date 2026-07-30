@@ -2,7 +2,10 @@ package at.posselt.pfrpg2e.camping
 
 import at.posselt.pfrpg2e.kingdom.getKingdom
 import at.posselt.pfrpg2e.kingdom.getKingdomActors
+import at.posselt.pfrpg2e.utils.postChatMessage
+import at.posselt.pfrpg2e.utils.t
 import com.foundryvtt.core.Game
+import js.objects.recordOf
 import com.foundryvtt.core.grid.GridHex
 import com.foundryvtt.kingmaker.kingmaker
 import com.pixijs.Point
@@ -80,10 +83,16 @@ fun clearDepartingCompanionFromCamp(
     }.toTypedArray()
     camping.watchSlots = updatedWatchSlots
 
-    // 3. Clear meal choices
-    if (camping.cooking.actorMeals[companionUuid] != null) {
-        js("delete camping.cooking.actorMeals[companionUuid]")
-        clearedMealChoice = true
+    // 3. Clear meal choices. actorMeals is keyed by actor.id (UUIDs contain dots and would be
+    //    mangled by Foundry's flag flattening — see CampingData.downtimeHoursKey), so match on the
+    //    entry VALUE's actorUuid, never on the record key.
+    val meals = camping.cooking.actorMeals
+    val mealKeys = js("Object.keys(meals)").unsafeCast<Array<String>>()
+    mealKeys.forEach { mealKey ->
+        if (meals[mealKey]?.actorUuid == companionUuid) {
+            js("delete meals[mealKey]")
+            clearedMealChoice = true
+        }
     }
 
     return ClearedCompanionData(
@@ -91,4 +100,42 @@ fun clearDepartingCompanionFromCamp(
         clearedWatchSlotsCount = clearedWatchSlotsCount,
         clearedMealChoice = clearedMealChoice,
     )
+}
+
+/**
+ * Departure housekeeping for companions leaving on an expedition: unassign each departing
+ * companion from camping activities, watch slots, and meal choices on the camping actor, persist
+ * once, and post ONE GM-whispered note listing what was cleared. Assignments are deliberately NOT
+ * auto-restored when the expedition returns — the GM re-assigns replacements.
+ *
+ * @param departing (actorUuid, displayName) pairs for the companions leaving camp.
+ */
+suspend fun clearDepartingCompanionsFromCamp(game: Game, departing: List<Pair<String, String>>) {
+    if (departing.isEmpty()) return
+    val campingActor = game.getCampingActors().firstOrNull() ?: return
+    val camping = campingActor.getCamping() ?: return
+    val clearedByName = departing.mapNotNull { (uuid, name) ->
+        val cleared = clearDepartingCompanionFromCamp(camping, uuid)
+        val parts = buildList {
+            if (cleared.clearedActivities.isNotEmpty()) {
+                add(t("camping.departureClearedActivities", recordOf("count" to cleared.clearedActivities.size)))
+            }
+            if (cleared.clearedWatchSlotsCount > 0) {
+                add(t("camping.departureClearedWatches", recordOf("count" to cleared.clearedWatchSlotsCount)))
+            }
+            if (cleared.clearedMealChoice) {
+                add(t("camping.departureClearedMeal"))
+            }
+        }
+        if (parts.isEmpty()) null else "$name: ${parts.joinToString(", ")}"
+    }
+    if (clearedByName.isEmpty()) return
+    campingActor.setCamping(camping)
+    val gmUserIds = game.users.filter { it.isGM }.mapNotNull { it.id }.toTypedArray()
+    if (gmUserIds.isNotEmpty()) {
+        postChatMessage(
+            t("camping.expeditionDepartureCleared", recordOf("details" to clearedByName.joinToString("; "))),
+            whisper = gmUserIds,
+        )
+    }
 }

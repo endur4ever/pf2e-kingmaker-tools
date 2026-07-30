@@ -70,6 +70,16 @@ open external class PF2EActor : Actor {
     fun increaseCondition(
         slug: String,
     ): Promise<Void>
+
+    /** Toggle a BINARY condition (unconscious, prone, ...) on/off — valued conditions use [increaseCondition]. */
+    fun toggleCondition(
+        slug: String,
+    ): Promise<Void>
+
+    /** Whether the actor currently has the condition with [slug]. */
+    fun hasCondition(
+        slug: String,
+    ): Boolean
 }
 
 // required to make instance of work, but since the classes are not registered here

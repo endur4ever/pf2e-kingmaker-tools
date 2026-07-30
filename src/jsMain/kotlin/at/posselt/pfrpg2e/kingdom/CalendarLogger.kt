@@ -1,5 +1,6 @@
 package at.posselt.pfrpg2e.kingdom
 
+import at.posselt.pfrpg2e.camping.clearDepartingCompanionsFromCamp
 import at.posselt.pfrpg2e.kingdom.data.RawCharacter
 import at.posselt.pfrpg2e.kingdom.data.RawCompanionExpedition
 import at.posselt.pfrpg2e.utils.escapeHtml
@@ -15,12 +16,24 @@ import kotlinx.coroutines.await
  * Log an expedition's launch to the calendar so the GM has an in-fiction "back on day X" signal.
  * Logged at the current date with a "returns in N days" note (no fragile future-date arithmetic);
  * no-ops gracefully when no Simple Calendar integration is present.
+ *
+ * Also performs departure housekeeping: it is the one seam every launch path (KingdomSheet,
+ * both ChatButtons offers, CompanionProfileDialog) already calls after persisting the kingdom, so
+ * the departing companions' camp assignments are cleared here (see
+ * [at.posselt.pfrpg2e.camping.clearDepartingCompanionsFromCamp]).
  */
 suspend fun logExpeditionLaunched(expedition: RawCompanionExpedition, companions: Array<RawCharacter>) {
     val nameByKey = companions.associateBy({ it.actorUuid ?: it.name }, { it.name })
     val names = expedition.companionIds.mapNotNull { nameByKey[it] }.joinToString(", ")
         .ifBlank { t("kingdom.expeditions.companionsFallback") }
     val days = expedition.totalDays
+
+    // Departing companions keep no stale camp assignments behind (activities, watches, meals).
+    val departing = expedition.companionIds.mapNotNull { cid ->
+        companions.find { (it.actorUuid ?: it.name) == cid }
+            ?.let { c -> c.actorUuid?.let { uuid -> uuid to c.name } }
+    }
+    clearDepartingCompanionsFromCamp(game, departing)
 
     // The calendar note is rendered as HTML by Simple Calendar — escape there only.
     logToCalendar(

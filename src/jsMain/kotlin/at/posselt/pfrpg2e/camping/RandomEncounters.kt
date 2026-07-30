@@ -1,5 +1,6 @@
 package at.posselt.pfrpg2e.camping
 
+import at.posselt.pfrpg2e.app.confirm
 import at.posselt.pfrpg2e.camping.dialogs.RegionSetting
 import at.posselt.pfrpg2e.data.checks.DegreeOfSuccess
 import at.posselt.pfrpg2e.data.checks.RollMode
@@ -67,10 +68,30 @@ suspend fun rollRandomEncounter(
  * GM previews it (see [EncounterPreviewDialog]) before accepting. On accept the
  * result is posted; reroll re-runs this flow; reject discards it.
  */
-suspend fun rollCuratedEncounter(game: Game, actor: CampingActor): Boolean {
+suspend fun rollCuratedEncounter(game: Game, actor: CampingActor, offerRestore: Boolean = true): Boolean {
     val camping = actor.getCamping() ?: return false
     val region = camping.findCurrentRegion() ?: camping.regionSettings.regions.firstOrNull() ?: return false
     val rollMode = fromCamelCase<RollMode>(camping.randomEncounterRollMode) ?: RollMode.GMROLL
+
+    // An un-committed preview persisted before a browser reload can be restored instead of
+    // forcing a reroll. Only offered on fresh entry — the preview dialog's own Reroll button
+    // passes offerRestore = false so it never prompts against itself.
+    if (offerRestore) {
+        val persistedCategory = restorableEncounterPreview(camping.lastEncounterCategory, camping.lastEncounterResult)
+        val persistedResult = camping.lastEncounterResult
+        if (persistedCategory != null && !persistedResult.isNullOrBlank()) {
+            val restore = confirm(
+                t(
+                    "camping.encounterRestorePrompt",
+                    recordOf("category" to t("camping.encounterCategory.${persistedCategory.value}")),
+                ),
+            )
+            if (restore) {
+                showEncounterPreview(game, actor, camping, persistedCategory, region.name, persistedResult)
+                return true
+            }
+        }
+    }
 
     // Roadmap #11: the Encounter Curator weight sliders drive category selection.
     // The category proxy table is only consulted as a fallback when every weight
@@ -114,15 +135,37 @@ suspend fun rollCuratedEncounter(game: Game, actor: CampingActor): Boolean {
         .draw.results.get(0)?.text?.trim()
         ?: ""
 
+    showEncounterPreview(game, actor, camping, category, region.name, resultText)
+    return true
+}
+
+/**
+ * Persist the rolled (un-committed) preview to [CampingData.lastEncounterCategory]/
+ * [CampingData.lastEncounterResult] and show the preview dialog. The persisted fields survive a
+ * browser reload mid-preview (offered back by [rollCuratedEncounter]) and are cleared when the GM
+ * commits (accept/convert) or discards (reject) the preview; a reroll simply overwrites them.
+ */
+private suspend fun showEncounterPreview(
+    game: Game,
+    actor: CampingActor,
+    camping: CampingData,
+    category: EncounterCategory,
+    regionName: String,
+    resultText: String,
+) {
+    camping.lastEncounterCategory = category.value
+    camping.lastEncounterResult = resultText
+    actor.setCamping(camping)
+
     // A rumor is always offered as a potential quest hook so the GM can convert it
     // from the preview dialog (roadmap #11 rumor->quest pipeline).
     val rumor = if (category == EncounterCategory.RUMOR && resultText.isNotBlank()) {
-        Rumor(text = resultText, sourceRegion = region.name, isQuestHook = true)
+        Rumor(text = resultText, sourceRegion = regionName, isQuestHook = true)
     } else null
 
     EncounterPreviewDialog(
         category = category,
-        regionName = region.name,
+        regionName = regionName,
         resultText = resultText,
         rumor = rumor,
         onAccept = { buildPromise {
@@ -131,17 +174,31 @@ suspend fun rollCuratedEncounter(game: Game, actor: CampingActor): Boolean {
                 recordOf(
                     "category" to category.value,
                     "iconClass" to category.iconClass,
-                    "regionName" to region.name,
+                    "regionName" to regionName,
                     "resultText" to resultText,
                     "isRumor" to (category == EncounterCategory.RUMOR),
                 ),
             )
+            clearEncounterPreview(actor)
         } },
-        onReroll = { buildPromise { rollCuratedEncounter(game, actor) } },
-        onReject = {},
-        onConvertToQuest = { hook -> buildPromise { convertRumorToQuest(game, hook) } },
+        onReroll = { buildPromise { rollCuratedEncounter(game, actor, offerRestore = false) } },
+        onReject = { buildPromise { clearEncounterPreview(actor) } },
+        onConvertToQuest = { hook -> buildPromise {
+            convertRumorToQuest(game, hook)
+            clearEncounterPreview(actor)
+        } },
     ).render(true)
-    return true
+}
+
+/** Clear the persisted preview once it is committed or discarded. */
+private suspend fun clearEncounterPreview(actor: CampingActor) {
+    actor.getCamping()?.let { camping ->
+        if (camping.lastEncounterCategory != null || camping.lastEncounterResult != null) {
+            camping.lastEncounterCategory = null
+            camping.lastEncounterResult = null
+            actor.setCamping(camping)
+        }
+    }
 }
 
 /**
@@ -184,31 +241,7 @@ private suspend fun rollCuratedEncounterWithSuppressedCombat(
         .draw.results.get(0)?.text?.trim()
         ?: ""
 
-    val rumor = if (newCategory == EncounterCategory.RUMOR && resultText.isNotBlank()) {
-        Rumor(text = resultText, sourceRegion = region.name, isQuestHook = true)
-    } else null
-
-    EncounterPreviewDialog(
-        category = newCategory,
-        regionName = region.name,
-        resultText = resultText,
-        rumor = rumor,
-        onAccept = { buildPromise {
-            postChatTemplate(
-                "chatmessages/curated-rumor.hbs",
-                recordOf(
-                    "category" to newCategory.value,
-                    "iconClass" to newCategory.iconClass,
-                    "regionName" to region.name,
-                    "resultText" to resultText,
-                    "isRumor" to (newCategory == EncounterCategory.RUMOR),
-                ),
-            )
-        } },
-        onReroll = { buildPromise { rollCuratedEncounter(game, actor) } },
-        onReject = {},
-        onConvertToQuest = { hook -> buildPromise { convertRumorToQuest(game, hook) } },
-    ).render(true)
+    showEncounterPreview(game, actor, camping, newCategory, region.name, resultText)
     return true
 }
 

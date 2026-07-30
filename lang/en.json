@@ -577,6 +577,12 @@
         "tornado": "Tornado"
       },
       "encounterPreview": "Encounter Preview",
+      "encounterRestoreTitle": "Restore Encounter Preview",
+      "encounterRestorePrompt": "An unresolved encounter preview from before the reload was found ({category}). Restore it instead of rolling a new one?",
+      "expeditionDepartureCleared": "Expedition departure — cleared camp assignments for: {details}. Assignments are not restored automatically on return; reassign as needed.",
+      "departureClearedActivities": "{count} activity assignment(s)",
+      "departureClearedWatches": "{count} watch slot(s)",
+      "departureClearedMeal": "meal choice",
       "encounterCategory": {
         "combat": "Combat",
         "rp": "Roleplay",

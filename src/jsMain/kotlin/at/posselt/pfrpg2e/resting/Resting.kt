@@ -12,6 +12,7 @@ import at.posselt.pfrpg2e.camping.RecipeData
 import at.posselt.pfrpg2e.camping.RestSettings
 import at.posselt.pfrpg2e.camping.applyRestHealEffects
 import at.posselt.pfrpg2e.camping.askDc
+import at.posselt.pfrpg2e.data.actor.isValuedCondition
 import at.posselt.pfrpg2e.kingdom.CompanionAutonomy
 import at.posselt.pfrpg2e.kingdom.getKingdom
 import at.posselt.pfrpg2e.kingdom.getKingdomActors
@@ -353,7 +354,14 @@ private suspend fun beginRest(
             val sleepingActors = campCharacters.filter { it.uuid !in onWatchUuids }
             sleepingActors.forEach { actor ->
                 resolution.appliedConditions.forEach { condition ->
-                    actor.increaseCondition(condition)
+                    if (isValuedCondition(condition)) {
+                        actor.increaseCondition(condition)
+                    } else if (!actor.hasCondition(condition)) {
+                        // Binary conditions (unconscious, prone) have no value in PF2e —
+                        // toggle them on once instead of running them through the
+                        // increase-condition machinery; skip when already applied.
+                        actor.toggleCondition(condition)
+                    }
                 }
             }
 

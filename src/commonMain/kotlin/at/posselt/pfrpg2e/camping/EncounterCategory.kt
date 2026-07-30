@@ -32,3 +32,11 @@ enum class EncounterCategory(val value: String, val iconClass: String) {
         fun allCategories(): List<EncounterCategory> = entries.toList()
     }
 }
+
+/**
+ * Whether persisted (un-committed) encounter-preview fields constitute a restorable preview: both
+ * must be present, the result text non-blank, and the category must still resolve to a real
+ * [EncounterCategory]. Returns the resolved category, or null when there is nothing to restore.
+ */
+fun restorableEncounterPreview(category: String?, resultText: String?): EncounterCategory? =
+    if (resultText.isNullOrBlank()) null else category?.let { EncounterCategory.fromString(it) }
