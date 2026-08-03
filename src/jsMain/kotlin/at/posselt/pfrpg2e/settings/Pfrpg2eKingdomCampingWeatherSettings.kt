@@ -244,6 +244,13 @@ object Pfrpg2eKingdomCampingWeatherSettings {
     fun getLatestMigrationBackup(): String =
         game.settings.getString("latestMigrationBackup")
 
+    suspend fun setHomebrewProfileRegistry(value: String) =
+        game.settings.setString("homebrewProfileRegistry", value)
+
+    /** JSON-serialized [at.posselt.pfrpg2e.homebrew.HomebrewProfileRegistry]; "{}" when unset. */
+    fun getHomebrewProfileRegistry(): String =
+        game.settings.getString("homebrewProfileRegistry")
+
     suspend fun setCampaignMapSceneIds(value: String) =
         game.settings.setString("campaignMapSceneIds", value)
 
@@ -445,7 +452,9 @@ object Pfrpg2eKingdomCampingWeatherSettings {
         val strings = mapOf(
             "currentWeatherFx" to "none",
             "currentWeatherType" to "sunny",
-            "latestMigrationBackup" to "{}"
+            "latestMigrationBackup" to "{}",
+            // JSON-serialized HomebrewProfileRegistry (managed via the Homebrew Profile Manager)
+            "homebrewProfileRegistry" to "{}",
         )
     }
 

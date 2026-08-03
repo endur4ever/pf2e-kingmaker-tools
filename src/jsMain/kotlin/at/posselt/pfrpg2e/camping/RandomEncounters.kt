@@ -11,6 +11,7 @@ import at.posselt.pfrpg2e.kingdom.getKingdom
 import at.posselt.pfrpg2e.kingdom.getKingdomActors
 import at.posselt.pfrpg2e.kingdom.setKingdom
 import at.posselt.pfrpg2e.questevent.CampaignQuest
+import at.posselt.pfrpg2e.settings.pfrpg2eKingdomCampingWeather
 import at.posselt.pfrpg2e.questevent.QuestRewards
 import at.posselt.pfrpg2e.questevent.QuestStatus
 import at.posselt.pfrpg2e.questevent.QuestType
@@ -190,6 +191,16 @@ private suspend fun showEncounterPreview(
     ).render(true)
 }
 
+/**
+ * The homebrew rules profile registry from world settings; null when unset or unparseable.
+ * (Reads the registered `homebrewProfileRegistry` string setting — never a raw `js()` call: the
+ * Kotlin `getObject` extension does not exist as a method on the runtime settings object.)
+ */
+private fun loadHomebrewRegistry(game: Game): HomebrewProfileRegistry? =
+    runCatching { game.settings.pfrpg2eKingdomCampingWeather.getHomebrewProfileRegistry() }
+        .getOrNull()
+        ?.let { HomebrewProfileRegistry.fromJson(it) }
+
 /** Clear the persisted preview once it is committed or discarded. */
 private suspend fun clearEncounterPreview(actor: CampingActor) {
     actor.getCamping()?.let { camping ->
@@ -271,7 +282,7 @@ private fun checkEncounterHexFilter(
     val hexContentSuppresses = hexContent?.suppressesEncounters
 
     // Check homebrew setting overlap: noRandomCombatInClaimedHexes takes precedence
-    val registry = js("game.settings.getObject('homebrewRulesProfileRegistry')") as? HomebrewProfileRegistry
+    val registry = loadHomebrewRegistry(game)
     val activeProfile = RuleResolutionHelper.getActiveProfile(registry)
     val homebrewSuppresses = activeProfile?.let { RuleResolutionHelper.isRandomCombatSuppressedInClaimedHexes(it) } ?: false
     if (homebrewSuppresses && hexClaimed && category == EncounterCategory.COMBAT) {
@@ -353,7 +364,7 @@ private suspend fun rollRandomEncounter(
                 val hexContent = kingdom?.hexContents?.firstOrNull { it.hexKey == hexKey }
                 val hexContentSuppresses = hexContent?.suppressesEncounters
 
-                val registry = js("game.settings.getObject('homebrewRulesProfileRegistry')") as? HomebrewProfileRegistry
+                val registry = loadHomebrewRegistry(game)
                 val activeProfile = RuleResolutionHelper.getActiveProfile(registry)
                 val homebrewSuppresses = activeProfile?.let { RuleResolutionHelper.isRandomCombatSuppressedInClaimedHexes(it) } ?: false
                 if (homebrewSuppresses && hexClaimed) {

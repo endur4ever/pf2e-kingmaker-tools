@@ -8,6 +8,7 @@ import at.posselt.pfrpg2e.homebrew.HomebrewProfileRegistry
 import at.posselt.pfrpg2e.homebrew.HomebrewRegistryImport
 import at.posselt.pfrpg2e.homebrew.HomebrewRulesProfile
 import at.posselt.pfrpg2e.homebrew.HomebrewRules
+import at.posselt.pfrpg2e.settings.pfrpg2eKingdomCampingWeather
 import at.posselt.pfrpg2e.kingdom.KingdomActor
 import at.posselt.pfrpg2e.utils.buildPromise
 import at.posselt.pfrpg2e.utils.downloadJson
@@ -58,7 +59,9 @@ class HomebrewProfileManagerApplication(
     private var workingRegistry: HomebrewProfileRegistry = HomebrewProfileRegistry()
 
     init {
-        val saved = game.settings.get<String?>("pfrpg2eKingdom", "homebrew.profileRegistry")
+        // The registry lives in the registered module setting (see Pfrpg2eKingdomCampingWeatherSettings);
+        // reading an unregistered namespace/key throws in Foundry, so never game.settings.get raw here.
+        val saved = runCatching { game.settings.pfrpg2eKingdomCampingWeather.getHomebrewProfileRegistry() }.getOrNull()
         if (saved != null) {
             workingRegistry = HomebrewProfileRegistry.fromJson(saved) ?: HomebrewProfileRegistry()
         }
@@ -71,7 +74,7 @@ class HomebrewProfileManagerApplication(
             activeProfileId = if (workingRegistry.activeProfileId == id) null else workingRegistry.activeProfileId
         )
         // Save the registry to game settings
-        game.settings.set("pfrpg2eKingdom", "homebrew.profileRegistry", workingRegistry.toJson())
+        game.settings.pfrpg2eKingdomCampingWeather.setHomebrewProfileRegistry(workingRegistry.toJson())
         render()
         undefined
     }
@@ -87,7 +90,7 @@ class HomebrewProfileManagerApplication(
             is HomebrewRegistryImport.Invalid -> ui.notifications.error(result.message)
             is HomebrewRegistryImport.Valid -> {
                 workingRegistry = result.registry
-                game.settings.set("pfrpg2eKingdom", "homebrew.profileRegistry", workingRegistry.toJson())
+                game.settings.pfrpg2eKingdomCampingWeather.setHomebrewProfileRegistry(workingRegistry.toJson())
                 ui.notifications.info(
                     t("kingdom.homebrewImported", recordOf("name" to (result.imported.firstOrNull()?.name ?: ""))),
                 )
@@ -175,7 +178,7 @@ class HomebrewProfileManagerApplication(
             profiles = profilesWithActiveFlag
         )
         // Save the registry to game settings
-        game.settings.set("pfrpg2eKingdom", "homebrew.profileRegistry", workingRegistry.toJson())
+        game.settings.pfrpg2eKingdomCampingWeather.setHomebrewProfileRegistry(workingRegistry.toJson())
         render()
         undefined
     }
