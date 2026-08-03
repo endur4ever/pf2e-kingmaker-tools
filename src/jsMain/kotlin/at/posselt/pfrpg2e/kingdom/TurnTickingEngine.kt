@@ -104,6 +104,9 @@ data class TickResult(
 	val clockEvents: Array<ClockTickEvent> = emptyArray(),
 	val updatedClocks: Array<CampaignClock> = emptyArray(),
 	val totalUnrestChange: Int = 0,
+
+	/** War pressure crossed its ruin threshold this tick — performEndTurn posts the GM-confirmed ruin offer. */
+	val ruinThresholdCrossed: Boolean = false,
 	val campaignQuests: Array<dynamic> = emptyArray(),
 		val warThreats: Array<RawWarThreat> = emptyArray(),
 		val armyDeployments: Array<RawArmyDeployment> = emptyArray(),
@@ -371,11 +374,9 @@ object TurnTickingEngine {
 			newConsumption = RawConsumption.copy(newConsumption, now = newConsumption.now + wpModifiers.consumptionDelta)
 			changes += TickChange("consumption", "warPressure", null, wpModifiers.consumptionDelta)
 		}
-		// Ruin threshold crossed: fire a GM offer (same pattern as warThreatOffers).
-		// The actual offer card is posted in performEndTurn when warThreatOffers > 0.
-		if (wpModifiers.ruinThresholdCrossed) {
-			warThreatOffers++
-		}
+		// Ruin threshold crossed: surfaced on the TickResult so performEndTurn posts the
+		// ruin-specific GM-confirmed offer card. (It previously bumped warThreatOffers — a
+		// counter no consumer reads — so the promised offer silently vanished.)
 
 		// 13) RP-to-XP conversion: convert current RP into XP based on rate and limit
 		var xpAwarded = 0
@@ -486,6 +487,7 @@ object TurnTickingEngine {
 					diplomacyQuestOffers = diplomacyQuestOffers,
 					questDeadlineReached = deadlineReached,
 					newlyTriggeredThreats = newlyTriggered.toTypedArray(),
+					ruinThresholdCrossed = wpModifiers.ruinThresholdCrossed,
 				)
 	}
 

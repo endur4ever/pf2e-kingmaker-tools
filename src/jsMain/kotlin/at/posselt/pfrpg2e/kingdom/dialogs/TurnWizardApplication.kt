@@ -608,6 +608,23 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
         }
     }
 
+    // War pressure crossed its ruin threshold this turn: GM-confirmed offer to let the strain
+    // bite as +1 to a Ruin of the GM's choice (or be dismissed). GM-whispered — the buttons are
+    // GM-only and must never render on player clients.
+    if (tickResult.ruinThresholdCrossed) {
+        val gmUserIds = game.users.filter { it.isGM }.mapNotNull { it.id }.toTypedArray()
+        if (gmUserIds.isNotEmpty()) {
+            val offerContext = js("{}")
+            offerContext.actorUuid = actor.uuid
+            offerContext.turn = currentTurn
+            postChatTemplate(
+                templatePath = "chatmessages/war-pressure-ruin-offer.hbs",
+                templateContext = offerContext,
+                whisper = gmUserIds,
+            )
+        }
+    }
+
     // Auto-detect the two house-rule milestones (road-to-capital, region fully claimed) from live
     // hex state and post a GM-confirmed award offer for any newly-earned one. Read-only detection;
     // never auto-awards.

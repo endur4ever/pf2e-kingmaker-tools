@@ -267,6 +267,33 @@ private val buttons = listOf(
             }
         }
     },
+    ChatButton("km-offer-war-ruin") { game, actor, event, button ->
+        // GM-confirmed offer posted when war pressure crosses its ruin threshold at End Turn:
+        // the GM picks which Ruin absorbs the strain (+1 to its value) or dismisses.
+        // Idempotent per crossing: warPressure.ruinOfferTurn records the answered turn.
+        if (!game.user.isGM) return@ChatButton
+        val choice = button.dataset["choice"] ?: return@ChatButton
+        val cardTurn = button.dataset["turn"]?.toIntOrNull() ?: return@ChatButton
+        actor.getKingdom()?.let { kingdom ->
+            val pressure = kingdom.warPressure ?: return@ChatButton
+            if (pressure.ruinOfferTurn == cardTurn) return@ChatButton  // already answered
+            when (choice) {
+                "corruption" -> kingdom.ruin.corruption.value += 1
+                "crime" -> kingdom.ruin.crime.value += 1
+                "decay" -> kingdom.ruin.decay.value += 1
+                "strife" -> kingdom.ruin.strife.value += 1
+                "dismiss" -> {}
+                else -> return@ChatButton
+            }
+            pressure.ruinOfferTurn = cardTurn
+            actor.setKingdom(kingdom)
+            if (choice == "dismiss") {
+                postChatMessage(t("chatMessages.warRuin.dismissed"))
+            } else {
+                postChatMessage(t("chatMessages.warRuin.applied", recordOf("ruin" to t("chatMessages.warRuin.$choice"))))
+            }
+        }
+    },
     ChatButton("km-offer-diplomacy-quest") { game, actor, event, button ->
         // GM-confirmed offer from a faction-standing threshold crossing (#1 → #2).
         // Opens the AddQuest dialog prefilled with the faction as giver.

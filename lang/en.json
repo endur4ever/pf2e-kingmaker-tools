@@ -2172,6 +2172,17 @@
         "failed": "Quest \"{name}\" has failed — its deadline passed.",
         "extended": "Quest \"{name}\" extended by {turns} turns."
       },
+      "warRuin": {
+        "offerTitle": "War Pressure: Ruin Threshold Crossed",
+        "offerBody": "The strain of the war has reached ruinous levels. Choose which Ruin absorbs the damage (+1 to its value), or dismiss if the kingdom weathers it narratively.",
+        "corruption": "+1 Corruption",
+        "crime": "+1 Crime",
+        "decay": "+1 Decay",
+        "strife": "+1 Strife",
+        "dismiss": "Dismiss",
+        "applied": "War pressure takes its toll: {ruin}.",
+        "dismissed": "The kingdom weathers the war's strain — no Ruin applied."
+      },
       "warThreatArrival": {
         "offerTitle": "War Threat Arrived",
         "offerBody": "The war threat {name} has arrived at the kingdom's borders!",

@@ -16,6 +16,7 @@ import at.posselt.pfrpg2e.kingdom.data.RawGroup
 import at.posselt.pfrpg2e.campaign.jsObject
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -259,8 +260,9 @@ class TurnTickingEngineTest {
         )
         assertNotNull(result.warPressure)
         assertTrue(result.warPressure!!.currentPressure >= 75)
-        // warThreatOffers should be incremented for ruin threshold crossing
-        assertEquals(1, result.warThreatOffers)
+        // The crossing is surfaced on the TickResult so performEndTurn posts the
+        // km-offer-war-ruin card (warThreatOffers is a counter no consumer reads).
+        assertTrue(result.ruinThresholdCrossed)
     }
 
     @Test
@@ -286,7 +288,7 @@ class TurnTickingEngineTest {
         )
         // Pressure stays above ruin threshold but didn't CROSS it this tick
         assertNotNull(result.warPressure)
-        assertEquals(0, result.warThreatOffers, "No offer should be fired when already above ruin threshold")
+        assertFalse(result.ruinThresholdCrossed, "No offer should be fired when already above ruin threshold")
     }
 
     // ── Solution counters ──────────────────────────────────────────────
@@ -837,6 +839,7 @@ class TurnTickingEngineTest {
         assertEquals(previewResult.warPressure?.unrestModifier, commitResult.warPressure?.unrestModifier)
         assertEquals(previewResult.warPressure?.consumptionModifier, commitResult.warPressure?.consumptionModifier)
         assertEquals(previewResult.warThreatOffers, commitResult.warThreatOffers)
+        assertEquals(previewResult.ruinThresholdCrossed, commitResult.ruinThresholdCrossed)
     }
 
     // ── RP-to-XP conversion ────────────────────────────────────────────

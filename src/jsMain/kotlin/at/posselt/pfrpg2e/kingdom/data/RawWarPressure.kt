@@ -19,4 +19,11 @@ external interface RawWarPressure {
     var ruinThreshold: Int
 
     var lastChange: Int?
+
+    /**
+     * Turn whose ruin-threshold offer card has been answered (applied or dismissed) — idempotency
+     * guard so the km-offer-war-ruin buttons can only fire once per crossing. Nullable for saves
+     * predating the field; no migration needed.
+     */
+    var ruinOfferTurn: Int?
 }
