@@ -23,6 +23,17 @@
     <strong>{{localizeKM "camping.conditionsApplied"}}:</strong> <span>{{appliedConditions}}</span>
   </div>
   {{/if}}
+  {{#if defenseContributions.length}}
+  <hr/>
+  <div class="km-card-row">
+    <strong>{{localizeKM "camping.defenseContributions"}}:</strong>
+  </div>
+  <ul class="km-defense-contributions">
+    {{#each defenseContributions}}
+    <li>{{this}}</li>
+    {{/each}}
+  </ul>
+  {{/if}}
   <hr/>
   <div class="km-notes">
     <p>{{{gmNotes}}}</p>

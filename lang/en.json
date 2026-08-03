@@ -568,6 +568,7 @@
         "prone": "Prone",
         "unconscious": "Unconscious"
       },
+      "defenseContributions": "Camp Defenses Contributing",
       "weatherEvent": {
         "fog": "Fog",
         "heavyDownpour": "Heavy Downpour",

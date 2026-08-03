@@ -32,6 +32,7 @@ import at.posselt.pfrpg2e.camping.getAllRecipes
 import at.posselt.pfrpg2e.camping.groupActivities
 import at.posselt.pfrpg2e.camping.doesNotRequireACheck
 import at.posselt.pfrpg2e.camping.repetitionsOrDefault
+import at.posselt.pfrpg2e.camping.parseResult
 import at.posselt.pfrpg2e.camping.getAppliedCampingEffects
 import at.posselt.pfrpg2e.camping.getAppliedMealEffects
 import at.posselt.pfrpg2e.camping.getCampingActorsByUuid
@@ -47,6 +48,7 @@ import at.posselt.pfrpg2e.camping.rollRandomEncounter
 import at.posselt.pfrpg2e.camping.setCamping
 import at.posselt.pfrpg2e.camping.findCurrentRegion
 import at.posselt.pfrpg2e.camping.EncounterResolverEngine
+import at.posselt.pfrpg2e.camping.CampDefenseState
 import at.posselt.pfrpg2e.camping.dialogs.showEncounterResolutionDialog
 import at.posselt.pfrpg2e.actor.resolveAttribute
 import at.posselt.pfrpg2e.data.actor.Perception
@@ -343,10 +345,25 @@ private suspend fun beginRest(
             val degree = best?.third ?: DegreeOfSuccess.FAILURE
             val bestRollTotal = best?.second ?: 0
 
+            // Collect camp defense activity results for this session
+            val activities = camping.groupActivities()
+            val alarmsActivity = activities.find { it.data.id == "set-alarms" }
+            val camouflageActivity = activities.find { it.data.id == "camouflage-campsite" }
+            val trapsActivity = activities.find { it.data.id == "set-traps" }
+            val guardiansActivity = activities.find { it.data.id == "undead-guardians" }
+            
+            val defenseState = CampDefenseState(
+                alarmsDegree = alarmsActivity?.result?.parseResult()?.name?.lowercase(),
+                camouflageDegree = camouflageActivity?.result?.parseResult()?.name?.lowercase(),
+                trapsDegree = trapsActivity?.result?.parseResult()?.name?.lowercase(),
+                undeadGuardiansActive = guardiansActivity?.result?.parseResult()?.let { it == DegreeOfSuccess.CRITICAL_SUCCESS || it == DegreeOfSuccess.SUCCESS }
+            )
+
             val resolution = EncounterResolverEngine.resolve(
                 watcherRoll = bestRollTotal,
                 stealthDc = totalDc,
-                degree = degree
+                degree = degree,
+                defenseState = defenseState
             )
 
             // Everyone in camp who is not awake on this watch is exposed in their sleep.
@@ -381,7 +398,8 @@ private suspend fun beginRest(
                     "distance" to resolution.distanceToEnemy,
                     "appliedConditions" to resolution.appliedConditions.joinToString(", ") { t("camping.conditions.$it") },
                     "ambusherState" to resolution.ambusherState,
-                    "gmNotes" to resolution.gmNotes
+                    "gmNotes" to resolution.gmNotes,
+                    "defenseContributions" to resolution.defenseContributions
                 ),
                 rollMode = rollMode
             )
