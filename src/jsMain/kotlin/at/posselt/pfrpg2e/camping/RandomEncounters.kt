@@ -345,6 +345,25 @@ private suspend fun rollRandomEncounter(
         true
     }
     if (rollCheck) {
+        // Party hex state, looked up once for both the per-hex override and the combat filter.
+        val hexKey = getPartyCurrentHexKey(game, actor)
+        val hexState = hexKey?.let { com.foundryvtt.kingmaker.kingmaker.state.hexes[it] }
+        val hexClaimed = hexState?.claimed == true
+        val hexCleared = hexState?.cleared == true
+        val hexContent = hexKey?.let { key ->
+            game.getKingdomActors().firstOrNull()?.getKingdom()?.hexContents?.firstOrNull { it.hexKey == key }
+        }
+        val hexContentSuppresses = hexContent?.suppressesEncounters
+
+        // The per-hex "suppresses encounters" override applies to EVERY encounter type — check it
+        // before any table is rolled. (Previously only the Creature branch consulted it, so a
+        // non-creature proxy result still fired — with a phantom proxy-roll chat card — in a hex
+        // the GM explicitly marked encounter-free.)
+        if (hexContentSuppresses == true) {
+            whisperEncounterSuppressed(game, actor, "encounter suppressed (hex content override)")
+            return false
+        }
+
         val proxyResult = proxyTable?.rollWithDraw(rollMode = rollMode)
             ?.draw
             ?.results
@@ -353,17 +372,9 @@ private suspend fun rollRandomEncounter(
             ?.trim()
             ?: "Creature"
         if (proxyResult == "Creature") {
-            // Check hex-state filter for combat encounters in the legacy path
-            val hexKey = getPartyCurrentHexKey(game, actor)
+            // Combat-only filters: homebrew claimed-hex rule (takes precedence), then the
+            // camping claimed+cleared toggle via the shared decision function.
             if (hexKey != null) {
-                val hexState = com.foundryvtt.kingmaker.kingmaker.state.hexes[hexKey]
-                val hexClaimed = hexState?.claimed == true
-                val hexCleared = hexState?.cleared == true
-                val kingdomActor = game.getKingdomActors().firstOrNull()
-                val kingdom = kingdomActor?.getKingdom()
-                val hexContent = kingdom?.hexContents?.firstOrNull { it.hexKey == hexKey }
-                val hexContentSuppresses = hexContent?.suppressesEncounters
-
                 val registry = loadHomebrewRegistry(game)
                 val activeProfile = RuleResolutionHelper.getActiveProfile(registry)
                 val homebrewSuppresses = activeProfile?.let { RuleResolutionHelper.isRandomCombatSuppressedInClaimedHexes(it) } ?: false

@@ -22,8 +22,11 @@ enum class EncounterFilterDecision {
  * ([HexContent.suppressesEncounters]).
  *
  * Decision logic:
- * 1. If the rolled category is not COMBAT, always ALLOW (only combat is filterable).
- * 2. If [hexContentSuppresses] is true, SUPPRESS_ALL (content override wins, ignores filter toggle).
+ * 1. If [hexContentSuppresses] is true, SUPPRESS_ALL — the per-hex override means "no encounters
+ *    HERE" and applies to EVERY category, ignoring the filter toggle. (It must be checked before
+ *    the category short-circuit: checking category first made SUPPRESS_ALL unreachable for
+ *    non-combat rolls, so a hex the GM marked encounter-free still fired rumors/merchants.)
+ * 2. If the rolled category is not COMBAT, ALLOW (the claimed+cleared filter is combat-only).
  * 3. If [filterEnabled] is false, ALLOW (toggle off = no filtering).
  * 4. If [hexClaimed] AND [hexCleared] are both true, SUPPRESS_COMBAT.
  * 5. Otherwise ALLOW.
@@ -45,14 +48,14 @@ fun decideEncounterFilter(
     hexContentSuppresses: Boolean?,
     rolledCategory: EncounterCategory,
 ): EncounterFilterDecision {
-    // Non-combat categories are never suppressed by this filter
-    if (rolledCategory != EncounterCategory.COMBAT) {
-        return EncounterFilterDecision.ALLOW
-    }
-
-    // Per-hex content override: suppresses regardless of the filter toggle
+    // Per-hex content override first: it suppresses EVERY category, regardless of the toggle
     if (hexContentSuppresses == true) {
         return EncounterFilterDecision.SUPPRESS_ALL
+    }
+
+    // Beyond the override, only combat is filterable
+    if (rolledCategory != EncounterCategory.COMBAT) {
+        return EncounterFilterDecision.ALLOW
     }
 
     // Filter disabled: no suppression

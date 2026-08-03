@@ -6,7 +6,7 @@ import kotlin.test.assertEquals
 class EncounterHexFilterTest {
 
     @Test
-    fun `non-combat category always allowed regardless of filter`() {
+    fun `non-combat category allowed by the claimed-cleared filter`() {
         val categories = listOf(
             EncounterCategory.RP,
             EncounterCategory.RUMOR,
@@ -22,15 +22,30 @@ class EncounterHexFilterTest {
                 EncounterFilterDecision.ALLOW,
                 decideEncounterFilter(true, true, true, false, cat)
             )
-            // Filter on, claimed+cleared, content override true
-            assertEquals(
-                EncounterFilterDecision.ALLOW,
-                decideEncounterFilter(true, true, true, true, cat)
-            )
             // Filter off
             assertEquals(
                 EncounterFilterDecision.ALLOW,
                 decideEncounterFilter(false, true, true, false, cat)
+            )
+        }
+    }
+
+    @Test
+    fun `content override suppresses every category not just combat`() {
+        // The per-hex "suppresses encounters" override means NO encounters here — it must beat
+        // the non-combat short-circuit (the original ordering made SUPPRESS_ALL unreachable for
+        // non-combat rolls, so an encounter-free hex still fired rumors/merchants).
+        EncounterCategory.entries.forEach { cat ->
+            assertEquals(
+                EncounterFilterDecision.SUPPRESS_ALL,
+                decideEncounterFilter(true, true, true, true, cat),
+                "override must suppress $cat",
+            )
+            // ...and it ignores the filter toggle entirely
+            assertEquals(
+                EncounterFilterDecision.SUPPRESS_ALL,
+                decideEncounterFilter(false, false, false, true, cat),
+                "override must suppress $cat with the toggle off",
             )
         }
     }
