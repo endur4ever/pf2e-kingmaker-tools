@@ -30,7 +30,7 @@ external interface LearnSpecialRecipeData {
     val degree: String
 }
 
-class LearnSpecialRecipeHandler() : ActionHandler("learnSpecialRecipe") {
+class LearnSpecialRecipeHandler() : ActionHandler("learnSpecialRecipe", originatorPolicy = OriginatorPolicy.ANY) {
     override suspend fun execute(action: ActionMessage, dispatcher: ActionDispatcher) {
         val data = action.data.unsafeCast<LearnSpecialRecipeData>()
         val campingActor = fromUuidTypeSafe<CampingActor>(data.campingActorUuid) ?: return

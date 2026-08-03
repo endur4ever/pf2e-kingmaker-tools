@@ -1,0 +1,27 @@
+{
+  "id": "improve-settlement",
+  "enabled": true,
+  "oncePerRound": false,
+  "fortune": false,
+  "phase": "civic",
+  "dc": "custom",
+  "title": "activities.improve-settlement.title",
+  "description": "activities.improve-settlement.description",
+  "special": "activities.improve-settlement.special",
+  "skills": {
+    "engineering": 0,
+    "industry": 0
+  },
+  "criticalSuccess": {
+    "msg": "activities.improve-settlement.criticalSuccess.msg"
+  },
+  "success": {
+    "msg": "activities.improve-settlement.success.msg"
+  },
+  "failure": {
+    "msg": "activities.improve-settlement.failure.msg"
+  },
+  "criticalFailure": {
+    "msg": "activities.improve-settlement.criticalFailure.msg"
+  }
+}

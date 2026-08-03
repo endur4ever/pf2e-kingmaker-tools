@@ -3,11 +3,14 @@ package at.posselt.pfrpg2e.camping.dialogs
 import at.posselt.pfrpg2e.app.FormApp
 import at.posselt.pfrpg2e.app.HandlebarsRenderContext
 import at.posselt.pfrpg2e.app.ValidatedHandlebarsContext
+import at.posselt.pfrpg2e.app.forms.Button
+import at.posselt.pfrpg2e.app.forms.DataAttribute
 import at.posselt.pfrpg2e.app.forms.FormElementContext
 import at.posselt.pfrpg2e.app.forms.Select
 import at.posselt.pfrpg2e.app.forms.TextInput
 import at.posselt.pfrpg2e.app.forms.toOption
 import at.posselt.pfrpg2e.camping.CampingActor
+import at.posselt.pfrpg2e.camping.EncounterCategory
 import at.posselt.pfrpg2e.camping.getCamping
 import at.posselt.pfrpg2e.camping.setCamping
 import at.posselt.pfrpg2e.data.regions.Terrain
@@ -27,6 +30,8 @@ import com.foundryvtt.core.documents.PlaylistSound
 import com.foundryvtt.core.game
 import kotlinx.coroutines.await
 import kotlinx.js.JsPlainObject
+import js.objects.Record
+import js.objects.recordOf
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.get
 import org.w3c.dom.pointerevents.PointerEvent
@@ -48,6 +53,16 @@ external interface RegionSetting {
     var terrain: String
     var rollTableUuid: String?
     var combatTrack: Track?
+
+    /**
+     * Roadmap #11: per-category encounter roll table UUIDs keyed by
+     * [at.posselt.pfrpg2e.camping.EncounterCategory.value]. Nullable for
+     * backwards compatibility; read via `categoryRollTableUuidMap()`.
+     */
+    var categoryRollTableUuids: Record<String, String?>?
+
+    /** Roadmap #11: suppress encounters in claimed+cleared hexes for this region. */
+    var suppressEncountersOnClearedHex: Boolean?
 }
 
 @JsPlainObject
@@ -88,6 +103,11 @@ class RegionSettingsDataModel(
                         string("playlistUuid", nullable = true)
                         string("trackUuid", nullable = true)
                     }
+                    schema("categoryRollTableUuids") {
+                        string("combat", nullable = true)
+                        string("rumor", nullable = true)
+                        string("merchant", nullable = true)
+                    }
                     string("terrain")
                 }
             }
@@ -95,6 +115,30 @@ class RegionSettingsDataModel(
     }
 }
 
+
+/**
+ * Merge a region's per-category roll tables: the matrix renders combat/rumor/merchant,
+ * so those come from [matrix]; the remaining five are preserved from the prior [old]
+ * settings (they're only editable via the per-region encounter-tables sub-dialog).
+ */
+private fun mergeRegionCategoryTables(
+    old: Record<String, String?>?,
+    matrix: Record<String, String?>?,
+): Record<String, String?> {
+    val matrixCategories = setOf(
+        EncounterCategory.COMBAT.value,
+        EncounterCategory.RUMOR.value,
+        EncounterCategory.MERCHANT.value,
+    )
+    val pairs = EncounterCategory.entries.map { category ->
+        val source = if (category.value in matrixCategories) matrix else old
+        category.value to source?.get(category.value)
+    }.toTypedArray()
+    return recordOf(*pairs)
+}
+
+private fun allCategoryTablesNull(tables: Record<String, String?>): Boolean =
+    EncounterCategory.entries.all { tables[it.value] == null }
 
 @JsExport
 @JsName("RegionConfig")
@@ -139,6 +183,26 @@ class RegionConfig(
                 }
             }
 
+            "configure-region-tables" -> {
+                target.dataset["index"]?.toInt()?.let { index ->
+                    currentSettings.regions.getOrNull(index)?.let { region ->
+                        val rollTableOptions = game.tables.contents
+                            .mapNotNull { it.toOption(useUuid = true) }
+                            .sortedBy { it.label }
+                        configureRegionEncounterTables(
+                            regionName = region.name,
+                            tables = region.categoryRollTableUuids,
+                            suppress = region.suppressEncountersOnClearedHex == true,
+                            rollTableOptions = rollTableOptions,
+                        ) { tables, suppress ->
+                            region.categoryRollTableUuids = tables
+                            region.suppressEncountersOnClearedHex = suppress
+                            render()
+                        }
+                    }
+                }
+            }
+
             else -> console.log(action)
         }
     }
@@ -165,8 +229,12 @@ class RegionConfig(
                 TableHead(t("camping.zoneDc"), arrayOf("number-select-heading")),
                 TableHead(t("camping.encounterDc"), arrayOf("number-select-heading")),
                 TableHead(t("camping.rollTable")),
+                TableHead(t("camping.encounterCategoryTable.combat"), arrayOf("category-table-heading")),
+                TableHead(t("camping.encounterCategoryTable.rumor"), arrayOf("category-table-heading")),
+                TableHead(t("camping.encounterCategoryTable.merchant"), arrayOf("category-table-heading")),
                 TableHead(t("camping.combatPlaylist")),
                 TableHead(t("camping.combatTrack")),
+                TableHead(t("camping.regionEncounterTables"), arrayOf("small-heading")),
                 TableHead(t("applications.delete"), arrayOf("small-heading"))
             ),
             allowDelete = currentSettings.regions.size > 1,
@@ -213,6 +281,30 @@ class RegionConfig(
                         options = rollTableOptions,
                     ).toContext(),
                     Select(
+                        name = "regions.$index.categoryRollTableUuids.combat",
+                        label = t("camping.encounterCategoryTable.combat"),
+                        value = row.categoryRollTableUuids?.get("combat"),
+                        required = false,
+                        hideLabel = true,
+                        options = rollTableOptions,
+                    ).toContext(),
+                    Select(
+                        name = "regions.$index.categoryRollTableUuids.rumor",
+                        label = t("camping.encounterCategoryTable.rumor"),
+                        value = row.categoryRollTableUuids?.get("rumor"),
+                        required = false,
+                        hideLabel = true,
+                        options = rollTableOptions,
+                    ).toContext(),
+                    Select(
+                        name = "regions.$index.categoryRollTableUuids.merchant",
+                        label = t("camping.encounterCategoryTable.merchant"),
+                        value = row.categoryRollTableUuids?.get("merchant"),
+                        required = false,
+                        hideLabel = true,
+                        options = rollTableOptions,
+                    ).toContext(),
+                    Select(
                         name = "regions.$index.combatTrack.playlistUuid",
                         label = t("camping.combatPlaylist"),
                         value = row.combatTrack?.playlistUuid,
@@ -228,6 +320,12 @@ class RegionConfig(
                         hideLabel = true,
                         options = trackOptions
                     ).toContext(),
+                    Button(
+                        value = "configure-region-tables",
+                        label = "",
+                        icon = "fa-solid fa-dice-d20",
+                        data = listOf(DataAttribute(key = "index", value = index.toString())),
+                    ).toContext(),
                 )
             }.toTypedArray()
         )
@@ -235,9 +333,19 @@ class RegionConfig(
 
     override fun onParsedSubmit(value: RegionSettings) = buildPromise {
         // unfortunately there is no way to make an object optional if all of its properties are null
-        value.regions.forEach {
-            if (it.combatTrack?.playlistUuid == null) {
-                it.combatTrack = null
+        value.regions.forEachIndexed { index, region ->
+            val old = currentSettings.regions.getOrNull(index)
+            if (region.combatTrack?.playlistUuid == null) {
+                region.combatTrack = null
+            }
+            // The matrix only renders combat/rumor/merchant; the other five category
+            // tables and the cleared-hex toggle are edited via the per-region sub-dialog.
+            // Preserve them from the prior settings so saving the matrix doesn't wipe them.
+            region.categoryRollTableUuids =
+                mergeRegionCategoryTables(old?.categoryRollTableUuids, region.categoryRollTableUuids)
+            region.suppressEncountersOnClearedHex = old?.suppressEncountersOnClearedHex
+            if (region.categoryRollTableUuids?.let { allCategoryTablesNull(it) } == true) {
+                region.categoryRollTableUuids = null
             }
         }
         currentSettings = value

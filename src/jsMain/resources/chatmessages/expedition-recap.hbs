@@ -1,0 +1,18 @@
+<h2>{{localizeKM "chatMessages.expeditionRecap.title" title=title}}</h2>
+<div class="km-expedition-recap">
+    <p><strong>{{localizeKM "chatMessages.expeditionRecap.expedition"}}:</strong> {{title}}</p>
+    <p><strong>{{localizeKM "chatMessages.expeditionRecap.companion"}}:</strong> {{companionName}}</p>
+    {{#if isCriticalSuccess}}
+    <p class="km-degree-critical-success">{{localizeKM "degreeOfSuccess.criticalSuccess"}}</p>
+    {{/if}}
+    {{#if isSuccess}}
+    <p class="km-degree-success">{{localizeKM "degreeOfSuccess.success"}}</p>
+    {{/if}}
+    {{#if isFailure}}
+    <p class="km-degree-failure">{{localizeKM "degreeOfSuccess.failure"}}</p>
+    {{/if}}
+    {{#if isCriticalFailure}}
+    <p class="km-degree-critical-failure">{{localizeKM "degreeOfSuccess.criticalFailure"}}</p>
+    {{/if}}
+    <p class="km-expedition-recap-flavor">{{flavor}}</p>
+</div>

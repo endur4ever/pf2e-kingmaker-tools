@@ -65,6 +65,7 @@ class ManageActivitiesApplication(
                 .map { activity ->
                     val canBeEdited = activity.isHomebrew
                     val enabled = !locked.contains(activity.id)
+                    console.log("KM_DEBUG_DIALOG Activity in config list:", "id:", activity.id, "name:", activity.name, "enabled (checked):", enabled)
                     CrudItem(
                         id = activity.id,
                         name = activity.name,

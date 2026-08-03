@@ -1,7 +1,91 @@
 <h2>{{localizeKM "chatMessages.endTurn.title"}}</h2>
+{{#if (or xpAwarded fame)}}
+<div class="km-end-turn-summary">
+    {{#if xpAwarded}}
+    <p><strong>{{localizeKM "kingdom.xpAwarded"}}:</strong> {{xpAwarded}}</p>
+    {{/if}}
+    <p><strong>{{localizeKM "kingdom.fameNow"}}:</strong> {{fame}}{{#if maximumFamePoints}}/{{maximumFamePoints}}{{/if}}</p>
+    <hr>
+</div>
+{{/if}}
+{{#if changes.length}}
+<ul>
+    {{#each changes}}
+    <li>{{this}}</li>
+    {{/each}}
+</ul>
+{{else}}
 <ul>
     <li>{{localizeKM "chatMessages.endTurn.resetRP"}}</li>
     <li>{{localizeKM "chatMessages.endTurn.reduceMods"}}</li>
     <li>{{localizeKM "chatMessages.endTurn.resetSolutions"}}</li>
     <li>{{localizeKM "chatMessages.endTurn.moveValues"}}</li>
 </ul>
+{{/if}}
+{{#if clockEvents.length}}
+<hr>
+<h3>{{localizeKM "kingdom.clocks.title"}}</h3>
+<ul>
+    {{#each clockEvents}}
+    <li>
+        {{#if (eq type "ADVANCED")}}
+            {{localizeKM "kingdom.chat.clockAdvanced" label=label old=oldTurns remaining=newTurns}}
+        {{/if}}
+        {{#if (eq type "EXPIRED")}}
+            {{localizeKM "kingdom.chat.clockExpired" label=label message=message}}
+        {{/if}}
+        {{#if (eq type "TRIGGERED")}}
+            {{localizeKM "kingdom.chat.clockTriggered" label=label}}
+        {{/if}}
+        {{#if (eq type "PAUSED")}}
+            {{localizeKM "kingdom.chat.clockPaused" label=label}}
+        {{/if}}
+    </li>
+    {{/each}}
+</ul>
+{{/if}}
+{{#if standingChanges.length}}
+<hr>
+<h3>{{localizeKM "chatMessages.endTurn.factionStanding"}}</h3>
+<ul>
+    {{#each standingChanges}}
+    <li>
+        {{localizeKM "chatMessages.endTurn.factionStandingChange"
+            group=this.group
+            oldAttitude=this.oldAttitude
+            newAttitude=this.newAttitude
+            delta=this.delta
+        }}
+        {{#if this.offerWarThreat}}
+        <button type="button"
+                class="km-offer-war-threat"
+                data-faction="{{this.group}}"
+                data-kingdom-actor-uuid="{{../actorUuid}}">
+            {{localizeKM "chatMessages.endTurn.raiseWarThreat"}}
+        </button>
+        {{/if}}
+        {{#if this.offerDiplomacyQuest}}
+        <button type="button"
+                class="km-offer-diplomacy-quest"
+                data-faction="{{this.group}}"
+                data-kingdom-actor-uuid="{{../actorUuid}}">
+            {{localizeKM "chatMessages.endTurn.offerDiplomacyQuest"}}
+        </button>
+        {{/if}}
+    </li>
+    {{/each}}
+</ul>
+{{/if}}
+{{#if hasUndoSnapshot}}
+<hr>
+<p class="km-undo-section">
+    <button type="button"
+            class="km-undo-end-turn"
+            data-action="undo-end-turn"
+            data-kingdom-actor-uuid="{{actorUuid}}"
+            data-snapshot-turn="{{snapshotTurn}}"
+            title="{{localizeKM 'chatMessages.endTurn.endTurnUndoneTooltip'}}">
+        <i class="fa-solid fa-rotate-left"></i> {{localizeKM "chatMessages.endTurn.undoEndTurn"}}
+    </button>
+</p>
+{{/if}}

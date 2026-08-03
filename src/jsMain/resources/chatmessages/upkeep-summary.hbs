@@ -1,0 +1,24 @@
+<h3>{{localizeKM "kingdom.turnWizard.upkeepSummary"}}</h3>
+<ul>
+    {{#if fameGained}}
+        <li><b>{{localizeKM "kingdom.fame"}}</b>: +{{fameDelta}} ({{localizeKM "kingdom.current"}}: {{fameNow}})</li>
+    {{/if}}
+    {{#if unrestAdjusted}}
+        <li><b>{{localizeKM "kingdom.unrest"}}</b>: {{#if (gt unrestDelta 0)}}+{{unrestDelta}}{{else}}{{unrestDelta}}{{/if}} ({{localizeKM "kingdom.current"}}: {{unrestNow}})</li>
+    {{/if}}
+    {{#if resourcesCollected}}
+        <li>
+            <b>{{localizeKM "kingdom.collecting"}}</b>:
+            <ul>
+                <li><b>{{localizeKM "kingdom.resourcePoints"}}</b>: +{{rpCollected}} ({{localizeKM "kingdom.current"}}: {{rpNow}})</li>
+                <li><b>{{localizeKM "kingdom.ore"}}</b>: {{#if (gt oreCollected 0)}}+{{/if}}{{oreCollected}}</li>
+                <li><b>{{localizeKM "kingdom.lumber"}}</b>: {{#if (gt lumberCollected 0)}}+{{/if}}{{lumberCollected}}</li>
+                <li><b>{{localizeKM "kingdom.stone"}}</b>: {{#if (gt stoneCollected 0)}}+{{/if}}{{stoneCollected}}</li>
+                <li><b>{{localizeKM "kingdom.luxuries"}}</b>: {{#if (gt luxuriesCollected 0)}}+{{/if}}{{luxuriesCollected}}</li>
+            </ul>
+        </li>
+    {{/if}}
+    {{#if consumptionPaid}}
+        <li><b>{{localizeKM "kingdom.payConsumption"}}</b>: {{consumptionPaidAmount}} ({{localizeKM "kingdom.available"}} {{localizeKM "kingdom.food"}}: {{foodNow}})</li>
+    {{/if}}
+</ul>

@@ -25,14 +25,20 @@ private fun parseKingmakerWorksite(
 ): WorkSite = hexes.asSequence()
     .filter { it.camp == type }
     .map {
-        // there is no luxuries camp so we assume that a mine on a luxury commodity
-        // adds 1 luxury worksite (as described in the adventure)
-        val (quantity, resources) = if (type == "mine" && commodity == "luxuries") {
-            (if (commodity == it.commodity) 1 else 0) to 0
-        } else if (it.commodity != "luxuries") {
-            1 to if (commodity == it.commodity) 1 else 0
-        } else {
-            0 to 0
+        // There is no "luxury" camp on the Kingmaker map, so a mine on a Luxury Resource hex is
+        // treated as a luxury source (counted, but it produces no Commodity here) and is excluded
+        // from the ore-mine count.
+        val (quantity, resources) = when {
+            // A mine on a Luxury Resource hex generates 1 Luxury Commodity per turn instead of Ore
+            // (RAW: it does not double). Counted only for the luxury-source pass.
+            type == "mine" && commodity == "luxuries" ->
+                (if (it.commodity == "luxuries") 1 else 0).let { it to it }
+            type == "mine" && it.commodity == "luxuries" ->
+                0 to 0
+            // RAW: an established Work Site generates 1 Commodity of its type, doubled to 2 when the
+            // hex also has a matching Resource (the Kingmaker hex `commodity` marks that Resource).
+            else ->
+                1 to if (commodity == it.commodity) 2 else 1
         }
         WorkSite(
             quantity = quantity,
@@ -195,4 +201,35 @@ fun Game.getRealmData(
         AutomateResources.TILE_BASED if realmScene != null -> realmScene.parseRealmData(kingdomActor)
         else -> RealmData(size = kingdom.size, worksites = kingdom.parseWorksites())
     }
+}
+
+/**
+ * A work site (or Farmland) that exists on a hex the kingdom hasn't claimed yet. Per the Kingmaker
+ * rules a work site only produces Commodities once its hex is claimed, so these are surfaced on the
+ * sheet as a reminder that claiming the hex will turn them on. Only meaningful in Kingmaker mode,
+ * where each hex carries its own `camp`/`claimed` flags.
+ */
+data class UnclaimedWorksite(
+    val camp: String,        // quarry | mine | lumber | farmland (the Kingmaker hex `camp`)
+    val hexLabel: String,    // human coordinate, e.g. "4.21"
+    val commodity: String?,  // stone | ore | lumber | food | luxuries
+)
+
+fun Game.getUnclaimedWorksites(kingdom: KingdomData): List<UnclaimedWorksite> {
+    val mode = AutomateResources.fromString(kingdom.settings.automateResources)
+    if (mode != AutomateResources.KINGMAKER || !isKingmakerInstalled) return emptyList()
+    return kingmaker.state.hexes.asSequence()
+        .filter { (_, hex) -> hex.claimed != true }
+        .flatMap { (key, hex) ->
+            val coord = key.toIntOrNull()?.let { "${it / 1000}.${it % 1000}" } ?: key
+            val sites = mutableListOf<UnclaimedWorksite>()
+            hex.camp?.takeIf { it.isNotBlank() }?.let { camp ->
+                sites.add(UnclaimedWorksite(camp = camp, hexLabel = coord, commodity = hex.commodity))
+            }
+            if (hex.features?.any { it.type == "farmland" } == true) {
+                sites.add(UnclaimedWorksite(camp = "farmland", hexLabel = coord, commodity = "food"))
+            }
+            sites.asSequence()
+        }
+        .toList()
 }

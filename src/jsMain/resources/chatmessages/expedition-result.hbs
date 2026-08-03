@@ -1,0 +1,81 @@
+<h2>{{localizeKM "chatMessages.expeditionResult.title" title=title}}</h2>
+<div class="km-expedition-result-summary">
+    <p><strong>{{localizeKM "chatMessages.expeditionResult.expedition"}}:</strong> {{title}}</p>
+    {{#if isCriticalSuccess}}
+    <p class="km-degree-critical-success">{{localizeKM "degreeOfSuccess.criticalSuccess"}}</p>
+    {{/if}}
+    {{#if isSuccess}}
+    <p class="km-degree-success">{{localizeKM "degreeOfSuccess.success"}}</p>
+    {{/if}}
+    {{#if isFailure}}
+    <p class="km-degree-failure">{{localizeKM "degreeOfSuccess.failure"}}</p>
+    {{/if}}
+    {{#if isCriticalFailure}}
+    <p class="km-degree-critical-failure">{{localizeKM "degreeOfSuccess.criticalFailure"}}</p>
+    {{/if}}
+    {{#if accruedXp}}
+    <p><strong>{{localizeKM "chatMessages.expeditionResult.xpGained"}}:</strong> {{accruedXp}}</p>
+    {{/if}}
+    {{#if accruedInfluenceDelta}}
+    <p><strong>{{localizeKM "chatMessages.expeditionResult.influenceGained"}}:</strong> {{accruedInfluenceDelta}}</p>
+    {{/if}}
+    {{#if lootTier}}
+    <p><strong>{{localizeKM "chatMessages.expeditionResult.lootTier"}}:</strong> {{lootTier}}</p>
+    {{/if}}
+    {{#if gmNotes}}
+    <p class="km-gm-notes">{{gmNotes}}</p>
+    {{/if}}
+</div>
+{{#if rewardApplied}}
+<div class="km-expedition-resolved">
+    {{localizeKM "chatMessages.expeditionResult.resolved"}}
+</div>
+{{/if}}
+<hr>
+<h3>{{localizeKM "chatMessages.expeditionResult.gmActions"}}</h3>
+<div class="km-expedition-offers">
+    {{#if offerReward}}
+    <button type="button"
+            class="km-offer-expedition-reward"
+            data-expedition-id="{{expeditionId}}"
+            data-kingdom-actor-uuid="{{actorUuid}}">
+        {{localizeKM "chatMessages.expeditionResult.applyReward"}}
+    </button>
+    {{/if}}
+    {{#if offerLevelUp}}
+    <button type="button"
+            class="km-offer-companion-levelup"
+            data-companion-id="{{companionId}}"
+            data-kingdom-actor-uuid="{{actorUuid}}"
+            data-target-level="{{targetLevel}}">
+        {{localizeKM "chatMessages.expeditionResult.companionLevelUp"}}
+    </button>
+    {{/if}}
+    {{#if offerInjury}}
+    <button type="button"
+            class="km-offer-injury"
+            data-expedition-id="{{expeditionId}}"
+            data-kingdom-actor-uuid="{{actorUuid}}"
+            data-companion-id="{{companionId}}">
+        {{localizeKM "chatMessages.expeditionResult.applyInjury"}}
+    </button>
+    {{/if}}
+    {{#if offerFactionStanding}}
+    {{#if offerWarThreat}}
+    <button type="button"
+            class="km-offer-war-threat"
+            data-faction="{{factionName}}"
+            data-kingdom-actor-uuid="{{actorUuid}}">
+        {{localizeKM "chatMessages.endTurn.raiseWarThreat"}}
+    </button>
+    {{/if}}
+    {{#if offerDiplomacyQuest}}
+    <button type="button"
+            class="km-offer-diplomacy-quest"
+            data-faction="{{factionName}}"
+            data-kingdom-actor-uuid="{{actorUuid}}">
+        {{localizeKM "chatMessages.endTurn.offerDiplomacyQuest"}}
+    </button>
+    {{/if}}
+    {{/if}}
+</div>

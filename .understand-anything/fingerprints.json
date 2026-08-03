@@ -1,0 +1,2847 @@
+{
+  "version": "1.0.0",
+  "gitCommitHash": "99d38ecea389984b6e09c4941e31a2d4b7b5793d",
+  "generatedAt": "2026-06-09T12:44:41.274Z",
+  "files": {
+    "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/map/HexDiscovery.kt": {
+      "filePath": "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/map/HexDiscovery.kt",
+      "contentHash": "1c6ba9a3e16582cdae089815cd2279d0237bf03f77af802d9b1c70357de125d1",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 119,
+      "hasStructuralAnalysis": false
+    },
+    "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/map/HexDrawingHelpers.kt": {
+      "filePath": "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/map/HexDrawingHelpers.kt",
+      "contentHash": "e3de3a55d3ad540049006ef14a945602be4873f361b45129913f921c3e058b80",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 53,
+      "hasStructuralAnalysis": false
+    },
+    "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/bonuses/AbilityBonuses.kt": {
+      "filePath": "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/bonuses/AbilityBonuses.kt",
+      "contentHash": "dc8454913c95edef9da8b879b4e2fef8372552f485586e5ff66a426031f8fd91",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 58,
+      "hasStructuralAnalysis": false
+    },
+    "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/bonuses/CreativeSolution.kt": {
+      "filePath": "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/bonuses/CreativeSolution.kt",
+      "contentHash": "25f01307c426b42b1e77c905304739b3acbbd1465af90f8cbb8662d60cfd8b82",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 20,
+      "hasStructuralAnalysis": false
+    },
+    "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/bonuses/InvestedBonuses.kt": {
+      "filePath": "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/bonuses/InvestedBonuses.kt",
+      "contentHash": "348585230943cc3a3f1e41d3b183aa4a50deada81025265995bf86d3845ab3df",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 56,
+      "hasStructuralAnalysis": false
+    },
+    "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/bonuses/LeaderBonuses.kt": {
+      "filePath": "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/bonuses/LeaderBonuses.kt",
+      "contentHash": "6b3c52d9713301fb6429d2e4b09874c745afc77d4fa9916b9e7dbbe7f72ddb25",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 55,
+      "hasStructuralAnalysis": false
+    },
+    "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/bonuses/LeaderEventBonus.kt": {
+      "filePath": "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/bonuses/LeaderEventBonus.kt",
+      "contentHash": "20d019f2d5fa1bc78d30a67b0609e970029f60d2dea982db01d5f13920f826ce",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 29,
+      "hasStructuralAnalysis": false
+    },
+    "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/bonuses/LeadershipBonuses.kt": {
+      "filePath": "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/bonuses/LeadershipBonuses.kt",
+      "contentHash": "fd7e1dceeabd01878ef10f1894ce44bbb80950e8c1333a29a1f4c1721a96337f",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 129,
+      "hasStructuralAnalysis": false
+    },
+    "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/bonuses/ProficiencyBonuses.kt": {
+      "filePath": "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/bonuses/ProficiencyBonuses.kt",
+      "contentHash": "1a97be41653f1cf8826b87c422593546a32f54d101b14916eb6d6f074caf799c",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 48,
+      "hasStructuralAnalysis": false
+    },
+    "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/bonuses/RepairBonuses.kt": {
+      "filePath": "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/bonuses/RepairBonuses.kt",
+      "contentHash": "48e9afc304af2fe1311bc8d8ea9825e66392bb06b1c111f5f53f7b57e26fa505",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 16,
+      "hasStructuralAnalysis": false
+    },
+    "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/bonuses/RulerBonus.kt": {
+      "filePath": "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/bonuses/RulerBonus.kt",
+      "contentHash": "510e70e7698115790f0af867844fb53173f0019cee3e9076354be7a087c3e1ae",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 24,
+      "hasStructuralAnalysis": false
+    },
+    "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/bonuses/StructureBonuses.kt": {
+      "filePath": "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/bonuses/StructureBonuses.kt",
+      "contentHash": "c62543e7150145bfdacf9c1d77aa06e1697e7d20b697c3021880e6678ca5cab9",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 24,
+      "hasStructuralAnalysis": false
+    },
+    "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/bonuses/StructureEventBonuses.kt": {
+      "filePath": "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/bonuses/StructureEventBonuses.kt",
+      "contentHash": "9f4eb77683c5d964db4dc69625a717870d8bf26a47a3fe48d4b7ed4fab222589",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 22,
+      "hasStructuralAnalysis": false
+    },
+    "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/DegreeChange.kt": {
+      "filePath": "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/DegreeChange.kt",
+      "contentHash": "5a4a6b8baf3e4189d6ca72f5e02e990740b8e121bf8c8eb35180ad2c6d8e337c",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 41,
+      "hasStructuralAnalysis": false
+    },
+    "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/DowngradeResult.kt": {
+      "filePath": "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/DowngradeResult.kt",
+      "contentHash": "75a34bba309cb6e660e5e2e41e01736bbbc33728f3babf1fcd76972765bfa82a",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 8,
+      "hasStructuralAnalysis": false
+    },
+    "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/evaluation/CreateAllModifiers.kt": {
+      "filePath": "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/evaluation/CreateAllModifiers.kt",
+      "contentHash": "dbdb95212b89b0a4b4756b744e8a89a5d4951d5a7b5eac7cc50266a12cda5cf0",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 106,
+      "hasStructuralAnalysis": false
+    },
+    "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/evaluation/EvaluateModifiers.kt": {
+      "filePath": "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/evaluation/EvaluateModifiers.kt",
+      "contentHash": "431727b79c83e50cb2a3c21711e2828880026af8f44352e1367972fc1b1f2fbc",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 73,
+      "hasStructuralAnalysis": false
+    },
+    "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/evaluation/EvaluateStructures.kt": {
+      "filePath": "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/evaluation/EvaluateStructures.kt",
+      "contentHash": "12e089473f9d82d63074e7e4890be3b81119fd1c609b94aa72194202b98f5bef",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 268,
+      "hasStructuralAnalysis": false
+    },
+    "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/evaluation/FilterModifiers.kt": {
+      "filePath": "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/evaluation/FilterModifiers.kt",
+      "contentHash": "2e17b38319179c10a0dcac1e2e9ab739161d4b86dbee0406b73e6d1e6d745bf7",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 34,
+      "hasStructuralAnalysis": false
+    },
+    "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/evaluation/ModifierResult.kt": {
+      "filePath": "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/evaluation/ModifierResult.kt",
+      "contentHash": "62b3d1d8ff2202421e1d3f4b4a06cdef9d2778d6532fa4d5c4d4e91f3356d9da",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 23,
+      "hasStructuralAnalysis": false
+    },
+    "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/evaluation/UntrainedProficiencyMode.kt": {
+      "filePath": "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/evaluation/UntrainedProficiencyMode.kt",
+      "contentHash": "d5452f36fe7e64ffabccdd14b87aeec7709ecd26ff3e0ed4e8bbb62add04d6fc",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 23,
+      "hasStructuralAnalysis": false
+    },
+    "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/expressions/All.kt": {
+      "filePath": "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/expressions/All.kt",
+      "contentHash": "954ec7bc73cba8aaaf6d7f57fa15a4764977402fd159f4fba75bd8eb1150df8f",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 6,
+      "hasStructuralAnalysis": false
+    },
+    "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/expressions/Case.kt": {
+      "filePath": "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/expressions/Case.kt",
+      "contentHash": "0d1ae191dff12f22e1517a5621665ab066eb2e01582f6eab237662127f9835a4",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 10,
+      "hasStructuralAnalysis": false
+    },
+    "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/expressions/Eq.kt": {
+      "filePath": "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/expressions/Eq.kt",
+      "contentHash": "377419e7100ad39ecc0807eff293c867e07e5a7ce2061568b1b12e2118d11db8",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 6,
+      "hasStructuralAnalysis": false
+    },
+    "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/expressions/Expression.kt": {
+      "filePath": "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/expressions/Expression.kt",
+      "contentHash": "dbc5f9e3d4f6654c7ce2f0b58c36c5b298b5a48b797f2369572a365b583e36e2",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 7,
+      "hasStructuralAnalysis": false
+    },
+    "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/expressions/ExpressionContext.kt": {
+      "filePath": "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/expressions/ExpressionContext.kt",
+      "contentHash": "ceec77f1846e959954272fda5f22870719e73ee542a6c637bd070d98929a0c1d",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 111,
+      "hasStructuralAnalysis": false
+    },
+    "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/expressions/Gt.kt": {
+      "filePath": "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/expressions/Gt.kt",
+      "contentHash": "925e43be787eb6621ac8014361869469b8221a9e1356b2cb97545b17d71b7870",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 6,
+      "hasStructuralAnalysis": false
+    },
+    "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/expressions/Gte.kt": {
+      "filePath": "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/expressions/Gte.kt",
+      "contentHash": "496a202bd7909e5a8c69048848ad4b2fb16a7dbded75750cf86ce8c1d453df7b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 6,
+      "hasStructuralAnalysis": false
+    },
+    "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/expressions/HasRollOption.kt": {
+      "filePath": "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/expressions/HasRollOption.kt",
+      "contentHash": "b5287600039a504fe709bc6590f5ee75b4b159c9e2b0b45e3230fbf8240c6920",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 6,
+      "hasStructuralAnalysis": false
+    },
+    "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/expressions/In.kt": {
+      "filePath": "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/expressions/In.kt",
+      "contentHash": "40d0122c4ed113a5ffe3567c31a356a6944a58bd1436d16dad372f7358f6864e",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 13,
+      "hasStructuralAnalysis": false
+    },
+    "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/expressions/Lt.kt": {
+      "filePath": "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/expressions/Lt.kt",
+      "contentHash": "0030ba669c99c61f99328473515da7375a6e237938f13d107ec0e248f2e76819",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 6,
+      "hasStructuralAnalysis": false
+    },
+    "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/expressions/Lte.kt": {
+      "filePath": "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/expressions/Lte.kt",
+      "contentHash": "018e7073ac86e2af10c35d0e3680e6d88288de7970d168a8e8100b481e8c55f3",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 6,
+      "hasStructuralAnalysis": false
+    },
+    "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/expressions/Not.kt": {
+      "filePath": "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/expressions/Not.kt",
+      "contentHash": "6c9bd7d01fe3b0ebaee6916b6002a8a6f6cd12d9d31398300259cb3d631495bd",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 6,
+      "hasStructuralAnalysis": false
+    },
+    "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/expressions/Some.kt": {
+      "filePath": "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/expressions/Some.kt",
+      "contentHash": "a81082869e522310a7ab3b28fa6a801353f632db510e0421d1b5e25ab8db1f7c",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 6,
+      "hasStructuralAnalysis": false
+    },
+    "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/expressions/When.kt": {
+      "filePath": "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/expressions/When.kt",
+      "contentHash": "7f2515adadb0580fbbd207eb35f22c997cf7fc6cb7fb0b2bff4f7afa5eaa9187",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 16,
+      "hasStructuralAnalysis": false
+    },
+    "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/Modifier.kt": {
+      "filePath": "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/Modifier.kt",
+      "contentHash": "e9b35b79890c9d5a43f64ac1db36d7752453aaf6b329d27e988e8791213a2713",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 26,
+      "hasStructuralAnalysis": false
+    },
+    "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/ModifierSelector.kt": {
+      "filePath": "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/ModifierSelector.kt",
+      "contentHash": "ad45db0b377e8256eaafae5961e46ed9da2ca00cdc5df9afcb7c70d738dc5330",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 23,
+      "hasStructuralAnalysis": false
+    },
+    "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/ModifierType.kt": {
+      "filePath": "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/ModifierType.kt",
+      "contentHash": "1afda5acc3d603daa5a49286faff60573dac55e899a4484f9a28baa47626b842",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 26,
+      "hasStructuralAnalysis": false
+    },
+    "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/Note.kt": {
+      "filePath": "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/Note.kt",
+      "contentHash": "5c84250659b1c548a73ac12bda61e0e9951bdcd66895a7d10deb16cf84716eae",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 8,
+      "hasStructuralAnalysis": false
+    },
+    "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/penalties/AnarchyPenalty.kt": {
+      "filePath": "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/penalties/AnarchyPenalty.kt",
+      "contentHash": "f8865f08017712ad9bb769f138347fb8c7b3b0c70c01c485d1aa90d6e2dff33d",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 29,
+      "hasStructuralAnalysis": false
+    },
+    "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/penalties/ArmyConditionPenalties.kt": {
+      "filePath": "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/penalties/ArmyConditionPenalties.kt",
+      "contentHash": "268233855f681372d4606bdacfa0ae98932baada8dab3eec74146a2e07bce889",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 49,
+      "hasStructuralAnalysis": false
+    },
+    "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/penalties/FavoredLandPenalty.kt": {
+      "filePath": "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/penalties/FavoredLandPenalty.kt",
+      "contentHash": "2dbcd4c35f0e3bb69fb34191d07f8b5c4f710170d5fade2e137bd0114418b797",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 18,
+      "hasStructuralAnalysis": false
+    },
+    "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/penalties/NoBridgePenalty.kt": {
+      "filePath": "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/penalties/NoBridgePenalty.kt",
+      "contentHash": "ddccff320dc3a4310f68c6de8912ac29b02747cb73d85b764ced512d403f5ade",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 29,
+      "hasStructuralAnalysis": false
+    },
+    "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/penalties/RuinPenalties.kt": {
+      "filePath": "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/penalties/RuinPenalties.kt",
+      "contentHash": "75f7de50f131b2f45be14336925820271b520e93bfb9d29d5779962412b76afe",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 25,
+      "hasStructuralAnalysis": false
+    },
+    "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/penalties/SecondaryTerritoryPenalty.kt": {
+      "filePath": "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/penalties/SecondaryTerritoryPenalty.kt",
+      "contentHash": "e7099ecfc42d446dd6b58650f86d7a959074aa1be556ca11a13857e2bb04629d",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 17,
+      "hasStructuralAnalysis": false
+    },
+    "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/penalties/UnrestPenalty.kt": {
+      "filePath": "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/penalties/UnrestPenalty.kt",
+      "contentHash": "a0752bf1ba10cbc246a8af54c37684ecab1db909fac3a4508fc2ca036de0f7d5",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 31,
+      "hasStructuralAnalysis": false
+    },
+    "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/penalties/VacancyPenalties.kt": {
+      "filePath": "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/penalties/VacancyPenalties.kt",
+      "contentHash": "411f716ee6f6f68d85b63dcab424f81c827ac26a9663df265b26a7a972991c26",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 33,
+      "hasStructuralAnalysis": false
+    },
+    "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/UpgradeResult.kt": {
+      "filePath": "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/modifiers/UpgradeResult.kt",
+      "contentHash": "48f59df0606fb3d46597726b7a11dcbefb45bb4c6ecb7e4c83db22553259c4f9",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 9,
+      "hasStructuralAnalysis": false
+    },
+    "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/resources/Consumption.kt": {
+      "filePath": "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/resources/Consumption.kt",
+      "contentHash": "c135deb9c916a989ce097000693246a31c9e4d0ffd6fc9de25c1363068a1ace3",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 52,
+      "hasStructuralAnalysis": false
+    },
+    "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/resources/Income.kt": {
+      "filePath": "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/resources/Income.kt",
+      "contentHash": "790ab939bc3ee5288e3a0df6b0599d5e79db011f071778e8f12a82d5cae7956d",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 45,
+      "hasStructuralAnalysis": false
+    },
+    "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/resources/Storage.kt": {
+      "filePath": "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/resources/Storage.kt",
+      "contentHash": "299a53435c049a42bb1c00342e8809612c53e8fbd3d3d27f14f0c2a557a5939d",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 19,
+      "hasStructuralAnalysis": false
+    },
+    "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/unrest/GainedUnrest.kt": {
+      "filePath": "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/unrest/GainedUnrest.kt",
+      "contentHash": "d70954ae7b1de845f50f41beec932cc2be7d217572e86b8864c866ad81102211",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 8,
+      "hasStructuralAnalysis": false
+    },
+    "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/unrest/Unrest.kt": {
+      "filePath": "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/unrest/Unrest.kt",
+      "contentHash": "da0d90303c819553509fd444eea2410824627887eb38d412da2b1760060a2c0c",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 15,
+      "hasStructuralAnalysis": false
+    },
+    "src/commonTest/kotlin/at/posselt/pfrpg2e/kingdom/data/RawCharacterCompanionFieldsTest.kt": {
+      "filePath": "src/commonTest/kotlin/at/posselt/pfrpg2e/kingdom/data/RawCharacterCompanionFieldsTest.kt",
+      "contentHash": "781824afabeba104bf3b5cc982f34b6e00b5fcabdbdee0ac3b7ae663f7a1e93c",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 42,
+      "hasStructuralAnalysis": false
+    },
+    "src/commonTest/kotlin/at/posselt/pfrpg2e/kingdom/data/RawCharacterTest.kt": {
+      "filePath": "src/commonTest/kotlin/at/posselt/pfrpg2e/kingdom/data/RawCharacterTest.kt",
+      "contentHash": "9a7b5bb32768433c6d4f832b31ac0e3327ddf3b752367c45ff7548b458c94dc0",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 272,
+      "hasStructuralAnalysis": false
+    },
+    "src/commonTest/kotlin/at/posselt/pfrpg2e/kingdom/map/HexDiscoveryTest.kt": {
+      "filePath": "src/commonTest/kotlin/at/posselt/pfrpg2e/kingdom/map/HexDiscoveryTest.kt",
+      "contentHash": "63fbe8a2b8bd34bb9c9c1744cda837baa44ebf604e92efe17962961867f39968",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 237,
+      "hasStructuralAnalysis": false
+    },
+    "src/commonTest/kotlin/at/posselt/pfrpg2e/kingdom/map/HexStateTest.kt": {
+      "filePath": "src/commonTest/kotlin/at/posselt/pfrpg2e/kingdom/map/HexStateTest.kt",
+      "contentHash": "be4e9df06c38aedac6ea37b4ca97389487ebff64e25cc402981415a7d22e89bd",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 312,
+      "hasStructuralAnalysis": false
+    },
+    "src/commonTest/kotlin/at/posselt/pfrpg2e/kingdom/map/ZoneLabelTest.kt": {
+      "filePath": "src/commonTest/kotlin/at/posselt/pfrpg2e/kingdom/map/ZoneLabelTest.kt",
+      "contentHash": "3202eda3fb49049dcb8737e097f939c13f033fa1e4a95d69b5e8a595a25d8286",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 183,
+      "hasStructuralAnalysis": false
+    },
+    "src/commonTest/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/CompanionProfileContextTest.kt": {
+      "filePath": "src/commonTest/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/CompanionProfileContextTest.kt",
+      "contentHash": "c4b306d03a79ee9a5f526832fb07c1a99d7b46ffedd13c352806d97ece697580",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 67,
+      "hasStructuralAnalysis": false
+    },
+    "src/commonTest/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/CompanionQuestRowsTest.kt": {
+      "filePath": "src/commonTest/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/CompanionQuestRowsTest.kt",
+      "contentHash": "886e118819abb8304e0d35acea3c726eeb5a3f05b07b047a79276c4b202c8cc3",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 65,
+      "hasStructuralAnalysis": false
+    },
+    "src/commonTest/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/PartyInfluenceContextTest.kt": {
+      "filePath": "src/commonTest/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/PartyInfluenceContextTest.kt",
+      "contentHash": "de645ba3e3f87779783a642b9b24d8e507ad81d237f52cb7f59f6c355945b85b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 106,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/ActivityCapCalculator.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/ActivityCapCalculator.kt",
+      "contentHash": "f97f8d1c35982ea9919df780c3548302a6958dacb180a4c9ad67ef3bcd8a570b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 64,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/armies/Armies.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/armies/Armies.kt",
+      "contentHash": "f10fdf87e9dab6a883d4a409a1b63d236d173ebfd1f6908dfd287e7c07751f25",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 109,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/armies/ArmyCompendiumEntries.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/armies/ArmyCompendiumEntries.kt",
+      "contentHash": "8712e34480a830e6a4ca84ce3698c164a6858f3ddd3bc5b5da7643b86e66f3df",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 345,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/armies/ArmyConsumption.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/armies/ArmyConsumption.kt",
+      "contentHash": "000371386ee6c49913a1699abecbc9c48e40b0a33f277a714afcd242b4287ff6",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 76,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/armies/Modifiers.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/armies/Modifiers.kt",
+      "contentHash": "5bc10764e0030dc141450c7554bb92bbb9f06a0ad7c06c699b31043e83e48918",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 13,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/armies/Tactics.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/armies/Tactics.kt",
+      "contentHash": "724eb4d42dc03ecbdd2e58691d94ddfc35938f13db4cd51e10aa7d4362ed3c5a",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 25,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/ArmyPressureView.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/ArmyPressureView.kt",
+      "contentHash": "6d6da14d722b7456bc27f87908ad027068ce7c140a0053832dbdf50b3a4c7d1b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 109,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/ArmyWarPressure.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/ArmyWarPressure.kt",
+      "contentHash": "783f0cade7f105a067f298e81b31a32851e47d6100bd80433b31bc5308add068",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 133,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/AutomateResources.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/AutomateResources.kt",
+      "contentHash": "fd7acff0745cf96a60d9b88d8d4fdfd1d6cba7a5b96a3114397999c188a4297e",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 22,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/ChangeDegree.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/ChangeDegree.kt",
+      "contentHash": "8b37f87a2fee592a2543c10e941ce263f814a606f7881937892e4bff88bffd03",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 63,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/ChatButtons.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/ChatButtons.kt",
+      "contentHash": "8ab2463468f7626a9d3f7c541783432ea17400eaa5fd97e4b6d2249b34bec381",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 190,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/ContextMenus.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/ContextMenus.kt",
+      "contentHash": "33b171426a43751ac31460afb3cd08e3a94f83cd0f01fea8beb9e8b8cddefc59",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 159,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/DailyTickEngine.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/DailyTickEngine.kt",
+      "contentHash": "70e5df34ddb44b6ed218da13359290db7165454df365ad223f6ef6100a1e5fd1",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 52,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/DailyTickHooks.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/DailyTickHooks.kt",
+      "contentHash": "6589da8b8e5c37b194339887207b71dc96e286c7632a2a530375a906d1d8fce1",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 233,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/data/ArmyDeploymentStatus.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/data/ArmyDeploymentStatus.kt",
+      "contentHash": "7a2943633de72e9a622a99af7b4934265b0de835898db43a30e3d74fcfcd793d",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 25,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/data/MilestoneChoice.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/data/MilestoneChoice.kt",
+      "contentHash": "70bf0ad760962edc97adb4ce3deceb3ca6211a347b6062e223b5b6c5fb3df400",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 10,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/data/RawAbilityScores.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/data/RawAbilityScores.kt",
+      "contentHash": "756628c5c9449c632f7c8a78678ae80a88c745ad61852f3d14f63f715b137cea",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 11,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/data/RawArmyDeployment.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/data/RawArmyDeployment.kt",
+      "contentHash": "ddd68e7f54cefaded5887e221f5ded4b806743471d54ea47d40a60deb12cf947",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 22,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/data/RawCharacter.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/data/RawCharacter.kt",
+      "contentHash": "9f9b27fa30966e5352f5b4e6d7a56d173bc4457a09c241e12583824228e6b9d1",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 52,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/data/RawCommodities.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/data/RawCommodities.kt",
+      "contentHash": "98d85dc7d39f414e6b0b8f0b46bdf91679c99f2758132894d2cd2ffbe12cd575",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 39,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/data/RawConsumption.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/data/RawConsumption.kt",
+      "contentHash": "cb83ddb04c6de271e055ba788283b772daee26bf7e5c92496f4f95e0a4e1c199",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 16,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/data/RawFame.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/data/RawFame.kt",
+      "contentHash": "3477806a2338fd2f872324f990220b3360733ac8d2bd91e17eaa95980e890918",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 10,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/data/RawFeat.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/data/RawFeat.kt",
+      "contentHash": "876f64c421436be7fe2ea525ca1f36ae2e7e689f4e5f8536c48735711960bd82",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 38,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/data/RawGroup.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/data/RawGroup.kt",
+      "contentHash": "7ae4c514d253ce64639c960e83f7d820e019f436b18a632b23655d022946fa87",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 12,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/data/RawHexContent.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/data/RawHexContent.kt",
+      "contentHash": "ab0910f07beaab4f5827db419e9e062830f69cc3b379052af7ec05568dc3f451",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 20,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/data/RawLeaders.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/data/RawLeaders.kt",
+      "contentHash": "f4b5f9818c3285ee23eaec635e1d5194f75619638085e658ba90d9359fd24eb4",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 23,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/data/RawLevelUpChoices.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/data/RawLevelUpChoices.kt",
+      "contentHash": "e2edc0f7553ecb8e8b442eabf01e955fa9ba99aa0af80e01299eccffc28cdb5d",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 131,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/data/RawNotes.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/data/RawNotes.kt",
+      "contentHash": "c0b989bf30ee376e29c4ffd0087b666da4fdea4dc06c16c3dfea7bcbc4fdb4a5",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 9,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/data/RawPacingAlert.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/data/RawPacingAlert.kt",
+      "contentHash": "103be4042619dee0c1b3101c35481f27b32ce018a233f28205d7e22e2b8e96e0",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 48,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/data/RawPartyMemberInfluence.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/data/RawPartyMemberInfluence.kt",
+      "contentHash": "e1f79585a575a826d16757cc47804bc4303cb5368978c8b44bc5e14ce8be2d1c",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 20,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/data/RawQuest.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/data/RawQuest.kt",
+      "contentHash": "3b70bb97fd24f22b2c939c153ba33c611f7c690feeabf0526ff2f1ed627daad7",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 29,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/data/RawResources.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/data/RawResources.kt",
+      "contentHash": "a56df5b97becf4e45b44947aabcab2288ff30cbcd3977ad8a021da3da56ef419",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 14,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/data/RawRuin.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/data/RawRuin.kt",
+      "contentHash": "8041ae24c7deb4d58f01e2bfbae384046c6740c92904facfaeb380552aec8e08",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 34,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/data/RawSkillRanks.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/data/RawSkillRanks.kt",
+      "contentHash": "4639a2adfdda70e7b52406781e0a2f2e59ffbff241db9cac32efb44fce15b8e9",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 23,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/data/RawWarPressure.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/data/RawWarPressure.kt",
+      "contentHash": "ad7ad9d5a29e97cee4792f5adda5eef0e95cafbf90f62ca5079261ef6b8827e3",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 23,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/data/RawWarThreat.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/data/RawWarThreat.kt",
+      "contentHash": "1c67f5653bdaef945cb40dc04508cdef2ba2eb3ed849aad8bd9760bf77479057",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 31,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/data/RawWorksites.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/data/RawWorksites.kt",
+      "contentHash": "0ac170b952a05c746a9b22f73c7160dc6246cf83d09860ac3c33e45e3eea1bd2",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 18,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/data/WarThreatStatus.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/data/WarThreatStatus.kt",
+      "contentHash": "4327a51615bafd760d8d08a98793d8b9ceb52ecee21965e69cf53fbfe1738210",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 25,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/ActivityManagement.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/ActivityManagement.kt",
+      "contentHash": "d44dc50541596c2bdb4fa74615461984cff1950983ef114126f3c9238e2aca47",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 105,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/ActorActions.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/ActorActions.kt",
+      "contentHash": "da2e6bf4576766b0421e12acc1f37f98c84ae7c3c202c6a3d37d0ca001f264a9",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 93,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/AddEvent.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/AddEvent.kt",
+      "contentHash": "4ef4cbe3d8d5017f1ade36c8ee20b2bfd3f8a54c93a49862988708a4da59e4ae",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 300,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/AddModifier.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/AddModifier.kt",
+      "contentHash": "00d8582c9cdf453c9f08f911e909744494d12463c837bc1d7a9aa8af4d3b0d9d",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 245,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/AddQuest.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/AddQuest.kt",
+      "contentHash": "5ce36004eec115ecb1764ad9405ccb7291261764919a5e0d9a535a80e49240ad",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 288,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/AddSettlementBlock.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/AddSettlementBlock.kt",
+      "contentHash": "1ef853a24a7986dc62555648cf48c014f668e779c5b0dba54a0ba89a1331d8f2",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 68,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/AddWarThreat.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/AddWarThreat.kt",
+      "contentHash": "98a808316957d0972a1eefbd7515b2c2567010e41a4d528042efe8c95e6e4a99",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 145,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/ArmyBrowser.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/ArmyBrowser.kt",
+      "contentHash": "dc14344576b53479a691743a86374f2da695121e5e851699f28c09e7d13d1b7d",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 198,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/ArmyTacticsBrowser.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/ArmyTacticsBrowser.kt",
+      "contentHash": "07611988537a5c7d9e4a8b2bda0c7ba7e399b7d77bdaffa9493d5acf667e957f",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 145,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/AskDc.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/AskDc.kt",
+      "contentHash": "7689818689195f7da988aa651d8ba900d58bff764c35391575d00a8e6401842e",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 24,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/AskRp.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/AskRp.kt",
+      "contentHash": "1491f202c2df7f5cd5171838194a109335f80d3f891b5552ccafa24fb20c8ec0",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 37,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/CampaignClockDialog.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/CampaignClockDialog.kt",
+      "contentHash": "95b1dbb65b156e66c51b92c9ea6da6568fcf0f3279f817e4c343b284ad05775b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 112,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/CharterManagement.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/CharterManagement.kt",
+      "contentHash": "93406c0fe3b718de0a09e9f96588c4211da5aac96960af60575670e37cf91d24",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 127,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/ConfigureLeaderKingdomSkills.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/ConfigureLeaderKingdomSkills.kt",
+      "contentHash": "2dbe1091dc482d5cd2c3f9bc93636f1b4ca1a4aba86bbe74407765ffe2b146b0",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 189,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/ConfigureLeaderSkills.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/ConfigureLeaderSkills.kt",
+      "contentHash": "bd675a642629a483eb47c78031c6509f58e567180ce1eebe6ff247294205986a",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 248,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/ConsumptionBreakdown.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/ConsumptionBreakdown.kt",
+      "contentHash": "c4c4824c5b640899807dc205cad301945c5db10e98a495fe53920533c3379bd9",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 14,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/DeleteSettlement.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/DeleteSettlement.kt",
+      "contentHash": "62e80b6c977eaadade6068f3cd4d2fbf5cde0451e262c1c6107d1fbbc50491e1",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 40,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/DeployArmy.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/DeployArmy.kt",
+      "contentHash": "a400aeb0d78dcad2b11eefa833af4d05ed6eb161c95b27d4c4204ccfc9778742",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 151,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/FeatManagement.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/FeatManagement.kt",
+      "contentHash": "01bb89f641d9b8989d1847f05fce0e25e9de57594dbff6c8d0530e6afcbbbefd",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 120,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/GovernmentManagement.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/GovernmentManagement.kt",
+      "contentHash": "444ad1affe2d042067679c974c6837e74a7f9b8ff3c13bcb99f238eb9e00c76c",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 135,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/HeartlandManagement.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/HeartlandManagement.kt",
+      "contentHash": "0c01c1844958d28e5e64ae513f9cf8bf5514aa1d12894c64d9cfaa0123e3888f",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 118,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/HexContentManager.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/HexContentManager.kt",
+      "contentHash": "2cbb44ba129fef392f817b8dae03c834c3b49a5001f0e8c652fa0ae894791196",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 434,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/HomebrewProfileManager.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/HomebrewProfileManager.kt",
+      "contentHash": "0b9615b6e0455e09587d2ccc805db71bae6193a888e6cb3a28d2bef15cdc87f5",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 179,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/InspectSettlement.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/InspectSettlement.kt",
+      "contentHash": "6ed4b3f0784d3f0bd94653ec874ab00949663ed2ecb7ff8dbdb971bf50a179d6",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 558,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/KingdomCheckDialog.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/KingdomCheckDialog.kt",
+      "contentHash": "4498e3ee9733fa59a79141c26df2ea1cf73ca51a456596f9e57bab435ca51e60",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 985,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/KingdomEventManagement.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/KingdomEventManagement.kt",
+      "contentHash": "a1a591168dc7353e0f9b877632acf858c5b76ad38b4536ae90b4bf725082ef66",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 106,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/KingdomRoll.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/KingdomRoll.kt",
+      "contentHash": "dcf32260d2e85aaa3af1b0b30434856e4105f7c30afc58c046e23ee3c8913741",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 289,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/KingdomSettings.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/KingdomSettings.kt",
+      "contentHash": "571d591b192c538d7d7d22c247f5573113e56128cb9ac4f13b78df341d66bc5d",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 493,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/KingdomSizeHelp.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/KingdomSizeHelp.kt",
+      "contentHash": "dc36347cb5d1dfb8dfd6898d1fc500031328083e390dd35ee408c2870aedc33d",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 47,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/KingdomSkillPicker.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/KingdomSkillPicker.kt",
+      "contentHash": "4f107ce7d90bd26c615ce193d5bacd303fc47e6881e850e8a4be132220fd98f3",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 184,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/MilestoneManagement.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/MilestoneManagement.kt",
+      "contentHash": "33b687301d6014aa1ba998f9b0fb1aa9c07a4a8d1d6f84a93bb184f954750ead",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 121,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/ModifyActivity.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/ModifyActivity.kt",
+      "contentHash": "51eb3d6f6ee99a570ec351d3fd1f35c431b1086c4754047a39b37f1c87d269ea",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 370,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/ModifyCampaignClock.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/ModifyCampaignClock.kt",
+      "contentHash": "45dc7f5cca655c7d56deea5c082b16b875a0bc2ff38813ec332ba4c930b4129e",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 212,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/ModifyCharter.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/ModifyCharter.kt",
+      "contentHash": "1fd2d2f8b8c1b181d1c9bddba6dc4b61adbd47eefbe278dd456b67ab0e8deeb7",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 163,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/ModifyFeat.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/ModifyFeat.kt",
+      "contentHash": "bb8a0d28ea34cb2f90eab012578b92d15a5c74df00f2413443cac1edfc540a56",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 236,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/ModifyGovernment.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/ModifyGovernment.kt",
+      "contentHash": "da783d5a7bd002cb9df48a69a73ed5bda4014138faff9ba4663173d99469b69d",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 190,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/ModifyHeartland.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/ModifyHeartland.kt",
+      "contentHash": "f9e07ca264ae415bf67f6fab32945e7011e442dc2efdd4763b3d84737eb8acd5",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 142,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/ModifyKingdomEvent.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/ModifyKingdomEvent.kt",
+      "contentHash": "4741caca568a44fada4d93036203704aec4387df752942452f959cd91fa14b08",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 366,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/ModifyMilestone.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/ModifyMilestone.kt",
+      "contentHash": "2643cdf50d23d5f1ff9b1ac205d893eb85b8d14fff265753fa6953580ba0ad4e",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 137,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/NewSettlementChoices.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/NewSettlementChoices.kt",
+      "contentHash": "1b22a34a3cf14605b3b8310e00b7e77602f7beca7f62521ad497522175dedf89",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 72,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/PickEvent.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/PickEvent.kt",
+      "contentHash": "678b1264f3ef6d60cfe5f6e5f326df518cc2c9a28cc4f38a31cda12d91b557a0",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 65,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/PickEventSettlement.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/PickEventSettlement.kt",
+      "contentHash": "6c9fb382a6d918fde54e824297ca7b7fda55bcb8ae0589e4144f0b5b8d6401a2",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 60,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/PickGroup.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/PickGroup.kt",
+      "contentHash": "69f84cd4649e6ebffff1785ae52c8e9c1d93c0bb6eec29d4d6ca8d8782959366",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 52,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/PickLeader.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/PickLeader.kt",
+      "contentHash": "9388ea3e588ff6d0ff4144c7db95e81e3404be472d8e8b4cf3aa2519a6eb5a4b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 34,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/PopulationDialogs.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/PopulationDialogs.kt",
+      "contentHash": "cee0ceb59a91bef2a6301ca456daa313ef324cf93703c601a0bc6a4b1aa9abc4",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 152,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/RequestAmount.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/RequestAmount.kt",
+      "contentHash": "95108e1f412c533aec400de695aa85f1ca6e1b5db85c34f4f65d27f2f37e99d9",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 34,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/RosterPanel.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/RosterPanel.kt",
+      "contentHash": "98ce74f1bab90b7e36270f5a0add8b0b7c260bb25def165b4ca644c5e5d2b994",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 282,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/SettlementSizeHelp.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/SettlementSizeHelp.kt",
+      "contentHash": "3e5db1c18c3a14617fb9d7eeb0455e9596ed5ed0e47dde5ff6e4818162773b57",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 60,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/StructureBrowser.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/StructureBrowser.kt",
+      "contentHash": "7bf8c29072cdb5abfea1bad166cb5741ffba3b2362ca0fb3980b1f6dd82b9a2d",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 771,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/StructureChatMessages.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/StructureChatMessages.kt",
+      "contentHash": "d55eea4f254293fd2b65e5f322b9cc8699e4e24116de6ca7a8020bc256d8f902",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 216,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/StructureXpDialog.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/StructureXpDialog.kt",
+      "contentHash": "0172e25a5197536fa69d50cc40d44b3a3969d25dbb28e1de5a49e02658781744",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 61,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/TurnWizardApplication.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/dialogs/TurnWizardApplication.kt",
+      "contentHash": "9428f03088ed1d980974e9a50a3ad71debf13eacd4dba2f90be9b92db5dbb6a6",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 509,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/Icons.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/Icons.kt",
+      "contentHash": "667bd37538d5acdfede536c21eca1dc990a1bad6c65f62d0939b927272ca5ab8",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 28,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/Kingdom.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/Kingdom.kt",
+      "contentHash": "e0fb30b8928f9ccaf184a28776e9322c6cb0e22ab3047f47811784bc822174dd",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 27,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/KingdomCharter.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/KingdomCharter.kt",
+      "contentHash": "ebc86bd2c194f93adf9aa7d711b373ca072c5a48a67b713952647fd1d37847dd",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 37,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/KingdomData.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/KingdomData.kt",
+      "contentHash": "f85ca7f7bf160104d286382bf0581c2232bdac2a8a40f876c9932f08079847ae",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 602,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/KingdomEvent.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/KingdomEvent.kt",
+      "contentHash": "6830dd974486c78ba2737da2e9e366f42f3e0c579ac32dd01aaaa730cd105de7",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 172,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/KingdomFeat.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/KingdomFeat.kt",
+      "contentHash": "476c5f432895f5f5dc8d219c31952e7afe104a422fef4c2ad601d84bf601fb83",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 171,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/KingdomGovernment.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/KingdomGovernment.kt",
+      "contentHash": "39a8e853869f3d0fd0fd890c0f71c7d06afedbad1a97bcccd5612e876df2b4e2",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 38,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/KingdomHeartland.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/KingdomHeartland.kt",
+      "contentHash": "3bfb5e27feecd3f4500cbd1a6b817e3faa611f534de6caae020207369137faa4",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 36,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/KingdomMilestone.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/KingdomMilestone.kt",
+      "contentHash": "f44b3273320fb7747982efcf59da4ebcc580024db2c955e448ec514080bd07a7",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 47,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/KingdomModifier.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/KingdomModifier.kt",
+      "contentHash": "74a18f7ea5ff058317c73672ed6b762bd1c88538fed3dc22cdc9a466b261ba96",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 362,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/Leaders.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/Leaders.kt",
+      "contentHash": "899b24939220898ebd5c547580cbe989f7b34dd045588658cdd528179472cd85",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 11,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/map/HexContentSync.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/map/HexContentSync.kt",
+      "contentHash": "2e1678c1614f61d67e7725956c3e4e80d3243b5df7c6256ca3687c51715a8680",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 178,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/map/HexGridSync.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/map/HexGridSync.kt",
+      "contentHash": "069976eebb29814b48cb61a508215a6d66e1c1b01cada326e5a323d4b0820a96",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 627,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/PacingAlertChat.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/PacingAlertChat.kt",
+      "contentHash": "7cc4be138d0c300f0b1f8a9d48048dbb47ac6982660c29cf068e6505ee2bc3a3",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 24,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/PacingAlerts.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/PacingAlerts.kt",
+      "contentHash": "b57804f048efa8b41aec7e418a592e070a68460ae084cc2a117baf7896526b44",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 165,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/PacingAlertView.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/PacingAlertView.kt",
+      "contentHash": "4cd82750e4687c87bdcb02a4ab68a0c9852a555638bc1818ca162f0f12eb356e",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 53,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/RawActivity.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/RawActivity.kt",
+      "contentHash": "02d83075ba72b0f6f9f20f6743e35834c2987f66cac775ad4a225eee8318310e",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 268,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/RawKingdomFeature.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/RawKingdomFeature.kt",
+      "contentHash": "7b9a8fb363bb29ff1fa884bbab59eff327ffa4a71795340010aefaf568985814",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 85,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/Realm.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/Realm.kt",
+      "contentHash": "ebdcc861a1abb0fb3e8a6dc6a5a4bb0b656105485d312c1885bc92e08b06b347",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 198,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/ReRolls.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/ReRolls.kt",
+      "contentHash": "96fe4c4a1c7286d3692c1458fea39b1d44e82705f64a7df8edd427948b289758",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 220,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/scenes/LayerDocuments.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/scenes/LayerDocuments.kt",
+      "contentHash": "f9e9357a8ce6363a949d4032c2eec577e0af0c26946fb754f1aa599e699fc1ef",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 36,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/scenes/Rectangle.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/scenes/Rectangle.kt",
+      "contentHash": "cfee8e657b16b17cd45a9f035e33f2dcd38bdb13d8f558b7026796b1eec30bd1",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 25,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/SettlementTerrain.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/SettlementTerrain.kt",
+      "contentHash": "f90756f6504b654760debd4b8de0268d3d86eaf803dbcb6b7cd128be18707ae0",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 23,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/BeforeKingdomUpdate.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/BeforeKingdomUpdate.kt",
+      "contentHash": "270cbfef2c5d90fb862671fce9c9e78a2452683deb27a80ad4895897275fb607",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 135,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/CalculateIncome.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/CalculateIncome.kt",
+      "contentHash": "bc93561a0dfb3914f38e1e257923d05a5a10410b8242f9f2074fed5cd22c4d53",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 98,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/CalculateUnrest.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/CalculateUnrest.kt",
+      "contentHash": "f3fdd34386111150d554f8492ebb50320823b28b2d0de9866762da437fa8a4cd",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 86,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/Consumption.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/Consumption.kt",
+      "contentHash": "f9cb5f660ca25e13ce16b32847d3bbea7d7303098bade7af2858e65ccb0a1bb1",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 53,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/AbilityBoostContext.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/AbilityBoostContext.kt",
+      "contentHash": "8f558e331556d564078745bd362c6d360624d269e335d61230d665a6f52e7507",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 95,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/AbilityScoresContext.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/AbilityScoresContext.kt",
+      "contentHash": "818ce583242a6990d9abdd06a5c8d13dd1d24cf75742d1a8d36aef0368e42bea",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 77,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/ActivitiesContext.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/ActivitiesContext.kt",
+      "contentHash": "64d6302dc41ff62912c79d2d95951b0da9814bdd2c51727a4374051a3c544a0d",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 307,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/ArmyPressureContext.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/ArmyPressureContext.kt",
+      "contentHash": "2130331735c135e809c22c004f0bd0fa6e575c536c43919c01ff83fc10948d66",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 115,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/BonusFeatContext.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/BonusFeatContext.kt",
+      "contentHash": "f62a784bddc16f564f00d6d92c87e7e635f398b97290e3067e9e6dcb7da0a503",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 128,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/CampaignClockContext.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/CampaignClockContext.kt",
+      "contentHash": "a5c8691c9b83c09f123f9d71c28264e82e63aabda199e238db39fa0fa067e685",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 65,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/CharterContext.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/CharterContext.kt",
+      "contentHash": "5839bcfa8fa439564a1519eb1e7c09fc9ab368ea8bf44bfeb3d8cbc412e272c4",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 47,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/CommodityContext.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/CommodityContext.kt",
+      "contentHash": "8e42ee34dc846d2c51ea592113c62cbc9e461a2dc62858f8e0fb47f16974b46c",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 110,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/CompanionProfileContext.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/CompanionProfileContext.kt",
+      "contentHash": "d8eb327be37dfdda6f25ae52f4df9048e2b67f798d3a16ef5cb85b49402822c7",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 118,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/CompanionQuestContext.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/CompanionQuestContext.kt",
+      "contentHash": "b07cecb957193d7dd07dcbf2eed6f8977f31db83af8ca3f2c621b60ae9c3f52f",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 71,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/ConsumptionBreakdownContext.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/ConsumptionBreakdownContext.kt",
+      "contentHash": "eda2bc90e4ace261906ce2639bf3004fbbaf46927a2b61a72df8f4594ad5534a",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 33,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/ConsumptionContext.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/ConsumptionContext.kt",
+      "contentHash": "7d8b351802910f901b7898a636fc92a8f5d857b5fabb5624890bbe0601deb05b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 37,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/FameContext.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/FameContext.kt",
+      "contentHash": "cfbe2e2bf42bd586454c4519fb048b5c6036b797195aee07ab6152dafcd8f174",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 48,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/FeaturesContext.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/FeaturesContext.kt",
+      "contentHash": "32ab656d4083b5a625aaa6a7a2fe1dafa901ab6e1b4baf5b5ed274ef3105e827",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 262,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/GovernmentContext.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/GovernmentContext.kt",
+      "contentHash": "a6a68df81b3c91f76f04a04b1f6d72bf190b30237a3897892fddd1cecd3ca770",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 89,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/GroupContext.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/GroupContext.kt",
+      "contentHash": "962adcd049fcdccfdde46ab4063758fca3d305655612f7106a8085b122ac3519",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 55,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/HeartlandContext.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/HeartlandContext.kt",
+      "contentHash": "0590c2734db81a26160358081e8ed9b475ea931ccd9d88272c6b697f13d71b59",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 34,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/KingdomSheetContext.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/KingdomSheetContext.kt",
+      "contentHash": "f6aa97ebc6c68320f40d142cccf3cb61f2b4e98e83921fd9cdc2fe60e64b2faf",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 109,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/LeadersContext.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/LeadersContext.kt",
+      "contentHash": "f94b63db704600dfc0704544652c7e41f5a8e376cb394f00cede0ff4555b2443",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 151,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/MilestoneContext.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/MilestoneContext.kt",
+      "contentHash": "e057ef9c4cfbe3b9f91d08db9d6a9f0113df2de42d02e71d794e2ad49f9fe52b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 63,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/ModifierContext.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/ModifierContext.kt",
+      "contentHash": "4f85e3e71e6ca8f7d231320b346570a42daeed2a20e3085e33fa3159b299d7b6",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 34,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/NavEntryContext.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/NavEntryContext.kt",
+      "contentHash": "c2926c7106d972cb915a93aca095e4a20cc9284b206763e28829cb119e8c6618",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 30,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/NewKingdomContext.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/NewKingdomContext.kt",
+      "contentHash": "8639c48d4f60a161ad3540baeb0f4a5c3b0ff28363b5c95f96ae4bf15aa477cc",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 9,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/NotesContext.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/NotesContext.kt",
+      "contentHash": "d5f1010702e2773f96198793582d5f5e040b3903edef8c8397a280c86094a3bd",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 26,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/OngoingEventContext.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/OngoingEventContext.kt",
+      "contentHash": "589820c1fb4a914c5b958de87327df7b80ad43f41c93329b2092dc743676ee87",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 98,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/PacingAlertContext.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/PacingAlertContext.kt",
+      "contentHash": "0a75850744d1e28c8df3c42479d0ee80acb19ff091c49e0f69b72d14a26ee1c0",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 52,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/PartyInfluenceContext.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/PartyInfluenceContext.kt",
+      "contentHash": "46ab76fd2e00244048fd86c1adfbb4ece14011ace58e10826896fc147deedb81",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 103,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/ResourceContext.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/ResourceContext.kt",
+      "contentHash": "b0325ba9a43e80e679e7be32b1f493f01c76d435d7daa5042d7ace2a5a5ce8b4",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 33,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/RosterContext.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/RosterContext.kt",
+      "contentHash": "a121f7e8629c34d56614f86d032556156cbffeb2858e2de1218ecd6855e317b6",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 88,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/RuinContext.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/RuinContext.kt",
+      "contentHash": "403ad0b2e81fda03546859b8db7083646d81c23d5eb6cdc4c2660e9b52b7e5f4",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 81,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/SettlementsContext.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/SettlementsContext.kt",
+      "contentHash": "cb00489025e54b6bbedc28937fbf0d8edc60cef5a1ee6ea5c31dd7043b946888",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 182,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/SkillChecksContext.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/SkillChecksContext.kt",
+      "contentHash": "f1e781e7eccd55829b8ff4567c71424399f4dd718384ddeccd501ee9c59f0c37",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 94,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/SkillRanksContext.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/SkillRanksContext.kt",
+      "contentHash": "e90acd3997218aa9f19650a676531d777801e4658268229ef46e6b9ce54f1bac",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 128,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/TurnWizardContext.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/TurnWizardContext.kt",
+      "contentHash": "b49595578306fcf30b6755d8d1e1b33fe76ae286c3d0aae487e5d3768ca5c0f4",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 62,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/WorksitesContext.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/contexts/WorksitesContext.kt",
+      "contentHash": "b5b60c6f59f62114dc23ab9293cb842dfec2e7f7eaa881d7a0b6183211a26000",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 69,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/Defaults.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/Defaults.kt",
+      "contentHash": "3cea141a5a8e86f2e82994d7b4decc7e588afa0b4022eb5af9a59e7cb909cf1c",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 380,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/KingdomSheet.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/KingdomSheet.kt",
+      "contentHash": "5143bcbb17f4164b999714c703e225feb8ad9e2f59e25a583552fdc1a1f19aa0",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 2413,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/KingdomSheetData.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/KingdomSheetData.kt",
+      "contentHash": "2e67e2fcb0c3d3fd08813e6e357ae4d89b91af819f565ca556b93b6b873a423b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 60,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/KingdomSheetDataModel.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/KingdomSheetDataModel.kt",
+      "contentHash": "02251bd86227f57785210db5a3f0dc3573252446e40a50abe333392d2a466994",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 311,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/navigation/MainNavEntry.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/navigation/MainNavEntry.kt",
+      "contentHash": "3534fadf25aa9a54e4914d2e73ee73bfb215f91a85e632f90689c6e199ec82cd",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 31,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/navigation/TurnNavEntry.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/navigation/TurnNavEntry.kt",
+      "contentHash": "7cafaf486525e7b670effec927156b7ee8d2ffef7f6f816a187c6b7698ed17bf",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 25,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/ObsidianIntegration.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/ObsidianIntegration.kt",
+      "contentHash": "5f7010593fd91e0c290043db76a55eeeb2beaf91d78490ab3aa7fc40b6bb8d36",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 401,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/ResourceButton.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/ResourceButton.kt",
+      "contentHash": "35414dd5670272c87b9324d752526c3c830e0e8d4c24dd4c5c37689b04e9de9b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 451,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/Turn.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/Turn.kt",
+      "contentHash": "f0143941cbe9e44bcf6fed668fa9fe5a2417e48984ffa62769910ef7accdbc58",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 22,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/Xp.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/sheet/Xp.kt",
+      "contentHash": "c6bbbb30a003551b9ea5d38782de0f84798e7443ebaa8f4d965632824f446564",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 93,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/structures/InitialValidation.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/structures/InitialValidation.kt",
+      "contentHash": "f02846639d1a3254615b599116373731fa52ba71f49584d139701c295fe87c4d",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 33,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/structures/RawSettlement.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/structures/RawSettlement.kt",
+      "contentHash": "14bf01695a50fc2105d387c6e6866e0bdc45b5371e7ac7bc6215ff1661ba768c",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 30,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/structures/RawStructureData.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/structures/RawStructureData.kt",
+      "contentHash": "7542ff0fea9210226db602b649fd496eb6b9fbd513933cb60105fb97cd365130",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 201,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/structures/Scenes.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/structures/Scenes.kt",
+      "contentHash": "128df94082be1a351e261bc597bb3d0984780b3086b30bb6619db1e91d4449f0",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 472,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/structures/Structure.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/structures/Structure.kt",
+      "contentHash": "762acbc848e184c6b1b3ea24924e02d8f70e4e5d68a2c0b7e58b354a6f18fb1e",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 245,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/structures/Validation.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/structures/Validation.kt",
+      "contentHash": "452d50b3d60fc8dbfd8dbe238e808b2950f4ed913ccda4a3616663c86cd923d6",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 49,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/TurnTickingEngine.kt": {
+      "filePath": "src/jsMain/kotlin/at/posselt/pfrpg2e/kingdom/TurnTickingEngine.kt",
+      "contentHash": "4ddce621dbdbbcfc7dd873f29d1dcb4e6ccb8c857333ca3dfaf3f1b8afec03ad",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 285,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/resources/applications/kingdom/activities.hbs": {
+      "filePath": "src/jsMain/resources/applications/kingdom/activities.hbs",
+      "contentHash": "1462e32663222b35e9592f8ca3dce8bd5eab895d19aeebd8ded6ee60fe9ab4f5",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 51,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/resources/applications/kingdom/army-browser.hbs": {
+      "filePath": "src/jsMain/resources/applications/kingdom/army-browser.hbs",
+      "contentHash": "c0ddec8e79b8e6dbb1336ab38ca69d4e326aed92a1f5b8d662cfe8cc6291f5cd",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 72,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/resources/applications/kingdom/army-tactics-browser.hbs": {
+      "filePath": "src/jsMain/resources/applications/kingdom/army-tactics-browser.hbs",
+      "contentHash": "aa7c4efcbdc0e52e470c89e63ab26af2553495e3915e168fb5852573afc27dde",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 23,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/resources/applications/kingdom/check.hbs": {
+      "filePath": "src/jsMain/resources/applications/kingdom/check.hbs",
+      "contentHash": "d10f4db038ca3103377f7dcbeb6c3c3bf43f3366d5b013553a394750b8d62ae6",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 74,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/resources/applications/kingdom/companion-profile.hbs": {
+      "filePath": "src/jsMain/resources/applications/kingdom/companion-profile.hbs",
+      "contentHash": "a87c8cef5ce8dee1f7a8bb64f07190a417d93c72f90cac43fb8bf3d1498311a7",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 84,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/resources/applications/kingdom/companion-quest-card.hbs": {
+      "filePath": "src/jsMain/resources/applications/kingdom/companion-quest-card.hbs",
+      "contentHash": "82a4f4b49c0fd8ab131c58233bd1faeacb131e74f1f8ab7b27f18a0f9ff4adcc",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 41,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/resources/applications/kingdom/companion-quest-row.hbs": {
+      "filePath": "src/jsMain/resources/applications/kingdom/companion-quest-row.hbs",
+      "contentHash": "58a7c7ad3183def84f8b2d8278fa6f66a80999e80be98572a8460480f1fadca0",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 26,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/resources/applications/kingdom/consumption-breakdown.hbs": {
+      "filePath": "src/jsMain/resources/applications/kingdom/consumption-breakdown.hbs",
+      "contentHash": "956d49c0f4f9d2feb1daa5d68149cc76988a600fa1377bec9e8fa456121d62f4",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 37,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/resources/applications/kingdom/event-browser.hbs": {
+      "filePath": "src/jsMain/resources/applications/kingdom/event-browser.hbs",
+      "contentHash": "331017819359e9ffea84a5c0cf08ba7ded1146db74c5ff9139876b4b227cc3e8",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 60,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/resources/applications/kingdom/events.hbs": {
+      "filePath": "src/jsMain/resources/applications/kingdom/events.hbs",
+      "contentHash": "20896038438d8c78a6dac706aacfc9e8d6f8d1a10374d8c1708d3409f4c38d29",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 79,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/resources/applications/kingdom/generate-quest-dialog.hbs": {
+      "filePath": "src/jsMain/resources/applications/kingdom/generate-quest-dialog.hbs",
+      "contentHash": "479e2291553c8eaacc92ebc0cc6bc6afefe57fbff962e01ff59cc59e3c102b64",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 108,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/resources/applications/kingdom/hex-content-add.hbs": {
+      "filePath": "src/jsMain/resources/applications/kingdom/hex-content-add.hbs",
+      "contentHash": "85a95b177541495b77e58a29d4107f5f233711316907abb1a1df3c535744dc73",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 11,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/resources/applications/kingdom/hex-content-edit.hbs": {
+      "filePath": "src/jsMain/resources/applications/kingdom/hex-content-edit.hbs",
+      "contentHash": "2fb19fcebc7098ad7666633a9f2c2b79a3e6767e8a6c51bf7aa5fbe51a872386",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 11,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/resources/applications/kingdom/hex-content-manager.hbs": {
+      "filePath": "src/jsMain/resources/applications/kingdom/hex-content-manager.hbs",
+      "contentHash": "097d856753b95652e66ec7d89d6fd64459e0d26a50f6b6bd214d79132f2b61e5",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 70,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/resources/applications/kingdom/homebrew-profile-manager.hbs": {
+      "filePath": "src/jsMain/resources/applications/kingdom/homebrew-profile-manager.hbs",
+      "contentHash": "e1027ab9275393db294f6badcc0623f3dbeb1b6f4fc262b494263cdbb6505b91",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 50,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/resources/applications/kingdom/kingdom-sheet.hbs": {
+      "filePath": "src/jsMain/resources/applications/kingdom/kingdom-sheet.hbs",
+      "contentHash": "22dfe99d47c51175fdfdc8cd06de15d6d4a290a1397965c4e1f13233f293cb22",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 28,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/resources/applications/kingdom/kingdom-size-help.hbs": {
+      "filePath": "src/jsMain/resources/applications/kingdom/kingdom-size-help.hbs",
+      "contentHash": "96098455f47161049812066e86aa828ded92f042e27b7400b22e7f2f38d1776a",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 18,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/resources/applications/kingdom/population-add.hbs": {
+      "filePath": "src/jsMain/resources/applications/kingdom/population-add.hbs",
+      "contentHash": "b7e20c696b3c66384c570bdc881a7b81b00e2f65e37f5751c57ccfdd427e2854",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 32,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/resources/applications/kingdom/population-edit.hbs": {
+      "filePath": "src/jsMain/resources/applications/kingdom/population-edit.hbs",
+      "contentHash": "85d03411167aa7756d399b0f0850ca565c9c7627947bec55466c5808aa76bf85",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 35,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/resources/applications/kingdom/quest-card-generated-badge.hbs": {
+      "filePath": "src/jsMain/resources/applications/kingdom/quest-card-generated-badge.hbs",
+      "contentHash": "046bcb9cf98a14420eb3da5458ed77d576d6da84632183d604b62be75b01a526",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 7,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/resources/applications/kingdom/quest-generator-settings.hbs": {
+      "filePath": "src/jsMain/resources/applications/kingdom/quest-generator-settings.hbs",
+      "contentHash": "5810707031748077ef388a28ac2987b0122a298113add8ca68f60444b6c91820",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 15,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/resources/applications/kingdom/quest-generator.hbs": {
+      "filePath": "src/jsMain/resources/applications/kingdom/quest-generator.hbs",
+      "contentHash": "59ca1ce31f06af89acef329f877170d6c93282103459494d3ecc2fcf64fd02b9",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 15,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/resources/applications/kingdom/roster-add.hbs": {
+      "filePath": "src/jsMain/resources/applications/kingdom/roster-add.hbs",
+      "contentHash": "0410696c28c4ecacccfcacc11236a4e867a50c97b959df91a2a15a58a728f630",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 80,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/resources/applications/kingdom/roster-edit.hbs": {
+      "filePath": "src/jsMain/resources/applications/kingdom/roster-edit.hbs",
+      "contentHash": "557155a2c744536a87f4b266688f372ed5898c96f7e8844c597818e56284446e",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 96,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/resources/applications/kingdom/sections/army-pressure/page.hbs": {
+      "filePath": "src/jsMain/resources/applications/kingdom/sections/army-pressure/page.hbs",
+      "contentHash": "d32b84c1730a48909610ff843e1edc00607ddaa980fe3f45aad2fa24f406529b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 96,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/resources/applications/kingdom/sections/character-sheet/bonus.hbs": {
+      "filePath": "src/jsMain/resources/applications/kingdom/sections/character-sheet/bonus.hbs",
+      "contentHash": "b017bf0bb14efbc1a54c47e3acf5dd88bc2ad5dd6061b0df0154e06813e61f19",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 60,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/resources/applications/kingdom/sections/character-sheet/creation.hbs": {
+      "filePath": "src/jsMain/resources/applications/kingdom/sections/character-sheet/creation.hbs",
+      "contentHash": "f1f329aef03308c5c0522a0bf03b978faa9943a8103d8d75a255b2af5027c71c",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 144,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/resources/applications/kingdom/sections/character-sheet/levels.hbs": {
+      "filePath": "src/jsMain/resources/applications/kingdom/sections/character-sheet/levels.hbs",
+      "contentHash": "3231e917216bb95bd65dad4191ab282e9b100db53d5cd9154d057ea4d9c26cc2",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 80,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/resources/applications/kingdom/sections/character-sheet/page.hbs": {
+      "filePath": "src/jsMain/resources/applications/kingdom/sections/character-sheet/page.hbs",
+      "contentHash": "75fce16b6bff202ff09d43b97721db5f37f9d7c3bbdc49cd86f697354aedeea2",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 86,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/resources/applications/kingdom/sections/clocks/page.hbs": {
+      "filePath": "src/jsMain/resources/applications/kingdom/sections/clocks/page.hbs",
+      "contentHash": "5531c2ab8af6b7d56add983763cce36462feac34badea7d69295b73a9ab629d7",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 87,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/resources/applications/kingdom/sections/modifiers/page.hbs": {
+      "filePath": "src/jsMain/resources/applications/kingdom/sections/modifiers/page.hbs",
+      "contentHash": "833b387382f1a6afc55cb5bfb4dccb16501a84031ece139e3d7663a42ddb3623",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 33,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/resources/applications/kingdom/sections/notes/page.hbs": {
+      "filePath": "src/jsMain/resources/applications/kingdom/sections/notes/page.hbs",
+      "contentHash": "5739ea18d8be4188754f4a243240bf65963fbc329c99cb291b78803f9fff6d60",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 17,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/resources/applications/kingdom/sections/pacing-alerts/page.hbs": {
+      "filePath": "src/jsMain/resources/applications/kingdom/sections/pacing-alerts/page.hbs",
+      "contentHash": "f849613762c542891187e9cad82000d71870867f9f439356e6cae3c26245e403",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 41,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/resources/applications/kingdom/sections/party/page.hbs": {
+      "filePath": "src/jsMain/resources/applications/kingdom/sections/party/page.hbs",
+      "contentHash": "304240ee79031d0a61c7727fbf9c57c73d6bade75d64b1654277f06f192a2cc8",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 66,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/resources/applications/kingdom/sections/quests/page.hbs": {
+      "filePath": "src/jsMain/resources/applications/kingdom/sections/quests/page.hbs",
+      "contentHash": "5be082998d76b289df898c00bb7fa2ba6d4f35610573ad5768a1be2f39eed8ef",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 203,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/resources/applications/kingdom/sections/roster/page.hbs": {
+      "filePath": "src/jsMain/resources/applications/kingdom/sections/roster/page.hbs",
+      "contentHash": "87143d993ba2bb51c8d97041276e126828b2e15fbcfb5c573a505e3a27c17c86",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 142,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/resources/applications/kingdom/sections/settlements/page.hbs": {
+      "filePath": "src/jsMain/resources/applications/kingdom/sections/settlements/page.hbs",
+      "contentHash": "1659d2c48aeed3dd400c505856b653e81b05b1398b4c715350b72c7df00866d5",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 185,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/resources/applications/kingdom/sections/trade-agreements/page.hbs": {
+      "filePath": "src/jsMain/resources/applications/kingdom/sections/trade-agreements/page.hbs",
+      "contentHash": "705177113db0fe9497115a4169dca7587a9626b0f928c8a142c104f09926d0fe",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 33,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/resources/applications/kingdom/sections/turn/page.hbs": {
+      "filePath": "src/jsMain/resources/applications/kingdom/sections/turn/page.hbs",
+      "contentHash": "1090dac502c7464c45858456db385a4b61d47534e97736a26859cb663cec0244",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 409,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/resources/applications/kingdom/settlement-size-help.hbs": {
+      "filePath": "src/jsMain/resources/applications/kingdom/settlement-size-help.hbs",
+      "contentHash": "50b9ccf88570cd0947da18991f47fda1cf06eac21d15dd1215db6ad67a4eb157",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 22,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/resources/applications/kingdom/settlement.hbs": {
+      "filePath": "src/jsMain/resources/applications/kingdom/settlement.hbs",
+      "contentHash": "2efef3ae5114497f69fe30a39ef4962f88f8c54b46b2916400bfdeee6d2d47f5",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 218,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/resources/applications/kingdom/structure-browser.hbs": {
+      "filePath": "src/jsMain/resources/applications/kingdom/structure-browser.hbs",
+      "contentHash": "23c1c621fe1abfc1d58bc9452e8c37c19e272551286f4184a7273de6018bcbf3",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 87,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsMain/resources/applications/kingdom/turn-wizard.hbs": {
+      "filePath": "src/jsMain/resources/applications/kingdom/turn-wizard.hbs",
+      "contentHash": "7f1c0a22ba10e3138bd1fa4f842f99f3110cece36df4f3011744f49e914aea76",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 105,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsTest/kotlin/at/posselt/pfrpg2e/kingdom/ActivityCapCalculatorTest.kt": {
+      "filePath": "src/jsTest/kotlin/at/posselt/pfrpg2e/kingdom/ActivityCapCalculatorTest.kt",
+      "contentHash": "3f44d2a7955fdf518896a3cb36e3ad4f980027bf7990ec0902e5e6cc46ea5606",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 121,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsTest/kotlin/at/posselt/pfrpg2e/kingdom/ArmyPressureViewTest.kt": {
+      "filePath": "src/jsTest/kotlin/at/posselt/pfrpg2e/kingdom/ArmyPressureViewTest.kt",
+      "contentHash": "0a9d4808c15d646bbe3ceda41235ba5a912189208f3e5c253cce1de8cdec44a7",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 62,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsTest/kotlin/at/posselt/pfrpg2e/kingdom/ArmyWarPressureTest.kt": {
+      "filePath": "src/jsTest/kotlin/at/posselt/pfrpg2e/kingdom/ArmyWarPressureTest.kt",
+      "contentHash": "ce1140f5db1d2f35aa57e7785edb3a795f1f047935c16d1ca5af224d66d4ec7f",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 119,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsTest/kotlin/at/posselt/pfrpg2e/kingdom/DailyTickEngineTest.kt": {
+      "filePath": "src/jsTest/kotlin/at/posselt/pfrpg2e/kingdom/DailyTickEngineTest.kt",
+      "contentHash": "abcc02a37355fa0a0387ec8286304c3cf37f83c281820718f60fc28173e33de5",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 89,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsTest/kotlin/at/posselt/pfrpg2e/kingdom/ObsidianIntegrationTest.kt": {
+      "filePath": "src/jsTest/kotlin/at/posselt/pfrpg2e/kingdom/ObsidianIntegrationTest.kt",
+      "contentHash": "54654ecc3963f94b44afaaa705c7f792e46f1eae2a4e140c98c4240afc69d373",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 79,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsTest/kotlin/at/posselt/pfrpg2e/kingdom/PacingAlertsTest.kt": {
+      "filePath": "src/jsTest/kotlin/at/posselt/pfrpg2e/kingdom/PacingAlertsTest.kt",
+      "contentHash": "fb42dee6fa784ab36939980f3ce023770d4c10b18a5ad711c75c1e29263bdac9",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 212,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsTest/kotlin/at/posselt/pfrpg2e/kingdom/PacingAlertViewTest.kt": {
+      "filePath": "src/jsTest/kotlin/at/posselt/pfrpg2e/kingdom/PacingAlertViewTest.kt",
+      "contentHash": "5cb7d64e5caa2b5f9985e72bcc519b591e93f96e27aa137fe41025d3e35ead27",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 78,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsTest/kotlin/at/posselt/pfrpg2e/kingdom/settlements/PopulationPersistenceTest.kt": {
+      "filePath": "src/jsTest/kotlin/at/posselt/pfrpg2e/kingdom/settlements/PopulationPersistenceTest.kt",
+      "contentHash": "1ff7f3fdce4c6fcf13ea2302fa7129deb213ca8eb6df59ddeac49c52063c049b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 522,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsTest/kotlin/at/posselt/pfrpg2e/kingdom/structures/HouseRulesDataValidationTest.kt": {
+      "filePath": "src/jsTest/kotlin/at/posselt/pfrpg2e/kingdom/structures/HouseRulesDataValidationTest.kt",
+      "contentHash": "6fe31b8800e41bcd1689c4b3f274fadce790de97124bd031c0809d0abc033e4b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 82,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsTest/kotlin/at/posselt/pfrpg2e/kingdom/TurnTickingEngineTest.kt": {
+      "filePath": "src/jsTest/kotlin/at/posselt/pfrpg2e/kingdom/TurnTickingEngineTest.kt",
+      "contentHash": "abb7556bd77983d5420e0908cde5706184ee137e6659febf17654bcb9ed342a2",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 553,
+      "hasStructuralAnalysis": false
+    },
+    "src/jsTest/kotlin/at/posselt/pfrpg2e/kingdom/TurnWizardApplicationTest.kt": {
+      "filePath": "src/jsTest/kotlin/at/posselt/pfrpg2e/kingdom/TurnWizardApplicationTest.kt",
+      "contentHash": "068e631a2a96578663c10578b67d2e68473c2dc89c3387fd567e111c92e60b1d",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 153,
+      "hasStructuralAnalysis": false
+    }
+  }
+}

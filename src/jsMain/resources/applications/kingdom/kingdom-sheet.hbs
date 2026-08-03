@@ -12,12 +12,21 @@
 
     {{> tabs mainNav}}
 
-    <main class="km-kingdom-sheet-main" style="background-image: url({{sheetBackground}})">
+    <main class="km-kingdom-sheet-main" {{#if sheetBackground}}style="background-image: url({{sheetBackground}})"{{/if}}>
         {{> kingdom-character-sheet this}}
         {{> kingdom-notes this}}
         {{> kingdom-turn this}}
         {{> kingdom-trade-agreements this}}
         {{> kingdom-settlements this}}
         {{> kingdom-modifiers this}}
+        {{> kingdom-quests this}}
+        {{> kingdom-roster this}}
+        {{> kingdom-party this}}
+        {{> kingdom-session-prep this}}
+        {{> kingdom-army-pressure this}}
+        {{> kingdom-pacing-alerts this}}
+        {{> kingdom-analytics this}}
+        {{> kingdom-expeditions this}}
+        {{> kingdom-campaign this}}
     </main>
 </div>

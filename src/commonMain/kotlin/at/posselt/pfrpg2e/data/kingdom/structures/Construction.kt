@@ -73,4 +73,28 @@ data class Construction(
             ore <= existingOre &&
             stone <= existingStone &&
             min(rp, rpPerStructure) <= existingRp
+
+    /**
+     * Returns a multiplier for construction costs based on rough terrain.
+     * Plains/null/unknown: 1.0x (standard cost)
+     * Forest, Swamp, Mountains: 1.5x (harder to build)
+     */
+    fun terrainCostMultiplier(terrain: String?): Double = when (terrain) {
+        "forest", "swamp", "mountains" -> 1.5
+        else -> 1.0
+    }
+
+    /**
+     * Returns a new Construction with costs adjusted by terrain multiplier.
+     * RP is not affected by terrain (only material costs).
+     */
+    fun withTerrainCost(terrain: String?): Construction {
+        val multiplier = terrainCostMultiplier(terrain)
+        return if (multiplier == 1.0) this else copy(
+            lumber = (lumber * multiplier).toInt(),
+            luxuries = (luxuries * multiplier).toInt(),
+            ore = (ore * multiplier).toInt(),
+            stone = (stone * multiplier).toInt(),
+        )
+    }
 }

@@ -36,6 +36,7 @@
   "upgradeFrom": [
     "shrine"
   ],
+  "notes": "structures.temple.notes",
   "construction": {
     "rp": 32,
     "lumber": 6,

@@ -65,7 +65,7 @@ kotlin {
             }
             testTask {
                 useKarma {
-                    useFirefoxHeadless()
+                    useChromeHeadless()
                 }
             }
         }
@@ -130,6 +130,7 @@ tasks {
             "validateHeartlands",
             "validateMilestones",
             "validateKingdomEvents",
+            "validateExpeditionActivities",
         )
     }
 }
@@ -157,6 +158,12 @@ tasks.register<JsonSchemaValidator>("validateCampingActivities") {
     outputs.upToDateWhen { true } // no outputs, only depend on input files
     schema = layout.projectDirectory.file("src/commonMain/resources/schemas/camping-activity.json")
     files = layout.projectDirectory.dir("data/camping-activities")
+}
+
+tasks.register<JsonSchemaValidator>("validateExpeditionActivities") {
+    outputs.upToDateWhen { true } // no outputs, only depend on input files
+    schema = layout.projectDirectory.file("src/commonMain/resources/schemas/expedition-activity.json")
+    files = layout.projectDirectory.dir("data/expedition-activities")
 }
 
 tasks.register<JsonSchemaValidator>("validateFeats") {

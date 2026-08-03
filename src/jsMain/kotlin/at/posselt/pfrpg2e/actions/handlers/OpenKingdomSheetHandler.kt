@@ -19,6 +19,7 @@ class OpenKingdomSheetHandler(
 ) : ActionHandler(
     action = "openKingdomSheet",
     mode = ExecutionMode.OTHERS,
+    originatorPolicy = OriginatorPolicy.GM_ONLY,
 ) {
     override suspend fun execute(action: ActionMessage, dispatcher: ActionDispatcher) {
         val data = action.data.unsafeCast<OpenKingdomSheetAction>()

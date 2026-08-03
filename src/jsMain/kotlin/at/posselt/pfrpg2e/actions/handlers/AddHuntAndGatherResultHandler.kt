@@ -14,6 +14,7 @@ import js.objects.recordOf
 
 class AddHuntAndGatherResultHandler() : ActionHandler(
     action = "addHuntAndGatherResult",
+    originatorPolicy = OriginatorPolicy.ANY,
 ) {
     override suspend fun execute(action: ActionMessage, dispatcher: ActionDispatcher) {
         val result = action.data.unsafeCast<HuntAndGatherData>()

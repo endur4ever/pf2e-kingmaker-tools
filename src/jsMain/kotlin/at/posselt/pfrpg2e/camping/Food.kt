@@ -44,7 +44,7 @@ suspend fun PF2EActor.addConsumableToInventory(uuid: String, quantity: Int) {
             } else {
                 system.quantity = quantity
             }
-            addToInventory(obj, undefined, false)
+            addToInventory(obj, undefined, false).await()
         }
     }
 }
@@ -217,6 +217,32 @@ suspend fun PF2ECharacter.applyConsumptionMealEffects(outcome: CookingOutcome) {
         ?.mapNotNull { effectsByUuid[it.uuid]?.name?.let { name -> MealNameAndEffect(name, it) } }
         ?: emptyList()
     applyMealHealEffects(applicableHealEffects)
+    applyMealActionEffects(outcome)
+}
+
+private fun collectGrantedActions(outcome: CookingOutcome): List<GrantedAction> =
+    outcome.effects
+        ?.flatMap { effect ->
+            listOfNotNull(effect.grantsFreeAction, effect.grantsReaction)
+        }
+        ?: emptyList()
+
+private suspend fun PF2ECharacter.applyMealActionEffects(outcome: CookingOutcome) {
+    val grantedActions = collectGrantedActions(outcome)
+    grantedActions.forEach { action ->
+        val durationText = action.durationSeconds?.let { " (${it}s)" } ?: ""
+        postChatTemplate(
+            templatePath = "chatmessages/granted-action.hbs",
+            templateContext = recordOf(
+                "actorName" to name,
+                "actionName" to action.name,
+                "actionType" to action.type,
+                "actionDescription" to (action.description ?: ""),
+                "durationText" to durationText,
+            ),
+            speaker = this,
+        )
+    }
 }
 
 suspend fun applyConsumptionMealEffects(
@@ -577,4 +603,20 @@ suspend fun CampingData.getTotalCarriedFood(
     actors.map {
         it.getTotalCarriedFood(foodItems = foodItems)
     }.sum()
+}
+
+/** Provisions this actor carries — the tonight-only food stock (wiped every rest per RAW). */
+fun PF2EActor.getCarriedProvisions(foodItems: FoodItems): Int =
+    consumableQuantityByName(foodItems.provisions.name!!)
+
+/**
+ * Provisions carried across camp actors + party. Separated from durable rations for the food
+ * forecast: provisions are wiped every rest ([removeProvisions]) so they only cover tonight.
+ */
+suspend fun CampingData.getTotalProvisions(
+    party: PF2EParty?,
+    foodItems: FoodItems,
+): Int = coroutineScope {
+    val actors = getActorsInCamp() + (party?.let { listOf(it) } ?: emptyList())
+    actors.sumOf { it.getCarriedProvisions(foodItems) }
 }

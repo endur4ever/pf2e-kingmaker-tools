@@ -12,7 +12,7 @@ external interface ResourceContext {
     var next: FormElementContext
 }
 
-fun RawResources.toContext(key: String, label: String) =
+fun RawResources.toContext(key: String, label: String, automate: Boolean = false, projectedValue: Int? = null) =
     ResourceContext(
         now = NumberInput(
             name = "$key.now",
@@ -25,9 +25,10 @@ fun RawResources.toContext(key: String, label: String) =
         next = NumberInput(
             name = "$key.next",
             label = t("kingdom.next"),
-            value = next,
+            value = if (automate && projectedValue != null) projectedValue else next,
             stacked = false,
             elementClasses = listOf("km-width-small", "km-slim-inputs"),
             hideLabel = true,
+            readonly = automate && key == "resourceDice",
         ).toContext(),
     )

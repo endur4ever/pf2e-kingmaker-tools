@@ -31,7 +31,7 @@
                         {{/unless}}</td>
                 </tr>
                 <tr>
-                    <th>{{localizeKM "kingdom.population"}}</th>
+                    <th>{{localizeKM "kingdom.population.title"}}</th>
                     <td>{{population}}</td>
                 </tr>
                 <tr>
@@ -69,6 +69,10 @@
                     <td>{{> formElement waterBordersInput}}</td>
                 </tr>
                 <tr>
+                    <th>{{localizeKM "kingdom.caravans.settlementHex"}}</th>
+                    <td>{{> formElement hexKeyInput}}</td>
+                </tr>
+                <tr>
                     <th>{{localizeKM "kingdom.lacksBridge"}}</th>
                     <td>{{#if lacksBridge}}{{localizeKM "yes"}}{{else}}{{localizeKM "no"}}{{/if}}</td>
                 </tr>
@@ -97,6 +101,45 @@
                 {{/each}}
                 </tbody>
             </table>
+            <div class="km-unlocked-access-section" style="margin-top: 15px;">
+                <h3>{{localizeKM "kingdom.settlementUnlockedAccess"}}</h3>
+                <table class="km-unlocked-access-table">
+                    <tbody>
+                        <tr>
+                            <th>{{localizeKM "kingdom.settlementItemPurchaseLevel"}}</th>
+                            <td>Level {{itemPurchaseLevel}}</td>
+                        </tr>
+                        <tr>
+                            <th>{{localizeKM "kingdom.settlementTrainers"}}</th>
+                            <td>
+                                {{#if trainers.length}}
+                                    <ul>
+                                        {{#each trainers}}
+                                            <li>{{this}}</li>
+                                        {{/each}}
+                                    </ul>
+                                {{else}}
+                                    {{localizeKM "kingdom.settlementNone"}}
+                                {{/if}}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>{{localizeKM "kingdom.settlementCraftingAccess"}}</th>
+                            <td>
+                                {{#if craftingAccess.length}}
+                                    <ul>
+                                        {{#each craftingAccess}}
+                                            <li>{{this}}</li>
+                                        {{/each}}
+                                    </ul>
+                                {{else}}
+                                    {{localizeKM "kingdom.settlementNone"}}
+                                {{/if}}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
         <div {{#unless (eq currentTab 'bonuses')}}hidden{{/unless}}>
             <ul>
@@ -128,6 +171,56 @@
                     <li>{{this}}</li>
                 {{/each}}
             </ul>
+        </div>
+        <div {{#unless (eq currentTab 'population')}}hidden{{/unless}}>
+            <div class="km-population-roster">
+                <div class="km-population-header">
+                    <h3><i class="fa-solid fa-users"></i> {{localizeKM "kingdom.population.title"}}</h3>
+                    <span class="km-header-right-align">
+                        <button type="button" data-action="generate-npcs"
+                                title="{{localizeKM "kingdom.population.generateNpcsHelp"}}">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> {{localizeKM "kingdom.population.generateNpcs"}}
+                        </button>
+                        <button type="button" data-action="add-npc">
+                            <i class="fa-solid fa-plus"></i> {{localizeKM "kingdom.population.addNpc"}}
+                        </button>
+                    </span>
+                </div>
+                {{#if populationNpcs.length}}
+                <table class="km-population-table">
+                    <thead>
+                        <tr>
+                            <th>{{localizeKM "kingdom.population.name"}}</th>
+                            <th>{{localizeKM "kingdom.population.occupation"}}</th>
+                            <th>{{localizeKM "kingdom.population.notes"}}</th>
+                            <th>{{localizeKM "applications.actions"}}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#each populationNpcs}}
+                        <tr>
+                            <td>{{this.name}}</td>
+                            <td>{{this.occupation}}</td>
+                            <td>{{#if this.notes}}{{this.notes}}{{else}}&mdash;{{/if}}</td>
+                            <td class="km-population-actions">
+                                <button type="button" data-action="edit-npc" data-index="{{@index}}" title="{{localizeKM 'applications.edit'}}">
+                                    <i class="fa-solid fa-pencil"></i>
+                                </button>
+                                <button type="button" data-action="delete-npc" data-index="{{@index}}" title="{{localizeKM 'applications.delete'}}">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+                {{else}}
+                <div class="km-empty-population">
+                    <i class="fa-regular fa-folder-open"></i>
+                    <p>{{localizeKM "kingdom.population.empty"}}</p>
+                </div>
+                {{/if}}
+            </div>
         </div>
     </div>
 </div>

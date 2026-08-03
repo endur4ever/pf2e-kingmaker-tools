@@ -10,6 +10,9 @@
                     <td>{{localizeKM "kingdom.atWar"}}</td>
                     <td>{{localizeKM "kingdom.preventPledgeOfFealty"}}</td>
                     <td>{{localizeKM "kingdom.relations"}}</td>
+                    <td>{{localizeKM "kingdom.caravans.partnerHex"}}</td>
+                    <td>{{localizeKM "kingdom.attitude"}}</td>
+                    <td>{{localizeKM "kingdom.treaty"}}</td>
                     <td>{{localizeKM "applications.delete"}}</td>
                 </tr>
                 </thead>
@@ -21,6 +24,24 @@
                         <td>{{> formElement atWar}}</td>
                         <td>{{> formElement preventPledgeOfFealty}}</td>
                         <td>{{> formElement relations}}</td>
+                        <td>{{> formElement hexKey}}</td>
+                        <td>{{attitude}} ({{standing}})
+                            <button type="button" data-action="adjust-standing" data-index="{{@index}}" data-tooltip="{{localizeKM "kingdom.adjustStanding"}}">
+                                <i class="fa-solid fa-scale-balanced"></i>
+                            </button>
+                        </td>
+                        <td>
+                            {{#if allianceLevel}}
+                                {{localizeKM (concat "kingdom.allianceLevel." allianceLevel)}}
+                                {{#if (eq allianceLevel "tribute")}}
+                                    {{#if ../isGM}}
+                                        <button type="button" data-action="annex-group" data-index="{{@index}}" data-tooltip="{{localizeKM "kingdom.annexTooltip"}}">
+                                            <i class="fa-solid fa-crown"></i>
+                                        </button>
+                                    {{/if}}
+                                {{/if}}
+                            {{/if}}
+                        </td>
                         <td><button type="button" data-action="delete-group" data-index="{{@index}}">
                             <i class="fa-solid fa-trash"></i>
                         </button></td>
@@ -28,6 +49,34 @@
                 {{/each}}
                 </tbody>
             </table>
+        </section>
+        <section>
+            <h2>{{localizeKM "kingdom.standingLog"}}</h2>
+            {{#each groups}}
+                {{#if standingLog.length}}
+                    <details>
+                        <summary>{{name.text}}</summary>
+                        <table>
+                            <thead>
+                            <tr>
+                                <td>{{localizeKM "kingdom.turnNumber"}}</td>
+                                <td>{{localizeKM "kingdom.standingDelta"}}</td>
+                                <td>{{localizeKM "kingdom.standingReason"}}</td>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {{#each standingLog}}
+                            <tr>
+                                <td>{{turn}}</td>
+                                <td>{{delta}}</td>
+                                <td>{{localizeKM reason}}</td>
+                            </tr>
+                            {{/each}}
+                            </tbody>
+                        </table>
+                    </details>
+                {{/if}}
+            {{/each}}
         </section>
     </div>
 </div>

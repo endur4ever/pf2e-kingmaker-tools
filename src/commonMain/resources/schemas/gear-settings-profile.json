@@ -1,0 +1,126 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "gear-settings-profile.json",
+  "title": "GearSettingsProfile",
+  "description": "A named configuration of all toggleable pf2e-kingmaker-tools module settings.",
+  "type": "object",
+  "required": ["schemaVersion", "id", "name", "isBuiltin", "createdAt", "updatedAt", "settings"],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "type": "integer",
+      "const": 1,
+      "description": "Schema format version. Increment when fields are added/removed."
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9_-]+$",
+      "maxLength": 64,
+      "description": "Unique profile identifier. Builtin: raw, vance-kerenshara, gregory."
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "description": "Display name shown in settings UI."
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 512,
+      "description": "Longer description for tooltip."
+    },
+    "author": {
+      "type": "string",
+      "maxLength": 128,
+      "description": "Creator name for shared profiles."
+    },
+    "isBuiltin": {
+      "type": "boolean",
+      "description": "true for RAW and V&K (immutable). false for custom."
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 creation timestamp."
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 last modification timestamp."
+    },
+    "settings": {
+      "$ref": "#/definitions/GearSettings"
+    }
+  },
+  "definitions": {
+    "GearSettings": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kingdom": { "$ref": "#/definitions/KingdomSettingsGroup" },
+        "camping": { "$ref": "#/definitions/CampingSettingsGroup" },
+        "hex": { "$ref": "#/definitions/HexSettingsGroup" },
+        "army": { "$ref": "#/definitions/ArmySettingsGroup" },
+        "ui": { "$ref": "#/definitions/UiSettingsGroup" }
+      }
+    },
+    "KingdomSettingsGroup": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "advancement": {
+          "type": "string",
+          "enum": ["xp", "milestone"],
+          "default": "xp"
+        },
+        "ruinThreshold": { "type": "integer", "minimum": 1, "maximum": 20, "default": 10 },
+        "eventDc": { "type": "integer", "minimum": 1, "maximum": 30, "default": 15 },
+        "eventDcStep": { "type": "integer", "minimum": 0, "maximum": 10, "default": 0 },
+        "leadershipActivityCap": { "type": "integer", "minimum": 1, "maximum": 20, "default": 6 },
+        "leadershipActivityCapWithTownhall": { "type": "integer", "minimum": 1, "maximum": 20, "default": 8 },
+        "canUpgradeNonCapital": { "type": "boolean", "default": false },
+        "capitalCanGrowOneSizeLarger": { "type": "boolean", "default": false },
+        "noRandomCombatInClaimedHexes": { "type": "boolean", "default": false },
+        "capStructureBonusAtKingdomLevel": { "type": "boolean", "default": false },
+        "settlementInfluenceRadius": { "type": "integer", "minimum": 0, "maximum": 5, "default": 0 },
+        "cultOfTheBloomEvents": { "type": "boolean", "default": false }
+      }
+    },
+    "CampingSettingsGroup": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "campingActivityCountByPartySize": { "type": "boolean", "default": false },
+        "enableSheltered": { "type": "boolean", "default": false },
+        "enableWeather": { "type": "boolean", "default": true }
+      }
+    },
+    "HexSettingsGroup": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "travelCostRiverNoBridgeAdditional": { "type": "integer", "minimum": 0, "maximum": 5, "default": 0 },
+        "pavedStreetsReduceTravelCost": { "type": "boolean", "default": false },
+        "hexMapEnabled": { "type": "boolean", "default": true }
+      }
+    },
+    "ArmySettingsGroup": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enableCombatTracks": { "type": "boolean", "default": true }
+      }
+    },
+    "UiSettingsGroup": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "hideBuiltinKingdomSheet": { "type": "boolean", "default": false },
+        "enablePartyActorIcons": { "type": "boolean", "default": true },
+        "enableWeatherSoundFx": { "type": "boolean", "default": true },
+        "enableTokenMapping": { "type": "boolean", "default": true },
+        "disableFirstRunMessage": { "type": "boolean", "default": false }
+      }
+    }
+  }
+}

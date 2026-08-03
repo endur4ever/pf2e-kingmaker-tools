@@ -12,7 +12,7 @@
     "currency": "gp",
     "value": 13
   },
-  "rarity": "uncommon",
+  "rarity": "common",
   "favoriteMeal": {
     "effects": [
       {
@@ -33,7 +33,13 @@
     "effects": [
       {
         "uuid": "Compendium.pf2e-kingmaker-tools.kingmaker-tools-meal-effects.Item.Zw8I0G3RqDfNHuCl",
-        "removeWhenPreparingCampsite": false
+        "removeWhenPreparingCampsite": false,
+        "grantsFreeAction": {
+          "type": "freeAction",
+          "name": "recipes.grilled-silver-eel.freeAction.name",
+          "description": "recipes.grilled-silver-eel.freeAction.description",
+          "durationSeconds": 60
+        }
       }
     ]
   },
@@ -41,7 +47,13 @@
     "effects": [
       {
         "uuid": "Compendium.pf2e-kingmaker-tools.kingmaker-tools-meal-effects.Item.ta81jwzhkNsN88EZ",
-        "removeWhenPreparingCampsite": false
+        "removeWhenPreparingCampsite": false,
+        "grantsFreeAction": {
+          "type": "freeAction",
+          "name": "recipes.grilled-silver-eel.freeAction.name",
+          "description": "recipes.grilled-silver-eel.freeAction.description",
+          "durationSeconds": 60
+        }
       }
     ]
   }

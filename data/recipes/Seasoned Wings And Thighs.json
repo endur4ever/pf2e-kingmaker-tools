@@ -12,7 +12,7 @@
     "currency": "gp",
     "value": 100
   },
-  "rarity": "common",
+  "rarity": "uncommon",
   "criticalSuccess": {
     "effects": [
       {
@@ -21,14 +21,24 @@
       },
       {
         "uuid": "Compendium.pf2e-kingmaker-tools.kingmaker-tools-meal-effects.Item.JqKhpMXiQCEsDSCw",
-        "removeWhenPreparingCampsite": false
+        "removeWhenPreparingCampsite": false,
+        "grantsReaction": {
+          "type": "reaction",
+          "name": "recipes.seasoned-wings-and-thighs.reaction.name",
+          "description": "recipes.seasoned-wings-and-thighs.reaction.description"
+        }
       }
     ]
   },
   "success": {
     "effects": [
       {
-        "uuid": "Compendium.pf2e-kingmaker-tools.kingmaker-tools-meal-effects.Item.JqKhpMXiQCEsDSCw"
+        "uuid": "Compendium.pf2e-kingmaker-tools.kingmaker-tools-meal-effects.Item.JqKhpMXiQCEsDSCw",
+        "grantsReaction": {
+          "type": "reaction",
+          "name": "recipes.seasoned-wings-and-thighs.reaction.name",
+          "description": "recipes.seasoned-wings-and-thighs.reaction.description"
+        }
       }
     ]
   },
@@ -47,5 +57,6 @@
         "removeWhenPreparingCampsite": false
       }
     ]
-  }
+  },
+  "requirements": "ability to cast fire spell"
 }

@@ -5,6 +5,14 @@
                 <summary data-id="activity-{{id}}">{{#if order}}{{order}}){{/if}}{{#each actions}}{{#unless @first}}/{{/unless}}<span class="action-glyph">{{this}}</span>{{/each}}<span class="km-detail-label">{{label}}</span>{{#if fortune}}
                     <i title="{{localizeKM "kingdom.fortune"}}" class="fa-solid fa-clover"></i>{{/if}}
                     <div class="km-detail-controls">
+                        <button type="button"
+                                class="km-activity-performed-toggle{{#if performed}} km-active{{/if}}"
+                                data-activity="{{id}}"
+                                data-action="toggle-activity-performed"
+                                aria-pressed="{{#if performed}}true{{else}}false{{/if}}"
+                                title="{{localizeKM "kingdom.markActivityPerformed"}}">
+                            <i class="fa-solid {{#if performed}}fa-square-check{{else}}fa-square{{/if}}"></i>{{#if performedBadge}} <span class="km-activity-performed-count">{{performedBadge}}</span>{{/if}}
+                        </button>
                         {{#if isCollectTaxes}}
                             <button {{#if ../collectTaxesReduceUnrestDisabled}}disabled{{/if}}
                                     type="button"
@@ -15,6 +23,7 @@
                         {{/if}}
                         {{#if hasCheck}}
                         <button {{#if disabled}}disabled{{/if}}
+                                {{#if disabledReason}}title="{{disabledReason}}"{{/if}}
                                 data-activity="{{id}}"
                                 type="button"
                                 class="km-kingdom-activity-check"

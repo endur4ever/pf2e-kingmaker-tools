@@ -1,0 +1,20 @@
+<div class="km-curated-encounter-card">
+  <h3>
+    <i class="{{iconClass}}"></i>
+    {{localizeKM (concat "camping.encounterCategory." category)}}
+  </h3>
+  <div class="km-card-row">
+    <strong>{{localizeKM "camping.encounterCurator"}}:</strong>
+    <span>{{regionName}}</span>
+  </div>
+  <hr/>
+  <div class="km-encounter-result-text">
+    {{{resultText}}}
+  </div>
+  {{#if isRumor}}
+  <div class="km-rumor-callout">
+    <i class="fa-solid fa-scroll"></i>
+    <em>{{localizeKM "camping.encounterRumorHeading"}}</em>
+  </div>
+  {{/if}}
+</div>

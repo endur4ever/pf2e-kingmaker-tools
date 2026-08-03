@@ -1,0 +1,14 @@
+{{!-- Quest Generator panel partial embedded in the Events section --}}
+<section class="km-quest-generator-panel">
+  <h3>
+    <i class="fa-solid fa-scroll"></i>
+    {{localizeKM "kingdom.questGenerator.title"}}
+    <span class="km-quest-generator-count">{{localizeKM "kingdom.questGenerator.activeCount" count=generatedQuestCount}}</span>
+  </h3>
+  {{#if isGM}}
+    <button type="button" data-action="open-quest-generator" class="km-open-generator-btn">
+      <i class="fa-solid fa-wand-magic-sparkles"></i>
+      {{localizeKM "kingdom.questGenerator.open"}}
+    </button>
+  {{/if}}
+</section>

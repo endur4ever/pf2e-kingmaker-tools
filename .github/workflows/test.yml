@@ -19,5 +19,15 @@ jobs:
         with:
           node-version: 24
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Check i18n parity
+        run: python3 scripts/check_i18n_keys.py --all
+
+      - name: Check packs consistency
+        run: python3 scripts/check_packs_consistency.py
+
       - name: Run build
         run: ./gradlew build

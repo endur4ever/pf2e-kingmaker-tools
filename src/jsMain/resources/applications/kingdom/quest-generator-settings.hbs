@@ -1,0 +1,14 @@
+<form>
+  <h2>{{localizeKM "kingdom.questGenerator.settings.title"}}</h2>
+
+  <section class="km-qg-settings-form">
+    {{#each formRows}}
+      {{> formElement this}}
+    {{/each}}
+  </section>
+
+  <footer>
+    <button type="button" data-action="save">{{localizeKM "applications.save"}}</button>
+    <button type="button" data-action="cancel">{{localizeKM "kingdom.questGenerator.cancel"}}</button>
+  </footer>
+</form>

@@ -8,6 +8,8 @@ import at.posselt.pfrpg2e.data.kingdom.KingdomAbilityScores
 import at.posselt.pfrpg2e.data.kingdom.KingdomSkill
 import at.posselt.pfrpg2e.data.kingdom.KingdomSkillRanks
 import at.posselt.pfrpg2e.data.kingdom.RuinValues
+import at.posselt.pfrpg2e.kingdom.data.RawCompanionExpedition
+import at.posselt.pfrpg2e.kingdom.data.RawExpeditionChronicleEntry
 import at.posselt.pfrpg2e.data.kingdom.calculateScore
 import at.posselt.pfrpg2e.data.kingdom.leaders.Leader
 import at.posselt.pfrpg2e.data.kingdom.leaders.LeaderActor
@@ -23,7 +25,19 @@ import at.posselt.pfrpg2e.kingdom.data.ChosenFeature
 import at.posselt.pfrpg2e.kingdom.data.MilestoneChoice
 import at.posselt.pfrpg2e.kingdom.data.RawAbilityBoostChoices
 import at.posselt.pfrpg2e.kingdom.data.RawAbilityScores
+import at.posselt.pfrpg2e.kingdom.data.RawArmyDeployment
+import at.posselt.pfrpg2e.kingdom.data.RawCaravan
+import at.posselt.pfrpg2e.kingdom.data.RawCaravanShipment
+import at.posselt.pfrpg2e.kingdom.data.RawArmyBattle
+import at.posselt.pfrpg2e.kingdom.data.RawPacingAlert
+import at.posselt.pfrpg2e.kingdom.data.RawTurnRecord
+import at.posselt.pfrpg2e.kingdom.data.RawWarPressure
+import at.posselt.pfrpg2e.kingdom.data.RawWarThreat
+import at.posselt.pfrpg2e.kingdom.data.RawHexContent
+import at.posselt.pfrpg2e.kingdom.data.RawQuest
 import at.posselt.pfrpg2e.kingdom.data.RawBonusFeat
+import at.posselt.pfrpg2e.kingdom.data.RawCharacter
+import at.posselt.pfrpg2e.kingdom.data.RawPartyMemberInfluence
 import at.posselt.pfrpg2e.kingdom.data.RawCharterChoices
 import at.posselt.pfrpg2e.kingdom.data.RawConsumption
 import at.posselt.pfrpg2e.kingdom.data.RawCurrentCommodities
@@ -42,6 +56,8 @@ import at.posselt.pfrpg2e.kingdom.data.RawWorkSites
 import at.posselt.pfrpg2e.kingdom.data.RuinThresholdIncreases
 import at.posselt.pfrpg2e.kingdom.data.getBoosts
 import at.posselt.pfrpg2e.kingdom.data.parse
+import at.posselt.pfrpg2e.campaign.CampaignClock
+import at.posselt.pfrpg2e.companion.CompanionPersonalQuest
 import at.posselt.pfrpg2e.kingdom.modifiers.Modifier
 import at.posselt.pfrpg2e.kingdom.modifiers.evaluation.evaluateGlobalBonuses
 import at.posselt.pfrpg2e.kingdom.modifiers.evaluation.includeCapital
@@ -96,6 +112,45 @@ external interface KingdomSettings {
     var partialStructureConstruction: Boolean
     var capStructureBonusAtKingdomLevel: Boolean
     var capitalCanGrowOneSizeLarger: Boolean
+    var enableCouncilMissions: Boolean
+    var autoGainFamePerTurn: Boolean
+
+    // Army & war pressure board (roadmap #12) — nullable for back-compat (read via the
+    // isArmyPressureBoardEnabled()/… helpers in ArmyWarPressure.kt).
+    var enableArmyPressureBoard: Boolean?
+    var autoCalculateWarPressure: Boolean?
+    var showThreatDistance: Boolean?
+    var armyPressureBoardMode: String?
+
+    // Balance & pacing alert thresholds (roadmap #13) — nullable for back-compat.
+    var pacingAlertMinUnrestDelta: Int?
+    var pacingAlertMaxTurnGap: Int?
+    var pacingAlertLevelMismatchRange: Int?
+    var pacingAlertLootImbalanceEnabled: Boolean?
+    // 0 or null = compare against the party's average level; > 0 = a fixed chapter
+    // target level the campaign is expected to be at.
+    var pacingAlertChapterTargetLevel: Int?
+    // Dedicated loot-imbalance tolerance; null falls back to pacingAlertLevelMismatchRange.
+    var pacingAlertLootImbalanceRange: Int?
+
+    // Rough terrain cost multipliers (roadmap #14)
+    var enableRoughTerrainCosts: Boolean?
+
+    // Anarchy activity gating — when enabled, non-essential activities are
+    // disabled in the UI during anarchy with an explanatory tooltip.
+    var enableAnarchyActivityGating: Boolean?
+
+    // Strict phase gating for the Turn Wizard (rules/state machine)
+    var enableStrictPhaseGating: Boolean?
+
+    // Faction & diplomacy relations tracker (roadmap #1 faction standing drift)
+    var factionStandingDriftPerTurn: Int?
+
+    // V&K (Vance & Kerenshara) XP sub-rules — which V&K bonuses to apply
+    var vkCharterExtraSkills: Boolean?
+    var vkHeartlandExtraSkills: Boolean?
+    var vkExtraAbilityBoost: Boolean?
+    var enableCalendarMonthEndTurn: Boolean?
 }
 
 @JsPlainObject
@@ -123,8 +178,29 @@ external interface RawLeaderSkills {
 }
 
 @JsPlainObject
+external interface RawCouncilCooldowns {
+    var audit: Int
+    var scrying: Int
+    var lockdown: Int
+    var feast: Int
+}
+
+/** Persisted per-activity timeout/escalating-DC state; see [ActivityUsage]. */
+@JsPlainObject
+external interface RawActivityBlock {
+    var activityId: String
+    var lockedUntilTurn: Int?
+    var dcBump: Int?
+    var usedThisTurn: Boolean?
+}
+
+@JsPlainObject
 external interface KingdomData {
     var name: String
+    var councilCooldowns: RawCouncilCooldowns?
+    /** Per-activity timeout/escalating-DC usage state (nullable for migration safety). */
+    var activityUsage: Array<RawActivityBlock>?
+    var quests: Array<RawQuest>?
     var atWar: Boolean
     var fame: RawFame
     var level: Int
@@ -142,8 +218,11 @@ external interface KingdomData {
     var commodities: RawCurrentCommodities
     var ruin: RawRuin
     var activeSettlement: String?
+    var hexContents: Array<RawHexContent>?
     var turnsWithoutCultEvent: Int // set via button
     var turnsWithoutEvent: Int // set via button
+    /** Monotonic kingdom turn counter, incremented each End Turn. Nullable for back-compat. */
+    var currentTurn: Int?
     var notes: RawNotes
     var homebrewMilestones: Array<RawMilestone>
     var homebrewActivities: Array<RawActivity>
@@ -173,6 +252,56 @@ external interface KingdomData {
     var abilityScores: RawAbilityScores
     var initialProficiencies: Array<String?>
     var milestones: Array<MilestoneChoice>
+    var companions: Array<RawCharacter>?
+    var structureBlacklist: Array<String>?
+    var campaignClocks: Array<CampaignClock>
+    var questTemplates: Array<dynamic>
+    var campaignQuests: Array<dynamic>
+    var kingdomEventTemplates: Array<dynamic>
+    var campaignKingdomEvents: Array<dynamic>
+    var eventGenerationLogs: Array<dynamic>
+    var questGeneratorSettings: dynamic
+    /** Personal quests tied to individual companions (roadmap #7). */
+    var companionPersonalQuests: Array<CompanionPersonalQuest>?
+    /** Party-member influence keyed by actor UUID. Membership is read live from the party actor. */
+    var partyInfluence: Array<RawPartyMemberInfluence>?
+
+    /** Roadmap #11: quest IDs created by converting curated rumors into quests. Nullable for back-compat. */
+    var rumorGeneratedQuestIds: Array<String>?
+
+    // Army & war pressure board (roadmap #12) — all nullable for back-compat.
+    var warThreats: Array<RawWarThreat>?
+    var armyDeployments: Array<RawArmyDeployment>?
+    var warPressure: RawWarPressure?
+    var activeBattles: Array<RawArmyBattle>?
+
+    /** Balance & pacing alerts (roadmap #13) — advisory alert history, nullable for back-compat. */
+    var pacingAlerts: Array<RawPacingAlert>?
+
+    /** Commodity market / caravan economy — in-transit caravans, nullable for back-compat. */
+    var caravans: Array<RawCaravan>?
+
+    /** Active caravan shipments for equipment/supplies. */
+    var shipments: Array<RawCaravanShipment>?
+
+    /** Per-turn history records (gap analysis item 2) — newest last, nullable for back-compat. */
+    var turnHistory: Array<RawTurnRecord>?
+    /** Pacing tracking: last observed unrest + consecutive turns it hasn't changed. */
+    var pacingLastUnrest: Int?
+    var pacingTurnsSinceUnrestChange: Int?
+    /** Pacing tracking: last reported level-mismatch severity, so it fires only on change. */
+    var pacingLastLevelMismatch: String?
+    /** Pacing tracking: last reported loot-imbalance severity, so it fires only on change. */
+    var pacingLastLootImbalance: String?
+
+    /** Bonus resource dice granted by the GM this turn (e.g. from events). Applied during collection, then reset. */
+    var bonusResourceDice: Int
+
+    /** Active and historical companion expeditions. Null when no expeditions have been dispatched. */
+    var companionExpeditions: Array<RawCompanionExpedition>?
+
+    /** Capped durable chronicle of applied expedition rewards — survives pruneResolvedExpeditions. Newest last, cap ~100. */
+    var expeditionChronicle: Array<RawExpeditionChronicleEntry>?
 }
 
 fun RawLeaderKingdomSkills.hasSkill(leader: Leader, skill: KingdomSkill) =

@@ -1,0 +1,160 @@
+<div {{#if (ne currentNavEntry 'roster')}}hidden{{/if}} class="km-kingdom-sheet-content">
+    <div class="km-kingdom-sheet-sub-content km-roster-board">
+        <section class="km-roster-section">
+            <h2 class="km-roster-header">
+                <span><i class="fa-solid fa-users"></i> {{localizeKM "kingdom.roster.title"}}</span>
+                {{#if isGM}}
+                <span class="km-header-right-align">
+                    <button type="button" class="km-add-companion-btn" data-action="add-companion">
+                        <i class="fa-solid fa-plus"></i> {{localizeKM "kingdom.roster.addCompanion"}}
+                    </button>
+                </span>
+                {{/if}}
+            </h2>
+
+            {{#if rosterContext.items.length}}
+            <div class="km-roster-grid">
+                {{#each rosterContext.items}}
+                <div class="km-roster-card {{#unless this.active}}km-roster-card-inactive{{/unless}} {{#if this.traveling}}km-roster-card-traveling{{/if}}">
+                    {{#if this.img}}
+                    <div class="km-roster-card-img">
+                        <img src="{{this.img}}" alt="{{this.name}}" />
+                    </div>
+                    {{/if}}
+                    <div class="km-roster-card-body">
+                        <div class="km-roster-card-header">
+                            <span class="km-roster-name">{{this.name}}</span>
+                            <span class="km-roster-role-badge {{#if (eq this.role "npc")}}km-roster-role-npc{{else}}km-roster-role-companion{{/if}}">
+                                {{this.roleLabel}}
+                            </span>
+                        </div>
+                        <div class="km-roster-expedition-status-chip km-expedition-status-{{this.expeditionStatus}}" title="{{this.expeditionStatusLabel}}">
+                            {{this.expeditionStatusLabel}}
+                        </div>
+
+                        <div class="km-roster-relationship">
+                            <div class="km-roster-influence" title="{{localizeKM 'kingdom.companion.influence'}}: {{this.influence}}/12">
+                                <div class="km-roster-influence-bar">
+                                    <div class="km-roster-influence-fill" style="width: {{this.influencePercent}}%"></div>
+                                </div>
+                            </div>
+                            <div class="km-roster-xp" title="{{localizeKM 'kingdom.companion.xp'}}: {{this.xp}}/1000 (Lv {{this.level}})">
+                                <div class="km-roster-xp-bar">
+                                    <div class="km-roster-xp-fill" style="width: {{this.xpPercent}}%"></div>
+                                </div>
+                                <span class="km-roster-xp-label">Lv {{this.level}}</span>
+                            </div>
+                            <div class="km-roster-badges">
+                                <span class="km-roster-camp-badge {{#if this.campAvailable}}km-camp-available{{else}}km-camp-unavailable{{/if}}"
+                                      title="{{#if this.campAvailable}}{{localizeKM 'kingdom.companion.inCamp'}}{{else}}{{localizeKM 'kingdom.companion.notInCamp'}}{{/if}}">
+                                    <i class="fa-solid {{#if this.campAvailable}}fa-campground{{else}}fa-person-walking-arrow-right{{/if}}"></i>
+                                </span>
+                                <span class="km-roster-discovery-icon" data-status="{{this.discoveryStatus}}" title="{{this.discoveryStatusLabel}}">
+                                    {{#if (eq this.discoveryStatus "unknown")}}<i class="fa-solid fa-circle-question"></i>{{/if}}
+                                    {{#if (eq this.discoveryStatus "introduced")}}<i class="fa-solid fa-handshake-simple"></i>{{/if}}
+                                    {{#if (eq this.discoveryStatus "established")}}<i class="fa-solid fa-handshake"></i>{{/if}}
+                                    {{#if (eq this.discoveryStatus "trusted")}}<i class="fa-solid fa-heart"></i>{{/if}}
+                                    {{#if (eq this.discoveryStatus "bonded")}}<i class="fa-solid fa-heart-circle-check"></i>{{/if}}
+                                </span>
+                                {{#if this.hasPersonalQuests}}
+                                <span class="km-roster-quest-badge" title="{{localizeKM 'kingdom.companion.personalQuests'}}">
+                                    <i class="fa-solid fa-scroll"></i> {{this.personalQuestCount}}
+                                </span>
+                                {{/if}}
+                                {{#if (eq this.expeditionStatus "onExpedition")}}
+                                <span class="km-roster-expedition-badge" title="{{localizeKM 'kingdom.companion.onExpedition'}}">
+                                    <i class="fa-solid fa-compass"></i>
+                                </span>
+                                {{/if}}
+                                {{#if (eq this.expeditionStatus "unavailable")}}
+                                <span class="km-roster-injured-badge" title="{{localizeKM 'kingdom.companion.injured'}} {{#if this.injuryDaysRemaining}}({{this.injuryDaysRemaining}} {{localizeKM 'kingdom.companion.days'}}){{/if}}">
+                                    <i class="fa-solid fa-bandage"></i>
+                                </span>
+                                {{/if}}
+                            </div>
+                        </div>
+
+                        <div class="km-roster-fields">
+                            <div class="km-roster-field">
+                                <label>{{localizeKM "kingdom.roster.speed"}}</label>
+                                <span>{{this.speed}}</span>
+                            </div>
+                            {{#if this.destinationX}}
+                            <div class="km-roster-field">
+                                <label>{{localizeKM "kingdom.roster.destination"}}</label>
+                                <span>{{this.destinationLabel}}</span>
+                            </div>
+                            {{/if}}
+                            {{#if this.eta}}
+                            <div class="km-roster-field">
+                                <label>{{localizeKM "kingdom.roster.eta"}}</label>
+                                <span>{{this.eta}}</span>
+                            </div>
+                            {{/if}}
+                            <div class="km-roster-field">
+                                <label>{{localizeKM "kingdom.roster.traveling"}}</label>
+                                <span class="km-roster-status {{#if this.traveling}}km-status-on{{else}}km-status-off{{/if}}">
+                                    {{#if this.traveling}}Yes{{else}}No{{/if}}
+                                </span>
+                            </div>
+                            <div class="km-roster-field">
+                                <label>{{localizeKM "kingdom.roster.active"}}</label>
+                                <span class="km-roster-status {{#if this.active}}km-status-on{{else}}km-status-off{{/if}}">
+                                    {{#if this.active}}Yes{{else}}No{{/if}}
+                                </span>
+                            </div>
+                            {{#if this.actorUuid}}
+                            <div class="km-roster-field">
+                                <label>{{localizeKM "kingdom.roster.linkedActor"}}</label>
+                                <span class="km-roster-linked-actor"><i class="fa-solid fa-link"></i> Yes</span>
+                            </div>
+                            {{/if}}
+                        </div>
+
+                        {{#if this.plotHook}}
+                        <div class="km-roster-plot-hook">
+                            <label>{{localizeKM "kingdom.roster.plotHook"}}</label>
+                            <p>{{this.plotHook}}</p>
+                        </div>
+                        {{/if}}
+
+                        {{#unless ../rosterContext.isGM}}
+                        <div class="km-roster-actions">
+                            <button type="button" class="km-roster-action-btn km-profile-btn" data-action="open-companion-profile" data-index="{{@index}}" title="{{localizeKM 'kingdom.companion.openProfile'}}">
+                                <i class="fa-solid fa-address-card"></i> {{localizeKM "kingdom.companion.openProfile"}}
+                            </button>
+                        </div>
+                        {{/unless}}
+
+                        {{#if ../rosterContext.isGM}}
+                        <div class="km-roster-actions">
+                            <button type="button" class="km-roster-action-btn km-profile-btn" data-action="open-companion-profile" data-index="{{@index}}" title="{{localizeKM 'kingdom.companion.openProfile'}}">
+                                <i class="fa-solid fa-address-card"></i> {{localizeKM "kingdom.companion.openProfile"}}
+                            </button>
+                            <button type="button" class="km-roster-action-btn km-edit-btn" data-action="edit-companion" data-index="{{@index}}" title="{{localizeKM 'kingdom.roster.edit'}}">
+                                <i class="fa-solid fa-pen"></i> {{localizeKM "kingdom.roster.edit"}}
+                            </button>
+                            <button type="button" class="km-roster-action-btn km-toggle-btn" data-action="toggle-traveling" data-index="{{@index}}" title="{{localizeKM 'kingdom.roster.traveling'}}">
+                                <i class="fa-solid fa-person-walking"></i>
+                            </button>
+                            <button type="button" class="km-roster-action-btn km-toggle-btn" data-action="toggle-active" data-index="{{@index}}" title="{{localizeKM 'kingdom.roster.active'}}">
+                                <i class="fa-solid fa-power-off"></i>
+                            </button>
+                            <button type="button" class="km-roster-action-btn km-delete-btn" data-action="delete-companion" data-index="{{@index}}" title="{{localizeKM 'kingdom.roster.delete'}}">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                        {{/if}}
+                    </div>
+                </div>
+                {{/each}}
+            </div>
+            {{else}}
+            <div class="km-empty-roster">
+                <i class="fa-regular fa-folder-open"></i>
+                <p>{{localizeKM "kingdom.roster.noCompanions"}}</p>
+            </div>
+            {{/if}}
+        </section>
+    </div>
+</div>

@@ -1,0 +1,41 @@
+<div class="km-encounter-resolution-card">
+  <h3>{{localizeKM "camping.encounterCardTitle"}}</h3>
+  <div class="km-card-row">
+    <strong>{{localizeKM "camping.watchersOnDuty"}}:</strong>
+  </div>
+  <ul class="km-watcher-rolls">
+    {{#each watcherRolls}}
+    <li>{{this.name}}: {{this.rollTotal}} (<b>{{this.degree}}</b>)</li>
+    {{/each}}
+  </ul>
+  <div class="km-card-row">
+    <strong>{{localizeKM "camping.outcome"}}:</strong> <span>{{localizeKM "camping.stealthDc"}} {{stealthDc}} &mdash; <b>{{degree}}</b></span>
+  </div>
+  <hr/>
+  <div class="km-card-row">
+    <strong>{{localizeKM "camping.startDistance"}}:</strong> <span>{{distance}} ft</span>
+  </div>
+  <div class="km-card-row">
+    <strong>{{localizeKM "camping.ambusherState"}}:</strong> <span>{{ambusherState}}</span>
+  </div>
+  {{#if appliedConditions}}
+  <div class="km-card-row">
+    <strong>{{localizeKM "camping.conditionsApplied"}}:</strong> <span>{{appliedConditions}}</span>
+  </div>
+  {{/if}}
+  {{#if defenseContributions.length}}
+  <hr/>
+  <div class="km-card-row">
+    <strong>{{localizeKM "camping.defenseContributions"}}:</strong>
+  </div>
+  <ul class="km-defense-contributions">
+    {{#each defenseContributions}}
+    <li>{{this}}</li>
+    {{/each}}
+  </ul>
+  {{/if}}
+  <hr/>
+  <div class="km-notes">
+    <p>{{{gmNotes}}}</p>
+  </div>
+</div>

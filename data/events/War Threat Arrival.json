@@ -1,0 +1,35 @@
+{
+  "id": "war-threat-arrival",
+  "name": "events.war-threat-arrival.name",
+  "traits": [
+    "continuous",
+    "dangerous"
+  ],
+  "modifier": 2,
+  "description": "events.war-threat-arrival.description",
+  "resolution": "events.war-threat-arrival.resolution",
+  "resolvedOn": [
+    "criticalSuccess",
+    "success"
+  ],
+  "stages": [
+    {
+      "leader": "warden",
+      "skills": [
+        "defense"
+      ],
+      "criticalSuccess": {
+        "msg": "events.war-threat-arrival.stage-0.criticalSuccess.msg"
+      },
+      "success": {
+        "msg": "events.war-threat-arrival.stage-0.success.msg"
+      },
+      "failure": {
+        "msg": "events.war-threat-arrival.stage-0.failure.msg"
+      },
+      "criticalFailure": {
+        "msg": "events.war-threat-arrival.stage-0.criticalFailure.msg"
+      }
+    }
+  ]
+}

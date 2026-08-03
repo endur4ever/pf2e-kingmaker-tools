@@ -4,11 +4,13 @@ import at.posselt.pfrpg2e.data.kingdom.KingdomSkill.*
 import at.posselt.pfrpg2e.kingdom.KingdomData
 import at.posselt.pfrpg2e.kingdom.KingdomSettings
 import at.posselt.pfrpg2e.kingdom.RawLeaderKingdomSkills
+import at.posselt.pfrpg2e.kingdom.RawCouncilCooldowns
 import at.posselt.pfrpg2e.kingdom.RawLeaderSkills
 import at.posselt.pfrpg2e.kingdom.data.RawAbilityBoostChoices
 import at.posselt.pfrpg2e.kingdom.data.RawAbilityScores
 import at.posselt.pfrpg2e.kingdom.data.RawCharterChoices
 import at.posselt.pfrpg2e.kingdom.data.RawCommodities
+import at.posselt.pfrpg2e.kingdom.data.RawCompanionExpedition
 import at.posselt.pfrpg2e.kingdom.data.RawConsumption
 import at.posselt.pfrpg2e.kingdom.data.RawCurrentCommodities
 import at.posselt.pfrpg2e.kingdom.data.RawFame
@@ -22,6 +24,8 @@ import at.posselt.pfrpg2e.kingdom.data.RawRuin
 import at.posselt.pfrpg2e.kingdom.data.RawRuinValues
 import at.posselt.pfrpg2e.kingdom.data.RawSkillRanks
 import at.posselt.pfrpg2e.kingdom.data.RawWorkSite
+import at.posselt.pfrpg2e.kingdom.data.RawQuest
+import at.posselt.pfrpg2e.kingdom.data.RawHexContent
 import at.posselt.pfrpg2e.kingdom.data.RawWorkSites
 import at.posselt.pfrpg2e.kingdom.disabledActivityIds
 import at.posselt.pfrpg2e.kingdom.initialMilestoneChoices
@@ -38,6 +42,7 @@ fun createKingdomDefaults(name: String) =
         unrest = 0,
         resourcePoints = RawResources(now = 0, next = 0),
         resourceDice = RawResources(now = 0, next = 0),
+        bonusResourceDice = 0,
         workSites = RawWorkSites(
             farmlands = RawWorkSite(
                 quantity = 0,
@@ -113,6 +118,11 @@ fun createKingdomDefaults(name: String) =
             ),
             capStructureBonusAtKingdomLevel = false,
             capitalCanGrowOneSizeLarger = false,
+            enableCouncilMissions = false,
+            autoGainFamePerTurn = false,
+            vkCharterExtraSkills = false,
+            vkHeartlandExtraSkills = false,
+            vkExtraAbilityBoost = false,
             leaderSkills = RawLeaderSkills(
                 ruler = arrayOf(
                     "diplomacy",
@@ -236,6 +246,14 @@ fun createKingdomDefaults(name: String) =
             ),
         ),
         activeSettlement = null,
+        hexContents = emptyArray<RawHexContent>(),
+        quests = defaultQuests(),
+        councilCooldowns = RawCouncilCooldowns(
+            audit = 0,
+            scrying = 0,
+            lockdown = 0,
+            feast = 0,
+        ),
         turnsWithoutCultEvent = 0,
         turnsWithoutEvent = 0,
         notes = RawNotes(
@@ -355,4 +373,14 @@ fun createKingdomDefaults(name: String) =
         homebrewKingdomEvents = emptyArray(),
         kingdomEventBlacklist = emptyArray(),
         ongoingEvents = emptyArray(),
+        companions = emptyArray(),
+        companionExpeditions = emptyArray<RawCompanionExpedition>(),
+        structureBlacklist = emptyArray(),
+        campaignClocks = emptyArray(),
+        questTemplates = emptyArray(),
+        campaignQuests = emptyArray(),
+        kingdomEventTemplates = emptyArray(),
+        campaignKingdomEvents = emptyArray(),
+        eventGenerationLogs = emptyArray(),
+        questGeneratorSettings = js("({ defaultVisibilityToPlayers: false, maxActiveGeneratedQuests: 10, autoAdvanceQuestTimersOnTurn: true })"),
     )

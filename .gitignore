@@ -8,6 +8,16 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 /dist
+# LevelDB runtime files that should not be tracked
+packs/**/LOCK
+packs/**/LOG
+packs/**/LOG.old
+packs/**/*.log
+packs/**/lost/
+foundry.zip
+.foundry-creds.env
+
+
 
 ### IntelliJ IDEA ###
 .idea/modules.xml
@@ -20,6 +30,7 @@ build/
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
+
 
 ### Eclipse ###
 .apt_generated
@@ -47,3 +58,15 @@ bin/
 .DS_Store
 .kotlin
 .idea
+
+### Local agent / tooling / scratch (not part of the module) ###
+.claude/
+.gemini/
+graphify-out/
+/.hermes-notebooklm-gap-query.txt
+/CLAUDE.md
+/GEMINI.md
+/build_check.sh
+/test.txt
+/tmp.json
+*.bak

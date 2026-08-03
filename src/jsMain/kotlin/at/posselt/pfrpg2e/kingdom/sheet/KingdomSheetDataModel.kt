@@ -109,6 +109,7 @@ class KingdomSheetDataModel(
                 }
             }
             string("activeSettlement", nullable = true)
+            int("bonusResourceDice")
             schema("notes") {
                 string("gm")
                 string("public")
@@ -256,6 +257,7 @@ class KingdomSheetDataModel(
                     boolean("atWar")
                     boolean("preventPledgeOfFealty")
                     enum<Relations>("relations")
+                    string("hexKey", nullable = true)
                 }
             }
             schema("skillRanks") {
@@ -289,6 +291,44 @@ class KingdomSheetDataModel(
                     boolean("enabled")
                 }
             }
+            array("companions") {
+                schema {
+                    string("name")
+                    string("actorUuid", nullable = true)
+                    int("destinationX", nullable = true, allowNegative = true)
+                    int("destinationY", nullable = true, allowNegative = true)
+                    int("speed")
+                    int("eta", nullable = true, allowNegative = true)
+                    string("plotHook", nullable = true)
+                    boolean("traveling")
+                    boolean("active")
+                    string("role")
+                    string("img", nullable = true)
+                }
+            }
+            array("shipments") {
+                schema {
+                    string("id")
+                    string("itemName")
+                    int("itemQuantity")
+                    int("itemLevel")
+                    string("itemBulk")
+                    double("itemPriceGp")
+                    string("originHexKey")
+                    string("destHexKey")
+                    string("originLabel")
+                    string("destLabel")
+                    string("caravanType")
+                    double("goldCost")
+                    int("etaTurns")
+                    int("turnsRemaining")
+                    stringArray("path")
+                    string("currentHexKey")
+                    string("status")
+                }
+            }
+            string("homebrewProfileName", nullable = true)
+            boolean("homebrewProfileActive")
         }
     }
 }

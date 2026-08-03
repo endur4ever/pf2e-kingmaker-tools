@@ -1,0 +1,195 @@
+package at.posselt.pfrpg2e.kingdom.sheet.contexts
+
+import at.posselt.pfrpg2e.kingdom.data.RawCharacter
+import at.posselt.pfrpg2e.kingdom.data.RawCompanionExpedition
+import at.posselt.pfrpg2e.kingdom.data.RawExpeditionChronicleEntry
+import at.posselt.pfrpg2e.kingdom.data.createRawExpeditionChronicleEntry
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
+
+class ExpeditionsContextTest {
+
+    private fun exp(
+        id: String,
+        status: String = "inProgress",
+        visible: Boolean = false,
+        daysRemaining: Int = 1,
+        totalDays: Int = 4,
+        companionIds: Array<String> = arrayOf("uuid-a"),
+    ): RawCompanionExpedition =
+        js("{ id: id, title: 'T', activityId: 'scout', status: status, daysRemaining: daysRemaining, totalDays: totalDays, dc: 15, tier: 'standard', accruedXp: 0, accruedInfluenceDelta: 0, accruedInjuries: [], factionStandingDelta: 0, companionIds: companionIds, visibleToPlayers: visible, rewardApplied: false, gmNotes: '' }")
+            .unsafeCast<RawCompanionExpedition>()
+
+    @Test
+    fun `toExpeditionsContext hides non-visible rows from players but shows all to the GM`() {
+        val all = arrayOf(exp("e1", visible = false), exp("e2", visible = true))
+        val comps = arrayOf(RawCharacter("Amiri", "uuid-a"))
+
+        val gm = all.toExpeditionsContext(isGM = true, companions = comps)
+        assertEquals(2, gm.items.size)
+        assertTrue(gm.isGM)
+
+        val player = all.toExpeditionsContext(isGM = false, companions = comps)
+        assertEquals(1, player.items.size)
+        assertEquals("e2", player.items[0].id)
+        assertFalse(player.isGM)
+    }
+
+    @Test
+    fun `toExpeditionsContext computes progress percent and companion names`() {
+        val ctx = arrayOf(exp("e1", visible = true, daysRemaining = 1, totalDays = 4))
+            .toExpeditionsContext(isGM = true, companions = arrayOf(RawCharacter("Amiri", "uuid-a")))
+        assertEquals(75, ctx.items[0].progressPercent) // (4 - 1) / 4 = 75%
+        assertEquals("Amiri", ctx.items[0].companionNames)
+        assertTrue(ctx.items[0].isInProgress)
+    }
+
+    @Test
+    fun `activeExpeditionCount counts only in-flight expeditions`() {
+        val es = arrayOf(
+            exp("e1", status = "inProgress"),
+            exp("e2", status = "awaitingResolution"),
+            exp("e3", status = "resolved"),
+            exp("e4", status = "cancelled"),
+        )
+        assertEquals(2, activeExpeditionCount(es))
+        assertEquals(3, MAX_CONCURRENT_EXPEDITIONS)
+    }
+
+    @Test
+    fun `toExpeditionsContext blanks GM-only fields for players`() {
+        val e = js("{ id: 'e1', title: 'T', activityId: 'scout', status: 'awaitingResolution', daysRemaining: 0, totalDays: 4, dc: 18, tier: 'standard', accruedXp: 80, accruedInfluenceDelta: 1, accruedInjuries: ['wounded'], factionStandingDelta: 0, companionIds: ['uuid-a'], visibleToPlayers: true, rewardApplied: false, gmNotes: 'secret plan' }")
+            .unsafeCast<RawCompanionExpedition>()
+        val comps = arrayOf(RawCharacter("Amiri", "uuid-a"))
+
+        val gmRow = arrayOf(e).toExpeditionsContext(isGM = true, companions = comps).items[0]
+        assertEquals(18, gmRow.dc)
+        assertEquals("secret plan", gmRow.gmNotes)
+        assertEquals(1, gmRow.accruedInjuries.size)
+
+        val playerRow = arrayOf(e).toExpeditionsContext(isGM = false, companions = comps).items[0]
+        assertEquals(0, playerRow.dc)              // dc hidden
+        assertEquals("", playerRow.gmNotes)        // GM notes hidden
+        assertEquals(0, playerRow.accruedInjuries.size) // injury slugs hidden
+    }
+
+    @Test
+    fun `pruneResolvedExpeditions keeps active rows and caps terminal ones`() {
+        val es = arrayOf(
+            exp("r1", status = "resolved"),
+            exp("r2", status = "cancelled"),
+            exp("r3", status = "resolved"),
+            exp("a1", status = "inProgress"),
+            exp("a2", status = "awaitingResolution"),
+        )
+        val ids = pruneResolvedExpeditions(es, cap = 2).map { it.id }
+        assertTrue("a1" in ids) // active always kept
+        assertTrue("a2" in ids)
+        assertFalse("r1" in ids) // oldest terminal dropped
+        assertTrue("r2" in ids)  // newest 2 terminal kept
+        assertTrue("r3" in ids)
+        assertEquals(4, ids.size)
+    }
+
+    @Test
+    fun `pruneResolvedExpeditions is a no-op under the cap`() {
+        val es = arrayOf(exp("r1", status = "resolved"), exp("a1", status = "inProgress"))
+        assertEquals(2, pruneResolvedExpeditions(es, cap = 50).size)
+    }
+
+    @Test
+    fun `pruneExpeditionChronicle caps at max entries dropping oldest`() {
+        val entries = (1..105).map { i ->
+            createRawExpeditionChronicleEntry(
+                title = "Exp $i", companionNames = "C", activityId = "scout",
+                outcomeDegree = "success", lootRp = 0, factionStandingDelta = 0,
+                targetFactionName = null, turn = i, appliedAt = "2026-06-15T10:00:00Z"
+            )
+        }.toTypedArray()
+
+        val pruned = pruneExpeditionChronicle(entries, cap = 100)!!
+        assertEquals(100, pruned.size)
+        assertEquals("Exp 6", pruned[0].title) // oldest 5 dropped
+        assertEquals("Exp 105", pruned[99].title) // newest kept
+    }
+
+    @Test
+    fun `pruneExpeditionChronicle no-op under cap`() {
+        val entries = (1..50).map { i ->
+            createRawExpeditionChronicleEntry(
+                title = "Exp $i", companionNames = "C", activityId = "scout",
+                outcomeDegree = "success", lootRp = 0, factionStandingDelta = 0,
+                targetFactionName = null, turn = i, appliedAt = "2026-06-15T10:00:00Z"
+            )
+        }.toTypedArray()
+
+        val pruned = pruneExpeditionChronicle(entries, cap = 100)!!
+        assertEquals(50, pruned.size)
+    }
+
+    @Test
+    fun `pruneExpeditionChronicle null or empty returns null`() {
+        assertNull(pruneExpeditionChronicle(null))
+        assertNull(pruneExpeditionChronicle(emptyArray()))
+    }
+
+    @Test
+    fun `createRawExpeditionChronicleEntry creates valid entry`() {
+        val entry = createRawExpeditionChronicleEntry(
+            title = "Scout the Wilds", companionNames = "Amiri, Valeros", activityId = "scout",
+            outcomeDegree = "criticalSuccess", lootRp = 10, factionStandingDelta = 2,
+            targetFactionName = "Pitax", turn = 5, appliedAt = "2026-06-15T10:00:00Z"
+        )
+        assertEquals("Scout the Wilds", entry.title)
+        assertEquals("Amiri, Valeros", entry.companionNames)
+        assertEquals("scout", entry.activityId)
+        assertEquals("criticalSuccess", entry.outcomeDegree)
+        assertEquals(10, entry.lootRp)
+        assertEquals(2, entry.factionStandingDelta)
+        assertEquals("Pitax", entry.targetFactionName)
+        assertEquals(5, entry.turn)
+        assertEquals("2026-06-15T10:00:00Z", entry.appliedAt)
+    }
+
+    private fun diplomacyExp(delta: Int, rewardApplied: Boolean): RawCompanionExpedition =
+        js("{ id: 'e1', title: 'T', activityId: 'diplomacy', status: 'awaitingResolution', daysRemaining: 0, totalDays: 4, dc: 18, tier: 'standard', accruedXp: 80, accruedInfluenceDelta: 1, accruedInjuries: [], factionStandingDelta: delta, targetFactionName: 'Pitax', companionIds: ['uuid-a'], visibleToPlayers: true, rewardApplied: rewardApplied, gmNotes: '' }")
+            .unsafeCast<RawCompanionExpedition>()
+
+    @Test
+    fun `target faction is public but the pending standing delta is GM-only`() {
+        val comps = arrayOf(RawCharacter("Amiri", "uuid-a"))
+        val e = diplomacyExp(delta = 4, rewardApplied = false)
+
+        val gmRow = arrayOf(e).toExpeditionsContext(isGM = true, companions = comps).items[0]
+        assertEquals("Pitax", gmRow.targetFactionName)
+        assertEquals("+4", gmRow.factionDeltaLabel)
+        assertTrue(gmRow.factionDeltaPositive)
+        assertTrue(gmRow.showFactionDelta) // GM previews the pending delta
+
+        val playerRow = arrayOf(e).toExpeditionsContext(isGM = false, companions = comps).items[0]
+        assertEquals("Pitax", playerRow.targetFactionName) // the target itself is public knowledge
+        assertFalse(playerRow.showFactionDelta) // outcome stays hidden until the GM applies it
+    }
+
+    @Test
+    fun `standing delta becomes player-visible once the reward is applied`() {
+        val comps = arrayOf(RawCharacter("Amiri", "uuid-a"))
+        val e = diplomacyExp(delta = -4, rewardApplied = true)
+
+        val playerRow = arrayOf(e).toExpeditionsContext(isGM = false, companions = comps).items[0]
+        assertTrue(playerRow.showFactionDelta)
+        assertEquals("-4", playerRow.factionDeltaLabel)
+        assertFalse(playerRow.factionDeltaPositive)
+    }
+
+    @Test
+    fun `zero standing delta shows no badge even for the GM`() {
+        val comps = arrayOf(RawCharacter("Amiri", "uuid-a"))
+        val e = diplomacyExp(delta = 0, rewardApplied = true)
+        val gmRow = arrayOf(e).toExpeditionsContext(isGM = true, companions = comps).items[0]
+        assertFalse(gmRow.showFactionDelta)
+    }
+}

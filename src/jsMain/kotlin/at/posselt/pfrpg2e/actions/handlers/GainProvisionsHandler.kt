@@ -18,7 +18,7 @@ external interface GainProvisions {
     val actorUuid: String
 }
 
-class GainProvisionsHandler() : ActionHandler("gainProvisions") {
+class GainProvisionsHandler() : ActionHandler("gainProvisions", originatorPolicy = OriginatorPolicy.ANY) {
     override suspend fun execute(action: ActionMessage, dispatcher: ActionDispatcher) {
         val data = action.data.unsafeCast<GainProvisions>()
         val quantity = data.quantity

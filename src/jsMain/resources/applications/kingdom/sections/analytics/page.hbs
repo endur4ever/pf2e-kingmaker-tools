@@ -1,0 +1,26 @@
+<div {{#if (ne currentNavEntry 'analytics')}}hidden{{/if}} class="km-kingdom-sheet-content">
+    <div class="km-kingdom-sheet-sub-content km-analytics">
+        <header class="km-analytics-header">
+            <h2><i class="fa-solid fa-chart-line"></i> {{localizeKM "kingdom.analytics.title"}}</h2>
+            {{#unless analyticsContext.isGM}}
+            <p class="km-analytics-player-note">{{localizeKM "kingdom.analytics.playerViewNote"}}</p>
+            {{/unless}}
+            <div class="km-analytics-window-selector">
+                <span>{{localizeKM "kingdom.analytics.timeWindow"}}:</span>
+                <button type="button" class="km-window-btn {{#if (eq analyticsContext.windowSize 10)}}active{{/if}}" data-action="change-analytics-window" data-window="10">10 {{localizeKM "kingdom.analytics.turns"}}</button>
+                <button type="button" class="km-window-btn {{#if (eq analyticsContext.windowSize 25)}}active{{/if}}" data-action="change-analytics-window" data-window="25">25 {{localizeKM "kingdom.analytics.turns"}}</button>
+                <button type="button" class="km-window-btn {{#if (eq analyticsContext.windowSize 0)}}active{{/if}}" data-action="change-analytics-window" data-window="0">{{localizeKM "kingdom.analytics.windowAll"}}</button>
+            </div>
+        </header>
+
+        {{#if analyticsContext.hasData}}
+            <div class="km-analytics-grid">
+                {{#each analyticsContext.series}}
+                    {{> kingdom-metric-chart this}}
+                {{/each}}
+            </div>
+        {{else}}
+            <p class="km-analytics-empty"><i class="fa-solid fa-folder-open"></i> {{localizeKM "kingdom.analytics.emptyState"}}</p>
+        {{/if}}
+    </div>
+</div>

@@ -1,0 +1,129 @@
+<div {{#if (ne currentNavEntry 'expeditions')}}hidden{{/if}} class="km-kingdom-sheet-content">
+    <div class="km-kingdom-sheet-sub-content km-expedition-board">
+        <section class="km-expedition-section">
+            <h2 class="km-expedition-header">
+                <span><i class="fa-solid fa-compass"></i> {{localizeKM "kingdom.expeditions.title"}}</span>
+                {{#if isGM}}
+                            <span class="km-header-right-align">
+                                {{#if expeditionsContext.hasAwaitingResolution}}
+                                <button type="button" class="km-resolve-all-expeditions-btn" data-action="resolve-all-expeditions">
+                                    <i class="fa-solid fa-check-double"></i> {{localizeKM "kingdom.expeditions.resolveAll"}}
+                                </button>
+                                {{/if}}
+                                {{#if expeditionsContext.hasInProgress}}
+                                <button type="button" class="km-resolve-all-expeditions-btn" data-action="resolve-all-expeditions">
+                                    <i class="fa-solid fa-check-double"></i> {{localizeKM "kingdom.expeditions.resolveAll"}}
+                                </button>
+                                {{/if}}
+                                <button type="button" class="km-add-expedition-btn" data-action="add-expedition">
+                                    <i class="fa-solid fa-plus"></i> {{localizeKM "kingdom.expeditions.addExpedition"}}
+                                </button>
+                            </span>
+                            {{/if}}
+            </h2>
+
+            {{#if expeditionsContext.hasExpeditions}}
+            <div class="km-expedition-grid">
+                {{#each expeditionsContext.items}}
+                <div class="km-expedition-card {{#if this.isResolved}}km-expedition-card-resolved{{/if}} {{#if this.isAwaitingResolution}}km-expedition-card-awaiting{{/if}}">
+                    <div class="km-expedition-card-header">
+                        <span class="km-expedition-title">{{this.title}}</span>
+                        <span class="km-expedition-tier-badge km-expedition-tier-{{this.tier}}">
+                            {{this.tierLabel}}
+                        </span>
+                    </div>
+
+                    <div class="km-expedition-card-body">
+                        <div class="km-expedition-field">
+                            <label>{{localizeKM "kingdom.expeditions.companions"}}</label>
+                            <span>{{this.companionNames}}</span>
+                        </div>
+
+                        {{#if this.destinationLabel}}
+                        <div class="km-expedition-field">
+                            <label>{{localizeKM "kingdom.expeditions.destination"}}</label>
+                            <span><i class="fa-solid fa-location-dot"></i> {{this.destinationLabel}}</span>
+                        </div>
+                        {{/if}}
+
+                        {{#if this.targetFactionName}}
+                        <div class="km-expedition-field">
+                            <label>{{localizeKM "kingdom.expeditions.targetFaction"}}</label>
+                            <span class="km-expedition-faction-chip" title="{{localizeKM 'kingdom.expeditions.targetFactionHint'}}">
+                                <i class="fa-solid fa-handshake"></i> {{this.targetFactionName}}
+                                {{#if this.showFactionDelta}}
+                                <span class="km-expedition-standing-delta {{#if this.factionDeltaPositive}}km-standing-up{{else}}km-standing-down{{/if}}"
+                                      title="{{localizeKM 'kingdom.expeditions.standingDelta'}}">{{this.factionDeltaLabel}}</span>
+                                {{/if}}
+                            </span>
+                        </div>
+                        {{/if}}
+
+                        {{#if this.isInProgress}}
+                        <div class="km-expedition-progress">
+                            <div class="km-expedition-progress-bar">
+                                <div class="km-expedition-progress-fill" style="width: {{this.progressPercent}}%"></div>
+                            </div>
+                            <span class="km-expedition-days">
+                                {{this.daysRemaining}} {{localizeKM "kingdom.expeditions.daysRemaining"}}
+                            </span>
+                        </div>
+                        {{/if}}
+
+                        {{#if this.isAwaitingResolution}}
+                        <div class="km-expedition-outcome">
+                            <span class="km-expedition-outcome-label">{{localizeKM "kingdom.expeditions.resolution"}}:</span>
+                            <span class="km-expedition-outcome-degree km-outcome-{{this.outcomeDegree}}">
+                                {{#if (eq this.outcomeDegree "criticalSuccess")}}{{localizeKM "degreeOfSuccess.criticalSuccess"}}{{/if}}
+                                {{#if (eq this.outcomeDegree "success")}}{{localizeKM "degreeOfSuccess.success"}}{{/if}}
+                                {{#if (eq this.outcomeDegree "failure")}}{{localizeKM "degreeOfSuccess.failure"}}{{/if}}
+                                {{#if (eq this.outcomeDegree "criticalFailure")}}{{localizeKM "degreeOfSuccess.criticalFailure"}}{{/if}}
+                            </span>
+                        </div>
+                        {{/if}}
+
+                        {{#if this.isResolved}}
+                        <div class="km-expedition-summary">
+                            {{#if this.accruedXp}}
+                            <span class="km-expedition-xp">{{localizeKM "kingdom.expeditions.xp"}}: +{{this.accruedXp}}</span>
+                            {{/if}}
+                            {{#if this.accruedInfluenceDelta}}
+                            <span class="km-expedition-influence">{{localizeKM "kingdom.expeditions.influence"}}: {{this.accruedInfluenceDelta}}</span>
+                            {{/if}}
+                            {{#if this.lootTier}}
+                            <span class="km-expedition-loot km-loot-{{this.lootTier}}">{{localizeKM "kingdom.expeditions.loot"}}: {{this.lootTier}}</span>
+                            {{/if}}
+                        </div>
+                        {{/if}}
+
+                        {{#if this.gmNotes}}
+                        <div class="km-expedition-notes">{{this.gmNotes}}</div>
+                        {{/if}}
+                    </div>
+
+                    {{#if ../isGM}}
+                    <div class="km-expedition-card-actions">
+                        {{#if this.isInProgress}}
+                        <button type="button" class="km-expedition-action-btn" data-action="cancel-expedition" data-expedition-id="{{this.id}}">
+                            <i class="fa-solid fa-ban"></i> {{localizeKM "kingdom.expeditions.cancel"}}
+                        </button>
+                        {{/if}}
+                        {{#if this.isAwaitingResolution}}
+                        <button type="button" class="km-expedition-action-btn km-expedition-resolve-btn" data-action="resolve-expedition" data-expedition-id="{{this.id}}">
+                            <i class="fa-solid fa-check"></i> {{localizeKM "kingdom.expeditions.resolve"}}
+                        </button>
+                        {{/if}}
+                    </div>
+                    {{/if}}
+                </div>
+                {{/each}}
+            </div>
+            {{else}}
+            <div class="km-expedition-empty">
+                <i class="fa-solid fa-compass"></i>
+                <p>{{localizeKM "kingdom.expeditions.noExpeditions"}}</p>
+            </div>
+            {{/if}}
+        </section>
+    </div>
+</div>

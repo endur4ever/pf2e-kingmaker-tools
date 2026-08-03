@@ -1,0 +1,267 @@
+package at.posselt.pfrpg2e.kingdom
+
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
+
+class SessionPrepNarrativeGeneratorTest {
+
+    private fun entry(
+        id: String,
+        name: String,
+        detail: String = "",
+        turnsRemaining: Int? = null,
+    ) = SessionPrepEntry(
+        id = id,
+        name = name,
+        detail = detail,
+        turnsRemaining = turnsRemaining,
+    )
+
+    private fun view(
+        openQuests: List<SessionPrepEntry> = emptyList(),
+        activeClocks: List<SessionPrepEntry> = emptyList(),
+        unresolvedEvents: List<SessionPrepEntry> = emptyList(),
+        hexHooks: List<SessionPrepEntry> = emptyList(),
+        companionMoments: List<SessionPrepEntry> = emptyList(),
+        companionExpeditions: List<SessionPrepEntry> = emptyList(),
+        recentTurns: List<TurnRecentEntry> = emptyList(),
+        isGM: Boolean = true,
+    ) = SessionPrepView(
+        openQuests = openQuests,
+        activeClocks = activeClocks,
+        unresolvedEvents = unresolvedEvents,
+        hexHooks = hexHooks,
+        companionMoments = companionMoments,
+        companionExpeditions = companionExpeditions,
+        recentTurns = recentTurns,
+        isGM = isGM,
+    )
+
+    @Test
+    fun emptyViewReturnsEmptyString() {
+        val result = SessionPrepNarrativeGenerator.generate(view())
+        assertEquals("", result)
+    }
+
+    @Test
+    fun emptyViewPlainTextReturnsEmptyString() {
+        val result = SessionPrepNarrativeGenerator.generatePlainText(view())
+        assertEquals("", result)
+    }
+
+    @Test
+    fun escapesMarkupInWorldStrings() {
+        // World data (quest/companion names) may contain markup; it must be HTML-escaped so it
+        // cannot inject into the dialog/journal HTML the narrative is rendered into.
+        val v = view(
+            openQuests = listOf(entry("q1", "Tom & <script>alert(1)</script> Crown")),
+        )
+        val html = SessionPrepNarrativeGenerator.generate(v)
+        assertTrue(html.contains("Tom &amp; &lt;script&gt;alert(1)&lt;/script&gt; Crown"))
+        assertFalse(html.contains("<script>"))
+    }
+
+    @Test
+    fun openQuestsOnlyGeneratesQuestSection() {
+        val v = view(
+            openQuests = listOf(entry("q1", "Recover the Crown", detail = "Oleg")),
+        )
+        val html = SessionPrepNarrativeGenerator.generate(v)
+        assertTrue(html.contains("<h2>Open Quests</h2>"))
+        assertTrue(html.contains("Recover the Crown"))
+        assertTrue(html.contains("The kingdom is currently dealing with the following open quests"))
+        assertFalse(html.contains("Active Campaign Clocks"))
+        assertFalse(html.contains("Unresolved Kingdom Events"))
+        assertFalse(html.contains("Hex Content Hooks"))
+        assertFalse(html.contains("Companion Moments"))
+    }
+
+    @Test
+    fun gmSeesAllSections() {
+        val v = view(
+            openQuests = listOf(entry("q1", "Quest A")),
+            activeClocks = listOf(entry("c1", "Rising Tension", turnsRemaining = 3)),
+            unresolvedEvents = listOf(entry("e1", "Bandit Raid")),
+            hexHooks = listOf(entry("h1", "Old Ruins", detail = "3,4")),
+            companionMoments = listOf(entry("m1", "Amiri's Quest", detail = "Amiri", turnsRemaining = 2)),
+        )
+        val html = SessionPrepNarrativeGenerator.generate(v)
+        assertTrue(html.contains("<h2>Open Quests</h2>"))
+        assertTrue(html.contains("<h2>Active Campaign Clocks</h2>"))
+        assertTrue(html.contains("<h2>Unresolved Kingdom Events</h2>"))
+        assertTrue(html.contains("<h2>Hex Content Hooks</h2>"))
+        assertTrue(html.contains("<h2>Companion Moments</h2>"))
+        assertTrue(html.contains("3 turns remaining"))
+        assertTrue(html.contains("3,4"))
+        assertTrue(html.contains("[Amiri]"))
+    }
+
+    @Test
+    fun playerDoesNotSeeGmOnlySections() {
+        val v = view(
+            openQuests = listOf(entry("q1", "Quest A")),
+            activeClocks = listOf(entry("c1", "Clock A", turnsRemaining = 1)),
+            unresolvedEvents = listOf(entry("e1", "Event A")),
+            hexHooks = listOf(entry("h1", "Hex A")),
+            companionMoments = listOf(entry("m1", "Companion A")),
+            isGM = false,
+        )
+        val html = SessionPrepNarrativeGenerator.generate(v)
+        assertTrue(html.contains("<h2>Open Quests</h2>"))
+        assertFalse(html.contains("Active Campaign Clocks"))
+        assertFalse(html.contains("Unresolved Kingdom Events"))
+        assertTrue(html.contains("<h2>Hex Content Hooks</h2>"))
+        assertTrue(html.contains("<h2>Companion Moments</h2>"))
+    }
+
+    @Test
+    fun multipleQuestsAreJoined() {
+        val v = view(
+            openQuests = listOf(
+                entry("q1", "Quest A"),
+                entry("q2", "Quest B"),
+                entry("q3", "Quest C"),
+            ),
+        )
+        val html = SessionPrepNarrativeGenerator.generate(v)
+        assertTrue(html.contains("Quest A, Quest B, Quest C"))
+    }
+
+    @Test
+    fun clockWithoutTurnsRemainingOmitsTurnsText() {
+        val v = view(
+            activeClocks = listOf(entry("c1", "Slow Burn")),
+        )
+        val html = SessionPrepNarrativeGenerator.generate(v)
+        assertTrue(html.contains("Slow Burn"))
+        assertFalse(html.contains("turns remaining"))
+    }
+
+    @Test
+    fun plainTextOutputContainsAllSections() {
+        val v = view(
+            openQuests = listOf(entry("q1", "Quest A")),
+            activeClocks = listOf(entry("c1", "Clock A", turnsRemaining = 2)),
+            unresolvedEvents = listOf(entry("e1", "Event A")),
+            hexHooks = listOf(entry("h1", "Hex A", detail = "5,6")),
+            companionMoments = listOf(entry("m1", "Companion A", detail = "Amiri", turnsRemaining = 1)),
+        )
+        val text = SessionPrepNarrativeGenerator.generatePlainText(v)
+        assertTrue(text.contains("**Session Prep Recap**"))
+        assertTrue(text.contains("**Open Quests**"))
+        assertTrue(text.contains("- Quest A"))
+        assertTrue(text.contains("**Active Campaign Clocks**"))
+        assertTrue(text.contains("- Clock A (2 turns remaining)"))
+        assertTrue(text.contains("**Unresolved Kingdom Events**"))
+        assertTrue(text.contains("- Event A"))
+        assertTrue(text.contains("**Hex Content Hooks**"))
+        assertTrue(text.contains("- Hex A at 5,6"))
+        assertTrue(text.contains("**Companion Moments**"))
+        assertTrue(text.contains("- Companion A (1 turns remaining) [Amiri]"))
+    }
+
+    @Test
+    fun htmlContainsSessionPrepRecapHeader() {
+        val v = view(openQuests = listOf(entry("q1", "Quest A")))
+        val html = SessionPrepNarrativeGenerator.generate(v)
+        assertTrue(html.contains("Session Prep Recap"))
+    }
+
+    @Test
+    fun hexHookWithoutDetailOmitsLocation() {
+        val v = view(hexHooks = listOf(entry("h1", "Mysterious Cave")))
+        val html = SessionPrepNarrativeGenerator.generate(v)
+        assertTrue(html.contains("Mysterious Cave"))
+        assertFalse(html.contains("at "))
+    }
+
+    @Test
+    fun companionMomentWithoutDetailOmitsBrackets() {
+        val v = view(companionMoments = listOf(entry("m1", "Personal Moment")))
+        val html = SessionPrepNarrativeGenerator.generate(v)
+        assertTrue(html.contains("Personal Moment"))
+        assertFalse(html.contains("["))
+    }
+
+    private fun expeditionEntry(
+        id: String,
+        name: String,
+        status: String,
+        companionNames: String = "",
+        turnsRemaining: Int? = null,
+        outcomeDegree: String? = null,
+        willLevelUp: Boolean = false,
+        completesQuest: Boolean = false,
+    ) = SessionPrepEntry(
+        id = id,
+        name = name,
+        status = status,
+        companionNames = companionNames,
+        turnsRemaining = turnsRemaining,
+        outcomeDegree = outcomeDegree,
+        willLevelUp = willLevelUp,
+        completesQuest = completesQuest,
+    )
+
+    @Test
+    fun companionExpeditionsInProgressFormattedCorrectly() {
+        val v = view(
+            companionExpeditions = listOf(
+                expeditionEntry(
+                    id = "exp1",
+                    name = "Scouting the Hills",
+                    status = "inProgress",
+                    companionNames = "Amiri, Valeros",
+                    turnsRemaining = 3
+                )
+            )
+        )
+
+        val html = SessionPrepNarrativeGenerator.generate(v)
+        assertTrue(html.contains("<h2>Companion Expeditions</h2>"))
+        assertTrue(html.contains("Companions currently away on expeditions: Amiri, Valeros on Scouting the Hills (3 days remaining)."))
+
+        val plainText = SessionPrepNarrativeGenerator.generatePlainText(v)
+        assertTrue(plainText.contains("**Companion Expeditions**"))
+        assertTrue(plainText.contains("Away on expeditions:"))
+        assertTrue(plainText.contains("- Amiri, Valeros on Scouting the Hills (3 days remaining)"))
+    }
+
+    @Test
+    fun companionExpeditionsAwaitingResolutionFormattedCorrectly() {
+        val v = view(
+            companionExpeditions = listOf(
+                expeditionEntry(
+                    id = "exp1",
+                    name = "Diplomatic Mission",
+                    status = "awaitingResolution",
+                    companionNames = "Ezren",
+                    outcomeDegree = "success",
+                    willLevelUp = true,
+                    completesQuest = true
+                ),
+                expeditionEntry(
+                    id = "exp2",
+                    name = "Dangerous Ruin Expedition",
+                    status = "awaitingResolution",
+                    companionNames = "Harrim",
+                    outcomeDegree = "criticalFailure",
+                    willLevelUp = false,
+                    completesQuest = false
+                )
+            )
+        )
+
+        val html = SessionPrepNarrativeGenerator.generate(v)
+        assertTrue(html.contains("<h2>Companion Expeditions</h2>"))
+        assertTrue(html.contains("<strong>Ezren</strong>: Diplomatic Mission — Success (completed personal quest, ready to level up)"))
+        assertTrue(html.contains("<strong>Harrim</strong>: Dangerous Ruin Expedition — Critical Failure (complication arose)"))
+
+        val plainText = SessionPrepNarrativeGenerator.generatePlainText(v)
+        assertTrue(plainText.contains("Completed expeditions awaiting resolution:"))
+        assertTrue(plainText.contains("- Ezren: Diplomatic Mission — Success (completed personal quest, ready to level up)"))
+        assertTrue(plainText.contains("- Harrim: Dangerous Ruin Expedition — Critical Failure (complication arose)"))
+    }
+}

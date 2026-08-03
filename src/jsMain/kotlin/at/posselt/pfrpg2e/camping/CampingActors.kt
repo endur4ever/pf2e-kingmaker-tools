@@ -33,6 +33,9 @@ private val allowedCampingActorTypes = arrayOf(
 )
 private val allowedCampingActivityActorTypes: Array<KClass<out PF2EActor>> = arrayOf(
     PF2ECharacter::class,
+    // Allow NPC actors (e.g. homebrew NPC companions added to the camp) to perform activities,
+    // not just player characters — otherwise they can be added to camp but never assigned.
+    PF2ENpc::class,
 )
 val allowedDnDItems = arrayOf(
     PF2EAction::class,

@@ -30,6 +30,19 @@ external interface CollectResources {
     val luxuries: Int
 }
 
+/**
+ * The automated resource gain for the following turn, including whether storage reduced any
+ * commodity gain. [income] remains a delta: it is added to the current commodity totals at the
+ * end of the turn.
+ */
+data class ProjectedResources(
+    val income: Income,
+    val oreCappedByStorage: Boolean,
+    val stoneCappedByStorage: Boolean,
+    val lumberCappedByStorage: Boolean,
+    val luxuriesCappedByStorage: Boolean,
+)
+
 suspend fun collectResources(
     kingdomData: KingdomData,
     realmData: RealmData,
@@ -38,6 +51,7 @@ suspend fun collectResources(
     settlements: List<Settlement>,
     expressionContext: ExpressionContext,
     modifiers: List<Modifier>,
+    suppressChat: Boolean = false,
 ): Income {
     val income = calculateIncome(
         realmData = realmData,
@@ -47,17 +61,19 @@ suspend fun collectResources(
     val ore = calculateModifierResource(modifiers, expressionContext, ModifierSelector.ORE)
     val stone = calculateModifierResource(modifiers, expressionContext, ModifierSelector.STONE)
     val lumber = calculateModifierResource(modifiers, expressionContext, ModifierSelector.LUMBER)
-    val rolledRp = roll(income.resourcePointsFormula, flavor = t("kingdom.gainingResourcePoints"))
-    postChatTemplate(
-        templatePath = "chatmessages/collect-resources.hbs",
-        templateContext = CollectResources(
-            rp = rolledRp,
-            ore = income.ore + ore,
-            stone = income.stone + stone,
-            lumber = income.lumber + lumber,
-            luxuries = income.luxuries,
-        ),
-    )
+    val rolledRp = roll(income.resourcePointsFormula, flavor = t("kingdom.gainingResourcePoints"), toChat = !suppressChat)
+    if (!suppressChat) {
+        postChatTemplate(
+            templatePath = "chatmessages/collect-resources.hbs",
+            templateContext = CollectResources(
+                rp = rolledRp,
+                ore = income.ore + ore,
+                stone = income.stone + stone,
+                lumber = income.lumber + lumber,
+                luxuries = income.luxuries,
+            ),
+        )
+    }
     return income
         .copy(
             resourcePoints = income.resourcePoints + rolledRp + kingdomData.resourcePoints.now,
@@ -80,10 +96,14 @@ fun KingdomData.getResourceDiceAmount(
     allFeats: List<ChosenFeat>,
     settlements: List<Settlement>,
     kingdomLevel: Int,
+    // The dice you currently hold are rolled and spent during Collect Resources, so a *next-turn*
+    // projection must not fold them in — otherwise the carried-over value compounds each turn.
+    includeCurrent: Boolean = true,
 ) = 4 +
         kingdomLevel +
         allFeats.sumOf { it.feat.resourceDice ?: 0 } +
-        resourceDice.now +
+        (if (includeCurrent) resourceDice.now else 0) +
+        bonusResourceDice +
         if (settings.settlementsGenerateRd) {
             settlements.sumOf {
                 when (it.size.type) {
@@ -96,3 +116,54 @@ fun KingdomData.getResourceDiceAmount(
         } else {
             0
         }
+
+fun calculateProjectedResources(
+    kingdomData: KingdomData,
+    realmData: RealmData,
+    chosenFeats: List<ChosenFeat>,
+    settlements: List<Settlement>,
+    expressionContext: ExpressionContext,
+    modifiers: List<Modifier>,
+): ProjectedResources {
+    val resourceDice = kingdomData.getResourceDiceAmount(
+        chosenFeats,
+        settlements,
+        kingdomLevel = kingdomData.level,
+        includeCurrent = false,
+    )
+    val increaseGainedLuxuries = chosenFeats.sumOf { it.feat.increaseGainedLuxuriesOncePerTurnBy ?: 0 }
+    val baseIncome = calculateIncome(
+        realmData = realmData,
+        resourceDice = resourceDice,
+        increaseGainedLuxuries = increaseGainedLuxuries,
+    )
+    val ore = calculateModifierResource(modifiers, expressionContext, ModifierSelector.ORE)
+    val stone = calculateModifierResource(modifiers, expressionContext, ModifierSelector.STONE)
+    val lumber = calculateModifierResource(modifiers, expressionContext, ModifierSelector.LUMBER)
+    val uncappedIncome = baseIncome.copy(
+        ore = baseIncome.ore + ore,
+        stone = baseIncome.stone + stone,
+        lumber = baseIncome.lumber + lumber,
+    )
+    val currentCommodities = kingdomData.commodities.now
+    val cappedTotals = uncappedIncome.copy(
+        ore = uncappedIncome.ore + currentCommodities.ore,
+        stone = uncappedIncome.stone + currentCommodities.stone,
+        lumber = uncappedIncome.lumber + currentCommodities.lumber,
+        luxuries = uncappedIncome.luxuries + currentCommodities.luxuries,
+    ).limitBy(calculateStorage(realmData, settlements))
+    val cappedIncome = uncappedIncome.copy(
+        ore = cappedTotals.ore - currentCommodities.ore,
+        stone = cappedTotals.stone - currentCommodities.stone,
+        lumber = cappedTotals.lumber - currentCommodities.lumber,
+        luxuries = cappedTotals.luxuries - currentCommodities.luxuries,
+    )
+
+    return ProjectedResources(
+        income = cappedIncome,
+        oreCappedByStorage = cappedIncome.ore != uncappedIncome.ore,
+        stoneCappedByStorage = cappedIncome.stone != uncappedIncome.stone,
+        lumberCappedByStorage = cappedIncome.lumber != uncappedIncome.lumber,
+        luxuriesCappedByStorage = cappedIncome.luxuries != uncappedIncome.luxuries,
+    )
+}

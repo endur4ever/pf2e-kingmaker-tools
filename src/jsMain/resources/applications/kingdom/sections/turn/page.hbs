@@ -74,6 +74,12 @@
                 <td>{{> formElement resourcePointsContext.next }}</td>
             </tr>
         </table>
+        {{#if isGM}}
+            <div class="km-bonus-resource-dice">
+                <label>{{localizeKM "kingdom.bonusResourceDice"}}</label>
+                {{> formElement bonusResourceDiceInput }}
+            </div>
+        {{/if}}
         <h3>{{localizeKM "kingdom.commodities"}}</h3>
         <table class="km-unrest-ruin">
             <tr>
@@ -93,30 +99,127 @@
                 <td>{{> formElement commoditiesContext.now.lumber }}</td>
                 <td>/</td>
                 <td class="km-capacity">{{ commoditiesContext.capacity.lumber }}</td>
-                <td>{{> formElement commoditiesContext.next.lumber }}</td>
+                <td>
+                    {{> formElement commoditiesContext.next.lumber }}
+                    {{#if commoditiesContext.cappedByStorage.lumber}}
+                        <i class="fa-solid fa-boxes-stacked km-storage-cap-hint" title="{{localizeKM "kingdom.turn.cappedByStorage"}}"></i>
+                    {{/if}}
+                </td>
             </tr>
             <tr>
                 <td>{{> formElement commoditiesContext.now.stone }}</td>
                 <td>/</td>
                 <td class="km-capacity">{{ commoditiesContext.capacity.stone }}</td>
-                <td>{{> formElement commoditiesContext.next.stone }}</td>
+                <td>
+                    {{> formElement commoditiesContext.next.stone }}
+                    {{#if commoditiesContext.cappedByStorage.stone}}
+                        <i class="fa-solid fa-boxes-stacked km-storage-cap-hint" title="{{localizeKM "kingdom.turn.cappedByStorage"}}"></i>
+                    {{/if}}
+                </td>
             </tr>
             <tr>
                 <td>{{> formElement commoditiesContext.now.ore }}</td>
                 <td>/</td>
                 <td class="km-capacity">{{ commoditiesContext.capacity.ore }}</td>
-                <td>{{> formElement commoditiesContext.next.ore }}</td>
+                <td>
+                    {{> formElement commoditiesContext.next.ore }}
+                    {{#if commoditiesContext.cappedByStorage.ore}}
+                        <i class="fa-solid fa-boxes-stacked km-storage-cap-hint" title="{{localizeKM "kingdom.turn.cappedByStorage"}}"></i>
+                    {{/if}}
+                </td>
             </tr>
             <tr>
                 <td>{{> formElement commoditiesContext.now.luxuries }}</td>
                 <td>/</td>
                 <td class="km-capacity">{{ commoditiesContext.capacity.luxuries }}</td>
-                <td>{{> formElement commoditiesContext.next.luxuries }}</td>
+                <td>
+                    {{> formElement commoditiesContext.next.luxuries }}
+                    {{#if commoditiesContext.cappedByStorage.luxuries}}
+                        <i class="fa-solid fa-boxes-stacked km-storage-cap-hint" title="{{localizeKM "kingdom.turn.cappedByStorage"}}"></i>
+                    {{/if}}
+                </td>
             </tr>
         </table>
         <h3>{{localizeKM "kingdom.solutions"}}</h3>
         {{> formElement supernaturalSolutionsInput }}
         {{> formElement creativeSolutionsInput }}
+        {{#if enableCouncilMissions}}
+            <h3>{{localizeKM "kingdom.councilMissions.title"}}</h3>
+            <div class="km-council-missions">
+                <div class="km-mission-item">
+                    <button type="button" data-action="council-mission-audit" {{#unless canAudit}}disabled{{/unless}}>
+                        {{localizeKM "kingdom.councilMissions.audit.btn"}}
+                    </button>
+                    <div class="km-mission-info">
+                        {{#if (gt auditCooldownTurns 0)}}
+                            <span class="km-cooldown">{{localizeKM "kingdom.councilMissions.cooldown" turns=auditCooldownTurns}}</span>
+                        {{else if canAudit}}
+                            <span class="km-ready">{{localizeKM "kingdom.councilMissions.ready"}}</span>
+                        {{else}}
+                            <span class="km-cooldown">{{localizeKM "kingdom.councilMissions.unavailable"}}</span>
+                        {{/if}}
+                    </div>
+                    <div class="km-tooltip">
+                        <div class="km-tooltip-title">{{localizeKM "kingdom.councilMissions.audit.btn"}}</div>
+                        <div class="km-tooltip-desc">{{localizeKM "kingdom.councilMissions.audit.help"}}</div>
+                    </div>
+                </div>
+                <div class="km-mission-item">
+                    <button type="button" data-action="council-mission-scrying" {{#unless canScrying}}disabled{{/unless}}>
+                        {{localizeKM "kingdom.councilMissions.scrying.btn"}}
+                    </button>
+                    <div class="km-mission-info">
+                        {{#if (gt scryingCooldownTurns 0)}}
+                            <span class="km-cooldown">{{localizeKM "kingdom.councilMissions.cooldown" turns=scryingCooldownTurns}}</span>
+                        {{else if canScrying}}
+                            <span class="km-ready">{{localizeKM "kingdom.councilMissions.ready"}}</span>
+                        {{else}}
+                            <span class="km-cooldown">{{localizeKM "kingdom.councilMissions.unavailable"}}</span>
+                        {{/if}}
+                    </div>
+                    <div class="km-tooltip">
+                        <div class="km-tooltip-title">{{localizeKM "kingdom.councilMissions.scrying.btn"}}</div>
+                        <div class="km-tooltip-desc">{{localizeKM "kingdom.councilMissions.scrying.help"}}</div>
+                    </div>
+                </div>
+                <div class="km-mission-item">
+                    <button type="button" data-action="council-mission-lockdown" {{#unless canLockdown}}disabled{{/unless}}>
+                        {{localizeKM "kingdom.councilMissions.lockdown.btn"}}
+                    </button>
+                    <div class="km-mission-info">
+                        {{#if (gt lockdownCooldownTurns 0)}}
+                            <span class="km-cooldown">{{localizeKM "kingdom.councilMissions.cooldown" turns=lockdownCooldownTurns}}</span>
+                        {{else if canLockdown}}
+                            <span class="km-ready">{{localizeKM "kingdom.councilMissions.ready"}}</span>
+                        {{else}}
+                            <span class="km-cooldown">{{localizeKM "kingdom.councilMissions.unavailable"}}</span>
+                        {{/if}}
+                    </div>
+                    <div class="km-tooltip">
+                        <div class="km-tooltip-title">{{localizeKM "kingdom.councilMissions.lockdown.btn"}}</div>
+                        <div class="km-tooltip-desc">{{localizeKM "kingdom.councilMissions.lockdown.help"}}</div>
+                    </div>
+                </div>
+                <div class="km-mission-item">
+                    <button type="button" data-action="council-mission-feast" {{#unless canFeast}}disabled{{/unless}}>
+                        {{localizeKM "kingdom.councilMissions.feast.btn"}}
+                    </button>
+                    <div class="km-mission-info">
+                        {{#if (gt feastCooldownTurns 0)}}
+                            <span class="km-cooldown">{{localizeKM "kingdom.councilMissions.cooldown" turns=feastCooldownTurns}}</span>
+                        {{else if canFeast}}
+                            <span class="km-ready">{{localizeKM "kingdom.councilMissions.ready"}}</span>
+                        {{else}}
+                            <span class="km-cooldown">{{localizeKM "kingdom.councilMissions.unavailable"}}</span>
+                        {{/if}}
+                    </div>
+                    <div class="km-tooltip">
+                        <div class="km-tooltip-title">{{localizeKM "kingdom.councilMissions.feast.btn"}}</div>
+                        <div class="km-tooltip-desc">{{localizeKM "kingdom.councilMissions.feast.help"}}</div>
+                    </div>
+                </div>
+            </div>
+        {{/if}}
     </div>
 </aside>
 <div class="km-kingdom-sheet-content" {{#if (ne currentNavEntry 'turn')}}hidden{{/if}}>
@@ -149,17 +252,17 @@
         </section>
         <section class="km-kingdom-sheet-section">
             <h2 id="{{actorUuid}}-km-turn-commerce" {{#unless activities.commerce}}hidden{{/unless}}>{{localizeKM
-                    "kingdom.commerce"}}</h2>
+                    "kingdom.commerce"}} ({{localizeKM "kingdom.activitiesRemaining" remaining=activities.commerceRemaining max=activities.commerceCap}})</h2>
             {{> kingdom-activities activities=activities.commerce collectTaxesReduceUnrestDisabled=collectTaxesReduceUnrestDisabled}}
         </section>
         <section class="km-kingdom-sheet-section">
             <h2 id="{{actorUuid}}-km-turn-leadership" {{#unless activities.leadership}}hidden{{/unless}}>{{localizeKM
-                    "kingdom.leadership" count=leadershipActivities}}</h2>
+                    "kingdom.leadership" count=leadershipActivities}} ({{localizeKM "kingdom.activitiesRemaining" remaining=activities.leadershipRemaining max=activities.leadershipCap}})</h2>
             {{> kingdom-activities activities=activities.leadership}}
         </section>
         <section class="km-kingdom-sheet-section">
             <h2 id="{{actorUuid}}-km-turn-region" {{#unless activities.region}}hidden{{/unless}}>{{localizeKM
-                    "kingdom.region"}}</h2>
+                    "kingdom.region"}} ({{localizeKM "kingdom.activitiesRemaining" remaining=activities.regionRemaining max=activities.regionCap}})</h2>
 
             {{#if heartlandLabel}}
                 <p>{{localizeKM "kingdom.favoredLand" heartland=heartlandLabel}}</p>
@@ -171,12 +274,15 @@
             <div class="km-turn-buttons">
                 <button type="button" data-action="claimed-refuge">{{localizeKM "kingdom.claimedRefuge"}}</button>
                 <button type="button" data-action="claimed-landmark">{{localizeKM "kingdom.claimedLandmark"}}</button>
+                {{#if isGM}}
+                    <button type="button" data-action="open-hex-content-manager"><i class="fa-solid fa-map-location-dot"></i> {{localizeKM "kingdom.hexContent.managerTitle"}}</button>
+                {{/if}}
             </div>
             {{> kingdom-activities activities=activities.region}}
         </section>
         <section class="km-kingdom-sheet-section">
             <h2 id="{{actorUuid}}-km-turn-civic" {{#unless activities.civic}}hidden{{/unless}}>{{localizeKM
-                    "kingdom.civic"}}</h2>
+                    "kingdom.civic"}} ({{localizeKM "kingdom.activitiesRemaining" remaining=activities.civicRemaining max=activities.civicCap}})</h2>
             {{#if civicPlanning}}
                 <p>{{localizeKM "kingdom.civicPlanning"}}</p>
             {{/if}}
@@ -185,7 +291,7 @@
         </section>
         <section class="km-kingdom-sheet-section">
             <h2 id="{{actorUuid}}-km-turn-army" {{#unless activities.army}}hidden{{/unless}}>{{localizeKM
-                    "kingdom.armyPhaseTitle"}}</h2>
+                    "kingdom.armyPhaseTitle"}} ({{localizeKM "kingdom.activitiesRemaining" remaining=activities.armyRemaining max=activities.armyCap}})</h2>
             <p>{{localizeKM "kingdom.armyHelp"}}</p>
             {{> kingdom-activities activities=activities.army}}
         </section>
@@ -211,6 +317,63 @@
                     "kingdom.addEvent"}}</button></span></h3>
             <p>{{localizeKM "kingdom.continuousTraitHelp"}}</p>
             {{> kingdom-events ongoingEvents=ongoingEvents isGM=isGM}}
+        </section>
+        <section class="km-kingdom-sheet-section" {{#unless questTimerChanges.length}}hidden{{/unless}}>
+            <h2>{{localizeKM "kingdom.questGenerator.title"}}</h2>
+            {{#each questTimerChanges}}
+            <div class="km-quest-timer-change">
+                <span class="km-quest-timer-name">{{questName}}</span>:
+                <span class="km-quest-timer-value">{{changeLabel}}</span>
+            </div>
+            {{/each}}
+        </section>
+        <section class="km-kingdom-sheet-section" {{#if (ne currentNavEntry 'clock')}}hidden{{/if}}>
+            <h2 id="{{actorUuid}}-km-turn-clock">{{localizeKM "kingdom.clocks.title"}}</h2>
+            {{#if campaignClocks.hasActiveClocks}}
+                <p class="km-clock-summary">
+                    🕐 {{localizeKM "kingdom.clocks.summary" active=campaignClocks.activeClockCount expiring=campaignClocks.expiringClockCount}}
+                </p>
+            {{/if}}
+            {{#if isGM}}
+                <p class="km-turn-buttons">
+                    <button type="button" data-action="open-clock-dialog">{{localizeKM "kingdom.clocks.manage"}}</button>
+                </p>
+            {{/if}}
+            {{#if campaignClocks.campaignClocks.length}}
+                {{#each campaignClocks.campaignClocks}}
+                    <div class="km-clock-card {{#if isExpired}}km-clock-expired{{/if}}">
+                        <div class="km-clock-header">
+                            <span class="km-clock-label">{{label}}</span>
+                            {{#if active}}
+                                <span class="km-clock-remaining">{{remainingTurns}}/{{maxTurns}}</span>
+                            {{else}}
+                                <span class="km-clock-inactive">Inactive</span>
+                            {{/if}}
+                        </div>
+                        <div class="km-clock-progress-bar">
+                            <div class="km-clock-progress-fill
+                                        {{#if isExpiring}}km-clock-urgent{{/if}}
+                                        {{#if isExpired}}km-clock-expired-fill{{/if}}"
+                                 style="width: {{progressPercent}}%;">
+                            </div>
+                        </div>
+                        {{#if isExpiring}}
+                            <p class="km-clock-warning">{{localizeKM "kingdom.clocks.expiring"}}</p>
+                        {{/if}}
+                        {{#if isExpired}}
+                            <p class="km-clock-warning">
+                                {{#if paused}}
+                                    {{localizeKM "kingdom.clocks.paused"}}
+                                {{else}}
+                                    {{localizeKM "kingdom.clocks.expired"}}
+                                {{/if}}
+                            </p>
+                        {{/if}}
+                    </div>
+                {{/each}}
+            {{else}}
+                <p>{{localizeKM "kingdom.clocks.noClocks"}}</p>
+            {{/if}}
         </section>
         <section class="km-kingdom-sheet-section">
             <h2 id="{{actorUuid}}-km-turn-xp">{{localizeKM "applications.xp"}}</h2>
@@ -268,11 +431,53 @@
             </table>
         </section>
         <section class="km-kingdom-sheet-section">
+            <h2>{{localizeKM "kingdom.caravans.title"}}</h2>
+            <p class="km-turn-buttons">
+                <button type="button" data-action="dispatch-caravan"><i class="fa-solid fa-truck-fast"></i> {{localizeKM "kingdom.caravans.dispatch"}}</button>
+                <button type="button" data-action="dispatch-shipment"><i class="fa-solid fa-box-open"></i> {{localizeKM "kingdom.caravans.dispatchShipment"}}</button>
+            </p>
+            {{#if caravans.length}}
+                <ul class="km-caravans">
+                    {{#each caravans}}
+                        <li class="km-caravan">
+                            <span class="km-caravan-summary">{{summary}}</span>
+                            <span class="km-caravan-eta">{{localizeKM "kingdom.caravans.eta" turns=turnsRemaining}}</span>
+                            {{#if recallable}}
+                                <button type="button" class="km-btn-sm" data-action="recall-caravan" data-caravan-id="{{id}}">{{localizeKM "kingdom.caravans.recall"}}</button>
+                            {{/if}}
+                        </li>
+                    {{/each}}
+                </ul>
+            {{/if}}
+            {{#if shipments.length}}
+                <h3 style="margin-top: 10px; font-size: 1.1em; opacity: 0.9;">{{localizeKM "kingdom.caravans.equipmentShipments"}}</h3>
+                <ul class="km-caravans">
+                    {{#each shipments}}
+                        <li class="km-caravan">
+                            <span class="km-caravan-summary">{{summary}}</span>
+                            <span class="km-caravan-eta">{{localizeKM "kingdom.caravans.eta" turns=turnsRemaining}}</span>
+                            {{#if recallable}}
+                                <button type="button" class="km-btn-sm" data-action="recall-shipment" data-shipment-id="{{id}}">{{localizeKM "kingdom.caravans.recall"}}</button>
+                            {{/if}}
+                        </li>
+                    {{/each}}
+                </ul>
+            {{/if}}
+            {{#unless caravans.length}}
+                {{#unless shipments.length}}
+                    <p>{{localizeKM "kingdom.caravans.none"}}</p>
+                {{/unless}}
+            {{/unless}}
+        </section>
+        <section class="km-kingdom-sheet-section">
             <h2 id="{{actorUuid}}-km-turn-end">{{localizeKM "kingdom.endTurn"}}</h2>
             <p class="km-turn-buttons">
                 <button type="button" {{#unless canLevelUp}}disabled{{/unless}} data-action="level-up">{{localizeKM
                         "kingdom.levelUp"}}</button>
-                <button type="button" data-action="end-turn">{{localizeKM "kingdom.endTurn"}}</button>
+                <button type="button" data-action="open-turn-wizard"><i class="fas fa-magic"></i> {{localizeKM "kingdom.turnWizard.openButton"}}</button>
+                {{#if isGM}}
+                    <button type="button" data-action="end-turn">{{localizeKM "kingdom.endTurn"}}</button>
+                {{/if}}
             </p>
         </section>
     </div>

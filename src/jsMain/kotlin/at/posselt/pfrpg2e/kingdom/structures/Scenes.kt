@@ -4,6 +4,8 @@ import at.posselt.pfrpg2e.Config
 import at.posselt.pfrpg2e.actor.isKingmakerInstalled
 import at.posselt.pfrpg2e.data.ValueEnum
 import at.posselt.pfrpg2e.data.kingdom.settlements.Block
+import at.posselt.pfrpg2e.data.kingdom.settlements.NpcEntry
+import at.posselt.pfrpg2e.data.kingdom.settlements.PopulationRoster
 import at.posselt.pfrpg2e.data.kingdom.settlements.Settlement
 import at.posselt.pfrpg2e.data.kingdom.settlements.SettlementLayoutType
 import at.posselt.pfrpg2e.data.kingdom.settlements.SettlementLevelUpType
@@ -17,6 +19,7 @@ import at.posselt.pfrpg2e.kingdom.scenes.GridType
 import at.posselt.pfrpg2e.kingdom.scenes.toRectangle
 import at.posselt.pfrpg2e.localization.Translatable
 import at.posselt.pfrpg2e.toCamelCase
+import at.posselt.pfrpg2e.utils.createDrawingsResilient
 import at.posselt.pfrpg2e.utils.getAppFlag
 import at.posselt.pfrpg2e.utils.t
 import at.posselt.pfrpg2e.utils.typeSafeUpdate
@@ -101,6 +104,18 @@ fun Scene.parseSettlement(
         blocks.filter { it.isOccupied }.size
     ) else rawSettlement.lots
     val structures = getStructures()
+    val populationRoster = rawSettlement.populationRoster?.let { raw ->
+        PopulationRoster(
+            npcs = raw.npcs?.map { npc ->
+                NpcEntry(
+                    id = npc.id,
+                    name = npc.name,
+                    occupation = npc.occupation,
+                    notes = npc.notes,
+                )
+            }?.toList() ?: emptyList()
+        )
+    } ?: PopulationRoster()
     return evaluateSettlement(
         data = SettlementData(
             id = rawSettlement.sceneId,
@@ -112,6 +127,7 @@ fun Scene.parseSettlement(
                 ?: SettlementLayoutType.RIGID,
             isSecondaryTerritory = rawSettlement.secondaryTerritory,
             waterBorders = rawSettlement.waterBorders,
+            populationRoster = populationRoster,
         ),
         structures = structures,
         allStructuresStack = allStructuresStack,
@@ -213,7 +229,7 @@ suspend fun Scene.createSettlementBlocks(blocks: List<BlockTile>, lockTiles: Boo
     return createEmbeddedDocuments<TileDocument>("Tile", data).await().first()
 }
 
-suspend fun Scene.createSettlementLegends(legends: List<Legend>): DrawingDocument {
+suspend fun Scene.createSettlementLegends(legends: List<Legend>): Array<DrawingDocument> {
     val data = legends.map {
         val squareX = it.x
         val squareY = it.y
@@ -236,7 +252,7 @@ suspend fun Scene.createSettlementLegends(legends: List<Legend>): DrawingDocumen
             "strokeAlpha" to 0,
         ).unsafeCast<AnyObject>()
     }.toTypedArray()
-    return createEmbeddedDocuments<DrawingDocument>("Drawing", data).await().first()
+    return createDrawingsResilient(data)
 }
 
 data class BlockTile(

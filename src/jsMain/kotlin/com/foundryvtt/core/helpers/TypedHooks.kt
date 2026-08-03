@@ -10,6 +10,7 @@ import com.foundryvtt.core.applications.api.ContextMenuEntry
 import com.foundryvtt.core.applications.ui.Hotbar
 import com.foundryvtt.core.canvas.Canvas
 import com.foundryvtt.core.canvas.groups.CanvasVisibility
+import com.foundryvtt.core.canvas.placeables.Drawing
 import com.foundryvtt.core.documents.ChatMessage
 import com.foundryvtt.core.documents.TokenDocument
 import org.w3c.dom.HTMLElement
@@ -76,6 +77,9 @@ fun <O> HooksEventListener.onUpdateWorldTime(callback: (worldTime: Int, deltaInS
 
 fun <O> HooksEventListener.onCanvasReady(callback: (Canvas) -> O) =
     on("canvasReady", callback)
+
+fun <O> HooksEventListener.onDrawDrawing(callback: (drawing: Drawing) -> O) =
+    on("drawDrawing", callback)
 
 fun <O> HooksEventListener.onRenderChatLog(callback: RenderApplication<AnyObject, O>) =
     on("renderChatLog", callback)

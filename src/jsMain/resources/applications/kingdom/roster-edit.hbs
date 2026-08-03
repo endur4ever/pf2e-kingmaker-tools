@@ -1,0 +1,95 @@
+<div class="km-roster-dialog km-roster-edit-dialog">
+    <div class="km-roster-dialog-section">
+        <h3><i class="fa-solid fa-user-pen"></i> {{localizeKM "kingdom.roster.editCompanion"}}</h3>
+
+        <div class="km-form-group">
+            <label for="companionName">{{localizeKM "kingdom.roster.name"}}</label>
+            <input type="text" name="companionName" value="{{actorName}}" />
+        </div>
+
+        <div class="km-form-group">
+            <label for="companionRole">{{localizeKM "kingdom.roster.role"}}</label>
+            <select name="companionRole">
+                <option value="companion" {{#unless isNpc}}selected{{/unless}}>{{localizeKM "kingdom.roster.companion"}}</option>
+                <option value="npc" {{#if isNpc}}selected{{/if}}>{{localizeKM "kingdom.roster.npc"}}</option>
+            </select>
+        </div>
+
+        <div class="km-form-group">
+            <label for="companionSpeed">{{localizeKM "kingdom.roster.speed"}}</label>
+            <input type="number" name="companionSpeed" value="{{speed}}" min="0" />
+        </div>
+
+        <div class="km-form-group">
+            <label for="companionPlotHook">{{localizeKM "kingdom.roster.plotHook"}}</label>
+            <textarea name="companionPlotHook" rows="3">{{plotHook}}</textarea>
+        </div>
+    </div>
+
+    <hr>
+
+    <div class="km-roster-dialog-section">
+        <h3><i class="fa-solid fa-gear"></i> {{localizeKM "kingdom.roster.status"}}</h3>
+
+        <div class="km-form-group">
+            <label for="companionActive">{{localizeKM "kingdom.roster.active"}}</label>
+            <input type="checkbox" name="companionActive" {{#if active}}checked{{/if}} />
+        </div>
+
+        <div class="km-form-group">
+            <label for="companionDestinationX">{{localizeKM "kingdom.roster.destination"}} X</label>
+            <input type="number" name="companionDestinationX" value="{{destinationX}}" step="1" />
+        </div>
+
+        <div class="km-form-group">
+            <label for="companionDestinationY">{{localizeKM "kingdom.roster.destination"}} Y</label>
+            <input type="number" name="companionDestinationY" value="{{destinationY}}" step="1" />
+        </div>
+
+        <div class="km-form-group">
+            <label for="companionEta">{{localizeKM "kingdom.roster.eta"}}</label>
+            <input type="number" name="companionEta" value="{{eta}}" min="0" step="1" />
+        </div>
+    </div>
+
+    <hr>
+
+    <div class="km-roster-dialog-section">
+        <h3><i class="fa-solid fa-heart"></i> {{localizeKM "kingdom.companion.profile"}}</h3>
+
+        <div class="km-form-group">
+            <label for="companionInfluence">{{localizeKM "kingdom.companion.influence"}}</label>
+            <input type="number" name="companionInfluence" value="{{influence}}" min="0" max="12" />
+        </div>
+
+        <div class="km-form-group">
+            <label for="companionCampAvailable">{{localizeKM "kingdom.companion.campAvailable"}}</label>
+            <input type="checkbox" name="companionCampAvailable" {{#if campAvailable}}checked{{/if}} />
+        </div>
+
+        <div class="km-form-group">
+            <label for="companionDiscovery">{{localizeKM "kingdom.companion.discoveryStatus"}}</label>
+            <select name="companionDiscovery">
+                <option value="unknown" {{#if (eq discoveryStatus "unknown")}}selected{{/if}}>{{localizeKM "kingdom.companion.discovery.unknown"}}</option>
+                <option value="introduced" {{#if (eq discoveryStatus "introduced")}}selected{{/if}}>{{localizeKM "kingdom.companion.discovery.introduced"}}</option>
+                <option value="established" {{#if (eq discoveryStatus "established")}}selected{{/if}}>{{localizeKM "kingdom.companion.discovery.established"}}</option>
+                <option value="trusted" {{#if (eq discoveryStatus "trusted")}}selected{{/if}}>{{localizeKM "kingdom.companion.discovery.trusted"}}</option>
+                <option value="bonded" {{#if (eq discoveryStatus "bonded")}}selected{{/if}}>{{localizeKM "kingdom.companion.discovery.bonded"}}</option>
+            </select>
+        </div>
+    </div>
+
+    <hr>
+
+    <div class="km-roster-dialog-actions">
+        <button type="button" data-action="save" class="km-primary-btn">
+            <i class="fa-solid fa-check"></i> {{localizeKM "applications.save"}}
+        </button>
+        <button type="button" data-action="delete" class="km-danger-btn">
+            <i class="fa-solid fa-trash"></i> {{localizeKM "kingdom.roster.delete"}}
+        </button>
+        <button type="button" data-action="cancel" class="km-secondary-btn">
+            <i class="fa-solid fa-times"></i> {{localizeKM "applications.cancel"}}
+        </button>
+    </div>
+</div>

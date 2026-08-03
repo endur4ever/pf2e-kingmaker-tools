@@ -23,6 +23,9 @@ import at.posselt.pfrpg2e.utils.t
 import at.posselt.pfrpg2e.utils.toMap
 import at.posselt.pfrpg2e.utils.unsetAppFlag
 import at.posselt.pfrpg2e.utils.worldTimeSeconds
+import com.foundryvtt.core.game
+import at.posselt.pfrpg2e.kingdom.getKingdomActors
+import at.posselt.pfrpg2e.kingdom.getKingdom
 import com.foundryvtt.core.AnyObject
 import com.foundryvtt.core.Game
 import com.foundryvtt.core.documents.Actor
@@ -46,6 +49,7 @@ external interface ActorMeal {
     var actorUuid: String
     var favoriteMeal: String?
     var chosenMeal: String
+    var fixedFavoriteMeal: Boolean?
 }
 
 @JsPlainObject
@@ -61,6 +65,13 @@ external interface Cooking {
     var homebrewMeals: Array<RecipeData>
     var results: Record<String, CookingResult>
     var minimumSubsistence: Int
+    var favoriteMealProgress: Record<String, Record<String, FavoriteMealProgression>>?
+}
+
+@JsPlainObject
+external interface FavoriteMealProgression {
+    var successCount: Int
+    var criticalSuccessCount: Int
 }
 
 @JsPlainObject
@@ -68,7 +79,16 @@ external interface CampingActivity {
     var actorUuid: String?
     var result: String?
     var selectedSkill: String?
+    // Only set on the "Learn from a Companion" activity: the id of the companion
+    // activity the player chose to learn from the dropdown.
+    var learnTargetActivityId: String?
+    // No-check activities only: how many times the assigned actor performs the
+    // activity this session (each repetition costs downtime hours). Null = 1 for
+    // saves that predate the field.
+    var repetitions: Int?
 }
+
+fun CampingActivity.repetitionsOrDefault(): Int = repetitions ?: 1
 
 @JsPlainObject
 external interface CampingActivityWithId {
@@ -76,7 +96,11 @@ external interface CampingActivityWithId {
     val actorUuid: String?
     val result: String?
     val selectedSkill: String?
+    val learnTargetActivityId: String?
+    val repetitions: Int?
 }
+
+fun CampingActivityWithId.repetitionsOrDefault(): Int = repetitions ?: 1
 
 fun ReadonlyRecord<String, CampingActivity>.toCampingActivitiesWithId() =
     asSequence()
@@ -86,6 +110,8 @@ fun ReadonlyRecord<String, CampingActivity>.toCampingActivitiesWithId() =
                 actorUuid = data.actorUuid,
                 result = data.result,
                 selectedSkill = data.selectedSkill,
+                learnTargetActivityId = data.learnTargetActivityId,
+                repetitions = data.repetitions,
             )
         }.toTypedArray()
 
@@ -133,6 +159,146 @@ external interface CampingData {
     var forcedMarchActive: Boolean
     var secondsSpentForcedMarching: Int
     var hexSizeInMiles: Int
+    var travelStartHex: String?
+    var travelEndHex: String?
+
+    /**
+     * Companion-specific activity IDs that the party has learned via the
+     * "Learn from a Companion" activity. When an activity's required companion
+     * is absent, it is still available if its id is in this list.
+     */
+    var learnedCompanionActivities: Array<String>
+
+    /**
+     * Companion-specific activity IDs learned per actor.
+     * Key is the actor's UUID or ID (with dots replaced by underscores), value is the array of learned activity IDs.
+     */
+    var learnedCompanionActivitiesByActor: Record<String, Array<String>>?
+
+    /**
+     * One entry per watch slot; each entry is the list of actor UUIDs assigned to that watch.
+     * The number of watch slots equals this array's size (defaults to [defaultNumberOfWatches]).
+     */
+    var watchSlots: Array<Array<String>>
+
+    /**
+     * Downtime hours each actor has spent this camping session, keyed by actor UUID. Incremented
+     * every time that actor rolls a camping activity (see [spendDowntimeHours]); it is NOT
+     * recomputed from current assignments, so unassigning an actor does not refund hours and
+     * re-rolling the same activity keeps spending. Reset to empty at daily preparations.
+     * Nullable for backwards compatibility with camping data saved before this field existed.
+     */
+    var downtimeHoursSpent: Record<String, Int>?
+
+    // ── Roadmap #11: random encounter & rumor curator ──
+    // All nullable for backwards compatibility (read via the *OrDefault helpers
+    // in EncounterCuratorData.kt); no data-touching migration required.
+
+    /** Relative per-category weights controlling encounter frequency. */
+    var categoryWeights: RawCategoryWeights?
+
+    /** Category-level proxy roll table; falls back to [proxyRandomEncounterTableUuid] when null. */
+    var encounterCategoryProxyTableUuid: String?
+
+    /** Suppress Combat encounters in claimed+cleared hexes when enabled. */
+    var filterByHexState: Boolean?
+
+    /** Auto-succeed campsite preparation & cooking in claimed hexes (house rule) when enabled. */
+    var autoSucceedInClaimedHexes: Boolean?
+
+    /** Rumors accumulated this camping session. */
+    var rumors: Array<RawRumor>?
+
+    /** Active merchant stock surfaced by Merchant-category encounters. */
+    var merchantStock: Array<RawMerchantStock>?
+
+    /** Transient: the category rolled for the current (un-committed) encounter preview. */
+    var lastEncounterCategory: String?
+
+    /** Transient: the result text rolled for the current (un-committed) encounter preview. */
+    var lastEncounterResult: String?
+}
+
+/**
+ * Foundry flattens flag objects on `.` when persisting, so an actor UUID (which contains dots,
+ * e.g. `Scene.x.Token.y.Actor.z`) cannot be used directly as a [downtimeHoursSpent] key — it
+ * would be mangled into nested objects on save. Replace dots so the key round-trips intact.
+ * (The same reason `cooking.actorMeals` is keyed by `actor.id` rather than the UUID.)
+ */
+private fun downtimeHoursKey(actorUuid: String): String = actorUuid.replace('.', '_')
+
+/**
+ * Remaining downtime hours for [actorUuid] this session, clamped to
+ * `[0, MAX_DOWNTIME_HOURS]`. Derived purely from [CampingData.downtimeHoursSpent].
+ */
+fun CampingData.downtimeHoursRemaining(actorUuid: String): Int {
+    val spent = downtimeHoursSpent?.get(downtimeHoursKey(actorUuid)) ?: 0
+    return (CampingActivityScheduler.MAX_DOWNTIME_HOURS - spent)
+        .coerceIn(0, CampingActivityScheduler.MAX_DOWNTIME_HOURS)
+}
+
+/**
+ * Records that [actorUuid] spent [hours] of downtime (one camping roll). Accumulates; never
+ * decreases here. Allowed to exceed [CampingActivityScheduler.MAX_DOWNTIME_HOURS]; the display
+ * clamps remaining hours to zero.
+ */
+fun CampingData.spendDowntimeHours(actorUuid: String, hours: Int) {
+    val spent = downtimeHoursSpent ?: recordOf()
+    val key = downtimeHoursKey(actorUuid)
+    spent[key] = (spent[key] ?: 0) + hours
+    downtimeHoursSpent = spent
+}
+
+/**
+ * Refunds [hours] of [actorUuid]'s downtime, clamped so spent hours never go negative.
+ * Only no-check activity un-assignment refunds; rolled hours are never given back
+ * (re-roll costs accumulate by design).
+ */
+fun CampingData.refundDowntimeHours(actorUuid: String, hours: Int) {
+    val spent = downtimeHoursSpent ?: return
+    val key = downtimeHoursKey(actorUuid)
+    spent[key] = ((spent[key] ?: 0) - hours).coerceAtLeast(0)
+    downtimeHoursSpent = spent
+}
+
+/**
+ * Computes the downtime ledger after a no-check activity is dropped on [newActorUuid]:
+ * the new actor is charged [CampingActivityScheduler.DOWNTIME_HOURS_PER_ACTIVITY] (one
+ * repetition) and [previousActorUuid] (when the activity changes hands) is refunded
+ * [refundHours] — all of their accumulated repetitions — clamped at 0. Same-actor
+ * reassignment is a no-op. Returns a fresh record so it can be fed to a partial Foundry
+ * update without mutating [spent].
+ */
+fun moveNoCheckDowntimeCharge(
+    spent: Record<String, Int>?,
+    previousActorUuid: String?,
+    newActorUuid: String,
+    refundHours: Int = CampingActivityScheduler.DOWNTIME_HOURS_PER_ACTIVITY,
+): Record<String, Int> {
+    val result = recordOf<String, Int>()
+    spent?.let { js.objects.Object.keys(it).forEach { k -> result[k] = it[k]!! } }
+    if (previousActorUuid == newActorUuid) {
+        return result
+    }
+    val chargeKey = downtimeHoursKey(newActorUuid)
+    result[chargeKey] = (result[chargeKey] ?: 0) + CampingActivityScheduler.DOWNTIME_HOURS_PER_ACTIVITY
+    if (previousActorUuid != null) {
+        val refundKey = downtimeHoursKey(previousActorUuid)
+        result[refundKey] = ((result[refundKey] ?: 0) - refundHours).coerceAtLeast(0)
+    }
+    return result
+}
+
+/**
+ * Resets every actor's spent downtime hours to zero for a new camping session. Entries are
+ * zeroed in place rather than dropped because Foundry merges flag objects on update (it does
+ * not remove keys), so assigning an empty map would leave stale values behind.
+ */
+fun CampingData.resetDowntimeHours() {
+    downtimeHoursSpent?.let { spent ->
+        js.objects.Object.keys(spent).forEach { spent[it] = 0 }
+    }
+    secondsSpentForcedMarching = 0
 }
 
 fun CampingData.campingActivitiesWithId() =
@@ -144,7 +310,17 @@ suspend fun CampingData.getActorsCarryingFood(party: PF2EParty?): List<PF2EActor
 suspend fun CampingData.getActorsInCamp(
     campingActivityOnly: Boolean = false,
 ): List<PF2EActor> = coroutineScope {
+    val onExpeditionUuids = game.getKingdomActors()
+        .mapNotNull { it.getKingdom() }
+        .flatMap { kingdom ->
+            (kingdom.companions ?: emptyArray())
+                .filter { it.expeditionStatus == "onExpedition" }
+                .mapNotNull { it.actorUuid }
+        }
+        .toSet()
+
     actorUuids
+        .filter { it !in onExpeditionUuids }
         .map {
             async {
                 if (campingActivityOnly) {
@@ -167,13 +343,18 @@ fun CampingActivity.parseResult() =
 fun CampingActivityWithId.checkPerformed() =
     result != null && actorUuid != null
 
-const val prepareCampsiteId = "prepare-campsite"
-const val cookMealId = "cook-meal"
+/** Default number of watch slots shown when first opening the Set Watches section. */
+const val defaultNumberOfWatches = 3
+
+/** Inclusive bounds for the "number of watches" dropdown. */
+const val minNumberOfWatches = 1
+const val maxNumberOfWatches = 8
 
 enum class CampingSheetSection : Translatable, ValueEnum {
     PREPARE_CAMPSITE,
     CAMPING_ACTIVITIES,
-    EATING;
+    EATING,
+    SET_WATCHES;
 
     override val value: String
         get() = toCamelCase()
@@ -251,6 +432,12 @@ fun getDefaultCamping(game: Game): CampingData {
         travelModeActive = false,
         secondsSpentForcedMarching = 0,
         hexSizeInMiles = 12,
+        travelStartHex = null,
+        travelEndHex = null,
+        learnedCompanionActivities = emptyArray(),
+        learnedCompanionActivitiesByActor = recordOf(),
+        watchSlots = emptyArray(),
+        downtimeHoursSpent = recordOf(),
         regionSettings = RegionSettings(
             regions = arrayOf(
                 RegionSetting(
@@ -597,13 +784,12 @@ fun CampingData.findCookingChoices(
     charactersInCampByUuid: Map<String, PF2EActor>,
     recipesById: Map<String, RecipeData>,
 ): ParsedMeals {
+    // Cooking no longer requires a prepared campsite: a cook is simply whoever is assigned
+    // to the Cook Meal activity.
     val cook = campingActivities[cookMealId]
         ?.takeIf { it.actorUuid != null }
         ?.let { charactersInCampByUuid[it.actorUuid] }
         ?.takeIfInstance<PF2ECharacter>()
-        ?.takeIf {
-            hasPreparedCampsite()
-        }
     val cookingLore = Lore("cooking")
     val cookingSkills: List<Attribute> = if (cook == null) {
         listOf(Skill.SURVIVAL, cookingLore)
@@ -640,4 +826,37 @@ fun CampingData.findCookingChoices(
             )
         }
     )
+}
+
+/**
+ * Companion activity IDs this actor effectively knows: those learned individually
+ * ([learnedCompanionActivitiesByActor]) unioned with the party-wide
+ * [learnedCompanionActivities] (which count as known by everyone).
+ */
+fun CampingData.learnedActivityIdsForActor(actorUuid: String): Set<String> {
+    val key = actorUuid.replace('.', '_')
+    val learnedByActor = learnedCompanionActivitiesByActor?.get(key)?.toSet() ?: emptySet()
+    return learnedByActor + learnedCompanionActivities.toSet()
+}
+
+fun CampingData.hasActorLearnedActivity(actorUuid: String, activityId: String): Boolean =
+    activityId in learnedActivityIdsForActor(actorUuid)
+
+/**
+ * Whether [actorUuid] / [actorName] may perform [activity].
+ *
+ * Non-companion activities are open to everyone. A companion activity can only be
+ * performed by the companion themselves (when they are available) or by an actor who
+ * has learned it — merely having the companion present in camp does NOT let everyone
+ * else perform it.
+ */
+fun CampingData.canActorPerformActivity(
+    activity: CampingActivityData,
+    actorUuid: String,
+    actorName: String,
+    companionUnavailable: Boolean,
+): Boolean {
+    if (activity.requiredCompanion == null) return true
+    if (hasActorLearnedActivity(actorUuid, activity.id)) return true
+    return activity.isActorRequiredCompanion(actorName) && !companionUnavailable
 }

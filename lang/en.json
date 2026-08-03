@@ -1,5 +1,127 @@
 {
   "pf2e-kingmaker-tools": {
+    "expeditionActivities": {
+      "diplomacy": {
+        "name": "Broker Diplomacy",
+        "criticalSuccess": {
+          "message": "The envoy returns with a signed accord and the goodwill of a distant power, a generous gift in hand."
+        },
+        "success": {
+          "message": "Talks went well; the companion returns with a useful understanding and a token of friendship."
+        },
+        "failure": {
+          "message": "The negotiations stalled. No harm done, but the time was spent for little gain."
+        },
+        "criticalFailure": {
+          "message": "A diplomatic blunder soured the room; the companion limps home weary and bruised, the relationship strained."
+        }
+      },
+      "treasure-hunt": {
+        "name": "Treasure Hunt",
+        "criticalSuccess": {
+          "message": "An old map paid off. The companion hauls back a major find from a forgotten cache."
+        },
+        "success": {
+          "message": "Careful searching turned up a worthwhile haul of coin and curios."
+        },
+        "failure": {
+          "message": "The trail went cold. The companion returns empty-handed but unharmed."
+        },
+        "criticalFailure": {
+          "message": "A trapped vault nearly claimed them; they escape with nothing but fresh wounds."
+        }
+      },
+      "personal-quest": {
+        "name": "Pursue Personal Quest",
+        "criticalSuccess": {
+          "message": "The companion resolves their personal quest in spectacular fashion, returning changed and emboldened."
+        },
+        "success": {
+          "message": "The companion makes real progress on what matters to them and comes back the better for it."
+        },
+        "failure": {
+          "message": "The quest eludes them this time, though they return whole and undeterred."
+        },
+        "criticalFailure": {
+          "message": "The pursuit ended badly; the companion returns shaken and hurt, the matter worse than before."
+        }
+      },
+      "hunt": {
+        "name": "Hunt and Forage",
+        "criticalSuccess": {
+          "message": "A legendary kill. The companion returns laden with provisions and a trophy worth boasting of."
+        },
+        "success": {
+          "message": "Good hunting fills the larder; the companion returns with ample game."
+        },
+        "failure": {
+          "message": "The game was scarce. The companion returns tired and empty-handed."
+        },
+        "criticalFailure": {
+          "message": "The hunt turned on them; the companion staggers back mauled and exhausted."
+        }
+      },
+      "rest": {
+        "name": "Rest and Recover",
+        "criticalSuccess": {
+          "message": "True respite. The companion returns fully restored and remarkably refreshed."
+        },
+        "success": {
+          "message": "A quiet stretch of downtime leaves the companion rested and ready."
+        },
+        "failure": {
+          "message": "Rest was fitful and interrupted; little was gained."
+        },
+        "criticalFailure": {
+          "message": "Rest went wrong; illness or mishap leaves the companion worse off than when they left."
+        }
+      },
+      "scout": {
+        "name": "Scout the Region",
+        "criticalSuccess": {
+          "message": "The companion maps the region in exacting detail, returning with invaluable intelligence."
+        },
+        "success": {
+          "message": "The companion returns with a solid lay of the land and useful notes."
+        },
+        "failure": {
+          "message": "Fog and dead ends; the companion learns little of value."
+        },
+        "criticalFailure": {
+          "message": "Lost and harried, the companion barely finds their way home, battered and spent."
+        }
+      },
+      "craft": {
+        "name": "Craft and Tinker",
+        "criticalSuccess": {
+          "message": "A masterwork takes shape. The companion returns with a finely made piece and coin to spare."
+        },
+        "success": {
+          "message": "Steady work yields a solid, useful creation."
+        },
+        "failure": {
+          "message": "The project did not come together; materials and time spent for nothing."
+        },
+        "criticalFailure": {
+          "message": "A workshop mishap. The companion returns injured, the work ruined."
+        }
+      },
+      "train": {
+        "name": "Train and Drill",
+        "criticalSuccess": {
+          "message": "Intense drilling pays off; the companion returns sharper and more capable than ever."
+        },
+        "success": {
+          "message": "Diligent practice leaves the companion measurably improved."
+        },
+        "failure": {
+          "message": "Training plateaued; the companion returns no worse, but no better."
+        },
+        "criticalFailure": {
+          "message": "An overzealous regimen backfired; the companion returns strained and hurting."
+        }
+      }
+    },
     "moduleName": "Kingdom Building, Camping & Weather",
     "yes": "Yes",
     "no": "No",
@@ -54,6 +176,8 @@
       "advancementHelp": "If set to Milestone, will not display XP option in end combat dialog",
       "artDirectory": "Art Directory",
       "artDirectoryHelp": "Path to your art directory relative to Foundry Data folder. For expected files, view the Art help journal in your kingdom sheet.",
+      "campaignMapSceneIds": "Campaign Map Scene IDs",
+      "campaignMapSceneIdsHelp": "A comma-separated list of Scene IDs that act as regional maps. Moving the party token on these scenes automatically updates the active camping region based on hex coordinates.",
       "enableAfterCombatDialog": "Enable End Combat Dialog",
       "enableAfterCombatDialogHelp": "If enabled, shows a popup after ending combat that allows you to award XP and hero points",
       "disableFirstRunMessage": "Disable First Run Message",
@@ -64,6 +188,8 @@
       "climate": "Climate",
       "climateButton": "Customize Climate",
       "enableWeather": "Enable Weather",
+      "enableForagingModifiers": "Vary foraging by terrain, season & weather",
+      "enableForagingModifiersHelp": "When enabled, Hunt & Gather yields are scaled (±50% max) by the current hex terrain, the season, and the weather — forest/swamp/water forage richer, desert/mountain leaner, deep winter and snow lean. Off restores flat RAW yields.",
       "enableWeatherSoundFx": "Enable Ambient Weather Sounds",
       "enableWeatherSoundFxHelp": "If enabled, will play rain and snow tracks from the official module. You can override this behavior by creating playlists named like \"weather.blizzard\" or \"weather.rain\".",
       "weatherRollMode": "Weather Roll Mode",
@@ -77,7 +203,17 @@
       "schemaVersionHelp": "All data migrations greater than this version are run at page load. Do not edit unless you know what you are doing!",
       "kingdomActiveLeader": "Actively Filtered Kingdom Leader",
       "enablePartyActorIcons": "Enable Party Actor Icons",
-      "enablePartyActorIconsHelp": "If enabled, shows icons next to the party actor. Disable if you only use macros."
+      "enablePartyActorIconsHelp": "If enabled, shows icons next to the party actor. Disable if you only use macros.",
+      "obsidianVaultName": "Obsidian Vault Name",
+      "obsidianVaultNameHelp": "The name of your Obsidian vault. If provided, displays an 'Open Obsidian' button in the Kingdom sheet header.",
+      "obsidianJournalFolder": "Obsidian Export Folder",
+      "obsidianJournalFolderHelp": "The name of the Journal Folder where exported Kingdom summaries will be stored.",
+      "obsidianOverwrite": "Overwrite Kingdom Summary",
+      "obsidianOverwriteHelp": "If enabled, overwrites the single 'Kingdom Summary' journal entry on each export. If disabled, creates a historical entry per turn (e.g. 'Kingdom Summary - Turn X').",
+      "enableCompanionLeveling": "Enable Companion Leveling",
+      "enableCompanionLevelingHelp": "If disabled, companions do not gain levels from expedition XP. Useful for campaigns that prefer milestone-based companion advancement.",
+      "companionAutonomyEnabled": "Companion Autonomy",
+      "companionAutonomyEnabledHelp": "If enabled, when making camp, eligible companions will volunteer for expeditions autonomously. The GM receives an offer card to approve or decline."
     },
     "applications": {
       "apply": "Apply",
@@ -90,6 +226,7 @@
       "edit": "Edit",
       "add": "Add",
       "delete": "Delete",
+      "actions": "Actions",
       "enable": "Enable",
       "title": "Title",
       "name": "Name",
@@ -142,7 +279,8 @@
         "exportCamping": "Export Camping",
         "deleteCamping": "Delete Camping",
         "importCamping": "Import Camping"
-      }
+      },
+      "cancel": "Cancel"
     },
     "forms": {
       "effects": "Effects"
@@ -158,7 +296,10 @@
       "checkPrecipitation": "Checking for Precipitation with DC {dc}",
       "checkingCold": "Checking for Cold with DC {dc}",
       "checkingWeatherEvent": "Checking for Weather Event with DC {dc}",
-      "checkingSecondWeatherEvent": "Checking for Second Weather Event with DC {dc}"
+      "checkingSecondWeatherEvent": "Checking for Second Weather Event with DC {dc}",
+      "nat20SecondEvent": "Natural 20! A second weather event may occur.",
+      "useDataDrivenWeatherEvents": "Use Data-Driven Weather Events",
+      "useDataDrivenWeatherEventsHelp": "If enabled, uses the built-in KCG p.122 weather event table instead of Foundry roll tables"
     },
     "settlementLayoutType": {
       "rigid": "Rigid",
@@ -222,6 +363,9 @@
       "proxyRandomEncounterTableUuid": "Proxy Random Encounter Table",
       "proxyRandomEncounterTableUuidHelp": "Custom Roll Table; use 'Creature' text result to roll on the default random encounter table",
       "ignoreSkillRequirements": "Do not validate activity skill proficiency",
+      "autoSucceedInClaimedHexes": "Auto-succeed camp preparation & cooking in claimed hexes",
+      "autoSucceedInClaimedHexesHelp": "House rule: when the party is camping in a hex your kingdom has claimed, Prepare Campsite and Cook Meal skip their rolls and take a plain success. Ingredient costs are still paid — only the roll is waived. Off by default (RAW).",
+      "autoSuccessInOwnLands": "<strong>Auto-success:</strong> camping in your own claimed lands — the roll is waived (house rule).",
       "huntAndGatherTargetActorUuid": "Add Ingredients from Hunt and Gather to",
       "huntAndGatherTargetActorUuidHelp": "Default is the actor performing the activity",
       "alwaysPerformActivities": "Activity will be hidden from list of activities and will be automatically enabled",
@@ -258,6 +402,7 @@
       "manageActivities": "Manage Activities",
       "cookingCost": "Cooking Cost",
       "purchaseCost": "Purchase Cost",
+      "requirements": "Requirements",
       "manageRecipes": "Manage Recipes",
       "learnableRecipes": "Recipes learnable in Zone",
       "newRegion": "New Region",
@@ -276,6 +421,7 @@
       "wrongItemAddedToActor": "Unsupported Item dragged onto camping actors",
       "onlyCharactersConsumeMeals": "Only Characters can consume meals",
       "onlyCharactersCanPerformActivities": "Only Characters can perform camping activities",
+      "downtimeBudgetExhausted": "Actor has exhausted their 8-hour downtime budget",
       "noRecipeChosen": "Discover Special Meal: No recipe chosen!",
       "reuseCampsite": "Reusing a previous campsite",
       "prepareNewCampsite": "Preparing a new campsite",
@@ -289,6 +435,9 @@
       "resetMeals": "Reset Meals",
       "favoriteMeals": "Favorite Meals",
       "favoriteMeal": "Favorite Meal",
+      "favoriteMealLearned": "<b>{actorName}</b> has learned <b>{recipeName}</b> as a favorite meal!",
+      "favoriteMealChanged": "<b>{actorName}</b> has changed their favorite meal to <b>{recipeName}</b>!",
+      "favoriteMealFixed": "Fixed",
       "activities": "Activities",
       "recipes": "Recipes",
       "regions": "Regions",
@@ -321,6 +470,10 @@
       "zone": "Zone {id}",
       "basicIngredients": "Basic Ingredients",
       "specialIngredients": "Special Ingredients",
+      "foraging": {
+        "bountiful": "The land provides — rich terrain and fair conditions make for a bountiful forage.",
+        "lean": "Lean pickings — poor terrain or harsh weather thin out the forage."
+      },
       "rations": "Rations",
       "consumingFood": "Consuming Food",
       "missingFood": "Missing the following ingredients:",
@@ -331,6 +484,9 @@
       "consumed": "Consumed",
       "available": "Available",
       "uncookedCost": "Uncooked Cost",
+      "foodDays": "Food",
+      "foodDaysHelp": "Full days the party can sustain at current consumption. Only durable rations count — provisions are wiped every rest, so they cover tonight's meal only. \"∞\" means no one is eating.",
+      "routeExceedsFood": "This route needs {days} days but the party only has food for {food}. Plan Hunt & Gather days or resupply first.",
       "recipe": "Recipe",
       "cost": "Cost",
       "pick": "Pick",
@@ -339,7 +495,24 @@
       "forcedMarchHelp": "Forced March: {days}/{maxDays, plural, =1 {1 day} other {# days}}",
       "travelingHelp": "If checked, time passed is accounted as travel time for Fatigue automation",
       "dropActorAbove": "Drop Actor from Above",
+      "activityRequiresCompanion": "Requires {companion} to be in camp",
+      "activityRequiresCompanionOrLearned": "Only {companion} or a character who has learned it can perform this",
+      "actorHasNotLearnedActivity": "{actor} has not learned the companion activity {activityName} and the required companion is absent from camp",
+      "actorCannotPerformCompanionActivity": "{actor} cannot perform {activityName}: only {companion} or a character who has learned it can.",
+      "learnedActivitiesHeader": "Knows companion activities:",
+      "learnTarget": "Activity to learn",
+      "learnTargetOption": "{activity} (from {companion})",
       "dropActorFromSidebar": "Drop Actor from Sidebar",
+      "watchSlot": "Watch Slot",
+      "dropActorOnWatch": "Drop actor here to assign to watch",
+      "suggestWatchOrder": "Suggest Watch Order",
+      "suggestWatchOrderHelp": "Assign every camper who stands watch to a slot, spreading the best Perception evenly across the night. Replaces the current assignments.",
+      "watchPerception": "Perception",
+      "watchWarningEmptySlot": "Watch Slot {slot} has no watchers",
+      "watchWarningUnassigned": "Not assigned to any watch: {names}",
+      "watchWarningDuplicate": "Assigned to multiple watches: {names}",
+      "numberOfWatches": "Number of Watches",
+      "assignCookHint": "Assign a character to the Cook Meal activity to cook special meals.",
       "retractHours": "Retract {count, plural, =1 {1 Hour} other {# Hours}}",
       "advanceHours": "Advance {count, plural, =1 {1 Hour} other {# Hours}}",
       "retractHexActivity": "Retract 1 Hexploration Activity ({duration})",
@@ -356,10 +529,109 @@
       "resetDc": "Reset Encounter DC",
       "encounterDc": "Encounter DC",
       "hoursSymbol": "h",
+      "downtimeBudgetHelp": "Remaining downtime this camping session (max {max}h). Each camping activity costs 2 hours.",
+      "startHex": "Start Hex",
+      "endHex": "End Hex",
+      "routePlanner": "Route Planner",
+      "noPathFound": "No path found between the selected hexes.",
+      "estimatedDuration": "ETA",
+      "totalCost": "Travel Cost",
+      "totalDistance": "Distance",
+      "routeModifiers": "Route Modifiers",
+      "weatherModifierLabel": "Weather modifier: x{value}",
+      "partySpeedModifierLabel": "Party speed: {value}",
+      "terrainModifierCount": "{count}x {terrain}",
+      "roadCount": "{count}x Road",
+      "riverCount": "{count}x River Crossing (no bridge)",
       "autoApplyFatigued": "Automatically apply Fatigued",
       "autoApplyFatiguedHelp": "Based on weather and meal effects, apply the Fatigued condition to actors in camp after advancing time",
       "fatigueDuration": "Change Fatigued Duration",
-      "fatigueDurationHelp": "Increase or decrease duration until character becomes fatigued in seconds. Use negative values to decrease duration and positive to increase"
+      "fatigueDurationHelp": "Increase or decrease duration until character becomes fatigued in seconds. Use negative values to decrease duration and positive to increase",
+      "encounterResolutionTitle": "Resolve Camping Watch Encounter",
+      "selectWatcher": "Select Watcher on Watch",
+      "stealthDc": "Ambusher Stealth DC",
+      "rollModifier": "Watcher Perception Modifier",
+      "dcModifier": "Stealth DC Modifier",
+      "encounterCardTitle": "Camping Watch Encounter Resolution",
+      "watcher": "Watcher on Watch",
+      "watchersOnDuty": "Watchers on Duty",
+      "watchersOnDutyHelp": "Every character on watch rolls Perception against the ambusher's Stealth DC. On watch: {watchers}",
+      "outcome": "Detection Outcome",
+      "repeatActivity": "Perform again (costs 2 more downtime hours)",
+      "removeActivityRepetition": "Remove one repetition and refund 2 downtime hours",
+      "activityRepetitions": "Times performed and total downtime hours spent",
+      "perceptionCheck": "Perception Check",
+      "startDistance": "Starting Distance",
+      "ambusherState": "Ambusher State",
+      "conditionsApplied": "Conditions Applied",
+      "conditions": {
+        "prone": "Prone",
+        "unconscious": "Unconscious"
+      },
+      "defenseContributions": "Camp Defenses Contributing",
+      "weatherEvent": {
+        "fog": "Fog",
+        "heavyDownpour": "Heavy Downpour",
+        "coldSnap": "Cold Snap",
+        "windstorm": "Windstorm",
+        "severeHailstorm": "Severe Hailstorm",
+        "blizzard": "Blizzard",
+        "supernaturalStorm": "Supernatural Storm",
+        "flashFlood": "Flash Flood",
+        "wildfire": "Wildfire",
+        "subsidence": "Subsidence",
+        "thunderstorm": "Thunderstorm",
+        "tornado": "Tornado"
+      },
+      "encounterPreview": "Encounter Preview",
+      "encounterRestoreTitle": "Restore Encounter Preview",
+      "encounterRestorePrompt": "An unresolved encounter preview from before the reload was found ({category}). Restore it instead of rolling a new one?",
+      "expeditionDepartureCleared": "Expedition departure — cleared camp assignments for: {details}. Assignments are not restored automatically on return; reassign as needed.",
+      "departureClearedActivities": "{count} activity assignment(s)",
+      "departureClearedWatches": "{count} watch slot(s)",
+      "departureClearedMeal": "meal choice",
+      "encounterCategory": {
+        "combat": "Combat",
+        "rp": "Roleplay",
+        "rumor": "Rumor",
+        "merchant": "Merchant",
+        "disease": "Disease",
+        "faction": "Faction",
+        "weather": "Weather",
+        "lore": "Lore"
+      },
+      "encounterAccept": "Accept",
+      "encounterReroll": "Reroll",
+      "encounterReject": "Reject",
+      "encounterConvertQuest": "Convert to Quest",
+      "encounterNoResult": "No result rolled.",
+      "encounterRumorHeading": "Rumor",
+      "encounterQuestHook": "Quest hook",
+      "encounterCurator": "Encounter Curator",
+      "encounterCategoryTable": {
+        "combat": "Combat Table",
+        "rp": "Roleplay Table",
+        "rumor": "Rumor Table",
+        "merchant": "Merchant Table",
+        "disease": "Disease Table",
+        "faction": "Faction Table",
+        "weather": "Weather Table",
+        "lore": "Lore Table"
+      },
+      "regionEncounterTables": "Encounter Tables",
+      "regionSuppressClearedHex": "Suppress Combat in Cleared Hexes",
+      "regionSuppressClearedHexHelp": "When enabled, Combat-category encounters are skipped while the party is in a claimed and cleared hex in this region.",
+      "encounterCuratorRouting": "Category Routing",
+      "encounterCuratorWeights": "Category Weights",
+      "encounterCategoryProxyTable": "Category Proxy Roll Table",
+      "encounterCategoryProxyTableHelp": "Roll table whose results name an encounter category (Combat, Rumor, Merchant, …). When set, random encounters route through the GM curator preview instead of the legacy creature roll.",
+      "filterByHexState": "Suppress Combat in Cleared Hexes",
+      "filterByHexStateHelp": "When enabled, Combat-category encounters are suppressed while the party is in a claimed and cleared hex (per-region opt-in still applies).",
+      "encounterCuratorRumorSource": "Curated Encounter",
+      "encounterNoKingdom": "No kingdom actor found to attach the quest to.",
+      "encounterRumorConverted": "Rumor converted into a kingdom quest.",
+      "encounterSuppressed": "Encounter suppressed: {reason}",
+      "encounterSuppressedTitle": "Encounter Suppressed"
     },
     "settlementNav": {
       "status": "Status",
@@ -367,7 +639,8 @@
       "structures": "Structures",
       "storage": "Storage",
       "notes": "Notes",
-      "bonuses": "Bonuses"
+      "bonuses": "Bonuses",
+      "population": "Population"
     },
     "structureBrowserNav": {
       "buildable": "Buildable",
@@ -381,6 +654,15 @@
       "cavalry": "Cavalry",
       "siege": "Siege",
       "infantry": "Infantry"
+    },
+    "armyAttackType": {
+      "melee": "Melee",
+      "ranged": "Ranged",
+      "both": "Melee & Ranged"
+    },
+    "armySaveBonus": {
+      "high": "High",
+      "low": "Low"
     },
     "settlementBlockShape": {
       "twoByTwo": "2x2",
@@ -410,7 +692,8 @@
     "campingSection": {
       "prepareCampsite": "Prepare Campsite",
       "campingActivities": "Camping Activities",
-      "eating": "Eating"
+      "eating": "Eating",
+      "setWatches": "Set Watches"
     },
     "kingdomTurnNav": {
       "upkeep": "Upkeep",
@@ -420,6 +703,7 @@
       "civic": "Civic",
       "army": "Army",
       "event": "Event",
+      "clock": "Campaign",
       "xp": "XP",
       "end": "End"
     },
@@ -429,7 +713,16 @@
       "settlements": "Settlements",
       "tradeAgreements": "Trade Agreements",
       "modifiers": "Modifiers",
-      "notes": "Notes"
+      "quests": "Quests",
+      "notes": "Notes",
+      "roster": "Roster",
+      "party": "Party Influence",
+      "sessionPrep": "Session Prep",
+      "campaign": "Campaign",
+      "armyPressure": "Army & Pressure",
+      "pacing": "Pacing",
+      "analytics": "Analytics",
+      "expeditions": "Expeditions"
     },
     "addSettlementBlock": {
       "title": "Add Settlement Block",
@@ -437,7 +730,236 @@
       "y": "Location Y",
       "success": "Placed block onto scene {sceneName}!"
     },
+    "factionAttitude": {
+      "hostile": "Hostile",
+      "unfriendly": "Unfriendly",
+      "indifferent": "Indifferent",
+      "friendly": "Friendly",
+      "helpful": "Helpful"
+    },
     "kingdom": {
+      "analytics": {
+        "title": "Campaign Analytics & Trends",
+        "timeWindow": "Time Window",
+        "turns": "Turns",
+        "windowAll": "All Turns",
+        "emptyState": "No historical turn records available yet. Complete a turn to start gathering metrics.",
+        "statMin": "Min",
+        "statMax": "Max",
+        "statMean": "Mean",
+        "unrest": "Unrest",
+        "resourcePoints": "Resource Points (RP)",
+        "consumption": "Consumption",
+        "fame": "Fame",
+        "xpAwarded": "XP Awarded",
+        "warPressure": "War Pressure",
+        "pressurePerTurn": "War Pressure Rate",
+        "level": "Kingdom Level",
+        "size": "Kingdom Size",
+        "ruinCorruption": "Ruin: Corruption",
+        "ruinCrime": "Ruin: Crime",
+        "ruinDecay": "Ruin: Decay",
+        "ruinStrife": "Ruin: Strife",
+        "targetLevelMax": "Level Match Tolerance Max",
+        "targetLevelMin": "Level Match Tolerance Min",
+        "playerViewNote": "Player view — showing unrest, fame, RP, kingdom size, and level trends only. GM-only series (consumption, XP, war pressure, ruin) are hidden."
+      },
+      "turnWizard": {
+        "title": "Kingdom Turn Assistant",
+        "openButton": "Turn Assistant",
+        "checklistTitle": "Pre-Turn Checklist",
+        "runUpkeep": "Run Upkeep",
+        "upkeepSummary": "Upkeep Phase Summary",
+        "upkeepAlreadyDone": "All Upkeep checklist steps are already satisfied.",
+        "recapTitle": "Turn {turn} Recap",
+        "recapDeltas": "Stat Changes",
+        "recapNotes": "Turn Gazette Notes",
+        "recapWarPressure": "War Pressure",
+        "recapXpAwarded": "XP Awarded",
+        "upkeepStepAlreadyDone": "This upkeep step is already done this turn — uncheck it in the Turn Wizard to re-run.",
+        "checklist": {
+          "gainFame": "Gain 1 Fame point",
+          "adjustUnrest": "Adjust Unrest",
+          "collectResources": "Collect Resource Dice",
+          "payConsumption": "Pay Consumption",
+          "leadershipPhase": "Leadership Phase",
+          "civicPhase": "Civic Phase",
+          "regionPhase": "Region Phase",
+          "commercePhase": "Commerce Phase",
+          "armyPhase": "Army Phase",
+          "checkEvents": "Check Ongoing Events",
+          "questsFailing": "Quests failing this turn",
+          "warThreatsMax": "War threats at maximum escalation",
+          "expeditionsAwaiting": "Expeditions awaiting resolution",
+          "companionsInjured": "Companions injured"
+        },
+        "stateTitle": "Kingdom State",
+        "state": {
+          "rp": "Resource Points",
+          "commodities": "Commodities",
+          "consumption": "Consumption",
+          "unrest": "Unrest",
+          "ruin": "Ruin",
+          "modifiers": "Active Modifiers"
+        },
+        "capsTitle": "Activity Caps",
+        "caps": {
+          "leadership": "Leadership: {current}/{max}",
+          "civic": "Civic: {current}/{max}",
+          "region": "Region: {current}/{max}",
+          "army": "Army: {current}/{max}",
+          "commerce": "Commerce: {current}/{max}"
+        },
+        "previewTitle": "End-Turn Preview",
+        "preview": {
+          "empty": "No recorded activities this turn",
+          "changeRp": "RP: {old} → {new}",
+          "changeFame": "Fame: {old} → {new}",
+          "changeConsumption": "Consumption: {old} → {new}",
+          "expiredModifiers": "{count} modifier(s) expired",
+          "tributeRp": "Vassal Tribute: +{amount} RP"
+        },
+        "commit": "Complete Turn",
+        "cancel": "Cancel",
+        "previewButton": "Preview Turn",
+        "journalSummary": "Turn summary written to journal"
+      },
+      "fame": "Fame",
+      "current": "Current",
+      "available": "Available",
+      "exportToJournal": "Export to Journal",
+      "exportToWorldAnvil": "Export for World Anvil",
+      "exportToWorldAnvilTooltip": "Export kingdom data as BBCode/HTML files for manual import into World Anvil",
+      "importFromObsidian": "Import from Obsidian",
+      "openObsidian": "Open Obsidian",
+      "obsidianImportSuccess": "Successfully imported Obsidian data: {details}",
+      "obsidianImportError": "Error importing Obsidian data: {error}",
+      "obsidianExportSuccess": "Successfully exported Kingdom summary to Journal folder: {folder}!",
+      "companionArrival": "<b>{name}</b> has arrived at Hex <b>{x}, {y}</b>!",
+      "companionInjured": "{name} was injured on the expedition.",
+      "companionLeveledUp": "{name} has leveled up to Level {level}!",
+      "companionRecovered": "{name} has recovered from their injuries.",
+      "expeditionRewardApplied": "Expedition rewards for {name} have been applied.",
+      "expeditionLootApplied": "Recovered {rp} resource points from the expedition's haul.",
+      "expeditionCommoditiesApplied": "The expedition brought home commodities: {food} food, {lumber} lumber, {ore} ore.",
+      "expeditionRestHealed": "The recuperation expedition shaved {days} day(s) off recovering companions.",
+      "expeditionFactionStandingApplied": "Diplomacy expedition shifted {name}'s standing by {delta}.",
+      "expeditionFactionStandingMissing": "Faction \"{name}\" no longer exists, so the expedition's standing change ({delta}) was not applied — adjust it manually if needed.",
+      "expeditionBatchResolved": "Resolved {count} expedition rewards.",
+      "companionQuestFailed": "Personal Quest Failed: {name} ran out of time to complete '{quest}'.",
+      "sessionPrep": {
+        "title": "Session Prep",
+        "help": "A read-only snapshot to prep before play: open quests, deadlines, unresolved events, hex hooks, companion moments, and pending encounters. GM-only sections are hidden from players.",
+        "emptyAll": "Nothing to prepare — the kingdom is quiet for now.",
+        "openQuests": "Open Quests",
+        "noOpenQuests": "No open quests",
+        "activeClocks": "Active Campaign Clocks",
+        "noActiveClocks": "No active campaign clocks",
+        "turnsRemaining": "turns remaining",
+        "unresolvedEvents": "Unresolved Kingdom Events",
+        "noUnresolvedEvents": "No unresolved events",
+        "hexHooks": "Hex Content Hooks",
+        "noHexHooks": "No hex content hooks",
+        "companionMoments": "Companion Moments",
+        "noCompanionMoments": "No active companion moments",
+        "companionExpeditions": "Companion Expeditions",
+        "noCompanionExpeditions": "No active companion expeditions",
+        "pendingEncounters": "Pending Encounters",
+        "noPendingEncounters": "No pending encounters",
+        "markAsRun": "Mark as Run",
+        "markAsRunTooltip": "Mark this queued encounter as run",
+        "generateNarrative": "Generate Narrative",
+        "generateNarrativeTooltip": "Generate a narrative recap of the session prep data",
+        "narrativeEmpty": "No session prep data available to generate a narrative from.",
+        "exportToJournal": "Export to Journal",
+        "exportToJournalTooltip": "Export session prep to a Foundry Journal Entry",
+        "exportSuccess": "Successfully exported Session Prep to Journal folder: {folder}!",
+        "recentTurns": "Recent Turns",
+        "noRecentTurns": "No turn history recorded yet",
+        "turnLabel": "Turn"
+      },
+      "quests": {
+        "addQuest": "Add Quest",
+        "editQuest": "Edit Quest",
+        "activeQuests": "Active Objectives",
+        "completedQuests": "Completed Chronicles",
+        "giver": "Quest Giver",
+        "type": {
+          "explore_hex": "Explore Hex",
+          "claim_hex": "Claim Hex",
+          "build_structure": "Build Structure",
+          "clear_hex": "Clear Hex",
+          "assign_leader": "Assign Leader",
+          "other": "Other",
+          "combat": "Combat",
+          "exploration": "Exploration",
+          "roleplay": "Roleplay",
+          "political": "Political",
+          "crafting": "Crafting",
+          "travel": "Travel"
+        },
+        "category": {
+          "main_story": "Main Story",
+          "side": "Side Quest",
+          "mythic": "Mythic",
+          "companion": "Companion"
+        },
+        "target": "Target",
+        "rewards": "Bounty Rewards",
+        "completeQuest": "Complete Quest",
+        "reopenQuest": "Reopen Quest (undo completion)",
+        "reopened": "Quest \"{name}\" reopened; its completion rewards were reversed.",
+        "reopenStale": "Quest \"{name}\" was completed on an earlier turn; kingdom resources may have changed since, so the reversal is approximate — verify RP/unrest/commodities.",
+        "deleteQuest": "Delete Quest",
+        "hiddenBadge": "Hidden",
+        "levelBadge": "Lvl",
+        "createdAt": "Created",
+        "updatedAt": "Updated",
+        "filter": {
+          "titlePlaceholder": "Search quests…",
+          "levelRange": "Filter by level range",
+          "min": "min",
+          "max": "max",
+          "visibility": "Visibility",
+          "visibilityAll": "All",
+          "visibilityVisible": "Visible only",
+          "visibilityHidden": "Hidden only",
+          "category": "Filter by category",
+          "categoryAll": "All categories",
+          "clear": "Clear filters",
+          "noMatches": "No quests match the current filters."
+        },
+        "completed": "Quest Completed",
+        "flavorTextCompleted": "Completion Story / Details",
+        "fields": {
+          "title": "Title",
+          "giver": "Quest Giver",
+          "type": "Quest Type",
+          "category": "Quest Category",
+          "level": "Level",
+          "levelHelp": "Recommended party level for this quest (0 = none).",
+          "target": "Target",
+          "description": "Description",
+          "flavorTextCompleted": "Completion Flavor Text",
+          "notes": "GM Notes",
+          "notesHelp": "Private notes visible only to the GM. Not shown to players.",
+          "hidden": "Hidden from Players",
+          "hiddenHelp": "When checked, this quest is greyed out for the GM and not shown to players at all.",
+          "source": "Source / Reference",
+          "sourceHelp": "Where this quest comes from — an adventure book and page, a URL, or any reference.",
+          "rp": "RP Reward",
+          "xp": "XP Reward",
+          "unrest": "Unrest Adjustment",
+          "food": "Food Reward",
+          "lumber": "Lumber Reward",
+          "stone": "Stone Reward",
+          "ore": "Ore Reward",
+          "luxuries": "Luxuries Reward",
+          "rewardOther": "Other / Custom Reward",
+          "rewardOtherHelp": "Freeform bounty text for rewards that aren't tracked resources — a magic item, a title, a favor, land, etc."
+        },
+        "optional": "Optional"
+      },
       "settlementLayoutTypeHelp": "Rigid: Predefined layout like in rules, allows to level up settlements and place settlement blocks automatically. Free Form: Manually copy settlement tiles anywhere on the scene",
       "canLevelUpTo": "Level Up To: {target}",
       "capitalCanGrowOneSizeLarger": "Capital can grow one size larger",
@@ -448,7 +970,36 @@
       "fishingFleets": "Fishing Fleets",
       "deleteSettlement": "Delete Settlement {name}",
       "confirmDeleteSettlement": "Do really you want to delete settlement {name} and its scene?",
+      "confirmDelete": {
+        "bonusFeat": "Delete bonus feat {name}? This cannot be undone.",
+        "warThreat": "Delete war threat {name}? This cannot be undone.",
+        "quest": "Delete quest {name}? This cannot be undone.",
+        "companion": "Delete companion {name}? This cannot be undone.",
+        "modifier": "Delete modifier {name}? This cannot be undone.",
+        "group": "Delete faction {name}? This also destroys its entire standing history and cannot be undone.",
+        "event": "Delete ongoing event {name}? This cannot be undone."
+      },
+      "warfare": {
+        "mired": "Mired",
+        "pinned": "Pinned",
+        "weary": "Weary",
+        "damaged": "Damaged",
+        "routed": "Routed",
+        "destroyed": "Destroyed"
+      },
       "deleteSettlementScene": "Delete Scene",
+      "overview": "Overview",
+      "detailedMatrix": "Detailed Matrix",
+      "statistic": "Statistic",
+      "lots": "Lots",
+      "itemLevels": "Maximum Item Levels",
+      "baseItemLevel": "Base Item Level",
+      "alchemicalItemLevel": "Alchemical Item Level",
+      "magicItemLevel": "Magic Item Level",
+      "arcaneItemLevel": "Arcane Item Level",
+      "divineItemLevel": "Divine Item Level",
+      "primalItemLevel": "Primal Item Level",
+      "luxuryItemLevel": "Luxury Item Level",
       "utilities": "Utilities",
       "increasedRuinPenalty": "Increased {ruin} penalty by 1",
       "firstArmies": "Muster your People",
@@ -458,6 +1009,19 @@
       "noRecruitableArmiesFolderFound": "No Recruitable Armies folder configured or configured one was deleted. You can setup a new folder under Kingdom -> Creation or configure an existing one in settings",
       "capStructureBonusAtKingdomLevel": "Cap Structure Bonuses at Kingdom Level",
       "capStructureBonusAtKingdomLevelHelp": "If disabled, maximum item bonuses are only limited by the settlement level. If enabled, all structure item bonuses are additionally limited by the maximum attainable settlement level at that point. Enable this if you want your capital to grow larger than your settlements while still staying at the expected maximum item bonus.",
+      "pacingAlertsSettings": "Pacing Advisories",
+      "pacingMaxTurnGap": "Stagnation / Event Gap Threshold",
+      "pacingMaxTurnGapHelp": "How many turns of unchanged unrest, or turns without a kingdom event, before a pacing advisory warns you. A reminder repeats at double this value.",
+      "pacingMinUnrestDelta": "Minimum Unrest Delta",
+      "pacingMinUnrestDeltaHelp": "Minimum change in unrest required to reset the stagnation counter. Unrest changes smaller than this count as stagnating. Default: 1 (only unchanged unrest triggers).",
+      "pacingLevelMismatchRange": "Level Mismatch Tolerance",
+      "pacingLevelMismatchRangeHelp": "How far the kingdom level may drift from the target level before a pacing advisory warns you. Double this difference escalates it to critical.",
+      "pacingLootImbalanceEnabled": "Flag Excessive Item Access",
+      "pacingLootImbalanceEnabledHelp": "When enabled, warns if your settlements grant access to items far above the party's level, which can break the wealth-by-level curve.",
+      "pacingChapterTargetLevel": "Chapter Target Level",
+      "pacingChapterTargetLevelHelp": "Pace level and loot advisories against this fixed campaign level instead of the party's average. 0 tracks the party.",
+      "pacingLootImbalanceRange": "Item Access Tolerance",
+      "pacingLootImbalanceRangeHelp": "How far settlement item access may outpace the target level before the loot advisory fires. Defaults to the level mismatch tolerance.",
       "firstTurnNotice": "On your first turn after founding your kingdom, skip the Adjust Unrest and Pay Consumption steps.",
       "failedToCompleteStructure": "Failed to complete structure; it is delayed further.",
       "spendRp": "Spend RP",
@@ -503,6 +1067,194 @@
       "kingdomCultTableHelp": "If none selected, falls back to the Random Cult Events table in this module's Roll Tables compendium",
       "kingdomEventRollMode": "Kingdom Event Roll Mode",
       "companionGuide": "Companion Guide",
+      "roster": {
+        "title": "Companion & NPC Roster",
+        "addCompanion": "Add Companion/NPC",
+        "editCompanion": "Edit Companion/NPC",
+        "name": "Name",
+        "role": "Role",
+        "companion": "Companion",
+        "npc": "NPC",
+        "speed": "Speed (hexes/day)",
+        "destination": "Destination",
+        "eta": "ETA (turns)",
+        "traveling": "Traveling",
+        "active": "Active",
+        "plotHook": "Plot Hook / GM Notes",
+        "actions": "Actions",
+        "edit": "Edit",
+        "delete": "Delete",
+        "save": "Save",
+        "cancel": "Cancel",
+        "noCompanions": "No companions or NPCs on the roster yet. Add one to get started!",
+        "actorSearch": "Search Actors",
+        "searchPlaceholder": "Type actor name...",
+        "search": "Search",
+        "linkActor": "Link Actor",
+        "linkedActor": "Linked Actor",
+        "namePlaceholder": "Enter companion or NPC name...",
+        "actorSearchHint": "Search for an existing actor to link. Linked actors auto-populate name and portrait.",
+        "noResults": "No matching actors found",
+        "status": "Status",
+        "yes": "Yes",
+        "no": "No",
+        "duplicateName": "A companion with this name already exists.",
+        "invalidSpeed": "Speed must be a positive number.",
+        "confirmDelete": "Are you sure you want to remove {name} from the roster?"
+      },
+      "party": {
+        "title": "Party Influence",
+        "influence": "Influence",
+        "noMembers": "No party members found. Add characters to your party actor.",
+        "noCompanions": "No companions or NPCs in the roster yet. Add them on the Roster tab."
+      },
+      "companion": {
+        "influenceAttemptUsed": "Already made an Influence attempt this camping session (house rule). Use \"Allow another\" to override.",
+        "discoveryAttemptUsed": "Already made a Discover attempt this camping session (house rule). Use \"Allow another\" to override.",
+        "allowAnother": "Allow another attempt this session (GM)",
+        "careerLabel": "Expedition Record",
+        "careerSummary": "Veteran of {count} expeditions ({triumphs} triumphs, {scars} scars)",
+        "profile": "Companion Profile",
+        "influence": "Influence",
+        "campAvailable": "Available at Camp",
+        "discoveryStatus": "Discovery Status",
+        "discovery": {
+          "unknown": "Unknown",
+          "introduced": "Introduced",
+          "established": "Established",
+          "trusted": "Trusted",
+          "bonded": "Bonded"
+        },
+        "personalQuests": "Personal Quests",
+        "addPersonalQuest": "Add Personal Quest",
+        "editPersonalQuest": "Edit Personal Quest",
+        "noPersonalQuests": "No personal quests yet.",
+        "openProfile": "Profile",
+        "inCamp": "In Camp",
+        "notInCamp": "Away",
+        "questHook": "Quest Hook",
+        "gmOnly": "GM Only",
+        "cannotDeleteHasQuests": "This companion has active personal quests. Resolve or abandon them before removing the companion.",
+        "quest": {
+          "title": "Title",
+          "description": "Description",
+          "turns": "Turns Remaining (blank = no deadline)",
+          "turnsRemaining": "Turns Remaining",
+          "influenceReward": "Influence Reward",
+          "xp": "XP Reward",
+          "complication": "Complication: A significant setback has occurred in this personal quest.",
+          "visibleToPlayers": "Visible to Players",
+          "complete": "Complete Quest",
+          "reopen": "Reopen Quest (undo completion)",
+          "reveal": "Reveal to Players",
+          "hide": "Hide from Players",
+          "status": {
+            "active": "Active",
+            "completed": "Completed",
+            "failed": "Failed",
+            "abandoned": "Abandoned"
+          }
+        },
+        "level": "Level",
+        "xp": "XP",
+        "injured": "Injured",
+        "days": "Days",
+        "cannotDeleteOnExpedition": "This companion is currently on an expedition. Resolve or recall it before removing the companion.",
+        "sendOnExpedition": "Send on Expedition",
+        "recallFromExpedition": "Recall from Expedition",
+        "noExpeditions": "No expedition history.",
+        "currentExpeditions": "Current Expeditions",
+        "pastExpeditions": "Past Expeditions",
+        "expeditionStatusLabel": "Expedition Status",
+        "expeditionStatus": {
+          "available": "Idle",
+          "onExpedition": "On Expedition",
+          "onExpeditionDays": "{title}, returns in {days}d",
+          "unavailable": "Recovering",
+          "recoveringDays": "Recovering ({days}d)"
+        }
+      },
+      "expedition": {
+        "tier": {
+          "routine": "Routine",
+          "standard": "Standard",
+          "perilous": "Perilous"
+        },
+        "status": {
+          "inProgress": "In Progress",
+          "awaitingResolution": "Awaiting Resolution",
+          "resolved": "Resolved",
+          "cancelled": "Cancelled"
+        }
+      },
+      "expeditions": {
+        "title": "Expeditions",
+        "noExpeditions": "No expeditions are currently active.",
+        "addExpedition": "Launch Expedition",
+        "resolveAll": "Resolve All",
+        "cancel": "Cancel",
+        "resolve": "Resolve",
+        "activity": "Activity",
+        "selectActivity": "Select an activity...",
+        "companions": "Companions",
+        "companionsHint": "Choose which companions are setting out on this expedition.",
+        "tier": "Tier",
+        "tierHint": "Routine (2 days, DC 14) / Standard (3 days, DC 18) / Perilous (5 days, DC 22)",
+        "tiers": {
+          "routine": "Routine",
+          "standard": "Standard",
+          "perilous": "Perilous"
+        },
+        "daysRemaining": "Days Remaining",
+        "xp": "XP",
+        "loot": "Loot",
+        "influence": "Influence",
+        "resolution": "Resolution",
+        "launch": "Launch",
+        "notes": "GM Notes",
+        "notesPlaceholder": "Any private notes about this expedition...",
+        "visibleToPlayers": "Visible to Players",
+        "targetQuest": "Target Personal Quest",
+        "targetQuestNone": "— None —",
+        "targetQuestHint": "For a personal-quest expedition, pick which quest it completes (so the reward lands on the right one).",
+        "targetFaction": "Target Faction",
+        "targetFactionNone": "— None —",
+        "targetFactionHint": "Only used by diplomacy expeditions: the faction whose standing shifts when the reward is applied.",
+        "diplomacyRequiresFaction": "A diplomacy expedition needs a target faction — pick one before launching.",
+        "destination": "Destination",
+        "destinationNone": "— None (abstract) —",
+        "destinationHint": "Optional: round-trip travel from your nearest settlement is added to the duration. Diplomacy missions sent to a faction's trade hub target that faction automatically.",
+        "destinationSettlements": "Settlements",
+        "destinationHexes": "Claimed Hexes",
+        "destinationHubs": "Faction Trade Hubs",
+        "destinationExplored": "Explored Hexes",
+        "destinationUncharted": "Uncharted Wilderness",
+        "intel": {
+          "routine": "Scouts return with a rough sketch of the nearby trails and a rumor or two — enough for the GM to seed a minor lead.",
+          "standard": "Scouts map the region in detail: a hidden cache, a wary neighbor, and the lay of the land. The GM gains a solid hook.",
+          "perilous": "Scouts penetrate deep and return with hard intelligence — an enemy's strength, a secret way, a looming threat. The GM gains a major revelation."
+        },
+        "companionsFallback": "Companions",
+        "standingDelta": "Faction standing change from this expedition",
+        "tooMany": "Too many active expeditions (max 3). Resolve or cancel one before launching another.",
+        "cancelConfirm": "Cancel this expedition? The companions will return immediately with no rewards.",
+        "legendaryReward": "Legendary Reward",
+        "majorReward": "Major Reward",
+        "minorReward": "Minor Reward",
+        "failure": "Failure (No Reward)",
+        "sendoff": "Setting out on {title}: {names} — expected back in {days} days.",
+        "homecoming": "{names} returned from {title}.",
+        "activities": {
+          "escortCaravan": "Escort Caravan",
+          "exploreFrontier": "Explore Frontier",
+          "scoutRuins": "Scout Ruins",
+          "huntGame": "Hunt Game",
+          "mapsRoutes": "Map Routes",
+          "clearMonsters": "Clear Monsters",
+          "protectSettlement": "Protect Settlement",
+          "recoverArtifact": "Recover Artifact"
+        }
+      },
       "reduceDCToBuildLumberStructures": "Reduce DC for building Structures made out of Lumber by 2",
       "expandMagicUse": "Expand Magic Use",
       "expandMagicUseHelp": "When enabled, you can use Magic for the following activities: Celebrate Holiday, Craft Luxuries, Create a Masterpiece, and Rest and Relax",
@@ -514,11 +1266,73 @@
       "capitalInvestmentInCapital": "Enable Capital Investment in Capital without Bank",
       "includeCapitalItemModifier": "Enable Capital Item Modifier Fallback",
       "includeCapitalItemModifierHelp": "If enabled, falls back to the item bonus of the capital if it is higher than the currently selected settlement",
+      "enableCouncilMissions": "Enable Council Missions",
+      "enableCouncilMissionsHelp": "If checked, enables the custom Council active role missions in the sidebar of the Turn phase.",
+      "councilMissions": {
+        "title": "Council Missions",
+        "ready": "Ready",
+        "cooldown": "Cooldown ({turns} {turns, plural, =1 {turn} other {turns}})",
+        "unavailable": "Unavailable",
+        "audit": {
+          "btn": "Espionage Audit (+10 RP)",
+          "chat": "Treasurer performs Espionage Audit, gaining +10 RP.",
+          "help": "Requires Treasurer. Gain +10 RP. (Cooldown: 4 turns)"
+        },
+        "scrying": {
+          "btn": "Arcane Scrying (-4 RP)",
+          "chat": "Magister performs Arcane Scrying, granting a +2 circumstance bonus to Exploration checks for 1 turn.",
+          "help": "Requires Magister. Cost: 4 RP. Adds a +2 circumstance modifier to all Exploration skill checks for 1 turn. (Cooldown: 3 turns)"
+        },
+        "lockdown": {
+          "btn": "Border Lockdown (-2 RP)",
+          "chat": "Warden enforces Border Lockdown, reducing Unrest by 2.",
+          "help": "Requires Warden. Cost: 2 RP. Reduce Unrest by 2. (Cooldown: 5 turns)"
+        },
+        "feast": {
+          "btn": "Feast of Plenty (-3 Food)",
+          "chat": "Counselor organizes a Feast of Plenty, reducing Unrest by 1 and granting a +1 status bonus to Loyalty checks for 1 turn.",
+          "help": "Requires Counselor. Cost: 3 Food. Adds a +1 status modifier to all Loyalty ability checks for 1 turn, and reduces Unrest by 1. (Cooldown: 4 turns)"
+        }
+      },
+      "turnGazette": {
+        "tribute": "Tribute: +{tributeRp} RP collected from vassal states",
+        "activities": "Activities: {activities}",
+        "expansion": "Expansion: Claimed {sizeChange} hex(es) (Size: {currentSize})",
+        "caravanDeliveredRd": "Caravan delivered: {summary} (+{bonusResourceDice} RD)",
+        "caravanDeliveredAmount": "Caravan delivered: {summary} (delivered {deliveredAmount})",
+        "caravanRaided": "Caravan raided: {summary} (lost {cargoLost})",
+        "caravanLost": "Caravan lost: {summary}",
+        "caravans": "Caravans: {list}",
+        "shipmentArrived": "Shipment arrived: {summary}",
+        "shipmentRaided": "Shipment raided: {summary} (lost {cargoLost})",
+        "shipmentLost": "Shipment lost: {summary}",
+        "shipments": "Shipments: {list}",
+        "campaignClocks": "Campaign Clocks: {clocks}",
+        "expeditionCriticalSuccess": "🏆 {title} — {companionNames}{loot}{faction}",
+        "expeditionSuccess": "✅ {title} — {companionNames}{loot}{faction}",
+        "expeditionFailure": "❌ {title} — {companionNames}{loot}{faction}",
+        "expeditionCriticalFailure": "💀 {title} — {companionNames}{loot}{faction}",
+        "expeditionOther": "{outcomeLabel} {title} — {companionNames}{loot}{faction}",
+        "expeditions": "Expeditions: {list}"
+      },
       "xpRules": "XP Rules",
       "xpRulesHelp": "Adds additional milestones, gain XP buttons and increases XP for claiming hexes and converting XP based on kingdom level",
+      "vkCharterExtraSkills": "V&K: Extra Charter Skill",
+      "vkCharterExtraSkillsHelp": "Grants one additional trained skill proficiency from the kingdom's charter during creation",
+      "vkHeartlandExtraSkills": "V&K: Extra Heartland Skill",
+      "vkHeartlandExtraSkillsHelp": "Grants one additional trained skill proficiency from the kingdom's heartland during creation",
+      "vkExtraAbilityBoost": "V&K: Extra Ability Boost",
+      "vkExtraAbilityBoostHelp": "Grants one additional free ability boost during kingdom creation",
       "rpToXpConversionRate": "RP to XP Conversion Rate",
       "xpPerClaimedHex": "XP per Claimed Hex",
       "rpToXpConversionLimit": "RP to XP Conversion Limit",
+      "autoGainFamePerTurn": "Auto Gain Fame Per Turn",
+      "autoGainFamePerTurnHelp": "Automatically gain 1 Fame point at the end of each kingdom turn (up to the maximum)",
+      "showFameInTurnWizard": "Show Fame in Turn Wizard",
+      "showFameInTurnWizardHelp": "Display the current Fame points in the End Turn wizard dialog",
+      "xpAwarded": "XP Awarded",
+      "fameNow": "Fame",
+      "autoGainFame": "Auto Gain Fame",
       "enableLeadershipModifiers": "Use Leadership Modifiers",
       "enableLeadershipModifiersHelp": "Replaces Invested Status Bonus with Bonuses based on PC skill ranks",
       "configureLeaderSkills": "Leader Skills",
@@ -533,6 +1347,22 @@
       "rpPerStructure": "Max RP per Structure",
       "settlementsGenerateRd": "Settlements Generate Resource Dice",
       "partialStructureConstruction": "Partial Structure Construction",
+      "terrain": "Terrain",
+      "enableRoughTerrainCosts": "Enable Rough Terrain Costs",
+      "enableRoughTerrainCostsHelp": "When enabled, building structures in forest, swamp, or mountain terrain costs 50% more materials (lumber, ore, stone, luxuries). Resource Points are not affected.",
+      "terrainCostWarning": "Building in {terrain} terrain: material costs increased by 50%",
+      "anarchyActivityGatingSettings": "Anarchy Activity Gating",
+      "enableAnarchyActivityGating": "Gate Activities During Anarchy",
+      "enableAnarchyActivityGatingHelp": "When enabled, only Quell Unrest activities can be performed during anarchy. All other activities are disabled with an explanatory tooltip.",
+      "activityDisabledDuringAnarchy": "This activity cannot be performed during anarchy",
+      "turnWizardPhaseGatingSettings": "Turn Wizard & Phase Gating",
+      "enableStrictPhaseGating": "Strict Phase Gating",
+      "enableStrictPhaseGatingHelp": "When enabled, checklist items in the Turn Wizard must be completed in order. Furthermore, sheet activities are locked until their corresponding phase is active.",
+      "activityPhaseGated": "Locked: Current turn step is {activePhase} (this activity is {phase}).",
+      "calendarIntegrationSettings": "Calendar Integration",
+      "enableCalendarMonthEndTurn": "Prompt End Turn on Month Change",
+      "enableCalendarMonthEndTurnHelp": "When enabled, you will be prompted to perform a Kingdom End Turn whenever the active calendar month changes.",
+      "calendarMonthEndTurnPrompt": "Calendar Month has advanced to {month}! Make sure to perform your monthly Kingdom End Turn.",
       "kingdomSkillIncreaseEveryLevel": "Kingdom Skill Increase Every Level",
       "kingdomSettings": "Kingdom Settings",
       "numActions": "{count, plural, =1 {1 Action} other {# Actions}}",
@@ -641,6 +1471,13 @@
       "confirmDeleteCamping": "Do you really want to erase all camping data from actor {actorName}?",
       "uploadKingdomJson": "Upload Kingdom JSON File",
       "uploadCampingJson": "Upload Camping JSON File",
+      "import": {
+        "parseError": "Import failed: the file is not valid JSON.",
+        "wrongKind": "Import failed: this file is not the expected kind (kingdom vs camping).",
+        "newerVersion": "Import failed: this file was exported from a newer module version than you have installed.",
+        "noVersionStamp": "This file has no version stamp (or is very old). Imported data may need manual review and will NOT be migrated. Import anyway?",
+        "success": "Import successful."
+      },
       "manageActivities": "Manage Activities",
       "resourceDice": "Resource Dice",
       "luxurySources": "Luxury Sources",
@@ -679,6 +1516,7 @@
       "governments": "Governments",
       "heartlands": "Heartlands",
       "milestones": "Milestones",
+      "hex-content": "Hex Content Manager",
       "gainingPointsToRuins": "Gaining points to Ruin (distribute as you wish)",
       "losingHexOnFlatCheck": "Losing Hex on a Flat Check 11",
       "loseHexOfChoice": "You lose one hex of your choice",
@@ -741,10 +1579,75 @@
       "clearFilters": "Clear Filters",
       "buildStructure": "Build",
       "settlement": "Settlement",
+      "settlementUnlockedAccess": "Unlocked Access",
+      "settlementItemPurchaseLevel": "Item Purchase Level",
+      "settlementTrainers": "Trainers",
+      "settlementCraftingAccess": "Crafting Access",
+      "settlementNone": "None",
+      "class": {
+        "cleric": "Cleric",
+        "oracle": "Oracle",
+        "investigator": "Investigator",
+        "thaumaturge": "Thaumaturge",
+        "psychic": "Psychic",
+        "alchemist": "Alchemist",
+        "gunslinger": "Gunslinger",
+        "inventor": "Inventor",
+        "bard": "Bard",
+        "wizard": "Wizard",
+        "witch": "Witch",
+        "sorcerer": "Sorcerer",
+        "magus": "Magus",
+        "fighter": "Fighter",
+        "barbarian": "Barbarian",
+        "champion": "Champion",
+        "monk": "Monk",
+        "druid": "Druid",
+        "kineticist": "Kineticist",
+        "summoner": "Summoner",
+        "ranger": "Ranger",
+        "rogue": "Rogue",
+        "swashbuckler": "Swashbuckler"
+      },
+      "crafting": {
+        "metallic": "Metallic items",
+        "runes": "Runes",
+        "leather": "Leather",
+        "scrollsWandsStaves": "Scrolls, wands & staves",
+        "amuletsRings": "Amulets and rings",
+        "tomes": "Tomes",
+        "alchemical": "Alchemical items",
+        "wooden": "Wooden items",
+        "other": "Other"
+      },
       "blocks": "Blocks",
       "blocksWithMaximum": "Occupied Blocks (Maximum: {count})",
       "surplus": "Surplus",
-      "population": "Population",
+      "population": {
+        "title": "Population",
+        "name": "Name",
+        "namePlaceholder": "Enter a name…",
+        "occupation": "Occupation",
+        "notes": "Notes",
+        "notesPlaceholder": "Optional notes…",
+        "addNpc": "Add NPC",
+        "editNpc": "Edit NPC",
+        "empty": "No residents recorded yet.",
+        "generateNpcs": "Generate NPCs",
+        "generateNpcsHelp": "Top the roster up to the recommended size for the settlement's current population. Only adds new residents — your edits and deletions are kept.",
+        "rosterAtRecommendedSize": "The roster already has at least the recommended {count} residents for this settlement's population."
+      },
+      "populationRoster": {
+        "title": "Population Roster",
+        "addNpc": "Add NPC",
+        "editNpc": "Edit NPC",
+        "name": "Name",
+        "namePlaceholder": "Enter NPC name...",
+        "occupation": "Occupation",
+        "notes": "Notes",
+        "notesPlaceholder": "Optional notes about this NPC...",
+        "empty": "No NPCs in this settlement yet. Add one to populate it!"
+      },
       "consumption": "Consumption",
       "maxItemBonus": "Max. Item Bonus",
       "influence": "Influence",
@@ -771,10 +1674,28 @@
       "army": "Army",
       "armyPhaseTitle": "Army (1 per army)",
       "armyType": "Type",
+      "armyRecruitmentBrowserTitle": "Available Basic Armies",
+      "armyStats": "Army Stats",
+      "armyTacticsGuide": "Army Tactics Guide",
+      "applicableTypes": "Applicable Types",
+      "grantedActions": "Granted Actions",
+      "requiredLevel": "Required Level",
+      "hitPoints": "Hit Points",
+      "attackType": "Attack Type",
+      "rangedAmmo": "Ranged Ammo",
+      "maneuverSave": "Maneuver Save",
+      "startingTactics": "Starting Tactics",
+      "armyDescription": "Description",
+      "specialFaction": "Special Faction",
+      "accessibility": "Availability",
+      "accessible": "Accessible",
+      "notAccessible": "Special",
       "settlements": "Settlements",
       "farmlands": "Farmlands",
       "food": "Food",
       "totalConsumption": "Total Consumption",
+      "hp": "HP",
+      "attacks": "Attacks",
       "assurance": "Assurance",
       "roll": "Roll",
       "rollWithFortune": "Roll With Fortune",
@@ -787,6 +1708,8 @@
       "skipReduceUnrest": "Reduce Unrest",
       "check": "Check",
       "requirement": "Requirement",
+      "activitiesRemaining": "{remaining} of {max} left",
+      "markActivityPerformed": "Toggle whether this activity has been performed this turn",
       "status": "Status",
       "vacancies": "Vacant Positions",
       "characterSkills": "Character Skills",
@@ -843,7 +1766,33 @@
       "negotiationDc": "Negotiation DC",
       "atWar": "At War",
       "relations": "Relations",
+      "attitude": "Attitude",
+      "adjustStanding": "Adjust Standing",
+      "annexTooltip": "Annex Vassal State",
+      "annexConfirm": "Are you sure you want to annex the vassal state of {name}? This will clear their tribute treaty, increase Unrest by 2, and claim their trade hub hex.",
+      "standingDelta": "Standing Change",
+      "standingDeltaHelp": "Signed change to this faction's standing (e.g. 10 or -15). Standing is clamped to -100..100.",
+      "standingReason": "Reason",
+      "treaty": "Treaty",
+      "standingLog": "Standing Log",
+      "turnNumber": "Turn",
+      "allianceLevel": {
+        "none": "None",
+        "non-aggression": "Non-Aggression Pact",
+        "alliance": "Alliance",
+        "tribute": "Tribute"
+      },
+      "factionStanding": {
+        "drift": "Passive Standing Drift",
+        "expedition": "Diplomacy Expedition",
+        "allianceChange": "Treaty Level Changed",
+        "annexation": "Annexed Vassal State"
+      },
       "newSettlement": "New Settlement",
+      "emptySettlements": "No settlements yet — found your first by clicking New Settlement, or add the current scene.",
+      "emptyModifiers": "No active modifiers. Temporary bonuses and penalties to kingdom checks appear here.",
+      "emptyModifiersCta": "Add Modifier",
+      "emptyEvents": "No active events. Ongoing kingdom events appear here when they trigger.",
       "addCurrentScene": "Add Current Scene",
       "settlementSize": "Settlement Size",
       "view": "View",
@@ -860,6 +1809,77 @@
       "consumptionBreakdown": "Consumption Breakdown",
       "abilityScores": "Ability Scores",
       "worksitesAndResources": "Worksites & Resources",
+      "unclaimedWorksitesNotice": "These work sites sit on unclaimed hexes and produce nothing — claim the hex to gather their Commodities:",
+      "unclaimedWorksiteEntry": "{type} on hex {hex}",
+      "worksiteName": {
+        "quarry": "Quarry",
+        "mine": "Mine",
+        "lumber": "Lumber Camp",
+        "farmland": "Farmland"
+      },
+      "caravans": {
+        "title": "Caravans",
+        "dispatch": "Dispatch Caravan",
+        "dispatchTitle": "Dispatch Caravan to a Trade Partner",
+        "kind": "Trade",
+        "kindSell": "Sell Commodities (gain Resource Dice)",
+        "kindBuy": "Buy Commodities (spend RP)",
+        "kindHelp": "Selling delivers bonus Resource Dice on arrival; buying spends RP now and delivers Commodities on arrival. Rates improve with the partner's standing/treaty.",
+        "notEnoughRp": "Not enough Resource Points to buy that many commodities.",
+        "origin": "Depart from (claimed hex)",
+        "partner": "Trade partner",
+        "partnerHex": "Hex",
+        "commodity": "Commodity",
+        "amount": "Amount",
+        "recall": "Recall",
+        "none": "No caravans in transit.",
+        "eta": "arrives in {turns, plural, =1 {1 turn} other {# turns}}",
+        "noOriginHexes": "Claim at least one hex before dispatching a caravan.",
+        "noPartners": "No trade partner has a map hex set. Add a Hex to a partner in Trade Agreements first.",
+        "allPartnersEmbargoed": "Every trade partner is at war — you cannot dispatch a caravan while all partners are under embargo. Make peace or wait out the war first.",
+        "warOfferTitle": "War Declared — Caravan at Risk",
+        "warDeclaredOffer": "War has broken out with {partner}. This caravan is still in transit and now faces a higher chance of being raided. Recall it to safety, or press on and accept the increased Raid DC.",
+        "caravanWarOfferRecall": "Recall Caravan",
+        "caravanWarOfferPressOn": "Press On (Raid DC +4)",
+        "unreachable": "No route to that trade partner from the chosen hex.",
+        "notEnough": "Not enough of that commodity in storage to load the caravan.",
+        "chatDeliveredRd": "Caravan delivered ({summary}) — gain {rd} bonus Resource Dice next turn.",
+        "chatRdCapped": "Bonus Resource Dice from caravans capped at {cap} this turn (worksite yields would have earned {earned}).",
+        "chatDeliveredCommodity": "Caravan delivered ({summary}) — {amount} Commodities arrived.",
+        "chatRaided": "Caravan raided in transit ({summary}) — lost {lost} cargo.",
+        "chatLost": "Caravan lost to raiders ({summary}).",
+        "shipmentTitle": "Request Caravan Shipment",
+        "itemName": "Item Name",
+        "itemQuantity": "Quantity",
+        "itemLevel": "Item Level",
+        "itemBulk": "Item Bulk",
+        "itemPriceGp": "Price (GP)",
+        "isPurchase": "Purchase new item (adds price to cost)",
+        "destination": "Destination (settlement hex)",
+        "caravanType": "Caravan Type",
+        "typeLight": "Light Caravan",
+        "typeMedium": "Medium Caravan",
+        "typeHeavy": "Heavy Caravan",
+        "sameOriginDest": "Origin and destination settlements must be different.",
+        "dispatchShipment": "Request / Dispatch Shipment",
+        "equipmentShipments": "Equipment Shipments en Route",
+        "needTwoSettlements": "You need at least two settlements with map hexes to request a shipment.",
+        "notEnoughGold": "The kingdom's party treasury does not have enough gold to cover this shipment's costs.",
+        "itemLevelTooHigh": "The item level is higher than the origin settlement's purchase level ({level}).",
+        "chatDeliveredShipment": "Shipment delivered ({summary}) — {amount} items added to Party inventory.",
+        "chatRaidedShipment": "Shipment raided en route ({summary}) — lost {lost} quantity.",
+        "chatLostShipment": "Shipment lost to raiders ({summary}).",
+        "settlementHex": "Realm Map Hex",
+        "settlementHexHelp": "The realm-map hex this settlement occupies (e.g. 5015), required to route caravan shipments to or from it.",
+        "originCustomHex": "Custom origin hex",
+        "destCustomHex": "Custom destination hex",
+        "customHexHelp": "Optional: a realm-map hex key (e.g. 5015) for a location not in the list above, such as a distant city. Overrides the dropdown when filled.",
+        "pickOriginDest": "Pick or enter both an origin and a destination hex.",
+        "noShipmentLocations": "Give at least one settlement or trade-partner faction a realm-map hex first (then you can also enter a custom hex for the other end).",
+        "partyLocation": "The Party (current location)",
+        "typeWithCapacity": "{type} — up to {bulk} Bulk",
+        "overCapacity": "This shipment is {bulk} Bulk, over this caravan's {capacity}-Bulk capacity. Pick a larger caravan or reduce the quantity."
+      },
       "creation": "Creation",
       "bonus": "Bonus",
       "pickBoosts": "Pick {count, plural, =1 {1 Boost} other {# Boosts}}",
@@ -895,9 +1915,151 @@
       "thenCreateCapitalScene": "Then, create a capital scene",
       "importAllStructures": "Import Structures",
       "createACapital": "Create a Capital",
-      "capitalRequirement": "The capital must be located within your Heartland's terrain. The Scene includes blocks, onto which you can place your structures to automatically calculate settlement level. Once a Village qualifies for a level up, you can click the level up button next to the settlement in the Settlements tab to automatically place new blocks. Keep in mind that a settlement must not be overcrowded, requires a minimum kingdom level and has a specific requirements on how many lots must be filled on existing blocks in order to qualify for a level up."
+      "capitalRequirement": "The capital must be located within your Heartland's terrain. The Scene includes blocks, onto which you can place your structures to automatically calculate settlement level. Once a Village qualifies for a level up, you can click the level up button next to the settlement in the Settlements tab to automatically place new blocks. Keep in mind that a settlement must not be overcrowded, requires a minimum kingdom level and has a specific requirements on how many lots must be filled on existing blocks in order to qualify for a level up.",
+      "questGenerator": {
+        "title": "Quest Generator",
+        "generateFromEvent": "Generate Quest",
+        "generatedBadge": "Generated",
+        "generatedFrom": "From: {eventName}",
+        "generate": "Generate",
+        "cancel": "Cancel",
+        "commit": "Add Quest",
+        "open": "Open Quest Generator",
+        "activeCount": "{count} Active",
+        "noEvents": "No kingdom events available to generate quests from.",
+        "preview": {
+          "event": "Select Event",
+          "type": "Type",
+          "urgency": "Urgency",
+          "recommendedLevel": "Recommended Level",
+          "objectives": "Objectives",
+          "rewards": "Rewards"
+        },
+        "settings": {
+          "title": "Quest Generator Settings",
+          "defaultVisibility": "Default Visibility",
+          "defaultVisibilityGmOnly": "GM Only",
+          "defaultVisibilityPlayers": "Visible to Players",
+          "maxActiveQuests": "Max Active Generated Quests",
+          "autoAdvanceTimers": "Auto-Advance Quest Timers"
+        },
+        "regenerate": "Regenerate",
+        "filterGenerated": "Generated Quests",
+        "visibility": {
+          "makeVisible": "Reveal to Players",
+          "makeHidden": "Hide from Players"
+        }
+      },
+      "hexContent": {
+        "managerTitle": "Hex Content Manager",
+        "addNew": "Add Content to Hex",
+        "addContent": "Add Hex Content",
+        "editContent": "Edit Hex Content",
+        "addToHex": "Add Content to Hex",
+        "editForHex": "Edit Content for Hex",
+        "hexKey": "Hex Key",
+        "type": "Type",
+        "name": "Name",
+        "visibility": "Visibility",
+        "gmNotes": "GM Notes",
+        "playerText": "Player Text",
+        "suppressesEncounters": "Suppresses Random Encounters",
+        "travelModifier": "Travel Modifier",
+        "linkedQuestId": "Linked Quest ID",
+        "linkedUuid": "Linked UUID",
+        "linkedReferences": "Linked References",
+        "linkedQuests": "Linked Quests",
+        "linkedDocuments": "Linked Documents",
+        "linkedWarThreat": "Linked War Threat",
+        "noWarThreat": "— None —",
+        "dropHint": "Drag a journal, actor, scene, or item here to link it",
+        "removeLink": "Remove link",
+        "links": "Links",
+        "icon": "Custom Icon (FontAwesome class)",
+        "actions": "Actions",
+        "edit": "Edit",
+        "delete": "Delete",
+        "reveal": "Reveal",
+        "hide": "Hide",
+        "clear": "Clear",
+        "save": "Save",
+        "cancel": "Cancel",
+        "noContent": "No hex content yet. Click \"Add Content to Hex\" to get started."
+      },
+      "homebrewProfile": {
+        "title": "Homebrew Rules Profile",
+        "active": "Active Profile",
+        "manage": "Manage Profiles...",
+        "import": "Import Profile",
+        "export": "Export Profile",
+        "importSuccess": "Profile imported successfully",
+        "importError": "Invalid profile: {reason}",
+        "activate": "Activate",
+        "deactivate": "Deactivate"
+      },
+      "clocks": {
+        "title": "Campaign Clocks",
+        "noClocks": "No campaign clocks active",
+        "remaining": "{remaining} / {max} turns",
+        "expiring": "Expiring next turn!",
+        "expired": "Expired",
+        "paused": "Paused at expiry",
+        "manage": "Manage Clocks",
+        "add": "Add Clock",
+        "edit": "Edit",
+        "delete": "Delete",
+        "pauseOnExpiry": "Pause on expiry (soft-pause)",
+        "turnsRemaining": "Turns remaining",
+        "maxTurns": "Total turns",
+        "expiryMessage": "On expiry",
+        "expiryConsequenceUnrest": "Unrest on expiry",
+        "summary": "{active} active · {expiring} expiring next turn"
+      },
+      "chat": {
+        "clockAdvanced": "{label}: {old} → {remaining} turns remaining",
+        "clockExpired": "{label}: EXPIRED — {message}",
+        "clockTriggered": "{label}: Consequence triggered",
+        "clockPaused": "{label}: Paused at 0 — awaiting GM resolution"
+      },
+      "manageCampaignClocks": "Manage Campaign Clocks",
+      "addCampaignClock": "Add Campaign Clock",
+      "editCampaignClock": "Edit Campaign Clock",
+      "maxTurns": "Total Turns",
+      "turnsRemaining": "Turns Remaining",
+      "pauseOnExpiry": "Pause on Expiry",
+      "expiryMessage": "Expiry Message",
+      "expiryConsequenceUnrest": "Unrest on Expiry",
+      "active": "Active",
+      "created": "Created",
+      "description": "Description",
+      "manageProfiles": "Manage Profiles",
+      "newProfile": "New Profile",
+      "importHomebrewProfile": "Import Homebrew Profile",
+      "homebrewProfileJson": "Homebrew profile JSON",
+      "homebrewImported": "Imported and activated homebrew profile '{name}'.",
+      "homebrewProfileNotFound": "That homebrew profile was not found.",
+      "updated": "Updated",
+      "version": "Version",
+      "delete": "Delete",
+      "feat": "Feat",
+      "turn": {
+        "next": "Next",
+        "cappedByStorage": "Capped by storage capacity",
+        "commodityCappedByStorage": "{commodity} is capped by storage capacity",
+        "endTurnGmOnly": "Only the GM can end the kingdom turn.",
+        "confirmEndTurn": "Are you sure you want to end turn {turn}? This will advance the kingdom to the next turn. You can undo this with \"Undo Last End Turn\" if needed."
+      },
+      "activityLockedUntilTurn": "Available again on turn {turn}"
     },
     "chatMessages": {
+      "calendarBridgeMissing": "<strong>Kingmaker Tools:</strong> Seasons &amp; Stars is active, but the <em>Simple Calendar Compatibility Bridge</em> module is not. Calendar notes (expeditions, weather, end-of-turn and camp summaries) are being silently skipped. Install <a href=\"{url}\">the compatibility bridge</a> (package id <code>{packageId}</code>) to enable them. This notice appears only once.",
+      "calendarTimeAdvanceFailed": "<strong>Kingmaker Tools:</strong> The world clock could not be advanced during rest &mdash; usually a misconfigured Seasons &amp; Stars calendar (a \"Calendar not found\" fallback). Time did not advance; re-select your calendar in the Seasons &amp; Stars settings, or check the console for details. This notice appears only once.",
+      "annexation": {
+        "title": "Vassal State Annexed",
+        "body": "The vassal state of {name} has been formally annexed into the kingdom.",
+        "unrestReason": "Annexation integration",
+        "hexClaimed": "Claimed Hex"
+      },
       "addHuntAndGather": {
         "gained": "{actorName} gained:"
       },
@@ -906,7 +2068,48 @@
         "resetRP": "Setting Resource Points to 0",
         "reduceMods": "Reducing Modifiers' Turns by 1",
         "resetSolutions": "Setting available Supernatural and Creative Solutions to 0",
-        "moveValues": "Adding values from the next columns to the now columns, respecting their resource limits"
+        "moveValues": "Adding values from the next columns to the now columns, respecting their resource limits",
+        "factionStanding": "Faction Standing Changes",
+        "factionStandingChange": "{{group}}: {{oldAttitude}} → {{newAttitude}} ({{delta}})",
+        "raiseWarThreat": "Raise War Threat",
+        "offerDiplomacyQuest": "Offer Diplomacy Quest",
+        "warThreatName": "{{group}} Aggression",
+        "diplomacyQuestTitle": "Diplomatic Accord with {{group}}",
+        "undoEndTurn": "Undo Last End Turn",
+        "undoStale": "This undo is out of date — another End Turn has happened since. Only the most recent End Turn can be undone.",
+        "undoNothing": "Nothing to undo — no End Turn snapshot is available.",
+        "endTurnUndone": "Turn {turn} end reverted; kingdom state restored.",
+        "endTurnUndoneTooltip": "Reverts kingdom state (RP, fame, commodities, unrest, quests, threats, clocks) to before End Turn. Does NOT remove chat messages or calendar notes."
+      },
+      "expeditionResult": {
+        "title": "Companion Expedition: {title}",
+        "expedition": "Expedition",
+        "gmActions": "GM Actions",
+        "applyReward": "Apply Reward",
+        "companionLevelUp": "Level Up Companion",
+        "applyInjury": "Apply Injury",
+        "xpGained": "XP Gained",
+        "influenceGained": "Influence Gained",
+        "lootTier": "Loot Tier",
+        "resolved": "This expedition has been resolved."
+      },
+      "companionAutonomy": {
+        "offerTitle": "Companion Volunteers for Expedition",
+        "offerBody": "The following companions have volunteered for an expedition:",
+        "offerApprove": "Approve",
+        "offerSendElsewhere": "Send on Different Expedition",
+        "offerDecline": "Decline",
+        "noEligible": "No eligible companions available for autonomous expedition.",
+        "personalQuestTag": "Personal Quest",
+        "discoveryTag": "Established+",
+        "influenceLabel": "Influence",
+        "gmActions": "GM Actions",
+        "approvedTitle": "Expedition Approved",
+        "approvedSuffix": "has been dispatched on the expedition.",
+        "approvedMessage": "Approved! The selected companion has been assigned to the expedition.",
+        "declinedMessage": "Declined. The companions remain available.",
+        "sendElsewhereMessage": "Sent on a different expedition. They will return later.",
+        "proposalPitch": "{name} volunteers to pursue {activity} ({tier}, at least {days} days plus travel, costs {rp} RP)"
       },
       "firstRun": {
         "dontShowAgain": "Don't show this again",
@@ -935,6 +2138,60 @@
         "criticalFailure": "Suffer Critical Failure Effect",
         "learn": "Learn {recipeName}",
         "learned": "Learned {recipeName}"
+      },
+      "clockTick": {
+        "title": "Campaign Clocks",
+        "advanced": "Advanced",
+        "expired": "Expired",
+        "unrest": "Unrest",
+        "triggered": "Consequence Triggered",
+        "paused": "Paused at expiry",
+        "totalUnrest": "Total Unrest Change"
+      },
+      "pacingAlert": {
+        "title": "Pacing Advisory",
+        "hint": "Advisory only — adjust the campaign's pressure curve if this looks off.",
+        "jumpToSettlement": "Jump to Settlement"
+      },
+      "expeditionRecap": {
+        "title": "Companion Expedition Complete: {title}",
+        "expedition": "Expedition",
+        "companion": "Companion",
+        "flavor": {
+          "criticalSuccess": "The expedition was a resounding success. Tales of the companion's exploits will be told for seasons.",
+          "success": "The expedition completed successfully. The companion returns with stories to share.",
+          "failure": "The expedition fell short of its goals. The companion returns wiser for the attempt.",
+          "criticalFailure": "The expedition ended in disaster. The companion barely escaped with their life."
+        }
+      },
+      "questDeadline": {
+        "offerTitle": "Quest Deadline Approaching",
+        "offerBody": "The quest {name} is nearing its deadline.",
+        "failNow": "Fail Quest Now",
+        "extendTurns": "Extend by {turns} Turns",
+        "failed": "Quest \"{name}\" has failed — its deadline passed.",
+        "extended": "Quest \"{name}\" extended by {turns} turns."
+      },
+      "warThreatArrival": {
+        "offerTitle": "War Threat Arrived",
+        "offerBody": "The war threat {name} has arrived at the kingdom's borders!",
+        "spawnEvent": "Spawn Kingdom Event",
+        "queueEncounter": "Queue Encounter at Linked Hex",
+        "dismiss": "Dismiss",
+        "spawnedEvent": "Spawned kingdom event for threat {name}.",
+        "queuedEncounter": "Encounter queued for hex {hexKey} linked to threat {name}.",
+        "dismissed": "War threat {name} arrival dismissed.",
+        "eventMissing": "The war-threat-arrival kingdom event definition is missing — cannot spawn an event.",
+        "markedAsRun": "Pending encounter at hex {hexKey} marked as run."
+      },
+      "milestone": {
+        "award": "Award milestone",
+        "dismiss": "Dismiss",
+        "gmActions": "GM: award or dismiss this milestone.",
+        "offerBody": "The kingdom has reached a milestone: <strong>{name}</strong> (+{xp} XP). Award it?",
+        "offerTitle": "Milestone reached!",
+        "awarded": "Milestone awarded: {name} (+{xp} XP).",
+        "dismissed": "Milestone offer dismissed: {name}."
       }
     },
     "displayBars": {
@@ -1569,6 +2826,24 @@
           "message": "Prepare Campsite: Your campsite is a mess. You can use it to rest and to perform daily preparations, but it isn’t good enough to allow for Campsite activities at all. Worse, your attempt to secure a campsite has possibly attracted unwanted attention—attempt a flat check against the zone’s Encounter DC. If successful, a random encounter automatically occurs."
         }
       },
+      "provide-aid": {
+        "name": "Provide Aid",
+        "criticalSuccess": {
+          "message": "You grant your ally a +2 circumstance bonus to the activity. If you’re a master with the check you attempted, the bonus is +3, and if you’re legendary, it’s +4. Circumstance bonuses granted by Provide Aid don’t stack."
+        },
+        "success": {
+          "message": "You grant your ally a +1 circumstance bonus to the activity’s check. Circumstance bonuses granted by Provide Aid don’t stack."
+        },
+        "failure": {
+          "message": "Your assistance has no effect; your ally gains no bonus."
+        },
+        "criticalFailure": {
+          "message": "Your ally takes a –1 circumstance penalty to their activity’s check."
+        }
+      },
+      "relax": {
+        "name": "Relax"
+      },
       "set-alarms": {
         "name": "Set Alarms"
       },
@@ -1607,14 +2882,8 @@
       "basic-meal": {
         "name": "Basic Meal"
       },
-      "berry-pie": {
-        "name": "Berry Pie"
-      },
       "black-linnorm-stew": {
         "name": "Black Linnorm Stew"
-      },
-      "broiled-oysters": {
-        "name": "Broiled Oysters"
       },
       "cheese-crostata": {
         "name": "Cheese Crostata"
@@ -1629,7 +2898,11 @@
         "name": "Giant Scrambled Egg"
       },
       "grilled-silver-eel": {
-        "name": "Grilled Silver Eel"
+        "name": "Grilled Silver Eel",
+        "freeAction": {
+          "name": "Silver Eel's Swiftness",
+          "description": "As a free action, you can move up to 5 additional feet until the end of the current turn. This has no effect on your Speed."
+        }
       },
       "haggis": {
         "name": "Haggis"
@@ -1655,41 +2928,55 @@
       "monster-casserole": {
         "name": "Monster Casserole"
       },
-      "omelet": {
-        "name": "Omelet"
-      },
       "onion-soup": {
         "name": "Onion Soup"
-      },
-      "oysters": {
-        "name": "Oysters"
-      },
-      "ragout": {
-        "name": "Ragout"
       },
       "rice-n-nut-pudding": {
         "name": "Rice-N-Nut Pudding"
       },
       "seasoned-wings-and-thighs": {
-        "name": "Seasoned Wings And Thighs"
+        "name": "Seasoned Wings And Thighs",
+        "reaction": {
+          "name": "Ignite Magic",
+          "description": "When an ally within 30 feet critically fails a spell attack roll or a save against an ally's spell, you can use your reaction to cause the magic to flare. The target takes 2d6 fire damage."
+        }
       },
       "shepherds-pie": {
         "name": "Shepherd's Pie"
       },
-      "smoked-trout-and-hydra-plate": {
+      "succulent-sausages": {
+        "name": "Succulent Sausages",
+        "reaction": {
+          "name": "Careful Casting",
+          "description": "When you would lose a spell because you were disrupted, you can use your reaction to attempt a DC 15 flat check. On a success, you don't lose the spell."
+        }
+      },
+      "sweet-pancakes": {
+        "name": "Sweet Pancakes"
+      },
+      "broiled-tuskwater-oysters": {
+        "name": "Broiled Oysters"
+      },
+      "owlbear-omelet": {
+        "name": "Omelet"
+      },
+      "whiterose-oysters": {
+        "name": "Oysters"
+      },
+      "galt-ragout": {
+        "name": "Ragout"
+      },
+      "smoked-trout-and-hydra-pate": {
         "name": "Smoked Trout And Hydra Pate",
         "criticalSuccess": {
           "message": "All eaters treat light armor they're at least trained in as if the armor had the comfort trait."
         }
       },
-      "succulent-sausages": {
-        "name": "Succulent Sausages"
-      },
-      "supernatural-mince-pie": {
+      "first-world-mince-pie": {
         "name": "Supernatural Mince Pie"
       },
-      "sweet-pancakes": {
-        "name": "Sweet Pancakes"
+      "kameberry-pie": {
+        "name": "Kameberry Pie"
       }
     },
     "kingdomFeats": {
@@ -2247,6 +3534,12 @@
       },
       "win-your-first-war-encounter": {
         "name": "Win your first War Encounter (V&K)"
+      },
+      "claim-all-hexes-in-a-region": {
+        "name": "Claim all hexes in a region"
+      },
+      "connect-settlement-to-capital-via-roads": {
+        "name": "Connect a settlement to your capital via roads"
       }
     },
     "charters": {
@@ -2272,6 +3565,18 @@
       }
     },
     "structures": {
+      "aiudara-gate": {
+        "name": "Aiudara Gate",
+        "notes": "Allows teleporting between settlements without delay. Kingdom activities performed in a gated town are also considered performed in all its counterparts."
+      },
+      "temple": {
+        "name": "Temple",
+        "notes": "Provides a +1 status bonus to perform rituals. While in a settlement with a Temple, you gain a +1 item bonus to Lore and Religion checks made to Recall Knowledge while Investigating, and to all faith-themed checks made while Researching."
+      },
+      "cathedral": {
+        "name": "Cathedral",
+        "notes": "Provides a +2 status bonus to perform rituals. While in a settlement with a Cathedral, you gain a +3 item bonus to Lore and Religion checks made to Recall Knowledge while Investigating, and to all faith-themed checks made while Researching."
+      },
       "academy": {
         "name": "Academy",
         "notes": "While in a settlement with an Academy, you gain a +2 item bonus to Lore checks made to Recall Knowledge while Investigate, to all checks made while Researching, and to Decipher Writing."
@@ -2311,10 +3616,6 @@
       },
       "castle": {
         "name": "Castle"
-      },
-      "cathedral": {
-        "name": "Cathedral",
-        "notes": "While in a settlement with a cathedral, you gain a +3 item bonus to Lore and Religion checks made to Recall Knowledge while Investigating, and to all faith-themed checks made while Researching."
       },
       "cemetery": {
         "name": "Cemetery"
@@ -2375,6 +3676,18 @@
       },
       "houses": {
         "name": "Houses"
+      },
+      "companion-shacks": {
+        "name": "Companion Shacks",
+        "notes": "Companion Shacks provide a +1 bonus to companion activities. A settlement can have only one companion structure. The house rules list this structure as upgrading to Lodges."
+      },
+      "companion-rooms": {
+        "name": "Companion Rooms",
+        "notes": "Companion Rooms provide a +2 bonus to companion activities. A settlement can have only one companion structure. The house rules list this structure as upgrading from Companion Shacks and upgrading to Chambers."
+      },
+      "companion-quarters": {
+        "name": "Companion Quarters",
+        "notes": "Companion Quarters provide a +3 bonus to companion activities. A settlement can have only one companion structure. The house rules list this structure as upgrading from Lodges."
       },
       "illicit-market": {
         "name": "Illicit Market"
@@ -2551,9 +3864,6 @@
       "tavern-world-class": {
         "name": "Tavern, World-Class",
         "notes": "If you attempt a Performance check to Earn Income in a settlement with a world-class tavern, you gain a +3 item bonus to the check. All checks made to Gather Information in a settlement with a world-class tavern gain a +3 item bonus."
-      },
-      "temple": {
-        "name": "Temple"
       },
       "tenement": {
         "name": "Tenement"
@@ -2816,10 +4126,32 @@
           }
         }
       },
+      "cleanse-item": {
+        "structure": {
+          "shrine": "Shrine",
+          "temple": "Temple",
+          "cathedral": "Cathedral"
+        },
+        "title": "Cleanse Item",
+        "description": "<p>You attempt to cleanse a cursed or corrupted item by performing a kingdom-scale magical counteract check.</p>",
+        "special": "Use a Magic check. The counteract level is half the kingdom level, rounded up. The DC is the item level + 10. Items of levels 1-5 require 1 Luxuries and a Shrine; levels 6-10 require 2 Luxuries and a Temple; levels 11-15 require 4 Luxuries and a Temple; levels 16-20 require 8 Luxuries and a Cathedral.",
+        "criticalSuccess": {
+          "msg": "<p>The curse is removed and only half the materials are consumed.</p>"
+        },
+        "success": {
+          "msg": "<p>The curse is removed.</p>"
+        },
+        "failure": {
+          "msg": "<p>The curse remains.</p>"
+        },
+        "criticalFailure": {
+          "msg": "<p>The item is destroyed.</p>"
+        }
+      },
       "clandestine-business": {
         "title": "Clandestine Business",
         "description": "<p>You know there are criminals in your kingdom, and they know you know. You encourage them to send kickbacks in the form of resources and Commodities to the government, but the common citizens will be more than upset if they find out! This starts as a basic check against your Control DC, but every subsequent Kingdom turn you pursue Clandestine Business, the DC increases by 2. Every Kingdom turn that passes without Clandestine Business reduces the DC by 1 (until you reach your Control DC).</p>",
-        "automationNotes": "DC increase from previous turns is not implemented",
+        "automationNotes": "The DC climbs by 2 each consecutive Kingdom turn you pursue this activity and drops by 1 each turn you skip it (down to the base Control DC). Tracked automatically.",
         "criticalSuccess": {
           "msg": "<p>@gain2RolledResourceDice. In addition, you @gain1d4Luxuries. The public is none the wiser.</p>"
         },
@@ -3221,7 +4553,7 @@
       "false-victory": {
         "title": "False Victory",
         "description": "<p>Your contacts with the criminal underworld and your knack for dodging punishment and claiming responsibility for victories you had no direct role in can be harnessed to engineer false victories to trick the kingdom’s citizens into thinking their leaders are doing more than they actually are to create a safe place to live. Such attempts are not without risks, though, for if things backfire, you can cause problems where none existed in the first place. When setting up a false victory, attempt a basic Intrigue check.</p>",
-        "automationNotes": "Critical Failure timeout is not implemented",
+        "automationNotes": "Failure locks this activity out on your next Kingdom turn; Critical Failure locks it for 6 Kingdom turns. Tracked automatically.",
         "criticalSuccess": {
           "msg": "<p>At the end of this Kingdom turn’s Event Phase, roll again on the random kingdom events table. Rumors of this event being resolved spread throughout your kingdom. You don’t gain any of the benefits of resolving this false victory, but instead @lose1d6Unrest and one Ruin of your choice by 1</p> <ul><li>@lose1Corruption</li><li>@lose1Crime</li><li>@lose1Decay</li><li>@lose1Strife</li></ul><p>If you randomly roll that same random kingdom event at any time during the next four kingdom turns, you can attempt an Intrigue check with a +1 circumstance bonus to resolve it rather than the normal check to resolve it.</p>",
           "modifiers": {
@@ -3322,7 +4654,7 @@
       "garrison-army": {
         "title": "Garrison Army",
         "description": "<p>You move an army into a fortification and assign them to guard it. In order to garrison, the army must be located in a hex that contains a Refuge, Settlement, or Work Site. If you’re garrisoning the army in a Refuge hex, attempt a basic Defense check. If you’re garrisoning the army in a settlement, attempt a basic Politics check. If you’re garrisoning the army in a Work Site hex, attempt a basic Engineering check. This check’s DC increases by 5 if the hex is not part of your kingdom, or by 10 if the location is part of an enemy kingdom.</p>",
-        "automationNotes": "Critical Failure timeout is not implemented",
+        "automationNotes": "Critical Failure locks this activity out for 4 Kingdom turns. Tracked automatically (as a single kingdom-wide lockout rather than per-army-per-location).",
         "requirement": "The army is in the same hex as a Refuge, Settlement, or Work Site.",
         "modifiers": {
           "outsideKingdom": {
@@ -3541,6 +4873,22 @@
           "msg": "<p>You gain no benefit, as your traders and merchants met with bad luck on the road. You can’t Manage Trade Agreements for 1 Kingdom turn</p>."
         }
       },
+      "naval-support": {
+        "title": "Naval Support",
+        "description": "<p>You direct your kingdom's sailors, ports, and river traffic to support operations across the realm. Attempt a Boating check.</p>",
+        "criticalSuccess": {
+          "msg": "<p>You @gain2RegionActivities this Kingdom turn.</p>"
+        },
+        "success": {
+          "msg": "<p>You @gain1RegionActivity this Kingdom turn.</p>"
+        },
+        "failure": {
+          "msg": "<p>You @gain1RegionActivity this Kingdom turn, but you @lose2d6ResourcePoints.</p>"
+        },
+        "criticalFailure": {
+          "msg": "<p>You gain no extra Region activities and @lose2d6ResourcePoints.</p>"
+        }
+      },
       "new-leadership-vk": {
         "title": "New Leadership (V&K)",
         "description": "<p>You announce the promotion of a character into a leadership role, whether they’re a newly appointed leader or just shifting from one leadership role to another. You normally perform this activity at the start of a Kingdom turn, but if unexpected events (such as the death of the character) remove a leader from a leadership role, you may immediately use the New Leadership activity to attempt to assign a new leader to that role, even outside of a Kingdom turn (applying the vacancy penalty for that role as appropriate). Attempt a basic Intrigue, Politics, Statecraft, or Warfare skill check—while any of these skills can be used, each skill is particularly suited to assigning two specific leadership roles.</p> <ul> <li><b>Intrigue</b>: Grants a +2 circumstance bonus to checks to assign Emissaries and Treasurers.</li> <li><b>Politics</b>: Grants a +2 circumstance bonus to checks to assign Counselors and Rulers.</li> <li><b>Statecraft</b>: Grants a +2 circumstance bonus to checks to assign Magisters and Viceroys.</li> <li><b>Warfare</b>: Grants a +2 circumstance bonus to checks to assign Generals and Wardens.</li> </ul><p>Rulers are particularly difficult to assign; when you take this activity to assign a new Ruler, you take a –4 circumstance penalty to the skill check, and unless you achieve a critical success, you @gain1Unrest.</p><p>Whether or not you are simultaneously assigning a leader, you may also use this activity to attempt to reselect the four leadership roles that you have invested. Any result other than a critical failure allows this.</p> <p>On the Turn a new Leader is appointed, that Leader gains one fewer actions to spend during that Kingdom Turn: two for PCs, and one for NPCs.</p>",
@@ -3657,7 +5005,7 @@
       "preventative-measures": {
         "title": "Preventative Measures",
         "description": "<p>You help to organize magical defenses and resources to combat potential upcoming disasters or dangers to the kingdom. Attempt a basic Magic check to determine how effective the magical preparations are.</p>",
-        "automationNotes": "Critical Failure timeout of 1 turn is not tracked",
+        "automationNotes": "Critical Failure locks this activity out on your next Kingdom turn. Tracked automatically.",
         "criticalSuccess": {
           "msg": "<p>The next time during this Kingdom turn that you attempt a Kingdom skill check to resolve a dangerous event, you gain a +2 circumstance bonus to the check and, unless you roll a critical failure, the result is improved one degree. If you reach the end of this Kingdom turn and haven’t had a dangerous event, you may decrease one Ruin of your choice by 1</p> <ul><li>@lose1Corruption</li><li>@lose1Crime</li><li>@lose1Decay</li><li>@lose1Strife</li></ul>",
           "modifiers": {
@@ -3683,7 +5031,7 @@
       "process-hidden-fees": {
         "title": "Process Hidden Fees",
         "description": "<p>With your aid, you can process additional taxes, fees, and payments. Attempt a basic Trade check to determine what sorts of additional resources you gather.</p>",
-        "automationNotes": "Failure and Critical Failure timeout of 1 turn is not tracked",
+        "automationNotes": "Failure or Critical Failure locks this activity out on your next Kingdom turn. Tracked automatically.",
         "criticalSuccess": {
           "msg": "<p>@gain2ResourceDiceNextTurn</p>"
         },
@@ -4084,7 +5432,7 @@
       "request-foreign-aid-vk": {
         "title": "Request Foreign Aid (V&K)",
         "description": "<p>When disaster strikes, you send out a call for help to another nation with whom you have diplomatic relations. The DC of this check starts at the other group’s Negotiation DC +2, but every subsequent Kingdom turn you Request Foreign Aid from the same group, the DC increases by 2. Every Kingdom turn that passes without Requesting Foreign Aid from that Group reduces the DC by 1 (until you reach the other group’s Negotiation DC +2). You may only attempt to request Foreign Aid with a given group once per Kingdom turn regardless of the number of leaders pursuing activities.</p>",
-        "automationNotes": "DC increases are not tracked and circumstance bonuses are not applied after, but before the roll",
+        "automationNotes": "The DC climbs by 2 each consecutive Kingdom turn you request aid and drops by 1 each turn you skip it (tracked automatically, kingdom-wide rather than per-group). Circumstance bonuses are still applied before the roll.",
         "requirement": "You have diplomatic relations with the group you are requesting aid from.",
         "criticalSuccess": {
           "msg": "<p>Your ally’s aid grants a +4 circumstance bonus to any one Kingdom skill check attempted during the remainder of this Kingdom turn. You can choose to apply this bonus to any Kingdom skill check after the die is rolled, but must do so before the result is known. In addition, @gain2RolledResourceDice; this RP does not accrue into XP at the end of the turn if you don’t spend it.</p>",
@@ -4230,7 +5578,7 @@
       "send-diplomatic-envoy": {
         "title": "Send Diplomatic Envoy",
         "description": "<p>You send emissaries to another group to foster positive relations and communication. The DC of this check is the group’s Negotiation DC (see the sidebar on page 519). Attempts to Send a Diplomatic Envoy to a nation with which your kingdom is at war take a –4 circumstance penalty to the check and have the result worsened one degree. At the GM’s option, some wars might be so heated that this activity has no chance of success.</p>",
-        "automationNotes": "Group is not tracked plus on a Critical Failure, the 2 turn timeout is not tracked",
+        "automationNotes": "Critical Failure locks this activity out for 2 Kingdom turns (tracked automatically). The target group's diplomatic-relation state is still tracked manually.",
         "modifiers": {
           "atWar": {
             "name": "At War with Group",
@@ -4310,7 +5658,7 @@
         "title": "Supernatural Solution",
         "description": "<p>Your spellcasters try to resolve issues when mundane solutions just aren’t enough. Attempt a basic check.</p>",
         "special": "You cannot influence a check with Supernatural Solution and Creative Solution simultaneously.",
-        "automationNotes": "2 turn timeout on a Critical Failure is not tracked",
+        "automationNotes": "Critical Failure locks this activity out for 2 Kingdom turns. Tracked automatically.",
         "criticalSuccess": {
           "msg": "<p>You can call upon your spellcasters’ supernatural solution to aid in resolving any Kingdom skill check made during the remainder of this Kingdom turn @gain1SupernaturalSolution. Do so just before a Kingdom skill check is rolled (by yourself or any other PC). Attempt a Magic check against the same DC in addition to the Kingdom skill check, and take whichever of the two results you prefer. If you don’t use your Supernatural Solution by the end of this Kingdom turn, this benefit ends and you gain 10XP instead.</p>"
         },
@@ -4327,7 +5675,7 @@
       "supplementary-hunting": {
         "title": "Supplementary Hunting",
         "description": "<p>Following your advice, rural-dwelling citizens work to supplement stores of food and resources through hunting and trapping. Attempt a basic Wilderness check to gather excess livestock from the local wildlife, ranches, and farms to generate food commodities.</p>",
-        "automationNotes": "Failure and Critical Failure timeout of 1 turn is not tracked",
+        "automationNotes": "Failure or Critical Failure locks this activity out on your next Kingdom turn. Tracked automatically.",
         "criticalSuccess": {
           "msg": "<p>@gain1d4Food, @gain1Luxuries, and @gain1ResourceDiceNextTurn</p>"
         },
@@ -4490,6 +5838,23 @@
         "criticalFailure": {
           "msg": "<p>You accidentally form incorrect assumptions about your military tactics. The next time you roll a failure on an Army activity this Kingdom turn, it becomes a critical failure instead.</p>"
         }
+      },
+      "improve-settlement": {
+        "criticalFailure": {
+          "msg": "MISSING: activities.improve-settlement.criticalFailure.msg"
+        },
+        "criticalSuccess": {
+          "msg": "MISSING: activities.improve-settlement.criticalSuccess.msg"
+        },
+        "description": "MISSING: activities.improve-settlement.description",
+        "failure": {
+          "msg": "MISSING: activities.improve-settlement.failure.msg"
+        },
+        "special": "MISSING: activities.improve-settlement.special",
+        "success": {
+          "msg": "MISSING: activities.improve-settlement.success.msg"
+        },
+        "title": "MISSING: activities.improve-settlement.title"
       }
     },
     "events": {
@@ -4566,6 +5931,25 @@
           },
           "criticalFailure": {
             "msg": "<p>The assassins slay the NPC and escape. If the NPC was a leader, that leadership role is now vacant. @gain2d4Unrest and @gain1d4Decay.</p>"
+          }
+        }
+      },
+      "war-threat-arrival": {
+        "name": "War Threat Arrives",
+        "description": "<p>A hostile force your scouts have long tracked has reached the kingdom's borders. Its vanguard probes your defenses while the main body encamps within striking distance.</p>",
+        "resolution": "Resolve with a success on the check as your defenders blunt the incursion. The GM may instead (or additionally) run the queued encounter at the linked hex to play the arrival out at the table.",
+        "stage-0": {
+          "criticalSuccess": {
+            "msg": "<p>Your defenders rout the vanguard and scatter the encampment before it can dig in. The threat is broken. @lose1d4Unrest</p>"
+          },
+          "success": {
+            "msg": "<p>The border holds; the hostile force withdraws to lick its wounds. The threat is contained.</p>"
+          },
+          "failure": {
+            "msg": "<p>Raids slip past your patrols. @gain1d4Unrest as border settlements bear the brunt.</p>"
+          },
+          "criticalFailure": {
+            "msg": "<p>Your defenses are overrun at the border. @gain2d4Unrest and the GM may escalate the linked encounter.</p>"
           }
         }
       },
@@ -5758,6 +7142,154 @@
             "msg": "<p>After sending representatives, the immigrant decides not to build a home in your settlement after all, disappointing the local aristocracy. @gain1Unrest</p>"
           }
         }
+      }
+    },
+    "hexContentType": {
+      "landmark": "Landmark",
+      "refuge": "Refuge",
+      "worksite": "Worksite",
+      "resource": "Resource",
+      "ruin": "Ruin",
+      "merchant": "Merchant",
+      "trainer": "Trainer",
+      "enemyArmy": "Enemy Army",
+      "custom": "Custom"
+    },
+    "hexContentVisibility": {
+      "hidden": "Hidden",
+      "discovered": "Discovered",
+      "cleared": "Cleared"
+    },
+    "turns": "Turns",
+    "armyPressure": {
+      "title": "War Pressure",
+      "disabledHelp": "The Army & War Pressure board is disabled. Enable it in kingdom settings to track enemy threats, army deployments, and war pressure.",
+      "current": "Pressure",
+      "perTurn": "Per Turn",
+      "unrest": "Unrest",
+      "unrestThreshold": "Unrest Threshold",
+      "ruinThreshold": "Ruin Threshold",
+      "projection": "Pressure Forecast",
+      "unrestIn": "Unrest threshold in {turns} turns",
+      "ruinIn": "Ruin threshold in {turns} turns",
+      "threats": "War Threats",
+      "addThreat": "Add Threat",
+      "threatName": "Threat",
+      "escalation": "Escalation",
+      "eta": "ETA",
+      "target": "Target",
+      "status": "Status",
+      "turns": "Turns",
+      "noThreats": "No active threats.",
+      "deployments": "Army Deployments",
+      "deployArmy": "Deploy Army",
+      "resolveBattle": "Resolve Battle",
+      "armyName": "Army",
+      "armyType": "Type",
+      "assignThreat": "Assign to Threat",
+      "assignThreatHelp": "Optionally tie this army to a specific war threat. Either way, deployed armies reduce overall war pressure.",
+      "noThreatAssignment": "— Unassigned —",
+      "noGarrisonAssignment": "— No Garrison Duty —",
+      "garrisonSettlement": "Garrison Settlement",
+      "garrisonSettlementHelp": "Optionally assign this army to garrison duty at a settlement.",
+      "noArmiesAvailable": "No army actors were found to deploy. Create or recruit a PF2e army first.",
+      "noDeployments": "No armies deployed.",
+      "enable": "Enable Army & Pressure Board",
+      "editThreat": "Edit Threat",
+      "threatDescription": "Description",
+      "enemyFaction": "Enemy Faction",
+      "maxEscalation": "Max Escalation",
+      "etaHelp": "Turns until arrival (0 = unknown/arrived).",
+      "pauseOnExpiry": "Pause on Escalation",
+      "pauseOnExpiryHelp": "When escalation maxes out, hold for GM confirmation instead of auto-triggering the invasion.",
+      "visibleToPlayers": "Visible to players",
+      "visibleToPlayersHelp": "When off, this threat is hidden from the players' war board entirely (it still counts toward war pressure — it's real, just undiscovered).",
+      "hiddenFromPlayers": "Hidden from players",
+      "settings": "Army & War Pressure Settings",
+      "boardMode": "Board Mode",
+      "modeBasic": "Basic",
+      "modeAdvanced": "Advanced",
+      "forecast": "Pressure Forecast",
+      "forecastUnrest": "Unrest threshold in {turns} turns",
+      "forecastUnrestStable": "Pressure stable — never reaches unrest threshold",
+      "forecastUnrestBreached": "Unrest threshold already breached",
+      "forecastRuin": "Ruin threshold in {turns} turns",
+      "forecastRuinStable": "Pressure stable — never reaches ruin threshold",
+      "forecastRuinBreached": "Ruin threshold already breached",
+      "threatArrivals": "Threat Arrivals",
+      "threatArrivesIn": "arrives in {turns} turns",
+      "threatArrivingNow": "Arriving now",
+      "activeThreats": "Active Threats ({count})",
+          "activeDeployments": "Active Deployments ({count})",
+          "removeDeployment": "Remove Deployment",
+          "removeDeploymentConfirm": "Remove the destroyed army deployment for \"{name}\"? This cannot be undone."
+    },
+    "warThreatStatus": {
+      "active": "Active",
+      "defeated": "Defeated",
+      "evaded": "Evaded",
+      "expired": "Invaded"
+    },
+    "armyDeploymentStatus": {
+      "deployed": "Deployed",
+      "battle": "In Battle",
+      "retreated": "Retreated",
+      "destroyed": "Destroyed"
+    },
+    "warBattle": {
+      "resolveBattle": "Resolve Battle",
+      "round": "Round",
+      "attackers": "Attackers",
+      "defenders": "Defenders",
+      "attackerStatus": "Attacker Status",
+      "defenderStatus": "Defender Status",
+      "resolveRound": "Resolve Round",
+      "battleLog": "Battle Log",
+      "chatTitle": "{{battleName}} — Round {{round}}",
+      "victory": "Victory! The kingdom's armies have defeated the threat.",
+      "defeat": "Defeat… the kingdom's armies have been destroyed.",
+      "recovers": "{name} recovers from {condition}.",
+      "recoversMiredSuccess": "{name} recovers from mired (roll {roll} >= 10).",
+      "recoversMiredFail": "{name} fails to recover from mired (roll {roll} < 10).",
+      "recoversPinnedSuccess": "{name} recovers from pinned (roll {roll} >= 10).",
+      "recoversPinnedFail": "{name} fails to recover from pinned (roll {roll} < 10).",
+      "moraleCheckPass": "{name} passes the morale check (roll {roll} + {bonus} = {total} vs DC {dc}) and recovers.",
+      "moraleCheckFail": "{name} fails the morale check (roll {roll} + {bonus} = {total} vs DC {dc}) and becomes routed!",
+      "conditionWearyPenalty": "{name} is weary and takes a –1 penalty to attack rolls and AC.",
+      "conditionPinnedNoStrike": "{name} is pinned and cannot strike!",
+      "levelUpOffer": {
+        "title": "{{name}} Ready to Level Up!",
+        "description": "{{name}} has earned {{xp}} XP (threshold: {{threshold}}). Level up to {{level}}?",
+        "levelUp": "Level Up",
+        "dismiss": "Dismiss",
+        "leveledUp": "{{name}} leveled up to level {{level}}!",
+        "dismissed": "{{name}} level-up offer dismissed."
+      }
+    },
+    "pacingAlertType": {
+      "levelMismatch": "The party's level has drifted far from the chapter's intended level. Consider adjusting encounter difficulty or rewards.",
+      "stagnation": "Unrest hasn't changed in several turns — the kingdom feels static. Consider introducing an event or complication.",
+      "turnGap": "Many turns have passed without a campaign-altering event. Consider triggering one to keep momentum.",
+      "lootImbalance": "Item access is out of step with the party's level. Consider adjusting available rewards."
+    },
+    "pacingAlertSeverity": {
+      "warning": "Warning",
+      "critical": "Critical"
+    },
+    "pacingAlerts": {
+      "title": "Pacing Advisories",
+      "help": "Advisory only — these flags watch for the campaign drifting off its intended pressure curve. They never change game state; dismiss any you've addressed.",
+      "empty": "No pacing concerns — the campaign looks balanced.",
+      "turnLabel": "Turn",
+      "dismiss": "Dismiss",
+      "clearAll": "Clear All",
+      "jumpToSettlement": "Jump to Settlement"
+    },
+    "turnWizard": {
+      "checklist": {
+        "expeditionsAwaitingResolution": "Expeditions awaiting resolution",
+        "warThreatsMaxEscalation": "War threats at max escalation",
+        "companionsInjured": "Companions injured/unavailable"
       }
     }
   }

@@ -16,7 +16,10 @@ private suspend fun getHuntAndGatherQuantities(
     degreeOfSuccess: DegreeOfSuccess,
     regionDc: Int,
     regionLevel: Int,
+    foraging: ForagingModifier,
 ): FoodAmount {
+    // The terrain/season/weather modifier only scales the yield of a *successful* forage — a failed
+    // or fumbled forage is unchanged (a rich forest doesn't reward a botched attempt).
     if (degreeOfSuccess == DegreeOfSuccess.CRITICAL_SUCCESS) {
         val specialIngredients = if (regionLevel >= 14) {
             12
@@ -26,8 +29,8 @@ private suspend fun getHuntAndGatherQuantities(
             4
         }
         return FoodAmount(
-            basicIngredients = 2 * regionDc,
-            specialIngredients = specialIngredients,
+            basicIngredients = applyForagingModifier(2 * regionDc, foraging),
+            specialIngredients = applyForagingModifier(specialIngredients, foraging),
             rations = 0,
         )
     } else if (degreeOfSuccess == DegreeOfSuccess.SUCCESS) {
@@ -40,8 +43,8 @@ private suspend fun getHuntAndGatherQuantities(
         }
         val specialIngredients = roll("${dice}d4", t("camping.specialIngredients"))
         return FoodAmount(
-            basicIngredients = regionDc,
-            specialIngredients = specialIngredients,
+            basicIngredients = applyForagingModifier(regionDc, foraging),
+            specialIngredients = applyForagingModifier(specialIngredients, foraging),
             rations = 0,
         )
     } else if (degreeOfSuccess == DegreeOfSuccess.FAILURE) {
@@ -66,12 +69,19 @@ suspend fun postHuntAndGather(
     zoneDc: Int,
     regionLevel: Int,
     campingActor: CampingActor,
+    foraging: ForagingModifier = ForagingModifier.NEUTRAL,
 ) {
     val amount = getHuntAndGatherQuantities(
         degreeOfSuccess = degreeOfSuccess,
         regionDc = zoneDc,
         regionLevel = regionLevel,
+        foraging = foraging,
     )
+    val flavor = when (foraging.trend) {
+        ForagingTrend.BOUNTIFUL -> t("camping.foraging.bountiful")
+        ForagingTrend.LEAN -> t("camping.foraging.lean")
+        ForagingTrend.NEUTRAL -> null
+    }
     postChatTemplate(
         templatePath = "chatmessages/hunt-and-gather.hbs",
         templateContext = recordOf(
@@ -80,6 +90,7 @@ suspend fun postHuntAndGather(
             "campingActorUuid" to campingActor.uuid,
             "basicIngredients" to amount.basicIngredients,
             "specialIngredients" to amount.specialIngredients,
+            "flavor" to flavor,
         )
     )
 }

@@ -4,11 +4,16 @@ import at.posselt.pfrpg2e.app.ValidatedHandlebarsContext
 import at.posselt.pfrpg2e.app.forms.FormElementContext
 import at.posselt.pfrpg2e.kingdom.KingdomActor
 import at.posselt.pfrpg2e.kingdom.KingdomSettings
+import at.posselt.pfrpg2e.kingdom.RawCouncilCooldowns
+import at.posselt.pfrpg2e.kingdom.data.RawQuest
+import at.posselt.pfrpg2e.kingdom.sheet.contexts.RosterContext
 import kotlinx.js.JsPlainObject
 
 @Suppress("unused")
 @JsPlainObject
 external interface KingdomSheetContext : ValidatedHandlebarsContext {
+    val activeQuests: Array<RawQuest>
+    val completedQuests: Array<RawQuest>
     val kingdomNameInput: FormElementContext
     val settlementInput: FormElementContext
     val xpInput: FormElementContext
@@ -24,6 +29,9 @@ external interface KingdomSheetContext : ValidatedHandlebarsContext {
     val resourcePointsContext: ResourceContext
     val resourceDiceContext: ResourceContext
     val worksitesContext: Array<WorkSiteContext>
+    val unclaimedWorksites: Array<UnclaimedWorksiteContext>
+    val caravans: Array<CaravanRowContext>
+    val shipments: Array<ShipmentRowContext>
     val ruinContext: Array<RuinContext>
     val controlDc: Int
     val unrestPenalty: Int
@@ -56,6 +64,7 @@ external interface KingdomSheetContext : ValidatedHandlebarsContext {
     val initialProficiencies: Array<FormElementContext>
     val enableLeadershipModifiers: Boolean
     val settlements: Array<SettlementsContext>
+    val settlementDetailsRows: Array<SettlementDetailsMatrixRowContext>
     val canAddCurrentSceneAsSettlement: Boolean
     val turnSectionNav: Array<NavEntryContext>
     val vkXp: Boolean
@@ -72,10 +81,44 @@ external interface KingdomSheetContext : ValidatedHandlebarsContext {
     val consumption: Int
     val automateStats: Boolean
     val resourceDiceIncome: String
+    val bonusResourceDiceInput: FormElementContext
     val skillChecks: Array<SkillChecksContext>
     val automateResources: Boolean
     val useLeadershipModifiers: Boolean
     val actorUuid: String
     val activeLeader: FormElementContext
-    val sheetBackground: String
+    val sheetBackground: String?
+    val enableCouncilMissions: Boolean
+    val councilCooldowns: RawCouncilCooldowns
+    val canAudit: Boolean
+    val canScrying: Boolean
+    val canLockdown: Boolean
+    val canFeast: Boolean
+    val auditCooldownTurns: Int
+    val scryingCooldownTurns: Int
+    val lockdownCooldownTurns: Int
+    val feastCooldownTurns: Int
+    val auditAffordable: Boolean
+    val scryingAffordable: Boolean
+    val lockdownAffordable: Boolean
+    val feastAffordable: Boolean
+    val rosterContext: RosterContext
+    val partyInfluenceContext: PartyInfluenceContext
+    val armyPressureContext: ArmyPressureContext
+    val pacingAlertContext: PacingAlertContext
+    val sessionPrepContext: SessionPrepContext
+    val showDetailedMatrix: Boolean
+    val campaignClocks: CampaignClockContext
+    val generatedQuestCount: Int
+    val activeEventCount: Int
+    val questTimerChanges: Array<QuestTimerChangeContext>
+    val personalQuests: Array<CompanionQuestRowContext>
+    val analyticsContext: AnalyticsContext?
+    val expeditionsContext: ExpeditionsContext
+}
+
+@JsPlainObject
+external interface QuestTimerChangeContext {
+    val questName: String
+    val changeLabel: String
 }

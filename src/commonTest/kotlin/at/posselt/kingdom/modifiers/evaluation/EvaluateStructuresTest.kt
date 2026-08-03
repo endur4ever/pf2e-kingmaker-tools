@@ -5,6 +5,12 @@ import at.posselt.pfrpg2e.data.kingdom.settlements.SettlementLayoutType
 import at.posselt.pfrpg2e.data.kingdom.settlements.SettlementSizeType
 import at.posselt.pfrpg2e.data.kingdom.settlements.SettlementType
 import at.posselt.pfrpg2e.data.kingdom.settlements.settlementSizeData
+import at.posselt.pfrpg2e.data.kingdom.settlements.Block
+import at.posselt.pfrpg2e.data.kingdom.settlements.BlockGrid
+import at.posselt.pfrpg2e.data.kingdom.settlements.BlockTerrain
+import at.posselt.pfrpg2e.data.kingdom.settlements.SettlementEdges
+import at.posselt.pfrpg2e.data.kingdom.settlements.UrbanGrid
+import at.posselt.pfrpg2e.data.kingdom.settlements.UrbanGridEdge
 import at.posselt.pfrpg2e.data.kingdom.structures.AvailableItemsRule
 import at.posselt.pfrpg2e.data.kingdom.structures.CommodityStorage
 import at.posselt.pfrpg2e.data.kingdom.structures.GroupedStructureBonus
@@ -587,5 +593,260 @@ class EvaluateStructuresTest {
             )
         )
         assertEquals(2, result.divine)
+    }
+
+    @Test
+    fun millGetsExtraConsumptionReductionWhenWaterAdjacent() {
+        val resultWithWater = evaluateSettlement(
+            data = SettlementData(
+                name = "name",
+                id = "name",
+                type = SettlementType.CAPITAL,
+                waterBorders = 1,
+                occupiedBlocks = 4,
+                isSecondaryTerritory = false,
+                layoutType = SettlementLayoutType.RIGID,
+            ),
+            structures = listOf(
+                Structure(
+                    name = "Mill",
+                    id = "mill",
+                    consumptionReduction = 1,
+                    uuid = "",
+                    actorUuid = ""
+                ),
+            ),
+            allStructuresStack = false,
+            allowCapitalInvestmentInCapitalWithoutBank = false,
+            kingdomLevel = 1,
+            capStructureBonusAtKingdomLevel = false,
+            blocks = emptyList()
+        )
+        val resultWithoutWater = evaluateSettlement(
+            data = SettlementData(
+                name = "name",
+                id = "name",
+                type = SettlementType.CAPITAL,
+                waterBorders = 0,
+                occupiedBlocks = 4,
+                isSecondaryTerritory = false,
+                layoutType = SettlementLayoutType.RIGID,
+            ),
+            structures = listOf(
+                Structure(
+                    name = "Mill",
+                    id = "mill",
+                    consumptionReduction = 1,
+                    uuid = "",
+                    actorUuid = ""
+                ),
+            ),
+            allStructuresStack = false,
+            allowCapitalInvestmentInCapitalWithoutBank = false,
+            kingdomLevel = 1,
+            capStructureBonusAtKingdomLevel = false,
+            blocks = emptyList()
+        )
+        // Mill with water borders >= 1 gets +1 consumption reduction (total 2)
+        assertEquals(2, resultWithWater.consumptionReduction)
+        // Mill without water borders only gets base consumption reduction (1)
+        assertEquals(1, resultWithoutWater.consumptionReduction)
+        // Water-adjacent mill results in lower consumption
+        assertTrue(resultWithWater.consumption < resultWithoutWater.consumption)
+    }
+
+    @Test
+    fun nonMillStructureDoesNotGetWaterAdjacentBonus() {
+        val result = evaluateSettlement(
+            data = SettlementData(
+                name = "name",
+                id = "name",
+                type = SettlementType.CAPITAL,
+                waterBorders = 3,
+                occupiedBlocks = 4,
+                isSecondaryTerritory = false,
+                layoutType = SettlementLayoutType.RIGID,
+            ),
+            structures = listOf(
+                Structure(
+                    name = "residential",
+                    id = "residential",
+                    consumptionReduction = 1,
+                    uuid = "",
+                    actorUuid = ""
+                ),
+            ),
+            allStructuresStack = false,
+            allowCapitalInvestmentInCapitalWithoutBank = false,
+            kingdomLevel = 1,
+            capStructureBonusAtKingdomLevel = false,
+            blocks = emptyList()
+        )
+        // Non-mill structure does NOT get the water-adjacent bonus
+        assertEquals(1, result.consumptionReduction)
+    }
+
+    @Test
+    fun derivesOccupiedBlocksFromBlocksList() {
+        val occupiedBlock = Block(
+            delayedStructures = emptyList(),
+            constructedStructures = listOf(
+                Structure(name = "Residential", id = "residential", lots = 1, uuid = "", actorUuid = "")
+            ),
+            structuresUnderConstruction = emptyList()
+        )
+        val emptyBlock = Block(
+            delayedStructures = emptyList(),
+            constructedStructures = emptyList(),
+            structuresUnderConstruction = emptyList()
+        )
+
+        val result = evaluateSettlement(
+            data = SettlementData(
+                name = "Test",
+                id = "test",
+                type = SettlementType.SETTLEMENT,
+                waterBorders = 0,
+                occupiedBlocks = 10,
+                isSecondaryTerritory = false,
+                layoutType = SettlementLayoutType.RIGID,
+            ),
+            structures = emptyList(),
+            allStructuresStack = false,
+            allowCapitalInvestmentInCapitalWithoutBank = false,
+            kingdomLevel = 1,
+            capStructureBonusAtKingdomLevel = false,
+            blocks = listOf(occupiedBlock, emptyBlock)
+        )
+        // 1 occupied block, overrides the data value of 10
+        assertEquals(1, result.occupiedBlocks)
+    }
+
+    @Test
+    fun fallsBackToDataOccupiedBlocksWhenBlocksIsEmpty() {
+        val result = evaluateSettlement(
+            data = SettlementData(
+                name = "Test",
+                id = "test",
+                type = SettlementType.SETTLEMENT,
+                waterBorders = 0,
+                occupiedBlocks = 10,
+                isSecondaryTerritory = false,
+                layoutType = SettlementLayoutType.RIGID,
+            ),
+            structures = emptyList(),
+            allStructuresStack = false,
+            allowCapitalInvestmentInCapitalWithoutBank = false,
+            kingdomLevel = 1,
+            capStructureBonusAtKingdomLevel = false,
+            blocks = emptyList()
+        )
+        // Empty blocks list should fallback to 10
+        assertEquals(10, result.occupiedBlocks)
+    }
+
+    @Test
+    fun derivesWaterBordersFromEdges() {
+        val customEdges = SettlementEdges(
+            north = UrbanGridEdge(hasWater = true),
+            south = UrbanGridEdge(hasWater = true),
+        )
+        val result = evaluateSettlement(
+            data = SettlementData(
+                name = "Test",
+                id = "test",
+                type = SettlementType.SETTLEMENT,
+                waterBorders = 0,
+                occupiedBlocks = 1,
+                isSecondaryTerritory = false,
+                layoutType = SettlementLayoutType.RIGID,
+                edges = customEdges,
+            ),
+            structures = emptyList(),
+            allStructuresStack = false,
+            allowCapitalInvestmentInCapitalWithoutBank = false,
+            kingdomLevel = 1,
+            capStructureBonusAtKingdomLevel = false,
+            blocks = emptyList()
+        )
+        // Edges specify 2 water borders, overrides the data value of 0
+        assertEquals(2, result.waterBorders)
+    }
+
+    @Test
+    fun fallsBackToDataWaterBordersWhenEdgesIsDefault() {
+        val result = evaluateSettlement(
+            data = SettlementData(
+                name = "Test",
+                id = "test",
+                type = SettlementType.SETTLEMENT,
+                waterBorders = 3,
+                occupiedBlocks = 1,
+                isSecondaryTerritory = false,
+                layoutType = SettlementLayoutType.RIGID,
+                edges = SettlementEdges(),
+            ),
+            structures = emptyList(),
+            allStructuresStack = false,
+            allowCapitalInvestmentInCapitalWithoutBank = false,
+            kingdomLevel = 1,
+            capStructureBonusAtKingdomLevel = false,
+            blocks = emptyList()
+        )
+        // Default edges should fallback to 3 water borders
+        assertEquals(3, result.waterBorders)
+    }
+
+    @Test
+    fun derivesLotsBorderingWaterFromUrbanGrid() {
+        val customGrid = UrbanGrid(
+            blockA = BlockGrid(topLeft = BlockTerrain.WATER),
+        )
+        val result = evaluateSettlement(
+            data = SettlementData(
+                name = "Test",
+                id = "test",
+                type = SettlementType.SETTLEMENT,
+                waterBorders = 0,
+                occupiedBlocks = 1,
+                isSecondaryTerritory = false,
+                layoutType = SettlementLayoutType.RIGID,
+                lotsBorderingWater = 0,
+                urbanGrid = customGrid,
+            ),
+            structures = emptyList(),
+            allStructuresStack = false,
+            allowCapitalInvestmentInCapitalWithoutBank = false,
+            kingdomLevel = 1,
+            capStructureBonusAtKingdomLevel = false,
+            blocks = emptyList()
+        )
+        // Urban grid specifies 1 water lot, overrides the data value of 0
+        assertEquals(1, result.lotsBorderingWater)
+    }
+
+    @Test
+    fun fallsBackToDataLotsBorderingWaterWhenUrbanGridIsDefault() {
+        val result = evaluateSettlement(
+            data = SettlementData(
+                name = "Test",
+                id = "test",
+                type = SettlementType.SETTLEMENT,
+                waterBorders = 0,
+                occupiedBlocks = 1,
+                isSecondaryTerritory = false,
+                layoutType = SettlementLayoutType.RIGID,
+                lotsBorderingWater = 4,
+                urbanGrid = UrbanGrid(),
+            ),
+            structures = emptyList(),
+            allStructuresStack = false,
+            allowCapitalInvestmentInCapitalWithoutBank = false,
+            kingdomLevel = 1,
+            capStructureBonusAtKingdomLevel = false,
+            blocks = emptyList()
+        )
+        // Default urban grid should fallback to 4 lots bordering water
+        assertEquals(4, result.lotsBorderingWater)
     }
 }

@@ -1,7 +1,7 @@
 {
     "title": "Kingdom Building, Camping & Weather",
     "description": "A collection of utilities to run the most popular adventure for PFRPG 2e",
-    "version": "6.3.1",
+    "version": "6.3.3-debug",
     "scripts": [
         "dist/api/patches.js",
         "dist/main.js"
@@ -50,7 +50,7 @@
         {
             "lang": "pt-BR",
             "name": "Portuguese (Brazilian)",
-            "path": "dist/lang/pt_BR.json"
+            "path": "dist/lang/pt-BR.json"
         }
     ],
     "packs": [
@@ -133,6 +133,16 @@
             "flags": {},
             "banner": "systems/pf2e/assets/compendium-banner/red.webp",
             "system": "pf2e"
+        },
+        {
+            "name": "kingmaker-tools-companions",
+            "path": "packs/kingmaker-tools-companions",
+            "label": "Companions",
+            "type": "Actor",
+            "system": "pf2e",
+            "private": false,
+            "banner": "systems/pf2e/assets/compendium-banner/red.webp",
+            "flags": {}
         }
     ],
     "packFolders": [

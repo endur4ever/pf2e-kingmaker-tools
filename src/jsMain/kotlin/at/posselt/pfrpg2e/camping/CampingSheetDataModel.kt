@@ -16,8 +16,17 @@ class CampingSheetDataModel(
             boolean("travelModeActive")
             boolean("forcedMarchActive")
             string("region")
+            string("travelStartHex", nullable = true)
+            string("travelEndHex", nullable = true)
+            // Only present in the DOM while the Set Watches section is open, so it must be nullable.
+            int("numberOfWatches", nullable = true)
             schema("activities") {
                 stringRecord("selectedSkill")
+                stringRecord("learnTarget") {
+                    string(nullable = true) {
+
+                    }
+                }
                 stringRecord("degreeOfSuccess") {
                     string(nullable = true) {
 

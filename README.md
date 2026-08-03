@@ -50,8 +50,14 @@ If you've enabled the official module, the following things are automatically ta
     * Kingdom Events
     * Random Encounters
     * Cult Events
+* Hex editor injection (for module integrity)
+* kingmaker.state claim writes (to automate kingdom state updates)
+
+### Documentation
+For an overview of newly implemented subsystems and player-facing features, see [New Subsystems Overview](./docs/user-guide/new-subsystems-overview.md).
 
 ### Screenshots
+
 
 ![Kingdom Sheet](./img/kingdom/docs/kingdom-sheet.webp)
 

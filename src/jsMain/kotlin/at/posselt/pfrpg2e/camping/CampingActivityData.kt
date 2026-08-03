@@ -62,10 +62,35 @@ external interface CampingActivityData {
     var success: ActivityOutcome?
     var failure: ActivityOutcome?
     var criticalFailure: ActivityOutcome?
+    var oncePerSession: Boolean
+    var requiredCompanion: String?
 }
+
+/**
+ * Whether [actorName] is the companion this activity belongs to (e.g. Amiri for
+ * "Enhance Weapons"). Matched on a word boundary so "Amiri the Barbarian" still counts.
+ */
+fun CampingActivityData.isActorRequiredCompanion(actorName: String): Boolean =
+    requiredCompanion?.let { companionName ->
+        Regex("\\b$companionName\\b", RegexOption.IGNORE_CASE).containsMatchIn(actorName)
+    } ?: false
+
+fun CampingActivityData.isRequiredCompanionPresent(actorNames: Set<String>): Boolean =
+    if (requiredCompanion == null) true else actorNames.any { isActorRequiredCompanion(it) }
+
+/**
+ * Companion-learning activities must stay visible in the activity list (greyed out when the
+ * required NPC is absent), so they are never hidden by the manage-activities lock. Every other
+ * activity is hidden while its id is in [lockedActivityIds].
+ */
+fun CampingActivityData.isHiddenByLock(lockedActivityIds: Set<String>): Boolean =
+    requiredCompanion == null && lockedActivityIds.contains(id)
 
 fun CampingActivityData.isCookMeal() =
     id == cookMealId
+
+fun CampingActivityData.isLearnFromCompanion() =
+    id == learnFromACompanionId
 
 fun CampingActivityData.isPrepareCampsite() =
     id == prepareCampsiteId

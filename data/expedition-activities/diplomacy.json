@@ -1,0 +1,34 @@
+{
+  "id": "diplomacy",
+  "name": "expeditionActivities.diplomacy.name",
+  "isLocked": false,
+  "isSecret": false,
+  "isHomebrew": false,
+  "skills": [
+    {
+      "name": "diplomacy",
+      "proficiency": "trained",
+      "dcType": "actorLevel",
+      "required": true
+    },
+    {
+      "name": "society",
+      "proficiency": "untrained",
+      "dcType": "actorLevel",
+      "required": false
+    }
+  ],
+  "criticalSuccess": {
+    "message": "expeditionActivities.diplomacy.criticalSuccess.message"
+  },
+  "success": {
+    "message": "expeditionActivities.diplomacy.success.message"
+  },
+  "failure": {
+    "message": "expeditionActivities.diplomacy.failure.message"
+  },
+  "criticalFailure": {
+    "message": "expeditionActivities.diplomacy.criticalFailure.message"
+  },
+  "oncePerSession": false
+}

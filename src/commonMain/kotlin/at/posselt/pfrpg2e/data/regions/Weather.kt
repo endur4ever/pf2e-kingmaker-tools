@@ -91,3 +91,12 @@ fun findWeatherType(isCold: Boolean, hasPrecipitation: Boolean) =
     } else {
         WeatherType.SUNNY
     }
+
+fun getSeasonForMonth(monthZeroIndexed: Int): Season {
+    return when (monthZeroIndexed) {
+        2, 3, 4 -> Season.SPRING      // Pharast (2), Gozran (3), Desnus (4)
+        5, 6, 7 -> Season.SUMMER      // Sarenith (5), Erastus (6), Arodus (7)
+        8, 9, 10 -> Season.FALL       // Rova (8), Lamashtan (9), Neth (10)
+        else -> Season.WINTER          // Kuthona (11), Abadius (0), Calistril (1)
+    }
+}

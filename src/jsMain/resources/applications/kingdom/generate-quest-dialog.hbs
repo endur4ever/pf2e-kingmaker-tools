@@ -1,0 +1,107 @@
+<form class="km-qg-form">
+  <h2 class="km-qg-title-header"><i class="fa-solid fa-scroll-old"></i> {{localizeKM "kingdom.questGenerator.title"}}</h2>
+
+  {{!-- Preview card (shown above the picker so it's visible immediately after Generate) --}}
+  {{#if showPreview}}
+  <section class="km-qg-preview">
+    <div class="km-qg-preview-header">
+      <span class="km-qg-badge"><i class="fa-solid fa-star-of-life"></i> {{localizeKM "kingdom.questGenerator.generatedBadge"}}</span>
+    </div>
+    <div class="km-qg-scroll-parchment">
+      <h3 class="km-qg-quest-name">{{questPreview.name}}</h3>
+      <div class="km-qg-quest-meta">
+        <span class="km-qg-meta-pill">
+          <b>{{localizeKM "kingdom.questGenerator.preview.type"}}:</b>
+          {{localizeKM (concat "kingdom.quests.type." questPreview.type)}}
+        </span>
+        <span class="km-qg-meta-pill">
+          <b>{{localizeKM "kingdom.questGenerator.preview.recommendedLevel"}}:</b>
+          {{questPreview.recommendedLevel}}
+        </span>
+      </div>
+
+      <div class="km-qg-quest-desc">
+        {{{questPreview.description}}}
+      </div>
+
+      <h4 class="km-qg-section-title"><i class="fa-solid fa-list-check"></i> {{localizeKM "kingdom.questGenerator.preview.objectives"}}</h4>
+      <ul class="km-qg-objectives-list">
+        {{#each questPreview.objectives}}
+        <li>
+          <i class="fa-regular {{#if optional}}fa-circle{{else}}fa-circle-dot{{/if}} km-obj-bullet"></i>
+          <span class="km-obj-desc">{{{description}}}</span>
+          {{#if optional}}<span class="km-badge km-badge-optional">{{localizeKM "kingdom.quests.optional"}}</span>{{/if}}
+        </li>
+        {{/each}}
+      </ul>
+
+      <h4 class="km-qg-section-title"><i class="fa-solid fa-gift"></i> {{localizeKM "kingdom.questGenerator.preview.rewards"}}</h4>
+      <div class="km-qg-rewards">
+        {{#if questPreview.rewards.xp}}
+          <span class="km-reward-pill km-reward-xp" title="XP"><i class="fa-solid fa-star"></i> {{questPreview.rewards.xp}} XP</span>
+        {{/if}}
+        {{#if questPreview.rewards.rp}}
+          <span class="km-reward-pill km-reward-rp" title="RP"><i class="fa-solid fa-crown"></i> {{questPreview.rewards.rp}} RP</span>
+        {{/if}}
+        {{#if questPreview.rewards.fame}}
+          <span class="km-reward-pill km-reward-fame" title="Fame"><i class="fa-solid fa-award"></i> {{questPreview.rewards.fame}} Fame</span>
+        {{/if}}
+        {{#if questPreview.rewards.unrestReduction}}
+          <span class="km-reward-pill km-reward-unrest" title="Unrest reduction"><i class="fa-solid fa-triangle-exclamation"></i> {{questPreview.rewards.unrestReduction}} Unrest</span>
+        {{/if}}
+        {{#each questPreview.rewards.commodities}}
+          <span class="km-reward-pill km-reward-commodity" title="{{type}}"><i class="fa-solid fa-boxes-stacked"></i> {{amount}} {{type}}</span>
+        {{/each}}
+        {{#if questPreview.rewards.customReward}}
+          <span class="km-reward-pill km-reward-custom" title="Custom reward"><i class="fa-solid fa-gift"></i> {{questPreview.rewards.customReward}}</span>
+        {{/if}}
+      </div>
+    </div>
+  </section>
+  {{/if}}
+
+  {{!-- Event picker --}}
+  <section class="km-qg-event-picker">
+    <h3><i class="fa-solid fa-calendar-day"></i> {{localizeKM "kingdom.questGenerator.preview.event"}}</h3>
+    {{#if events.length}}
+      <div class="km-qg-events-grid">
+        {{#each events}}
+          <div class="km-qg-event-card {{#if (eq ../selectedEventId id)}}selected{{/if}}" data-event-id="{{id}}">
+            <div class="km-qg-event-card-body">
+              <span class="km-qg-event-name">{{name}}</span>
+              <div class="km-qg-traits-list">
+                {{#each traits}}<span class="km-qg-trait">{{this}}</span>{{/each}}
+              </div>
+            </div>
+            <button type="button" class="km-btn km-qg-generate-btn" data-action="generate" data-event-id="{{id}}">
+              <i class="fa-solid fa-sparkles"></i> {{localizeKM "kingdom.questGenerator.generate"}}
+            </button>
+          </div>
+        {{/each}}
+      </div>
+    {{else}}
+      <div class="km-empty-placeholder">
+        <i class="fa-regular fa-calendar-xmark"></i>
+        <p>{{localizeKM "kingdom.questGenerator.noEvents"}}</p>
+      </div>
+    {{/if}}
+  </section>
+
+  {{!-- Visibility --}}
+  <section class="km-qg-visibility">
+    <label class="km-qg-checkbox-label">
+      <input type="checkbox" name="visibleToPlayers" class="km-qg-checkbox" />
+      <span>{{localizeKM "kingdom.questGenerator.settings.defaultVisibilityPlayers"}}</span>
+    </label>
+  </section>
+
+  {{!-- Actions --}}
+  <footer class="km-qg-footer">
+    <button type="button" class="km-btn km-btn-primary km-qg-action-btn" data-action="commit" {{#unless canGenerate}}disabled{{/unless}}>
+      <i class="fa-solid fa-check"></i> {{localizeKM "kingdom.questGenerator.commit"}}
+    </button>
+    <button type="button" class="km-btn km-qg-action-btn" data-action="cancel">
+      <i class="fa-solid fa-xmark"></i> {{localizeKM "kingdom.questGenerator.cancel"}}
+    </button>
+  </footer>
+</form>

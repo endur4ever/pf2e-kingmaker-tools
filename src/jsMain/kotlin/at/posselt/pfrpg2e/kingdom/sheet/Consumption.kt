@@ -21,6 +21,7 @@ suspend fun payConsumption(
     now: Int,
     expressionContext: ExpressionContext,
     modifiers: List<Modifier>,
+    suppressChat: Boolean = false,
 ): Int {
     val consumption = calculateConsumption(
         settlements = settlements,
@@ -33,7 +34,9 @@ suspend fun payConsumption(
     return if (consumption > 0) {
         val consumedFood = availableFood - consumption
         val paidFood = consumedFood.coerceIn(0, Int.MAX_VALUE)
-        postChatMessage(t("kingdom.reducingFoodBy", recordOf("consumption" to consumption)))
+        if (!suppressChat) {
+            postChatMessage(t("kingdom.reducingFoodBy", recordOf("consumption" to consumption)))
+        }
         if (consumedFood < 0) {
             val missingFood = abs(consumedFood)
             postChatTemplate(
@@ -47,7 +50,9 @@ suspend fun payConsumption(
         }
         paidFood
     } else {
-        postChatMessage(t("kingdom.payingConsumption"))
+        if (!suppressChat) {
+            postChatMessage(t("kingdom.payingConsumption"))
+        }
         availableFood
     }
 }

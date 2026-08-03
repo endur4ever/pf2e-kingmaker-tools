@@ -7,6 +7,8 @@ import com.foundryvtt.core.documents.Actor
 import com.foundryvtt.core.utils.deepClone
 import com.foundryvtt.pf2e.actor.PF2EParty
 
+import com.foundryvtt.core.game
+
 typealias KingdomActor = PF2EParty
 
 fun KingdomActor.getKingdom(): KingdomData? =

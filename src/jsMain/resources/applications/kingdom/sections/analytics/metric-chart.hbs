@@ -1,0 +1,55 @@
+<div class="km-analytics-card" data-metric="{{key}}">
+    <div class="km-analytics-card-header">
+        <span class="km-analytics-card-title">{{label}}</span>
+        <div class="km-analytics-card-value-group">
+            <span class="km-analytics-card-current">{{current}}</span>
+            <span class="km-analytics-card-delta {{#if (gt deltaFromStart 0)}}km-delta-positive{{/if}}{{#if (lt deltaFromStart 0)}}km-delta-negative{{/if}}">
+                {{#if (gt deltaFromStart 0)}}+{{/if}}{{deltaFromStart}}
+            </span>
+        </div>
+    </div>
+
+    <div class="km-analytics-chart-container">
+        <svg viewBox="0 0 400 150" class="km-analytics-svg" xmlns="http://www.w3.org/2000/svg">
+            <!-- Background grid lines -->
+            <line x1="15" y1="15" x2="385" y2="15" stroke="rgba(255, 255, 255, 0.08)" stroke-width="1" />
+            <line x1="15" y1="75" x2="385" y2="75" stroke="rgba(255, 255, 255, 0.08)" stroke-width="1" />
+            <line x1="15" y1="135" x2="385" y2="135" stroke="rgba(255, 255, 255, 0.08)" stroke-width="1" />
+
+            <!-- Pacing Alert Threshold lines -->
+            {{#if hasThresholds}}
+                {{#each thresholdLines}}
+                    <line x1="15" y1="{{y}}" x2="385" y2="{{y}}" stroke="rgba(255, 80, 80, 0.5)" stroke-width="1" stroke-dasharray="4,4" />
+                    <text x="18" y="{{textY}}" fill="rgba(255, 80, 80, 0.8)" font-size="8px" font-family="sans-serif">{{label}} ({{value}})</text>
+                {{/each}}
+            {{/if}}
+
+            <!-- Polyline -->
+            {{#if polylinePoints}}
+                <polyline points="{{polylinePoints}}" fill="none" stroke="var(--color-primary, #df9f28)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            {{/if}}
+
+            <!-- Dots -->
+            {{#each points}}
+                <circle cx="{{x}}" cy="{{y}}" r="4" class="km-chart-dot" data-turn="{{turn}}" data-value="{{value}}">
+                    <title>Turn {{turn}}: {{value}}</title>
+                </circle>
+            {{/each}}
+        </svg>
+    </div>
+
+    <div class="km-analytics-stats">
+        <div class="km-stat-item">
+            <span class="km-stat-label">{{localizeKM "kingdom.analytics.statMin"}}</span>
+            <span class="km-stat-value">{{min}}</span>
+        </div>
+        <div class="km-stat-item">
+            <span class="km-stat-label">{{localizeKM "kingdom.analytics.statMax"}}</span>
+            <span class="km-stat-value">{{max}}</span>
+        </div>
+        <div class="km-stat-item">
+            <span class="km-stat-label">{{localizeKM "kingdom.analytics.statMean"}}</span>
+            <span class="km-stat-value">{{numberFormat mean decimals=1}}</span>
+        </div>
+    </div>
+</div>

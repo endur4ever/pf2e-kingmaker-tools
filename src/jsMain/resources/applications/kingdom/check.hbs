@@ -47,6 +47,7 @@
         <div class="km-check-roll-mode">{{> formElement rollModeInput }}</div>
         <button
                 {{#if useAssurance}}hidden{{/if}}
+                {{#if rollDisabled}}disabled{{/if}}
                 data-notes="{{notes}}"
                 data-action="roll"
                 data-modifier="{{checkModifier}}"
@@ -67,6 +68,7 @@
         </button>
         <button
                 {{#unless useAssurance}}hidden{{/unless}}
+                {{#if rollDisabled}}disabled{{/if}}
                 data-action="assurance"
                 data-modifier="{{checkModifier}}"
         >{{localizeKM "kingdom.assurance"}} ({{assuranceModifier}}: {{assuranceDegree}})</button>

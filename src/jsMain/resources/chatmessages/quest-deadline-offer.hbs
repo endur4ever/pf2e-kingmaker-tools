@@ -1,0 +1,25 @@
+<h2>{{localizeKM "chatMessages.questDeadline.offerTitle"}}</h2>
+<div class="km-quest-deadline-offer">
+    <p>{{localizeKM "chatMessages.questDeadline.offerBody" name=name}}</p>
+</div>
+{{#if isGM}}
+<hr>
+<h3>{{localizeKM "chatMessages.companionAutonomy.gmActions"}}</h3>
+<div class="km-expedition-offers">
+    <button type="button"
+            class="km-offer-quest-deadline"
+            data-kingdom-actor-uuid="{{actorUuid}}"
+            data-quest-id="{{questId}}"
+            data-action="fail">
+        {{localizeKM "chatMessages.questDeadline.failNow"}}
+    </button>
+    <button type="button"
+            class="km-offer-quest-deadline"
+            data-kingdom-actor-uuid="{{actorUuid}}"
+            data-quest-id="{{questId}}"
+            data-extend-turns="{{extendTurns}}"
+            data-action="extend">
+        {{localizeKM "chatMessages.questDeadline.extendTurns" turns=extendTurns}}
+    </button>
+</div>
+{{/if}}

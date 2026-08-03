@@ -54,9 +54,10 @@ suspend fun postChatTemplate(
     templateContext: Any? = unsafeJso(),
     rollMode: RollMode? = null,
     speaker: Actor? = null,
+    whisper: Array<String>? = null,
 ) {
     val message = tpl(templatePath, templateContext)
-    postChatMessage(message, rollMode, speaker = speaker, isHtml = true)
+    postChatMessage(message, rollMode, speaker = speaker, isHtml = true, whisper = whisper)
 }
 
 suspend fun postChatMessage(
@@ -64,6 +65,7 @@ suspend fun postChatMessage(
     rollMode: RollMode? = null,
     speaker: Actor? = null,
     isHtml: Boolean = false,
+    whisper: Array<String>? = null,
 ) {
     val value = if (isHtml) message else escapeHtml(message)
     val fixedMessage = if (rollMode == RollMode.BLINDROLL) {
@@ -72,10 +74,13 @@ suspend fun postChatMessage(
         value
     }
     val data = recordOf<String, Any?>(
-        "content" to fixedMessage
+        "content" to fixedMessage,
     )
     if (speaker != null) {
         data["speaker"] = ChatMessage.getSpeaker(GetSpeakerOptions(actor = speaker))
+    }
+    if (whisper != null && whisper.isNotEmpty()) {
+        data["whisper"] = whisper
     }
     rollMode?.let { ChatMessage.applyMode(data, it.toMessageMode()) }
     ChatMessage.create(data).await()
@@ -99,11 +104,14 @@ fun bindChatClick(
         .mapNotNull { document.getElementById(it) }
         .forEach { elem ->
             elem.addEventListener("click", { event ->
-                val target = event.target
-                if (target is HTMLElement && target.matches(targetSelector)) {
-                    target.closest(parentSelector)
+                // Resolve descendant clicks (e.g. a click on the <i> icon INSIDE a button) up to
+                // the matching button; closest() returns the element itself when it already matches,
+                // so this is safe for text-only buttons too.
+                val clicked = (event.target as? HTMLElement)?.closest(targetSelector)?.takeIfInstance<HTMLElement>()
+                if (clicked != null) {
+                    clicked.closest(parentSelector)
                         ?.takeIfInstance<HTMLElement>()
-                        ?.let { callback(event, target, it) }
+                        ?.let { callback(event, clicked, it) }
                 }
             })
         }

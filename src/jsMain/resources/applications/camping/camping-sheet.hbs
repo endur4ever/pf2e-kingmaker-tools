@@ -120,12 +120,18 @@
     <ul class="km-camping-actors">
         {{#each actors}}
             <li class="km-camping-actor" draggable="true" data-uuid="{{uuid}}" data-type="Actor">
-                <a href="#" data-uuid="{{uuid}}" data-action="open-actor"><img src="{{image}}" alt="{{name}}"></a>
+                <a href="#" draggable="false" data-uuid="{{uuid}}" data-action="open-actor"{{#if learnedActivities}} data-tooltip="{{learnedActivities}}" data-tooltip-direction="UP"{{/if}}><img draggable="false" src="{{image}}" alt="{{name}}"></a>
                 {{#if choseActivity}}
                     <div class="taken-camping-activity"><i class="fa-solid fa-circle-check"></i></div>
                 {{/if}}
                 {{#if chosenMealImg}}
                     <img class="chosen-meal" src="{{chosenMealImg}}" alt="{{chosenMeal}}" title="{{chosenMeal}}">
+                {{/if}}
+                {{#if downtimeHoursMax}}
+                    <div class="km-camping-actor-hours{{#if downtimeBudgetFull}} km-camping-actor-hours-full{{/if}}"
+                         title="{{localizeKM "camping.downtimeBudgetHelp" max=downtimeHoursMax}}">
+                        {{downtimeHoursRemaining}}<span class="km-hours-unit">{{localizeKM "camping.hoursSymbol"}}</span>
+                    </div>
                 {{/if}}
                 <button class="km-camping-action"
                         data-action="clear-actor"
@@ -148,12 +154,16 @@
             {{#if prepareCampSection}}hidden{{/if}}
                 type="button"><i class="fa-solid fa-chevron-left"></i>
         </button>
-        <button {{#if eatingSection}}hidden{{/if}}
+        <button {{#if setWatchesSection}}hidden{{/if}}
                 class="km-camping-next"
                 {{#unless isGM}}hidden{{/unless}}
                 data-action="next-section"
                 type="button"><i class="fa-solid fa-chevron-right"></i></button>
         <div {{#unless eatingSection}}hidden{{/unless}} class="km-camping-eating-total">
+            <span class="km-food-days{{#unless foodTonightCovered}} km-food-days-warn{{/unless}}"
+                  title="{{localizeKM "camping.foodDaysHelp"}}">
+                <b>{{localizeKM "camping.foodDays"}}:</b> {{foodDaysDisplay}}
+            </span>
             <span>
                 {{> foodCost availableFood hideEmpty=false title="camping.available"}}
             </span>
@@ -164,7 +174,101 @@
         </div>
         <div id="km-camping-content-wrapper">
             <div class="km-camping-activities-wrapper">
+                <details class="km-route-planner" {{#if travelStartHexSelect.value}}open{{/if}}>
+                    <summary><i class="fa-solid fa-map-directions"></i> {{localizeKM "camping.routePlanner"}}</summary>
+                    <div class="km-route-planner-content">
+                        <div class="km-row">
+                            <div class="km-form-group">
+                                {{> formElement travelStartHexSelect}}
+                            </div>
+                            <div class="km-form-group">
+                                {{> formElement travelEndHexSelect}}
+                            </div>
+                        </div>
+                        {{#if travelRoute}}
+                            <div class="km-route-details">
+                                {{#if travelRoute.foodWarning}}
+                                <div class="km-route-food-warning"><i class="fa-solid fa-triangle-exclamation"></i> {{travelRoute.foodWarning}}</div>
+                                {{/if}}
+                                <div class="km-row km-route-summary">
+                                    <div><b>{{localizeKM "camping.totalCost"}}:</b> {{travelRoute.totalCost}} {{localizeKM "camping.hoursSymbol"}}</div>
+                                    <div><b>{{localizeKM "camping.estimatedDuration"}}:</b> {{travelRoute.estimatedDuration}}</div>
+                                    <div><b>{{localizeKM "camping.totalDistance"}}:</b> {{travelRoute.totalDistance}} {{localizeKM "kingdom.hex" count=travelRoute.totalDistance}}</div>
+                                </div>
+                                <div class="km-route-modifiers">
+                                    <b>{{localizeKM "camping.routeModifiers"}}:</b>
+                                    <ul>
+                                        {{#each travelRoute.modifiers}}
+                                            <li>{{this}}</li>
+                                        {{/each}}
+                                    </ul>
+                                </div>
+                            </div>
+                        {{else}}
+                            {{#if travelPathError}}
+                                <div class="km-route-error">{{travelPathError}}</div>
+                            {{/if}}
+                        {{/if}}
+                    </div>
+                </details>
+
                 <h1>{{section}}</h1>
+                {{#if setWatchesSection}}
+                <div class="km-camping-watch-controls">
+                    {{> formElement numberOfWatches}}
+                    <button type="button" class="km-camping-action" data-action="suggest-watch-order"
+                            title="{{localizeKM "camping.suggestWatchOrderHelp"}}">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> {{localizeKM "camping.suggestWatchOrder"}}
+                    </button>
+                </div>
+                {{#if watchWarnings}}
+                <div class="km-camping-watch-warnings">
+                    {{#each watchWarnings}}
+                    <p><i class="fa-solid fa-triangle-exclamation"></i> {{this}}</p>
+                    {{/each}}
+                </div>
+                {{/if}}
+                <div class="km-camping-watch-grid">
+                    {{#each watchSlots}}
+                    <div class="km-camping-watch-slot" data-slot-index="{{index}}">
+                        <div class="km-camping-watch-slot-header">{{localizeKM "camping.watchSlot"}} {{add index 1}}{{#if hourRange}}
+                            <span class="km-camping-watch-hours">{{hourRange}}</span>{{/if}}</div>
+                        {{#if actors}}
+                        <div class="km-camping-watch-assignees">
+                            {{#each actors}}
+                            <div class="km-camping-watch-assignee" draggable="true" data-type="Actor" data-uuid="{{uuid}}">
+                                <img src="{{image}}" alt="{{name}}">
+                                <span>{{name}}</span>
+                                {{#if perceptionLabel}}
+                                <span class="km-camping-watch-perception"
+                                      title="{{localizeKM "camping.watchPerception"}}">{{perceptionLabel}}</span>
+                                {{/if}}
+                                <button class="km-camping-action"
+                                        data-action="clear-watch-slot"
+                                        type="button"
+                                        data-slot-index="{{../index}}"
+                                        data-uuid="{{uuid}}">
+                                    <i class="fa-regular fa-circle-xmark"></i>
+                                </button>
+                            </div>
+                            {{/each}}
+                        </div>
+                        {{else}}
+                        <div class="km-camping-watch-empty">
+                            <i class="fa-solid fa-shield-halved"></i>
+                            <span>{{localizeKM "camping.dropActorOnWatch"}}</span>
+                        </div>
+                        {{/if}}
+                    </div>
+                    {{/each}}
+                </div>
+                {{else}}
+                {{#if needsCookAssignment}}
+                <div class="km-camping-cook-hint">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <span>{{localizeKM "camping.assignCookHint"}}</span>
+                </div>
+                {{/if}}
                 <div class="km-camping-activities">
                     {{> campingTile prepareCamp}}
                     {{#each activities}}
@@ -174,6 +278,7 @@
                         {{> recipeTile }}
                     {{/each}}
                 </div>
+                {{/if}}
             </div>
         </div>
     </div>

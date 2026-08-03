@@ -9,9 +9,13 @@ import at.posselt.pfrpg2e.app.forms.HiddenInput
 import at.posselt.pfrpg2e.app.forms.NumberInput
 import at.posselt.pfrpg2e.app.forms.OverrideType
 import at.posselt.pfrpg2e.app.forms.Select
+import at.posselt.pfrpg2e.app.forms.TextInput
 import at.posselt.pfrpg2e.data.ValueEnum
 import at.posselt.pfrpg2e.data.kingdom.settlements.SettlementLayoutType
 import at.posselt.pfrpg2e.data.kingdom.settlements.SettlementType
+import at.posselt.pfrpg2e.data.kingdom.settlements.npcOccupations
+import at.posselt.pfrpg2e.data.kingdom.settlements.growPopulation
+import at.posselt.pfrpg2e.data.kingdom.settlements.recommendedRosterSize
 import at.posselt.pfrpg2e.data.kingdom.structures.CommodityStorage
 import at.posselt.pfrpg2e.data.kingdom.structures.calculateAvailableItems
 import at.posselt.pfrpg2e.fromCamelCase
@@ -20,9 +24,14 @@ import at.posselt.pfrpg2e.kingdom.data.ChosenFeat
 import at.posselt.pfrpg2e.kingdom.getAllActivities
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.NavEntryContext
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.createTabs
+import at.posselt.pfrpg2e.kingdom.structures.RawNpcEntry
+import at.posselt.pfrpg2e.kingdom.structures.RawPopulationRoster
+import at.posselt.pfrpg2e.utils.launch
 import at.posselt.pfrpg2e.kingdom.structures.RawSettlement
 import at.posselt.pfrpg2e.kingdom.structures.isStructure
+import at.posselt.pfrpg2e.kingdom.SettlementTerrain
 import at.posselt.pfrpg2e.kingdom.structures.parseSettlement
+import at.posselt.pfrpg2e.kingdom.structures.toRaw
 import at.posselt.pfrpg2e.localization.Translatable
 import at.posselt.pfrpg2e.toCamelCase
 import at.posselt.pfrpg2e.utils.buildPromise
@@ -74,6 +83,8 @@ external interface InspectSettlementContext : ValidatedHandlebarsContext {
     val manualSettlementLevelInput: FormElementContext
     val waterBordersInput: FormElementContext
     val layoutInput: FormElementContext
+    val terrainInput: FormElementContext
+    val hexKeyInput: FormElementContext
     val level: Int
     val type: String
     val manualSettlementLevel: Boolean
@@ -96,6 +107,10 @@ external interface InspectSettlementContext : ValidatedHandlebarsContext {
     val tabs: Array<NavEntryContext>
     val storage: Array<LabelValueContext>
     val settlementActions: Int
+    val populationNpcs: Array<RawNpcEntry>
+    val itemPurchaseLevel: Int
+    val trainers: Array<String>
+    val craftingAccess: Array<String>
 }
 
 @JsPlainObject
@@ -106,6 +121,8 @@ external interface InspectSettlementData {
     val manualSettlementLevel: Boolean
     val waterBorders: Int
     val layoutType: String
+    val terrain: String?
+    val hexKey: String?
 }
 
 @JsExport
@@ -119,9 +136,11 @@ class InspectSettlementDataModel(
             int("blocks")
             enum<SettlementType>("type")
             enum<SettlementLayoutType>("layoutType")
+            enum<SettlementTerrain>("terrain", nullable = true)
             boolean("secondaryTerritory")
             boolean("manualSettlementLevel")
             int("waterBorders")
+            string("hexKey", nullable = true)
         }
     }
 }
@@ -133,7 +152,8 @@ enum class SettlementNav : Translatable, ValueEnum {
     STRUCTURES,
     STORAGE,
     NOTES,
-    BONUSES;
+    BONUSES,
+    POPULATION;
 
     companion object {
         fun fromString(value: String) = fromCamelCase<SettlementNav>(value)
@@ -158,6 +178,7 @@ class InspectSettlement(
     private val kingdomLevel: Int,
     settlement: RawSettlement,
     feats: List<ChosenFeat>,
+    private val onRosterChange: suspend (roster: RawPopulationRoster) -> Unit,
     private val afterSubmit: suspend (settlement: RawSettlement) -> Unit
 ) : FormApp<InspectSettlementContext, InspectSettlementData>(
     title = title,
@@ -202,7 +223,29 @@ class InspectSettlement(
         manualSettlementLevel = settlement.manualSettlementLevel,
         waterBorders = settlement.waterBorders,
         layoutType = settlement.layoutType,
+        terrain = settlement.terrain,
+        hexKey = settlement.hexKey,
+        populationRoster = settlement.populationRoster ?: RawPopulationRoster(),
     )
+
+    init {
+        // The seeded starter roster only exists on the evaluated Settlement;
+        // copy it into the editable raw data when the stored roster is empty
+        // so it renders in the population tab and persists on save. Done once
+        // at construction so deleting NPCs in the open dialog doesn't reseed.
+        if (current.populationRoster?.npcs?.isNotEmpty() != true) {
+            game.scenes.get(current.sceneId)?.parseSettlement(
+                rawSettlement = current,
+                autoCalculateSettlementLevel = autoCalculateSettlementLevel,
+                allStructuresStack = allStructuresStack,
+                allowCapitalInvestmentInCapitalWithoutBank = allowCapitalInvestmentInCapitalWithoutBank,
+                capStructureBonusAtKingdomLevel = capStructureBonusAtKingdomLevel,
+                kingdomLevel = kingdomLevel,
+            )?.let { parsed ->
+                current.populationRoster = parsed.populationRoster.toRaw()
+            }
+        }
+    }
 
     override fun _onClickAction(event: PointerEvent, target: HTMLElement) {
         when (target.dataset["action"]) {
@@ -219,6 +262,98 @@ class InspectSettlement(
                 if (isValid()) {
                     close().await()
                     afterSubmit(current)
+                }
+                undefined
+            }
+
+            "generate-npcs" -> buildPromise {
+                // Tops the roster up to the recommended size for the settlement's current
+                // population. Only ever adds entries: user edits and deletions stick.
+                val parsed = game.scenes.get(current.sceneId)?.parseSettlement(
+                    rawSettlement = current,
+                    autoCalculateSettlementLevel = autoCalculateSettlementLevel,
+                    allStructuresStack = allStructuresStack,
+                    allowCapitalInvestmentInCapitalWithoutBank = allowCapitalInvestmentInCapitalWithoutBank,
+                    capStructureBonusAtKingdomLevel = capStructureBonusAtKingdomLevel,
+                    kingdomLevel = kingdomLevel,
+                )
+                if (parsed != null) {
+                    val grown = parsed.growPopulation()
+                    if (grown.npcs.size > (current.populationRoster?.npcs?.size ?: 0)) {
+                        val updatedRoster = grown.toRaw()
+                        current.populationRoster = updatedRoster
+                        onRosterChange(updatedRoster)
+                        render()
+                    } else {
+                        ui.notifications.info(
+                            t(
+                                "kingdom.population.rosterAtRecommendedSize",
+                                recordOf("count" to parsed.recommendedRosterSize()),
+                            )
+                        )
+                    }
+                }
+                undefined
+            }
+
+            "add-npc" -> buildPromise {
+                PopulationAddDialog(
+                    occupations = npcOccupations.toTypedArray(),
+                    onAdd = { npc ->
+                        val roster = current.populationRoster ?: RawPopulationRoster()
+                        val existingNpcs = roster.npcs?.toMutableList() ?: mutableListOf()
+                        existingNpcs.add(npc)
+                        val updatedRoster = RawPopulationRoster(npcs = existingNpcs.toTypedArray())
+                        current.populationRoster = updatedRoster
+                        onRosterChange(updatedRoster)
+                        render()
+                    },
+                ).launch()
+                undefined
+            }
+
+            "edit-npc" -> buildPromise {
+                val index = target.dataset["index"]?.toIntOrNull()
+                if (index != null) {
+                    val roster = current.populationRoster ?: RawPopulationRoster()
+                    val npcs = roster.npcs ?: emptyArray()
+                    if (index in npcs.indices) {
+                        val existing = npcs[index]
+                        PopulationEditDialog(
+                            occupations = npcOccupations.toTypedArray(),
+                            existing = existing,
+                            onSave = { updated ->
+                                val existingNpcs = (roster.npcs?.toMutableList() ?: mutableListOf())
+                                existingNpcs[index] = updated
+                                val updatedRoster = RawPopulationRoster(npcs = existingNpcs.toTypedArray())
+                                current.populationRoster = updatedRoster
+                                onRosterChange(updatedRoster)
+                                render()
+                            },
+                            onDelete = {
+                                val existingNpcs = (roster.npcs?.toMutableList() ?: mutableListOf())
+                                existingNpcs.removeAt(index)
+                                val updatedRoster = RawPopulationRoster(npcs = existingNpcs.toTypedArray())
+                                current.populationRoster = updatedRoster
+                                onRosterChange(updatedRoster)
+                                render()
+                            },
+                        ).launch()
+                    }
+                }
+                undefined
+            }
+
+            "delete-npc" -> buildPromise {
+                val index = target.dataset["index"]?.toIntOrNull()
+                if (index != null) {
+                    val roster = current.populationRoster ?: RawPopulationRoster()
+                    val existingNpcs = (roster.npcs?.toMutableList() ?: mutableListOf())
+                    existingNpcs.removeAt(index)
+                    val updatedRoster = RawPopulationRoster(npcs = existingNpcs.toTypedArray())
+                    current.populationRoster = updatedRoster
+                    onRosterChange(updatedRoster)
+                    render()
                 }
                 undefined
             }
@@ -276,6 +411,13 @@ class InspectSettlement(
             value = SettlementLayoutType.fromString(current.layoutType),
             hideLabel = true,
         )
+        val terrainSelect = Select.fromEnum<SettlementTerrain>(
+            name = "terrain",
+            label = t("kingdom.terrain"),
+            value = current.terrain?.let { SettlementTerrain.fromString(it) },
+            hideLabel = true,
+            required = false,
+        )
         val manualSettlementLevelInput = CheckboxInput(
             name = "manualSettlementLevel",
             label = t("kingdom.manualManagement"),
@@ -288,7 +430,17 @@ class InspectSettlement(
             value = current.waterBorders,
             hideLabel = true,
         )
+        val hexKeyInput = TextInput(
+            name = "hexKey",
+            label = t("kingdom.caravans.settlementHex"),
+            value = current.hexKey,
+            required = false,
+            help = t("kingdom.caravans.settlementHexHelp"),
+            hideLabel = true,
+        )
+        val blacklist = (kingdom.structureBlacklist ?: emptyArray()).toSet()
         val settlementStructures = parsed.constructedStructures
+            .filter { it.id !in blacklist }
             .groupBy { it.id }
             .values
             .sortedBy { it.first().name }
@@ -346,8 +498,9 @@ class InspectSettlement(
             .filter { it.second > 0 }
             .map { LabelValueContext(label = it.first, value = it.second) }
             .toTypedArray()
+        val basePurchaseLevel = parsed.itemPurchaseLevel
         val availableItems = calculateAvailableItems(
-            settlementLevel = parsed.occupiedBlocks,
+            settlementLevel = basePurchaseLevel,
             preventItemLevelPenalty = parsed.preventItemLevelPenalty,
             magicalItemLevelIncrease = magicItemLevelIncreases,
             bonuses = parsed.availableItems,
@@ -358,6 +511,75 @@ class InspectSettlement(
                 t("kingdom.notAvailable")
             }
         }.toRecord()
+
+        val trainersList = mutableListOf<String>()
+        val baseIds = parsed.constructedStructures.map { it.id.removeSuffix("-vk") }.toSet()
+
+        fun getStructureName(baseId: String): String {
+            return parsed.constructedStructures.find { it.id.removeSuffix("-vk") == baseId }?.name ?: ""
+        }
+
+        if ("shrine" in baseIds) {
+            trainersList.add("${getStructureName("shrine")}: ${t("kingdom.class.cleric")}, ${t("kingdom.class.oracle")}")
+        }
+        if ("library" in baseIds) {
+            trainersList.add("${getStructureName("library")}: ${t("kingdom.class.investigator")}, ${t("kingdom.class.thaumaturge")}, ${t("kingdom.class.psychic")}")
+        }
+        if ("alchemy-laboratory" in baseIds) {
+            trainersList.add("${getStructureName("alchemy-laboratory")}: ${t("kingdom.class.alchemist")}, ${t("kingdom.class.gunslinger")}, ${t("kingdom.class.inventor")}")
+        }
+        val taverns = parsed.constructedStructures.filter { it.id.removeSuffix("-vk").startsWith("tavern-") }
+        if (taverns.isNotEmpty()) {
+            val names = taverns.map { it.name }.distinct().joinToString(" / ")
+            trainersList.add("$names: ${t("kingdom.class.bard")}")
+        }
+        if ("arcanists-tower" in baseIds) {
+            trainersList.add("${getStructureName("arcanists-tower")}: ${t("kingdom.class.wizard")}, ${t("kingdom.class.witch")}, ${t("kingdom.class.sorcerer")}, ${t("kingdom.class.magus")}")
+        }
+        if ("garrison" in baseIds) {
+            trainersList.add("${getStructureName("garrison")}: ${t("kingdom.class.fighter")}, ${t("kingdom.class.barbarian")}, ${t("kingdom.class.champion")}, ${t("kingdom.class.monk")}")
+        }
+        if ("sacred-grove" in baseIds) {
+            trainersList.add("${getStructureName("sacred-grove")}: ${t("kingdom.class.druid")}, ${t("kingdom.class.kineticist")}, ${t("kingdom.class.summoner")}, ${t("kingdom.class.ranger")}")
+        }
+        if ("thieves-guild" in baseIds) {
+            trainersList.add("${getStructureName("thieves-guild")}: ${t("kingdom.class.rogue")}")
+        }
+        if ("pier" in baseIds) {
+            trainersList.add("${getStructureName("pier")}: ${t("kingdom.class.swashbuckler")}")
+        }
+
+        val craftingList = mutableListOf<String>()
+        val metalStructures = parsed.constructedStructures.filter { it.id.removeSuffix("-vk") in setOf("smithy", "foundry") }
+        if (metalStructures.isNotEmpty()) {
+            val names = metalStructures.map { it.name }.distinct().joinToString(" / ")
+            craftingList.add("$names: ${t("kingdom.crafting.metallic")}")
+        }
+        if ("stonemason" in baseIds) {
+            craftingList.add("${getStructureName("stonemason")}: ${t("kingdom.crafting.runes")}")
+        }
+        if ("tannery" in baseIds) {
+            craftingList.add("${getStructureName("tannery")}: ${t("kingdom.crafting.leather")}")
+        }
+        if ("arcanists-tower" in baseIds) {
+            craftingList.add("${getStructureName("arcanists-tower")}: ${t("kingdom.crafting.scrollsWandsStaves")}")
+        }
+        if ("luxury-store" in baseIds) {
+            craftingList.add("${getStructureName("luxury-store")}: ${t("kingdom.crafting.amuletsRings")}")
+        }
+        if ("library" in baseIds) {
+            craftingList.add("${getStructureName("library")}: ${t("kingdom.crafting.tomes")}")
+        }
+        if ("alchemy-laboratory" in baseIds) {
+            craftingList.add("${getStructureName("alchemy-laboratory")}: ${t("kingdom.crafting.alchemical")}")
+        }
+        if ("lumberyard" in baseIds) {
+            craftingList.add("${getStructureName("lumberyard")}: ${t("kingdom.crafting.wooden")}")
+        }
+        if ("specialized-artisan" in baseIds) {
+            craftingList.add("${getStructureName("specialized-artisan")}: ${t("kingdom.crafting.other")}")
+        }
+
         val notes = parsed.notes.toTypedArray()
         InspectSettlementContext(
             partId = parent.partId,
@@ -389,6 +611,8 @@ class InspectSettlement(
             currentTab = currentNav.value,
             storage = storage,
             layoutInput = settlementLayout.toContext(),
+            terrainInput = terrainSelect.toContext(),
+            hexKeyInput = hexKeyInput.toContext(),
             tabs = createTabs<SettlementNav>("change-nav", currentNav)
                 .filter {
                     if (it.link == SettlementNav.BONUSES.value) {
@@ -402,6 +626,10 @@ class InspectSettlement(
                     }
                 }
                 .toTypedArray(),
+            populationNpcs = current.populationRoster?.npcs ?: emptyArray(),
+            trainers = trainersList.toTypedArray(),
+            craftingAccess = craftingList.toTypedArray(),
+            itemPurchaseLevel = basePurchaseLevel,
         )
     }
 
@@ -412,6 +640,8 @@ class InspectSettlement(
         current.manualSettlementLevel = value.manualSettlementLevel
         current.waterBorders = value.waterBorders
         current.layoutType = value.layoutType
+        current.terrain = value.terrain
+        current.hexKey = value.hexKey?.takeIf { it.isNotBlank() }
         undefined
     }
 

@@ -1,0 +1,137 @@
+<div class="km-hex-content-manager">
+    {{#if isEditing}}
+        <div class="km-hex-content-form">
+            <h3>{{localizeKM "kingdom.hexContent.editContent"}}</h3>
+            {{#each formRows}}
+                {{> formElement this}}
+            {{/each}}
+            <div class="km-hex-links">
+                {{#if linkedQuestChoices.length}}
+                <div class="km-hex-links-group">
+                    <label class="km-hex-links-label"><i class="fa-solid fa-scroll"></i> {{localizeKM "kingdom.hexContent.linkedQuests"}}</label>
+                    <div class="km-hex-quest-choices">
+                        {{#each linkedQuestChoices}}
+                        <label class="km-hex-quest-choice">
+                            <input type="checkbox" name="questLink" value="{{this.id}}" {{#if this.checked}}checked{{/if}}>
+                            <span>{{this.title}}</span>
+                        </label>
+                        {{/each}}
+                    </div>
+                </div>
+                {{/if}}
+                <div class="km-hex-links-group">
+                    <label class="km-hex-links-label"><i class="fa-solid fa-link"></i> {{localizeKM "kingdom.hexContent.linkedDocuments"}}</label>
+                    <div class="km-hex-drop-zone">
+                        <i class="fa-solid fa-hand-pointer"></i> {{localizeKM "kingdom.hexContent.dropHint"}}
+                    </div>
+                    <div class="km-hex-link-list">
+                        {{#each linkedDocs}}
+                        <span class="km-hex-link-chip" data-uuid="{{this.uuid}}">
+                            {{{this.link}}}
+                            <a class="km-hex-link-remove" data-uuid="{{this.uuid}}" title="{{localizeKM 'kingdom.hexContent.removeLink'}}">×</a>
+                        </span>
+                        {{/each}}
+                    </div>
+                </div>
+            </div>
+            <div class="km-form-actions">
+                <button type="button" class="km-btn km-btn-save" data-action="save">{{localizeKM "kingdom.hexContent.save"}}</button>
+                <button type="button" class="km-btn" data-action="cancel-edit">{{localizeKM "kingdom.hexContent.cancel"}}</button>
+            </div>
+        </div>
+    {{else if isAdding}}
+        <div class="km-hex-content-form">
+            <h3>{{localizeKM "kingdom.hexContent.addContent"}}</h3>
+            {{#each formRows}}
+                {{> formElement this}}
+            {{/each}}
+            <div class="km-hex-links">
+                {{#if linkedQuestChoices.length}}
+                <div class="km-hex-links-group">
+                    <label class="km-hex-links-label"><i class="fa-solid fa-scroll"></i> {{localizeKM "kingdom.hexContent.linkedQuests"}}</label>
+                    <div class="km-hex-quest-choices">
+                        {{#each linkedQuestChoices}}
+                        <label class="km-hex-quest-choice">
+                            <input type="checkbox" name="questLink" value="{{this.id}}" {{#if this.checked}}checked{{/if}}>
+                            <span>{{this.title}}</span>
+                        </label>
+                        {{/each}}
+                    </div>
+                </div>
+                {{/if}}
+                <div class="km-hex-links-group">
+                    <label class="km-hex-links-label"><i class="fa-solid fa-link"></i> {{localizeKM "kingdom.hexContent.linkedDocuments"}}</label>
+                    <div class="km-hex-drop-zone">
+                        <i class="fa-solid fa-hand-pointer"></i> {{localizeKM "kingdom.hexContent.dropHint"}}
+                    </div>
+                    <div class="km-hex-link-list">
+                        {{#each linkedDocs}}
+                        <span class="km-hex-link-chip" data-uuid="{{this.uuid}}">
+                            {{{this.link}}}
+                            <a class="km-hex-link-remove" data-uuid="{{this.uuid}}" title="{{localizeKM 'kingdom.hexContent.removeLink'}}">×</a>
+                        </span>
+                        {{/each}}
+                    </div>
+                </div>
+            </div>
+            <div class="km-form-actions">
+                <button type="button" class="km-btn km-btn-save" data-action="save">{{localizeKM "kingdom.hexContent.save"}}</button>
+                <button type="button" class="km-btn" data-action="cancel-edit">{{localizeKM "kingdom.hexContent.cancel"}}</button>
+            </div>
+        </div>
+    {{else}}
+        <div class="km-hex-content-toolbar">
+            <button type="button" class="km-btn km-btn-primary" data-action="add-new">{{localizeKM "kingdom.hexContent.addNew"}}</button>
+        </div>
+        <div class="km-hex-content-list">
+            {{#if entries.length}}
+                <table class="km-table">
+                    <thead>
+                        <tr>
+                            <th>{{localizeKM "kingdom.hexContent.hexKey"}}</th>
+                            <th>{{localizeKM "kingdom.hexContent.type"}}</th>
+                            <th>{{localizeKM "kingdom.hexContent.name"}}</th>
+                            <th>{{localizeKM "kingdom.hexContent.visibility"}}</th>
+                            <th>{{localizeKM "kingdom.hexContent.links"}}</th>
+                            <th>{{localizeKM "kingdom.hexContent.actions"}}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#each entries}}
+                            <tr data-content-id="{{this.id}}">
+                                <td>{{this.hexLabel}}</td>
+                                <td>{{this.typeName}}</td>
+                                <td>{{this.name}}</td>
+                                <td>
+                                    <span class="km-badge km-badge-{{this.visibility}}">{{this.visibilityName}}</span>
+                                </td>
+                                <td class="km-hex-links-cell">
+                                    {{#if this.hasLinks}}
+                                        {{#if this.linkedQuestCount}}<span class="km-hex-link-count" title="{{localizeKM 'kingdom.hexContent.linkedQuests'}}"><i class="fa-solid fa-scroll"></i> {{this.linkedQuestCount}}</span>{{/if}}
+                                        {{#if this.linkedDocCount}}<span class="km-hex-link-count" title="{{localizeKM 'kingdom.hexContent.linkedDocuments'}}"><i class="fa-solid fa-link"></i> {{this.linkedDocCount}}</span>{{/if}}
+                                        {{#if this.hasWarThreat}}<span class="km-hex-link-count" title="{{localizeKM 'kingdom.hexContent.linkedWarThreat'}}"><i class="fa-solid fa-skull"></i></span>{{/if}}
+                                    {{else}}
+                                        <span class="km-hex-no-links">—</span>
+                                    {{/if}}
+                                </td>
+                                <td class="km-actions">
+                                    <button type="button" class="km-btn km-btn-sm" data-action="edit" data-content-id="{{this.id}}">{{localizeKM "kingdom.hexContent.edit"}}</button>
+                                    {{#if (eq this.visibility "hidden")}}
+                                        <button type="button" class="km-btn km-btn-sm km-btn-reveal" data-action="reveal" data-content-id="{{this.id}}">{{localizeKM "kingdom.hexContent.reveal"}}</button>
+                                    {{else}}
+                                        <button type="button" class="km-btn km-btn-sm" data-action="hide" data-content-id="{{this.id}}">{{localizeKM "kingdom.hexContent.hide"}}</button>
+                                    {{/if}}
+                                    <button type="button" class="km-btn km-btn-sm km-btn-clear" data-action="clear" data-content-id="{{this.id}}">{{localizeKM "kingdom.hexContent.clear"}}</button>
+                                    <button type="button" class="km-btn km-btn-sm km-btn-danger" data-action="delete" data-content-id="{{this.id}}">{{localizeKM "kingdom.hexContent.delete"}}</button>
+                                </td>
+                            </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+            {{else}}
+                <p class="km-empty">{{localizeKM "kingdom.hexContent.noContent"}}</p>
+            {{/if}}
+        </div>
+    {{/if}}
+</div>
+

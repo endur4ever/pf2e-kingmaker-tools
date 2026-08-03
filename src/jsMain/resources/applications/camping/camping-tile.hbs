@@ -1,7 +1,8 @@
-<div class="km-camping-activity km-camping-tile"
+<div class="km-camping-activity km-camping-tile{{#if disabled}} disabled{{/if}}"
     {{#if hidden}}hidden{{/if}}
     {{#if actor}}data-actor-uuid="{{actor.uuid}}"{{/if}}
      data-activity-id="{{id}}"
+    {{#if disabledReason}}title="{{disabledReason}}"{{/if}}
 >
     <header>
         {{#if journalUuid}}
@@ -27,11 +28,37 @@
             </div>
         {{/if}}
     </div>
+    {{#if learnTarget}}
+        <div class="km-camping-tile-learn">
+            {{> formElement learnTarget }}
+        </div>
+    {{/if}}
+    {{#unless requiresCheck}}
+        {{#if actor}}
+            {{! No-check activities charge downtime on drop and can be repeated: + performs
+                it again (2h each), the undo arrow removes one repetition and refunds it
+                (unassigning on the last). Sits in the slot where rolled tiles show the d20. }}
+            <div class="km-camping-tile-check km-no-check-controls">
+                <button class="km-camping-action km-tile-check" data-action="remove-activity-repetition" type="button"
+                        data-id="{{id}}" title="{{localizeKM "camping.removeActivityRepetition"}}">
+                    <i class="fa-solid fa-rotate-left"></i>
+                </button>
+                <span class="km-activity-repetitions"
+                      title="{{localizeKM "camping.activityRepetitions"}}">&times;{{repetitions}} ({{repetitionHours}}h)</span>
+                <button class="km-camping-action km-tile-check" data-action="repeat-activity" type="button"
+                        data-id="{{id}}" {{#if repeatDisabled}}disabled{{/if}}
+                        title="{{localizeKM "camping.repeatActivity"}}">
+                    <i class="fa-solid fa-plus"></i>
+                </button>
+            </div>
+        {{/if}}
+    {{/unless}}
     {{#if requiresCheck}}
         <div class="km-camping-tile-check">
             {{> formElement skills }}
             <button class="km-camping-action km-tile-check" data-action="roll-camping-check" type="button"
-                    {{#unless actor}}disabled{{/unless}}>
+                    {{#unless actor}}disabled{{/unless}}
+                    {{#if disabled}}disabled{{/if}}>
                 <i class="fa-solid fa-dice-d20"></i>
             </button>
         </div>

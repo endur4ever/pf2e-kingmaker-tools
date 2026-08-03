@@ -1,0 +1,12 @@
+<div class="km-offer-card km-offer-army-levelup">
+    <h3>{{localizeKM "warBattle.levelUpOffer.title" name=armyName level=nextLevel}}</h3>
+    <p>{{localizeKM "warBattle.levelUpOffer.description" name=armyName xp=currentXp threshold=xpThreshold}}</p>
+    <div class="km-offer-buttons">
+        <button type="button" class="km-offer-army-levelup" data-approve="true" data-army-actor-uuid="{{armyUuid}}" data-army-name="{{armyName}}" data-target-level="{{nextLevel}}">
+            {{localizeKM "warBattle.levelUpOffer.levelUp"}}
+        </button>
+        <button type="button" class="km-offer-army-levelup" data-decline="true" data-army-actor-uuid="{{armyUuid}}" data-army-name="{{armyName}}" data-target-level="{{nextLevel}}">
+            {{localizeKM "warBattle.levelUpOffer.dismiss"}}
+        </button>
+    </div>
+</div>

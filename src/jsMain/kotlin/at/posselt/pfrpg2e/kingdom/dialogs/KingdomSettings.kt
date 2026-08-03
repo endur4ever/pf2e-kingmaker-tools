@@ -16,6 +16,12 @@ import at.posselt.pfrpg2e.data.checks.RollMode
 import at.posselt.pfrpg2e.fromCamelCase
 import at.posselt.pfrpg2e.kingdom.AutomateResources
 import at.posselt.pfrpg2e.kingdom.KingdomSettings
+import at.posselt.pfrpg2e.kingdom.armyPressureBoardModeOrDefault
+import at.posselt.pfrpg2e.kingdom.pacingMaxTurnGap
+import at.posselt.pfrpg2e.kingdom.pacingMinUnrestDelta
+import at.posselt.pfrpg2e.kingdom.pacingLevelMismatchRange
+import at.posselt.pfrpg2e.kingdom.pacingLootImbalanceEnabled
+import at.posselt.pfrpg2e.kingdom.pacingLootImbalanceRange
 import at.posselt.pfrpg2e.kingdom.modifiers.evaluation.UntrainedProficiencyMode
 import at.posselt.pfrpg2e.toCamelCase
 import at.posselt.pfrpg2e.utils.buildPromise
@@ -25,6 +31,8 @@ import com.foundryvtt.core.AnyObject
 import com.foundryvtt.core.Game
 import com.foundryvtt.core.abstract.DataModel
 import com.foundryvtt.core.abstract.DocumentConstructionContext
+import com.foundryvtt.core.utils.MergeOptions
+import com.foundryvtt.core.utils.mergeObject
 import com.foundryvtt.core.applications.api.HandlebarsRenderOptions
 import com.foundryvtt.core.data.dsl.buildSchema
 import com.foundryvtt.core.utils.deepClone
@@ -58,6 +66,22 @@ class KingdomSettingsDataModel(
                 min = 0
             }
             int("increaseScorePicksBy")
+            int("pacingAlertMaxTurnGap") {
+                min = 1
+            }
+            int("pacingAlertMinUnrestDelta") {
+                min = 1
+            }
+            int("pacingAlertLevelMismatchRange") {
+                min = 0
+            }
+            boolean("pacingAlertLootImbalanceEnabled")
+            int("pacingAlertChapterTargetLevel") {
+                min = 0
+            }
+            int("pacingAlertLootImbalanceRange") {
+                min = 0
+            }
             boolean("expandMagicUse")
             boolean("capStructureBonusAtKingdomLevel")
             boolean("includeCapitalItemModifier")
@@ -72,7 +96,15 @@ class KingdomSettingsDataModel(
             boolean("kingdomIgnoreSkillRequirements")
             boolean("autoCalculateArmyConsumption")
             boolean("capitalCanGrowOneSizeLarger")
+            boolean("enableCouncilMissions")
             boolean("enableLeadershipModifiers")
+            boolean("enableRoughTerrainCosts")
+            boolean("enableAnarchyActivityGating")
+            boolean("enableStrictPhaseGating")
+            boolean("enableCalendarMonthEndTurn")
+            boolean("vkCharterExtraSkills")
+            boolean("vkHeartlandExtraSkills")
+            boolean("vkExtraAbilityBoost")
             string("recruitableArmiesFolderId", nullable = true)
             string("kingdomCultTable", nullable = true)
             string("kingdomEventsTable", nullable = true)
@@ -92,6 +124,9 @@ class KingdomSettingsDataModel(
                     .toRecord()
             }
             string("realmSceneId", nullable = true)
+            // Without this, the Board Mode select is stripped by DataModel.toObject() on save and
+            // the advanced army-pressure forecast could never be enabled through the settings UI.
+            string("armyPressureBoardMode", nullable = true)
         }
     }
 }
@@ -145,6 +180,12 @@ class KingdomSettingsApplication(
                             from = 1,
                             to = 10,
                             stacked = false,
+                        ),
+                        CheckboxInput(
+                            name = "autoGainFamePerTurn",
+                            label = t("kingdom.autoGainFamePerTurn"),
+                            value = settings.autoGainFamePerTurn,
+                            help = t("kingdom.autoGainFamePerTurnHelp")
                         ),
                         CheckboxInput(
                             name = "automateStats",
@@ -292,6 +333,12 @@ class KingdomSettingsApplication(
                             help = t("kingdom.capitalCanGrowOneSizeLargerHelp")
                         ),
                         CheckboxInput(
+                            name = "enableCouncilMissions",
+                            label = t("kingdom.enableCouncilMissions"),
+                            value = settings.enableCouncilMissions,
+                            help = t("kingdom.enableCouncilMissionsHelp"),
+                        ),
+                        CheckboxInput(
                             name = "kingdomAllStructureItemBonusesStack",
                             label = t("kingdom.kingdomAllStructureItemBonusesStack"),
                             value = settings.kingdomAllStructureItemBonusesStack,
@@ -329,6 +376,24 @@ class KingdomSettingsApplication(
                             value = settings.vanceAndKerensharaXP,
                             help = t("kingdom.xpRulesHelp"),
                         ),
+                        CheckboxInput(
+                            name = "vkCharterExtraSkills",
+                            label = t("kingdom.vkCharterExtraSkills"),
+                            value = settings.vkCharterExtraSkills == true,
+                            help = t("kingdom.vkCharterExtraSkillsHelp"),
+                        ),
+                        CheckboxInput(
+                            name = "vkHeartlandExtraSkills",
+                            label = t("kingdom.vkHeartlandExtraSkills"),
+                            value = settings.vkHeartlandExtraSkills == true,
+                            help = t("kingdom.vkHeartlandExtraSkillsHelp"),
+                        ),
+                        CheckboxInput(
+                            name = "vkExtraAbilityBoost",
+                            label = t("kingdom.vkExtraAbilityBoost"),
+                            value = settings.vkExtraAbilityBoost == true,
+                            help = t("kingdom.vkExtraAbilityBoostHelp"),
+                        ),
                         NumberInput(
                             name = "rpToXpConversionRate",
                             label = t("kingdom.rpToXpConversionRate"),
@@ -355,6 +420,12 @@ class KingdomSettingsApplication(
                             label = t("kingdom.enableLeadershipModifiers"),
                             value = settings.enableLeadershipModifiers,
                             help = t("kingdom.enableLeadershipModifiersHelp"),
+                        ),
+                        CheckboxInput(
+                            name = "enableRoughTerrainCosts",
+                            label = t("kingdom.enableRoughTerrainCosts"),
+                            value = settings.enableRoughTerrainCosts == true,
+                            help = t("kingdom.enableRoughTerrainCostsHelp"),
                         ),
                         Menu(
                             label = t("kingdom.configureLeaderSkills"),
@@ -400,16 +471,123 @@ class KingdomSettingsApplication(
                         ),
                     )
                 ),
+                Section(
+                    legend = t("kingdom.pacingAlertsSettings"),
+                    formRows = listOf(
+                        Select.range(
+                            from = 1,
+                            to = 30,
+                            name = "pacingAlertMaxTurnGap",
+                            label = t("kingdom.pacingMaxTurnGap"),
+                            value = settings.pacingMaxTurnGap(),
+                            help = t("kingdom.pacingMaxTurnGapHelp"),
+                            stacked = false,
+                        ),
+                        Select.range(
+                            from = 1,
+                            to = 10,
+                            name = "pacingAlertMinUnrestDelta",
+                            label = t("kingdom.pacingMinUnrestDelta"),
+                            value = settings.pacingAlertMinUnrestDelta ?: 1,
+                            help = t("kingdom.pacingMinUnrestDeltaHelp"),
+                            stacked = false,
+                        ),
+                        Select.range(
+                            from = 0,
+                            to = 10,
+                            name = "pacingAlertLevelMismatchRange",
+                            label = t("kingdom.pacingLevelMismatchRange"),
+                            value = settings.pacingLevelMismatchRange(),
+                            help = t("kingdom.pacingLevelMismatchRangeHelp"),
+                            stacked = false,
+                        ),
+                        Select.range(
+                            from = 0,
+                            to = 20,
+                            name = "pacingAlertChapterTargetLevel",
+                            label = t("kingdom.pacingChapterTargetLevel"),
+                            value = settings.pacingAlertChapterTargetLevel ?: 0,
+                            help = t("kingdom.pacingChapterTargetLevelHelp"),
+                            stacked = false,
+                        ),
+                        CheckboxInput(
+                            name = "pacingAlertLootImbalanceEnabled",
+                            label = t("kingdom.pacingLootImbalanceEnabled"),
+                            value = settings.pacingLootImbalanceEnabled(),
+                            help = t("kingdom.pacingLootImbalanceEnabledHelp"),
+                        ),
+                        Select.range(
+                            from = 0,
+                            to = 10,
+                            name = "pacingAlertLootImbalanceRange",
+                            label = t("kingdom.pacingLootImbalanceRange"),
+                            value = settings.pacingLootImbalanceRange(),
+                            help = t("kingdom.pacingLootImbalanceRangeHelp"),
+                            stacked = false,
+                        ),
+                    ),
+                ),
+                Section(
+                    legend = t("kingdom.anarchyActivityGatingSettings"),
+                    formRows = listOf(
+                        CheckboxInput(
+                            name = "enableAnarchyActivityGating",
+                            label = t("kingdom.enableAnarchyActivityGating"),
+                            value = settings.enableAnarchyActivityGating == true,
+                            help = t("kingdom.enableAnarchyActivityGatingHelp"),
+                        ),
+                    ),
+                ),
+                Section(
+                    legend = t("kingdom.turnWizardPhaseGatingSettings"),
+                    formRows = listOf(
+                        CheckboxInput(
+                            name = "enableStrictPhaseGating",
+                            label = t("kingdom.enableStrictPhaseGating"),
+                            value = settings.enableStrictPhaseGating == true,
+                            help = t("kingdom.enableStrictPhaseGatingHelp"),
+                        ),
+                    ),
+                ),
+                Section(
+                    legend = t("kingdom.calendarIntegrationSettings"),
+                    formRows = listOf(
+                        CheckboxInput(
+                            name = "enableCalendarMonthEndTurn",
+                            label = t("kingdom.enableCalendarMonthEndTurn"),
+                            value = settings.enableCalendarMonthEndTurn == true,
+                            help = t("kingdom.enableCalendarMonthEndTurnHelp"),
+                        ),
+                    ),
+                ),
+                Section(
+                    legend = t("armyPressure.settings"),
+                    formRows = listOf(
+                        Select(
+                            name = "armyPressureBoardMode",
+                            label = t("armyPressure.boardMode"),
+                            value = settings.armyPressureBoardModeOrDefault(),
+                            options = listOf(
+                                SelectOption(t("armyPressure.modeBasic"), "basic"),
+                                SelectOption(t("armyPressure.modeAdvanced"), "advanced"),
+                            ),
+                            stacked = false,
+                        ),
+                    ),
+                ),
             ),
         )
     }
 
     override fun onParsedSubmit(value: KingdomSettings): Promise<Void> = buildPromise {
-        settings = KingdomSettings.copy(
-            value,
-            leaderKingdomSkills = settings.leaderKingdomSkills,
-            leaderSkills = settings.leaderSkills,
-        )
+        // Merge the parsed (schema-shaped) form values onto the existing settings so any
+        // KingdomSettings field not represented in the schema (leader skills, army-board
+        // flags, pacing-alert thresholds, …) is preserved rather than wiped on save.
+        settings = mergeObject(
+            settings.unsafeCast<AnyObject>(),
+            value.unsafeCast<AnyObject>(),
+            MergeOptions(inplace = false),
+        ).unsafeCast<KingdomSettings>()
         if (settings.automateResources != AutomateResources.TILE_BASED.value) {
             settings.realmSceneId = null
         }

@@ -1,0 +1,34 @@
+{
+  "id": "scout",
+  "name": "expeditionActivities.scout.name",
+  "isLocked": false,
+  "isSecret": false,
+  "isHomebrew": false,
+  "skills": [
+    {
+      "name": "survival",
+      "proficiency": "trained",
+      "dcType": "zone",
+      "required": true
+    },
+    {
+      "name": "perception",
+      "proficiency": "trained",
+      "dcType": "zone",
+      "required": false
+    }
+  ],
+  "criticalSuccess": {
+    "message": "expeditionActivities.scout.criticalSuccess.message"
+  },
+  "success": {
+    "message": "expeditionActivities.scout.success.message"
+  },
+  "failure": {
+    "message": "expeditionActivities.scout.failure.message"
+  },
+  "criticalFailure": {
+    "message": "expeditionActivities.scout.criticalFailure.message"
+  },
+  "oncePerSession": false
+}

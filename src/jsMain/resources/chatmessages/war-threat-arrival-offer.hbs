@@ -1,0 +1,31 @@
+<h2>{{localizeKM "chatMessages.warThreatArrival.offerTitle"}}</h2>
+<div class="km-war-threat-arrival-offer">
+    <p>{{localizeKM "chatMessages.warThreatArrival.offerBody" name=threatName}}</p>
+</div>
+<hr>
+<h3>{{localizeKM "chatMessages.companionAutonomy.gmActions"}}</h3>
+<div class="km-expedition-offers">
+    <button type="button"
+            class="km-offer-war-threat-arrival"
+            data-kingdom-actor-uuid="{{actorUuid}}"
+            data-threat-id="{{threatId}}"
+            data-action="spawnEvent">
+        {{localizeKM "chatMessages.warThreatArrival.spawnEvent"}}
+    </button>
+    {{#if hasLinkedHex}}
+    <button type="button"
+            class="km-offer-war-threat-arrival"
+            data-kingdom-actor-uuid="{{actorUuid}}"
+            data-threat-id="{{threatId}}"
+            data-action="queueEncounter">
+        {{localizeKM "chatMessages.warThreatArrival.queueEncounter"}}
+    </button>
+    {{/if}}
+    <button type="button"
+            class="km-offer-war-threat-arrival"
+            data-kingdom-actor-uuid="{{actorUuid}}"
+            data-threat-id="{{threatId}}"
+            data-action="dismiss">
+        {{localizeKM "chatMessages.warThreatArrival.dismiss"}}
+    </button>
+</div>

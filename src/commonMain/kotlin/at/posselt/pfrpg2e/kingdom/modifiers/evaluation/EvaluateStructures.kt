@@ -1,11 +1,17 @@
 package at.posselt.pfrpg2e.kingdom.modifiers.evaluation
 
 import at.posselt.pfrpg2e.data.kingdom.settlements.Block
+import at.posselt.pfrpg2e.data.kingdom.settlements.NpcEntry
+import at.posselt.pfrpg2e.data.kingdom.settlements.PopulationRoster
 import at.posselt.pfrpg2e.data.kingdom.settlements.Settlement
+import at.posselt.pfrpg2e.data.kingdom.settlements.SettlementEdges
 import at.posselt.pfrpg2e.data.kingdom.settlements.SettlementLayoutType
 import at.posselt.pfrpg2e.data.kingdom.settlements.SettlementType
+import at.posselt.pfrpg2e.data.kingdom.settlements.UrbanGrid
+import at.posselt.pfrpg2e.data.kingdom.settlements.resolveUrbanGrid
 import at.posselt.pfrpg2e.data.kingdom.settlements.findSettlementMaxItemBonusLevel
 import at.posselt.pfrpg2e.data.kingdom.settlements.findSettlementSize
+import at.posselt.pfrpg2e.data.kingdom.settlements.generateInitialPopulation
 import at.posselt.pfrpg2e.data.kingdom.structures.AvailableItemBonuses
 import at.posselt.pfrpg2e.data.kingdom.structures.CommodityStorage
 import at.posselt.pfrpg2e.data.kingdom.structures.GroupedStructureBonus
@@ -180,6 +186,13 @@ data class SettlementData(
     val waterBorders: Int,
     val id: String,
     val layoutType: SettlementLayoutType,
+    val populationRoster: PopulationRoster = PopulationRoster(),
+    val magicalStreetlamps: Boolean = false,
+    val pavedStreets: Boolean = false,
+    val sewerSystem: Boolean = false,
+    val lotsBorderingWater: Int = 0,
+    val edges: SettlementEdges = SettlementEdges(),
+    val urbanGrid: UrbanGrid = UrbanGrid(),
 )
 
 fun evaluateSettlement(
@@ -191,7 +204,19 @@ fun evaluateSettlement(
     kingdomLevel: Int,
     blocks: List<Block>,
 ): Settlement {
-    val settlementSize = findSettlementSize(data.occupiedBlocks)
+    val urbanGrid = if (data.urbanGrid != UrbanGrid()) {
+        data.urbanGrid
+    } else if (data.edges != SettlementEdges() || data.pavedStreets) {
+        resolveUrbanGrid(data.edges, data.pavedStreets, data.magicalStreetlamps, data.sewerSystem)
+    } else {
+        data.urbanGrid
+    }
+
+    val occupiedBlocks = if (blocks.isNotEmpty()) blocks.count { it.isOccupied } else data.occupiedBlocks
+    val waterBorders = if (data.edges != SettlementEdges()) data.edges.waterBorders else data.waterBorders
+    val lotsBorderingWater = if (urbanGrid != UrbanGrid()) urbanGrid.totalWaterLots else data.lotsBorderingWater
+
+    val settlementSize = findSettlementSize(occupiedBlocks)
     val maxItemBonus = if(capStructureBonusAtKingdomLevel) {
         min(settlementSize.maxItemBonus, findSettlementMaxItemBonusLevel(kingdomLevel))
     } else {
@@ -200,7 +225,8 @@ fun evaluateSettlement(
     val constructedStructures = structures.filter { !it.slowed && it.rpPaid }
     val slowedStructures = structures.filter { it.slowed }
     val underConstructionStructures = structures.filter { !it.slowed && !it.rpPaid }
-    val consumptionReduction = calculateConsumptionReduction(constructedStructures)
+    val waterAdjacentMillBonus = if (waterBorders >= 1 && constructedStructures.any { it.id == "mill" }) 1 else 0
+    val consumptionReduction = calculateConsumptionReduction(constructedStructures) + waterAdjacentMillBonus
     val (bonuses, eventBonus, leaderBonus) = combineBonuses(
         constructedStructures,
         allStructuresStack,
@@ -225,10 +251,10 @@ fun evaluateSettlement(
         .flatMap { it.unlockActivities }
         .toSet()
     val hasBridge = constructedStructures.any { it.isBridge }
-    return Settlement(
+    val settlement = Settlement(
         id = data.id,
         name = data.name,
-        waterBorders = data.waterBorders,
+        waterBorders = waterBorders,
         isSecondaryTerritory = data.isSecondaryTerritory,
         settlementEventBonus = eventBonus,
         leaderLeadershipActivityBonus = leaderBonus,
@@ -242,7 +268,7 @@ fun evaluateSettlement(
         unlockActivities = unlockActivities,
         residentialLots = residentialLots,
         hasBridge = hasBridge,
-        occupiedBlocks = data.occupiedBlocks,
+        occupiedBlocks = occupiedBlocks,
         type = data.type,
         layoutType = data.layoutType,
         delayedStructures = slowedStructures,
@@ -253,5 +279,17 @@ fun evaluateSettlement(
         maximumCivicRdLimit = structures.maxOfOrNull { it.maximumCivicRdLimit } ?: 0,
         settlementActions = structures.maxOfOrNull { it.increaseMinimumSettlementActions } ?: 0,
         blocks = blocks,
+        populationRoster = data.populationRoster,
+        magicalStreetlamps = data.magicalStreetlamps,
+        pavedStreets = data.pavedStreets,
+        sewerSystem = data.sewerSystem,
+        lotsBorderingWater = lotsBorderingWater,
+        edges = data.edges,
+        urbanGrid = urbanGrid,
     )
+    return if (settlement.populationRoster.npcs.isEmpty()) {
+        settlement.copy(populationRoster = settlement.generateInitialPopulation())
+    } else {
+        settlement
+    }
 }

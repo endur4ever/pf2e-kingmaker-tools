@@ -3,6 +3,7 @@ package at.posselt.pfrpg2e.utils
 import at.posselt.pfrpg2e.Config
 import at.posselt.pfrpg2e.camping.translateCampingActivities
 import at.posselt.pfrpg2e.camping.translateRecipes
+import at.posselt.pfrpg2e.expedition.translateExpeditionActivities
 import at.posselt.pfrpg2e.kingdom.structures.translateStructureData
 import at.posselt.pfrpg2e.kingdom.translateActivities
 import at.posselt.pfrpg2e.kingdom.translateCharters
@@ -16,11 +17,11 @@ import at.posselt.pfrpg2e.localization.Translatable
 import com.foundryvtt.core.AnyObject
 import com.foundryvtt.core.game
 import com.foundryvtt.core.ui
-import com.i18next.I18Next
-import com.i18next.I18NextInitOptions
-import com.i18next.I18NextInterpolationOptions
-import com.i18next.ICU
-import com.i18next.i18next
+import com.i18n.I18Next
+import com.i18n.I18NextInitOptions
+import com.i18n.I18NextInterpolationOptions
+import com.i18n.ICU
+import com.i18n.i18n
 import js.array.component1
 import js.array.component2
 import js.objects.Object
@@ -63,14 +64,52 @@ fun registerI18NextHelper(handlebars: Handlebars, i18Next: I18Next) {
     }
 }
 
-fun t(key: String, value: AnyObject) =
-    i18next.t(key, value)
+fun t(key: String, value: AnyObject): String {
+    val isAvailable = try {
+        i18n.asDynamic().isInitialized.unsafeCast<Boolean>() == true
+    } catch (e: Throwable) {
+        false
+    }
+    if (isAvailable) {
+        try {
+            return i18n.t(key, value)
+        } catch (ignored: Throwable) {}
+    }
+    val details = try {
+        js("Object.entries(value).map(function(pair) { return pair[0] + '=' + pair[1]; }).join(', ')").unsafeCast<String>()
+    } catch (ignored: Throwable) {
+        ""
+    }
+    return "$key ($details)"
+}
 
-fun t(key: String) =
-    i18next.t(key)
+fun t(key: String): String {
+    val isAvailable = try {
+        i18n.asDynamic().isInitialized.unsafeCast<Boolean>() == true
+    } catch (e: Throwable) {
+        false
+    }
+    if (isAvailable) {
+        try {
+            return i18n.t(key)
+        } catch (ignored: Throwable) {}
+    }
+    return key
+}
 
-fun t(translatable: Translatable) =
-    i18next.t(translatable.i18nKey)
+fun t(translatable: Translatable): String {
+    val isAvailable = try {
+        i18n.asDynamic().isInitialized.unsafeCast<Boolean>() == true
+    } catch (e: Throwable) {
+        false
+    }
+    if (isAvailable) {
+        try {
+            return i18n.t(translatable.i18nKey)
+        } catch (ignored: Throwable) {}
+    }
+    return translatable.i18nKey
+}
 
 fun unfuckFoundryTranslations(obj: ReadonlyRecord<String, Any>): ReadonlyRecord<String, Any> {
     return obj.asSequence()
@@ -84,7 +123,7 @@ fun unfuckFoundryTranslations(obj: ReadonlyRecord<String, Any>): ReadonlyRecord<
         .toRecord()
 }
 
-suspend fun initLocalization() {
+fun initLocalization() {
     val lang = game.i18n.lang
     val trans = (game.i18n.translations[Config.moduleId] ?: englishTranslations[Config.moduleId])
         .unsafeCast<ReadonlyRecord<String, Any>>()
@@ -100,17 +139,19 @@ suspend fun initLocalization() {
             escapeValue = false,
         ),
     )
-    i18next
+    i18n
         .use(ICU::class.js)
         .init(options)
-        .await()
-    registerI18NextHelper(window.Handlebars, i18next)
+    registerI18NextHelper(window.Handlebars, i18n)
+    window.Handlebars.registerHelper("add", { a: Int, b: Int -> a + b })
+    window.Handlebars.registerHelper("json", { obj: Any -> JSON.stringify(obj) })
     val events = translateKingdomEvents()
     translateActivities(events)
     translateCharters()
     translateGovernments()
     translateHeartlands()
     translateCampingActivities()
+    translateExpeditionActivities()
     translateFeats()
     translateKingdomFeatures()
     translateMilestones()

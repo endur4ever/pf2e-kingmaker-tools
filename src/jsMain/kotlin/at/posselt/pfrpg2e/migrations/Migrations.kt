@@ -13,6 +13,33 @@ import at.posselt.pfrpg2e.migrations.migrations.Migration18
 import at.posselt.pfrpg2e.migrations.migrations.Migration19
 import at.posselt.pfrpg2e.migrations.migrations.Migration20
 import at.posselt.pfrpg2e.migrations.migrations.Migration21
+import at.posselt.pfrpg2e.migrations.migrations.Migration22
+import at.posselt.pfrpg2e.migrations.migrations.Migration23
+import at.posselt.pfrpg2e.migrations.migrations.Migration24
+import at.posselt.pfrpg2e.migrations.migrations.Migration25
+import at.posselt.pfrpg2e.migrations.migrations.Migration26
+import at.posselt.pfrpg2e.migrations.migrations.Migration27
+import at.posselt.pfrpg2e.migrations.migrations.Migration28
+import at.posselt.pfrpg2e.migrations.migrations.Migration29
+import at.posselt.pfrpg2e.migrations.migrations.Migration30
+import at.posselt.pfrpg2e.migrations.migrations.Migration31
+import at.posselt.pfrpg2e.migrations.migrations.Migration32
+import at.posselt.pfrpg2e.migrations.migrations.Migration33
+import at.posselt.pfrpg2e.migrations.migrations.Migration34
+import at.posselt.pfrpg2e.migrations.migrations.Migration35
+import at.posselt.pfrpg2e.migrations.migrations.Migration36
+import at.posselt.pfrpg2e.migrations.migrations.Migration37
+import at.posselt.pfrpg2e.migrations.migrations.Migration38
+import at.posselt.pfrpg2e.migrations.migrations.Migration39
+import at.posselt.pfrpg2e.migrations.migrations.Migration40
+import at.posselt.pfrpg2e.migrations.migrations.Migration41
+import at.posselt.pfrpg2e.migrations.migrations.Migration42
+import at.posselt.pfrpg2e.migrations.migrations.Migration43
+import at.posselt.pfrpg2e.migrations.migrations.Migration44
+import at.posselt.pfrpg2e.migrations.migrations.Migration45
+import at.posselt.pfrpg2e.migrations.migrations.Migration46
+import at.posselt.pfrpg2e.migrations.migrations.Migration47
+import at.posselt.pfrpg2e.migrations.migrations.Migration48
 import at.posselt.pfrpg2e.settings.pfrpg2eKingdomCampingWeather
 import at.posselt.pfrpg2e.utils.isFirstGM
 import at.posselt.pfrpg2e.utils.openJournal
@@ -42,15 +69,65 @@ private suspend fun createBackups(
     )
 }
 
-private val migrations = listOf(
+internal val migrations = listOf(
     Migration17(),
     Migration18(),
     Migration19(),
     Migration20(),
     Migration21(),
+    Migration22(),
+    Migration23(),
+    Migration24(),
+    Migration25(),
+    Migration26(),
+    Migration27(),
+    Migration28(),
+    Migration29(),
+    Migration30(),
+    Migration31(),
+    Migration32(),
+    Migration33(),
+    Migration34(),
+    Migration35(),
+    Migration36(),
+    Migration37(),
+    Migration38(),
+    Migration39(),
+    Migration40(),
+    // Migrations 41-48 were authored as classes but never registered here, so they never ran on
+    // existing worlds — new fields (accessGrants, bankedBonuses, autoSucceedInClaimedHexes,
+    // companion session ids, etc.) were left un-backfilled. Registered so the multi-version upgrade
+    // path actually applies them. MigrationChainTest guards contiguity so this can't regress.
+    Migration41(),
+    Migration42(),
+    Migration43(),
+    Migration44(),
+    Migration45(),
+    Migration46(),
+    Migration47(),
+    Migration48(),
 )
 
 private val latestMigrationVersion = migrations.maxOfOrNull { it.version }!!
+
+/** The current (latest) schema version this module migrates to. */
+fun currentSchemaVersion(): Int = latestMigrationVersion
+
+/**
+ * Run the kingdom migration chain on STANDALONE data (e.g. an imported JSON payload) — applies every
+ * migration newer than [fromVersion] in order, mutating [kingdom] in place. Reuses the exact same
+ * migration list the world-level flow uses, without touching world state or the schemaVersion
+ * setting. Callers must have already established that [fromVersion] is at/above the oldest supported
+ * version (see [OLDEST_SUPPORTED_SCHEMA_VERSION]).
+ */
+suspend fun Game.migrateKingdomDataFrom(fromVersion: Int, kingdom: dynamic) {
+    migrations.filter { it.version > fromVersion }.forEach { it.migrateKingdom(this, kingdom) }
+}
+
+/** Camping counterpart of [migrateKingdomDataFrom]. */
+suspend fun Game.migrateCampingDataFrom(fromVersion: Int, camping: dynamic) {
+    migrations.filter { it.version > fromVersion }.forEach { it.migrateCamping(this, camping) }
+}
 
 suspend fun Game.fixSchemaVersionV13() {
     val schemaVersion = settings.pfrpg2eKingdomCampingWeather.getSchemaVersion()

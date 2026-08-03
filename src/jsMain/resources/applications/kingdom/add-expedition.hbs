@@ -1,0 +1,122 @@
+<form class="km-add-expedition-dialog">
+    <div class="km-dialog-section">
+        <label for="expeditionActivity">{{localizeKM "kingdom.expeditions.activity"}}</label>
+        <select name="expeditionActivity" id="expeditionActivity" required>
+            <option value="">{{localizeKM "kingdom.expeditions.selectActivity"}}</option>
+            {{#each activities}}
+            <option value="{{id}}" {{#if (eq id ../selectedActivityId)}}selected{{/if}}>{{name}}</option>
+            {{/each}}
+        </select>
+    </div>
+
+    <div class="km-dialog-section">
+        <label for="expeditionTier">{{localizeKM "kingdom.expeditions.tier"}}</label>
+        <select name="expeditionTier" id="expeditionTier">
+            <option value="routine">{{localizeKM "kingdom.expeditions.tiers.routine"}}</option>
+            <option value="standard" selected>{{localizeKM "kingdom.expeditions.tiers.standard"}}</option>
+            <option value="perilous">{{localizeKM "kingdom.expeditions.tiers.perilous"}}</option>
+        </select>
+        <p class="km-hint">{{localizeKM "kingdom.expeditions.tierHint"}}</p>
+    </div>
+
+    <div class="km-dialog-section">
+        <label>{{localizeKM "kingdom.expeditions.companions"}}</label>
+        <div class="km-companion-select-grid">
+            {{#each companions}}
+            <label class="km-companion-checkbox">
+                <input type="checkbox" name="expeditionCompanions" value="{{id}}" {{#if checked}}checked{{/if}} />
+                <span>{{name}}</span>
+            </label>
+            {{/each}}
+        </div>
+        <p class="km-hint">{{localizeKM "kingdom.expeditions.companionsHint"}}</p>
+    </div>
+
+    {{#if quests}}
+    <div class="km-dialog-section">
+        <label for="expeditionQuest">{{localizeKM "kingdom.expeditions.targetQuest"}}</label>
+        <select name="expeditionQuest" id="expeditionQuest">
+            <option value="">{{localizeKM "kingdom.expeditions.targetQuestNone"}}</option>
+            {{#each quests}}
+            <option value="{{id}}" {{#if (eq id ../selectedQuestId)}}selected{{/if}}>{{label}}</option>
+            {{/each}}
+        </select>
+        <p class="km-hint">{{localizeKM "kingdom.expeditions.targetQuestHint"}}</p>
+    </div>
+    {{/if}}
+
+    {{#if factions}}
+    <div class="km-dialog-section">
+        <label for="expeditionFaction">{{localizeKM "kingdom.expeditions.targetFaction"}}</label>
+        <select name="expeditionFaction" id="expeditionFaction">
+            <option value="">{{localizeKM "kingdom.expeditions.targetFactionNone"}}</option>
+            {{#each factions}}
+            <option value="{{name}}">{{name}}</option>
+            {{/each}}
+        </select>
+        <p class="km-hint">{{localizeKM "kingdom.expeditions.targetFactionHint"}}</p>
+    </div>
+    {{/if}}
+
+    {{#if hasDestinations}}
+    <div class="km-dialog-section">
+        <label for="expeditionDestination">{{localizeKM "kingdom.expeditions.destination"}}</label>
+        <select name="expeditionDestination" id="expeditionDestination">
+            <option value="">{{localizeKM "kingdom.expeditions.destinationNone"}}</option>
+            {{#if destinationSettlements.length}}
+            <optgroup label="{{localizeKM 'kingdom.expeditions.destinationSettlements'}}">
+                {{#each destinationSettlements}}
+                <option value="{{key}}">{{label}}</option>
+                {{/each}}
+            </optgroup>
+            {{/if}}
+            {{#if destinationHubs.length}}
+            <optgroup label="{{localizeKM 'kingdom.expeditions.destinationHubs'}}">
+                {{#each destinationHubs}}
+                <option value="{{key}}">{{label}}</option>
+                {{/each}}
+            </optgroup>
+            {{/if}}
+            {{#if destinationHexes.length}}
+            <optgroup label="{{localizeKM 'kingdom.expeditions.destinationHexes'}}">
+                {{#each destinationHexes}}
+                <option value="{{key}}">{{label}}</option>
+                {{/each}}
+            </optgroup>
+            {{/if}}
+            {{#if destinationExplored.length}}
+            <optgroup label="{{localizeKM 'kingdom.expeditions.destinationExplored'}}">
+                {{#each destinationExplored}}
+                <option value="{{key}}">{{label}}</option>
+                {{/each}}
+            </optgroup>
+            {{/if}}
+            {{#if destinationUncharted.length}}
+            <optgroup label="{{localizeKM 'kingdom.expeditions.destinationUncharted'}}">
+                {{#each destinationUncharted}}
+                <option value="{{key}}">{{label}}</option>
+                {{/each}}
+            </optgroup>
+            {{/if}}
+        </select>
+        <p class="km-hint">{{localizeKM "kingdom.expeditions.destinationHint"}}</p>
+    </div>
+    {{/if}}
+
+    <div class="km-dialog-section">
+        <label for="expeditionNotes">{{localizeKM "kingdom.expeditions.notes"}}</label>
+        <textarea name="expeditionNotes" rows="3" placeholder="{{localizeKM 'kingdom.expeditions.notesPlaceholder'}}">{{gmNotes}}</textarea>
+    </div>
+
+    <div class="km-dialog-section km-checkbox-row">
+        <label>
+            <input type="checkbox" name="expeditionVisible" {{#if visibleToPlayers}}checked{{/if}} />
+            {{localizeKM "kingdom.expeditions.visibleToPlayers"}}
+        </label>
+    </div>
+
+    <div class="km-dialog-actions">
+        <button type="button" data-action="cancel">{{localize "Cancel"}}</button>
+        <button type="button" data-action="save" class="km-primary">{{localizeKM "kingdom.expeditions.launch"}}</button>
+    </div>
+</form>

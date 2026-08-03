@@ -2,6 +2,7 @@ package at.posselt.pfrpg2e.actions
 
 import at.posselt.pfrpg2e.actions.handlers.ActionHandler
 import at.posselt.pfrpg2e.actions.handlers.ExecutionMode
+import at.posselt.pfrpg2e.actions.handlers.OriginatorPolicy
 import at.posselt.pfrpg2e.utils.buildPromise
 import at.posselt.pfrpg2e.utils.emitPfrpg2eKingdomCampingWeather
 import at.posselt.pfrpg2e.utils.isFirstGM
@@ -34,13 +35,29 @@ class ActionDispatcher(
         if (debug) console.log("Dispatching action", action)
         val handler = handlers.find { it.canExecute(action) }
         if (handler != null) {
+            val senderId = if (receivedViaSocket) action.senderId else game.user._id
+
+            // Note: Since this is client-side code running in a browser, a player
+            // could modify their client-side memory or local javascript payload to forge
+            // the senderId metadata (e.g. setting it to a GM's user ID). This is a residual
+            // trust limitation of a peer-to-peer/broadcast client-side module architecture.
+            val senderUser = senderId?.let { game.users.get(it) }
+            val isSenderGm = senderUser?.isGM == true
+
+            if (handler.originatorPolicy == OriginatorPolicy.GM_ONLY && !isSenderGm) {
+                console.warn("Rejected action '${action.action}': Sender '${senderUser?.name ?: "Unknown"}' (ID: $senderId) is not a GM.")
+                return
+            }
+
             if (handler.mode == ExecutionMode.GM_ONLY && game.isFirstGM()) {
                 handler.execute(action, this)
             } else if (handler.mode == ExecutionMode.GM_ONLY && !game.isFirstGM() && !receivedViaSocket) {
+                action.asDynamic().senderId = game.user._id
                 game.socket.emitPfrpg2eKingdomCampingWeather(action.unsafeCast<AnyObject>())
             } else if (handler.mode == ExecutionMode.OTHERS) {
                 // break endless socket emitting circuit
                 if (!receivedViaSocket) {
+                    action.asDynamic().senderId = game.user._id
                     game.socket.emitPfrpg2eKingdomCampingWeather(action.unsafeCast<AnyObject>())
                 } else {
                     handler.execute(action, this)
@@ -49,6 +66,7 @@ class ActionDispatcher(
                 handler.execute(action, this)
                 // break endless socket emitting circuit
                 if (!receivedViaSocket) {
+                    action.asDynamic().senderId = game.user._id
                     game.socket.emitPfrpg2eKingdomCampingWeather(action.unsafeCast<AnyObject>())
                 }
             }

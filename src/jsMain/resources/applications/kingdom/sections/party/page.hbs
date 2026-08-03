@@ -1,0 +1,65 @@
+<div {{#if (ne currentNavEntry 'party')}}hidden{{/if}} class="km-kingdom-sheet-content">
+    <div class="km-kingdom-sheet-sub-content km-party-board">
+        <section class="km-party-section">
+            <h2 class="km-party-header">
+                <span><i class="fa-solid fa-users-line"></i> {{localizeKM "kingdom.party.title"}}</span>
+            </h2>
+
+            {{#if partyInfluenceContext.companions.length}}
+            <div class="km-party-groups">
+                {{#each partyInfluenceContext.companions}}
+                <div class="km-party-group">
+                    <div class="km-party-group-header">
+                        {{#if this.img}}
+                        <div class="km-party-portrait"><img src="{{this.img}}" alt="{{this.name}}" /></div>
+                        {{/if}}
+                        <span class="km-party-group-name">{{this.name}}</span>
+                        <span class="km-party-role-badge {{#if (eq this.roleLabel "NPC")}}km-roster-role-npc{{else}}km-roster-role-companion{{/if}}">{{this.roleLabel}}</span>
+                    </div>
+
+                    {{#if this.members.length}}
+                    <div class="km-party-member-list">
+                        {{#each this.members}}
+                        <div class="km-party-member-row">
+                            {{#if this.img}}
+                            <div class="km-party-member-portrait"><img src="{{this.img}}" alt="{{this.name}}" /></div>
+                            {{/if}}
+                            <div class="km-party-member-info">
+                                <span class="km-party-member-name">{{this.name}}</span>
+                                <div class="km-roster-influence" title="{{localizeKM 'kingdom.party.influence'}}: {{this.influence}}/{{this.maxInfluence}}">
+                                    <div class="km-roster-influence-bar">
+                                        <div class="km-roster-influence-fill" style="width: {{this.influencePercent}}%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="km-party-influence-control">
+                                {{#if ../../partyInfluenceContext.isGM}}
+                                <button type="button" class="km-party-inf-btn" data-action="party-influence-decrease" data-companion-id="{{../companionId}}" data-uuid="{{this.uuid}}" title="-1">
+                                    <i class="fa-solid fa-minus"></i>
+                                </button>
+                                {{/if}}
+                                <span class="km-party-inf-value">{{this.influence}} / {{this.maxInfluence}}</span>
+                                {{#if ../../partyInfluenceContext.isGM}}
+                                <button type="button" class="km-party-inf-btn" data-action="party-influence-increase" data-companion-id="{{../companionId}}" data-uuid="{{this.uuid}}" title="+1">
+                                    <i class="fa-solid fa-plus"></i>
+                                </button>
+                                {{/if}}
+                            </div>
+                        </div>
+                        {{/each}}
+                    </div>
+                    {{else}}
+                    <p class="km-party-empty-members">{{localizeKM "kingdom.party.noMembers"}}</p>
+                    {{/if}}
+                </div>
+                {{/each}}
+            </div>
+            {{else}}
+            <div class="km-empty-roster">
+                <i class="fa-regular fa-folder-open"></i>
+                <p>{{localizeKM "kingdom.party.noCompanions"}}</p>
+            </div>
+            {{/if}}
+        </section>
+    </div>
+</div>

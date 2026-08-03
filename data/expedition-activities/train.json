@@ -1,0 +1,28 @@
+{
+  "id": "train",
+  "name": "expeditionActivities.train.name",
+  "isLocked": false,
+  "isSecret": false,
+  "isHomebrew": false,
+  "skills": [
+    {
+      "name": "athletics",
+      "proficiency": "trained",
+      "dcType": "actorLevel",
+      "required": true
+    }
+  ],
+  "criticalSuccess": {
+    "message": "expeditionActivities.train.criticalSuccess.message"
+  },
+  "success": {
+    "message": "expeditionActivities.train.success.message"
+  },
+  "failure": {
+    "message": "expeditionActivities.train.failure.message"
+  },
+  "criticalFailure": {
+    "message": "expeditionActivities.train.criticalFailure.message"
+  },
+  "oncePerSession": false
+}

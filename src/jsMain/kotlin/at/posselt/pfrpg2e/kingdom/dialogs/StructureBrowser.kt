@@ -106,6 +106,7 @@ external interface StructureContext {
     val constructedRp: Int
     val remainingRp: Int
     val initialRp: Int?
+    val terrainWarning: String?
 }
 
 @Suppress("unused")
@@ -318,6 +319,12 @@ class StructureBrowser(
                         kingdom = kingdom,
                         capStructureBonusAtKingdomLevel = kingdom.settings.capStructureBonusAtKingdomLevel,
                         kingdomLevel = kingdom.level,
+                        onRosterChange = { roster ->
+                            kingdom.settlements
+                                .find { it.sceneId == id }
+                                ?.populationRoster = roster
+                            actor.setKingdom(kingdom)
+                        },
                     ) { data ->
                         kingdom.settlements = kingdom.settlements
                             .filter { it.sceneId != data.sceneId }
@@ -423,7 +430,15 @@ class StructureBrowser(
             }
 
             Cost.HALF -> structures.map { it.copy(notes = null, construction = it.construction.halveCost()) }
-            Cost.FULL -> structures.map { it.copy(notes = null) }
+            Cost.FULL -> structures.map {
+                val base = it.copy(notes = null)
+                if (kingdom.settings.enableRoughTerrainCosts == true) {
+                    val terrain = kingdom.settlements.find { s -> s.sceneId == kingdom.activeSettlement }?.terrain
+                    base.copy(construction = base.construction.withTerrainCost(terrain))
+                } else {
+                    base
+                }
+            }
             Cost.PARTIAL ->
                 structures.map {
                     it.copy(
@@ -460,6 +475,7 @@ class StructureBrowser(
         val structuresUpgradedFrom = worldStructures.flatMap { it.upgradeFrom }.toSet()
         val filters = buildList<StructureFilter> {
             add { s -> s.lots >= minLots && s.lots <= maxLots && s.level <= maxLevel }
+            add { s -> s.id !in (kingdom.structureBlacklist ?: emptyArray()).toSet() }
             search?.let { add { s -> it.lowercase() in s.name.lowercase() } }
             if (MainFilter.IGNORE_PROFICIENCY !in mainFilters) {
                 add { canBuild(it, increaseSkills) }
@@ -607,6 +623,16 @@ class StructureBrowser(
                         lacksFunds = it.construction.luxuries > kingdom.commodities.now.luxuries,
                     ),
                     initialRp = initialRp,
+                    terrainWarning = if (kingdom.settings.enableRoughTerrainCosts == true) {
+                        val terrain = kingdom.settlements.find { s -> s.sceneId == kingdom.activeSettlement }?.terrain
+                        if (terrain != null && terrain != "plains") {
+                            t("kingdom.terrainCostWarning", recordOf("terrain" to t("settlementTerrain.$terrain")))
+                        } else {
+                            null
+                        }
+                    } else {
+                        null
+                    },
                 )
             }.toTypedArray()
         val activeSettlement = Select(

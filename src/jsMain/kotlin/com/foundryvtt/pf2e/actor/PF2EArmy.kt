@@ -3,7 +3,11 @@ package com.foundryvtt.pf2e.actor
 import com.foundryvtt.core.AnyObject
 import com.foundryvtt.core.abstract.DatabaseDeleteOperation
 import com.foundryvtt.core.abstract.DatabaseUpdateOperation
+import com.foundryvtt.core.documents.Actor
+import com.foundryvtt.core.documents.collections.EmbeddedCollection
+import com.foundryvtt.pf2e.item.PF2EItem
 import com.foundryvtt.pf2e.system.IntValue
+import com.foundryvtt.pf2e.system.MaxValue
 import js.objects.unsafeJso
 import kotlinx.js.JsPlainObject
 import kotlin.js.Promise
@@ -21,12 +25,25 @@ external interface PF2EArmyDetails {
 }
 
 @JsPlainObject
+external interface PF2EArmyHp : MaxValue {
+    var temp: Int
+}
+
+@JsPlainObject
+external interface PF2EArmyAttributes {
+    var hp: PF2EArmyHp
+    var ac: IntValue
+}
+
+@JsPlainObject
 external interface PF2EArmyData {
     val recruitmentDC: Int
     val consumption: Int
     val scouting: Int
     val traits: PF2EArmyTraits
     val details: PF2EArmyDetails
+    val attributes: PF2EArmyAttributes
+    val items: EmbeddedCollection<PF2EItem>
 }
 
 // required to make instance of work, but since the classes are not registered here

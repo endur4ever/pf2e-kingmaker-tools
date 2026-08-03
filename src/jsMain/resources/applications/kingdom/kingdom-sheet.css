@@ -299,6 +299,23 @@
             }
         }
 
+        .km-unclaimed-worksites-notice {
+            margin: 0.4rem 0 0.2rem;
+            font-size: 0.85em;
+            color: var(--color-level-warning, #885600);
+
+            i {
+                margin-right: 0.3em;
+            }
+        }
+
+        .km-unclaimed-worksites {
+            margin: 0 0 0.4rem;
+            padding-left: 1.4rem;
+            font-size: 0.85em;
+            list-style: disc;
+        }
+
         .km-unrest {
             td {
                 padding: 3px;
@@ -330,6 +347,14 @@
             overflow: hidden;
             white-space: nowrap;
             padding: 0.2rem 0;
+        }
+
+        .km-storage-cap-hint {
+            color: var(--color-level-warning, #885600);
+            cursor: help;
+            font-size: 0.75em;
+            margin-left: 0.2rem;
+            vertical-align: middle;
         }
 
         .km-unrest-ruin {
@@ -659,7 +684,26 @@
 
                     .km-detail-controls {
                         display: flex;
+                        align-items: center;
+                        gap: .25em;
                         margin-left: auto;
+
+                        .km-activity-performed-toggle {
+                            display: inline-flex;
+                            align-items: center;
+                            gap: .25em;
+                            opacity: .65;
+
+                            &.km-active {
+                                opacity: 1;
+                                color: var(--color-level-success, #18520b);
+                            }
+
+                            .km-activity-performed-count {
+                                font-variant-numeric: tabular-nums;
+                                font-weight: bold;
+                            }
+                        }
                     }
 
                     button:not(.km-icon-only) {
@@ -809,5 +853,1562 @@
                 flex-grow: 1;
             }
         }
+    }
+
+    .km-caravans {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+
+        .km-caravan {
+            display: flex;
+            align-items: center;
+            gap: 0.5em;
+            padding: 0.2rem 0;
+
+            .km-caravan-summary {
+                flex-grow: 1;
+            }
+
+            .km-caravan-eta {
+                opacity: 0.8;
+                font-size: 0.9em;
+            }
+        }
+    }
+
+    .km-council-missions {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5em;
+        margin-top: 0.5em;
+
+        .km-mission-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 5px;
+            position: relative;
+
+            button {
+                flex-grow: 1;
+                margin-left: 0;
+                text-align: left;
+                padding: 0.3em 0.6em;
+                font-size: var(--font-size-13);
+            }
+
+            .km-mission-info {
+                min-width: 85px;
+                text-align: right;
+                font-size: var(--font-size-11);
+
+                .km-cooldown {
+                    color: #7a7a7a;
+                }
+
+                .km-ready {
+                    color: var(--secondary-km);
+                    font-weight: bold;
+                }
+            }
+
+            .km-tooltip {
+                position: absolute;
+                bottom: 125%;
+                left: 50%;
+                transform: translateX(-50%) translateY(10px);
+                width: 220px;
+                padding: 10px;
+                border-radius: 8px;
+                background: rgba(30, 30, 35, 0.92);
+                border: 1px solid rgba(255, 255, 255, 0.15);
+                backdrop-filter: blur(8px);
+                -webkit-backdrop-filter: blur(8px);
+                box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+                color: #e0e0e0;
+                z-index: 100;
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+                font-family: inherit;
+                text-align: left;
+
+                .km-tooltip-title {
+                    font-weight: bold;
+                    color: var(--secondary-km, #ee9b3a);
+                    margin-bottom: 4px;
+                    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                    padding-bottom: 4px;
+                    font-size: var(--font-size-12);
+                }
+
+                .km-tooltip-desc {
+                    font-size: var(--font-size-11);
+                    line-height: 1.3;
+                    font-weight: normal;
+                }
+
+                &::after {
+                    content: "";
+                    position: absolute;
+                    top: 100%;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    border-width: 6px;
+                    border-style: solid;
+                    border-color: rgba(30, 30, 35, 0.92) transparent transparent transparent;
+                }
+            }
+
+            &:hover {
+                .km-tooltip {
+                    opacity: 1;
+                    transform: translateX(-50%) translateY(0);
+                }
+            }
+        }
+    }
+
+    /* Quests Board */
+    .km-quests-board {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .km-quests-section {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+
+        &.km-completed-section {
+            margin-top: 15px;
+            border-top: 1px solid rgba(120, 120, 120, 0.3);
+            padding-top: 20px;
+        }
+    }
+
+    .km-quests-header {
+        font-size: 1.6em;
+        font-weight: bold;
+        color: var(--secondary-km, #ee9b3a);
+        border-bottom: 2px solid rgba(238, 155, 58, 0.4);
+        padding-bottom: 5px;
+        margin-bottom: 10px;
+        align-items: center;
+
+        i {
+            margin-right: 8px;
+        }
+
+        .km-add-quest-btn {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 12px;
+            font-size: 0.75em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: all 0.2s ease;
+
+            &:hover {
+                background: linear-gradient(135deg, #27ae60, #219653);
+                transform: translateY(-1px);
+                box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            }
+            
+            i {
+                margin: 0;
+            }
+        }
+    }
+
+    .km-quests-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 15px;
+    }
+
+    .km-quest-card {
+        background: rgba(30, 30, 30, 0.6);
+        border: 1px solid rgba(120, 120, 120, 0.25);
+        border-radius: 8px;
+        padding: 15px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        position: relative;
+        overflow: hidden;
+
+        &::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: #95a5a6; /* Default gray top border */
+        }
+
+        &.km-quest-active:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+            border-color: rgba(238, 155, 58, 0.5);
+        }
+        
+        &[data-id] {
+            &:has(.km-quest-type-explore_hex)::before { background: #3498db; }
+            &:has(.km-quest-type-claim_hex)::before { background: #9b59b6; }
+            &:has(.km-quest-type-build_structure)::before { background: #e67e22; }
+            &:has(.km-quest-type-clear_hex)::before { background: #e74c3c; }
+            &:has(.km-quest-type-assign_leader)::before { background: #f1c40f; }
+            &:has(.km-quest-type-other)::before { background: #1abc9c; }
+        }
+    }
+
+    .theme-light .km-quest-card {
+        background: rgba(255, 255, 255, 0.75);
+        border-color: rgba(0, 0, 0, 0.15);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+    }
+
+    /* Hidden quests are GM-only (filtered out for players) and shown de-emphasised
+       so the GM can tell at a glance which entries their players cannot see. */
+    .km-quest-card.km-quest-hidden,
+    .km-quest-row.km-quest-hidden {
+        opacity: 0.55;
+        filter: grayscale(0.6);
+    }
+
+    .km-quest-hidden-badge {
+        font-size: 0.75em;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        white-space: nowrap;
+        background: rgba(120, 120, 120, 0.25);
+        color: inherit;
+        border: 1px solid rgba(120, 120, 120, 0.4);
+    }
+
+    .km-quest-hidden-icon {
+        opacity: 0.8;
+    }
+
+    /* Recommended party level for the quest, shown as a pill beside the type badge. */
+    .km-quest-level-badge {
+        font-size: 0.75em;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        white-space: nowrap;
+        background: rgba(52, 152, 219, 0.18);
+        color: #5dade2;
+        border: 1px solid rgba(52, 152, 219, 0.35);
+    }
+
+    .theme-light .km-quest-level-badge {
+        color: #2471a3;
+        background: rgba(52, 152, 219, 0.12);
+    }
+
+    /* Created/updated stamps — muted, small, below the quest body. */
+    .km-quest-timestamps {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2px 14px;
+        font-size: 0.72em;
+        opacity: 0.6;
+        margin-top: 4px;
+
+        i { margin-right: 3px; }
+    }
+
+    .km-quest-timestamps-compact {
+        margin-top: 2px;
+    }
+
+    /* Quick-filter bar above the active quests grid. */
+    .km-quest-filters {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 12px;
+        padding: 8px 10px;
+        border-radius: 8px;
+        background: rgba(120, 120, 120, 0.12);
+        border: 1px solid rgba(120, 120, 120, 0.28);
+
+        .km-quest-filter-field {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .km-quest-filter-search {
+            flex: 1 1 180px;
+            min-width: 140px;
+        }
+
+        .km-quest-filter-title {
+            width: 100%;
+        }
+
+        .km-quest-filter-levels {
+            white-space: nowrap;
+            opacity: 0.95;
+        }
+
+        .km-quest-filter-level-min,
+        .km-quest-filter-level-max {
+            width: 52px;
+        }
+
+        .km-quest-filter-hidden,
+        .km-quest-filter-category {
+            width: auto;
+            flex: 0 0 auto;
+            max-width: 170px;
+        }
+
+        .km-quest-filter-clear {
+            flex: 0 0 auto;
+            width: auto;
+            line-height: 1;
+            padding: 0 8px;
+        }
+
+        .km-quest-filter-count {
+            margin-left: auto;
+            font-size: 0.8em;
+            opacity: 0.65;
+            white-space: nowrap;
+        }
+    }
+
+    .km-quest-card.km-quest-filtered-out {
+        display: none;
+    }
+
+    .km-quest-no-matches {
+        padding: 14px;
+        text-align: center;
+        font-style: italic;
+        opacity: 0.7;
+    }
+
+    .km-quest-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 10px;
+        margin-top: 5px;
+    }
+
+    .km-quest-title {
+        font-family: Signika, "Palatino Linotype", sans-serif;
+        font-size: 1.3em;
+        font-weight: bold;
+        line-height: 1.2;
+    }
+
+    .km-quest-badge {
+        font-size: 0.75em;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        white-space: nowrap;
+        background: rgba(120, 120, 120, 0.2);
+        color: inherit;
+        border: 1px solid rgba(120, 120, 120, 0.3);
+
+        &.km-quest-type-explore_hex { background: rgba(52, 152, 219, 0.15); color: #5dade2; border-color: rgba(52, 152, 219, 0.3); }
+        &.km-quest-type-claim_hex { background: rgba(155, 89, 182, 0.15); color: #bb8fce; border-color: rgba(155, 89, 182, 0.3); }
+        &.km-quest-type-build_structure { background: rgba(230, 126, 34, 0.15); color: #f5b041; border-color: rgba(230, 126, 34, 0.3); }
+        &.km-quest-type-clear_hex { background: rgba(231, 76, 60, 0.15); color: #f1948a; border-color: rgba(231, 76, 60, 0.3); }
+        &.km-quest-type-assign_leader { background: rgba(241, 196, 15, 0.15); color: #f4d03f; border-color: rgba(241, 196, 15, 0.3); }
+        &.km-quest-type-other { background: rgba(26, 188, 156, 0.15); color: #48c9b0; border-color: rgba(26, 188, 156, 0.3); }
+    }
+
+    .theme-light {
+        .km-quest-badge.km-quest-type-explore_hex { color: #20639b; }
+        .km-quest-badge.km-quest-type-claim_hex { color: #6c3483; }
+        .km-quest-badge.km-quest-type-build_structure { color: #b9770e; }
+        .km-quest-badge.km-quest-type-clear_hex { color: #922b21; }
+        .km-quest-badge.km-quest-type-assign_leader { color: #7d6608; }
+        .km-quest-badge.km-quest-type-other { color: #117a65; }
+    }
+
+    .km-quest-badge.km-quest-category-main_story { background: rgba(201, 162, 39, 0.18); color: #e0c050; border-color: rgba(201, 162, 39, 0.4); }
+    .km-quest-badge.km-quest-category-side { background: rgba(120, 144, 156, 0.18); color: #b0bec5; border-color: rgba(120, 144, 156, 0.35); }
+    .km-quest-badge.km-quest-category-mythic { background: rgba(142, 68, 173, 0.2); color: #c39bd3; border-color: rgba(142, 68, 173, 0.4); }
+    .km-quest-badge.km-quest-category-companion { background: rgba(192, 57, 43, 0.16); color: #ec7063; border-color: rgba(192, 57, 43, 0.35); }
+
+    .theme-light {
+        .km-quest-badge.km-quest-category-main_story { color: #9a7d12; }
+        .km-quest-badge.km-quest-category-mythic { color: #6c3483; }
+        .km-quest-badge.km-quest-category-companion { color: #922b21; }
+    }
+
+    /* compact category icon on completed-quest rows */
+    .km-quest-category-icon.km-quest-category-main_story { color: #d4ac2b; }
+    .km-quest-category-icon.km-quest-category-side { color: #90a4ae; }
+    .km-quest-category-icon.km-quest-category-mythic { color: #a569bd; }
+    .km-quest-category-icon.km-quest-category-companion { color: #cb4335; }
+
+    .km-quest-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        font-size: 0.85em;
+        color: #888;
+        border-bottom: 1px dashed rgba(120,120,120,0.2);
+        padding-bottom: 8px;
+
+        .km-quest-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            
+            i {
+                font-size: 0.9em;
+            }
+        }
+    }
+    
+    .theme-light .km-quest-meta {
+        color: #555;
+    }
+
+    .km-quest-description {
+        font-size: 0.95em;
+        line-height: 1.4;
+        flex-grow: 1;
+        min-height: 50px;
+    }
+
+    .km-quest-notes {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        background: rgba(166, 124, 30, 0.12);
+        border: 1px solid rgba(166, 124, 30, 0.35);
+        border-left: 3px solid #a67c1e;
+        border-radius: 6px;
+        padding: 6px 10px;
+
+        .km-quest-notes-label {
+            font-size: 0.75em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: bold;
+            color: #c79a3a;
+
+            i { margin-right: 3px; }
+        }
+
+        .km-quest-notes-body {
+            font-size: 0.9em;
+            line-height: 1.4;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+    }
+
+    /* GM notes collapse to just their label by default; click the summary to
+       expand. Native <details> keeps this JS-free and robust across re-renders.
+       Force block layout so the native collapse works regardless of Chromium
+       version (flex/grid on <details> broke collapsing in older builds). */
+    details.km-quest-notes {
+        display: block;
+
+        > summary.km-quest-notes-label {
+            cursor: pointer;
+            list-style: none;
+            user-select: none;
+        }
+
+        > .km-quest-notes-body {
+            margin-top: 4px;
+        }
+
+        > summary.km-quest-notes-label::-webkit-details-marker {
+            display: none;
+        }
+
+        .km-quest-notes-caret {
+            display: inline-block;
+            font-size: 0.9em;
+            transition: transform 0.15s ease;
+        }
+
+        &[open] .km-quest-notes-caret {
+            transform: rotate(90deg);
+        }
+    }
+
+    .km-quest-notes-compact {
+        margin-top: 6px;
+    }
+
+    .theme-light .km-quest-notes {
+        background: rgba(166, 124, 30, 0.08);
+
+        .km-quest-notes-label { color: #8a6516; }
+    }
+
+    .km-quest-notes-input textarea,
+    textarea.km-quest-notes-input {
+        min-height: 120px;
+        resize: vertical;
+    }
+
+    .km-quest-rewards-container {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 6px;
+        padding: 8px 12px;
+        border: 1px solid rgba(120, 120, 120, 0.1);
+
+        .km-rewards-title {
+            font-size: 0.8em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: bold;
+            color: #aaa;
+        }
+    }
+
+    .theme-light .km-quest-rewards-container {
+        background: rgba(0, 0, 0, 0.04);
+        .km-rewards-title {
+            color: #666;
+        }
+    }
+
+    .km-rewards-pills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .km-reward-other {
+        margin-top: 6px;
+        font-size: 0.88em;
+        line-height: 1.4;
+        white-space: pre-wrap;
+        word-break: break-word;
+        font-style: italic;
+        color: #cdbd8f;
+
+        i { margin-right: 4px; font-style: normal; color: #c79a3a; }
+    }
+
+    .theme-light .km-reward-other { color: #6b5a2b; }
+
+    .km-quest-reward-other-input textarea,
+    textarea.km-quest-reward-other-input {
+        min-height: 70px;
+        resize: vertical;
+    }
+
+    .km-reward-pill {
+        font-size: 0.8em;
+        padding: 3px 8px;
+        border-radius: 4px;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-weight: 500;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+
+        &.km-reward-rp { background: rgba(241, 196, 15, 0.15); color: #f4d03f; border: 1px solid rgba(241, 196, 15, 0.3); }
+        &.km-reward-xp { background: rgba(52, 152, 219, 0.15); color: #5dade2; border: 1px solid rgba(52, 152, 219, 0.3); }
+        &.km-reward-unrest { background: rgba(231, 76, 60, 0.15); color: #e74c3c; border: 1px solid rgba(231, 76, 60, 0.3); }
+        &.km-reward-food { background: rgba(46, 204, 113, 0.15); color: #2ecc71; border: 1px solid rgba(46, 204, 113, 0.3); }
+        &.km-reward-lumber { background: rgba(139, 69, 19, 0.15); color: #d2b48c; border: 1px solid rgba(139, 69, 19, 0.3); }
+        &.km-reward-stone { background: rgba(149, 165, 166, 0.15); color: #bdc3c7; border: 1px solid rgba(149, 165, 166, 0.3); }
+        &.km-reward-ore { background: rgba(127, 140, 141, 0.2); color: #ecf0f1; border: 1px solid rgba(127, 140, 141, 0.4); }
+        &.km-reward-luxuries { background: rgba(155, 89, 182, 0.15); color: #bb8fce; border: 1px solid rgba(155, 89, 182, 0.3); }
+    }
+
+    .theme-light {
+        .km-reward-pill {
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            &.km-reward-rp { color: #7d6608; }
+            &.km-reward-xp { color: #20639b; }
+            &.km-reward-unrest { color: #922b21; }
+            &.km-reward-food { color: #196f3d; }
+            &.km-reward-lumber { color: #5c3a21; }
+            &.km-reward-stone { color: #5d6d7e; }
+            &.km-reward-ore { color: #2c3e50; }
+            &.km-reward-luxuries { color: #6c3483; }
+        }
+    }
+
+    .km-quest-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 5px;
+
+        .km-quest-action-btn {
+            font-size: 0.85em;
+            padding: 6px 12px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            margin: 0;
+
+            &.km-complete-btn {
+                background: rgba(39, 174, 96, 0.2);
+                border: 1px solid rgba(39, 174, 96, 0.4);
+                color: #2ecc71;
+                flex-grow: 1;
+
+                &:hover {
+                    background: rgba(39, 174, 96, 0.35);
+                    border-color: #2ecc71;
+                }
+            }
+
+            &.km-delete-btn {
+                background: rgba(192, 57, 43, 0.15);
+                border: 1px solid rgba(192, 57, 43, 0.35);
+                color: #e74c3c;
+                width: 36px;
+                padding: 6px 0;
+
+                &:hover {
+                    background: rgba(192, 57, 43, 0.3);
+                    border-color: #e74c3c;
+                }
+            }
+        }
+    }
+
+    .theme-light .km-quest-actions {
+        .km-quest-action-btn.km-complete-btn {
+            background: rgba(39, 174, 96, 0.1);
+            color: #196f3d;
+            &:hover {
+                background: rgba(39, 174, 96, 0.2);
+            }
+        }
+        .km-quest-action-btn.km-delete-btn {
+            background: rgba(192, 57, 43, 0.08);
+            color: #922b21;
+            &:hover {
+                background: rgba(192, 57, 43, 0.18);
+            }
+        }
+    }
+
+    .km-empty-quests {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 40px;
+        color: #777;
+        text-align: center;
+        border: 2px dashed rgba(120, 120, 120, 0.15);
+        border-radius: 8px;
+
+        i {
+            font-size: 3em;
+            margin-bottom: 12px;
+            opacity: 0.5;
+        }
+
+        p {
+            font-size: 1.1em;
+            margin: 0;
+        }
+    }
+
+    .km-quests-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .km-quest-row {
+        background: rgba(30, 30, 30, 0.4);
+        border: 1px solid rgba(120, 120, 120, 0.15);
+        border-radius: 6px;
+        padding: 10px 15px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        border-left: 4px solid #27ae60;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+
+        .km-quest-row-main {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex-grow: 1;
+        }
+
+        .km-quest-row-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .km-quest-row-title {
+            font-weight: bold;
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+
+            .km-check-icon {
+                color: #2ecc71;
+            }
+        }
+
+        .km-quest-row-meta {
+            font-size: 0.85em;
+            color: #888;
+        }
+
+        .km-quest-row-flavor {
+            font-size: 0.9em;
+            font-style: italic;
+            color: #aaa;
+            padding-left: 20px;
+        }
+
+        .km-quest-row-delete-btn {
+            background: rgba(192, 57, 43, 0.15);
+            border: 1px solid rgba(192, 57, 43, 0.3);
+            color: #e74c3c;
+            border-radius: 4px;
+            cursor: pointer;
+            padding: 5px 8px;
+            transition: all 0.2s ease;
+            margin: 0;
+
+            &:hover {
+                background: rgba(192, 57, 43, 0.3);
+                border-color: #e74c3c;
+            }
+        }
+    }
+
+    .theme-light .km-quest-row {
+        background: rgba(255, 255, 255, 0.5);
+        border-color: rgba(0, 0, 0, 0.1);
+        .km-quest-row-meta { color: #666; }
+        .km-quest-row-flavor { color: #555; }
+        .km-quest-row-delete-btn {
+            background: rgba(192, 57, 43, 0.08);
+            color: #922b21;
+            &:hover {
+                background: rgba(192, 57, 43, 0.18);
+            }
+        }
+    }
+}
+
+.km-kingdom-sheet .km-roster-board {
+    /* The kingdom sheet is a dark surface: use light text on dark cards so the
+       roster reads the same way the Quests board does. */
+    color: #e0e0e0;
+
+    .km-roster-header {
+        display: flex;
+        align-items: center;
+        gap: .5em;
+        color: var(--secondary-km, #ee9b3a);
+    }
+
+    .km-roster-header .km-header-right-align {
+        margin-left: auto;
+    }
+
+    .km-roster-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 1em;
+        padding: .5em 0;
+    }
+
+    .km-roster-card {
+        display: flex;
+        flex-direction: column;
+        border: 1px solid rgba(120, 120, 120, 0.25);
+        border-radius: 8px;
+        overflow: hidden;
+        background: rgba(30, 30, 30, 0.6);
+        color: #e0e0e0;
+    }
+
+    .km-roster-card-inactive {
+        opacity: .55;
+    }
+
+    .km-roster-card-traveling {
+        border-color: rgba(238, 155, 58, 0.6);
+        box-shadow: 0 0 0 1px rgba(238, 155, 58, 0.4);
+    }
+
+    /* Bound the portrait so it never renders at its natural (full-screen) size. */
+    .km-roster-card-img {
+        width: 100%;
+        height: 8.5em;
+        overflow: hidden;
+    }
+
+    .km-roster-card-img img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: top center;
+        display: block;
+        border: 0;
+        border-radius: 0;
+    }
+
+    .km-roster-card-body {
+        display: flex;
+        flex-direction: column;
+        gap: .5em;
+        padding: .5em .75em;
+    }
+
+    .km-roster-card-header {
+        display: flex;
+        align-items: center;
+        gap: .5em;
+    }
+
+    .km-roster-name {
+        font-weight: bold;
+        color: #f5f5f5;
+    }
+
+    .km-roster-role-badge {
+        margin-left: auto;
+        font-size: var(--font-size-12);
+        padding: .1em .6em;
+        border-radius: 1em;
+        white-space: nowrap;
+        background: rgba(52, 152, 219, 0.22);
+        color: #5dade2;
+        border: 1px solid rgba(52, 152, 219, 0.35);
+    }
+
+    .km-roster-role-npc {
+        background: rgba(230, 126, 34, 0.22);
+        color: #f5b041;
+        border-color: rgba(230, 126, 34, 0.35);
+    }
+
+    .km-roster-expedition-status-chip {
+        font-size: var(--font-size-10, 0.7em);
+        padding: .1em .5em;
+        border-radius: 4px;
+        font-weight: 500;
+        display: inline-block;
+        margin-top: .2em;
+        width: fit-content;
+        border: 1px solid transparent;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        max-width: 100%;
+
+        &.km-expedition-status-available {
+            background: rgba(46, 204, 113, 0.15);
+            color: #2ecc71;
+            border-color: rgba(46, 204, 113, 0.3);
+        }
+
+        &.km-expedition-status-onExpedition {
+            background: rgba(52, 152, 219, 0.15);
+            color: #5dade2;
+            border-color: rgba(52, 152, 219, 0.3);
+        }
+
+        &.km-expedition-status-unavailable {
+            background: rgba(231, 76, 60, 0.15);
+            color: #e74c3c;
+            border-color: rgba(231, 76, 60, 0.3);
+        }
+    }
+
+    .km-roster-fields {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: .2em .75em;
+        font-size: var(--font-size-12);
+        color: #e0e0e0;
+    }
+
+    .km-roster-field {
+        display: flex;
+        justify-content: space-between;
+        gap: .5em;
+    }
+
+    .km-roster-field label {
+        font-weight: 600;
+        color: #9a9a9a;
+    }
+
+    .km-roster-status.km-status-on {
+        color: #2ecc71;
+        font-weight: 600;
+    }
+
+    .km-roster-status.km-status-off {
+        color: #888;
+    }
+
+    .km-roster-linked-actor {
+        color: #5dade2;
+    }
+
+    .km-roster-plot-hook {
+        font-size: var(--font-size-12);
+        color: #cfcfcf;
+    }
+
+    .km-roster-plot-hook label {
+        font-weight: 600;
+        color: #9a9a9a;
+    }
+
+    .km-roster-plot-hook p {
+        margin: .2em 0 0;
+        font-style: italic;
+    }
+
+    .km-roster-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .25em;
+        margin-top: .25em;
+    }
+
+    .km-roster-action-btn {
+        flex: 1 1 auto;
+        min-width: 2em;
+    }
+
+    .km-empty-roster {
+        text-align: center;
+        padding: 2em;
+        color: #999;
+    }
+
+    .km-empty-roster i {
+        font-size: 2em;
+        display: block;
+        margin-bottom: .3em;
+    }
+}
+
+/* Campaign Analytics & Trends dashboard (read-only, GM-only). Dark cards in both
+   themes so the white grid lines / amber polyline keep their contrast. */
+.km-kingdom-sheet .km-analytics {
+
+    .km-analytics-header {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: .5em 1em;
+        margin-bottom: .75em;
+    }
+
+    .km-analytics-header h2 {
+        display: flex;
+        align-items: center;
+        gap: .5em;
+        margin: 0;
+        border: none;
+    }
+
+    .km-analytics-header h2 i {
+        color: var(--secondary-km, #ee9b3a);
+    }
+
+    .km-analytics-window-selector {
+        display: flex;
+        align-items: center;
+        gap: .35em;
+        margin-left: auto;
+        font-size: var(--font-size-12);
+        color: #9a9a9a;
+    }
+
+    .km-window-btn {
+        flex: 0 0 auto;
+        width: auto;
+        line-height: 1.4;
+        padding: .15em .7em;
+        border-radius: 1em;
+        border: 1px solid rgba(120, 120, 120, 0.35);
+        background: rgba(30, 30, 30, 0.55);
+        color: #cfcfcf;
+        cursor: pointer;
+        transition: background-color .15s ease, border-color .15s ease, color .15s ease;
+    }
+
+    .km-window-btn:hover {
+        border-color: var(--secondary-km, #ee9b3a);
+        color: #f5f5f5;
+    }
+
+    .km-window-btn:focus-visible {
+        outline: 2px solid var(--secondary-km, #ee9b3a);
+        outline-offset: 1px;
+    }
+
+    .km-window-btn.active {
+        background: rgba(238, 155, 58, 0.22);
+        border-color: rgba(238, 155, 58, 0.6);
+        color: #f5b041;
+        font-weight: 600;
+    }
+
+    .km-analytics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1em;
+    }
+
+    .km-analytics-card {
+        display: flex;
+        flex-direction: column;
+        gap: .5em;
+        padding: .6em .75em .5em;
+        border: 1px solid rgba(120, 120, 120, 0.25);
+        border-radius: 8px;
+        background: rgba(30, 30, 30, 0.6);
+        color: #e0e0e0;
+    }
+
+    .km-analytics-card-header {
+        display: flex;
+        align-items: baseline;
+        gap: .5em;
+    }
+
+    .km-analytics-card-title {
+        font-weight: 600;
+        color: #f5f5f5;
+    }
+
+    .km-analytics-card-value-group {
+        display: flex;
+        align-items: baseline;
+        gap: .4em;
+        margin-left: auto;
+    }
+
+    .km-analytics-card-current {
+        font-size: var(--font-size-20, 1.25em);
+        font-weight: 700;
+        line-height: 1;
+        color: var(--secondary-km, #ee9b3a);
+    }
+
+    .km-analytics-card-delta {
+        font-size: var(--font-size-12);
+        font-weight: 600;
+        color: #9a9a9a;
+    }
+
+    .km-analytics-card-delta.km-delta-positive {
+        color: #2ecc71;
+    }
+
+    .km-analytics-card-delta.km-delta-negative {
+        color: #e74c3c;
+    }
+
+    .km-analytics-chart-container {
+        width: 100%;
+    }
+
+    .km-analytics-svg {
+        display: block;
+        width: 100%;
+        height: auto;
+        overflow: visible;
+    }
+
+    .km-chart-dot {
+        fill: var(--color-primary, #df9f28);
+        stroke: rgba(0, 0, 0, 0.4);
+        stroke-width: 1;
+        opacity: .35;
+        transition: opacity .15s ease, r .15s ease;
+        cursor: pointer;
+    }
+
+    .km-chart-dot:hover {
+        opacity: 1;
+        r: 5;
+    }
+
+    .km-analytics-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: .25em;
+        padding-top: .35em;
+        border-top: 1px solid rgba(120, 120, 120, 0.2);
+    }
+
+    .km-stat-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: .1em;
+    }
+
+    .km-stat-label {
+        font-size: var(--font-size-10, .7em);
+        text-transform: uppercase;
+        letter-spacing: .04em;
+        color: #9a9a9a;
+    }
+
+    .km-stat-value {
+        font-size: var(--font-size-14);
+        font-weight: 600;
+        color: #e0e0e0;
+    }
+
+    .km-analytics-empty {
+        text-align: center;
+        padding: 2.5em 1em;
+        color: #999;
+    }
+
+    .km-analytics-empty i {
+        font-size: 2em;
+        display: block;
+        margin-bottom: .3em;
+        color: var(--secondary-km, #ee9b3a);
+    }
+
+    .km-analytics-player-note {
+        width: 100%;
+        margin-top: .5em;
+        padding: .5em .75em;
+        font-size: var(--font-size-12);
+        color: var(--secondary-km, #ee9b3a);
+        background: rgba(238, 155, 58, 0.1);
+        border: 1px solid rgba(238, 155, 58, 0.3);
+        border-radius: 4px;
+        font-style: italic;
+    }
+}
+
+/* Hex content manager — linked references (quests / documents / war threat) */
+.km-hex-content-manager {
+    .km-hex-links {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin: 10px 0;
+        padding: 10px;
+        border: 1px solid rgba(120, 120, 120, 0.25);
+        border-radius: 6px;
+        background: rgba(0, 0, 0, 0.06);
+    }
+
+    .km-hex-links-label {
+        font-weight: bold;
+        font-size: 0.85em;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        opacity: 0.8;
+        display: block;
+        margin-bottom: 4px;
+
+        i { margin-right: 4px; color: var(--secondary-km, #ee9b3a); }
+    }
+
+    .km-hex-quest-choices {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        max-height: 160px;
+        overflow-y: auto;
+    }
+
+    .km-hex-quest-choice {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.9em;
+        cursor: pointer;
+
+        input { margin: 0; }
+    }
+
+    .km-hex-drop-zone {
+        border: 2px dashed rgba(120, 120, 120, 0.5);
+        border-radius: 6px;
+        padding: 12px;
+        text-align: center;
+        font-size: 0.85em;
+        opacity: 0.8;
+        transition: border-color 150ms ease, background 150ms ease;
+    }
+
+    .km-hex-drop-zone:hover {
+        border-color: var(--secondary-km, #ee9b3a);
+        background: rgba(238, 155, 58, 0.08);
+    }
+
+    .km-hex-link-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 6px;
+    }
+
+    .km-hex-link-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 2px 6px;
+        border-radius: 4px;
+        background: rgba(238, 155, 58, 0.12);
+        border: 1px solid rgba(238, 155, 58, 0.3);
+        font-size: 0.85em;
+    }
+
+    .km-hex-link-remove {
+        cursor: pointer;
+        font-weight: bold;
+        opacity: 0.6;
+        text-decoration: none;
+        padding: 0 2px;
+    }
+
+    .km-hex-link-remove:hover {
+        opacity: 1;
+        color: var(--color-level-error, #c0392b);
+    }
+
+    .km-hex-links-cell {
+        white-space: nowrap;
+        font-size: 0.85em;
+    }
+
+    .km-hex-link-count { margin-right: 6px; opacity: 0.85; }
+    .km-hex-no-links { opacity: 0.4; }
+}
+
+/* Linked References panel injected into the native pf2e-kingmaker hex editor */
+fieldset.km-hex-editor-links {
+    legend { font-weight: bold; }
+
+    .km-hexed-stack { flex-direction: column; align-items: stretch; }
+    .km-hexed-stack > label { margin-bottom: 4px; }
+
+    .km-hexed-quests {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        max-height: 130px;
+        overflow-y: auto;
+    }
+
+    .km-hexed-quest {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.9em;
+        cursor: pointer;
+
+        input { margin: 0; flex: 0 0 auto; }
+    }
+
+    .km-hexed-threat { width: 100%; }
+
+    .km-hexed-drop {
+        border: 2px dashed var(--color-border-light-2, rgba(120, 120, 120, 0.5));
+        border-radius: 6px;
+        padding: 8px;
+        text-align: center;
+        font-size: 0.85em;
+        opacity: 0.8;
+    }
+
+    .km-hexed-drop:hover {
+        border-color: var(--color-warm-2, #c9a227);
+        background: rgba(201, 162, 39, 0.08);
+    }
+
+    .km-hexed-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 6px;
+    }
+
+    .km-hexed-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 2px 6px;
+        border-radius: 4px;
+        background: rgba(201, 162, 39, 0.14);
+        border: 1px solid rgba(201, 162, 39, 0.35);
+        font-size: 0.85em;
+    }
+
+    .km-hexed-remove {
+        cursor: pointer;
+        font-weight: bold;
+        opacity: 0.6;
+        text-decoration: none;
+        padding: 0 2px;
+    }
+
+    .km-hexed-remove:hover { opacity: 1; color: var(--color-level-error, #c0392b); }
+}
+
+/* Native hex editor: let the content scroll vertically within the (now bounded, resizable)
+   window so the Save footer stays reachable instead of being pushed off-screen. */
+#kingmaker-hex-edit .window-content {
+    overflow-y: auto;
+}
+
+#kingmaker-hex-edit .form-footer {
+    position: sticky;
+    bottom: 0;
+    margin-top: auto;
+    padding-top: 8px;
+    background: var(--color-bg, var(--background, rgba(20, 20, 26, 0.96)));
+}
+
+/* Linked quests in the native hex hover tooltip */
+#kingmaker-hex-hud .km-hexhud-quests .fa-scroll {
+    margin-right: 4px;
+    color: var(--secondary-km, #ee9b3a);
+}
+
+/* ============================================================================
+   Shared responsive utilities (all kingdom sections).
+   ============================================================================ */
+
+/* Wide tables (settlements Detailed Matrix, army threats/deployments,
+   modifiers) scroll inside their own container so the PAGE never scrolls
+   horizontally on narrow widths. */
+.km-table-scroll {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Generic empty state for legacy tabs (events, modifiers, settlements) —
+   mirrors .km-empty-quests / .km-empty-roster on the newer tabs. */
+.km-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
+    color: #777;
+    text-align: center;
+    border: 2px dashed rgba(120, 120, 120, 0.15);
+    border-radius: 8px;
+
+    i {
+        font-size: 2.5em;
+        margin-bottom: 10px;
+        opacity: 0.5;
+    }
+
+    p {
+        font-size: 1.05em;
+        margin: 0;
+    }
+
+    button {
+        margin-top: 12px;
+        width: auto;
+    }
+}
+
+/* ============================================================================
+   Mobile / small-screen layout.
+   The desktop sheet is a fixed-width sidebar (256–300px) + content flex row
+   sized to `calc(100vh - 220px)`. On a phone that collapses into two cramped
+   ~190px columns of truncated text. Below ~768px we fill the screen with the
+   window, stack the sidebar above the content as one vertically-scrolling
+   column, drop the fixed widths/heights, let the nav wrap, and relax the
+   aggressive label truncation. CSS-only — no template or logic changes.
+   ============================================================================ */
+@media (max-width: 768px) {
+    /* Use the whole viewport for the window frame (Foundry centres a 1200px
+       window; pin it full-screen so it can't float partly off-screen). */
+    .application.km-kingdom-sheet,
+    .application.km-inspect-settlement {
+        inset: 0 !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        height: 100dvh !important;
+        max-width: 100vw !important;
+        max-height: 100vh !important;
+        max-height: 100dvh !important;
+    }
+
+    .km-kingdom-sheet .km-kingdom-sheet-header {
+        flex-wrap: wrap;
+        gap: .5em;
+        padding: .5em;
+    }
+
+    .km-kingdom-sheet .km-kingdom-sheet-active-xp {
+        margin-right: 1em;
+    }
+
+    /* Stack sidebar + content; grow with content so the page scrolls vertically
+       instead of trapping everything in a fixed-height inner box. */
+    .km-kingdom-sheet .km-kingdom-sheet-main {
+        flex-direction: column;
+        height: auto;
+        overflow: visible;
+    }
+
+    .km-kingdom-sheet .km-kingdom-sheet-sidebar,
+    .km-kingdom-sheet .km-kingdom-sheet-sidebar-kingdom,
+    .km-kingdom-sheet .km-kingdom-sheet-sidebar-turn {
+        width: auto;
+        min-width: 0;
+        max-width: none;
+        margin: 8px;
+    }
+
+    .km-kingdom-sheet .km-kingdom-sheet-content {
+        margin: 8px;
+        min-width: 0;
+    }
+
+    .km-kingdom-sheet .km-kingdom-sheet-sub-content {
+        overflow: visible;
+        padding: .75em;
+    }
+
+    /* Main tab bar (.km-tabs, 14 tabs): on desktop the tabs flex-grow to fill the
+       width; on a phone that forces a ~1487px row that overflows and clips the
+       later tabs (Quests, Roster, ...) out of reach. Turn it into a single
+       horizontally-scrollable strip so every tab stays reachable. */
+    .km-kingdom-sheet .km-tabs {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .km-kingdom-sheet .km-tabs ul {
+        flex-wrap: nowrap;
+        width: max-content;
+        min-width: 100%;
+        justify-content: flex-start;
+    }
+
+    .km-kingdom-sheet .km-tabs ul li {
+        flex: 0 0 auto;
+        padding: 0 1em;
+    }
+
+    .km-kingdom-sheet .km-tabs ul li a {
+        white-space: nowrap;
+    }
+
+    /* Sub-nav: also a horizontally-scrollable strip (the turn-step nav has up to
+       ~22 entries) so it never clips either. */
+    .km-kingdom-sheet .km-kingdom-sheet-sub-nav {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .km-kingdom-sheet .km-kingdom-sheet-sub-nav ul {
+        flex-wrap: nowrap;
+        width: max-content;
+        min-width: 100%;
+        justify-content: flex-start;
+    }
+
+    /* There's room to read full labels now — stop the ellipsis clamping. */
+    .km-kingdom-sheet .km-skill-checks .km-skills-label,
+    .km-kingdom-sheet .km-worksites .km-worksite-label,
+    .km-kingdom-sheet .km-leader-vacant-label,
+    .km-kingdom-sheet .km-next-header {
+        max-width: none;
+        white-space: normal;
+    }
+
+    /* Fixed-width activity summary -> fluid + wrap. */
+    .km-kingdom-sheet .km-kingdom-details details summary {
+        width: auto;
+        max-width: 100%;
+        flex-wrap: wrap;
+    }
+
+    /* Leaders grid: 4 columns is unreadable on a phone -> 2, auto rows. */
+    .km-kingdom-sheet .km-kingdom-sheet-kingdom .km-choose-leaders {
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto;
+        gap: .5em;
+    }
+
+    /* Charter/boost/skill/ruin choosers stack instead of squeezing side by side. */
+    .km-kingdom-sheet .km-kingdom-sheet-kingdom .km-choose-boosts,
+    .km-kingdom-sheet .km-kingdom-sheet-kingdom .km-choose-skills,
+    .km-kingdom-sheet .km-kingdom-sheet-kingdom .km-choose-ruins {
+        flex-direction: column;
+        gap: .5em;
+    }
+
+    .km-kingdom-sheet .km-government-pick-label {
+        margin-left: 0;
+    }
+}
+
+/* Phones: single-column leaders and tighter header chrome. */
+@media (max-width: 480px) {
+    .km-kingdom-sheet .km-kingdom-sheet-kingdom .km-choose-leaders {
+        grid-template-columns: 1fr;
+    }
+
+    .km-kingdom-sheet .km-kingdom-sheet-header .km-kingdom-sheet-name i {
+        font-size: 18px;
     }
 }
