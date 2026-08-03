@@ -49,6 +49,7 @@ import at.posselt.pfrpg2e.camping.setCamping
 import at.posselt.pfrpg2e.camping.findCurrentRegion
 import at.posselt.pfrpg2e.camping.EncounterResolverEngine
 import at.posselt.pfrpg2e.camping.CampDefenseState
+import at.posselt.pfrpg2e.camping.alarmsPerceptionBonus
 import at.posselt.pfrpg2e.camping.dialogs.showEncounterResolutionDialog
 import at.posselt.pfrpg2e.actor.resolveAttribute
 import at.posselt.pfrpg2e.data.actor.Perception
@@ -322,9 +323,23 @@ private suspend fun beginRest(
 
         if (onWatch.isNotEmpty()) {
             val totalDc = formData.dc - formData.rollModifier + formData.dcModifier
+
+            // Tonight's committed camp-defense results, collected BEFORE the watch roll so Set
+            // Alarms can shift the effective Stealth DC: a +N Perception bonus vs Stealth is the
+            // same check math as rolling against DC - N, and folding it into the DC keeps the
+            // system's own degree computation (nat 1/20 adjustments included) authoritative.
+            val defenseActivities = camping.groupActivities()
+            val defenseState = CampDefenseState(
+                alarmsDegree = defenseActivities.find { it.data.id == "set-alarms" }?.result?.parseResult(),
+                camouflageDegree = defenseActivities.find { it.data.id == "camouflage-campsite" }?.result?.parseResult(),
+                trapsDegree = defenseActivities.find { it.data.id == "set-traps" }?.result?.parseResult(),
+                undeadGuardiansActive = defenseActivities.find { it.data.id == "undead-guardians" }?.result?.parseResult()
+                    ?.let { it == DegreeOfSuccess.CRITICAL_SUCCESS || it == DegreeOfSuccess.SUCCESS },
+            )
+            val effectiveDc = totalDc - alarmsPerceptionBonus(defenseState.alarmsDegree)
             val rollParameters = StatisticRollParameters(
                 rollMode = "blindroll",
-                dc = CheckDC(value = totalDc),
+                dc = CheckDC(value = effectiveDc),
                 extraRollOptions = arrayOf("camping", "watch")
             )
 
@@ -345,22 +360,10 @@ private suspend fun beginRest(
             val degree = best?.third ?: DegreeOfSuccess.FAILURE
             val bestRollTotal = best?.second ?: 0
 
-            // Collect camp defense activity results for this session
-            val activities = camping.groupActivities()
-            val alarmsActivity = activities.find { it.data.id == "set-alarms" }
-            val camouflageActivity = activities.find { it.data.id == "camouflage-campsite" }
-            val trapsActivity = activities.find { it.data.id == "set-traps" }
-            val guardiansActivity = activities.find { it.data.id == "undead-guardians" }
-            
-            val defenseState = CampDefenseState(
-                alarmsDegree = alarmsActivity?.result?.parseResult()?.name?.lowercase(),
-                camouflageDegree = camouflageActivity?.result?.parseResult()?.name?.lowercase(),
-                trapsDegree = trapsActivity?.result?.parseResult()?.name?.lowercase(),
-                undeadGuardiansActive = guardiansActivity?.result?.parseResult()?.let { it == DegreeOfSuccess.CRITICAL_SUCCESS || it == DegreeOfSuccess.SUCCESS }
-            )
-
             val resolution = EncounterResolverEngine.resolve(
                 watcherRoll = bestRollTotal,
+                // Display the TRUE Stealth DC — the alarms bonus already shaped the outcome
+                // through the roll's effective DC above.
                 stealthDc = totalDc,
                 degree = degree,
                 defenseState = defenseState

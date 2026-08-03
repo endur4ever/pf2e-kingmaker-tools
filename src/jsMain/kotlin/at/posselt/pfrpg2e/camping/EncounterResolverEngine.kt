@@ -4,18 +4,36 @@ import at.posselt.pfrpg2e.data.checks.DegreeOfSuccess
 import kotlin.js.JsExport
 import kotlin.js.JsName
 
+/**
+ * Results of tonight's camp-defense activities, typed as [DegreeOfSuccess] so callers can pass
+ * `parseResult()` output directly — matching on serialized degree STRINGS is what silently
+ * disabled every critical result in the first cut of this feature.
+ */
 @JsExport
 @JsName("CampDefenseState")
 data class CampDefenseState(
-    /** Set Alarms: degree of success (CS/S/F/CF). Null if not attempted. */
-    val alarmsDegree: String?,
-    /** Camouflage Campsite: degree of success (CS/S/F/CF). Null if not attempted. */
-    val camouflageDegree: String?,
-    /** Set Traps: degree of success (CS/S/F/CF). Null if not attempted. */
-    val trapsDegree: String?,
-    /** Undead Guardians: whether the activity was successfully performed (CS/S). Null if not attempted. */
-    val undeadGuardiansActive: Boolean?
+    /** Set Alarms result; null when not attempted. */
+    val alarmsDegree: DegreeOfSuccess? = null,
+    /** Camouflage Campsite result; null when not attempted. */
+    val camouflageDegree: DegreeOfSuccess? = null,
+    /** Set Traps result; null when not attempted. */
+    val trapsDegree: DegreeOfSuccess? = null,
+    /** Undead Guardians: whether the activity succeeded (CS/S). Null when not attempted. */
+    val undeadGuardiansActive: Boolean? = null,
 )
+
+/**
+ * The Perception bonus Set Alarms grants the watcher against the ambusher's Stealth:
+ * +4 on a critical success, +2 on a success, -2 on a critical failure (jury-rigged tripwires
+ * ring at the wrong moments). The REST FLOW applies this to the watch roll's DC BEFORE rolling,
+ * so it changes the actual outcome degree; the resolver only reports it as a contribution line.
+ */
+fun alarmsPerceptionBonus(degree: DegreeOfSuccess?): Int = when (degree) {
+    DegreeOfSuccess.CRITICAL_SUCCESS -> 4
+    DegreeOfSuccess.SUCCESS -> 2
+    DegreeOfSuccess.CRITICAL_FAILURE -> -2
+    else -> 0
+}
 
 @JsExport
 data class EncounterResolutionResult(
@@ -35,32 +53,27 @@ object EncounterResolverEngine {
     /**
      * Resolves a night ambush encounter.
      *
-     * Camp defense effects (KDoc mapping):
-     * - Set Alarms (CS): +4 bonus to watcher's Perception vs ambush Stealth; (S): +2 bonus.
-     * - Camouflage Campsite (CS): worsens ambusher's start distance by one band (e.g., 120→60, 60→15);
-     *   (S): worsens by half-band (adds +15 ft to distance); (CF): improves ambusher distance by one band.
+     * Camp defense effects:
+     * - Set Alarms: [alarmsPerceptionBonus] is folded into the watch roll's DC by the rest flow
+     *   BEFORE the roll, so [degree] already reflects it; here it only adds a contribution line.
+     * - Camouflage Campsite (CS): the ambusher is spotted a full band farther out (60 -> 120);
+     *   (S): +15 ft; (CF): the ambusher slips a band closer (60 -> 15). Larger distance always
+     *   favors the party — a defense the party invested in must never pull the enemy closer.
      * - Set Traps (CS/S): adds a one-time trap damage/disruption line to the resolution output.
-     * - Undead Guardians (CS/S): adds an extra watcher-equivalent (uses best roll among party).
+     * - Undead Guardians (CS/S): the guardians stand an extra watch — advisory line for the GM.
      */
     fun resolve(
         watcherRoll: Int,
         stealthDc: Int,
         degree: DegreeOfSuccess,
-        defenseState: CampDefenseState = CampDefenseState(null, null, null, null)
+        defenseState: CampDefenseState = CampDefenseState()
     ): EncounterResolutionResult {
-        // Apply Set Alarms bonus to watcher roll
-        val alarmsBonus = when (defenseState.alarmsDegree) {
-            "criticalSuccess" -> 4
-            "success" -> 2
-            else -> 0
-        }
-        val adjustedWatcherRoll = watcherRoll + alarmsBonus
-        
-        // Determine base resolution from degree
+        // Determine base resolution from degree (the roll shown is the REAL roll — the Set Alarms
+        // bonus already influenced the degree via the DC, inflating the display would double-count)
         val baseResult = when (degree) {
             DegreeOfSuccess.CRITICAL_SUCCESS -> EncounterResolutionResult(
                 attackerStealthDc = stealthDc,
-                watcherPerceptionRoll = adjustedWatcherRoll,
+                watcherPerceptionRoll = watcherRoll,
                 distanceToEnemy = 120.0f,
                 appliedConditions = emptyArray(),
                 ambusherState = "Revealed",
@@ -69,7 +82,7 @@ object EncounterResolverEngine {
             )
             DegreeOfSuccess.SUCCESS -> EncounterResolutionResult(
                 attackerStealthDc = stealthDc,
-                watcherPerceptionRoll = adjustedWatcherRoll,
+                watcherPerceptionRoll = watcherRoll,
                 distanceToEnemy = 60.0f,
                 appliedConditions = arrayOf("prone"),
                 ambusherState = "Revealed",
@@ -78,7 +91,7 @@ object EncounterResolverEngine {
             )
             DegreeOfSuccess.FAILURE -> EncounterResolutionResult(
                 attackerStealthDc = stealthDc,
-                watcherPerceptionRoll = adjustedWatcherRoll,
+                watcherPerceptionRoll = watcherRoll,
                 distanceToEnemy = 60.0f,
                 appliedConditions = arrayOf("unconscious", "prone"),
                 ambusherState = "Hidden",
@@ -87,7 +100,7 @@ object EncounterResolverEngine {
             )
             DegreeOfSuccess.CRITICAL_FAILURE -> EncounterResolutionResult(
                 attackerStealthDc = stealthDc,
-                watcherPerceptionRoll = adjustedWatcherRoll,
+                watcherPerceptionRoll = watcherRoll,
                 distanceToEnemy = 15.0f,
                 appliedConditions = arrayOf("unconscious", "prone"),
                 ambusherState = "Hidden",
@@ -95,57 +108,56 @@ object EncounterResolverEngine {
                 defenseContributions = emptyArray()
             )
         }
-        
-        // Apply Camouflage Campsite effects on distance
+
+        // Camouflage shifts where the ambusher is finally noticed. Positive = farther from camp
+        // (party-favorable): a well-hidden camp forces the ambusher to search in the open.
         val camouflageDistanceAdjustment = when (defenseState.camouflageDegree) {
-            "criticalSuccess" -> -60.0f  // Worsen by one band: 120->60, 60->15
-            "success" -> -15.0f          // Worsen by half-band: add 15ft
-            "criticalFailure" -> 60.0f   // Improve ambusher distance by one band
+            DegreeOfSuccess.CRITICAL_SUCCESS -> 60.0f   // spotted a full band farther out
+            DegreeOfSuccess.SUCCESS -> 15.0f            // spotted half a band farther out
+            DegreeOfSuccess.CRITICAL_FAILURE -> -60.0f  // the botched job guides them in closer
             else -> 0.0f
         }
-        
-        // Apply Set Traps and Undead Guardians to contributions
+
         val contributions = mutableListOf<String>()
-        
-        if (defenseState.alarmsDegree != null) {
-            val alarmsText = when (defenseState.alarmsDegree) {
-                "criticalSuccess" -> "Set Alarms (Critical Success): +4 Perception vs Stealth"
-                "success" -> "Set Alarms (Success): +2 Perception vs Stealth"
-                "failure" -> "Set Alarms (Failure): No benefit"
-                "criticalFailure" -> "Set Alarms (Critical Failure): -2 Perception vs Stealth"
-                else -> "Set Alarms"
-            }
-            contributions.add(alarmsText)
+
+        defenseState.alarmsDegree?.let { alarms ->
+            val bonus = alarmsPerceptionBonus(alarms)
+            contributions.add(
+                when {
+                    bonus > 0 -> "Set Alarms: +$bonus Perception vs the ambusher's Stealth"
+                    bonus < 0 -> "Set Alarms (Critical Failure): $bonus Perception vs the ambusher's Stealth"
+                    else -> "Set Alarms (Failure): no benefit"
+                }
+            )
         }
-        
-        if (defenseState.camouflageDegree != null) {
-            val camoText = when (defenseState.camouflageDegree) {
-                "criticalSuccess" -> "Camouflage Campsite (Critical Success): Ambusher distance worsened by one band"
-                "success" -> "Camouflage Campsite (Success): Ambusher distance worsened by half band"
-                "failure" -> "Camouflage Campsite (Failure): No benefit"
-                "criticalFailure" -> "Camouflage Campsite (Critical Failure): Ambusher distance improved by one band"
-                else -> "Camouflage Campsite"
-            }
-            contributions.add(camoText)
+
+        defenseState.camouflageDegree?.let { camo ->
+            contributions.add(
+                when (camo) {
+                    DegreeOfSuccess.CRITICAL_SUCCESS -> "Camouflage Campsite (Critical Success): ambusher spotted a full band farther out"
+                    DegreeOfSuccess.SUCCESS -> "Camouflage Campsite (Success): ambusher spotted farther out (+15 ft)"
+                    DegreeOfSuccess.FAILURE -> "Camouflage Campsite (Failure): no benefit"
+                    DegreeOfSuccess.CRITICAL_FAILURE -> "Camouflage Campsite (Critical Failure): the ambusher slips a band closer"
+                }
+            )
         }
-        
-        if (defenseState.trapsDegree != null && defenseState.trapsDegree != "failure" && defenseState.trapsDegree != "criticalFailure") {
-            val trapsText = when (defenseState.trapsDegree) {
-                "criticalSuccess" -> "Set Traps (Critical Success): Trap triggers for 4d6 damage and disruption"
-                "success" -> "Set Traps (Success): Trap triggers for 2d6 damage and disruption"
-                else -> "Set Traps: Trap triggers"
-            }
-            contributions.add(trapsText)
+
+        when (defenseState.trapsDegree) {
+            DegreeOfSuccess.CRITICAL_SUCCESS ->
+                contributions.add("Set Traps (Critical Success): trap triggers for 4d6 damage and disrupts the ambush")
+            DegreeOfSuccess.SUCCESS ->
+                contributions.add("Set Traps (Success): trap triggers for 2d6 damage and disrupts the ambush")
+            else -> {}
         }
-        
+
         if (defenseState.undeadGuardiansActive == true) {
-            contributions.add("Undead Guardians: Extra watcher-equivalent contributed")
+            contributions.add("Undead Guardians: the guardians stand an extra watch over the camp")
         }
-        
-        // Return result with modifications
+
         return baseResult.copy(
-            watcherPerceptionRoll = adjustedWatcherRoll,
-            distanceToEnemy = (baseResult.distanceToEnemy + camouflageDistanceAdjustment).coerceAtLeast(15.0f).coerceAtMost(120.0f),
+            distanceToEnemy = (baseResult.distanceToEnemy + camouflageDistanceAdjustment)
+                .coerceAtLeast(15.0f)
+                .coerceAtMost(120.0f),
             defenseContributions = contributions.toTypedArray()
         )
     }
