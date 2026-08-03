@@ -42,6 +42,9 @@ external class PF2EAttribute {
     val lore: Boolean
     val label: String
     val dc: PF2EStatisticsDifficultyClass
+
+    /** The statistic's total modifier (PF2e `Statistic#mod`). */
+    val mod: Int
     fun roll(args: StatisticRollParameters = definedExternally): Promise<CheckRoll?>
 }
 

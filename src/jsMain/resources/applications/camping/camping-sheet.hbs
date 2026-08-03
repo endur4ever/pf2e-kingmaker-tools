@@ -216,17 +216,33 @@
                 {{#if setWatchesSection}}
                 <div class="km-camping-watch-controls">
                     {{> formElement numberOfWatches}}
+                    <button type="button" class="km-camping-action" data-action="suggest-watch-order"
+                            title="{{localizeKM "camping.suggestWatchOrderHelp"}}">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> {{localizeKM "camping.suggestWatchOrder"}}
+                    </button>
                 </div>
+                {{#if watchWarnings}}
+                <div class="km-camping-watch-warnings">
+                    {{#each watchWarnings}}
+                    <p><i class="fa-solid fa-triangle-exclamation"></i> {{this}}</p>
+                    {{/each}}
+                </div>
+                {{/if}}
                 <div class="km-camping-watch-grid">
                     {{#each watchSlots}}
                     <div class="km-camping-watch-slot" data-slot-index="{{index}}">
-                        <div class="km-camping-watch-slot-header">{{localizeKM "camping.watchSlot"}} {{add index 1}}</div>
+                        <div class="km-camping-watch-slot-header">{{localizeKM "camping.watchSlot"}} {{add index 1}}{{#if hourRange}}
+                            <span class="km-camping-watch-hours">{{hourRange}}</span>{{/if}}</div>
                         {{#if actors}}
                         <div class="km-camping-watch-assignees">
                             {{#each actors}}
                             <div class="km-camping-watch-assignee" draggable="true" data-type="Actor" data-uuid="{{uuid}}">
                                 <img src="{{image}}" alt="{{name}}">
                                 <span>{{name}}</span>
+                                {{#if perceptionLabel}}
+                                <span class="km-camping-watch-perception"
+                                      title="{{localizeKM "camping.watchPerception"}}">{{perceptionLabel}}</span>
+                                {{/if}}
                                 <button class="km-camping-action"
                                         data-action="clear-watch-slot"
                                         type="button"

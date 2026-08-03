@@ -123,6 +123,10 @@ external interface CampingSheetActor : BaseActorContext {
     // Pre-rendered HTML (escaped) listing the companion activities this actor knows,
     // shown as a Foundry tooltip on the avatar. Null when nothing has been learned.
     val learnedActivities: String?
+
+    // Signed Perception modifier ("+7") shown on watch-slot chips; null outside the
+    // watch section or when the actor has no Perception statistic (loot, vehicles).
+    val perceptionLabel: String?
 }
 
 @Suppress("unused")
@@ -156,6 +160,11 @@ fun CampingSheetActivity.isPrepareCampsite() = id == "prepare-campsite"
 external interface WatchSlotContext {
     val index: Int
     val actors: Array<CampingSheetActor>
+
+    // "HH:MM – HH:MM" offsets into the rest this slot covers, using the same night
+    // division the rest flow uses to map an encounter to its on-duty slot; null when
+    // the rest duration cannot be computed.
+    val hourRange: String?
 }
 
 @Suppress("unused")
@@ -241,6 +250,9 @@ external interface CampingSheetContext : ValidatedHandlebarsContext {
     var needsCookAssignment: Boolean
     var setWatchesSection: Boolean
     var watchSlots: Array<WatchSlotContext>
+
+    /** Non-blocking watch-assignment warnings (unassigned campers, empty/duplicate slots); null when clean. */
+    var watchWarnings: Array<String>?
     var numberOfWatches: FormElementContext
     var travelMode: FormElementContext
     var forcedMarch: FormElementContext
@@ -531,6 +543,12 @@ class CampingSheet(
                     if (index != null && uuid != null) {
                         clearWatchSlot(index, uuid)
                     }
+                }
+            }
+
+            "suggest-watch-order" -> {
+                buildPromise {
+                    suggestWatchOrderAction()
                 }
             }
 
@@ -868,6 +886,34 @@ class CampingSheet(
             if (slotIndex < 0 || slotIndex >= camping.watchSlots.size) return
             camping.watchSlots[slotIndex] = camping.watchSlots[slotIndex]
                 .filter { it != actorUuid }
+                .toTypedArray()
+            actor.setCamping(camping)
+        }
+    }
+
+    /**
+     * Replace the watch assignments with the suggested order — an even spread of best Perception
+     * across the current number of slots (see [suggestWatchOrder]) covering every present,
+     * non-exempt camper. Advisory: applied only on click, and the drag/drop path is untouched.
+     */
+    private suspend fun suggestWatchOrderAction() {
+        actor.getCamping()?.let { camping ->
+            ensureWatchSlots(camping)
+            val slotCount = camping.watchSlots.size
+            if (slotCount <= 0) return
+            val actorsByUuid = getCampingActorsByUuid(camping.actorUuids).associateBy(PF2EActor::uuid)
+            val campers = camping.actorUuids
+                .filter { !camping.actorUuidsNotKeepingWatch.contains(it) }
+                .mapNotNull { uuid ->
+                    actorsByUuid[uuid]?.let { act ->
+                        WatchCamper(
+                            uuid = uuid,
+                            perceptionModifier = runCatching { act.perception.mod }.getOrNull() ?: 0,
+                        )
+                    }
+                }
+            camping.watchSlots = suggestWatchOrder(campers, slotCount)
+                .map { it.toTypedArray() }
                 .toTypedArray()
             actor.setCamping(camping)
         }
@@ -1448,6 +1494,32 @@ class CampingSheet(
             skipWatch = false,
             skipDailyPreparations = false,
         )
+        // Watch panel: per-slot hour ranges divide the SAME total the rest flow divides when
+        // mapping a random encounter to its on-duty slot, so display and mechanics agree.
+        val watchDurationSeconds = fullRestDuration.total.value
+        val nonExemptPresentUuids = camping.actorUuids
+            .filter { !camping.actorUuidsNotKeepingWatch.contains(it) && actorsByUuid[it] != null }
+        val watchValidation = validateWatchAssignments(
+            nonExemptUuids = nonExemptPresentUuids,
+            slots = camping.watchSlots.map { it.toList() },
+        )
+        val watchWarnings = if (!setWatchesSection || watchValidation.isClean) {
+            null
+        } else {
+            buildList {
+                watchValidation.emptySlotIndices.forEach { idx ->
+                    add(t("camping.watchWarningEmptySlot", recordOf("slot" to idx + 1)))
+                }
+                if (watchValidation.unassignedUuids.isNotEmpty()) {
+                    val names = watchValidation.unassignedUuids.mapNotNull { actorsByUuid[it]?.name }
+                    add(t("camping.watchWarningUnassigned", recordOf("names" to names.joinToString(", "))))
+                }
+                if (watchValidation.duplicateUuids.isNotEmpty()) {
+                    val names = watchValidation.duplicateUuids.mapNotNull { actorsByUuid[it]?.name }
+                    add(t("camping.watchWarningDuplicate", recordOf("names" to names.joinToString(", "))))
+                }
+            }.toTypedArray()
+        }
         val currentRegion = camping.findCurrentRegion()
         val regions = camping.regionSettings.regions
         val isGM = game.user.isGM
@@ -1758,8 +1830,12 @@ class CampingSheet(
             watchSlots = camping.watchSlots.mapIndexed { index, slotUuids ->
                 WatchSlotContext(
                     index = index,
+                    hourRange = watchSlotOffsetRange(watchDurationSeconds, camping.watchSlots.size, index)
+                        ?.let { (start, end) -> "${formatSeconds(start)} – ${formatSeconds(end)}" },
                     actors = slotUuids.mapNotNull { slotUuid ->
                         actorsByUuid[slotUuid]?.let { act ->
+                            // Loot/vehicle camp actors have no Perception statistic — hide the badge.
+                            val perception = runCatching { act.perception.mod }.getOrNull()
                             CampingSheetActor(
                                 name = act.name,
                                 uuid = slotUuid,
@@ -1767,11 +1843,13 @@ class CampingSheet(
                                 choseActivity = false,
                                 chosenMeal = null,
                                 chosenMealImg = null,
+                                perceptionLabel = perception?.let { if (it >= 0) "+$it" else "$it" },
                             )
                         }
                     }.toTypedArray(),
                 )
             }.toTypedArray(),
+            watchWarnings = watchWarnings,
             numberOfWatches = Select(
                 label = t("camping.numberOfWatches"),
                 name = "numberOfWatches",
