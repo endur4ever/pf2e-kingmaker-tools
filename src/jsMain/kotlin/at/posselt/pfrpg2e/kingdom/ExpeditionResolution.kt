@@ -13,6 +13,7 @@ import at.posselt.pfrpg2e.data.checks.RollMode
 import at.posselt.pfrpg2e.data.kingdom.applyStandingDelta
 import at.posselt.pfrpg2e.data.kingdom.shouldOfferDiplomacyQuest
 import at.posselt.pfrpg2e.data.kingdom.shouldOfferWarThreat
+import at.posselt.pfrpg2e.fromCamelCase
 import at.posselt.pfrpg2e.fromOrdinal
 import at.posselt.pfrpg2e.kingdom.data.RawCharacter
 import at.posselt.pfrpg2e.kingdom.data.RawCompanionExpedition
@@ -177,94 +178,24 @@ internal suspend fun resolveExpeditionCore(
         postChatMessage(homecomingMessage, whisper = gmUserIds)
     }
 
-    // Post the full expedition-result offer card WHISPERED to GMs only.
-    // Renders degree styling, accrued results, GM notes, and GM-only offer buttons.
-    val companionName = (
-        companion.actorUuid?.let { uuid ->
-            fromUuidOfTypes<PF2ECharacter>(uuid)?.name
-                ?: fromUuidOfTypes<PF2ENpc>(uuid)?.name
-        } ?: companion.name
-    )
-
-    val isCriticalSuccess = degree == DegreeOfSuccess.CRITICAL_SUCCESS
-    val isSuccess = degree == DegreeOfSuccess.SUCCESS || isCriticalSuccess
-    val isCriticalFailure = degree == DegreeOfSuccess.CRITICAL_FAILURE
-    val isFailure = degree == DegreeOfSuccess.FAILURE || isCriticalFailure
-
-    // Determine offer flags based on accrued results
-    val hasInjuries = result.injuryConditions.isNotEmpty()
-    // The war-threat / diplomacy-quest narrative follow-ups fire only when the pending standing
-    // change actually crosses an attitude band, previewed against the target faction's current
-    // standing (the delta is applied later, when the GM applies the reward).
-    val targetGroup = expedition.targetFactionName?.let { fn -> kingdom.groups.find { it.name == fn } }
-    val hasFactionStanding = expedition.factionStandingDelta != 0 && targetGroup != null
-    val offerWarThreat: Boolean
-    val offerDiplomacyQuest: Boolean
-    if (hasFactionStanding && targetGroup != null) {
-        val before = targetGroup.standing
-        val after = applyStandingDelta(before, expedition.factionStandingDelta)
-        offerWarThreat = shouldOfferWarThreat(before, after)
-        offerDiplomacyQuest = shouldOfferDiplomacyQuest(before, after)
-    } else {
-        offerWarThreat = false
-        offerDiplomacyQuest = false
-    }
-
-    val offerReward = !expedition.rewardApplied && expedition.status == "awaitingResolution"
-    // Level-up offer: only when setting enabled AND companion has enough XP to level
-    val enableLeveling = Pfrpg2eKingdomCampingWeatherSettings.getEnableCompanionLeveling()
-    val offerLevelUp = shouldOfferLevelUp(
-        levelingEnabled = enableLeveling,
-        isNpc = companion.role == "npc",
-        currentLevel = companion.level,
-        currentXp = companion.xp,
-        xpAwarded = result.xpAwarded,
-    )
-    val targetLevel = if (offerLevelUp) (companion.level + 1).coerceAtMost(20) else companion.level
-    val offerInjury = hasInjuries
-    val offerFactionStanding = hasFactionStanding
-
-    // Build the GM-only offer card context (no isGM flag needed since it's whispered)
-    val offerContext = recordOf(
-        "title" to expedition.title,
-        "companionName" to companionName,
-        "isCriticalSuccess" to isCriticalSuccess,
-        "isSuccess" to isSuccess,
-        "isFailure" to isFailure,
-        "isCriticalFailure" to isCriticalFailure,
-        "accruedXp" to expedition.accruedXp,
-        "accruedInfluenceDelta" to result.influenceDelta,
-        "lootTier" to result.lootTier,
-        "gmNotes" to result.gmNotes,
-        "rewardApplied" to expedition.rewardApplied,
-        "expeditionId" to expedition.id,
-        "actorUuid" to actor.uuid,
-        "companionId" to companion.actorUuid,
-        "companionActorUuid" to companion.actorUuid,
-        "targetLevel" to targetLevel,
-        "offerInjury" to offerInjury,
-        "offerFactionStanding" to offerFactionStanding,
-        "offerWarThreat" to offerWarThreat,
-        "offerDiplomacyQuest" to offerDiplomacyQuest,
-        "factionName" to (expedition.targetFactionName ?: ""),
-        "offerReward" to offerReward,
-        "offerLevelUp" to offerLevelUp,
-    )
-
-    // Post GM-whispered full offer card
-    if (gmUserIds.isNotEmpty()) {
-        postChatTemplate(
-            templatePath = "chatmessages/expedition-result.hbs",
-            templateContext = offerContext,
-            whisper = gmUserIds,
-        )
-    }
+    // Post the full expedition-result offer card WHISPERED to GMs only. Built entirely from the
+    // PERSISTED accrued fields (all written above) so a dismissed card can be re-posted later
+    // without re-rolling — see [repostExpeditionOffer].
+    postExpeditionOfferCard(actor, kingdom, expedition, companion, degree, gmUserIds)
 
     // Post public player-safe recap ONLY when expedition.visibleToPlayers is true
     if (expedition.visibleToPlayers) {
+        val isCriticalSuccess = degree == DegreeOfSuccess.CRITICAL_SUCCESS
+        val isCriticalFailure = degree == DegreeOfSuccess.CRITICAL_FAILURE
+        val companionName = (
+            companion.actorUuid?.let { uuid ->
+                fromUuidOfTypes<PF2ECharacter>(uuid)?.name
+                    ?: fromUuidOfTypes<PF2ENpc>(uuid)?.name
+            } ?: companion.name
+        )
         val flavor = when {
             isCriticalSuccess -> t("chatMessages.expeditionRecap.flavor.criticalSuccess")
-            isSuccess -> t("chatMessages.expeditionRecap.flavor.success")
+            degree == DegreeOfSuccess.SUCCESS -> t("chatMessages.expeditionRecap.flavor.success")
             isCriticalFailure -> t("chatMessages.expeditionRecap.flavor.criticalFailure")
             else -> t("chatMessages.expeditionRecap.flavor.failure")
         }
@@ -319,6 +250,122 @@ suspend fun offerExpeditionResolution(
 ) {
     val kingdom = actor.getKingdom() ?: return
     resolveExpeditionCore(game, actor, kingdom, expedition, companion)
+}
+
+/**
+ * The GM-whispered expedition-result offer card, built ENTIRELY from the persisted accrued fields
+ * on [expedition] (degree styling, XP/influence/loot, enriched gmNotes, offer buttons). Used by
+ * the roll path right after accrual, and by [repostExpeditionOffer] to re-show a dismissed card.
+ */
+private suspend fun postExpeditionOfferCard(
+    actor: PF2EParty,
+    kingdom: KingdomData,
+    expedition: RawCompanionExpedition,
+    companion: RawCharacter,
+    degree: DegreeOfSuccess,
+    gmUserIds: Array<String>,
+) {
+    val companionName = (
+        companion.actorUuid?.let { uuid ->
+            fromUuidOfTypes<PF2ECharacter>(uuid)?.name
+                ?: fromUuidOfTypes<PF2ENpc>(uuid)?.name
+        } ?: companion.name
+    )
+
+    val isCriticalSuccess = degree == DegreeOfSuccess.CRITICAL_SUCCESS
+    val isSuccess = degree == DegreeOfSuccess.SUCCESS || isCriticalSuccess
+    val isCriticalFailure = degree == DegreeOfSuccess.CRITICAL_FAILURE
+    val isFailure = degree == DegreeOfSuccess.FAILURE || isCriticalFailure
+
+    // Determine offer flags based on the accrued (persisted) results
+    val hasInjuries = expedition.accruedInjuries.isNotEmpty()
+    // The war-threat / diplomacy-quest narrative follow-ups fire only when the pending standing
+    // change actually crosses an attitude band, previewed against the target faction's current
+    // standing (the delta is applied later, when the GM applies the reward).
+    val targetGroup = expedition.targetFactionName?.let { fn -> kingdom.groups.find { it.name == fn } }
+    val hasFactionStanding = expedition.factionStandingDelta != 0 && targetGroup != null
+    val offerWarThreat: Boolean
+    val offerDiplomacyQuest: Boolean
+    if (hasFactionStanding && targetGroup != null) {
+        val before = targetGroup.standing
+        val after = applyStandingDelta(before, expedition.factionStandingDelta)
+        offerWarThreat = shouldOfferWarThreat(before, after)
+        offerDiplomacyQuest = shouldOfferDiplomacyQuest(before, after)
+    } else {
+        offerWarThreat = false
+        offerDiplomacyQuest = false
+    }
+
+    val offerReward = !expedition.rewardApplied && expedition.status == "awaitingResolution"
+    // Level-up offer: only when setting enabled AND companion has enough XP to level
+    val enableLeveling = Pfrpg2eKingdomCampingWeatherSettings.getEnableCompanionLeveling()
+    val offerLevelUp = shouldOfferLevelUp(
+        levelingEnabled = enableLeveling,
+        isNpc = companion.role == "npc",
+        currentLevel = companion.level,
+        currentXp = companion.xp,
+        xpAwarded = expedition.accruedXp,
+    )
+    val targetLevel = if (offerLevelUp) (companion.level + 1).coerceAtMost(20) else companion.level
+    val offerInjury = hasInjuries
+    val offerFactionStanding = hasFactionStanding
+
+    // Build the GM-only offer card context (no isGM flag needed since it's whispered)
+    val offerContext = recordOf(
+        "title" to expedition.title,
+        "companionName" to companionName,
+        "isCriticalSuccess" to isCriticalSuccess,
+        "isSuccess" to isSuccess,
+        "isFailure" to isFailure,
+        "isCriticalFailure" to isCriticalFailure,
+        "accruedXp" to expedition.accruedXp,
+        "accruedInfluenceDelta" to expedition.accruedInfluenceDelta,
+        "lootTier" to expedition.lootTier,
+        // The enriched activity-outcome text persisted at accrual (the old card showed the raw
+        // engine placeholder instead — persisted-field sourcing fixes that inconsistency too).
+        "gmNotes" to (expedition.gmNotes ?: ""),
+        "rewardApplied" to expedition.rewardApplied,
+        "expeditionId" to expedition.id,
+        "actorUuid" to actor.uuid,
+        "companionId" to companion.actorUuid,
+        "companionActorUuid" to companion.actorUuid,
+        "targetLevel" to targetLevel,
+        "offerInjury" to offerInjury,
+        "offerFactionStanding" to offerFactionStanding,
+        "offerWarThreat" to offerWarThreat,
+        "offerDiplomacyQuest" to offerDiplomacyQuest,
+        "factionName" to (expedition.targetFactionName ?: ""),
+        "offerReward" to offerReward,
+        "offerLevelUp" to offerLevelUp,
+    )
+
+    // Post GM-whispered full offer card
+    if (gmUserIds.isNotEmpty()) {
+        postChatTemplate(
+            templatePath = "chatmessages/expedition-result.hbs",
+            templateContext = offerContext,
+            whisper = gmUserIds,
+        )
+    }
+}
+
+/**
+ * Re-post the GM offer card for an expedition already `awaitingResolution` WITHOUT re-rolling.
+ * The outcome was rolled exactly once; a dismissed card must be recoverable, never rerollable
+ * (routing a re-trigger through [resolveExpeditionCore] let a GM fish for better outcomes by
+ * clicking Resolve repeatedly). Returns false when the record carries no rolled outcome yet.
+ */
+suspend fun repostExpeditionOffer(
+    game: Game,
+    actor: PF2EParty,
+    kingdom: KingdomData,
+    expedition: RawCompanionExpedition,
+    companion: RawCharacter,
+): Boolean {
+    val degree = expedition.outcomeDegree?.let { fromCamelCase<DegreeOfSuccess>(it) } ?: return false
+    val gmUserIds = game.users.filter { it.isGM }.mapNotNull { it.id }.toTypedArray()
+    postExpeditionOfferCard(actor, kingdom, expedition, companion, degree, gmUserIds)
+    return true
 }
 
 /**

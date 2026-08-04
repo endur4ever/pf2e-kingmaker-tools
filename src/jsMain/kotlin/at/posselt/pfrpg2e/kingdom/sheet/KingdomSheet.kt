@@ -194,6 +194,7 @@ import at.posselt.pfrpg2e.kingdom.launchExpedition
 import at.posselt.pfrpg2e.kingdom.applyExpeditionRewardToKingdom
 import at.posselt.pfrpg2e.kingdom.buildExpeditionDestinationOptions
 import at.posselt.pfrpg2e.kingdom.logExpeditionLaunched
+import at.posselt.pfrpg2e.kingdom.repostExpeditionOffer
 import at.posselt.pfrpg2e.kingdom.resolveExpeditionCore
 import at.posselt.pfrpg2e.kingdom.data.RawCompanionExpedition
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.MAX_CONCURRENT_EXPEDITIONS
@@ -1219,12 +1220,19 @@ class KingdomSheet(
                 val expeditionId = target.dataset["expeditionId"] ?: return@buildPromise
                 val kingdom = getKingdom()
                 val expedition = kingdom.companionExpeditions?.find { it.id == expeditionId } ?: return@buildPromise
-                // Only resolve if still in progress (early resolve) or awaiting resolution (re-trigger offer)
+                // Only resolve if still in progress (early resolve) or awaiting resolution (re-show offer)
                 if (expedition.status !in setOf("inProgress", "awaitingResolution")) return@buildPromise
                 // Find the lead companion (first in companionIds) to make the check
                 val leadCompanionId = expedition.companionIds.firstOrNull() ?: return@buildPromise
                 val leadCompanion = kingdom.companions?.find { (it.actorUuid ?: it.name) == leadCompanionId } ?: return@buildPromise
-                // Roll, accrue, post offer card, set status to awaitingResolution
+                if (expedition.status == "awaitingResolution") {
+                    // The outcome is already rolled — re-show the dismissed offer card WITHOUT
+                    // re-rolling (routing this through resolveExpeditionCore rerolled the check
+                    // and silently overwrote the accrued outcome on every click).
+                    repostExpeditionOffer(game, actor, kingdom, expedition, leadCompanion)
+                    return@buildPromise
+                }
+                // Roll once, accrue, post offer card, set status to awaitingResolution
                 resolveExpeditionCore(game, actor, kingdom, expedition, leadCompanion)
             }
 
