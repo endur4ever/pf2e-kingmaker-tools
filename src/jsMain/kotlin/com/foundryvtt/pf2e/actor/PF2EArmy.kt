@@ -27,12 +27,48 @@ external interface PF2EArmyDetails {
 @JsPlainObject
 external interface PF2EArmyHp : MaxValue {
     var temp: Int
+
+    /** Rout threshold from the sheet (system schema keeps it on `attributes.hp`). */
+    var routThreshold: Int
 }
 
+/**
+ * Verified against the PF2e system's `ArmySystemData.defineSchema()` (v8.1.2): `hp` is the ONLY
+ * child of `attributes` — army AC is the TOP-LEVEL `system.ac` schema (value + potency), and the
+ * saves live under `system.saves` (maneuver/morale). Do not re-add `ac` here; the original guess
+ * pointed battle stats at a nonexistent path and every custom army silently fell back to the
+ * workbook level table.
+ */
 @JsPlainObject
 external interface PF2EArmyAttributes {
     var hp: PF2EArmyHp
-    var ac: IntValue
+}
+
+/** Top-level `system.ac`: base value plus armor potency rune. */
+@JsPlainObject
+external interface PF2EArmyAc {
+    var value: Int
+    var potency: Int
+}
+
+/** `system.saves`: maneuver (strong by default) and morale (weak by default), flat modifiers. */
+@JsPlainObject
+external interface PF2EArmySaves {
+    var maneuver: Int
+    var morale: Int
+}
+
+/** One army weapon (`system.weapons.melee`/`.ranged`): name + weapon potency rune. */
+@JsPlainObject
+external interface PF2EArmyWeapon {
+    var name: String
+    var potency: Int
+}
+
+@JsPlainObject
+external interface PF2EArmyWeapons {
+    var melee: PF2EArmyWeapon?
+    var ranged: PF2EArmyWeapon?
 }
 
 @JsPlainObject
@@ -42,6 +78,9 @@ external interface PF2EArmyData {
     val scouting: Int
     val traits: PF2EArmyTraits
     val details: PF2EArmyDetails
+    val ac: PF2EArmyAc
+    val saves: PF2EArmySaves
+    val weapons: PF2EArmyWeapons
     val attributes: PF2EArmyAttributes
     val items: EmbeddedCollection<PF2EItem>
 }

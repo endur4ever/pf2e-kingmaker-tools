@@ -554,7 +554,9 @@ private val buttons = listOf(
                 maxHp = armyActor.system.attributes.hp.max,
                 conditions = emptySet(),
                 attackBonus = 0,
-                ac = armyActor.system.attributes.ac.value,
+                // Army AC is the TOP-LEVEL system.ac (the old attributes.ac path never existed
+                // and would have thrown on click).
+                ac = armyActor.system.ac.value + armyActor.system.ac.potency,
                 routThreshold = 0,
                 xp = currentXp,
             ),

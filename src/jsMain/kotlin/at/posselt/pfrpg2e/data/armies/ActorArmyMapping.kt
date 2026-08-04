@@ -7,19 +7,19 @@ object ActorArmyMapping {
      * Pure mapping function: converts raw PF2EArmy actor data (from Foundry) into a [BattleArmyState].
      * This is the single source of truth for "what numbers enter the engine".
      *
-     * The actor data fixture shape mirrors the PF2EArmy system data structure:
+     * The fixture shape mirrors the REAL PF2e `ArmySystemData` schema (verified against the
+     * system's compiled `defineSchema()`, v8.1.2 — the original guess put AC/saves under
+     * `attributes` and scanned items for strike bonuses; none of those paths exist, so every
+     * custom army silently fell back to the workbook level table for everything but HP):
      * ```json
      * {
      *   "name": "1st Legion",
      *   "system": {
      *     "details": { "level": { "value": 5 } },
-     *     "attributes": {
-     *       "hp": { "value": 60, "max": 60 },
-     *       "ac": { "value": 22 }
-     *     },
-     *     "items": [
-     *       { "system": { "bonus": { "value": 15 } } }
-     *     ]
+     *     "ac": { "value": 22, "potency": 1 },
+     *     "saves": { "maneuver": 12, "morale": 8 },
+     *     "weapons": { "melee": { "name": "Pikes", "potency": 1 }, "ranged": null },
+     *     "attributes": { "hp": { "value": 60, "max": 60, "routThreshold": 15 } }
      *   }
      * }
      * ```
@@ -44,18 +44,27 @@ object ActorArmyMapping {
         val maxHp = (dyn.system?.attributes?.hp?.max as Int?) ?: 4
         val currentHp = (dyn.system?.attributes?.hp?.value as Int?) ?: maxHp
 
-        // AC from system.attributes.ac.value
-        val ac = (dyn.system?.attributes?.ac?.value as Int?) ?: getArmyAc(level)
+        // AC: TOP-LEVEL system.ac — sheet value plus armor potency rune
+        val acValue = dyn.system?.ac?.value as Int?
+        val acPotency = (dyn.system?.ac?.potency as Int?) ?: 0
+        val ac = acValue?.plus(acPotency) ?: getArmyAc(level)
 
-        // Attack bonus: find the best strike bonus from items
-        val attackBonus = computeBestStrikeBonus(dyn.system?.items, level)
+        // Attack bonus: level-table baseline plus the best weapon potency rune. Armies keep
+        // their weapons at system.weapons.melee/.ranged (name + potency) — they are NOT items.
+        val meleePotency = dyn.system?.weapons?.melee?.potency as Int? ?: 0
+        val rangedPotency = dyn.system?.weapons?.ranged?.potency as Int? ?: 0
+        val attackBonus = getArmyAttackBonus(level) + maxOf(meleePotency, rangedPotency, 0)
 
-        // Saves: try to read from system.attributes (high/low), fall back to workbook table
-        val highSave = (dyn.system?.attributes?.highSave?.value as Int?) ?: getArmyHighSave(level)
-        val lowSave = (dyn.system?.attributes?.lowSave?.value as Int?) ?: getArmyLowSave(level)
+        // Saves: system.saves.maneuver (strong by default) / .morale (weak by default). An actor
+        // can invert them, so the engine's high/low pair takes the actual max/min.
+        val maneuver = dyn.system?.saves?.maneuver as Int?
+        val morale = dyn.system?.saves?.morale as Int?
+        val highSave = if (maneuver != null && morale != null) maxOf(maneuver, morale) else maneuver ?: morale ?: getArmyHighSave(level)
+        val lowSave = if (maneuver != null && morale != null) minOf(maneuver, morale) else getArmyLowSave(level)
 
-        // Rout threshold: maxHp / 4 rounded up (workbook default)
-        val routThreshold = ((maxHp + 3) / 4 + getArmyRoutThresholdModifier(name)).coerceAtLeast(0)
+        // Rout threshold: the sheet keeps it at attributes.hp.routThreshold; derive only when absent.
+        val routThreshold = (dyn.system?.attributes?.hp?.routThreshold as Int?)
+            ?: ((maxHp + 3) / 4 + getArmyRoutThresholdModifier(name)).coerceAtLeast(0)
 
         return BattleArmyState(
             name = name,
@@ -66,38 +75,10 @@ object ActorArmyMapping {
             attackBonus = attackBonus,
             ac = ac,
             routThreshold = routThreshold,
-            moraleBonus = (dyn.system?.attributes?.morale?.value as Int?) ?: (dyn.system?.attributes?.morale as Int?) ?: 0,
+            moraleBonus = morale ?: 0,
             xp = 0,
             highSave = highSave,
             lowSave = lowSave,
         )
-    }
-
-    /**
-     * Extracts the best strike attack bonus from the army's items.
-     * Items with a `system.bonus.value` are treated as strikes.
-     * Falls back to the workbook level-based attack bonus if none found.
-     */
-    private fun computeBestStrikeBonus(items: Any?, fallbackLevel: Int): Int {
-        if (items == null) return getArmyAttackBonus(fallbackLevel)
-
-        val dynItems = items.asDynamic()
-        var best = Int.MIN_VALUE
-        var found = false
-
-        // Items can be an array or an EmbeddedCollection with .contents
-        val contents = (dynItems.contents?.asDynamic()) ?: dynItems
-        if (contents is Array<*>) {
-            for (item in contents) {
-                val itemDyn = item.asDynamic()
-                val bonus = (itemDyn?.system?.bonus?.value as Int?) ?: continue
-                if (bonus > best) {
-                    best = bonus
-                    found = true
-                }
-            }
-        }
-
-        return if (found) best else getArmyAttackBonus(fallbackLevel)
     }
 }

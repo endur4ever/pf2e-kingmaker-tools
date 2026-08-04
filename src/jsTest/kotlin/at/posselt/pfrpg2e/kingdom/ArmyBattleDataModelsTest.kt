@@ -155,22 +155,27 @@ class ArmyBattleDataModelsTest {
 
     // ── ActorArmyMapping tests ──────────────────────────────────────────────
 
+    // Fixtures mirror the REAL PF2e ArmySystemData schema (v8.1.2): top-level system.ac
+    // {value, potency}, system.saves {maneuver, morale}, system.weapons {melee, ranged} with
+    // {name, potency}, and system.attributes.hp {value, max, routThreshold}. The original
+    // fixtures asserted an invented shape (attributes.ac, items[].system.bonus) that no real
+    // army actor has — the tests were green while every custom army fell back to the level table.
+
     @Test
     fun actorArmyMappingUsesActorStatsForCustomArmy() {
-        // Fixture: a custom PF2EArmy with 60 HP, AC 22, attack +15, level 5
+        // Custom PF2EArmy: 60 HP, sheet AC 22 + potency 1, saves 13/9, melee potency 2, level 5
         val actorData = js(
             """
             {
               "name": "1st Legion",
               "system": {
                 "details": { "level": { "value": 5 } },
+                "ac": { "value": 22, "potency": 1 },
+                "saves": { "maneuver": 13, "morale": 9 },
+                "weapons": { "melee": { "name": "Pikes", "potency": 2 }, "ranged": null },
                 "attributes": {
-                  "hp": { "value": 60, "max": 60 },
-                  "ac": { "value": 22 }
-                },
-                "items": [
-                  { "system": { "bonus": { "value": 15 } } }
-                ]
+                  "hp": { "value": 60, "max": 60, "routThreshold": 15 }
+                }
               }
             }
             """
@@ -182,23 +187,24 @@ class ArmyBattleDataModelsTest {
         assertEquals(5, state.level)
         assertEquals(60, state.maxHp)
         assertEquals(60, state.currentHp)
-        assertEquals(22, state.ac)
-        assertEquals(15, state.attackBonus)
-        // Rout threshold = ceil(60/4) = 15
-        assertEquals(15, state.routThreshold)
+        assertEquals(23, state.ac)              // sheet 22 + armor potency 1
+        assertEquals(17, state.attackBonus)     // level-5 table 15 + weapon potency 2
+        assertEquals(15, state.routThreshold)   // straight from the sheet
+        assertEquals(13, state.highSave)
+        assertEquals(9, state.lowSave)
+        assertEquals(9, state.moraleBonus)
     }
 
     @Test
     fun actorArmyMappingFallsBackToWorkbookForMissingFields() {
-        // Fixture: minimal actor data (only name and level)
+        // Minimal actor data (only name and level) — synthesized-enemy path must not regress
         val actorData = js(
             """
             {
               "name": "Test Army",
               "system": {
                 "details": { "level": { "value": 3 } },
-                "attributes": {},
-                "items": []
+                "attributes": {}
               }
             }
             """
@@ -218,22 +224,23 @@ class ArmyBattleDataModelsTest {
     }
 
     @Test
-    fun actorArmyMappingPicksBestStrikeBonus() {
+    fun actorArmyMappingUsesBestWeaponPotency() {
+        // Ranged potency 3 beats melee potency 1: attack = level-5 table 15 + 3
         val actorData = js(
             """
             {
               "name": "Elite Guard",
               "system": {
                 "details": { "level": { "value": 5 } },
-                "attributes": {
-                  "hp": { "value": 20, "max": 20 },
-                  "ac": { "value": 20 }
+                "ac": { "value": 20, "potency": 0 },
+                "saves": { "maneuver": 12, "morale": 14 },
+                "weapons": {
+                  "melee": { "name": "Swords", "potency": 1 },
+                  "ranged": { "name": "Longbows", "potency": 3 }
                 },
-                "items": [
-                  { "system": { "bonus": { "value": 10 } } },
-                  { "system": { "bonus": { "value": 18 } } },
-                  { "system": { "bonus": { "value": 14 } } }
-                ]
+                "attributes": {
+                  "hp": { "value": 20, "max": 20, "routThreshold": 5 }
+                }
               }
             }
             """
@@ -241,7 +248,11 @@ class ArmyBattleDataModelsTest {
 
         val state = ActorArmyMapping.toBattleArmyStateFromActorData(actorData)
 
-        assertEquals(18, state.attackBonus)  // Best of 10, 18, 14
+        assertEquals(18, state.attackBonus)  // 15 + max(1, 3)
+        assertEquals(20, state.ac)
+        // saves can be inverted on the sheet — high/low take the actual max/min
+        assertEquals(14, state.highSave)
+        assertEquals(12, state.lowSave)
     }
 
     @Test
@@ -252,13 +263,10 @@ class ArmyBattleDataModelsTest {
               "name": "Wounded Army",
               "system": {
                 "details": { "level": { "value": 1 } },
+                "ac": { "value": 16, "potency": 0 },
                 "attributes": {
-                  "hp": { "value": 2, "max": 10 },
-                  "ac": { "value": 16 }
-                },
-                "items": [
-                  { "system": { "bonus": { "value": 9 } } }
-                ]
+                  "hp": { "value": 2, "max": 10 }
+                }
               }
             }
             """
@@ -268,5 +276,8 @@ class ArmyBattleDataModelsTest {
 
         assertEquals(10, state.maxHp)
         assertEquals(2, state.currentHp)
+        assertEquals(16, state.ac)
+        // No sheet routThreshold -> derived fallback ceil(10/4)
+        assertEquals(3, state.routThreshold)
     }
 }

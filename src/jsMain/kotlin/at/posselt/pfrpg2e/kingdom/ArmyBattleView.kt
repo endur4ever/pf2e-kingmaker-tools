@@ -100,18 +100,10 @@ suspend fun toBattleArmyStateFromActor(raw: RawBattleArmy): BattleArmyState {
 }
 
 /**
- * Synchronous version for tests and non-actor paths. Uses the workbook fallback
- * for stats. Prefer [toBattleArmyStateFromActor] in production code when an
- * actor UUID is available.
+ * (Removed: a `toBattleArmyState(raw, useActor)` overload whose both branches called the
+ * workbook fallback — zero callers, and its signature implied actor-stat behavior it never had.
+ * Use [toBattleArmyStateFromActor] for actor-backed armies.)
  */
-fun toBattleArmyState(raw: RawBattleArmy, useActor: Boolean): BattleArmyState =
-    if (useActor && raw.armyActorUuid.isNotBlank()) {
-        // This path is not actually synchronous; callers should use the suspend version.
-        // We fall back to workbook to keep the signature compatible.
-        toBattleArmyState(raw)
-    } else {
-        toBattleArmyState(raw)
-    }
 
 /** Builds the engine [BattleState] from a persisted battle (attackers first). */
 suspend fun toBattleState(battle: RawArmyBattle): BattleState = BattleState(
