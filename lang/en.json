@@ -841,6 +841,8 @@
       "companionRecovered": "{name} has recovered from their injuries.",
       "expeditionRewardApplied": "Expedition rewards for {name} have been applied.",
       "expeditionRewardMissing": "That expedition is no longer on the kingdom — its rewards may already have been applied and the record pruned.",
+      "chatButtonNoKingdom": "This card is not linked to a kingdom actor any more, so its buttons cannot act.",
+      "chatButtonFailed": "That kingdom action failed — see the browser console (F12) for details.",
       "expeditionRewardAlreadyApplied": "Rewards for {name} were already applied; nothing further to grant.",
       "expeditionLootApplied": "Recovered {rp} resource points from the expedition's haul.",
       "expeditionCommoditiesApplied": "The expedition brought home commodities: {food} food, {lumber} lumber, {ore} ore.",

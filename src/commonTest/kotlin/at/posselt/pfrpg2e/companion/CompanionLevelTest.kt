@@ -246,6 +246,12 @@ class CompanionLevelTest {
         assertFalse(canApplyExpeditionReward(rewardApplied = false, status = "resolved"))
     }
 
+    @Test
+    fun testCanApplyExpeditionReward_blocksCancelled() {
+        // A stale offer card for a cancelled expedition must not still pay out.
+        assertFalse(canApplyExpeditionReward(rewardApplied = false, status = "cancelled"))
+    }
+
     // ── Reward must not cancel injury downtime ──────────────────────────────
     // Regression: Apply Reward set EVERY participant to "available", which would wipe an injured
     // companion's downtime. The injury handler worked around that by marking the expedition

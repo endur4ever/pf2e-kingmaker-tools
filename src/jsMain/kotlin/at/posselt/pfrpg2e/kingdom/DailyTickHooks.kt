@@ -250,7 +250,7 @@ private suspend fun tickCompanionExpeditions(game: Game, daysPassed: Int) {
 						id == companion.actorUuid || id == companion.name
 					}
 					if (isParticipant) {
-						offerExpeditionResolution(game, actor, companion, exp)
+						offerExpeditionResolution(game, actor, companion, exp, kingdom)
 						break  // one resolution per expedition
 					}
 				}

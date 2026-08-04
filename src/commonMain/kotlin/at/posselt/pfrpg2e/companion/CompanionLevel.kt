@@ -222,9 +222,13 @@ fun applyPersonalQuestReward(
  *
  * Guards double-apply: a reward already applied, or an expedition already resolved,
  * must not award XP/influence/loot a second time (e.g. a re-clicked offer button).
+ *
+ * "cancelled" is terminal too — every other consumer treats it that way (ExpeditionsContext,
+ * CompanionProfileContext) — so a stale offer card left in chat for an expedition the GM
+ * cancelled must not still pay out.
  */
 fun canApplyExpeditionReward(rewardApplied: Boolean, status: String): Boolean =
-    !rewardApplied && status != "resolved"
+    !rewardApplied && status != "resolved" && status != "cancelled"
 
 /**
  * The `expeditionStatus` a participant should hold after their expedition's reward is applied.

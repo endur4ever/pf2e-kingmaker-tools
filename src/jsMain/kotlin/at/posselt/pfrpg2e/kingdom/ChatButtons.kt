@@ -313,10 +313,19 @@ private val buttons = listOf(
         // Guards double-apply by checking rewardApplied + status.
         // GM-confirmed: apply the accrued expedition reward + mark resolved (idempotent).
         if (!game.user.isGM) return@ChatButton
-        val expeditionId = button.dataset["expeditionId"] ?: return@ChatButton
-        actor.getKingdom()?.let { kingdom ->
-            // Every failure below used to return silently — the button simply did nothing and the
-            // GM had no way to tell why. Surface each case instead.
+        // Every failure below used to return silently — the button simply did nothing and the GM
+        // had no way to tell why. Surface each case instead.
+        val expeditionId = button.dataset["expeditionId"]
+        if (expeditionId.isNullOrBlank()) {
+            ui.notifications.warn(t("kingdom.expeditionRewardMissing"))
+            return@ChatButton
+        }
+        val kingdomData = actor.getKingdom()
+        if (kingdomData == null) {
+            ui.notifications.warn(t("kingdom.expeditionRewardMissing"))
+            return@ChatButton
+        }
+        kingdomData.let { kingdom ->
             val expedition = kingdom.companionExpeditions?.find { it.id == expeditionId }
             if (expedition == null) {
                 ui.notifications.warn(t("kingdom.expeditionRewardMissing"))
@@ -654,8 +663,20 @@ fun bindChatButtons(game: Game) {
         buttons.forEach { data ->
             bindChatClick(".${data.buttonClass}") { ev, target, parent ->
                 buildPromise {
-                    parent.findKingdomActor(game)
-                        ?.let { data.callback(game, it, ev, target) }
+                    val kingdomActor = parent.findKingdomActor(game)
+                    if (kingdomActor == null) {
+                        // The uuid attribute failed to resolve to a kingdom actor. Previously the
+                        // callback simply never ran and nothing anywhere reported it.
+                        ui.notifications.warn(t("kingdom.chatButtonNoKingdom"))
+                    } else {
+                        data.callback(game, kingdomActor, ev, target)
+                    }
+                }.catch { e ->
+                    // buildPromise's result was discarded, so a throw inside any offer handler was
+                    // an unhandled rejection visible only in the console — another dead button.
+                    console.error("kingdom chat button '${data.buttonClass}' failed", e)
+                    ui.notifications.error(t("kingdom.chatButtonFailed"))
+                    null
                 }
             }
         }

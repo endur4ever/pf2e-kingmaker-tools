@@ -248,9 +248,16 @@ suspend fun offerExpeditionResolution(
     actor: PF2EParty,
     companion: RawCharacter,
     expedition: RawCompanionExpedition,
+    kingdom: KingdomData? = null,
 ) {
-    val kingdom = actor.getKingdom() ?: return
-    resolveExpeditionCore(game, actor, kingdom, expedition, companion)
+    // Prefer the CALLER's clone when it has one. getKingdom() returns a deep clone, and the daily
+    // tick already holds the clone whose expedition objects are the very ones mutated here — so
+    // re-reading persisted a DIFFERENT clone that lacked the accrual. It survived only because the
+    // tick happened to write its own clone last; any throw in between (e.g. the player-facing
+    // recap) would have left a full-looking offer card sitting over a zeroed, still-"inProgress"
+    // record. One clone owns the whole tick.
+    val kingdomData = kingdom ?: actor.getKingdom() ?: return
+    resolveExpeditionCore(game, actor, kingdomData, expedition, companion)
 }
 
 /**
@@ -584,10 +591,12 @@ suspend fun applyExpeditionRewardToKingdom(
 
 /**
  * Record an expedition into the durable history: bump every participant's career ledger and
- * append a chronicle entry (capped). Shared by BOTH terminal paths — reward apply and the
- * injury offer (which consumes the reward path) — so no resolved expedition vanishes from
- * history. careerScars is NOT counted here: a scar is recorded only when an injury is
- * actually APPLIED (km-offer-injury), not merely offered.
+ * append a chronicle entry (capped). The reward-apply path is the SOLE owner of this record:
+ * the injury offer used to call it too, because it consumed the reward path outright — which
+ * silently forfeited the reward whenever the GM applied an injury first. Injury is now purely
+ * additive, so an expedition enters history exactly once, when its reward is applied.
+ * careerScars is NOT counted here: a scar is recorded only when an injury is actually APPLIED
+ * (km-offer-injury), not merely offered.
  *
  * The chronicle turn is stamped currentTurn + 1: entries are written DURING turn N but the
  * End Turn record that reports them is built with the incremented turn number, so +1 makes

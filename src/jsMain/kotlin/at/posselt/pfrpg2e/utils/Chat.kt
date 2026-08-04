@@ -103,6 +103,15 @@ fun bindChatClick(
     listOf("chat-notifications", "chat")
         .mapNotNull { document.getElementById(it) }
         .forEach { elem ->
+            // bindChatButtons re-runs on EVERY renderChatLog hook, but these container elements
+            // persist across renders — so an unguarded addEventListener accumulated one listener
+            // per button per render (20 buttons x 2 containers each time). A single click then ran
+            // its handler N times: N-1 spurious "already applied" warnings, N world-time advances
+            // on pass-time, and so on. Mark the container per selector and bind once. A container
+            // that Foundry re-creates loses the marker and is bound again, which is correct.
+            val marker = "data-km-bound-" + targetSelector.filter { it.isLetterOrDigit() || it == '-' }
+            if (elem.hasAttribute(marker)) return@forEach
+            elem.setAttribute(marker, "1")
             elem.addEventListener("click", { event ->
                 // Resolve descendant clicks (e.g. a click on the <i> icon INSIDE a button) up to
                 // the matching button; closest() returns the element itself when it already matches,
