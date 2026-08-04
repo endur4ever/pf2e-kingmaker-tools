@@ -6,8 +6,10 @@ import at.posselt.pfrpg2e.data.armies.BattleArmyState
 import at.posselt.pfrpg2e.data.armies.applyLevelUp
 import at.posselt.pfrpg2e.data.armies.xpThresholdForLevel
 import at.posselt.pfrpg2e.utils.fromUuidOfTypes
+import at.posselt.pfrpg2e.data.actor.isValuedCondition
 import com.foundryvtt.pf2e.actor.PF2EArmy
 import com.foundryvtt.pf2e.actor.PF2ECharacter
+import com.foundryvtt.pf2e.actor.PF2ENpc
 import kotlin.math.min
 import at.posselt.pfrpg2e.data.events.KingdomEventTrait
 import at.posselt.pfrpg2e.kingdom.dialogs.AddExpeditionDialog
@@ -366,7 +368,23 @@ private val buttons = listOf(
             val expedition = kingdom.companionExpeditions?.find { it.id == expeditionId } ?: return@ChatButton
             val companion = kingdom.companions?.find { it.actorUuid == companionId } ?: return@ChatButton
 
-            // Apply injury conditions (e.g., fatigued, wounded) to the linked actor.
+            // Apply the rolled injury conditions to the linked PF2e actor. The engine rolls these
+            // (fatigued + wounded on a critical failure) and the offer card displays them, but
+            // nothing ever put them on the character sheet — the injury was module-side downtime
+            // only, so "Apply Injury" left the actor untouched.
+            // Valued conditions (wounded) increase; binary ones (fatigued) toggle once — applying
+            // a binary condition through increaseCondition is the misuse fixed in bd3738f1.
+            val injuredActor = fromUuidOfTypes(companionId, PF2ECharacter::class, PF2ENpc::class)
+            if (injuredActor != null) {
+                expedition.accruedInjuries.forEach { condition ->
+                    if (isValuedCondition(condition)) {
+                        injuredActor.increaseCondition(condition)
+                    } else if (!injuredActor.hasCondition(condition)) {
+                        injuredActor.toggleCondition(condition)
+                    }
+                }
+            }
+
             // Time-boxed downtime: recovery days depend on the expedition tier
             // (routine 2 / standard 3 / perilous 5), decremented by the daily tick.
             companion.injuryDaysRemaining = when (expedition.tier) {
