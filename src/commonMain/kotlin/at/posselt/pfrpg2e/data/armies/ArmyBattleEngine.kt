@@ -545,6 +545,18 @@ fun xpThresholdForLevel(currentLevel: Int): Int =
     }
 
 /**
+ * Whether an army's cumulative XP moving from [oldXp] to [newXp] CROSSES its current level's
+ * threshold — the moment the battle-outcome sync posts the GM-confirmed level-up offer. Fires
+ * only on the crossing tick (not while already above, so a declined offer isn't re-posted every
+ * battle) and never at the level cap.
+ */
+fun shouldOfferArmyLevelUp(oldXp: Int, newXp: Int, currentLevel: Int): Boolean {
+    if (currentLevel >= 20) return false
+    val threshold = xpThresholdForLevel(currentLevel)
+    return newXp >= threshold && oldXp < threshold
+}
+
+/**
  * Attempts to level up an army based on accumulated XP.
  *
  * If [xp] meets or exceeds [threshold], the army levels up:

@@ -10,6 +10,7 @@ import at.posselt.pfrpg2e.kingdom.data.RawWarThreat
 import at.posselt.pfrpg2e.kingdom.data.WarThreatStatus
 import at.posselt.pfrpg2e.kingdom.recalculateWarPressure
 import at.posselt.pfrpg2e.data.armies.BattleStatus
+import at.posselt.pfrpg2e.data.armies.shouldOfferArmyLevelUp
 import at.posselt.pfrpg2e.data.armies.xpThresholdForLevel
 import at.posselt.pfrpg2e.utils.fromUuidTypeSafe
 import at.posselt.pfrpg2e.utils.setAppFlag
@@ -82,7 +83,7 @@ class SyncBattleOutcomeHandler(
                     // Post GM level-up offer card if XP threshold is crossed
                     val currentLevel = armyActor.system.details.level.value
                     val threshold = xpThresholdForLevel(currentLevel)
-                    if (participant.xp >= threshold && oldXp < threshold && currentLevel < 20) {
+                    if (shouldOfferArmyLevelUp(oldXp = oldXp, newXp = participant.xp, currentLevel = currentLevel)) {
                         val nextLevel = currentLevel + 1
                         val offerId = "levelup-${armyActor.id}-${nextLevel}"
                         postChatTemplate(

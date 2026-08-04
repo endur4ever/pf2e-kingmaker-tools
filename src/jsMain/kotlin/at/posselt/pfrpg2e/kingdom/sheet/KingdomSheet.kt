@@ -3,6 +3,7 @@ package at.posselt.pfrpg2e.kingdom.sheet
 import at.posselt.pfrpg2e.actions.ActionDispatcher
 import at.posselt.pfrpg2e.actions.ActionMessage
 import at.posselt.pfrpg2e.actions.handlers.OpenKingdomSheetAction
+import at.posselt.pfrpg2e.actions.handlers.SyncBattleOutcomeAction
 import at.posselt.pfrpg2e.actor.openActor
 import at.posselt.pfrpg2e.actor.ownershipOwnersOnly
 import at.posselt.pfrpg2e.actor.partyMembers
@@ -790,10 +791,18 @@ class KingdomSheet(
                             }
                             actor.setKingdom(current)
 
-                            // Dispatch syncBattleOutcome to sync HP/conditions/XP to PF2EArmy actors
+                            // Dispatch syncBattleOutcome to sync HP/conditions/XP to PF2EArmy actors.
+                            // Typed construction — the original raw js() literal left `actor` as a
+                            // free JS identifier (the compiler only resolved `updated`), so every
+                            // resolve threw ReferenceError and the sync never ran.
                             dispatcher.dispatch(
-                                js("({ action: 'syncBattleOutcome', data: { battle: updated, kingdomActorUuid: actor.uuid } })")
-                                    .unsafeCast<at.posselt.pfrpg2e.actions.ActionMessage>()
+                                ActionMessage(
+                                    action = "syncBattleOutcome",
+                                    data = SyncBattleOutcomeAction(
+                                        battle = updated,
+                                        kingdomActorUuid = actor.uuid,
+                                    ),
+                                )
                             )
                         }
                     }.launch()
