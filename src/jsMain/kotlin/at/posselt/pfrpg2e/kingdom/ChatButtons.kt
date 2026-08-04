@@ -315,10 +315,20 @@ private val buttons = listOf(
         if (!game.user.isGM) return@ChatButton
         val expeditionId = button.dataset["expeditionId"] ?: return@ChatButton
         actor.getKingdom()?.let { kingdom ->
-            val expedition = kingdom.companionExpeditions?.find { it.id == expeditionId } ?: return@ChatButton
+            // Every failure below used to return silently — the button simply did nothing and the
+            // GM had no way to tell why. Surface each case instead.
+            val expedition = kingdom.companionExpeditions?.find { it.id == expeditionId }
+            if (expedition == null) {
+                ui.notifications.warn(t("kingdom.expeditionRewardMissing"))
+                return@ChatButton
+            }
             if (applyExpeditionRewardToKingdom(kingdom, expedition)) {
                 actor.setKingdom(kingdom)
                 postChatMessage(t("kingdom.expeditionRewardApplied", recordOf("name" to expedition.title)))
+            } else {
+                ui.notifications.warn(
+                    t("kingdom.expeditionRewardAlreadyApplied", recordOf("name" to expedition.title))
+                )
             }
         }
     },
@@ -358,10 +368,8 @@ private val buttons = listOf(
             companion.expeditionStatus = "unavailable"
             companion.campAvailable = false
 
-            // Applying injury consumes the reward path (status=resolved + rewardApplied below),
-            // so applyExpeditionRewardToKingdom will never run for this expedition — release the
-            // OTHER participants here or they'd stay "onExpedition" forever, locked out of all
-            // future launches. Only the injured companion goes into downtime.
+            // Release the OTHER participants so they can't be stranded "onExpedition" if the GM
+            // never applies the reward. Only the injured companion goes into downtime.
             expedition.companionIds
                 .filter { it != companionId }
                 .forEach { participantId ->
@@ -374,16 +382,12 @@ private val buttons = listOf(
             // companion (the career ledger deliberately does not count waived offers).
             companion.careerScars = (companion.careerScars ?: 0) + 1
 
-            // This path consumes the reward flow, so record durable history here too —
-            // unless Apply Reward already ran and recorded it (guard on rewardApplied).
-            val alreadyRecorded = expedition.rewardApplied
-
-            // Mark expedition as resolved since injury was applied.
-            expedition.status = "resolved"
-            expedition.rewardApplied = true
-            if (!alreadyRecorded) {
-                recordExpeditionInHistory(kingdom, expedition, lootRp = 0)
-            }
+            // Injury and reward are INDEPENDENT offers on the same card (see
+            // applyExpeditionRewardToKingdom's KDoc). This path deliberately does NOT mark the
+            // expedition resolved/rewardApplied: doing so made Apply Reward a permanent SILENT
+            // no-op whenever the GM clicked Apply Injury first, forfeiting all XP/influence/loot.
+            // Apply Reward stays available and owns the durable history record; it preserves this
+            // companion's downtime rather than flipping them back to "available".
 
             kingdom.companionExpeditions = kingdom.companionExpeditions?.map {
                 if (it.id == expeditionId) expedition else it

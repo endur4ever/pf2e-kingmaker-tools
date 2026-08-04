@@ -27,6 +27,7 @@ import at.posselt.pfrpg2e.companion.canApplyExpeditionReward
 import at.posselt.pfrpg2e.companion.expeditionActivityReward
 import at.posselt.pfrpg2e.companion.expeditionActivitySkills
 import at.posselt.pfrpg2e.companion.lootTierToResourcePoints
+import at.posselt.pfrpg2e.companion.participantStatusAfterReward
 import at.posselt.pfrpg2e.companion.personalQuestCompletionSnapshot
 import at.posselt.pfrpg2e.companion.selectRewardQuest
 import at.posselt.pfrpg2e.companion.shouldOfferLevelUp
@@ -437,7 +438,11 @@ suspend fun applyExpeditionRewardToKingdom(
             companion.xp = outcome.levelResult.newXp
         }
         companion.influence = outcome.newInfluence
-        companion.expeditionStatus = "available"
+        // Un-strand the participant, but NEVER clobber an injured companion's downtime: the
+        // injury offer is an independent GM offer on the same card and may already have been
+        // applied. (This clobber is why the injury handler used to consume the reward path
+        // outright, which silently forfeited all XP/influence/loot.)
+        companion.expeditionStatus = participantStatusAfterReward(companion.injuryDaysRemaining)
     }
 
     // Personal-quest completion + reward.

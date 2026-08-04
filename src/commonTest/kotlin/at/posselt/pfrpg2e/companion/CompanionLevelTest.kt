@@ -246,6 +246,32 @@ class CompanionLevelTest {
         assertFalse(canApplyExpeditionReward(rewardApplied = false, status = "resolved"))
     }
 
+    // ── Reward must not cancel injury downtime ──────────────────────────────
+    // Regression: Apply Reward set EVERY participant to "available", which would wipe an injured
+    // companion's downtime. The injury handler worked around that by marking the expedition
+    // resolved + rewardApplied — which made Apply Reward a permanent SILENT no-op whenever the GM
+    // clicked Apply Injury first, forfeiting all XP/influence/loot. The two offers are
+    // independent and must work in either order.
+
+    @Test
+    fun testParticipantStatusAfterReward_releasesUninjuredParticipants() {
+        assertEquals("available", participantStatusAfterReward(null))
+        assertEquals("available", participantStatusAfterReward(0))
+    }
+
+    @Test
+    fun testParticipantStatusAfterReward_preservesInjuryDowntime() {
+        assertEquals("unavailable", participantStatusAfterReward(1))
+        assertEquals("unavailable", participantStatusAfterReward(5))
+    }
+
+    @Test
+    fun testInjuryThenRewardStillGrantsTheReward() {
+        // After Apply Injury the expedition must remain claimable: injury no longer marks it
+        // resolved/rewardApplied, so the reward gate still passes.
+        assertTrue(canApplyExpeditionReward(rewardApplied = false, status = "awaitingResolution"))
+    }
+
     // ── Loot tier -> resource points ────────────────────────────────────────
 
     @Test

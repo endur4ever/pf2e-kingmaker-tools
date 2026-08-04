@@ -227,6 +227,17 @@ fun canApplyExpeditionReward(rewardApplied: Boolean, status: String): Boolean =
     !rewardApplied && status != "resolved"
 
 /**
+ * The `expeditionStatus` a participant should hold after their expedition's reward is applied.
+ *
+ * Applying the reward un-strands participants (otherwise a member stays "onExpedition" forever and
+ * is locked out of future launches) — but it must NOT cancel injury downtime. Injury and reward are
+ * independent GM offers on the same result card and can be clicked in either order; an injured
+ * companion stays "unavailable" until the daily tick counts their recovery days down.
+ */
+fun participantStatusAfterReward(injuryDaysRemaining: Int?): String =
+    if ((injuryDaysRemaining ?: 0) > 0) "unavailable" else "available"
+
+/**
  * Resource points a completed expedition's loot tier yields to the kingdom treasury.
  *
  * Deliberately small so expeditions supplement rather than replace kingdom income

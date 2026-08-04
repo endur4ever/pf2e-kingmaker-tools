@@ -840,6 +840,8 @@
       "companionLeveledUp": "{name} has leveled up to Level {level}!",
       "companionRecovered": "{name} has recovered from their injuries.",
       "expeditionRewardApplied": "Expedition rewards for {name} have been applied.",
+      "expeditionRewardMissing": "That expedition is no longer on the kingdom — its rewards may already have been applied and the record pruned.",
+      "expeditionRewardAlreadyApplied": "Rewards for {name} were already applied; nothing further to grant.",
       "expeditionLootApplied": "Recovered {rp} resource points from the expedition's haul.",
       "expeditionCommoditiesApplied": "The expedition brought home commodities: {food} food, {lumber} lumber, {ore} ore.",
       "expeditionRestHealed": "The recuperation expedition shaved {days} day(s) off recovering companions.",
