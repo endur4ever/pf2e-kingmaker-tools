@@ -2,6 +2,7 @@ package at.posselt.pfrpg2e.kingdom.sheet
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 
 class ResourceButtonLabelTest {
 
@@ -72,11 +73,32 @@ class ResourceButtonLabelTest {
     }
 
     @Test
-    fun `resolveResourceButtonLabelKey - integer rd (e.g., 2rd) uses resource key with count`() {
+    fun `resolveResourceButtonLabelKey - integer rd (e.g., 2rd) uses resource key with a NUMERIC count`() {
         val result = resolveResourceButtonLabelKey("2rd", Resource.RESOURCE_DICE)
-        // "2rd" stripped of "rd" -> "2" doesn't match dice pattern, so uses resource key
+        // "2rd" stripped of "rd" -> "2" doesn't match the dice pattern, so it uses the count key.
         assertEquals("resourceButton.resource.resourceDice", result.i18nKey)
         assertEquals("count", result.interpolationVar)
-        assertEquals("2rd", result.interpolationValue)
+        // The count slot is an ICU plural: `{count, plural, =1 {1 Resource Dice} other {# Resource Dice}}`.
+        // Passing the raw "2rd" put a non-numeric into it — the same mangled label this function
+        // exists to prevent, just for the integer form rather than the dice form.
+        assertEquals("2", result.interpolationValue)
+    }
+
+    @Test
+    fun `resolveResourceButtonLabelKey - nothing routed to the count slot is ever non-numeric`() {
+        // The count key pluralizes on {count}; anything that is not a plain integer must have been
+        // routed to the expression key instead.
+        val values = listOf("3", "2rd", "1d4", "1d4rd", "1d4+1", "0", "12rd")
+        for (resource in listOf(Resource.RESOURCE_DICE, Resource.RESOURCE_POINTS, Resource.UNREST)) {
+            for (value in values) {
+                val result = resolveResourceButtonLabelKey(value, resource)
+                if (result.interpolationVar == "count") {
+                    assertNotNull(
+                        result.interpolationValue.toIntOrNull(),
+                        "count slot got a non-numeric \"${result.interpolationValue}\" for $value/$resource",
+                    )
+                }
+            }
+        }
     }
 }
