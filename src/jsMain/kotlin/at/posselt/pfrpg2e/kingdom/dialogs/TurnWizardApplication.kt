@@ -215,7 +215,20 @@ fun runKingdomTurnTick(kingdom: KingdomData, storage: CommodityStorage, currentT
         factionStandingDriftPerTurn = kingdom.settings.factionStandingDriftPerTurn ?: 0,
     )
 
-suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData): TickResult {
+/**
+ * Advance the kingdom by one turn. GM-only, enforced HERE rather than only at the callers:
+ * ending a turn mutates the whole kingdom and every caller is a click handler on the party
+ * actor, which players own. Gating only the sheet's "end-turn" button left the Turn Wizard's
+ * Commit Turn button — ungated in both its template and its listener — as a complete bypass,
+ * so the guard belongs at the single chokepoint every path funnels through.
+ *
+ * Returns null when the caller is not a GM; no caller uses the [TickResult].
+ */
+suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData): TickResult? {
+    if (!game.user.isGM) {
+        ui.notifications.warn(t("kingdom.turn.endTurnGmOnly"))
+        return null
+    }
     // Capture snapshot BEFORE any mutations — enables "undo-end-turn" (exact revert). Must cover
     // EVERYTHING End Turn mutates, not just the kingdom flag: the turn-wizard-state flag (performed
     // activity counts, cleared below) and the ids of shipment items added to the party inventory
@@ -836,7 +849,14 @@ class TurnWizardApplication(
         htmlElement.querySelector("button[data-action='commit-turn']")
             ?.addEventListener("click", {
                 buildPromise {
-                    commitTurn()
+                    // Same guard as the run-upkeep sibling above. The button is also hidden
+                    // for players in the template, but template gating is not a permission
+                    // check — players own the party actor and this listener is theirs to fire.
+                    if (game.user.isGM) {
+                        commitTurn()
+                    } else {
+                        ui.notifications.warn(t("kingdom.turn.endTurnGmOnly"))
+                    }
                 }
             })
             
