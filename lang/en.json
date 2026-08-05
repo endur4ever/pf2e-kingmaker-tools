@@ -7274,6 +7274,7 @@
       "moraleCheckFail": "{name} fails the morale check (roll {roll} + {bonus} = {total} vs DC {dc}) and becomes routed!",
       "conditionWearyPenalty": "{name} is weary and takes a –1 penalty to attack rolls and AC.",
       "conditionPinnedNoStrike": "{name} is pinned and cannot strike!",
+      "conditionMiredNoAdvance": "{name} is mired and cannot advance.",
       "levelUpOffer": {
         "title": "{{name}} Ready to Level Up!",
         "description": "{{name}} has earned {{xp}} XP (threshold: {{threshold}}). Level up to {{level}}?",

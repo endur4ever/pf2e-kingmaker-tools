@@ -307,10 +307,11 @@ private fun localizeBattleLogEntry(entry: String): String {
         val name = entry.substringAfter(":")
         t("warBattle.conditionPinnedNoStrike", recordOf("name" to name))
     } else if (entry.startsWith("COND_MIRED:")) {
-        // MIRED prevents advance but there's no advance action in current flow
-        // Still log it for completeness
+        // MIRED prevents advance, and the current round flow has no advance action, so this
+        // line is informational only — but it still reaches the player's battle log and must
+        // be localized like its WEARY and PINNED siblings.
         val name = entry.substringAfter(":")
-        "$name is mired and cannot advance."
+        t("warBattle.conditionMiredNoAdvance", recordOf("name" to name))
     } else {
         entry
     }

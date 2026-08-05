@@ -359,11 +359,17 @@ fun tickRound(
         if (mods.attackPenalty != 0 || mods.acPenalty != 0) {
             logs.add("COND_WEARY:${actor.name}")
         }
-        if (!mods.canStrike) {
-            logs.add("COND_PINNED:${actor.name}")
-        }
         if (!mods.canAdvance) {
             logs.add("COND_MIRED:${actor.name}")
+        }
+        // PINNED ends the action here. resolveStrike also refuses to strike when pinned, but
+        // letting the call happen appended its raw-English "is pinned and cannot strike." log
+        // on top of this structured (and localized) line, so the player saw the same event
+        // twice, once untranslated. Consuming mods.canStrike as control flow is also what the
+        // modifier is for — it was previously computed and only logged.
+        if (!mods.canStrike) {
+            logs.add("COND_PINNED:${actor.name}")
+            continue
         }
 
         val effectiveActor = if (mods.attackPenalty != 0 || mods.acPenalty != 0 || terrainMod != 0) {

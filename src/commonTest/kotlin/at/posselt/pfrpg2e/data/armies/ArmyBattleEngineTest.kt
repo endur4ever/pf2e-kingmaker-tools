@@ -646,7 +646,19 @@ class RoundFlowIntegrationTest {
 
         assertEquals(4, result.armies[1].currentHp) // No damage
         assertTrue(result.log.any { it.startsWith("COND_PINNED:") })
-        assertTrue(result.log.any { it.contains("pinned and cannot strike") })
+        // Exactly ONE line for the event. The structured COND_PINNED entry is what the UI
+        // localizes; resolveStrike's raw-English "is pinned and cannot strike." used to be
+        // appended alongside it, so the battle log showed the same event twice and the
+        // second copy was never translated.
+        assertFalse(
+            result.log.any { it.contains("pinned and cannot strike") },
+            "the raw-English duplicate must not reach the battle log",
+        )
+        assertEquals(
+            1,
+            result.log.count { it.startsWith("COND_PINNED:") },
+            "a pinned army logs its refusal once",
+        )
     }
 
     @Test
