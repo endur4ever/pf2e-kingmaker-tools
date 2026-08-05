@@ -433,8 +433,10 @@ suspend fun applyExpeditionRewardToKingdom(
     val companionId = expedition.companionIds.firstOrNull()
     val levelingEnabled = Pfrpg2eKingdomCampingWeatherSettings.getEnableCompanionLeveling()
 
-    // Names of participants whose real PF2e sheet received the XP (for the confirmation line).
+    // Names of participants whose real PF2e sheet received the XP (for the confirmation line),
+    // and of those linked to an npc-type actor, which has no XP track to write to.
     val sheetXpAwardedTo = mutableListOf<String>()
+    val sheetXpNoTrack = mutableListOf<String>()
 
     // Reward + status restore for EVERY participant, not just the lead — the expedition
     // rolled once as a party, so all members share the accrued XP/influence. Restoring
@@ -471,13 +473,22 @@ suspend fun applyExpeditionRewardToKingdom(
         // threshold from this XP pool. NPC-actor companions are skipped: the PF2e npc type has
         // no system.details.xp.
         if (expedition.accruedXp > 0) {
-            companion.actorUuid
-                ?.let { fromUuidOfTypes<PF2ECharacter>(it) }
-                ?.let { pc ->
-                    val newXp = pc.system.details.xp.value + expedition.accruedXp
-                    pc.typeSafeUpdate { system.details.xp.value = newXp }
-                    sheetXpAwardedTo += pc.name
-                }
+            val pc = companion.actorUuid?.let { fromUuidOfTypes<PF2ECharacter>(it) }
+            if (pc != null) {
+                val newXp = pc.system.details.xp.value + expedition.accruedXp
+                pc.typeSafeUpdate { system.details.xp.value = newXp }
+                sheetXpAwardedTo += pc.name
+            } else {
+                // A companion linked to an npc-type actor gets NO sheet XP: PF2e's npc schema has
+                // no system.details.xp at all (verified against the system's template.json —
+                // character.details has xp, npc.details does not). Skipping silently made this
+                // look like the award was broken, so name them instead. Their XP still accrues on
+                // the module's companion profile; only a character-type actor can show it on a
+                // real sheet.
+                companion.actorUuid
+                    ?.let { fromUuidOfTypes<PF2ENpc>(it) }
+                    ?.let { npc -> sheetXpNoTrack += npc.name }
+            }
         }
     }
 
@@ -488,6 +499,14 @@ suspend fun applyExpeditionRewardToKingdom(
             t(
                 "kingdom.expeditionSheetXpAwarded",
                 recordOf("names" to sheetXpAwardedTo.joinToString(", "), "xp" to expedition.accruedXp),
+            )
+        )
+    }
+    if (sheetXpNoTrack.isNotEmpty()) {
+        postChatMessage(
+            t(
+                "kingdom.expeditionSheetXpNoTrack",
+                recordOf("names" to sheetXpNoTrack.joinToString(", "), "xp" to expedition.accruedXp),
             )
         )
     }

@@ -841,6 +841,7 @@
       "companionRecovered": "{name} has recovered from their injuries.",
       "expeditionRewardApplied": "Expedition rewards for {name} have been applied.",
       "expeditionSheetXpAwarded": "{xp} XP added to the character sheet of: {names}.",
+      "expeditionSheetXpNoTrack": "{names} earned {xp} XP, but is linked to an NPC actor — PF2e NPC sheets have no XP track, so it was recorded on the companion profile only. Link the companion to a character-type actor to have XP appear on the sheet.",
       "expeditionRewardMissing": "That expedition is no longer on the kingdom — its rewards may already have been applied and the record pruned.",
       "chatButtonNoKingdom": "This card is not linked to a kingdom actor any more, so its buttons cannot act.",
       "chatButtonFailed": "That kingdom action failed — see the browser console (F12) for details.",
