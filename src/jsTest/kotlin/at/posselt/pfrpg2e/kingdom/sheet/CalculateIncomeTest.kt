@@ -11,6 +11,10 @@ import at.posselt.pfrpg2e.kingdom.data.RawCommodities
 import at.posselt.pfrpg2e.kingdom.data.RawCurrentCommodities
 import at.posselt.pfrpg2e.kingdom.data.endTurn
 import at.posselt.pfrpg2e.kingdom.modifiers.Modifier
+import at.posselt.pfrpg2e.data.kingdom.ResourceDieSize
+import at.posselt.pfrpg2e.kingdom.resources.Income
+import at.posselt.pfrpg2e.kingdom.modifiers.ModifierType
+import at.posselt.pfrpg2e.kingdom.modifiers.ModifierSelector
 import at.posselt.pfrpg2e.kingdom.modifiers.expressions.ExpressionContext
 import at.posselt.pfrpg2e.kingdom.resources.calculateStorage
 import at.posselt.pfrpg2e.data.kingdom.KingdomSkillRanks
@@ -323,5 +327,84 @@ class CalculateIncomeTest {
 
         // 4 base + 1 level, current resourceDice.now (1) excluded
         assertEquals(5, projected.income.resourceDice)
+    }
+}
+
+/**
+ * The Turn-tab projection and the real Collect Resources must agree. They used to compute the
+ * modifier-sourced commodities separately, and the collection folded them into its chat card
+ * only — so a "+2 ore per turn" structure was promised in the projection, announced in chat, and
+ * never actually granted. Both now go through Income.plusModifierCommodities.
+ */
+class ModifierCommodityIncomeTest {
+    private fun context() = ExpressionContext(
+        usedSkill = null,
+        ranks = KingdomSkillRanks(),
+        leader = null,
+        activity = null,
+        phase = null,
+        level = 1,
+        unrest = 0,
+        rollOptions = emptySet(),
+        vacancies = Vacancies(),
+        structure = null,
+        anarchyAt = 20,
+        atWar = false,
+        eventTraits = emptySet(),
+        settlementEvents = emptySet(),
+        eventLeader = null,
+        event = null,
+        structures = emptySet(),
+        waterBorders = 0,
+    )
+
+    private fun income() = Income(
+        stone = 1,
+        ore = 1,
+        lumber = 1,
+        resourceDice = 0,
+        resourceDiceSize = ResourceDieSize.D4,
+        resourcePoints = 0,
+        luxuries = 1,
+    )
+
+    private fun commodityModifier(id: String, selector: ModifierSelector, value: Int) = Modifier(
+        id = id,
+        type = ModifierType.UNTYPED,
+        value = value,
+        name = id,
+        selector = selector,
+    )
+
+    @Test
+    fun addsEachCommoditySelectorOntoTheBaseIncome() {
+        val result = income().plusModifierCommodities(
+            listOf(
+                commodityModifier("mine", ModifierSelector.ORE, 2),
+                commodityModifier("quarry", ModifierSelector.STONE, 3),
+                commodityModifier("mill", ModifierSelector.LUMBER, 4),
+            ),
+            context(),
+        )
+        assertEquals(3, result.ore)
+        assertEquals(4, result.stone)
+        assertEquals(5, result.lumber)
+        // No LUXURIES selector exists, so luxuries must pass through untouched.
+        assertEquals(1, result.luxuries)
+    }
+
+    @Test
+    fun withoutModifiersTheIncomeIsUnchanged() {
+        val base = income()
+        assertEquals(base, base.plusModifierCommodities(emptyList(), context()))
+    }
+
+    @Test
+    fun theProjectionUsesTheSameModifierMathAsTheCollection() {
+        // Guards the actual regression: whatever plusModifierCommodities adds is what the
+        // projection promises, so the projection cannot drift from what collection grants.
+        val modifiers = listOf(commodityModifier("mine", ModifierSelector.ORE, 2))
+        val expected = income().plusModifierCommodities(modifiers, context())
+        assertEquals(income().ore + 2, expected.ore)
     }
 }

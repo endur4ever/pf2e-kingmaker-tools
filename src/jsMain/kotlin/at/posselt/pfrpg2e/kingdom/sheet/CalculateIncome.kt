@@ -58,33 +58,53 @@ suspend fun collectResources(
         resourceDice = resourceDice,
         increaseGainedLuxuries = increaseGainedLuxuries,
     )
-    val ore = calculateModifierResource(modifiers, expressionContext, ModifierSelector.ORE)
-    val stone = calculateModifierResource(modifiers, expressionContext, ModifierSelector.STONE)
-    val lumber = calculateModifierResource(modifiers, expressionContext, ModifierSelector.LUMBER)
+    val withModifiers = income.plusModifierCommodities(modifiers, expressionContext)
     val rolledRp = roll(income.resourcePointsFormula, flavor = t("kingdom.gainingResourcePoints"), toChat = !suppressChat)
     if (!suppressChat) {
         postChatTemplate(
             templatePath = "chatmessages/collect-resources.hbs",
             templateContext = CollectResources(
                 rp = rolledRp,
-                ore = income.ore + ore,
-                stone = income.stone + stone,
-                lumber = income.lumber + lumber,
-                luxuries = income.luxuries,
+                ore = withModifiers.ore,
+                stone = withModifiers.stone,
+                lumber = withModifiers.lumber,
+                luxuries = withModifiers.luxuries,
             ),
         )
     }
-    return income
+    // The modifier-sourced commodities computed above must be GRANTED, not just announced. They
+    // were folded into the chat card only, so a structure or feat granting "+2 ore per turn"
+    // reported the gain and reported it in the Turn-tab projection (which does add them), while
+    // the kingdom received nothing — and the projection could never match the real collection.
+    return withModifiers
         .copy(
-            resourcePoints = income.resourcePoints + rolledRp + kingdomData.resourcePoints.now,
-            ore = income.ore + kingdomData.commodities.now.ore,
-            lumber = income.lumber + kingdomData.commodities.now.lumber,
-            luxuries = income.luxuries + kingdomData.commodities.now.luxuries,
-            stone = income.stone + kingdomData.commodities.now.stone,
+            resourcePoints = withModifiers.resourcePoints + rolledRp + kingdomData.resourcePoints.now,
+            ore = withModifiers.ore + kingdomData.commodities.now.ore,
+            lumber = withModifiers.lumber + kingdomData.commodities.now.lumber,
+            luxuries = withModifiers.luxuries + kingdomData.commodities.now.luxuries,
+            stone = withModifiers.stone + kingdomData.commodities.now.stone,
             resourceDice = 0,
         )
         .limitBy(calculateStorage(realmData, settlements))
 }
+
+/**
+ * Adds the modifier-sourced commodity income (structures, feats, and anything else selecting
+ * ORE/STONE/LUMBER) onto a base [Income].
+ *
+ * Shared by the real collection and the Turn-tab projection ON PURPOSE: the two used to compute
+ * these separately, and the collection folded them into its chat card only, so the projection
+ * promised modifier commodities the kingdom never actually received. Routing both through one
+ * function makes that divergence impossible rather than merely tested-against.
+ */
+fun Income.plusModifierCommodities(
+    modifiers: List<Modifier>,
+    expressionContext: ExpressionContext,
+): Income = copy(
+    ore = ore + calculateModifierResource(modifiers, expressionContext, ModifierSelector.ORE),
+    stone = stone + calculateModifierResource(modifiers, expressionContext, ModifierSelector.STONE),
+    lumber = lumber + calculateModifierResource(modifiers, expressionContext, ModifierSelector.LUMBER),
+)
 
 private fun calculateModifierResource(
     modifiers: List<Modifier>,
@@ -137,14 +157,7 @@ fun calculateProjectedResources(
         resourceDice = resourceDice,
         increaseGainedLuxuries = increaseGainedLuxuries,
     )
-    val ore = calculateModifierResource(modifiers, expressionContext, ModifierSelector.ORE)
-    val stone = calculateModifierResource(modifiers, expressionContext, ModifierSelector.STONE)
-    val lumber = calculateModifierResource(modifiers, expressionContext, ModifierSelector.LUMBER)
-    val uncappedIncome = baseIncome.copy(
-        ore = baseIncome.ore + ore,
-        stone = baseIncome.stone + stone,
-        lumber = baseIncome.lumber + lumber,
-    )
+    val uncappedIncome = baseIncome.plusModifierCommodities(modifiers, expressionContext)
     val currentCommodities = kingdomData.commodities.now
     val cappedTotals = uncappedIncome.copy(
         ore = uncappedIncome.ore + currentCommodities.ore,
