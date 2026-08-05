@@ -93,6 +93,9 @@ import at.posselt.pfrpg2e.data.hex.HexContent
 import at.posselt.pfrpg2e.data.hex.HexContentType
 import at.posselt.pfrpg2e.data.hex.HexContentVisibility
 import at.posselt.pfrpg2e.data.regions.Terrain
+import at.posselt.pfrpg2e.camping.routing.FoundryTravelProvider
+import at.posselt.pfrpg2e.camping.routing.TravelRouter
+import at.posselt.pfrpg2e.camping.routing.TravelPlan as RoutingTravelPlan
 import at.posselt.pfrpg2e.data.regions.getSeasonForMonth
 import at.posselt.pfrpg2e.camping.dialogs.RegionSetting
 import at.posselt.pfrpg2e.settings.Pfrpg2eKingdomCampingWeatherSettings
@@ -1623,34 +1626,22 @@ class CampingSheet(
                 infrastructureModifiers = defaultInfrastructureModifiers,
                 weatherModifier = weatherModifier
             )
-            val path = findOptimalPath(startHex, endHex) { hexKey ->
-                var hexCost = 1.0
-                val rawContent = rawHexContents.find { it.hexKey == hexKey }
-                rawContent?.travelModifier?.let { hexCost += it.toDouble() }
-                
-                val hexObj = com.foundryvtt.kingmaker.kingmaker.region.hexes.find { it.key.toString() == hexKey }
-                val terrainName = hexObj?.zone?.terrain
-                val terrain = terrainName?.let { fromCamelCase<Terrain>(it) }
-                if (terrain != null) {
-                    hexCost += defaultTerrainModifiers[terrain] ?: 0.0
-                }
-                
-                val hexState = com.foundryvtt.kingmaker.kingmaker.state.hexes[hexKey]
-                val features = hexState?.features?.mapNotNull { it.type } ?: emptyList()
-                val hasBridge = features.contains("bridge")
-                features.forEach { featureType ->
-                    if (featureType == "river") {
-                        if (!hasBridge) {
-                            hexCost += defaultInfrastructureModifiers["river"] ?: 1.0
-                        }
-                    } else if (featureType == "road") {
-                        hexCost += defaultInfrastructureModifiers["road"] ?: -1.0
-                    } else if (featureType != "bridge") {
-                        hexCost += defaultInfrastructureModifiers[featureType] ?: 0.0
-                    }
-                }
-                hexCost
-            }
+            // Routes through the SHARED router (the same one kingdom caravan routing uses)
+            // rather than a private Dijkstra with an inline copy of the cost rules. The edge cost
+            // is identical: base 1.0 + terrain modifier + hex-content travelModifier + road/river
+            // (a bridge negates the river penalty). Weather and party speed stay at 1.0 here
+            // because TravelService.calculateRoute applies them to the finished route, exactly as
+            // before — and being uniform multipliers they cannot change which route is cheapest.
+            val routingPlan = RoutingTravelPlan(
+                partySpeedMultiplier = 1.0,
+                terrainModifiers = defaultTerrainModifiers,
+                infrastructureModifiers = defaultInfrastructureModifiers,
+                weatherModifier = 1.0,
+            )
+            val path = TravelRouter(FoundryTravelProvider())
+                .calculateRoute(startHex, endHex, routingPlan)
+                ?.path
+                ?: emptyList()
             if (path.isNotEmpty()) {
                 val route = service.calculateRoute(
                     path = path,
@@ -1965,63 +1956,6 @@ class CampingSheet(
         return keys.sorted()
     }
 
-    private fun findOptimalPath(startKey: String, endKey: String, getHexCost: (String) -> Double): List<String> {
-        val hexesContents = try {
-            com.foundryvtt.kingmaker.kingmaker.region.hexes.contents
-        } catch (e: Throwable) {
-            emptyArray()
-        }
-        val hexMap = hexesContents.associateBy { it.key.toString() }
-        if (hexMap[startKey] == null || hexMap[endKey] == null) return emptyList()
-
-        val distances = mutableMapOf<String, Double>()
-        val previous = mutableMapOf<String, String>()
-        val queue = mutableSetOf<String>()
-
-        for (k in hexMap.keys) {
-            distances[k] = Double.MAX_VALUE
-            queue.add(k)
-        }
-        distances[startKey] = 0.0
-
-        while (queue.isNotEmpty()) {
-            val u = queue.minByOrNull { distances[it] ?: Double.MAX_VALUE } ?: break
-            if (distances[u] == Double.MAX_VALUE) break
-            if (u == endKey) break
-
-            queue.remove(u)
-
-            val uHex = hexMap[u] ?: continue
-            val neighbors = try {
-                uHex.getNeighbors()
-            } catch (e: Throwable) {
-                emptyArray()
-            }
-
-            for (neighbor in neighbors) {
-                val neighborHexObj = hexesContents.find { it.offset.i == neighbor.offset.i && it.offset.j == neighbor.offset.j }
-                val v = neighborHexObj?.key?.toString() ?: continue
-                if (v !in queue) continue
-
-                val cost = getHexCost(v)
-                val alt = distances[u]!! + cost
-                if (alt < distances[v]!!) {
-                    distances[v] = alt
-                    previous[v] = u
-                }
-            }
-        }
-
-        if (distances[endKey] == Double.MAX_VALUE) return emptyList()
-
-        val path = mutableListOf<String>()
-        var curr: String? = endKey
-        while (curr != null) {
-            path.add(0, curr)
-            curr = previous[curr]
-        }
-        return path
-    }
 }
 
 fun beginRest(actor: CampingActor, dispatcher: ActionDispatcher) {
