@@ -31,6 +31,24 @@ python3 scripts/check_i18n_keys.py
 It fails (exit 1) on any flat-dotted key or any `localizeKM`/`t("...")` reference
 that doesn't resolve. Keep it green.
 
+## Document lookups: pass the classes, not a generic argument
+
+`fromUuidOfTypes` / `fromUuidsOfTypes` filter on their vararg `KClass` list, not on the
+generic type parameter. `fromUuidOfTypes<PF2ECharacter>(uuid)` leaves that list empty, so
+the internal `types.any { it.isInstance(document) }` is false for every document and the
+call returns `null` **unconditionally** — it compiles, type-checks, and passes unit tests
+while the feature never fires at runtime.
+
+```kotlin
+val pc = fromUuidOfTypes(uuid, PF2ECharacter::class)                    // ✅
+val any = fromUuidOfTypes(uuid, PF2ECharacter::class, PF2ENpc::class)   // ✅
+val bad = fromUuidOfTypes<PF2ECharacter>(uuid)                          // ❌ always null
+```
+
+```bash
+python3 scripts/check_uuid_lookups.py
+```
+
 ## Building (needs JDK 25 + JDK 17)
 
 ```bash

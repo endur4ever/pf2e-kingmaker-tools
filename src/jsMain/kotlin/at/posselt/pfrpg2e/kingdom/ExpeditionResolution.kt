@@ -71,7 +71,7 @@ internal suspend fun resolveExpeditionCore(
     val dc = expedition.dc
     val bandBonus = influenceBandBonus(companion.discoveryStatus)
     val linkedActor = companion.actorUuid?.let {
-        fromUuidOfTypes<PF2ECharacter>(it)
+        fromUuidOfTypes(it, PF2ECharacter::class)
     }
 
     // Roll the activity's OWN declared skills (diplomacy -> Diplomacy, hunt -> Survival, ...) in
@@ -197,8 +197,7 @@ internal suspend fun resolveExpeditionCore(
         val isCriticalFailure = degree == DegreeOfSuccess.CRITICAL_FAILURE
         val companionName = (
             companion.actorUuid?.let { uuid ->
-                fromUuidOfTypes<PF2ECharacter>(uuid)?.name
-                    ?: fromUuidOfTypes<PF2ENpc>(uuid)?.name
+                fromUuidOfTypes(uuid, PF2ECharacter::class, PF2ENpc::class)?.name
             } ?: companion.name
         )
         val flavor = when {
@@ -282,8 +281,7 @@ private suspend fun postExpeditionOfferCard(
 ) {
     val companionName = (
         companion.actorUuid?.let { uuid ->
-            fromUuidOfTypes<PF2ECharacter>(uuid)?.name
-                ?: fromUuidOfTypes<PF2ENpc>(uuid)?.name
+            fromUuidOfTypes(uuid, PF2ECharacter::class, PF2ENpc::class)?.name
         } ?: companion.name
     )
 
@@ -473,7 +471,10 @@ suspend fun applyExpeditionRewardToKingdom(
         // threshold from this XP pool. NPC-actor companions are skipped: the PF2e npc type has
         // no system.details.xp.
         if (expedition.accruedXp > 0) {
-            val pc = companion.actorUuid?.let { fromUuidOfTypes<PF2ECharacter>(it) }
+            // NOTE: fromUuidOfTypes filters on the vararg KClass list, NOT on the generic type
+            // parameter — calling it without the ::class arguments makes `types.any { }` false for
+            // every document and returns null unconditionally. That silently skipped every award.
+            val pc = companion.actorUuid?.let { fromUuidOfTypes(it, PF2ECharacter::class) }
             if (pc != null) {
                 val newXp = pc.system.details.xp.value + expedition.accruedXp
                 pc.typeSafeUpdate { system.details.xp.value = newXp }
@@ -486,7 +487,7 @@ suspend fun applyExpeditionRewardToKingdom(
                 // the module's companion profile; only a character-type actor can show it on a
                 // real sheet.
                 companion.actorUuid
-                    ?.let { fromUuidOfTypes<PF2ENpc>(it) }
+                    ?.let { fromUuidOfTypes(it, PF2ENpc::class) }
                     ?.let { npc -> sheetXpNoTrack += npc.name }
             }
         }

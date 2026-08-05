@@ -353,7 +353,7 @@ private val buttons = listOf(
         val targetLevel = button.dataset["targetLevel"]?.toIntOrNull()?.let { min(20, it) } ?: return@ChatButton
         if (!Pfrpg2eKingdomCampingWeatherSettings.getEnableCompanionLeveling()) return@ChatButton
 
-        val linkedActor = fromUuidOfTypes<PF2ECharacter>(companionActorUuid) ?: return@ChatButton
+        val linkedActor = fromUuidOfTypes(companionActorUuid, PF2ECharacter::class) ?: return@ChatButton
         // Expedition rewards now add XP to the real sheet, so a level-up must SPEND it the way a
         // normal PF2e level-up does — consume one threshold and carry the remainder — otherwise
         // the character would level while the XP bar stayed full and looked ready to level again.
@@ -577,7 +577,7 @@ private val buttons = listOf(
         }
         if (!approve) return@ChatButton
 
-        val armyActor = fromUuidOfTypes<PF2EArmy>(armyActorUuid) ?: return@ChatButton
+        val armyActor = fromUuidOfTypes(armyActorUuid, PF2EArmy::class) ?: return@ChatButton
 
         // Apply level-up: increase level, HP, and carry over excess XP
         val currentLevel = armyActor.system.details.level.value

@@ -29,5 +29,8 @@ jobs:
       - name: Check packs consistency
         run: python3 scripts/check_packs_consistency.py
 
+      - name: Check document lookups
+        run: python3 scripts/check_uuid_lookups.py
+
       - name: Run build
         run: ./gradlew build
