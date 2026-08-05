@@ -49,3 +49,37 @@ fun calculateDefeatConsequences(
         spawnArrivalEvent = spawnArrivalEvent,
     )
 }
+
+/** One individually-applicable line on the GM defeat-offer card. */
+data class DefeatOffer(
+    /** Stable key, written into [RawArmyBattle.defeatConsequencesApplied] once applied. */
+    val key: String,
+    /** The delta this button applies; 0 for the arrival-event offer, which carries no number. */
+    val amount: Int,
+)
+
+const val DEFEAT_OFFER_UNREST = "unrest"
+const val DEFEAT_OFFER_PRESSURE = "pressure"
+const val DEFEAT_OFFER_ESCALATION = "escalation"
+const val DEFEAT_OFFER_ARRIVAL = "arrival"
+
+/**
+ * The buttons a defeat card should show, in display order, excluding any the GM has already
+ * applied. Zero-valued consequences are omitted so the card never offers a no-op button.
+ *
+ * Kept pure and in commonMain so the card's contents are unit-testable: the dialog only renders
+ * what this returns, and each button applies exactly the [DefeatOffer.amount] it was labelled with.
+ *
+ * @param consequences output of [calculateDefeatConsequences]
+ * @param alreadyApplied keys previously applied for this battle (idempotency across re-renders,
+ *   re-posts, and a GM clicking the same button twice)
+ */
+fun defeatOffers(
+    consequences: DefeatConsequences,
+    alreadyApplied: Set<String> = emptySet(),
+): List<DefeatOffer> = buildList {
+    if (consequences.unrestGain > 0) add(DefeatOffer(DEFEAT_OFFER_UNREST, consequences.unrestGain))
+    if (consequences.pressureJump > 0) add(DefeatOffer(DEFEAT_OFFER_PRESSURE, consequences.pressureJump))
+    if (consequences.escalationBump > 0) add(DefeatOffer(DEFEAT_OFFER_ESCALATION, consequences.escalationBump))
+    if (consequences.spawnArrivalEvent) add(DefeatOffer(DEFEAT_OFFER_ARRIVAL, 0))
+}.filterNot { it.key in alreadyApplied }

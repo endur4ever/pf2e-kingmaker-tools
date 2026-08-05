@@ -296,6 +296,90 @@ private val buttons = listOf(
             }
         }
     },
+    ChatButton("km-offer-battle-defeat") { game, actor, event, button ->
+        // GM-confirmed offer posted when a war battle resolves as DEFEAT. Each button applies
+        // exactly the one delta it was labelled with — never the whole set — and records its key
+        // in the battle's defeatConsequencesApplied so re-clicking it (or a re-posted card) is a
+        // no-op. Without this the DEFEAT branch was a pure no-op: losing every army to an
+        // invasion left the threat active and unchanged.
+        if (!game.user.isGM) return@ChatButton
+        val choice = button.dataset["choice"] ?: return@ChatButton
+        val battleId = button.dataset["battleId"] ?: return@ChatButton
+        val amount = button.dataset["amount"]?.toIntOrNull() ?: 0
+        actor.getKingdom()?.let { kingdom ->
+            val battle = kingdom.activeBattles?.find { it.id == battleId }
+            if (battle == null) {
+                ui.notifications.warn(t("chatMessages.battleDefeat.noBattle"))
+                return@ChatButton
+            }
+            val applied = battle.defeatConsequencesApplied ?: emptyArray()
+            if (choice == "dismiss") {
+                postChatMessage(t("chatMessages.battleDefeat.dismissed"))
+                return@ChatButton
+            }
+            if (choice in applied) {
+                ui.notifications.warn(t("chatMessages.battleDefeat.alreadyApplied"))
+                return@ChatButton
+            }
+            val threat = kingdom.warThreats?.find { it.id == battle.threatId }
+            when (choice) {
+                DEFEAT_OFFER_UNREST -> kingdom.unrest += amount
+                DEFEAT_OFFER_PRESSURE -> {
+                    val pressure = kingdom.warPressure ?: return@ChatButton
+                    pressure.currentPressure += amount
+                }
+                DEFEAT_OFFER_ESCALATION -> {
+                    if (threat == null) {
+                        ui.notifications.warn(t("chatMessages.battleDefeat.noThreat"))
+                        return@ChatButton
+                    }
+                    val raised = (threat.escalationLevel + amount).coerceAtMost(threat.maxEscalation)
+                    val escalated = threat.copyWith(escalationLevel = raised)
+                    kingdom.warThreats = kingdom.warThreats
+                        ?.map { if (it.id == threat.id) escalated else it }
+                        ?.toTypedArray() ?: emptyArray()
+                }
+                DEFEAT_OFFER_ARRIVAL -> {
+                    if (threat == null) {
+                        ui.notifications.warn(t("chatMessages.battleDefeat.noThreat"))
+                        return@ChatButton
+                    }
+                    // Same spawn path as km-offer-war-threat-arrival: resolve through getEvent()
+                    // so an id the registry cannot resolve never becomes an invisible ongoing entry.
+                    val eventId = "war-threat-arrival"
+                    val kingdomEvent = kingdom.getEvent(eventId)
+                    if (kingdomEvent == null) {
+                        ui.notifications.error(t("chatMessages.warThreatArrival.eventMissing"))
+                        return@ChatButton
+                    }
+                    val ongoingEvent = if (KingdomEventTrait.SETTLEMENT.value in kingdomEvent.traits) {
+                        val pick = pickEventSettlement(kingdom.getAllSettlements(game).allSettlements)
+                        RawOngoingKingdomEvent(
+                            stage = 0,
+                            id = eventId,
+                            settlementSceneId = pick.settlementId,
+                            secretLocation = pick.secretLocation,
+                        )
+                    } else {
+                        RawOngoingKingdomEvent(stage = 0, id = eventId)
+                    }
+                    kingdom.ongoingEvents = kingdom.ongoingEvents + ongoingEvent
+                }
+                else -> return@ChatButton
+            }
+            battle.defeatConsequencesApplied = applied + choice
+            kingdom.activeBattles = kingdom.activeBattles
+                ?.map { if (it.id == battleId) battle else it }
+                ?.toTypedArray() ?: emptyArray()
+            actor.setKingdom(kingdom)
+            postChatMessage(
+                t(
+                    "chatMessages.battleDefeat.applied",
+                    recordOf("consequence" to t("chatMessages.battleDefeat.$choice", recordOf("amount" to amount))),
+                )
+            )
+        }
+    },
     ChatButton("km-offer-diplomacy-quest") { game, actor, event, button ->
         // GM-confirmed offer from a faction-standing threshold crossing (#1 → #2).
         // Opens the AddQuest dialog prefilled with the faction as giver.

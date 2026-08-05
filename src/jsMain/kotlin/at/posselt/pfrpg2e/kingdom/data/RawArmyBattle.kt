@@ -33,4 +33,12 @@ external interface RawArmyBattle {
     var defenders: Array<RawBattleArmy>
     var log: Array<String>
     var status: String
+
+    /**
+     * Keys of the defeat consequences the GM has already applied from this battle's offer card
+     * (see [at.posselt.pfrpg2e.kingdom.defeatOffers]). Nullable and defaulted to empty on read, so
+     * battles persisted before defeat consequences existed load unchanged — same approach as
+     * [RawWarThreat.offerConsumed], which likewise needs no migration.
+     */
+    var defeatConsequencesApplied: Array<String>?
 }

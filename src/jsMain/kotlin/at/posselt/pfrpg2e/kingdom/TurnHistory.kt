@@ -79,6 +79,7 @@ fun formatTurnGazette(
     campaignClocks: List<String> = emptyList(),
     tributeRp: Int = 0,
     expeditionChronicle: List<RawExpeditionChronicleEntry> = emptyList(),
+    battleDefeats: List<String> = emptyList(),
     turn: Int = 0,
     localize: (key: String, data: AnyObject) -> String = ::defaultLocalize,
 ): String? {
@@ -94,6 +95,14 @@ fun formatTurnGazette(
         val data = js("{}")
         data.activities = activities.joinToString(", ")
         gazetteEvents.add(localize("kingdom.turnGazette.activities", data.unsafeCast<AnyObject>()))
+    }
+
+    // Losing a war battle now leaves a trace in Recent Turns; previously a defeat was archived
+    // silently and the turn record read exactly as if no battle had been fought.
+    if (battleDefeats.isNotEmpty()) {
+        val data = js("{}")
+        data.battles = battleDefeats.joinToString(", ")
+        gazetteEvents.add(localize("kingdom.turnGazette.battleDefeats", data.unsafeCast<AnyObject>()))
     }
 
     if (sizeChange > 0) {
@@ -194,6 +203,7 @@ fun defaultLocalize(key: String, data: AnyObject): String {
     return when (key) {
         "kingdom.turnGazette.tribute" -> "Tribute: +${dyn.tributeRp} RP collected from vassal states"
         "kingdom.turnGazette.activities" -> "Activities: ${dyn.activities}"
+        "kingdom.turnGazette.battleDefeats" -> "Defeated in battle: ${dyn.battles}"
         "kingdom.turnGazette.expansion" -> "Expansion: Claimed ${dyn.sizeChange} hex(es) (Size: ${dyn.currentSize})"
         "kingdom.turnGazette.caravanDeliveredRd" -> "Caravan delivered: ${dyn.summary} (+${dyn.bonusResourceDice} RD)"
         "kingdom.turnGazette.caravanDeliveredAmount" -> "Caravan delivered: ${dyn.summary} (delivered ${dyn.deliveredAmount})"

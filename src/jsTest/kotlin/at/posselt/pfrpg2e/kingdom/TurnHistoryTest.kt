@@ -150,6 +150,30 @@ class TurnHistoryTest {
     }
 
     @Test
+    fun formatTurnGazetteNamesBattlesLost() {
+        // A defeat used to leave no trace at all: the battle was archived and the turn record
+        // read exactly as if no battle had been fought.
+        val result = formatTurnGazette(
+            activities = emptyList(),
+            sizeChange = 0,
+            currentSize = 5,
+            battleDefeats = listOf("Siege of Tuskwater", "Ford Skirmish"),
+        )
+        assertEquals("Defeated in battle: Siege of Tuskwater, Ford Skirmish", result)
+    }
+
+    @Test
+    fun formatTurnGazetteOmitsBattleLineWhenNoneLost() {
+        val result = formatTurnGazette(
+            activities = listOf("Claim Hex"),
+            sizeChange = 0,
+            currentSize = 5,
+            battleDefeats = emptyList(),
+        )
+        assertEquals("Activities: Claim Hex", result)
+    }
+
+    @Test
     fun formatTurnGazetteExpansionOnly() {
         val result = formatTurnGazette(
             activities = emptyList(),

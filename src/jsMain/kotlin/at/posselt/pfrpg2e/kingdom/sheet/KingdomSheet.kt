@@ -34,6 +34,7 @@ import at.posselt.pfrpg2e.data.kingdom.settlements.SettlementType
 import at.posselt.pfrpg2e.kingdom.AutomateResources
 import at.posselt.pfrpg2e.kingdom.KingdomActor
 import at.posselt.pfrpg2e.kingdom.KingdomData
+import at.posselt.pfrpg2e.kingdom.offerDefeatConsequences
 import at.posselt.pfrpg2e.kingdom.RawCouncilCooldowns
 import at.posselt.pfrpg2e.kingdom.RawEq
 import at.posselt.pfrpg2e.kingdom.RawModifier
@@ -791,6 +792,14 @@ class KingdomSheet(
                                 )
                             }
                             actor.setKingdom(current)
+
+                            // A DEFEAT used to do nothing beyond archiving the battle: the threat
+                            // stayed active and unchanged, so losing every army to an invasion was
+                            // mechanically identical to never fighting. Offer the fallout instead —
+                            // GM-confirmed, per-consequence, never auto-applied.
+                            if (updated.status == BattleStatus.DEFEAT.value) {
+                                offerDefeatConsequences(game, actor, current, updated)
+                            }
 
                             // Dispatch syncBattleOutcome to sync HP/conditions/XP to PF2EArmy actors.
                             // Typed construction — the original raw js() literal left `actor` as a

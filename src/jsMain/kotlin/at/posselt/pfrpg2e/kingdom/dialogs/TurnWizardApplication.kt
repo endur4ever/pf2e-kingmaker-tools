@@ -10,6 +10,7 @@ import at.posselt.pfrpg2e.kingdom.restoreTurnWizardState
 import com.foundryvtt.pf2e.item.PF2EItem
 import at.posselt.pfrpg2e.kingdom.getPerformedActivities
 import at.posselt.pfrpg2e.kingdom.getActivity
+import at.posselt.pfrpg2e.data.armies.BattleStatus
 import at.posselt.pfrpg2e.kingdom.formatTurnGazette
 import at.posselt.pfrpg2e.kingdom.getExplodedFeatures
 import at.posselt.pfrpg2e.kingdom.data.getChosenFeatures
@@ -506,6 +507,10 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
     // Per-turn history record (gap analysis item 2): snapshot post-tick kingdom state.
     val clockEventNames = tickResult.clockEvents.map { it.label }.toTypedArray()
     val tributeRp = tickResult.changes.find { it.category == "resourcePoints" && it.field == "tribute" }?.newValue as? Int ?: 0
+    // Battles lost this turn, named in the gazette. Read before the tick archives them.
+    val battleDefeats = (kingdom.activeBattles ?: emptyArray())
+        .filter { it.status == BattleStatus.DEFEAT.value }
+        .map { it.name }
     val turnNotes = formatTurnGazette(
         activities = activitySummaries,
         sizeChange = sizeChange,
@@ -515,6 +520,7 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
         campaignClocks = tickResult.clockEvents.map { it.label },
         tributeRp = tributeRp,
         expeditionChronicle = kingdom.expeditionChronicle?.toList() ?: emptyList(),
+        battleDefeats = battleDefeats,
         turn = currentTurn,
         localize = ::t,
     )
@@ -529,6 +535,7 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
         campaignClocks = emptyList(),
         tributeRp = tributeRp,
         expeditionChronicle = kingdom.expeditionChronicle?.toList() ?: emptyList(),
+        battleDefeats = battleDefeats,
         turn = currentTurn,
         localize = ::t,
     )

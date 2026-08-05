@@ -1,0 +1,26 @@
+<h2>{{localizeKM "chatMessages.battleDefeat.offerTitle"}}</h2>
+<div class="km-battle-defeat-offer">
+    <p>{{localizeKM "chatMessages.battleDefeat.offerBody"}}</p>
+</div>
+<hr>
+<h3>{{localizeKM "chatMessages.companionAutonomy.gmActions"}}</h3>
+<div class="km-expedition-offers">
+    {{#each offers}}
+    <button type="button"
+            class="km-offer-battle-defeat"
+            data-kingdom-actor-uuid="{{../actorUuid}}"
+            data-battle-id="{{../battleId}}"
+            data-choice="{{this.key}}"
+            data-amount="{{this.amount}}">
+        {{this.label}}
+    </button>
+    {{/each}}
+    <button type="button"
+            class="km-offer-battle-defeat"
+            data-kingdom-actor-uuid="{{actorUuid}}"
+            data-battle-id="{{battleId}}"
+            data-choice="dismiss"
+            data-amount="0">
+        {{localizeKM "chatMessages.battleDefeat.dismiss"}}
+    </button>
+</div>
