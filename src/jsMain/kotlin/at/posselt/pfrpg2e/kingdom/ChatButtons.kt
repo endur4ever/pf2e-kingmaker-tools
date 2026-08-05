@@ -354,7 +354,15 @@ private val buttons = listOf(
         if (!Pfrpg2eKingdomCampingWeatherSettings.getEnableCompanionLeveling()) return@ChatButton
 
         val linkedActor = fromUuidOfTypes<PF2ECharacter>(companionActorUuid) ?: return@ChatButton
-        linkedActor.typeSafeUpdate { system.details.level.value = targetLevel }
+        // Expedition rewards now add XP to the real sheet, so a level-up must SPEND it the way a
+        // normal PF2e level-up does — consume one threshold and carry the remainder — otherwise
+        // the character would level while the XP bar stayed full and looked ready to level again.
+        val threshold = linkedActor.system.details.xp.max
+        val carriedXp = (linkedActor.system.details.xp.value - threshold).coerceAtLeast(0)
+        linkedActor.typeSafeUpdate {
+            system.details.level.value = targetLevel
+            system.details.xp.value = carriedXp
+        }
         postChatMessage(t("kingdom.companionLeveledUp", recordOf("name" to linkedActor.name, "level" to targetLevel)))
     },
     ChatButton("km-offer-injury") { game, actor, event, button ->

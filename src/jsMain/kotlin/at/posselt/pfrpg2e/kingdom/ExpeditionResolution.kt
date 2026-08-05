@@ -39,6 +39,7 @@ import at.posselt.pfrpg2e.utils.escapeHtml
 import at.posselt.pfrpg2e.utils.postChatMessage
 import at.posselt.pfrpg2e.utils.postChatTemplate
 import at.posselt.pfrpg2e.utils.t
+import at.posselt.pfrpg2e.utils.typeSafeUpdate
 import com.foundryvtt.core.Game
 import com.foundryvtt.core.dice.Roll
 import com.foundryvtt.pf2e.actor.PF2ECharacter
@@ -426,6 +427,9 @@ suspend fun applyExpeditionRewardToKingdom(
     val companionId = expedition.companionIds.firstOrNull()
     val levelingEnabled = Pfrpg2eKingdomCampingWeatherSettings.getEnableCompanionLeveling()
 
+    // Names of participants whose real PF2e sheet received the XP (for the confirmation line).
+    val sheetXpAwardedTo = mutableListOf<String>()
+
     // Reward + status restore for EVERY participant, not just the lead — the expedition
     // rolled once as a party, so all members share the accrued XP/influence. Restoring
     // expeditionStatus here is also what un-strands companions: a missed participant would
@@ -450,6 +454,36 @@ suspend fun applyExpeditionRewardToKingdom(
         // applied. (This clobber is why the injury handler used to consume the reward path
         // outright, which silently forfeited all XP/influence/loot.)
         companion.expeditionStatus = participantStatusAfterReward(companion.injuryDaysRemaining)
+
+        // Mirror the awarded XP onto the linked PF2e CHARACTER SHEET. Expedition XP used to be
+        // "shadow XP" visible only on the module's companion profile, so players saw nothing on
+        // their own sheet. The two tracks share a scale (XP_PER_LEVEL == PF2e's xp.max == 1000),
+        // so the amount transfers 1:1 with no conversion.
+        //
+        // Additive ONLY — the sheet's level is never touched here. Advancing a real PC stays a
+        // GM-confirmed offer (km-offer-companion-levelup), which is also what deducts the
+        // threshold from this XP pool. NPC-actor companions are skipped: the PF2e npc type has
+        // no system.details.xp.
+        if (expedition.accruedXp > 0) {
+            companion.actorUuid
+                ?.let { fromUuidOfTypes<PF2ECharacter>(it) }
+                ?.let { pc ->
+                    val newXp = pc.system.details.xp.value + expedition.accruedXp
+                    pc.typeSafeUpdate { system.details.xp.value = newXp }
+                    sheetXpAwardedTo += pc.name
+                }
+        }
+    }
+
+    // One line naming who actually received sheet XP, so "did it do anything?" is answerable
+    // without opening each sheet.
+    if (sheetXpAwardedTo.isNotEmpty()) {
+        postChatMessage(
+            t(
+                "kingdom.expeditionSheetXpAwarded",
+                recordOf("names" to sheetXpAwardedTo.joinToString(", "), "xp" to expedition.accruedXp),
+            )
+        )
     }
 
     // Personal-quest completion + reward.
