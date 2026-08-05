@@ -120,11 +120,17 @@ internal suspend fun resolveExpeditionCore(
     // scout->intel, treasure-hunt->loot swing). Pure; accrued here, spent at reward apply.
     val activityReward = expeditionActivityReward(expedition.activityId, expedition.tier, degree)
 
-    // When companion leveling is disabled, zero out XP so the reward offer shows 0
-    // and clicking "Apply Reward" gives no XP. Expeditions still resolve for flavor.
+    // accruedXp is the REAL XP the expedition earned, always — every expedition now updates the
+    // participants' character sheets, so this must not be zeroed by a module setting. (It used to
+    // be run through accruedExpeditionXp here, which zeroed it whenever companion leveling was
+    // disabled; the sheet then silently received nothing.)
+    //
+    // The "Enable Companion Leveling" setting still governs the module's SHADOW progression only:
+    // applyExpeditionParticipantReward gates companion.level/xp behind it (via accruedExpeditionXp),
+    // and shouldOfferLevelUp gates the real-actor level-up offer behind it. Sheet XP is unaffected.
     val levelingEnabled = Pfrpg2eKingdomCampingWeatherSettings.getEnableCompanionLeveling()
     val multipliedXp = (result.xpAwarded * activityReward.xpMultiplier).roundToInt()
-    expedition.accruedXp = accruedExpeditionXp(multipliedXp, levelingEnabled)
+    expedition.accruedXp = multipliedXp
     expedition.accruedInfluenceDelta = result.influenceDelta
     expedition.accruedInjuries = result.injuryConditions
     expedition.lootTier = activityReward.lootTierOverride ?: result.lootTier
