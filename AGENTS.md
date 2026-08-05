@@ -49,6 +49,26 @@ val bad = fromUuidOfTypes<PF2ECharacter>(uuid)                          // ❌ a
 python3 scripts/check_uuid_lookups.py
 ```
 
+## Handlebars: `../` does not escape a partial
+
+Inside `{{#each}}`, a bare identifier resolves against the ROW only — `{{#if isGM}}`
+is silently falsy when `isGM` lives on the parent context. The usual fix is `../isGM`.
+But a partial gets no frame above its own context, so at a partial's top level `../isGM`
+is just as falsy. Verified against Handlebars 4.7.9 (the build Foundry serves):
+
+```
+{{#each rows}}{{> p this}}{{/each}}
+p = "[bare:{{#if isGM}}Y{{else}}N{{/if}} parent:{{#if ../isGM}}Y{{else}}N{{/if}} root:{{#if @root.isGM}}Y{{else}}N{{/if}}]"
+-> [bare:N parent:N root:Y]
+```
+
+Use `../x` only when the enclosing `{{#each}}`/`{{#with}}` is in the SAME file;
+otherwise use `@root.x`. Note `{{#if}}` does not add a frame, only each/with do.
+
+```bash
+python3 scripts/check_hbs_scope.py
+```
+
 ## Building (needs JDK 25 + JDK 17)
 
 ```bash
