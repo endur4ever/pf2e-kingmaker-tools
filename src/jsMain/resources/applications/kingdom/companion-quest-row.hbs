@@ -8,7 +8,7 @@
     {{#if influenceReward}}
     <span class="km-pqr-reward"><i class="fa-solid fa-heart"></i> +{{influenceReward}}</span>
     {{/if}}
-    {{#if ../isGM}}
+    {{#if @root.isGM}}
     <div class="km-pqr-actions">
         {{#if visibleToPlayers}}
         <i class="fa-solid fa-eye" title="{{localizeKM 'kingdom.companion.quest.visibleToPlayers'}}"></i>
