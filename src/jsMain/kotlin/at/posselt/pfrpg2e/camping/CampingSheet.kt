@@ -93,6 +93,7 @@ import at.posselt.pfrpg2e.data.hex.HexContent
 import at.posselt.pfrpg2e.data.hex.HexContentType
 import at.posselt.pfrpg2e.data.hex.HexContentVisibility
 import at.posselt.pfrpg2e.data.regions.Terrain
+import at.posselt.pfrpg2e.companion.formatHexKeyLabel
 import at.posselt.pfrpg2e.camping.routing.FoundryTravelProvider
 import at.posselt.pfrpg2e.camping.routing.TravelRouter
 import at.posselt.pfrpg2e.camping.routing.TravelPlan as RoutingTravelPlan
@@ -1592,10 +1593,7 @@ class CampingSheet(
             )
         }
 
-        val hexKeys = getHexKeys()
-        val hexKeyOptions = hexKeys.map { key ->
-            SelectOption(value = key, label = key)
-        }
+        val hexKeyOptions = getHexKeyOptions()
         val travelStartHexSelect = Select(
             label = t("camping.startHex"),
             name = "travelStartHex",
@@ -1942,19 +1940,29 @@ class CampingSheet(
         }
     }
 
-    private fun getHexKeys(): List<String> {
-        val region = kotlin.js.js("kingmaker.region.hexes") ?: return emptyList()
-        val keys = mutableListOf<String>()
-        val len = region.length as? Int ?: return emptyList()
-        for (i in 0 until len) {
-            val hex = region[i]
-            val key = hex?.key?.toString()
-            if (key != null) {
-                keys.add(key)
+    /**
+     * Every hex on the region map, as start/end options for the route planner.
+     *
+     * `kingmaker.region.hexes` is a Foundry Collection, so it exposes `contents` and `size` — it
+     * has NO `length`. Reading it as an array through a raw `js(...)` handle made `length`
+     * undefined, so the old implementation returned an empty list on every call and both
+     * dropdowns rendered with nothing but their placeholder. Every other hex lookup in the
+     * codebase already goes through `.contents` / `.find`; this one is now the same.
+     *
+     * Labelled like the expedition destination picker — "Name (col.row)", or just the coordinate
+     * when the hex is unnamed — because a bare region key such as "12034" means nothing to a GM.
+     */
+    private fun getHexKeyOptions(): List<SelectOption> = runCatching {
+        kingmaker.region.hexes.contents
+            .map { hex ->
+                val key = hex.key.toString()
+                val coordinate = formatHexKeyLabel(key) ?: key
+                val name = hex.name
+                val label = if (name.isNotBlank() && name != coordinate) "$name ($coordinate)" else coordinate
+                SelectOption(value = key, label = label)
             }
-        }
-        return keys.sorted()
-    }
+            .sortedBy { it.label }
+    }.getOrDefault(emptyList())
 
 }
 
