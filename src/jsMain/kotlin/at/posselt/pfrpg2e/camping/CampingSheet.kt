@@ -1726,7 +1726,11 @@ class CampingSheet(
                 val terrainCounts = mutableMapOf<Terrain, Int>()
                 var riverCrossings = 0
                 var roadCount = 0
-                for (hexKey in path) {
+                // Hexes ENTERED, matching the distance and cost above. Including the starting hex
+                // made the summary contradict the rest of the panel — it counted the terrain of
+                // the hex the party is standing in, and reported a river already beside them as a
+                // crossing they were about to make.
+                for (hexKey in path.drop(1)) {
                     val hexObj = com.foundryvtt.kingmaker.kingmaker.region.hexes.find { it.key.toString() == hexKey }
                     val terrainName = hexObj?.zone?.terrain
                     val terrain = terrainName?.let { fromCamelCase<Terrain>(it) }
