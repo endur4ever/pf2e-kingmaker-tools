@@ -19,7 +19,14 @@ class TravelRouteTest {
     private fun service(
         hexContents: Map<String, HexContent> = emptyMap(),
         weatherModifier: Double = 1.0,
-    ) = TravelService(hexContents = hexContents, weatherModifier = weatherModifier)
+        riverNoBridgeExtraDegrees: Int = 0,
+        pavedSettlementHexKeys: Set<String> = emptySet(),
+    ) = TravelService(
+        hexContents = hexContents,
+        weatherModifier = weatherModifier,
+        riverNoBridgeExtraDegrees = riverNoBridgeExtraDegrees,
+        pavedSettlementHexKeys = pavedSettlementHexKeys,
+    )
 
     @Test
     fun testOpenTerrainCostsOneTravelActivityPerHex() {
@@ -79,10 +86,11 @@ class TravelRouteTest {
     }
 
     @Test
-    fun testUnbridgedRiverAddsOneStepAndABridgeNegatesIt() {
-        // House rule (docs/house-rules.md): "Increase the Travel activity cost by 1 degree (up to
-        // a maximum of 3) if PCs are travelling through a hex with a river and no bridge".
-        val river = service().calculateRoute(
+    fun testUnbridgedRiverAddsTheConfiguredSurchargeAndABridgeNegatesIt() {
+        // House rule (docs/house-rules.md), opt-in via travelCostRiverNoBridgeAdditional:
+        // "Increase the Travel activity cost by 1 degree (up to a maximum of 3) if PCs are
+        // travelling through a hex with a river and no bridge".
+        val river = service(riverNoBridgeExtraDegrees = 1).calculateRoute(
             path = listOf("start", "river"),
             secondsPerActivity = eightHours,
             getTerrain = { Terrain.PLAINS },
@@ -90,7 +98,7 @@ class TravelRouteTest {
         )
         assertEquals(2.0, river.totalCost)
 
-        val bridged = service().calculateRoute(
+        val bridged = service(riverNoBridgeExtraDegrees = 1).calculateRoute(
             path = listOf("start", "river"),
             secondsPerActivity = eightHours,
             getTerrain = { Terrain.PLAINS },
@@ -103,7 +111,7 @@ class TravelRouteTest {
     fun testCostIsCappedAtThreeActivities() {
         // Greater difficult terrain plus an unbridged river would be 4 without the house rule's
         // "up to a maximum of 3" ceiling, which nothing previously enforced.
-        val route = service().calculateRoute(
+        val route = service(riverNoBridgeExtraDegrees = 1).calculateRoute(
             path = listOf("start", "swampRiver"),
             secondsPerActivity = eightHours,
             getTerrain = { Terrain.SWAMP },
@@ -197,5 +205,41 @@ class TravelRouteTest {
             assertEquals(0.0, route.totalCost)
             assertEquals(0L, route.estimatedDurationSeconds)
         }
+    }
+
+    @Test
+    fun testRiverCostsNothingExtraUnlessTheHouseRuleIsEnabled() {
+        // Default is RAW: crossing a river is not a Travel surcharge.
+        val route = service().calculateRoute(
+            path = listOf("start", "river"),
+            secondsPerActivity = eightHours,
+            getTerrain = { Terrain.PLAINS },
+            getFeatures = { listOf("river") },
+        )
+        assertEquals(1.0, route.totalCost)
+    }
+
+    @Test
+    fun testPavedSettlementHexCostsOneActivity() {
+        // House rule: a settlement hex with Paved Streets drops to 1 Travel activity even in
+        // greater difficult terrain.
+        val route = service(pavedSettlementHexKeys = setOf("town")).calculateRoute(
+            path = listOf("start", "town"),
+            secondsPerActivity = eightHours,
+            getTerrain = { Terrain.MOUNTAIN },
+            getFeatures = { emptyList() },
+        )
+        assertEquals(1.0, route.totalCost)
+    }
+
+    @Test
+    fun testUnpavedSettlementHexStillPaysItsTerrain() {
+        val route = service().calculateRoute(
+            path = listOf("start", "town"),
+            secondsPerActivity = eightHours,
+            getTerrain = { Terrain.MOUNTAIN },
+            getFeatures = { emptyList() },
+        )
+        assertEquals(3.0, route.totalCost)
     }
 }

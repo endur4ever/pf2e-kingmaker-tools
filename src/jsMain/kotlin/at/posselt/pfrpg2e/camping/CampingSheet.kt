@@ -94,6 +94,7 @@ import at.posselt.pfrpg2e.data.hex.HexContentType
 import at.posselt.pfrpg2e.data.hex.HexContentVisibility
 import at.posselt.pfrpg2e.data.regions.Terrain
 import at.posselt.pfrpg2e.companion.formatHexKeyLabel
+import at.posselt.pfrpg2e.kingdom.getAllSettlements
 import kotlin.math.roundToInt
 import at.posselt.pfrpg2e.camping.routing.FoundryTravelProvider
 import at.posselt.pfrpg2e.camping.routing.TravelRouter
@@ -1678,9 +1679,40 @@ class CampingSheet(
         var travelPathError: String? = null
 
         if (startHex != null && endHex != null && startHex.isNotEmpty() && endHex.isNotEmpty()) {
+            // Both travel house rules are configurable settings that were never read by the
+            // route planner. RAW has no cost for CROSSING a river (only for travelling along
+            // one), so the river surcharge is whatever the GM configured and 0 by default —
+            // it used to be hardcoded to 1 regardless of the setting.
+            val riverExtra = Pfrpg2eKingdomCampingWeatherSettings.getTravelCostRiverNoBridgeAdditional()
+            // "Hexes containing a settlement reduce their Travel cost to 1 if you've constructed
+            // Paved Streets". Settlements are located by matching their scene name to a region hex
+            // name, the same way HexGridSync places settlement markers on the map.
+            val pavedSettlementHexKeys = if (Pfrpg2eKingdomCampingWeatherSettings.getPavedStreetsReduceTravelCost()) {
+                runCatching {
+                    val kingdomActor = game.getKingdomActors().firstOrNull()
+                    // Settlement.name is the settlement scene's name (Scenes.kt parseSettlement),
+                    // which is the key HexGridSync matches against region hex names.
+                    val paved = kingdomActor?.getKingdom()
+                        ?.getAllSettlements(game)
+                        ?.allSettlements
+                        .orEmpty()
+                        .filter { it.pavedStreets }
+                        .map { it.name.lowercase().trim() }
+                        .toSet()
+                    kingmaker.region.hexes.contents
+                        .filter { it.name.lowercase().trim() in paved }
+                        .map { it.key.toString() }
+                        .toSet()
+                }.getOrDefault(emptySet())
+            } else {
+                emptySet()
+            }
+
             val service = TravelService(
                 hexContents = hexContentsMap,
                 weatherModifier = weatherModifier,
+                riverNoBridgeExtraDegrees = riverExtra,
+                pavedSettlementHexKeys = pavedSettlementHexKeys,
             )
             // Routes through the SHARED router (the same one kingdom caravan routing uses)
             // rather than a private Dijkstra with an inline copy of the cost rules. The edge cost

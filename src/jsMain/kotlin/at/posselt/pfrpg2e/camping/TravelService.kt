@@ -25,6 +25,13 @@ import kotlin.math.roundToLong
 class TravelService(
     private val hexContents: Map<String, HexContent>,
     private val weatherModifier: Double = 1.0,
+    /**
+     * Extra Travel degrees for a hex with a river and no bridge. RAW has no crossing cost, so this
+     * comes from the `travelCostRiverNoBridgeAdditional` setting and is 0 unless the GM opts in.
+     */
+    private val riverNoBridgeExtraDegrees: Int = 0,
+    /** Hex keys holding a settlement with Paved Streets, when that house rule is enabled. */
+    private val pavedSettlementHexKeys: Set<String> = emptySet(),
 ) {
     /**
      * @param path hex keys start..goal inclusive; the starting hex is not charged, since the party
@@ -58,11 +65,13 @@ class TravelService(
         var totalActivities = 0
         for (hexKey in path.drop(1)) {
             val features = resolveFeatures(hexKey)
+            val unbridgedRiver = "river" in features && "bridge" !in features
             totalActivities += travelActivityCost(
                 difficulty = terrainDifficulty(resolveTerrain(hexKey)),
                 hasRoad = "road" in features,
-                unbridgedRiver = "river" in features && "bridge" !in features,
+                riverExtraDegrees = if (unbridgedRiver) riverNoBridgeExtraDegrees else 0,
                 extraDegrees = hexContents[hexKey]?.travelModifier ?: 0,
+                pavedSettlement = hexKey in pavedSettlementHexKeys,
             )
         }
 

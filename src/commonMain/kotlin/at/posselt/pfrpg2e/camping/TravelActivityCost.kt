@@ -39,21 +39,27 @@ fun terrainDifficulty(terrain: Terrain?): TerrainDifficulty = when (terrain) {
  * - Base cost is the destination terrain's difficulty (1 / 2 / 3).
  * - A road makes it "one step better than the surrounding terrain" (RAW), i.e. one activity less,
  *   never below open.
- * - An unbridged river adds one degree. That is the module's own house rule, not RAW: RAW only
- *   covers travelling ALONG water, saying nothing about crossing it. `docs/house-rules.md` adds
- *   the crossing cost so that building bridges is worth doing.
+ * - [riverExtraDegrees] is added when the hex has a river and no bridge. RAW says nothing about
+ *   CROSSING water — only about travelling along it — so this is the module's optional house rule,
+ *   configured by the `travelCostRiverNoBridgeAdditional` setting and 0 (i.e. RAW) by default.
+ * - [pavedSettlement] applies `docs/house-rules.md`: "Hexes containing a settlement reduce their
+ *   Travel cost to 1 if you've constructed Paved Streets". It overrides everything else, since a
+ *   paved settlement is passable regardless of the terrain it was built on. Gated by the
+ *   `pavedStreetsReduceTravelCost` setting, off by default.
  * - [extraDegrees] carries per-hex content modifiers (a hazard, a landmark) in the same units.
  *
- * The house-rule ceiling of 3 applies to the total, so a swamp with an unbridged river costs 3
- * rather than 4 — previously nothing capped it.
+ * The house-rule ceiling of 3 applies to the total, so a swamp with a river penalty costs 3 rather
+ * than 4 — nothing capped it before.
  */
 fun travelActivityCost(
     difficulty: TerrainDifficulty,
     hasRoad: Boolean = false,
-    unbridgedRiver: Boolean = false,
+    riverExtraDegrees: Int = 0,
     extraDegrees: Int = 0,
+    pavedSettlement: Boolean = false,
 ): Int {
+    if (pavedSettlement) return TerrainDifficulty.OPEN.travelActivities
     val afterRoad = if (hasRoad) difficulty.travelActivities - 1 else difficulty.travelActivities
-    val total = afterRoad + extraDegrees + if (unbridgedRiver) 1 else 0
+    val total = afterRoad + extraDegrees + riverExtraDegrees
     return total.coerceIn(TerrainDifficulty.OPEN.travelActivities, MAX_TRAVEL_ACTIVITIES)
 }
