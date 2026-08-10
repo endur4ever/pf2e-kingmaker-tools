@@ -11,7 +11,24 @@ import kotlin.math.roundToLong
  * The router takes a [TravelProvider] for hex topology/content and a [TravelPlan] for
  * cost modifiers, and returns a [TravelRoute] with the optimal path and total cost.
  */
-class TravelRouter(private val provider: TravelProvider) {
+/**
+ * Cost of stepping into hex [to]. Supplied so path SELECTION can use the same model that prices
+ * the finished route — otherwise the router optimises one cost function while the UI reports
+ * another, and it will happily route around a hex that is actually cheap.
+ */
+fun interface TravelEdgeCost {
+    fun cost(provider: TravelProvider, to: String, plan: TravelPlan): Double
+}
+
+class TravelRouter(
+    private val provider: TravelProvider,
+    /**
+     * Defaults to the additive modifier model, which is what kingdom caravan routing is calibrated
+     * against (fractional per-terrain costs converted to turns by caravanEtaTurns). The camping
+     * route planner passes the hexploration Travel-activity model instead.
+     */
+    private val edgeCost: TravelEdgeCost? = null,
+) {
 
     /**
      * Calculates the optimal travel route from start to end using Dijkstra's algorithm.
@@ -49,7 +66,8 @@ class TravelRouter(private val provider: TravelProvider) {
 
             for (neighbor in provider.getAdjacentHexKeys(current)) {
                 if (neighbor !in queue && neighbor != current) {
-                    val weight = calculateEdgeWeight(current, neighbor, plan)
+                    val weight = edgeCost?.cost(provider, neighbor, plan)
+                        ?: calculateEdgeWeight(current, neighbor, plan)
                     val alt = currentDist + weight
 
                     if (alt < (distances[neighbor] ?: Double.POSITIVE_INFINITY)) {

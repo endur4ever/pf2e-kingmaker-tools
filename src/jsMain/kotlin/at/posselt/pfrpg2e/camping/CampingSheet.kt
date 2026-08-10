@@ -1726,7 +1726,20 @@ class CampingSheet(
                 infrastructureModifiers = defaultInfrastructureModifiers,
                 weatherModifier = 1.0,
             )
-            val path = TravelRouter(FoundryTravelProvider())
+            // Select the path with the SAME cost model that prices it below, so the router
+            // cannot optimise one function while the panel reports another — most visibly, it
+            // would otherwise route around a paved settlement hex that actually costs 1.
+            val path = TravelRouter(FoundryTravelProvider()) { provider, to, _ ->
+                val features = provider.getFeaturesForHex(to)
+                val unbridged = "river" in features && "bridge" !in features
+                travelActivityCost(
+                    difficulty = terrainDifficulty(provider.getTerrainForHex(to)),
+                    hasRoad = "road" in features,
+                    riverExtraDegrees = if (unbridged) riverExtra else 0,
+                    extraDegrees = provider.getContentForHex(to).sumOf { it.travelModifier ?: 0 },
+                    pavedSettlement = to in pavedSettlementHexKeys,
+                ).toDouble()
+            }
                 .calculateRoute(startHex, endHex, routingPlan)
                 ?.path
                 ?: emptyList()

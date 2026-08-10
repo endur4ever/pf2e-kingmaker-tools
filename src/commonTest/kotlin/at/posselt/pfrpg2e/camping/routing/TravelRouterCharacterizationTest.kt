@@ -256,3 +256,47 @@ class TravelRouterCharacterizationTest {
         assertEquals(0L, route.estimatedDurationSeconds)
     }
 }
+/**
+ * The router lets a caller supply the cost model so path SELECTION can match how the finished
+ * route is PRICED. Without it the camping planner optimised additive hour-ish weights while
+ * pricing in Travel activities, and would route around a hex that was actually cheap.
+ */
+class TravelRouterEdgeCostStrategyTest {
+    private class MockProvider(
+        private val adjacencies: Map<String, List<String>>,
+    ) : TravelProvider {
+        override fun getAdjacentHexKeys(hexKey: String): List<String> = adjacencies[hexKey] ?: emptyList()
+        override fun getContentForHex(hexKey: String): List<HexContent> = emptyList()
+        override fun getTerrainForHex(hexKey: String): Terrain? = null
+        override fun getFeaturesForHex(hexKey: String): List<String> = emptyList()
+    }
+
+    // A -> cheap -> G costs 2; A -> pricey -> G costs 20 under the custom model.
+    private val provider = MockProvider(
+        mapOf(
+            "A" to listOf("pricey", "cheap"),
+            "cheap" to listOf("G"),
+            "pricey" to listOf("G"),
+        ),
+    )
+
+    @Test
+    fun `a supplied cost model drives both the chosen path and its total`() {
+        val router = TravelRouter(provider) { _, to, _ -> if (to == "pricey") 10.0 else 1.0 }
+
+        val route = router.calculateRoute("A", "G", TravelPlan())
+
+        assertNotNull(route)
+        assertEquals(listOf("A", "cheap", "G"), route.path)
+        assertEquals(2.0, route.totalCost)
+    }
+
+    @Test
+    fun `without a cost model the built-in additive weights are used unchanged`() {
+        // Caravan routing relies on this default staying put.
+        val route = TravelRouter(provider).calculateRoute("A", "G", TravelPlan())
+
+        assertNotNull(route)
+        assertEquals(2.0, route.totalCost, "two edges at the 1.0 base cost")
+    }
+}
