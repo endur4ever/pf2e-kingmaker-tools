@@ -21,7 +21,7 @@ class TravelRouteTest {
 
         // 1. Forest path
         val forestRoute = service.calculateRoute(
-            path = listOf("forestHex"),
+            path = listOf("startHex", "forestHex"),
             partySpeedMultiplier = 1.0,
             getTerrain = { if (it == "forestHex") Terrain.FOREST else Terrain.PLAINS },
             getFeatures = { emptyList() }
@@ -31,7 +31,7 @@ class TravelRouteTest {
 
         // 2. Road path
         val roadRoute = service.calculateRoute(
-            path = listOf("roadHex"),
+            path = listOf("startHex", "roadHex"),
             partySpeedMultiplier = 1.0,
             getTerrain = { Terrain.PLAINS },
             getFeatures = { if (it == "roadHex") listOf("road") else emptyList() }
@@ -53,7 +53,7 @@ class TravelRouteTest {
 
         // 1. River without bridge
         val riverRoute = service.calculateRoute(
-            path = listOf("riverHex"),
+            path = listOf("startHex", "riverHex"),
             partySpeedMultiplier = 1.0,
             getTerrain = { Terrain.PLAINS },
             getFeatures = { if (it == "riverHex") listOf("river") else emptyList() }
@@ -63,7 +63,7 @@ class TravelRouteTest {
 
         // 2. River with bridge
         val bridgeRoute = service.calculateRoute(
-            path = listOf("bridgeHex"),
+            path = listOf("startHex", "bridgeHex"),
             partySpeedMultiplier = 1.0,
             getTerrain = { Terrain.PLAINS },
             getFeatures = { if (it == "bridgeHex") listOf("river", "bridge") else emptyList() }
@@ -81,7 +81,7 @@ class TravelRouteTest {
 
         // Fast party
         val fastRoute = service.calculateRoute(
-            path = listOf("hex1"),
+            path = listOf("startHex", "hex1"),
             partySpeedMultiplier = 2.0,
             getTerrain = { Terrain.PLAINS },
             getFeatures = { emptyList() }
@@ -92,7 +92,7 @@ class TravelRouteTest {
 
         // Slow party
         val slowRoute = service.calculateRoute(
-            path = listOf("hex1"),
+            path = listOf("startHex", "hex1"),
             partySpeedMultiplier = 0.5,
             getTerrain = { Terrain.PLAINS },
             getFeatures = { emptyList() }
@@ -111,7 +111,7 @@ class TravelRouteTest {
         // Sunny weather (modifier = 1.0)
         val sunnyService = TravelService(hexContents = hexContents, weatherModifier = 1.0)
         val sunnyRoute = sunnyService.calculateRoute(
-            path = listOf("hex1"),
+            path = listOf("startHex", "hex1"),
             partySpeedMultiplier = 1.0,
             getTerrain = { Terrain.PLAINS },
             getFeatures = { emptyList() }
@@ -121,7 +121,7 @@ class TravelRouteTest {
         // Heavy rain/snow (modifier = 1.5)
         val rainService = TravelService(hexContents = hexContents, weatherModifier = 1.5)
         val rainRoute = rainService.calculateRoute(
-            path = listOf("hex1"),
+            path = listOf("startHex", "hex1"),
             partySpeedMultiplier = 1.0,
             getTerrain = { Terrain.PLAINS },
             getFeatures = { emptyList() }
@@ -129,5 +129,64 @@ class TravelRouteTest {
         assertEquals(1.5, rainRoute.totalCost)
 
         assertTrue(rainRoute.totalCost > sunnyRoute.totalCost)
+    }
+
+    @Test
+    fun testStartingHexIsNotCharged() {
+        // The party is already standing in the first hex of the path, so it costs nothing to
+        // "enter" it. Billing it added an extra hex of travel time to every single route.
+        val service = TravelService(hexContents = emptyMap())
+
+        val oneStep = service.calculateRoute(
+            path = listOf("a", "b"),
+            partySpeedMultiplier = 1.0,
+            getTerrain = { Terrain.PLAINS },
+            getFeatures = { emptyList() },
+        )
+        assertEquals(1.0, oneStep.totalCost, "A -> B is ONE hex of travel")
+
+        val twoSteps = service.calculateRoute(
+            path = listOf("a", "b", "c"),
+            partySpeedMultiplier = 1.0,
+            getTerrain = { Terrain.PLAINS },
+            getFeatures = { emptyList() },
+        )
+        assertEquals(2.0, twoSteps.totalCost, "A -> B -> C is TWO hexes of travel")
+    }
+
+    @Test
+    fun testGoingNowhereCostsNothing() {
+        val service = TravelService(hexContents = emptyMap())
+        for (path in listOf(emptyList(), listOf("a"))) {
+            val route = service.calculateRoute(
+                path = path,
+                partySpeedMultiplier = 1.0,
+                getTerrain = { Terrain.PLAINS },
+                getFeatures = { emptyList() },
+            )
+            assertEquals(0.0, route.totalCost, "a route that never leaves its hex is free")
+            assertEquals(0L, route.estimatedDurationSeconds)
+        }
+    }
+
+    @Test
+    fun testCostAgreesWithTheRouterForTheSamePath() {
+        // TravelRouter's Dijkstra sums edge weights into each destination, i.e. it already
+        // excludes the start. TravelService must total the same thing for the same path, or the
+        // route the planner CHOOSES and the hours it REPORTS come from different cost models.
+        val terrainByHex = mapOf("a" to Terrain.PLAINS, "b" to Terrain.FOREST, "c" to Terrain.HILLS)
+        val terrainModifiers = mapOf(Terrain.PLAINS to 0.0, Terrain.FOREST to 1.0, Terrain.HILLS to 2.0)
+        val service = TravelService(
+            hexContents = emptyMap(),
+            terrainModifiers = terrainModifiers,
+        )
+        val route = service.calculateRoute(
+            path = listOf("a", "b", "c"),
+            partySpeedMultiplier = 1.0,
+            getTerrain = { terrainByHex[it] },
+            getFeatures = { emptyList() },
+        )
+        // Entering b: 1 + 1 (forest). Entering c: 1 + 2 (hills). Start a: free.
+        assertEquals(5.0, route.totalCost)
     }
 }

@@ -1773,7 +1773,9 @@ class CampingSheet(
                 }
                 travelRouteContext = TravelRouteUiContext(
                     totalCost = route.totalCost,
-                    totalDistance = path.size,
+                    // Hexes TRAVELLED, not hexes occupied: the path includes the hex the
+                    // party starts in, so A -> B -> C is three entries but two hexes of travel.
+                    totalDistance = (path.size - 1).coerceAtLeast(0),
                     estimatedDuration = formatSeconds(route.estimatedDurationSeconds.toInt()),
                     path = route.path.toTypedArray(),
                     modifiers = routeModifiersList.toTypedArray(),

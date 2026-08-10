@@ -40,7 +40,11 @@ class TravelService(
             }
         }
 
-        for (hexKey in path) {
+        // Charge per hex ENTERED, so the starting hex is free — the party is already standing in
+        // it. `path` is a Dijkstra reconstruction and therefore includes the start, so iterating
+        // all of it billed one extra hex of travel time on every route. TravelRouter's own
+        // Dijkstra already sums edge weights only; this brings the two into agreement.
+        for (hexKey in path.drop(1)) {
             val content = hexContents[hexKey]
             var hexCost = 1.0
             
