@@ -1578,9 +1578,8 @@ class CampingSheet(
         val travelSpeed = try {
             actor.system.movement.speeds.travel.value.toDouble()
         } catch (e: Throwable) {
-            TRAVEL_SPEED_BASELINE_FEET.toDouble()
+            DEFAULT_PARTY_SPEED_FEET.toDouble()
         }
-        val partySpeedMultiplier = travelSpeed / TRAVEL_SPEED_BASELINE_FEET
 
         // Explain the pace in the UI rather than leaving players to reverse-engineer it: the
         // party Speed is PF2e's minimum across members, and the route planner turns it into a
@@ -1611,19 +1610,13 @@ class CampingSheet(
                 t(
                     "camping.travelSpeedHelpPace",
                     recordOf(
-                        "speed" to speedBreakdown.partySpeedFeet.toString(),
-                        "baseline" to speedBreakdown.baselineFeet.toString(),
-                        "multiplier" to ((speedBreakdown.multiplier * 100).roundToInt() / 100.0).toString(),
+                        "activities" to speedBreakdown.hexplorationActivitiesPerDay.toString(),
+                        "hours" to LocalTime.fromSecondOfDay(getHexplorationActivitySeconds()).toDateInputString(),
                     ),
                 )
             )
             add(t("camping.travelSpeedHelpRouteFormula"))
-            add(
-                t(
-                    "camping.travelSpeedHelpHexploration",
-                    recordOf("activities" to speedBreakdown.hexplorationActivitiesPerDay.toString()),
-                )
-            )
+            add(t("camping.travelSpeedHelpHexploration"))
         }
         // The hover tooltip is a single plain-text line: it goes into a data-tooltip attribute,
         // which Handlebars escapes, and it must stay escaped because member names are actor names
@@ -1632,9 +1625,8 @@ class CampingSheet(
         val travelSpeedTooltip = t(
             "camping.travelSpeedHelpPace",
             recordOf(
-                "speed" to speedBreakdown.partySpeedFeet.toString(),
-                "baseline" to speedBreakdown.baselineFeet.toString(),
-                "multiplier" to ((speedBreakdown.multiplier * 100).roundToInt() / 100.0).toString(),
+                "activities" to speedBreakdown.hexplorationActivitiesPerDay.toString(),
+                "hours" to LocalTime.fromSecondOfDay(getHexplorationActivitySeconds()).toDateInputString(),
             ),
         )
         val travelSpeedDetails = speedTooltipLines.toTypedArray()
@@ -1688,9 +1680,7 @@ class CampingSheet(
         if (startHex != null && endHex != null && startHex.isNotEmpty() && endHex.isNotEmpty()) {
             val service = TravelService(
                 hexContents = hexContentsMap,
-                terrainModifiers = defaultTerrainModifiers,
-                infrastructureModifiers = defaultInfrastructureModifiers,
-                weatherModifier = weatherModifier
+                weatherModifier = weatherModifier,
             )
             // Routes through the SHARED router (the same one kingdom caravan routing uses)
             // rather than a private Dijkstra with an inline copy of the cost rules. The edge cost
@@ -1709,19 +1699,25 @@ class CampingSheet(
                 ?.path
                 ?: emptyList()
             if (path.isNotEmpty()) {
+                // One hexploration activity, in seconds: the 8-hour exploration day divided
+                // by the party's activities per day. That already folds in the party Speed, the
+                // minimumTravelSpeed override, forced march and the hex size, so the route
+                // planner and the hexploration counter above it now agree by construction.
                 val route = service.calculateRoute(
                     path = path,
-                    partySpeedMultiplier = partySpeedMultiplier
+                    secondsPerActivity = getHexplorationActivitySeconds().toDouble(),
                 )
                 
                 val routeModifiersList = mutableListOf<String>()
                 if (weatherModifier != 1.0) {
                     routeModifiersList.add(t("camping.weatherModifierLabel", recordOf("value" to weatherModifier.toString())))
                 }
-                if (partySpeedMultiplier != 1.0) {
-                    val speedPct = (partySpeedMultiplier * 100).toInt()
-                    routeModifiersList.add(t("camping.partySpeedModifierLabel", recordOf("value" to "$speedPct%")))
-                }
+                routeModifiersList.add(
+                    t(
+                        "camping.activitiesPerDayLabel",
+                        recordOf("activities" to speedBreakdown.hexplorationActivitiesPerDay.toString()),
+                    )
+                )
                 
                 val terrainCounts = mutableMapOf<Terrain, Int>()
                 var riverCrossings = 0

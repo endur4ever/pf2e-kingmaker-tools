@@ -3,29 +3,45 @@ package at.posselt.pfrpg2e.camping
 import at.posselt.pfrpg2e.data.hex.HexContent
 import at.posselt.pfrpg2e.data.regions.Terrain
 import at.posselt.pfrpg2e.fromCamelCase
+import kotlin.math.roundToLong
 
+/**
+ * Prices a chosen route in Travel activities — the unit hexploration actually uses.
+ *
+ * This used to invent its own scale: a flat 1 hour per hex, terrain as additive hours, and the
+ * party's Speed in FEET divided by 24 (which is miles-per-day at Speed 30 in PF2e's travel table,
+ * so the units did not even agree). At Speed 25 that priced a plains hex at 0.96 h when the rules
+ * make it a full Travel activity — roughly five times too fast, and inconsistent with the
+ * hexploration counter on the same sheet.
+ *
+ * Now: each hex entered costs 1-3 Travel activities (see [travelActivityCost]), and the duration
+ * is that count times the length of one hexploration activity, which the sheet derives from the
+ * party's activities per day. Party Speed therefore enters exactly where the rules put it —
+ * activities per day — instead of through an invented multiplier.
+ *
+ * Travel is only one hexploration activity. Reconnoitering a hex costs the same again and is a
+ * SEPARATE activity, so it is deliberately not part of a route estimate.
+ */
 class TravelService(
     private val hexContents: Map<String, HexContent>,
-    private val terrainModifiers: Map<Terrain, Double> = emptyMap(),
-    private val infrastructureModifiers: Map<String, Double> = emptyMap(),
-    private val weatherModifier: Double = 1.0
+    private val weatherModifier: Double = 1.0,
 ) {
     /**
-     * Calculates the travel route based on a path of hex keys.
+     * @param path hex keys start..goal inclusive; the starting hex is not charged, since the party
+     *   is already standing in it
+     * @param secondsPerActivity length of one hexploration activity (the 8-hour exploration day
+     *   divided by the party's activities per day, already scaled for hex size)
      */
     fun calculateRoute(
         path: List<String>,
-        partySpeedMultiplier: Double,
+        secondsPerActivity: Double,
         getTerrain: ((String) -> Terrain?)? = null,
-        getFeatures: ((String) -> List<String>)? = null
+        getFeatures: ((String) -> List<String>)? = null,
     ): TravelRoute {
-        var totalCost = 0.0
-        
         val resolveTerrain = getTerrain ?: { hexKey ->
             try {
                 val hexObj = com.foundryvtt.kingmaker.kingmaker.region.hexes.find { it.key.toString() == hexKey }
-                val terrainName = hexObj?.zone?.terrain
-                terrainName?.let { fromCamelCase<Terrain>(it) }
+                hexObj?.zone?.terrain?.let { fromCamelCase<Terrain>(it) }
             } catch (e: Throwable) {
                 null
             }
@@ -33,70 +49,39 @@ class TravelService(
 
         val resolveFeatures = getFeatures ?: { hexKey ->
             try {
-                val hexState = com.foundryvtt.kingmaker.kingmaker.state.hexes[hexKey]
-                hexState?.features?.mapNotNull { it.type } ?: emptyList()
+                kingmakerHexFeatures(hexKey)
             } catch (e: Throwable) {
                 emptyList()
             }
         }
 
-        // Charge per hex ENTERED, so the starting hex is free — the party is already standing in
-        // it. `path` is a Dijkstra reconstruction and therefore includes the start, so iterating
-        // all of it billed one extra hex of travel time on every route. TravelRouter's own
-        // Dijkstra already sums edge weights only; this brings the two into agreement.
+        var totalActivities = 0
         for (hexKey in path.drop(1)) {
-            val content = hexContents[hexKey]
-            var hexCost = 1.0
-            
-            // Apply travelModifier from HexContent if it exists
-            content?.travelModifier?.let {
-                hexCost += it.toDouble()
-            }
-            
-            // Apply terrain modifier
-            val terrain = resolveTerrain(hexKey)
-            if (terrain != null) {
-                hexCost += terrainModifiers[terrain] ?: 0.0
-            }
-            
-            // Apply infrastructure modifiers
             val features = resolveFeatures(hexKey)
-            val hasBridge = features.contains("bridge")
-            features.forEach { featureType ->
-                if (featureType == "river") {
-                    if (!hasBridge) {
-                        hexCost += infrastructureModifiers["river"] ?: 1.0
-                    }
-                } else if (featureType == "road") {
-                    hexCost += infrastructureModifiers["road"] ?: -1.0
-                } else if (featureType != "bridge") {
-                    hexCost += infrastructureModifiers[featureType] ?: 0.0
-                }
-            }
-            
-            totalCost += hexCost
+            totalActivities += travelActivityCost(
+                difficulty = terrainDifficulty(resolveTerrain(hexKey)),
+                hasRoad = "road" in features,
+                unbridgedRiver = "river" in features && "bridge" !in features,
+                extraDegrees = hexContents[hexKey]?.travelModifier ?: 0,
+            )
         }
 
-        // Apply weather modifier to the total cost (as a multiplier)
-        totalCost *= weatherModifier
-        
-        // Adjust by party speed (higher multiplier = faster travel -> lower time/cost)
-        val finalCost = totalCost / partySpeedMultiplier.coerceAtLeast(0.1)
+        // Weather stretches the day rather than changing what the terrain costs, so it scales the
+        // duration and leaves the activity count — which is what the rules count — intact.
+        val seconds = totalActivities * secondsPerActivity * weatherModifier
 
         return TravelRoute(
             startHex = path.firstOrNull() ?: "",
             endHex = path.lastOrNull() ?: "",
             path = path.toList(),
-            totalCost = finalCost,
-            estimatedDurationSeconds = (finallyTime(finalCost)).toLong()
+            totalCost = totalActivities.toDouble(),
+            estimatedDurationSeconds = seconds.roundToLong(),
         )
-    }
-
-    private fun finallyTime(cost: Double): Double {
-        // 1 cost unit = 3600 seconds (1 hour).
-        return cost * 3600.0
     }
 }
 
-// Helper for JS interoperability in Kotlin/JS
-private fun Double.toDouble(): Double = this
+private fun kingmakerHexFeatures(hexKey: String): List<String> =
+    com.foundryvtt.kingmaker.kingmaker.state.hexes[hexKey]
+        ?.features
+        ?.mapNotNull { it.type }
+        ?: emptyList()

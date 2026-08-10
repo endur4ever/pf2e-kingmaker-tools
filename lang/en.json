@@ -638,9 +638,11 @@
       "travelSpeedHelpParty": "Party travel speed is the SLOWEST member's Speed — PF2e takes the minimum across all party members.",
       "travelSpeedHelpSlowest": "Currently set by: {names}",
       "travelSpeedHelpNoMembers": "No party members with a readable Speed, so the default is used.",
-      "travelSpeedHelpPace": "Pace: {speed} ft ÷ {baseline} ft baseline = {multiplier}× — route hours are divided by this, so a faster party travels in less time.",
-      "travelSpeedHelpRouteFormula": "Route hours = (sum of each hex's cost) × weather ÷ pace. A hex costs 1 by default, plus its terrain, plus any hex-content modifier, plus 1 for an unbridged river, minus 1 for a road.",
-      "travelSpeedHelpHexploration": "Separately, hexploration activities per day come from the Kingmaker table, not from this pace: Speed under 30 ft = 1 activity, 30-44 = 2, 45-59 = 3, 60+ = 4 (10 ft or less = 1/2). You currently get {activities} per day."
+      "travelSpeedHelpPace": "Speed sets your hexploration activities per day: {activities}. One activity therefore takes {hours} of the 8-hour exploration day.",
+      "travelSpeedHelpRouteFormula": "Entering a hex costs Travel activities by terrain: 1 open (plains), 2 difficult (forest, hills, desert), 3 greater difficult (mountains, swamp). A road makes the terrain one step better; an unbridged river adds one step (house rule), capped at 3.",
+      "travelSpeedHelpHexploration": "Travel is only one hexploration activity. Reconnoitering a hex costs the same again and is a separate activity, so it is not included in this estimate.",
+      "activitiesPerDayLabel": "Hexploration activities per day: {activities}",
+      "activitiesSymbol": "activities"
     },
     "settlementNav": {
       "status": "Status",
