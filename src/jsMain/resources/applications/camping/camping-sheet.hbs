@@ -194,7 +194,22 @@
                                     <div><b>{{localizeKM "camping.totalCost"}}:</b> {{travelRoute.totalCost}} {{localizeKM "camping.hoursSymbol"}}</div>
                                     <div><b>{{localizeKM "camping.estimatedDuration"}}:</b> {{travelRoute.estimatedDuration}}</div>
                                     <div><b>{{localizeKM "camping.totalDistance"}}:</b> {{travelRoute.totalDistance}} {{localizeKM "kingdom.hex" count=travelRoute.totalDistance}}</div>
+                                    <div class="km-route-speed">
+                                        <b>{{localizeKM "camping.travelSpeedLabel"}}:</b> {{travelRoute.travelSpeedLabel}}
+                                        <i class="fa-solid fa-circle-info km-route-speed-info"
+                                           data-tooltip="{{travelRoute.travelSpeedTooltip}}"
+                                           data-tooltip-direction="UP"
+                                           aria-label="{{localizeKM "camping.travelSpeedHelpTitle"}}"></i>
+                                    </div>
                                 </div>
+                                <details class="km-route-speed-help">
+                                    <summary>{{localizeKM "camping.travelSpeedHelpTitle"}}</summary>
+                                    <ul>
+                                        {{#each travelRoute.travelSpeedDetails}}
+                                            <li>{{this}}</li>
+                                        {{/each}}
+                                    </ul>
+                                </details>
                                 <div class="km-route-modifiers">
                                     <b>{{localizeKM "camping.routeModifiers"}}:</b>
                                     <ul>

@@ -631,7 +631,16 @@
       "encounterNoKingdom": "No kingdom actor found to attach the quest to.",
       "encounterRumorConverted": "Rumor converted into a kingdom quest.",
       "encounterSuppressed": "Encounter suppressed: {reason}",
-      "encounterSuppressedTitle": "Encounter Suppressed"
+      "encounterSuppressedTitle": "Encounter Suppressed",
+      "travelSpeedLabel": "Travel speed",
+      "travelSpeedValue": "{speed} ft",
+      "travelSpeedHelpTitle": "How travel speed is calculated",
+      "travelSpeedHelpParty": "Party travel speed is the SLOWEST member's Speed — PF2e takes the minimum across all party members.",
+      "travelSpeedHelpSlowest": "Currently set by: {names}",
+      "travelSpeedHelpNoMembers": "No party members with a readable Speed, so the default is used.",
+      "travelSpeedHelpPace": "Pace: {speed} ft ÷ {baseline} ft baseline = {multiplier}× — route hours are divided by this, so a faster party travels in less time.",
+      "travelSpeedHelpRouteFormula": "Route hours = (sum of each hex's cost) × weather ÷ pace. A hex costs 1 by default, plus its terrain, plus any hex-content modifier, plus 1 for an unbridged river, minus 1 for a road.",
+      "travelSpeedHelpHexploration": "Separately, hexploration activities per day come from the Kingmaker table, not from this pace: Speed under 30 ft = 1 activity, 30-44 = 2, 45-59 = 3, 60+ = 4 (10 ft or less = 1/2). You currently get {activities} per day."
     },
     "settlementNav": {
       "status": "Status",

@@ -1199,6 +1199,46 @@ ul.km-camping-actors {
             font-size: 1.05em;
         }
 
+        /* Travel speed sits in the summary row with a hover hint; the full derivation is a
+           collapsed details block underneath so it never competes with the numbers. */
+        .km-route-speed {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .km-route-speed-info {
+            opacity: 0.65;
+            cursor: help;
+            transition: opacity 120ms ease;
+        }
+
+        .km-route-speed-info:hover,
+        .km-route-speed-info:focus-visible {
+            opacity: 1;
+        }
+
+        .km-route-speed-help {
+            font-size: 0.85em;
+            opacity: 0.85;
+            margin-bottom: 6px;
+
+            summary {
+                cursor: pointer;
+                list-style: revert;
+            }
+
+            ul {
+                margin: 4px 0 0 15px;
+                padding: 0;
+
+                li {
+                    list-style-type: disc;
+                    margin-bottom: 3px;
+                }
+            }
+        }
+
         .km-route-modifiers {
             font-size: 0.9em;
             opacity: 0.9;

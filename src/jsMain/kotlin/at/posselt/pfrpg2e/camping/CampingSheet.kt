@@ -94,6 +94,7 @@ import at.posselt.pfrpg2e.data.hex.HexContentType
 import at.posselt.pfrpg2e.data.hex.HexContentVisibility
 import at.posselt.pfrpg2e.data.regions.Terrain
 import at.posselt.pfrpg2e.companion.formatHexKeyLabel
+import kotlin.math.roundToInt
 import at.posselt.pfrpg2e.camping.routing.FoundryTravelProvider
 import at.posselt.pfrpg2e.camping.routing.TravelRouter
 import at.posselt.pfrpg2e.camping.routing.TravelPlan as RoutingTravelPlan
@@ -224,6 +225,12 @@ external interface TravelRouteUiContext {
     val modifiers: Array<String>
     /** Non-null when the route's day count exceeds the party's durable days of food. */
     val foodWarning: String?
+    /** e.g. "25 ft" — the party travel Speed the pace multiplier came from. */
+    val travelSpeedLabel: String
+    /** One-line hover summary. Escaped into a data-tooltip attribute, so it stays plain text. */
+    val travelSpeedTooltip: String
+    /** Full derivation, rendered as a list so each line is escaped independently. */
+    val travelSpeedDetails: Array<String>
 }
 
 @Suppress("unused")
@@ -1571,9 +1578,70 @@ class CampingSheet(
         val travelSpeed = try {
             actor.system.movement.speeds.travel.value.toDouble()
         } catch (e: Throwable) {
-            24.0
+            TRAVEL_SPEED_BASELINE_FEET.toDouble()
         }
-        val partySpeedMultiplier = travelSpeed / 24.0
+        val partySpeedMultiplier = travelSpeed / TRAVEL_SPEED_BASELINE_FEET
+
+        // Explain the pace in the UI rather than leaving players to reverse-engineer it: the
+        // party Speed is PF2e's minimum across members, and the route planner turns it into a
+        // multiplier against a fixed baseline.
+        val memberSpeeds = runCatching {
+            actor.members.mapNotNull { member ->
+                val speed = member.asDynamic().system?.movement?.speeds?.travel?.value as? Int
+                speed?.let { MemberSpeed(name = member.name, speedFeet = it) }
+            }
+        }.getOrDefault(emptyList())
+        val speedBreakdown = explainTravelSpeed(
+            partySpeedFeet = travelSpeed.toInt(),
+            members = memberSpeeds,
+        )
+        val speedTooltipLines = buildList {
+            add(t("camping.travelSpeedHelpParty"))
+            if (speedBreakdown.slowest.isEmpty()) {
+                add(t("camping.travelSpeedHelpNoMembers"))
+            } else {
+                add(
+                    t(
+                        "camping.travelSpeedHelpSlowest",
+                        recordOf("names" to speedBreakdown.slowest.joinToString(", ") { it.name }),
+                    )
+                )
+            }
+            add(
+                t(
+                    "camping.travelSpeedHelpPace",
+                    recordOf(
+                        "speed" to speedBreakdown.partySpeedFeet.toString(),
+                        "baseline" to speedBreakdown.baselineFeet.toString(),
+                        "multiplier" to ((speedBreakdown.multiplier * 100).roundToInt() / 100.0).toString(),
+                    ),
+                )
+            )
+            add(t("camping.travelSpeedHelpRouteFormula"))
+            add(
+                t(
+                    "camping.travelSpeedHelpHexploration",
+                    recordOf("activities" to speedBreakdown.hexplorationActivitiesPerDay.toString()),
+                )
+            )
+        }
+        // The hover tooltip is a single plain-text line: it goes into a data-tooltip attribute,
+        // which Handlebars escapes, and it must stay escaped because member names are actor names
+        // and therefore user-controlled. The full derivation renders as a list instead, so every
+        // line is escaped on its own rather than smuggled through one attribute.
+        val travelSpeedTooltip = t(
+            "camping.travelSpeedHelpPace",
+            recordOf(
+                "speed" to speedBreakdown.partySpeedFeet.toString(),
+                "baseline" to speedBreakdown.baselineFeet.toString(),
+                "multiplier" to ((speedBreakdown.multiplier * 100).roundToInt() / 100.0).toString(),
+            ),
+        )
+        val travelSpeedDetails = speedTooltipLines.toTypedArray()
+        val travelSpeedLabel = t(
+            "camping.travelSpeedValue",
+            recordOf("speed" to speedBreakdown.partySpeedFeet.toString()),
+        )
 
         val rawHexContents = game.getKingdomActors().firstOrNull()?.getKingdom()?.hexContents ?: emptyArray()
         val hexContentsMap = rawHexContents.associate { raw ->
@@ -1710,6 +1778,9 @@ class CampingSheet(
                     path = route.path.toTypedArray(),
                     modifiers = routeModifiersList.toTypedArray(),
                     foodWarning = routeFoodWarning,
+                    travelSpeedLabel = travelSpeedLabel,
+                    travelSpeedTooltip = travelSpeedTooltip,
+                    travelSpeedDetails = travelSpeedDetails,
                 )
             } else {
                 travelPathError = t("camping.noPathFound")
