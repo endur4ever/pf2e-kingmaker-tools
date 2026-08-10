@@ -1547,23 +1547,6 @@ class CampingSheet(
         val background = game.settings.pfrpg2eKingdomCampingWeather
             .resolveCampingBackground(currentTerrain, time.isDay())
 
-        val defaultTerrainModifiers = mapOf(
-            Terrain.PLAINS to 0.0,
-            Terrain.FOREST to 1.0,
-            Terrain.HILLS to 1.0,
-            Terrain.MOUNTAIN to 2.0,
-            Terrain.SWAMP to 2.0,
-            Terrain.DESERT to 1.0,
-            Terrain.URBAN to 0.0,
-            Terrain.AQUATIC to 1.0,
-            Terrain.DUNGEON to 0.0
-        )
-
-        val defaultInfrastructureModifiers = mapOf(
-            "road" to -1.0,
-            "river" to 1.0
-        )
-
         val weatherType = try {
             game.settings.pfrpg2eKingdomCampingWeather.getCurrentWeatherType()
         } catch (e: Throwable) {
@@ -1715,17 +1698,10 @@ class CampingSheet(
                 pavedSettlementHexKeys = pavedSettlementHexKeys,
             )
             // Routes through the SHARED router (the same one kingdom caravan routing uses)
-            // rather than a private Dijkstra with an inline copy of the cost rules. The edge cost
-            // is identical: base 1.0 + terrain modifier + hex-content travelModifier + road/river
-            // (a bridge negates the river penalty). Weather and party speed stay at 1.0 here
-            // because TravelService.calculateRoute applies them to the finished route, exactly as
-            // before — and being uniform multipliers they cannot change which route is cheapest.
-            val routingPlan = RoutingTravelPlan(
-                partySpeedMultiplier = 1.0,
-                terrainModifiers = defaultTerrainModifiers,
-                infrastructureModifiers = defaultInfrastructureModifiers,
-                weatherModifier = 1.0,
-            )
+            // rather than a private Dijkstra with an inline copy of the cost rules. No TravelPlan
+            // is supplied: the cost model below reads terrain, roads, rivers and settlements
+            // itself, so a plan of additive modifiers would be dead weight that looks live —
+            // editing it would change nothing, which is how the cost models drifted apart before.
             // Select the path with the SAME cost model that prices it below, so the router
             // cannot optimise one function while the panel reports another — most visibly, it
             // would otherwise route around a paved settlement hex that actually costs 1.
@@ -1740,7 +1716,7 @@ class CampingSheet(
                     pavedSettlement = to in pavedSettlementHexKeys,
                 ).toDouble()
             }
-                .calculateRoute(startHex, endHex, routingPlan)
+                .calculateRoute(startHex, endHex)
                 ?.path
                 ?: emptyList()
             if (path.isNotEmpty()) {
