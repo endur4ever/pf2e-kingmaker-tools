@@ -165,3 +165,74 @@ class CaravanRoutingTest {
         assertTrue(routeRoaded!!.totalCost < routeUnroaded!!.totalCost)
     }
 }
+
+/**
+ * Companion expedition ETAs route through the same provider and cost model as caravans, so the
+ * roads a kingdom pays RP for shorten expeditions too. Previously this was straight-line cube
+ * distance, which cannot see terrain, roads, rivers or bridges at all.
+ */
+class ExpeditionRouteEtaTest {
+    // Two parallel two-hop routes from a to d: via b, or via c.
+    private val adjacency = mapOf(
+        "a" to listOf("b", "c"),
+        "b" to listOf("a", "d"),
+        "c" to listOf("a", "d"),
+        "d" to listOf("b", "c"),
+    )
+
+    @Test
+    fun `a roaded route takes no longer than an unroaded one and costs less`() {
+        val roaded = FakeTravelProvider(adjacency, features = mapOf("b" to listOf("road"), "d" to listOf("road")))
+        val plain = FakeTravelProvider(adjacency)
+
+        val roadedCost = expeditionRouteCost(arrayOf("a"), "d", roaded)
+        val plainCost = expeditionRouteCost(arrayOf("a"), "d", plain)
+
+        assertNotNull(roadedCost)
+        assertNotNull(plainCost)
+        assertTrue(roadedCost!! < plainCost!!, "roads must make the trip cheaper")
+        assertTrue(
+            expeditionTravelDaysTo(arrayOf("a"), "d", roaded) <=
+                expeditionTravelDaysTo(arrayOf("a"), "d", plain),
+        )
+    }
+
+    @Test
+    fun `rough terrain lengthens an expedition`() {
+        val plain = FakeTravelProvider(adjacency)
+        val mountains = FakeTravelProvider(
+            adjacency,
+            terrains = mapOf("b" to Terrain.MOUNTAIN, "c" to Terrain.MOUNTAIN, "d" to Terrain.MOUNTAIN),
+        )
+
+        val plainDays = expeditionTravelDaysTo(arrayOf("a"), "d", plain)
+        val mountainDays = expeditionTravelDaysTo(arrayOf("a"), "d", mountains)
+
+        assertTrue(mountainDays > plainDays, "mountains must take longer than open ground")
+    }
+
+    @Test
+    fun `the nearest of several origins wins`() {
+        // "c" is adjacent to "d"; "a" is two hops away.
+        val provider = FakeTravelProvider(adjacency)
+        val fromBoth = expeditionRouteCost(arrayOf("a", "c"), "d", provider)
+        val fromFar = expeditionRouteCost(arrayOf("a"), "d", provider)
+
+        assertNotNull(fromBoth)
+        assertNotNull(fromFar)
+        assertTrue(fromBoth!! < fromFar!!)
+    }
+
+    @Test
+    fun `an unreachable destination has no routed cost`() {
+        val provider = FakeTravelProvider(adjacency)
+        assertNull(expeditionRouteCost(arrayOf("a"), "zzz", provider))
+    }
+
+    @Test
+    fun `travelling nowhere costs no days`() {
+        val provider = FakeTravelProvider(adjacency)
+        assertEquals(0, expeditionTravelDaysTo(arrayOf("a"), "a", provider))
+        assertEquals(0, expeditionTravelDaysTo(arrayOf("a"), null, provider))
+    }
+}

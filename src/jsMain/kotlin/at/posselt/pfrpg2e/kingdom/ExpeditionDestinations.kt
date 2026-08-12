@@ -1,5 +1,7 @@
 package at.posselt.pfrpg2e.kingdom
 
+import at.posselt.pfrpg2e.camping.routing.TravelProvider
+import at.posselt.pfrpg2e.kingdom.map.KingmakerHexGridProvider
 import at.posselt.pfrpg2e.companion.expeditionTravelDays
 import at.posselt.pfrpg2e.companion.formatHexKeyLabel
 import at.posselt.pfrpg2e.companion.hexCubeDistance
@@ -9,6 +11,7 @@ import com.foundryvtt.kingmaker.kingmaker
 import js.array.component1
 import js.array.component2
 import kotlinx.js.JsPlainObject
+import kotlin.math.ceil
 
 /**
  * Destination choices for the expedition launch form, plus the origin hexes the
@@ -131,9 +134,40 @@ fun expeditionHexDistance(originHexKeys: Array<String>, destinationHexKey: Strin
         .minOfOrNull { c -> hexCubeDistance(c.q, c.r, c.s, dest.q, dest.r, dest.s) }
 }.getOrNull()
 
-/** One-way travel days from the nearest origin to [destinationHexKey]; 0 when unresolvable. */
-fun expeditionTravelDaysTo(originHexKeys: Array<String>, destinationHexKey: String?): Int {
+/**
+ * Weighted cost of the cheapest ACTUAL route from any origin to [destinationHexKey], or null when
+ * no route resolves (no region data, unreachable destination, unparseable keys).
+ *
+ * Routed through the same [KingmakerHexGridProvider] and cost model kingdom caravans use, so the
+ * roads a kingdom spends RP building shorten companion expeditions too, and trackless swamp costs
+ * what it should. Straight-line distance cannot see any of that.
+ */
+fun expeditionRouteCost(
+    originHexKeys: Array<String>,
+    destinationHexKey: String,
+    provider: TravelProvider = KingmakerHexGridProvider(),
+): Double? {
+    return originHexKeys
+        .mapNotNull { origin -> computeCaravanRoute(provider, origin, destinationHexKey)?.totalCost }
+        .filter { it.isFinite() }
+        .minOrNull()
+}
+
+/**
+ * One-way travel days from the nearest origin to [destinationHexKey]; 0 when unresolvable.
+ *
+ * Prefers the routed cost so terrain, roads, rivers and bridges all move the estimate. Falls back
+ * to straight-line hex distance when no route resolves, which keeps the previous behaviour for
+ * worlds without region data rather than silently reporting a free trip.
+ */
+fun expeditionTravelDaysTo(
+    originHexKeys: Array<String>,
+    destinationHexKey: String?,
+    provider: TravelProvider = KingmakerHexGridProvider(),
+): Int {
     if (destinationHexKey == null) return 0
+    val routed = expeditionRouteCost(originHexKeys, destinationHexKey, provider)
+    if (routed != null) return expeditionTravelDays(ceil(routed).toInt())
     val distance = expeditionHexDistance(originHexKeys, destinationHexKey) ?: return 0
     return expeditionTravelDays(distance)
 }
