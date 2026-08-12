@@ -46,6 +46,8 @@ import at.posselt.pfrpg2e.kingdom.data.RawCaravanShipment
 import at.posselt.pfrpg2e.kingdom.data.RawExpeditionChronicleEntry
 import at.posselt.pfrpg2e.kingdom.data.RawGroup
 import at.posselt.pfrpg2e.kingdom.computeCaravanRoute
+import at.posselt.pfrpg2e.kingdom.map.routeHexSafety
+import at.posselt.pfrpg2e.kingdom.caravanRouteSafety
 import at.posselt.pfrpg2e.kingdom.map.KingmakerHexGridProvider
 import com.foundryvtt.kingmaker.kingmaker
 import at.posselt.pfrpg2e.utils.postChatMessage
@@ -311,23 +313,17 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
                 val partner = groupsByName[caravan.partnerName]
                 val provider = KingmakerHexGridProvider()
                 val route = computeCaravanRoute(provider, caravan.originHexKey, caravan.destHexKey)
-                val claimedFraction = if (route != null && route.path.isNotEmpty()) {
-                    val path = route.path
-                    val safeCount = path.count { key ->
-                        val hs = kingmaker.state.hexes[key]
-                        hs?.claimed == true || hs?.cleared == true
-                    }
-                    safeCount.toDouble() / path.size
-                } else {
-                    0.0
-                }
+                // Same shared helper the map overlay uses, so the DC a caravan is actually
+                // rolled against matches the one drawn on the route.
+                val safety = caravanRouteSafety(route?.path.orEmpty().map { routeHexSafety(it) })
                 CaravanTickInput(
                     caravan = caravan,
                     raidDc = caravanRaidDc(
                         baseDc = CARAVAN_BASE_RAID_DC,
                         partnerStanding = partner?.standing,
                         atWar = partner?.atWar == true,
-                        claimedFraction = claimedFraction,
+                        claimedFraction = safety.claimedFraction,
+                        fullyRoadedThroughClaimed = safety.fullyRoadedThroughClaimed,
                     ),
                     raidRoll = kotlin.random.Random.nextInt(1, 21),
                     rdPerCommodity = caravanRdPerCommodity(partner?.standing, partner?.allianceLevel),

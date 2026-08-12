@@ -9,6 +9,8 @@ import at.posselt.pfrpg2e.utils.unsetAppFlag
 import at.posselt.pfrpg2e.utils.getRealmTileData
 import at.posselt.pfrpg2e.utils.RealmTileData
 import at.posselt.pfrpg2e.kingdom.computeCaravanRoute
+import at.posselt.pfrpg2e.kingdom.RouteHexSafety
+import at.posselt.pfrpg2e.kingdom.caravanRouteSafety
 import at.posselt.pfrpg2e.kingdom.caravanRaidDc
 import at.posselt.pfrpg2e.kingdom.CARAVAN_BASE_RAID_DC
 import at.posselt.pfrpg2e.kingdom.getKingdomActors
@@ -732,7 +734,6 @@ suspend fun syncCaravanRoutes(game: Game) {
         val path = route.path
         if (path.isEmpty()) continue
 
-        var safeCount = 0
         val segmentDrawings = mutableListOf<com.foundryvtt.core.AnyObject>()
 
         for (i in 0 until path.size - 1) {
@@ -806,21 +807,17 @@ suspend fun syncCaravanRoutes(game: Game) {
             segmentDrawings.add(drawingData)
         }
 
-        // Calculate claimed fraction over all hexes in the path
-        for (k in path) {
-            val hs = kingmaker.state.hexes[k]
-            if (hs?.claimed == true || hs?.cleared == true) {
-                safeCount++
-            }
-        }
-        val claimedFraction = if (path.isNotEmpty()) safeCount.toDouble() / path.size else 0.0
+        // Route safety through the shared helper, so this overlay and the End-Turn tick cannot
+        // report different numbers for the same caravan.
+        val safety = caravanRouteSafety(path.map { k -> routeHexSafety(k) })
 
         val partner = groupsByName[caravan.partnerName]
         val raidDc = caravanRaidDc(
             baseDc = CARAVAN_BASE_RAID_DC,
             partnerStanding = partner?.standing,
             atWar = partner?.atWar == true,
-            claimedFraction = claimedFraction,
+            claimedFraction = safety.claimedFraction,
+            fullyRoadedThroughClaimed = safety.fullyRoadedThroughClaimed,
         )
 
         // Draw midpoint label
@@ -950,3 +947,12 @@ suspend fun syncExpeditionMarkers(game: Game) {
 
 // Re-export from commonMain so jsMain callers and tests share the same source
 // (definition lives in commonMain/kotlin/.../map/HexDrawingHelpers.kt)
+
+/** Reads the claimed/cleared and road facts the caravan raid check needs for one hex. */
+internal fun routeHexSafety(hexKey: String): RouteHexSafety {
+    val state = kingmaker.state.hexes[hexKey]
+    return RouteHexSafety(
+        safe = state?.claimed == true || state?.cleared == true,
+        roaded = state?.features?.mapNotNull { it.type }?.contains("road") == true,
+    )
+}

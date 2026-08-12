@@ -78,12 +78,61 @@ data class ShipmentTickResult(
 fun caravanRaidLoss(amount: Int): Int =
     max(1, (amount * CARAVAN_RAID_LOSS_FRACTION).roundToInt()).coerceAtMost(amount)
 
-/** Raid DC: easier (safer) the friendlier the partner and the more of the route runs through claimed hexes. */
-fun caravanRaidDc(baseDc: Int, partnerStanding: Int?, atWar: Boolean, claimedFraction: Double): Int {
+/** What one hex on a caravan route contributes to its safety. */
+data class RouteHexSafety(
+    /** The kingdom holds it: claimed or cleared. */
+    val safe: Boolean,
+    /** A road runs through it. */
+    val roaded: Boolean,
+)
+
+/** The two route-derived inputs to [caravanRaidDc], so both are computed the same way. */
+data class CaravanRouteSafety(
+    val claimedFraction: Double,
+    val fullyRoadedThroughClaimed: Boolean,
+)
+
+/**
+ * Route safety from its hexes. Shared by the End-Turn tick and the map overlay, which previously
+ * each carried their own copy of the claimed-fraction loop and could drift apart.
+ *
+ * Both measures range over the same hexes, so they stay coherent: a route that earns
+ * [fullyRoadedThroughClaimed] necessarily has a [claimedFraction] of 1.0.
+ */
+fun caravanRouteSafety(hexes: List<RouteHexSafety>): CaravanRouteSafety =
+    if (hexes.isEmpty()) {
+        CaravanRouteSafety(claimedFraction = 0.0, fullyRoadedThroughClaimed = false)
+    } else {
+        CaravanRouteSafety(
+            claimedFraction = hexes.count { it.safe }.toDouble() / hexes.size,
+            fullyRoadedThroughClaimed = hexes.all { it.safe && it.roaded },
+        )
+    }
+
+/**
+ * Raid DC: easier (safer) the friendlier the partner and the more of the route runs through
+ * claimed hexes. A raid happens when the d20 rolls UNDER this DC, so subtracting is the safe
+ * direction.
+ *
+ * The two route modifiers are deliberately adjacent and additive:
+ *  - up to -4 scaled by [claimedFraction], the share of the route inside the kingdom's own hexes;
+ *  - a further -1 when the route is [fullyRoadedThroughClaimed], i.e. every hex is BOTH held and
+ *    roaded. That only ever applies on top of the full -4, since such a route is claimed
+ *    throughout, so a completely built-out trade road is 5 easier than open wilderness — which is
+ *    what makes paying to connect settlements by road pay off.
+ */
+fun caravanRaidDc(
+    baseDc: Int,
+    partnerStanding: Int?,
+    atWar: Boolean,
+    claimedFraction: Double,
+    fullyRoadedThroughClaimed: Boolean = false,
+): Int {
     var dc = baseDc
     if (atWar) dc += 4
     dc -= (partnerStanding ?: 0) / 2
     dc -= (claimedFraction.coerceIn(0.0, 1.0) * 4).roundToInt()
+    if (fullyRoadedThroughClaimed) dc -= 1
     return dc.coerceIn(5, 40)
 }
 
