@@ -202,6 +202,17 @@
                                            aria-label="{{localizeKM "camping.travelSpeedHelpTitle"}}"></i>
                                     </div>
                                 </div>
+                                {{#if isGM}}
+                                <div class="km-route-actions">
+                                    <button type="button" data-action="travel-route">
+                                        <i class="fa-solid fa-person-hiking"></i> {{localizeKM "camping.travelRoute"}}
+                                    </button>
+                                    <label class="km-route-move-token">
+                                        <input type="checkbox" name="travelMoveToken">
+                                        {{localizeKM "camping.travelRouteMoveToken"}}
+                                    </label>
+                                </div>
+                                {{/if}}
                                 <details class="km-route-speed-help">
                                     <summary>{{localizeKM "camping.travelSpeedHelpTitle"}}</summary>
                                     <ul>

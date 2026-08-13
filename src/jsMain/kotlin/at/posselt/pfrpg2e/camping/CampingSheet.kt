@@ -50,6 +50,8 @@ import at.posselt.pfrpg2e.utils.launch
 import at.posselt.pfrpg2e.utils.openItem
 import at.posselt.pfrpg2e.utils.openJournal
 import at.posselt.pfrpg2e.utils.postChatMessage
+import at.posselt.pfrpg2e.utils.typeSafeUpdate
+import at.posselt.pfrpg2e.utils.postChatTemplate
 import at.posselt.pfrpg2e.utils.t
 import at.posselt.pfrpg2e.utils.toDateInputString
 import at.posselt.pfrpg2e.utils.toMap
@@ -88,7 +90,6 @@ import kotlin.js.Promise
 import kotlin.math.max
 import com.foundryvtt.kingmaker.kingmaker
 import com.foundryvtt.kingmaker.KingmakerHex
-import com.foundryvtt.core.grid.GridHex
 import at.posselt.pfrpg2e.data.hex.HexContent
 import at.posselt.pfrpg2e.data.hex.HexContentType
 import at.posselt.pfrpg2e.data.hex.HexContentVisibility
@@ -520,6 +521,16 @@ class CampingSheet(
 
             "advance-hexploration" -> buildPromise {
                 advanceHexplorationActivities(target)
+            }
+
+            "travel-route" -> buildPromise {
+                // The checkbox lives beside the button; read it at click time so no extra state
+                // has to be persisted just to remember a per-journey choice.
+                val moveToken = target.closest(".km-route-planner-content")
+                    ?.querySelector("input[name='travelMoveToken']")
+                    ?.let { it as? org.w3c.dom.HTMLInputElement }
+                    ?.checked == true
+                travelPlannedRoute(moveToken = moveToken)
             }
 
             "clear-actor" -> {
@@ -1662,40 +1673,14 @@ class CampingSheet(
         var travelPathError: String? = null
 
         if (startHex != null && endHex != null && startHex.isNotEmpty() && endHex.isNotEmpty()) {
-            // Both travel house rules are configurable settings that were never read by the
-            // route planner. RAW has no cost for CROSSING a river (only for travelling along
-            // one), so the river surcharge is whatever the GM configured and 0 by default —
-            // it used to be hardcoded to 1 regardless of the setting.
-            val riverExtra = Pfrpg2eKingdomCampingWeatherSettings.getTravelCostRiverNoBridgeAdditional()
-            // "Hexes containing a settlement reduce their Travel cost to 1 if you've constructed
-            // Paved Streets". Settlements are located by matching their scene name to a region hex
-            // name, the same way HexGridSync places settlement markers on the map.
-            val pavedSettlementHexKeys = if (Pfrpg2eKingdomCampingWeatherSettings.getPavedStreetsReduceTravelCost()) {
-                runCatching {
-                    val kingdomActor = game.getKingdomActors().firstOrNull()
-                    // Settlement.name is the settlement scene's name (Scenes.kt parseSettlement),
-                    // which is the key HexGridSync matches against region hex names.
-                    val paved = kingdomActor?.getKingdom()
-                        ?.getAllSettlements(game)
-                        ?.allSettlements
-                        .orEmpty()
-                        .filter { it.pavedStreets }
-                        .map { it.name.lowercase().trim() }
-                        .toSet()
-                    kingmaker.region.hexes.contents
-                        .filter { it.name.lowercase().trim() in paved }
-                        .map { it.key.toString() }
-                        .toSet()
-                }.getOrDefault(emptySet())
-            } else {
-                emptySet()
-            }
-
+            // ONE cost model, shared with the "Travel This Route" action below, so the panel can
+            // never price a route differently from the way it is actually executed.
+            val costModel = travelCostModel()
             val service = TravelService(
                 hexContents = hexContentsMap,
                 weatherModifier = weatherModifier,
-                riverNoBridgeExtraDegrees = riverExtra,
-                pavedSettlementHexKeys = pavedSettlementHexKeys,
+                riverNoBridgeExtraDegrees = costModel.riverExtraDegrees,
+                pavedSettlementHexKeys = costModel.pavedSettlementHexKeys,
             )
             // Routes through the SHARED router (the same one kingdom caravan routing uses)
             // rather than a private Dijkstra with an inline copy of the cost rules. No TravelPlan
@@ -1705,19 +1690,7 @@ class CampingSheet(
             // Select the path with the SAME cost model that prices it below, so the router
             // cannot optimise one function while the panel reports another — most visibly, it
             // would otherwise route around a paved settlement hex that actually costs 1.
-            val path = TravelRouter(FoundryTravelProvider()) { provider, to, _ ->
-                val features = provider.getFeaturesForHex(to)
-                val unbridged = "river" in features && "bridge" !in features
-                travelActivityCost(
-                    difficulty = terrainDifficulty(provider.getTerrainForHex(to)),
-                    hasRoad = "road" in features,
-                    riverExtraDegrees = if (unbridged) riverExtra else 0,
-                    extraDegrees = provider.getContentForHex(to).sumOf { it.travelModifier ?: 0 },
-                    pavedSettlement = to in pavedSettlementHexKeys,
-                ).toDouble()
-            }
-                .calculateRoute(startHex, endHex)
-                ?.path
+            val path = costModel.routeBetween(startHex, endHex)
                 ?: emptyList()
             if (path.isNotEmpty()) {
                 // One hexploration activity, in seconds: the 8-hour exploration day divided
@@ -2046,6 +2019,219 @@ class CampingSheet(
      * Labelled like the expedition destination picker — "Name (col.row)", or just the coordinate
      * when the hex is unnamed — because a bare region key such as "12034" means nothing to a GM.
      */
+    /**
+     * The one travel cost model: how many Travel activities entering a hex costs, and the routing
+     * that follows from it.
+     *
+     * Shared by the route PREVIEW and the "Travel This Route" ACTION on purpose. Those are the two
+     * places that must agree — a panel that prices a journey one way while executing it another is
+     * the exact drift this module has repeatedly shipped.
+     */
+    private inner class TravelCostModel(
+        val riverExtraDegrees: Int,
+        val pavedSettlementHexKeys: Set<String>,
+    ) {
+        private val provider = FoundryTravelProvider()
+
+        /** Travel activities to ENTER [hexKey]. */
+        fun costOf(hexKey: String): Int {
+            val features = provider.getFeaturesForHex(hexKey)
+            val unbridged = "river" in features && "bridge" !in features
+            return travelActivityCost(
+                difficulty = terrainDifficulty(provider.getTerrainForHex(hexKey)),
+                hasRoad = "road" in features,
+                riverExtraDegrees = if (unbridged) riverExtraDegrees else 0,
+                extraDegrees = provider.getContentForHex(hexKey).sumOf { it.travelModifier ?: 0 },
+                pavedSettlement = hexKey in pavedSettlementHexKeys,
+            )
+        }
+
+        /** Cheapest path start..goal inclusive, chosen with the same costs it will be charged. */
+        fun routeBetween(startHex: String, endHex: String): List<String> =
+            TravelRouter(provider) { _, to, _ -> costOf(to).toDouble() }
+                .calculateRoute(startHex, endHex)
+                ?.path
+                ?: emptyList()
+
+        /** One leg per hex ENTERED — the starting hex is already occupied and costs nothing. */
+        fun legsFor(path: List<String>): List<RouteLeg> =
+            path.drop(1).map { RouteLeg(hexKey = it, activityCost = costOf(it).toDouble()) }
+    }
+
+    /**
+     * Reads the two configurable travel house rules and builds the cost model.
+     *
+     * RAW charges nothing for CROSSING a river (only for travelling along one), so the surcharge
+     * comes from travelCostRiverNoBridgeAdditional and is 0 unless the GM opts in. Paved-streets
+     * settlements are located by matching settlement names against region hex names, the same key
+     * HexGridSync uses to place its markers.
+     */
+    /**
+     * Executes the planned route: advances world time hex by hex, rolls an encounter check for
+     * each hex entered, and STOPS where an encounter interrupts the journey.
+     *
+     * GM-only. The button is template-gated too, but that is presentation — players own the party
+     * actor, so the guard here is the real one.
+     *
+     * The route is recomputed from the current start/end rather than read off the rendered panel,
+     * so a stale preview can never be executed, and it goes through the same [travelCostModel] the
+     * preview priced, so what the GM confirmed is what actually happens.
+     */
+    private suspend fun travelPlannedRoute(moveToken: Boolean) {
+        if (!game.user.isGM) {
+            ui.notifications.warn(t("camping.travelRouteGmOnly"))
+            return
+        }
+        val camping = actor.getCamping() ?: return
+        val startHex = camping.travelStartHex?.takeIf { it.isNotBlank() }
+        val endHex = camping.travelEndHex?.takeIf { it.isNotBlank() }
+        if (startHex == null || endHex == null) {
+            ui.notifications.warn(t("camping.travelRouteNoRoute"))
+            return
+        }
+
+        val costModel = travelCostModel()
+        val path = costModel.routeBetween(startHex, endHex)
+        val legs = costModel.legsFor(path)
+        if (legs.isEmpty()) {
+            ui.notifications.warn(t("camping.travelRouteNoRoute"))
+            return
+        }
+
+        val plan = splitRouteIntoDays(legs, getHexplorationActivities())
+        val confirmed = confirm(
+            t(
+                "camping.confirmTravelRoute",
+                recordOf("hexes" to plan.hexesEntered.toString(), "days" to plan.totalDays.toString()),
+            )
+        )
+        if (!confirmed) return
+
+        val secondsPerActivity = getHexplorationActivitySeconds()
+        var legsCompleted = 0
+        var stoppedAt: String? = null
+
+        legLoop@ for (day in plan.days) {
+            for (leg in day.legs) {
+                // Seasons & Stars can throw here on a misconfigured calendar (see Resting.kt,
+                // df09f4a3). Stop the journey rather than silently travelling free hexes.
+                val seconds = (leg.activityCost * secondsPerActivity).roundToInt()
+                val advanced = runCatching { game.time.advance(seconds).await() }.isSuccess
+                if (!advanced) {
+                    ui.notifications.error(t("camping.travelRouteTimeAdvanceFailed"))
+                    stoppedAt = leg.hexKey
+                    break@legLoop
+                }
+                legsCompleted++
+                if (moveToken) moveCampingTokenToHex(leg.hexKey)
+                // NOTE: rollRandomEncounter derives the hex it checks from the party TOKEN's
+                // position (getPartyCurrentHexKey) and takes no hex parameter. So the per-hex
+                // encounter DC and the hex-state suppression filter only follow the journey when
+                // the token is being moved; with the checkbox off, every check resolves against
+                // the hex the party token is standing in. Moving the token first, above, is what
+                // makes the check match the leg.
+                // An encounter ends the journey where it happened; the GM resumes by planning a
+                // new route from there.
+                if (rollRandomEncounter(game, actor, includeFlatCheck = true)) {
+                    stoppedAt = leg.hexKey
+                    break@legLoop
+                }
+            }
+        }
+
+        val summary = summarizeTravelExecution(plan, legsCompleted, stoppedAt)
+        // The party ends the journey wherever it actually stopped.
+        camping.travelStartHex = path.getOrNull(legsCompleted) ?: path.lastOrNull()
+        actor.setCamping(camping)
+        postTravelSummary(summary, destinationHexKey = path.lastOrNull())
+    }
+
+    /**
+     * Moves the party token to [hexKey]'s hex on the active scene.
+     *
+     * Follows the one verified token-move in the repo (DailyTickHooks companion travel): resolve
+     * the Kingmaker hex's grid offset, build a GridHex against the active hexagonal grid, and use
+     * its topLeft as the token's x/y. Token writes are GM-only, which the caller has already
+     * checked.
+     *
+     * Best-effort: a non-hex scene, a missing token or an unresolvable hex simply leaves the token
+     * where it is rather than aborting the journey.
+     */
+    private suspend fun moveCampingTokenToHex(hexKey: String) {
+        val scene = game.scenes.active ?: return
+        if (!scene.grid.isHexagonal) return
+        val tokenDoc = scene.tokens.contents.find { it.actorId == actor.id } ?: return
+        val hexObj = runCatching { kingmaker.region.hexes.find { it.key.toString() == hexKey } }
+            .getOrNull() ?: return
+        // Centre of the hex via the scene grid, then back off half a tile to get the token's
+        // top-left — the exact inverse of how getPartyCurrentHexKey derives a token's centre.
+        // Uses BaseGrid.getCenterPoint rather than constructing a GridHex: that external is
+        // @JsQualifier("foundry.grid") and resolving it at module load breaks outside Foundry.
+        val center = runCatching { scene.grid.getCenterPoint(hexObj.offset) }.getOrNull() ?: return
+        runCatching {
+            tokenDoc.typeSafeUpdate {
+                x = center.x - scene.grid.sizeX / 2.0
+                y = center.y - scene.grid.sizeY / 2.0
+            }
+        }
+    }
+
+    /** Posts the travel summary card: how far the party got, and whether something stopped them. */
+    private suspend fun postTravelSummary(summary: TravelExecutionSummary, destinationHexKey: String?) {
+        fun label(hexKey: String?) = hexKey?.let { formatHexKeyLabel(it) ?: it } ?: ""
+        val text = when {
+            summary.stoppedAtHexKey != null && summary.hexesEntered == 0 ->
+                t("chatMessages.travelRoute.noProgress", recordOf("stoppedAt" to label(summary.stoppedAtHexKey)))
+            summary.stoppedAtHexKey != null ->
+                t(
+                    "chatMessages.travelRoute.interrupted",
+                    recordOf(
+                        "hexes" to summary.hexesEntered.toString(),
+                        "days" to summary.daysElapsed.toString(),
+                        "stoppedAt" to label(summary.stoppedAtHexKey),
+                    ),
+                )
+            else ->
+                t(
+                    "chatMessages.travelRoute.arrived",
+                    recordOf(
+                        "hexes" to summary.hexesEntered.toString(),
+                        "days" to summary.daysElapsed.toString(),
+                        "destination" to label(destinationHexKey),
+                    ),
+                )
+        }
+        val context = js("{}")
+        context.summary = text
+        context.encounterStopped = summary.stoppedAtHexKey != null
+        postChatTemplate(templatePath = "chatmessages/travel-route-summary.hbs", templateContext = context)
+    }
+
+    private fun travelCostModel(): TravelCostModel {
+        val pavedKeys = if (Pfrpg2eKingdomCampingWeatherSettings.getPavedStreetsReduceTravelCost()) {
+            runCatching {
+                val paved = game.getKingdomActors().firstOrNull()
+                    ?.getKingdom()
+                    ?.getAllSettlements(game)
+                    ?.allSettlements
+                    .orEmpty()
+                    .filter { it.pavedStreets }
+                    .map { it.name.lowercase().trim() }
+                    .toSet()
+                kingmaker.region.hexes.contents
+                    .filter { it.name.lowercase().trim() in paved }
+                    .map { it.key.toString() }
+                    .toSet()
+            }.getOrDefault(emptySet())
+        } else {
+            emptySet()
+        }
+        return TravelCostModel(
+            riverExtraDegrees = Pfrpg2eKingdomCampingWeatherSettings.getTravelCostRiverNoBridgeAdditional(),
+            pavedSettlementHexKeys = pavedKeys,
+        )
+    }
+
     private fun getHexKeyOptions(): List<SelectOption> = runCatching {
         kingmaker.region.hexes.contents
             .map { hex ->

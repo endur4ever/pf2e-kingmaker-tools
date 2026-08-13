@@ -642,7 +642,13 @@
       "travelSpeedHelpRouteFormula": "Entering a hex costs Travel activities by terrain: 1 open (plains), 2 difficult (forest, hills, desert), 3 greater difficult (mountains, swamp). A road makes the terrain one step better; an unbridged river adds one step (house rule), capped at 3.",
       "travelSpeedHelpHexploration": "Travel is only one hexploration activity. Reconnoitering a hex costs the same again and is a separate activity, so it is not included in this estimate.",
       "activitiesPerDayLabel": "Hexploration activities per day: {activities}",
-      "activitiesSymbol": "activities"
+      "activitiesSymbol": "activities",
+      "travelRoute": "Travel This Route",
+      "travelRouteGmOnly": "Only the GM can travel a route.",
+      "travelRouteNoRoute": "Plan a route first — pick a start and end hex.",
+      "travelRouteMoveToken": "Move the party token along the route",
+      "confirmTravelRoute": "Travel {hexes} hex(es) over about {days} day(s)? Time advances hex by hex and an encounter check is rolled for each one; the journey stops where an encounter interrupts it.",
+      "travelRouteTimeAdvanceFailed": "World time could not be advanced — check your calendar module. The journey was stopped."
     },
     "settlementNav": {
       "status": "Status",
@@ -2235,6 +2241,12 @@
         "offerTitle": "Milestone reached!",
         "awarded": "Milestone awarded: {name} (+{xp} XP).",
         "dismissed": "Milestone offer dismissed: {name}."
+      },
+      "travelRoute": {
+        "title": "Travel",
+        "arrived": "The party travelled {hexes} hex(es) over {days} day(s) and arrived at {destination}.",
+        "interrupted": "The party travelled {hexes} hex(es) over {days} day(s) and was interrupted at {stoppedAt}.",
+        "noProgress": "The party set out but was interrupted at {stoppedAt} before covering any ground."
       }
     },
     "displayBars": {

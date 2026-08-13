@@ -63,3 +63,54 @@ fun splitRouteIntoDays(legs: List<RouteLeg>, activitiesPerDay: Double): RouteDay
         totalActivityCost = legs.sumOf { it.activityCost },
     )
 }
+
+/** How a route execution ended, for the summary chat card. */
+data class TravelExecutionSummary(
+    /** Travel days consumed. A partially travelled day still counts as a day. */
+    val daysElapsed: Int,
+    /** Hexes actually entered before stopping (or the whole route when it completed). */
+    val hexesEntered: Int,
+    /** The hex the party stopped in when an encounter interrupted them; null when they arrived. */
+    val stoppedAtHexKey: String?,
+    /** True when the party reached the destination. */
+    val completed: Boolean,
+)
+
+/**
+ * Travel days consumed after finishing [legsCompleted] legs of [plan].
+ *
+ * A day that was only partly travelled still counts — the party spent that day on the road. Zero
+ * legs is zero days, so an encounter on the very first hex does not silently bill a day.
+ */
+fun daysElapsedAfter(plan: RouteDayPlan, legsCompleted: Int): Int {
+    if (legsCompleted <= 0) return 0
+    var remaining = legsCompleted
+    var days = 0
+    for (day in plan.days) {
+        if (remaining <= 0) break
+        days++
+        remaining -= day.legs.size
+    }
+    return days
+}
+
+/**
+ * Builds the summary for a run that completed [legsCompleted] legs, stopping at
+ * [stoppedAtHexKey] when an encounter interrupted it.
+ *
+ * The party only "completed" the route if nothing stopped them AND they covered every leg, so a
+ * run cut short by an encounter on its final hex is still reported as interrupted.
+ */
+fun summarizeTravelExecution(
+    plan: RouteDayPlan,
+    legsCompleted: Int,
+    stoppedAtHexKey: String? = null,
+): TravelExecutionSummary {
+    val covered = legsCompleted.coerceIn(0, plan.hexesEntered)
+    return TravelExecutionSummary(
+        daysElapsed = daysElapsedAfter(plan, covered),
+        hexesEntered = covered,
+        stoppedAtHexKey = stoppedAtHexKey,
+        completed = stoppedAtHexKey == null && covered >= plan.hexesEntered,
+    )
+}
