@@ -791,6 +791,7 @@ class KingdomSheet(
                         kingdom.armyDeployments = transitionDeploymentToBattle(
                             kingdom.armyDeployments ?: emptyArray(),
                             threatIdNonNull,
+                            targetSettlementSceneId = threat.targetSettlementSceneId,
                         )
                         kingdom.activeBattles = (kingdom.activeBattles ?: emptyArray()) + created
                         actor.setKingdom(kingdom)

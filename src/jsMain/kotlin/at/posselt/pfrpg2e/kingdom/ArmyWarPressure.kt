@@ -184,10 +184,23 @@ fun updateDeploymentStatusesAfterBattle(
 /**
  * Transitions a deployment to BATTLE status when a battle is created for its assigned threat.
  * Call this from the battle-creation flow.
+ *
+ * [targetSettlementSceneId] is the settlement the threat targets, if any: armies GARRISONED there
+ * join that battle (see withGarrisonDefenders) without ever being assigned to the threat, so they
+ * must flip too. Miss them and [updateDeploymentStatusesAfterBattle] skips them afterwards — it
+ * only transitions deployments already in BATTLE — so an army wiped out defending its own walls
+ * still reads "Deployed" on the board, offers Recall instead of Remove Deployment, and would start
+ * relieving war pressure again the moment a GM clears its garrison duty to redeploy it.
  */
-fun transitionDeploymentToBattle(deployments: Array<RawArmyDeployment>, threatId: String): Array<RawArmyDeployment> =
+fun transitionDeploymentToBattle(
+    deployments: Array<RawArmyDeployment>,
+    threatId: String,
+    targetSettlementSceneId: String? = null,
+): Array<RawArmyDeployment> =
     deployments.map { deployment ->
-        if (deployment.assignedThreatId == threatId && deployment.status == ArmyDeploymentStatus.DEPLOYED.value) {
+        val joinsThisBattle = deployment.assignedThreatId == threatId ||
+            (targetSettlementSceneId != null && deployment.garrisonedSettlementId == targetSettlementSceneId)
+        if (joinsThisBattle && deployment.status == ArmyDeploymentStatus.DEPLOYED.value) {
             RawArmyDeployment.copy(deployment, status = ArmyDeploymentStatus.BATTLE.value)
         } else {
             deployment

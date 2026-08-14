@@ -148,6 +148,60 @@ class WarPressureCalculationTest {
     }
 
     @Test
+    fun garrisonedArmyDestroyedInBattleIsMarkedDestroyed() {
+        // A garrisoned army joins the battle for its own settlement without ever being assigned
+        // to the threat. The lifecycle has to carry it, or it dies in the fight and the board still
+        // shows it Deployed -- wrong status, wrong cleanup button, and it would relieve pressure
+        // again the moment its garrison duty is cleared.
+        val garrisoned = deployment(
+            id = "d1",
+            armyActorUuid = "Actor.garrison",
+            assignedThreatId = null,
+            garrisonedSettlementId = "Scene.capital",
+            status = ArmyDeploymentStatus.DEPLOYED,
+        )
+        val elsewhere = deployment(
+            id = "d2",
+            armyActorUuid = "Actor.other",
+            assignedThreatId = null,
+            garrisonedSettlementId = "Scene.otherTown",
+            status = ArmyDeploymentStatus.DEPLOYED,
+        )
+
+        val inBattle = transitionDeploymentToBattle(
+            arrayOf(garrisoned, elsewhere),
+            "w1",
+            targetSettlementSceneId = "Scene.capital",
+        )
+        assertEquals(ArmyDeploymentStatus.BATTLE.value, inBattle[0].status)
+        // A garrison in a different settlement is not in this battle.
+        assertEquals(ArmyDeploymentStatus.DEPLOYED.value, inBattle[1].status)
+
+        val afterBattle = updateDeploymentStatusesAfterBattle(
+            inBattle,
+            rawArmyBattle(
+                attackers = arrayOf(
+                    battleArmy(
+                        uuid = "Actor.garrison",
+                        conditions = arrayOf(ArmyCondition.DESTROYED.value),
+                    ),
+                ),
+            ),
+        )
+        assertEquals(ArmyDeploymentStatus.DESTROYED.value, afterBattle[0].status)
+    }
+
+    @Test
+    fun transitionDeploymentToBattleIgnoresGarrisonsWhenThreatTargetsNoSettlement() {
+        val deploys = arrayOf(
+            deployment(id = "d1", assignedThreatId = null, garrisonedSettlementId = "Scene.capital"),
+        )
+        // targetSettlementSceneId omitted: a field threat pulls in no garrisons.
+        val updated = transitionDeploymentToBattle(deploys, "w1")
+        assertEquals(ArmyDeploymentStatus.DEPLOYED.value, updated[0].status)
+    }
+
+    @Test
     fun updateDeploymentStatusesAfterBattleDestroyedBecomesDestroyed() {
         val deploys = arrayOf(
             deployment(id = "d1", assignedThreatId = "w1", status = ArmyDeploymentStatus.BATTLE),
