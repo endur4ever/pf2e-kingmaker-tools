@@ -35,6 +35,7 @@ import at.posselt.pfrpg2e.kingdom.AutomateResources
 import at.posselt.pfrpg2e.kingdom.KingdomActor
 import at.posselt.pfrpg2e.kingdom.KingdomData
 import at.posselt.pfrpg2e.kingdom.offerDefeatConsequences
+import at.posselt.pfrpg2e.kingdom.offerWarVictory
 import at.posselt.pfrpg2e.kingdom.RawCouncilCooldowns
 import at.posselt.pfrpg2e.kingdom.RawEq
 import at.posselt.pfrpg2e.kingdom.RawModifier
@@ -601,7 +602,10 @@ class KingdomSheet(
                 val threatId = target.dataset["id"]
                 val existingThreat = (getKingdom().warThreats ?: emptyArray()).find { it.id == threatId }
                 if (existingThreat != null) {
-                    AddWarThreat(existing = existingThreat) { updated ->
+                    AddWarThreat(
+                        existing = existingThreat,
+                        factions = getKingdom().groups.map { it.name },
+                    ) { updated ->
                         buildPromise {
                             val kingdom = getKingdom()
                             kingdom.warThreats = (kingdom.warThreats ?: emptyArray())
@@ -837,6 +841,14 @@ class KingdomSheet(
                             // GM-confirmed, per-consequence, never auto-applied.
                             if (updated.status == BattleStatus.DEFEAT.value) {
                                 offerDefeatConsequences(game, actor, current, updated)
+                            }
+
+                            // And a VICTORY over a faction's army used to move nothing diplomatic:
+                            // standing never shifted and atWar stayed set with no way to clear it,
+                            // so a won war never ended. Offer the standing gain, plus peace terms
+                            // once the faction has no threats left standing.
+                            if (updated.status == BattleStatus.VICTORY.value) {
+                                offerWarVictory(game, actor, current, updated)
                             }
 
                             // Dispatch syncBattleOutcome to sync HP/conditions/XP to PF2EArmy actors.

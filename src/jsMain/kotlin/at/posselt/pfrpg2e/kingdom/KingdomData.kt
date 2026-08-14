@@ -122,6 +122,11 @@ external interface KingdomSettings {
     var showThreatDistance: Boolean?
     var armyPressureBoardMode: String?
 
+    // War-end terms (card t_fe8399aa) — nullable for back-compat, read via the
+    // peaceStandingFloorOrDefault()/peaceTributeRpOrDefault() helpers in WarStanding.kt.
+    var peaceStandingFloor: Int?
+    var peaceTributeRp: Int?
+
     // Balance & pacing alert thresholds (roadmap #13) — nullable for back-compat.
     var pacingAlertMinUnrestDelta: Int?
     var pacingAlertMaxTurnGap: Int?

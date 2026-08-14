@@ -186,6 +186,7 @@ private val buttons = listOf(
         AddWarThreat(
             prefillName = t("chatMessages.endTurn.warThreatName", recordOf("group" to faction)),
             prefillEnemyFaction = faction.ifBlank { null },
+            factions = actor.getKingdom()?.groups?.map { it.name } ?: emptyList(),
         ) { threat ->
             buildPromise {
                 actor.getKingdom()?.let { kingdom ->
@@ -358,6 +359,102 @@ private val buttons = listOf(
             }
         }
     },
+    ChatButton("km-offer-war-victory") { game, actor, event, button ->
+        // GM-confirmed offer posted when a war battle against a faction-linked threat resolves as
+        // VICTORY. Winning previously moved nothing diplomatic: standing never shifted and atWar
+        // stayed set with no way to clear it, so a won war never actually ended.
+        if (!game.user.isGM) return@ChatButton
+        val choice = button.dataset["choice"] ?: return@ChatButton
+        val battleId = button.dataset["battleId"] ?: return@ChatButton
+        val amount = button.dataset["amount"]?.toIntOrNull() ?: 0
+        if (choice == "dismiss") {
+            postChatMessage(t("chatMessages.battleDefeat.dismissed"))
+            return@ChatButton
+        }
+        actor.getKingdom()?.let { kingdom ->
+            val battle = kingdom.activeBattles?.find { it.id == battleId }
+            if (battle == null) {
+                ui.notifications.warn(t("chatMessages.battleDefeat.noBattle"))
+                return@ChatButton
+            }
+            val applied = battle.victoryConsequencesApplied ?: emptyArray()
+            if (choice in applied) {
+                ui.notifications.warn(t("chatMessages.battleDefeat.alreadyApplied"))
+                return@ChatButton
+            }
+            val threat = kingdom.warThreats?.find { it.id == battle.threatId }
+            val faction = threat?.enemyFactionName
+            if (faction == null) {
+                ui.notifications.warn(t("chatMessages.battleDefeat.noThreat"))
+                return@ChatButton
+            }
+            val group = kingdom.groups.find { it.name == faction }
+            if (group == null) {
+                ui.notifications.warn(t("chatMessages.warStanding.factionMissing", recordOf("faction" to faction)))
+                return@ChatButton
+            }
+            val summary = when (choice) {
+                VICTORY_OFFER_STANDING -> {
+                    kingdom.applyWarStanding(faction, amount, WarStandingReason.VICTORY)
+                    t("chatMessages.warVictory.standing", recordOf("faction" to faction, "amount" to amount))
+                }
+
+                VICTORY_OFFER_SIGN_PEACE, VICTORY_OFFER_DEMAND_TRIBUTE -> {
+                    // Peace terms are only offerable while every linked threat is down. Re-check at
+                    // confirm time: these cards sit in chat, and a new threat can arrive from the
+                    // same faction before the GM clicks.
+                    if (!peaceEligible(kingdom.threatStates(), faction)) {
+                        ui.notifications.warn(t("chatMessages.warVictory.warStillOn", recordOf("faction" to faction)))
+                        return@ChatButton
+                    }
+                    val peaceChoice = if (choice == VICTORY_OFFER_SIGN_PEACE) {
+                        PeaceChoice.SIGN_PEACE
+                    } else {
+                        PeaceChoice.DEMAND_TRIBUTE
+                    }
+                    // Read standing NOW, not when the card was posted: another battle may have
+                    // moved it since, and a delta from a stale snapshot would miss the floor.
+                    val outcome = peaceOutcome(
+                        choice = peaceChoice,
+                        currentStanding = group.standing ?: 0,
+                        standingFloor = kingdom.settings.peaceStandingFloorOrDefault(),
+                        tributeRp = kingdom.settings.peaceTributeRpOrDefault(),
+                    )
+                    val reason = if (peaceChoice == PeaceChoice.SIGN_PEACE) {
+                        WarStandingReason.PEACE
+                    } else {
+                        WarStandingReason.TRIBUTE
+                    }
+                    kingdom.applyWarStanding(faction, outcome.standingDelta, reason)
+                    if (outcome.clearsFactionAtWar) {
+                        group.atWar = false
+                        // The kingdom-wide flag carries +1 unrest per turn, so it only clears when
+                        // the LAST war ends -- not when one of several enemies makes peace.
+                        kingdom.atWar = kingdom.kingdomStillAtWarWithout(faction)
+                    }
+                    if (outcome.rpGain > 0) {
+                        kingdom.resourcePoints.now += outcome.rpGain
+                    }
+                    if (peaceChoice == PeaceChoice.SIGN_PEACE) {
+                        t("chatMessages.warVictory.peaceSigned", recordOf("faction" to faction))
+                    } else {
+                        t(
+                            "chatMessages.warVictory.tributeTaken",
+                            recordOf("faction" to faction, "rp" to outcome.rpGain),
+                        )
+                    }
+                }
+
+                else -> return@ChatButton
+            }
+            battle.victoryConsequencesApplied = applied + choice
+            kingdom.activeBattles = kingdom.activeBattles
+                ?.map { if (it.id == battleId) battle else it }
+                ?.toTypedArray() ?: emptyArray()
+            actor.setKingdom(kingdom)
+            postChatMessage(summary)
+        }
+    },
     ChatButton("km-offer-battle-defeat") { game, actor, event, button ->
         // GM-confirmed offer posted when a war battle resolves as DEFEAT. Each button applies
         // exactly the one delta it was labelled with — never the whole set — and records its key
@@ -400,6 +497,19 @@ private val buttons = listOf(
                     kingdom.warThreats = kingdom.warThreats
                         ?.map { if (it.id == threat.id) escalated else it }
                         ?.toTypedArray() ?: emptyArray()
+                }
+                DEFEAT_OFFER_STANDING -> {
+                    val faction = threat?.enemyFactionName
+                    if (faction == null) {
+                        ui.notifications.warn(t("chatMessages.battleDefeat.noThreat"))
+                        return@ChatButton
+                    }
+                    if (!kingdom.applyWarStanding(faction, amount, WarStandingReason.DEFEAT)) {
+                        ui.notifications.warn(
+                            t("chatMessages.warStanding.factionMissing", recordOf("faction" to faction)),
+                        )
+                        return@ChatButton
+                    }
                 }
                 DEFEAT_OFFER_ARRIVAL -> {
                     if (threat == null) {

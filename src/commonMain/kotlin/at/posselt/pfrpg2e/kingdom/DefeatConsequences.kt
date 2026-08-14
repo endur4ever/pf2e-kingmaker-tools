@@ -63,6 +63,9 @@ const val DEFEAT_OFFER_PRESSURE = "pressure"
 const val DEFEAT_OFFER_ESCALATION = "escalation"
 const val DEFEAT_OFFER_ARRIVAL = "arrival"
 
+/** Standing lost with the faction whose war this was; only offered for a faction-linked threat. */
+const val DEFEAT_OFFER_STANDING = "standing"
+
 /**
  * The buttons a defeat card should show, in display order, excluding any the GM has already
  * applied. Zero-valued consequences are omitted so the card never offers a no-op button.
@@ -77,9 +80,14 @@ const val DEFEAT_OFFER_ARRIVAL = "arrival"
 fun defeatOffers(
     consequences: DefeatConsequences,
     alreadyApplied: Set<String> = emptySet(),
+    factionStandingPenalty: Int = 0,
 ): List<DefeatOffer> = buildList {
     if (consequences.unrestGain > 0) add(DefeatOffer(DEFEAT_OFFER_UNREST, consequences.unrestGain))
     if (consequences.pressureJump > 0) add(DefeatOffer(DEFEAT_OFFER_PRESSURE, consequences.pressureJump))
     if (consequences.escalationBump > 0) add(DefeatOffer(DEFEAT_OFFER_ESCALATION, consequences.escalationBump))
     if (consequences.spawnArrivalEvent) add(DefeatOffer(DEFEAT_OFFER_ARRIVAL, 0))
+    // Rides on this card rather than a second one: a defeat produces one set of fallout and the GM
+    // should approve it in one place. Zero when the threat has no linked faction, and the
+    // zero-valued button is dropped like any other.
+    if (factionStandingPenalty < 0) add(DefeatOffer(DEFEAT_OFFER_STANDING, factionStandingPenalty))
 }.filterNot { it.key in alreadyApplied }

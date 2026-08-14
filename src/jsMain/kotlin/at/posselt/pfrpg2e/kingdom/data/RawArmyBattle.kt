@@ -48,4 +48,11 @@ external interface RawArmyBattle {
      * [RawWarThreat.offerConsumed], which likewise needs no migration.
      */
     var defeatConsequencesApplied: Array<String>?
+
+    /**
+     * Same idea as [defeatConsequencesApplied], for the victory card: which of the standing /
+     * peace / tribute buttons the GM has already confirmed. Nullable and defaulted to empty on
+     * read, so battles persisted before war-end conditions existed load unchanged.
+     */
+    var victoryConsequencesApplied: Array<String>?
 }

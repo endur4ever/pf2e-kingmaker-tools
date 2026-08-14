@@ -17,6 +17,8 @@ import at.posselt.pfrpg2e.fromCamelCase
 import at.posselt.pfrpg2e.kingdom.AutomateResources
 import at.posselt.pfrpg2e.kingdom.KingdomSettings
 import at.posselt.pfrpg2e.kingdom.armyPressureBoardModeOrDefault
+import at.posselt.pfrpg2e.kingdom.peaceStandingFloorOrDefault
+import at.posselt.pfrpg2e.kingdom.peaceTributeRpOrDefault
 import at.posselt.pfrpg2e.kingdom.pacingMaxTurnGap
 import at.posselt.pfrpg2e.kingdom.pacingMinUnrestDelta
 import at.posselt.pfrpg2e.kingdom.pacingLevelMismatchRange
@@ -127,6 +129,10 @@ class KingdomSettingsDataModel(
             // Without this, the Board Mode select is stripped by DataModel.toObject() on save and
             // the advanced army-pressure forecast could never be enabled through the settings UI.
             string("armyPressureBoardMode", nullable = true)
+            int("peaceStandingFloor")
+            int("peaceTributeRp") {
+                min = 0
+            }
         }
     }
 }
@@ -571,6 +577,20 @@ class KingdomSettingsApplication(
                                 SelectOption(t("armyPressure.modeBasic"), "basic"),
                                 SelectOption(t("armyPressure.modeAdvanced"), "advanced"),
                             ),
+                            stacked = false,
+                        ),
+                        NumberInput(
+                            name = "peaceStandingFloor",
+                            label = t("armyPressure.peaceStandingFloor"),
+                            value = settings.peaceStandingFloorOrDefault(),
+                            help = t("armyPressure.peaceStandingFloorHelp"),
+                            stacked = false,
+                        ),
+                        NumberInput(
+                            name = "peaceTributeRp",
+                            label = t("armyPressure.peaceTributeRp"),
+                            value = settings.peaceTributeRpOrDefault(),
+                            help = t("armyPressure.peaceTributeRpHelp"),
                             stacked = false,
                         ),
                     ),

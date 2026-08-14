@@ -32,4 +32,15 @@ external interface RawWarThreat {
 
     /** Player-board visibility (house rule). Nullable for migration safety; null/true = visible. */
     var visibleToPlayers: Boolean?
+
+    /**
+     * The name of the [RawGroup] this threat belongs to, when it is a faction's war rather than a
+     * wandering menace. Null = unlinked, which is the whole point of keeping [enemyFaction] free
+     * text alongside it: a goblin horde has an enemy but no diplomatic relationship to mend.
+     *
+     * Matched on name because [RawGroup] has no id — the same key the caravan and expedition
+     * subsystems already use for their faction links. A rename orphans the link, so every resolver
+     * tells the GM rather than silently doing nothing.
+     */
+    var enemyFactionName: String?
 }

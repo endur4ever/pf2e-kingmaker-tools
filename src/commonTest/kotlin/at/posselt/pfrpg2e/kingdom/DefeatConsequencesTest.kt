@@ -2,6 +2,7 @@ package at.posselt.pfrpg2e.kingdom
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -114,5 +115,51 @@ class DefeatOffersTest {
         assertEquals(c.unrestGain, byKey[DEFEAT_OFFER_UNREST])
         assertEquals(c.pressureJump, byKey[DEFEAT_OFFER_PRESSURE])
         assertEquals(c.escalationBump, byKey[DEFEAT_OFFER_ESCALATION])
+    }
+
+    @Test
+    fun aFactionLinkedDefeatAddsTheStandingLossToTheSameCard() {
+        // The card's rule: extend the defeat payload rather than post a second card, so the GM
+        // approves one battle's whole fallout in one place.
+        val offers = defeatOffers(
+            calculateDefeatConsequences(
+                threatEscalation = 1,
+                maxEscalation = 3,
+                armiesLost = 1,
+                settlementTargeted = false,
+            ),
+            factionStandingPenalty = -4,
+        )
+        val standing = offers.find { it.key == DEFEAT_OFFER_STANDING }
+        assertEquals(-4, standing?.amount)
+    }
+
+    @Test
+    fun anUnlinkedThreatOffersNoStandingButton() {
+        val offers = defeatOffers(
+            calculateDefeatConsequences(
+                threatEscalation = 1,
+                maxEscalation = 3,
+                armiesLost = 1,
+                settlementTargeted = false,
+            ),
+            factionStandingPenalty = 0,
+        )
+        assertNull(offers.find { it.key == DEFEAT_OFFER_STANDING })
+    }
+
+    @Test
+    fun anAlreadyAppliedStandingLossIsNotReOffered() {
+        val offers = defeatOffers(
+            calculateDefeatConsequences(
+                threatEscalation = 1,
+                maxEscalation = 3,
+                armiesLost = 1,
+                settlementTargeted = false,
+            ),
+            alreadyApplied = setOf(DEFEAT_OFFER_STANDING),
+            factionStandingPenalty = -4,
+        )
+        assertNull(offers.find { it.key == DEFEAT_OFFER_STANDING })
     }
 }

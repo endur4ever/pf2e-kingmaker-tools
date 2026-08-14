@@ -1,0 +1,47 @@
+<h2>{{localizeKM "chatMessages.warVictory.offerTitle"}}</h2>
+<div class="km-war-victory-offer">
+    <p>{{body}}</p>
+    {{#if showPeace}}
+        <p>{{peaceBody}}</p>
+    {{/if}}
+</div>
+<hr>
+<h3>{{localizeKM "chatMessages.companionAutonomy.gmActions"}}</h3>
+<div class="km-expedition-offers">
+    {{#if showStanding}}
+        <button type="button"
+                class="km-offer-war-victory"
+                data-kingdom-actor-uuid="{{actorUuid}}"
+                data-battle-id="{{battleId}}"
+                data-choice="standing"
+                data-amount="{{standingAmount}}">
+            {{standingLabel}}
+        </button>
+    {{/if}}
+    {{#if showPeace}}
+        <button type="button"
+                class="km-offer-war-victory"
+                data-kingdom-actor-uuid="{{actorUuid}}"
+                data-battle-id="{{battleId}}"
+                data-choice="signPeace"
+                data-amount="0">
+            {{signPeaceLabel}}
+        </button>
+        <button type="button"
+                class="km-offer-war-victory"
+                data-kingdom-actor-uuid="{{actorUuid}}"
+                data-battle-id="{{battleId}}"
+                data-choice="demandTribute"
+                data-amount="0">
+            {{demandTributeLabel}}
+        </button>
+    {{/if}}
+    <button type="button"
+            class="km-offer-war-victory"
+            data-kingdom-actor-uuid="{{actorUuid}}"
+            data-battle-id="{{battleId}}"
+            data-choice="dismiss"
+            data-amount="0">
+        {{localizeKM "chatMessages.battleDefeat.dismiss"}}
+    </button>
+</div>

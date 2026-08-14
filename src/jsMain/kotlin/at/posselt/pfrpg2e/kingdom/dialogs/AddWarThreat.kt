@@ -6,6 +6,8 @@ import at.posselt.pfrpg2e.app.ValidatedHandlebarsContext
 import at.posselt.pfrpg2e.app.forms.CheckboxInput
 import at.posselt.pfrpg2e.app.forms.NumberInput
 import at.posselt.pfrpg2e.app.forms.Section
+import at.posselt.pfrpg2e.app.forms.Select
+import at.posselt.pfrpg2e.app.forms.SelectOption
 import at.posselt.pfrpg2e.app.forms.SectionsContext
 import at.posselt.pfrpg2e.app.forms.TextInput
 import at.posselt.pfrpg2e.app.forms.formContext
@@ -30,6 +32,7 @@ external interface WarThreatFormData {
     var name: String
     var description: String
     var enemyFaction: String?
+    var enemyFactionName: String?
     var maxEscalation: Int
     var eta: Int?
     var targetHexLocation: String?
@@ -48,6 +51,7 @@ class WarThreatDataModel(
             string("name")
             string("description")
             string("enemyFaction", nullable = true)
+            string("enemyFactionName", nullable = true)
             int("maxEscalation") { min = 1 }
             int("eta", nullable = true)
             string("targetHexLocation", nullable = true)
@@ -70,6 +74,8 @@ class AddWarThreat(
     private val existing: RawWarThreat? = null,
     private val prefillName: String? = null,
     private val prefillEnemyFaction: String? = null,
+    /** Names of the kingdom's groups, for the faction link dropdown. */
+    private val factions: List<String> = emptyList(),
     private val onSave: (RawWarThreat) -> Unit,
 ) : FormApp<WarThreatFormContext, WarThreatFormData>(
     title = if (existing == null) t("armyPressure.addThreat") else t("armyPressure.editThreat"),
@@ -85,6 +91,10 @@ class AddWarThreat(
         name = existing?.name ?: prefillName ?: "",
         description = existing?.description ?: "",
         enemyFaction = existing?.enemyFaction ?: prefillEnemyFaction,
+        // A threshold-crossing offer names the faction it came from, so a war started that way is
+        // linked from the outset without the GM picking it again.
+        enemyFactionName = existing?.enemyFactionName
+            ?: prefillEnemyFaction?.takeIf { it in factions },
         maxEscalation = existing?.maxEscalation ?: 3,
         eta = existing?.eta,
         targetHexLocation = existing?.targetHexLocation,
@@ -108,6 +118,20 @@ class AddWarThreat(
                         TextInput(name = "name", label = t("armyPressure.threatName"), value = data.name, stacked = false),
                         TextInput(name = "description", label = t("armyPressure.threatDescription"), value = data.description, required = false, stacked = false),
                         TextInput(name = "enemyFaction", label = t("armyPressure.enemyFaction"), value = data.enemyFaction ?: "", required = false, stacked = false),
+                        Select(
+                            name = "enemyFactionName",
+                            label = t("armyPressure.linkedFaction"),
+                            value = data.enemyFactionName ?: "",
+                            // The stored name is kept as an option even when it no longer matches a
+                            // group, so opening the dialog on a threat whose faction was renamed
+                            // shows the stale link instead of silently clearing it on save.
+                            options = listOf(SelectOption(label = t("armyPressure.noFactionLink"), value = "")) +
+                                (factions + listOfNotNull(data.enemyFactionName?.takeIf { it.isNotBlank() && it !in factions }))
+                                    .map { SelectOption(label = it, value = it) },
+                            required = false,
+                            stacked = false,
+                            help = t("armyPressure.linkedFactionHelp"),
+                        ),
                         NumberInput(name = "maxEscalation", label = t("armyPressure.maxEscalation"), value = data.maxEscalation, stacked = false),
                         NumberInput(name = "eta", label = t("armyPressure.eta"), value = data.eta ?: 0, stacked = false, help = t("armyPressure.etaHelp")),
                         TextInput(name = "targetHexLocation", label = t("armyPressure.target"), value = data.targetHexLocation ?: "", required = false, stacked = false),
@@ -133,6 +157,7 @@ class AddWarThreat(
                     name = data.name.ifBlank { t("armyPressure.threats") },
                     description = data.description,
                     enemyFaction = data.enemyFaction?.ifBlank { null },
+                    enemyFactionName = data.enemyFactionName?.ifBlank { null },
                     escalationLevel = existing?.escalationLevel ?: 0,
                     maxEscalation = data.maxEscalation.coerceAtLeast(1),
                     eta = etaValue,
@@ -144,6 +169,7 @@ class AddWarThreat(
                     status = existing?.status ?: "active",
                     triggeredTurn = existing?.triggeredTurn,
                     visibleToPlayers = data.visibleToPlayers,
+                    offerConsumed = existing?.offerConsumed,
                 )
                 close()
                 onSave(threat)

@@ -1,6 +1,7 @@
 package at.posselt.pfrpg2e.kingdom
 
 import at.posselt.pfrpg2e.data.armies.ArmyCondition
+import at.posselt.pfrpg2e.data.armies.BattleStatus
 import at.posselt.pfrpg2e.kingdom.data.RawArmyBattle
 import at.posselt.pfrpg2e.utils.postChatTemplate
 import at.posselt.pfrpg2e.utils.t
@@ -41,7 +42,11 @@ suspend fun offerDefeatConsequences(
     )
 
     val applied = (battle.defeatConsequencesApplied ?: emptyArray()).toSet()
-    val offers = defeatOffers(consequences, applied)
+    // Losing a faction's war costs standing with that faction. Only offered when the threat is
+    // linked to a group that still exists — a renamed or deleted faction has nothing to apply to.
+    val linkedFaction = threat?.enemyFactionName?.takeIf { name -> kingdom.groups.any { it.name == name } }
+    val standingPenalty = if (linkedFaction != null) warStandingDelta(BattleStatus.DEFEAT) else 0
+    val offers = defeatOffers(consequences, applied, factionStandingPenalty = standingPenalty)
         // Escalation and arrival need a threat to act on; without one the buttons would only be
         // able to report failure, so do not offer them at all.
         .filter { threat != null || (it.key != DEFEAT_OFFER_ESCALATION && it.key != DEFEAT_OFFER_ARRIVAL) }
@@ -50,11 +55,15 @@ suspend fun offerDefeatConsequences(
     val context = js("{}")
     context.actorUuid = actor.uuid
     context.battleId = battle.id
+    context.faction = linkedFaction ?: ""
     context.offers = offers.map { offer ->
         val row = js("{}")
         row.key = offer.key
         row.amount = offer.amount
-        row.label = t("chatMessages.battleDefeat.${offer.key}", recordOf("amount" to offer.amount))
+        row.label = t(
+            "chatMessages.battleDefeat.${offer.key}",
+            recordOf("amount" to offer.amount, "faction" to (linkedFaction ?: "")),
+        )
         row
     }.toTypedArray()
 

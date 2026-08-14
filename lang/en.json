@@ -1810,7 +1810,11 @@
         "drift": "Passive Standing Drift",
         "expedition": "Diplomacy Expedition",
         "allianceChange": "Treaty Level Changed",
-        "annexation": "Annexed Vassal State"
+        "annexation": "Annexed Vassal State",
+        "warVictory": "Won a Battle",
+        "warDefeat": "Lost a Battle",
+        "peaceTreaty": "Peace Treaty",
+        "tribute": "Tribute Demanded"
       },
       "newSettlement": "New Settlement",
       "emptySettlements": "No settlements yet — found your first by clicking New Settlement, or add the current scene.",
@@ -2219,7 +2223,8 @@
         "dismissed": "The GM waived the consequences of the defeat.",
         "alreadyApplied": "That consequence has already been applied for this battle.",
         "noBattle": "That battle is no longer on record, so its consequences cannot be applied.",
-        "noThreat": "This defeat has no linked war threat, so escalation and arrival cannot be applied."
+        "noThreat": "This defeat has no linked war threat, so escalation and arrival cannot be applied.",
+        "standing": "Standing with {faction}: {amount}"
       },
       "warThreatArrival": {
         "offerTitle": "War Threat Arrived",
@@ -2258,6 +2263,20 @@
         "appliedNoStructures": "{settlement} weathers the assault, but the attack causes +{unrest} Unrest.",
         "noTargets": "That settlement has no structures left to raze.",
         "gazette": "Sacked: {names}"
+      },
+      "warStanding": {
+        "factionMissing": "The faction “{faction}” no longer exists on the kingdom sheet, so its standing could not be adjusted. Set it by hand if it was renamed."
+      },
+      "warVictory": {
+        "offerTitle": "Victory",
+        "body": "Your armies have broken {faction}'s force in the field.",
+        "peaceBody": "{faction} has nothing left on the board. The war with them can be ended on your terms.",
+        "standing": "Standing with {faction}: {amount}",
+        "signPeace": "Sign Peace (standing to {floor}, war ends)",
+        "demandTribute": "Demand Tribute (+{rp} RP, standing falls, war ends)",
+        "peaceSigned": "Peace signed with {faction}. The war is over.",
+        "tributeTaken": "{faction} pays {rp} RP in tribute. The war is over, and they will not forget it.",
+        "warStillOn": "{faction} still has a war threat on the board, so peace terms are off the table."
       }
     },
     "displayBars": {
@@ -7288,7 +7307,14 @@
       "activeThreats": "Active Threats ({count})",
       "activeDeployments": "Active Deployments ({count})",
       "removeDeployment": "Remove Deployment",
-      "removeDeploymentConfirm": "Remove the destroyed army deployment for \"{name}\"? This cannot be undone."
+      "removeDeploymentConfirm": "Remove the destroyed army deployment for \"{name}\"? This cannot be undone.",
+      "linkedFaction": "Linked Faction",
+      "linkedFactionHelp": "Tie this war to one of your kingdom's groups. Linking it lets battle results move that faction's standing and unlocks peace terms once every one of their threats is beaten. Leave unlinked for a menace with no diplomacy behind it.",
+      "noFactionLink": "— No Faction —",
+      "peaceStandingFloor": "Peace Treaty Standing Floor",
+      "peaceStandingFloorHelp": "Signing peace raises the former enemy's standing to at least this value. It never lowers it. 0 is the middle of Indifferent — the war is over, but they are not your friends.",
+      "peaceTributeRp": "Tribute Demand (RP)",
+      "peaceTributeRpHelp": "One-time Resource Points gained by demanding tribute instead of signing peace, at the cost of standing."
     },
     "warThreatStatus": {
       "active": "Active",
