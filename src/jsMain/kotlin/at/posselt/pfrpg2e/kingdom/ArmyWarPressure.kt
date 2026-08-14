@@ -89,19 +89,13 @@ fun RawWarThreat.copyWith(
     status: String = this.status,
     triggeredTurn: Int? = this.triggeredTurn,
     offerConsumed: Boolean? = this.offerConsumed,
-): RawWarThreat = RawWarThreat(
-    id = id,
-    name = name,
-    description = description,
-    enemyFaction = enemyFaction,
+): RawWarThreat = RawWarThreat.copy(
+    // Spread-copy rather than rebuilding field by field: the old rebuild silently dropped every
+    // field it did not list, so consuming an offer un-hid a GM-hidden threat (visibleToPlayers came
+    // back undefined, which reads as visible). A spread also means new fields need no edit here.
+    this,
     escalationLevel = escalationLevel,
-    maxEscalation = maxEscalation,
     eta = eta,
-    targetSettlementSceneId = targetSettlementSceneId,
-    targetHexLocation = targetHexLocation,
-    linkedQuestId = linkedQuestId,
-    linkedEventId = linkedEventId,
-    pauseOnExpiry = pauseOnExpiry,
     status = status,
     triggeredTurn = triggeredTurn,
     offerConsumed = offerConsumed,

@@ -74,6 +74,7 @@ import at.posselt.pfrpg2e.utils.typeSafeUpdate
 import com.foundryvtt.core.grid.GridOffset2D
 import at.posselt.pfrpg2e.kingdom.data.RawFactionStandingEntry
 import at.posselt.pfrpg2e.kingdom.data.RawGroup
+import at.posselt.pfrpg2e.kingdom.mergeSubmittedGroups
 import at.posselt.pfrpg2e.kingdom.data.endTurn
 import at.posselt.pfrpg2e.kingdom.data.getChosenCharter
 import at.posselt.pfrpg2e.kingdom.data.getChosenFeats
@@ -3669,7 +3670,13 @@ class KingdomSheet(
             kingdom.features = value.features
             kingdom.bonusFeats = value.bonusFeats
             kingdom.leaders = value.leaders
-            kingdom.groups = value.groups
+            // The submitted groups carry only the six fields the sheet renders as inputs (see
+            // KingdomSheetDataModel's array("groups") schema). standing, standingLog and
+            // allianceLevel are display-only, so assigning value.groups wholesale erased a
+            // faction's entire attitude history on every sheet save. Carry those three across by
+            // position -- the form renders groups in kingdom order, and add/delete go through their
+            // own data-action handlers, so the indices line up.
+            kingdom.groups = mergeSubmittedGroups(value.groups, kingdom.groups)
             kingdom.skillRanks = value.skillRanks
             kingdom.abilityScores = value.abilityScores
             kingdom.milestones = value.milestones

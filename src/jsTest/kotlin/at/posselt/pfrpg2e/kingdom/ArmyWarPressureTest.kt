@@ -192,6 +192,19 @@ class WarPressureCalculationTest {
     }
 
     @Test
+    fun copyWithPreservesFieldsItDoesNotName() {
+        // copyWith used to rebuild the threat field by field, dropping everything unlisted. The
+        // visible symptom: consuming an offer un-hid a threat the GM had hidden from players.
+        val hidden = RawWarThreat.copy(threat(), visibleToPlayers = false)
+
+        val consumed = hidden.copyWith(offerConsumed = true)
+
+        assertEquals(false, consumed.visibleToPlayers)
+        assertEquals(true, consumed.offerConsumed)
+        assertEquals("t1", consumed.id)
+    }
+
+    @Test
     fun transitionDeploymentToBattleIgnoresGarrisonsWhenThreatTargetsNoSettlement() {
         val deploys = arrayOf(
             deployment(id = "d1", assignedThreatId = null, garrisonedSettlementId = "Scene.capital"),
