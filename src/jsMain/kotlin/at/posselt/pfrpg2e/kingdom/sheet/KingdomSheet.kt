@@ -585,7 +585,7 @@ class KingdomSheet(
                 actor.setKingdom(kingdom)
             }
 
-            "add-war-threat" -> AddWarThreat { threat ->
+            "add-war-threat" -> AddWarThreat(factions = getKingdom().groups.map { it.name }) { threat ->
                 buildPromise {
                     val kingdom = getKingdom()
                     kingdom.warThreats = (kingdom.warThreats ?: emptyArray()) + threat

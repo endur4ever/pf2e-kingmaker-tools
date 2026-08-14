@@ -83,4 +83,18 @@ class Migration52Test {
         Migration52().migrateKingdom(game, noGroups)
         assertNull(noGroups.warThreats[0].enemyFactionName)
     }
+
+    @Test
+    fun storesTheGroupsRealNameNotTheTrimmedFreeText() = runTest {
+        // Storing the trimmed form would make every later exact-name lookup miss, so no standing
+        // would ever move and the GM would get a "faction missing" warning on every victory.
+        val kingdom = unsafeJso<dynamic> {
+            groups = arrayOf(unsafeJso<dynamic> { name = "Pitax " })
+            warThreats = arrayOf(unsafeJso<dynamic> { enemyFaction = "Pitax" })
+        }
+
+        Migration52().migrateKingdom(game, kingdom)
+
+        assertEquals("Pitax ", kingdom.warThreats[0].enemyFactionName)
+    }
 }

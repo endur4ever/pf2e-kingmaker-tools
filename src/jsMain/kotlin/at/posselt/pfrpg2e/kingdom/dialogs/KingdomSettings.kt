@@ -129,7 +129,9 @@ class KingdomSettingsDataModel(
             // Without this, the Board Mode select is stripped by DataModel.toObject() on save and
             // the advanced army-pressure forecast could never be enabled through the settings UI.
             string("armyPressureBoardMode", nullable = true)
-            int("peaceStandingFloor")
+            // Standing runs -100..100, so a GM who wants "the war is over but they still hate us"
+            // needs a negative floor. Without allowNegative the field clamps to 0 on save, silently.
+            int("peaceStandingFloor", allowNegative = true)
             int("peaceTributeRp") {
                 min = 0
             }

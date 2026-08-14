@@ -12,16 +12,22 @@ import at.posselt.pfrpg2e.kingdom.data.RawGroup
  * faction's whole attitude history every time anyone saved the sheet -- including the war-standing
  * deltas and log entries this subsystem writes.
  *
- * Groups are matched positionally: the sheet renders them in kingdom order with index-addressed
- * field names (`groups.$index.name`), and adding or deleting a group goes through its own
- * data-action handler that persists and re-renders, so the two arrays stay aligned across a submit.
+ * Groups are matched positionally while the two arrays are the same length, which is the normal
+ * case and the only one that survives a RENAME: the submitted row still holds the old row's
+ * history even though its name just changed.
+ *
+ * When the lengths differ the form is stale -- another client deleted or added a group between
+ * render and submit -- and position no longer means anything. Falling back to a name lookup there
+ * stops a deleted faction being resurrected carrying its neighbour's standing and log, which is the
+ * very data loss this function exists to prevent, arriving by a different route.
  */
 fun mergeSubmittedGroups(
     submitted: Array<RawGroup>,
     existing: Array<RawGroup>,
-): Array<RawGroup> =
-    submitted.mapIndexed { index, group ->
-        val previous = existing.getOrNull(index)
+): Array<RawGroup> {
+    val aligned = submitted.size == existing.size
+    return submitted.mapIndexed { index, group ->
+        val previous = if (aligned) existing.getOrNull(index) else existing.find { it.name == group.name }
         RawGroup.copy(
             group,
             standing = previous?.standing,
@@ -29,3 +35,4 @@ fun mergeSubmittedGroups(
             allianceLevel = previous?.allianceLevel,
         )
     }.toTypedArray()
+}

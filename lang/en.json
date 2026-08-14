@@ -2276,7 +2276,11 @@
         "demandTribute": "Demand Tribute (+{rp} RP, standing falls, war ends)",
         "peaceSigned": "Peace signed with {faction}. The war is over.",
         "tributeTaken": "{faction} pays {rp} RP in tribute. The war is over, and they will not forget it.",
-        "warStillOn": "{faction} still has a war threat on the board, so peace terms are off the table."
+        "warStillOn": "{faction} still has a war threat on the board, so peace terms are off the table.",
+        "dismissed": "The GM declined the spoils of victory.",
+        "alreadyApplied": "That term has already been settled for this battle.",
+        "noBattle": "This victory's battle is no longer on the kingdom sheet.",
+        "noFaction": "This victory was not against a faction you have relations with, so there are no terms to settle."
       }
     },
     "displayBars": {

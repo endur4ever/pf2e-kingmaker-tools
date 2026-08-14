@@ -43,4 +43,17 @@ external interface RawWarThreat {
      * tells the GM rather than silently doing nothing.
      */
     var enemyFactionName: String?
+
+    /**
+     * Set once a peace treaty or tribute has concluded the war this threat belonged to.
+     *
+     * Peace is a per-faction, once-per-war event, but offer cards are per-battle and stay clickable
+     * in chat scrollback forever. Without this, every historical victory card against a faction
+     * stayed armed: a GM could scroll back and collect the tribute RP again, or sign peace AND
+     * demand tribute from the same card and land below the floor the treaty just promised.
+     *
+     * Settled threats drop out of peace eligibility entirely, so a LATER war with the same faction
+     * -- new threats, unsettled -- becomes offerable again on its own merits.
+     */
+    var peaceSettled: Boolean?
 }

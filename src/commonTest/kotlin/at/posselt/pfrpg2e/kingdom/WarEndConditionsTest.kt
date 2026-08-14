@@ -23,7 +23,8 @@ class WarEndConditionsTest {
         assertEquals(0, warStandingDelta(BattleStatus.ACTIVE))
     }
 
-    private fun threat(faction: String?, outcome: ThreatOutcome) = ThreatState(faction, outcome)
+    private fun threat(faction: String?, outcome: ThreatOutcome, settled: Boolean = false) =
+        ThreatState(faction, outcome, settled)
 
     @Test
     fun peaceIsOfferedWhenTheLastOfSeveralThreatsFalls() {
@@ -135,6 +136,45 @@ class WarEndConditionsTest {
         assertEquals(0, r.standingDelta)
         assertEquals(0, r.rpGain)
         assertFalse(r.clearsFactionAtWar)
+    }
+
+    @Test
+    fun aSettledWarCannotBeConcludedTwice() {
+        // Offer cards live in chat scrollback forever. Without dropping settled threats, scrolling
+        // back to any old victory card let the GM collect the tribute again, or sign peace AND
+        // demand tribute from one card and land below the floor the treaty just promised.
+        val settled = listOf(
+            threat("pitax", ThreatOutcome.DEFEATED, settled = true),
+            threat("pitax", ThreatOutcome.DEFEATED, settled = true),
+        )
+        assertFalse(peaceEligible(settled, "pitax"))
+    }
+
+    @Test
+    fun aFreshWarWithAnOldEnemyIsOfferableAgain() {
+        val war = listOf(
+            threat("pitax", ThreatOutcome.DEFEATED, settled = true),  // the last war
+            threat("pitax", ThreatOutcome.DEFEATED),                  // and the new one, just won
+        )
+        assertTrue(peaceEligible(war, "pitax"))
+    }
+
+    @Test
+    fun aSettledPastWarDoesNotUnblockALiveOne() {
+        val war = listOf(
+            threat("pitax", ThreatOutcome.DEFEATED, settled = true),
+            threat("pitax", ThreatOutcome.ACTIVE),
+        )
+        assertFalse(peaceEligible(war, "pitax"))
+    }
+
+    @Test
+    fun aLiveThreatKeepsTheKingdomAtWarEvenWithNoFactionFlagsSet() {
+        // Nothing in the war subsystem ever ticks a group's atWar box, so deriving the
+        // kingdom-wide flag from those alone let peace with one faction silently cancel an
+        // unrelated war that was still marching on the capital.
+        assertTrue(kingdomRemainsAtWar(listOf(false, false), anyThreatStillActive = true))
+        assertFalse(kingdomRemainsAtWar(listOf(false, false), anyThreatStillActive = false))
     }
 
     @Test

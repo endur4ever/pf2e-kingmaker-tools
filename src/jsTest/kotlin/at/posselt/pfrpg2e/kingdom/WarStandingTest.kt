@@ -118,4 +118,52 @@ class WarStandingTest {
 
         assertFalse(k.kingdomStillAtWarWithout("Pitax"))
     }
+
+    @Test
+    fun settlingPeaceStampsEveryThreatOfThatFactionAndNoOthers() {
+        val k = kingdom(
+            arrayOf(group("Pitax"), group("Mivon")),
+            arrayOf(
+                threat("Pitax", WarThreatStatus.DEFEATED),
+                threat("Pitax", WarThreatStatus.EVADED),
+                threat("Mivon", WarThreatStatus.DEFEATED),
+                threat(null, WarThreatStatus.DEFEATED),
+            ),
+        )
+
+        k.settlePeaceWith("Pitax")
+
+        assertEquals(true, k.warThreats?.get(0)?.peaceSettled)
+        assertEquals(true, k.warThreats?.get(1)?.peaceSettled)
+        assertEquals(null, k.warThreats?.get(2)?.peaceSettled)
+        assertEquals(null, k.warThreats?.get(3)?.peaceSettled)
+        // And the settled war is no longer concludable.
+        assertFalse(peaceEligible(k.threatStates(), "Pitax"))
+        assertTrue(peaceEligible(k.threatStates(), "Mivon"))
+    }
+
+    @Test
+    fun aLiveThreatKeepsTheKingdomAtWarEvenWhenNoGroupBoxIsTicked() {
+        // Peace with Pitax must not cancel the war Mendev is still fighting just because nobody
+        // ticked Mendev's atWar checkbox -- nothing in the war subsystem ever ticks it.
+        val k = kingdom(
+            arrayOf(group("Pitax", atWar = false), group("Mendev", atWar = false)),
+            arrayOf(
+                threat("Pitax", WarThreatStatus.DEFEATED),
+                threat("Mendev", WarThreatStatus.ACTIVE),
+            ),
+        )
+
+        assertTrue(k.kingdomStillAtWarWithout("Pitax"))
+    }
+
+    @Test
+    fun withNothingLeftRunningTheKingdomsWarCanEnd() {
+        val k = kingdom(
+            arrayOf(group("Pitax", atWar = true)),
+            arrayOf(threat("Pitax", WarThreatStatus.DEFEATED)),
+        )
+
+        assertFalse(k.kingdomStillAtWarWithout("Pitax"))
+    }
 }

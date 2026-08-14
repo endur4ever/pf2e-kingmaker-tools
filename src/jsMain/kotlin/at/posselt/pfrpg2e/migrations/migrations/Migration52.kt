@@ -19,17 +19,22 @@ class Migration52 : Migration(52) {
     override suspend fun migrateKingdom(game: Game, kingdom: dynamic) {
         val threats = kingdom.warThreats ?: return
         val groups = kingdom.groups
-        val groupNames = mutableSetOf<String>()
+        // Keyed by trimmed name but storing the group's REAL name: a group called "Pitax " and a
+        // threat naming "Pitax" are the same war, but storing the trimmed form would make every
+        // later exact-name lookup miss and no standing would ever move.
+        val groupNames = mutableMapOf<String, String>()
         if (groups != null) {
             for (i in 0 until (groups.length as Int)) {
-                (groups[i].name as String?)?.trim()?.takeIf { it.isNotBlank() }?.let(groupNames::add)
+                val name = groups[i].name as String?
+                val trimmed = name?.trim()
+                if (name != null && trimmed != null && trimmed.isNotBlank()) groupNames[trimmed] = name
             }
         }
         for (i in 0 until (threats.length as Int)) {
             val threat = threats[i]
             if (threat.enemyFactionName != null) continue
             val freeText = (threat.enemyFaction as String?)?.trim()
-            threat.enemyFactionName = if (freeText != null && freeText in groupNames) freeText else null
+            threat.enemyFactionName = if (freeText == null) null else groupNames[freeText]
         }
     }
 }

@@ -75,4 +75,36 @@ class GroupSubmitMergeTest {
         assertNull(merged[1].standingLog)
         assertEquals(2, merged.size)
     }
+
+    @Test
+    fun aStaleFormCannotResurrectADeletedFactionCarryingItsNeighboursHistory() {
+        // Another client deleted Pitax between render and submit, so the form still posts three
+        // rows against two stored ones. Matching by position here handed Pitax back Mivon's
+        // standing and log, and wiped Brevoy's -- the exact loss this function exists to prevent.
+        val submitted = arrayOf(group("Pitax"), group("Mivon"), group("Brevoy"))
+        val existing = arrayOf(
+            group("Mivon", standing = 30, log = arrayOf(entry(4))),
+            group("Brevoy", standing = 10, log = arrayOf(entry(8))),
+        )
+
+        val merged = mergeSubmittedGroups(submitted, existing)
+
+        assertNull(merged[0].standing)
+        assertNull(merged[0].standingLog)
+        assertEquals(30, merged[1].standing)
+        assertEquals(10, merged[2].standing)
+    }
+
+    @Test
+    fun renamingAFactionKeepsItsHistory() {
+        // Same length, so position still means something -- and it is the only thing that carries
+        // history through a rename, since the name lookup would find nothing.
+        val submitted = arrayOf(group("Pitax the Greater"), group("Mivon"))
+        val existing = arrayOf(group("Pitax", standing = -60), group("Mivon", standing = 30))
+
+        val merged = mergeSubmittedGroups(submitted, existing)
+
+        assertEquals(-60, merged[0].standing)
+        assertEquals(30, merged[1].standing)
+    }
 }

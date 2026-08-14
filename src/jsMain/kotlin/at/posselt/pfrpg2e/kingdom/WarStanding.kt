@@ -40,7 +40,11 @@ fun RawWarThreat.threatOutcome(): ThreatOutcome =
 /** The kingdom's threats as [ThreatState]s, for [peaceEligible]. */
 fun KingdomData.threatStates(): List<ThreatState> =
     (warThreats ?: emptyArray()).map {
-        ThreatState(enemyFactionName = it.enemyFactionName, outcome = it.threatOutcome())
+        ThreatState(
+            enemyFactionName = it.enemyFactionName,
+            outcome = it.threatOutcome(),
+            peaceSettled = it.peaceSettled == true,
+        )
     }
 
 /**
@@ -50,7 +54,22 @@ fun KingdomData.threatStates(): List<ThreatState> =
  * of several enemies.
  */
 fun KingdomData.kingdomStillAtWarWithout(factionName: String): Boolean =
-    kingdomRemainsAtWar(groups.filter { it.name != factionName }.map { it.atWar })
+    kingdomRemainsAtWar(
+        otherFactionsAtWar = groups.filter { it.name != factionName }.map { it.atWar },
+        anyThreatStillActive = (warThreats ?: emptyArray()).any { it.threatOutcome() == ThreatOutcome.ACTIVE },
+    )
+
+/**
+ * Close the war with [factionName]: stamp every one of its threats as settled so no offer card --
+ * this one or any still sitting in chat scrollback -- can conclude the same war twice.
+ *
+ * Mutates the caller's clone without persisting, like [applyWarStanding].
+ */
+fun KingdomData.settlePeaceWith(factionName: String) {
+    warThreats = (warThreats ?: emptyArray()).map {
+        if (it.enemyFactionName == factionName) RawWarThreat.copy(it, peaceSettled = true) else it
+    }.toTypedArray()
+}
 
 /**
  * Standing a signed peace treaty raises the former enemy to.

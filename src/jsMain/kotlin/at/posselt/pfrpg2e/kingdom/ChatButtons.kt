@@ -182,6 +182,9 @@ private val buttons = listOf(
         // GM-confirmed offer from a faction-standing threshold crossing (#1 → #12).
         // Opens the AddWarThreat dialog prefilled with the faction; nothing is created
         // until the GM saves.
+        // Party actors are owner-permissioned to players, so without this any player who can see
+        // the card's DOM could declare a war. {{#if isGM}} in a template is not a guard.
+        if (!game.user.isGM) return@ChatButton
         val faction = button.dataset["faction"] ?: ""
         AddWarThreat(
             prefillName = t("chatMessages.endTurn.warThreatName", recordOf("group" to faction)),
@@ -368,24 +371,24 @@ private val buttons = listOf(
         val battleId = button.dataset["battleId"] ?: return@ChatButton
         val amount = button.dataset["amount"]?.toIntOrNull() ?: 0
         if (choice == "dismiss") {
-            postChatMessage(t("chatMessages.battleDefeat.dismissed"))
+            postChatMessage(t("chatMessages.warVictory.dismissed"))
             return@ChatButton
         }
         actor.getKingdom()?.let { kingdom ->
             val battle = kingdom.activeBattles?.find { it.id == battleId }
             if (battle == null) {
-                ui.notifications.warn(t("chatMessages.battleDefeat.noBattle"))
+                ui.notifications.warn(t("chatMessages.warVictory.noBattle"))
                 return@ChatButton
             }
             val applied = battle.victoryConsequencesApplied ?: emptyArray()
             if (choice in applied) {
-                ui.notifications.warn(t("chatMessages.battleDefeat.alreadyApplied"))
+                ui.notifications.warn(t("chatMessages.warVictory.alreadyApplied"))
                 return@ChatButton
             }
             val threat = kingdom.warThreats?.find { it.id == battle.threatId }
             val faction = threat?.enemyFactionName
             if (faction == null) {
-                ui.notifications.warn(t("chatMessages.battleDefeat.noThreat"))
+                ui.notifications.warn(t("chatMessages.warVictory.noFaction"))
                 return@ChatButton
             }
             val group = kingdom.groups.find { it.name == faction }
@@ -428,9 +431,15 @@ private val buttons = listOf(
                     kingdom.applyWarStanding(faction, outcome.standingDelta, reason)
                     if (outcome.clearsFactionAtWar) {
                         group.atWar = false
-                        // The kingdom-wide flag carries +1 unrest per turn, so it only clears when
-                        // the LAST war ends -- not when one of several enemies makes peace.
-                        kingdom.atWar = kingdom.kingdomStillAtWarWithout(faction)
+                        // Stamp the war closed BEFORE deriving the kingdom flag, so this faction's
+                        // threats no longer count as live, and so no second card can re-conclude it.
+                        kingdom.settlePeaceWith(faction)
+                        // The kingdom-wide flag carries +1 unrest per turn. Only ever CLEAR it, and
+                        // only when nothing else is running: a GM may have ticked that box for a war
+                        // this subsystem cannot see, and peace with one enemy must not cancel it.
+                        if (kingdom.atWar && !kingdom.kingdomStillAtWarWithout(faction)) {
+                            kingdom.atWar = false
+                        }
                     }
                     if (outcome.rpGain > 0) {
                         kingdom.resourcePoints.now += outcome.rpGain
@@ -547,7 +556,15 @@ private val buttons = listOf(
             postChatMessage(
                 t(
                     "chatMessages.battleDefeat.applied",
-                    recordOf("consequence" to t("chatMessages.battleDefeat.$choice", recordOf("amount" to amount))),
+                    // The standing line also needs `faction`. Omitting it made ICU throw, and
+                    // i18next-icu's default error handler returns the RAW pattern -- the GM saw a
+                    // literal "Standing with {faction}: {amount}", losing the number too.
+                    recordOf(
+                        "consequence" to t(
+                            "chatMessages.battleDefeat.$choice",
+                            recordOf("amount" to amount, "faction" to (threat?.enemyFactionName ?: "")),
+                        ),
+                    ),
                 )
             )
         }

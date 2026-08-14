@@ -72,6 +72,8 @@ enum class ThreatOutcome {
 data class ThreatState(
     val enemyFactionName: String?,
     val outcome: ThreatOutcome,
+    /** True once a peace treaty or tribute closed the war this threat belonged to. */
+    val peaceSettled: Boolean = false,
 )
 
 /**
@@ -87,7 +89,9 @@ data class ThreatState(
  */
 fun peaceEligible(threats: List<ThreatState>, factionName: String): Boolean {
     if (factionName.isBlank()) return false
-    val linked = threats.filter { it.enemyFactionName == factionName }
+    // Threats whose war was already settled are history: they neither re-arm an old offer card nor
+    // block a fresh war with the same faction from being ended on its own terms.
+    val linked = threats.filter { it.enemyFactionName == factionName && !it.peaceSettled }
     return linked.isNotEmpty() &&
         linked.none { it.outcome == ThreatOutcome.ACTIVE } &&
         linked.any { it.outcome == ThreatOutcome.DEFEATED }
@@ -154,8 +158,18 @@ fun peaceOutcome(
 /**
  * Whether the kingdom-wide war flag should stay set after one faction makes peace.
  *
- * [otherFactionsAtWar] is every OTHER faction's `atWar` flag. The kingdom-level flag drives a
- * standing +1 unrest per turn and the `@atWar` modifier expression, so it must only clear when the
- * last war ends — signing peace with one of two enemies does not stop the war.
+ * The kingdom-level flag drives a standing +1 unrest per turn and the `@atWar` modifier, so it must
+ * survive making peace with one of several enemies.
+ *
+ * Both signals matter, and neither alone is enough. `RawGroup.atWar` is a manual GM checkbox that
+ * nothing in the war subsystem ever sets, so deriving from it alone would let peace with one
+ * faction silently cancel an unrelated war nobody ticked a box for. A live war threat is the war
+ * subsystem's own evidence that fighting continues, whether or not it names a faction at all.
+ *
+ * Callers must only ever use this to CLEAR the flag, never to set it: it cannot see the reasons a
+ * GM ticked the box by hand.
  */
-fun kingdomRemainsAtWar(otherFactionsAtWar: List<Boolean>): Boolean = otherFactionsAtWar.any { it }
+fun kingdomRemainsAtWar(
+    otherFactionsAtWar: List<Boolean>,
+    anyThreatStillActive: Boolean = false,
+): Boolean = anyThreatStillActive || otherFactionsAtWar.any { it }

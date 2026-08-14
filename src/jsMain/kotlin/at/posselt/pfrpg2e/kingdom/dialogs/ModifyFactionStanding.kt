@@ -40,7 +40,10 @@ class FactionStandingDataModel(
     companion object {
         @JsStatic
         fun defineSchema() = buildSchema {
-            int("delta")
+            // The field's own help text says "e.g. 10 or -15", but without allowNegative the schema
+        // clamped a negative delta to 0, and the caller's `delta != 0` guard then skipped the whole
+        // update: no standing change, no log entry, no error. Adjusting downward did nothing at all.
+        int("delta", allowNegative = true)
             string("reason")
             string("allianceLevel")
         }
