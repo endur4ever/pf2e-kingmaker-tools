@@ -17,6 +17,7 @@ import at.posselt.pfrpg2e.migrations.migrations.Migration45
 import at.posselt.pfrpg2e.migrations.migrations.Migration46
 import at.posselt.pfrpg2e.migrations.migrations.Migration47
 import at.posselt.pfrpg2e.migrations.migrations.Migration48
+import at.posselt.pfrpg2e.migrations.migrations.Migration49
 import com.foundryvtt.core.Game
 import js.objects.unsafeJso
 import kotlin.test.Test
@@ -257,5 +258,20 @@ class MigrationBackfillsTest {
         val k = kingdom { it.companions = arrayOf(unsafeJso<dynamic> { lastInfluenceAttemptSessionId = "s-1" }) }
         Migration48().migrateKingdom(game, k)
         assertEquals("s-1", k.companions[0].lastInfluenceAttemptSessionId.unsafeCast<String>())
+    }
+
+    // ── Migration49: camping.travelMoveToken ────────────────────────────────────────────────────
+    @Test
+    fun migration49DefaultsMoveTokenFalse() = runTest {
+        val c = camping()
+        Migration49().migrateCamping(game, c)
+        assertEquals(false, c.asDynamic().travelMoveToken.unsafeCast<Boolean>())
+    }
+
+    @Test
+    fun migration49PreservesEnabledToggle() = runTest {
+        val c = camping { it.travelMoveToken = true }
+        Migration49().migrateCamping(game, c)
+        assertEquals(true, c.asDynamic().travelMoveToken.unsafeCast<Boolean>())
     }
 }

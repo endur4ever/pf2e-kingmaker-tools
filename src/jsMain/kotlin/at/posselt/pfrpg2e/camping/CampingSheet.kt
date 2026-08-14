@@ -283,6 +283,7 @@ external interface CampingSheetContext : ValidatedHandlebarsContext {
     var travelStartHexSelect: FormElementContext?
     var travelEndHexSelect: FormElementContext?
     var travelRoute: TravelRouteUiContext?
+    var travelMoveToken: Boolean
     var travelPathError: String?
 }
 
@@ -309,6 +310,7 @@ external interface CampingSheetFormData {
     val numberOfWatches: Int?
     val travelStartHex: String?
     val travelEndHex: String?
+    val travelMoveToken: Boolean?
 }
 
 private fun isNightMode(
@@ -524,13 +526,7 @@ class CampingSheet(
             }
 
             "travel-route" -> buildPromise {
-                // The checkbox lives beside the button; read it at click time so no extra state
-                // has to be persisted just to remember a per-journey choice.
-                val moveToken = target.closest(".km-route-planner-content")
-                    ?.querySelector("input[name='travelMoveToken']")
-                    ?.let { it as? org.w3c.dom.HTMLInputElement }
-                    ?.checked == true
-                travelPlannedRoute(moveToken = moveToken)
+                travelPlannedRoute(moveToken = actor.getCamping()?.travelMoveToken == true)
             }
 
             "clear-actor" -> {
@@ -1934,6 +1930,7 @@ class CampingSheet(
             travelStartHexSelect = travelStartHexSelect,
             travelEndHexSelect = travelEndHexSelect,
             travelRoute = travelRouteContext,
+            travelMoveToken = camping.travelMoveToken == true,
             travelPathError = travelPathError
         )
     }
@@ -1982,6 +1979,9 @@ class CampingSheet(
             }
             camping.travelStartHex = value.travelStartHex
             camping.travelEndHex = value.travelEndHex
+            // The control is GM-gated, so it is absent from a player's form. Only honour it from
+            // a GM's submit; otherwise any player interaction with the sheet would clear it.
+            if (game.user.isGM) camping.travelMoveToken = value.travelMoveToken == true
             ensureWatchSlots(camping, value.numberOfWatches)
             actor.setCamping(camping)
         }

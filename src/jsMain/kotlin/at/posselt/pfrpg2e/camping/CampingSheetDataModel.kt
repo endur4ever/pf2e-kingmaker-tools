@@ -18,6 +18,9 @@ class CampingSheetDataModel(
             string("region")
             string("travelStartHex", nullable = true)
             string("travelEndHex", nullable = true)
+            // Only rendered for GMs, so it is absent from a player's form; the submit handler
+            // therefore only applies it when the submitting user is a GM.
+            boolean("travelMoveToken")
             // Only present in the DOM while the Set Watches section is open, so it must be nullable.
             int("numberOfWatches", nullable = true)
             schema("activities") {

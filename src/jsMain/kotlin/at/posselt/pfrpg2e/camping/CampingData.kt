@@ -163,6 +163,12 @@ external interface CampingData {
     var travelEndHex: String?
 
     /**
+     * Whether "Travel This Route" also walks the party token along the route. Persisted so the
+     * choice survives the sheet re-rendering, which reset a plain DOM checkbox on every update.
+     */
+    var travelMoveToken: Boolean?
+
+    /**
      * Companion-specific activity IDs that the party has learned via the
      * "Learn from a Companion" activity. When an activity's required companion
      * is absent, it is still available if its id is in this list.
@@ -434,6 +440,7 @@ fun getDefaultCamping(game: Game): CampingData {
         hexSizeInMiles = 12,
         travelStartHex = null,
         travelEndHex = null,
+        travelMoveToken = false,
         learnedCompanionActivities = emptyArray(),
         learnedCompanionActivitiesByActor = recordOf(),
         watchSlots = emptyArray(),
