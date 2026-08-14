@@ -18,6 +18,7 @@ import at.posselt.pfrpg2e.migrations.migrations.Migration46
 import at.posselt.pfrpg2e.migrations.migrations.Migration47
 import at.posselt.pfrpg2e.migrations.migrations.Migration48
 import at.posselt.pfrpg2e.migrations.migrations.Migration49
+import at.posselt.pfrpg2e.migrations.migrations.Migration50
 import com.foundryvtt.core.Game
 import js.objects.unsafeJso
 import kotlin.test.Test
@@ -273,5 +274,20 @@ class MigrationBackfillsTest {
         val c = camping { it.travelMoveToken = true }
         Migration49().migrateCamping(game, c)
         assertEquals(true, c.asDynamic().travelMoveToken.unsafeCast<Boolean>())
+    }
+
+    // ── Migration50: settlement.destroyedStructureIds ───────────────────────────────────────────
+    @Test
+    fun migration50SeedsEmptyRuinedList() = runTest {
+        val k = kingdom { it.settlements = arrayOf(unsafeJso<dynamic> { sceneId = "s1" }) }
+        Migration50().migrateKingdom(game, k)
+        assertEquals(0, k.settlements[0].destroyedStructureIds.length.unsafeCast<Int>())
+    }
+
+    @Test
+    fun migration50PreservesExistingRuins() = runTest {
+        val k = kingdom { it.settlements = arrayOf(unsafeJso<dynamic> { destroyedStructureIds = arrayOf("tok-1") }) }
+        Migration50().migrateKingdom(game, k)
+        assertEquals("tok-1", k.settlements[0].destroyedStructureIds[0].unsafeCast<String>())
     }
 }

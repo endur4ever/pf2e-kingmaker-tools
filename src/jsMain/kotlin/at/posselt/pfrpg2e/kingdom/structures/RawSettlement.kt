@@ -16,6 +16,13 @@ external interface RawSettlement {
     var populationRoster: RawPopulationRoster?
     var terrain: String? // SettlementTerrain value, e.g. "forest", "swamp"
     var hexKey: String? // realm-map hex this settlement occupies (for caravan routing)
+
+    /**
+     * Token ids of structures razed by a siege. A ruined structure keeps its token on the map but
+     * stops contributing bonuses, storage and block occupancy until it is rebuilt — clearing the id
+     * restores it, so a sack is recoverable rather than destructive.
+     */
+    var destroyedStructureIds: Array<String>?
 }
 
 @JsPlainObject

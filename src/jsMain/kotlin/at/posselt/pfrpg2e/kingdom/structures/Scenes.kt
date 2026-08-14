@@ -36,18 +36,28 @@ import js.objects.recordOf
 import kotlinx.coroutines.await
 import kotlin.math.max
 
-private fun Scene.structureTokens(): List<TokenDocument> =
+private fun Scene.structureTokens(ruinedTokenIds: Set<String> = emptySet()): List<TokenDocument> =
     tokens.contents
         .asSequence()
         .filter {
             val actor = it.actor
-            actor is StructureActor && actor.isStructure() && !it.hidden
+            actor is StructureActor && actor.isStructure() && !it.hidden && it._id !in ruinedTokenIds
         }
         .toList()
 
-private fun Scene.getStructures(): List<Structure> =
+/**
+ * The structures whose bonuses a settlement actually enjoys.
+ *
+ * [ruinedTokenIds] are structures razed by a siege: their tokens stay on the map so the GM can see
+ * what was lost and rebuild, but they contribute nothing until repaired. Both this and
+ * [structureTokens] filter them, so a ruined structure loses its bonuses AND frees its block —
+ * evaluating it one way but not the other is how a settlement's stats would silently disagree with
+ * its map.
+ */
+private fun Scene.getStructures(ruinedTokenIds: Set<String> = emptySet()): List<Structure> =
     tokens.contents
         .asSequence()
+        .filter { it._id !in ruinedTokenIds }
         .mapNotNull { it.actor }
         .filterIsInstance<StructureActor>()
         .mapNotNull { it.parseStructure() }
@@ -66,9 +76,9 @@ private fun isSlowedOrInfrastructure(actor: StructureActor): Boolean {
     return structure.slowed || structure.isInfrastructure
 }
 
-private fun Scene.getNonInfrastructureBlocks(): List<Block> {
+private fun Scene.getNonInfrastructureBlocks(ruinedTokenIds: Set<String> = emptySet()): List<Block> {
     val sceneGridSize = grid.size.toDouble()
-    val structuresAndRectangles = structureTokens()
+    val structuresAndRectangles = structureTokens(ruinedTokenIds)
         .mapNotNull {
             val actor = it.actor
             if (actor !is StructureActor) return@mapNotNull null
@@ -98,12 +108,13 @@ fun Scene.parseSettlement(
     capStructureBonusAtKingdomLevel: Boolean,
     kingdomLevel: Int,
 ): Settlement {
-    val blocks = getNonInfrastructureBlocks()
+    val ruinedTokenIds = rawSettlement.destroyedStructureIds?.toSet() ?: emptySet()
+    val blocks = getNonInfrastructureBlocks(ruinedTokenIds)
     val occupiedBlocks = if (autoCalculateSettlementLevel && rawSettlement.manualSettlementLevel != true) max(
         0,
         blocks.filter { it.isOccupied }.size
     ) else rawSettlement.lots
-    val structures = getStructures()
+    val structures = getStructures(ruinedTokenIds)
     val populationRoster = rawSettlement.populationRoster?.let { raw ->
         PopulationRoster(
             npcs = raw.npcs?.map { npc ->

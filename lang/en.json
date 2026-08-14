@@ -2247,6 +2247,17 @@
         "arrived": "The party travelled {hexes} hex(es) over {days} day(s) and arrived at {destination}.",
         "interrupted": "The party travelled {hexes} hex(es) over {days} day(s) and was interrupted at {stoppedAt}.",
         "noProgress": "The party set out but was interrupted at {stoppedAt} before covering any ground."
+      },
+      "siege": {
+        "heading": "Siege",
+        "willRaze": "The assault would raze {names} and stir up {unrest} Unrest. Defensive structures counted: {defences}.",
+        "spared": "The settlement's defences ({defences}) hold — no structure falls, but the assault still causes {unrest} Unrest.",
+        "sack": "Sack the settlement",
+        "reroll": "Reroll which structures fall",
+        "applied": "{settlement} is sacked: {names} left in ruins, +{unrest} Unrest.",
+        "appliedNoStructures": "{settlement} weathers the assault, but the attack causes +{unrest} Unrest.",
+        "noTargets": "That settlement has no structures left to raze.",
+        "gazette": "Sacked: {names}"
       }
     },
     "displayBars": {

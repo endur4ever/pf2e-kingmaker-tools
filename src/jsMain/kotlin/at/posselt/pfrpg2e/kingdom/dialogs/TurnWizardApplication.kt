@@ -46,6 +46,7 @@ import at.posselt.pfrpg2e.kingdom.data.RawCaravanShipment
 import at.posselt.pfrpg2e.kingdom.data.RawExpeditionChronicleEntry
 import at.posselt.pfrpg2e.kingdom.data.RawGroup
 import at.posselt.pfrpg2e.kingdom.computeCaravanRoute
+import at.posselt.pfrpg2e.kingdom.postWarThreatArrivalOffer
 import at.posselt.pfrpg2e.kingdom.map.routeHexSafety
 import at.posselt.pfrpg2e.kingdom.caravanRouteSafety
 import at.posselt.pfrpg2e.kingdom.map.KingmakerHexGridProvider
@@ -608,17 +609,14 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
         val gmUserIds = game.users.filter { it.isGM }.mapNotNull { it.id }.toTypedArray()
         if (gmUserIds.isNotEmpty()) {
             for (threat in tickResult.newlyTriggeredThreats) {
-                // Find linked hex content for the "Queue encounter" button
-                val hasLinkedHex = kingdom.hexContents?.any { it.linkedWarThreatId == threat.id } == true
-                val offerContext = js("{}")
-                offerContext.threatId = threat.id
-                offerContext.threatName = threat.name
-                offerContext.actorUuid = actor.uuid
-                offerContext.hasLinkedHex = hasLinkedHex
-                postChatTemplate(
-                    templatePath = "chatmessages/war-threat-arrival-offer.hbs",
-                    templateContext = offerContext,
-                    whisper = gmUserIds,
+                // Built by the shared poster so a rerolled card is identical to the original
+                // except for the freshly rolled selection.
+                postWarThreatArrivalOffer(
+                    game = game,
+                    actorUuid = actor.uuid,
+                    kingdom = kingdom,
+                    threat = threat,
+                    gmUserIds = gmUserIds,
                 )
             }
         }

@@ -1,6 +1,9 @@
 <h2>{{localizeKM "chatMessages.warThreatArrival.offerTitle"}}</h2>
 <div class="km-war-threat-arrival-offer">
     <p>{{localizeKM "chatMessages.warThreatArrival.offerBody" name=threatName}}</p>
+    {{#if hasSiege}}
+    <p class="km-siege-summary"><b>{{localizeKM "chatMessages.siege.heading"}}:</b> {{siegeSummary}}</p>
+    {{/if}}
 </div>
 <hr>
 <h3>{{localizeKM "chatMessages.companionAutonomy.gmActions"}}</h3>
@@ -19,6 +22,24 @@
             data-threat-id="{{threatId}}"
             data-action="queueEncounter">
         {{localizeKM "chatMessages.warThreatArrival.queueEncounter"}}
+    </button>
+    {{/if}}
+    {{#if hasSiege}}
+    <button type="button"
+            class="km-offer-war-threat-arrival"
+            data-kingdom-actor-uuid="{{actorUuid}}"
+            data-threat-id="{{threatId}}"
+            data-token-ids="{{siegeTokenIds}}"
+            data-unrest="{{siegeUnrest}}"
+            data-action="sack">
+        {{localizeKM "chatMessages.siege.sack"}}
+    </button>
+    <button type="button"
+            class="km-offer-war-threat-arrival"
+            data-kingdom-actor-uuid="{{actorUuid}}"
+            data-threat-id="{{threatId}}"
+            data-action="rerollSack">
+        {{localizeKM "chatMessages.siege.reroll"}}
     </button>
     {{/if}}
     <button type="button"

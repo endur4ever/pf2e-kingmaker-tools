@@ -257,6 +257,68 @@ private val buttons = listOf(
                         postChatMessage(t("chatMessages.warThreatArrival.queuedEncounter", recordOf("name" to threat.name, "hexKey" to hexContent.hexKey)))
                     }
                 }
+                "sack" -> {
+                    // Raze exactly the structures the GM was shown. Ruining records the token ids
+                    // on the settlement: the structures stay on the map so the GM can see what was
+                    // lost and rebuild later, but they stop contributing bonuses, storage and block
+                    // occupancy immediately.
+                    val sceneId = threat.targetSettlementSceneId
+                    val settlement = sceneId?.let { id -> kingdom.settlements.find { it.sceneId == id } }
+                    if (settlement == null) {
+                        ui.notifications.warn(t("chatMessages.siege.noTargets"))
+                        return@ChatButton
+                    }
+                    val tokenIds = button.dataset["tokenIds"]
+                        ?.split(",")
+                        ?.map { it.trim() }
+                        ?.filter { it.isNotEmpty() }
+                        ?: emptyList()
+                    val unrest = button.dataset["unrest"]?.toIntOrNull() ?: 0
+                    val names = tokenIds.mapNotNull { tokenId ->
+                        siegeTargetsFor(game, kingdom, settlement.sceneId).find { it.tokenId == tokenId }?.name
+                    }
+                    settlement.destroyedStructureIds =
+                        (settlement.destroyedStructureIds ?: emptyArray()) + tokenIds.toTypedArray()
+                    kingdom.unrest += unrest
+                    val settlementName = game.scenes.get(settlement.sceneId)?.name ?: threat.name
+                    val updatedThreat = threat.copyWith(offerConsumed = true)
+                    kingdom.warThreats = kingdom.warThreats?.map {
+                        if (it.id == threatId) updatedThreat else it
+                    }?.toTypedArray() ?: emptyArray()
+                    // Gazette line. The threat arrived at End Turn and the GM sacks in its
+                    // immediate aftermath, so the loss belongs to the turn just recorded; there is
+                    // no open turn record to write to between turns.
+                    if (names.isNotEmpty()) {
+                        kingdom.turnHistory?.lastOrNull()?.let { record ->
+                            val line = t("chatMessages.siege.gazette", recordOf("names" to names.joinToString(", ")))
+                            record.notes = listOfNotNull(record.notes?.takeIf { it.isNotBlank() }, line)
+                                .joinToString("\n")
+                        }
+                    }
+                    actor.setKingdom(kingdom)
+                    postChatMessage(
+                        if (names.isEmpty()) {
+                            t(
+                                "chatMessages.siege.appliedNoStructures",
+                                recordOf("settlement" to settlementName, "unrest" to unrest.toString()),
+                            )
+                        } else {
+                            t(
+                                "chatMessages.siege.applied",
+                                recordOf(
+                                    "settlement" to settlementName,
+                                    "names" to names.joinToString(", "),
+                                    "unrest" to unrest.toString(),
+                                ),
+                            )
+                        }
+                    )
+                }
+                "rerollSack" -> {
+                    // Re-post the same offer with a freshly rolled selection. The offer is NOT
+                    // consumed, so the GM can keep rerolling until they like the outcome.
+                    postWarThreatArrivalOffer(actor, kingdom, threat)
+                }
                 "dismiss" -> {
                     // Mark the offer as consumed to prevent re-posting
                     val updatedThreat = threat.copyWith(offerConsumed = true)
