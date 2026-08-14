@@ -46,7 +46,12 @@ private fun supportingArmyCount(deployments: Array<RawArmyDeployment>): Int =
         val status = it.status
         // Only DEPLOYED and BATTLE armies count toward pressure reduction.
         // DESTROYED and RETREATED armies no longer contribute (they are effectively removed from the field).
-        status == ArmyDeploymentStatus.DEPLOYED.value || status == ArmyDeploymentStatus.BATTLE.value
+        val onTheField = status == ArmyDeploymentStatus.DEPLOYED.value ||
+            status == ArmyDeploymentStatus.BATTLE.value
+        // A garrisoned army is holding one settlement, not projecting force across the realm, so it
+        // does not also relieve war pressure — otherwise garrisoning would be strictly better than
+        // deploying, granting the settlement defence AND the pressure relief for the same army.
+        onTheField && it.garrisonedSettlementId == null
     }
 
 /**

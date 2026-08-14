@@ -14,8 +14,9 @@ package at.posselt.pfrpg2e.kingdom
 /**
  * Kingmaker structure ids that harden a settlement against a sack (base ids; the "-vk" Vance &
  * Kerenshara homebrew variants collapse onto these). Each pair of them shaves one structure off the
- * destruction count. A garrisoned army is deliberately NOT here: per the card it is only a note on
- * the offer card (its mechanical effect is the sibling garrison-effects card), not mitigation.
+ * destruction count. A garrisoned ARMY is not counted here — that mitigation lives in
+ * [siegeDamageWithGarrison], which the sibling garrison-effects card (t_35bb2e42) wired in; this
+ * function stays purely about the settlement's built defences.
  */
 val DEFENSIVE_STRUCTURE_IDS: Set<String> = setOf(
     "wall-wooden",

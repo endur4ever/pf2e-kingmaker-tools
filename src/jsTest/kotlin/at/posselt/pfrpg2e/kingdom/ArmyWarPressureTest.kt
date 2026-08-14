@@ -12,6 +12,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 private fun threat(
     status: WarThreatStatus = WarThreatStatus.ACTIVE,
@@ -258,5 +259,36 @@ class WarThreatTickTest {
         val t = tickWarThreat(original, currentTurn = 1)
         assertEquals(3, t.eta)
         assertEquals(WarThreatStatus.DEFEATED.value, t.status)
+    }
+
+    @Test
+    fun `a garrisoned army does not also relieve war pressure`() {
+        // Garrisoning already buys settlement defence and siege mitigation. Letting it ALSO relieve
+        // pressure would make garrisoning strictly better than deploying for the same army.
+        val free = recalculateWarPressure(arrayOf(threat()), arrayOf(deployment()), null)
+        val garrisoned = recalculateWarPressure(
+            arrayOf(threat()),
+            arrayOf(deployment(garrisonedSettlementId = "scene-1")),
+            null,
+        )
+        assertTrue(
+            garrisoned.pressurePerTurn > free.pressurePerTurn,
+            "a garrisoned army must not reduce pressure the way a deployed one does",
+        )
+    }
+
+    @Test
+    fun `mixed deployments only count the un-garrisoned armies`() {
+        val mixed = recalculateWarPressure(
+            arrayOf(threat()),
+            arrayOf(
+                deployment(id = "d1"),
+                deployment(id = "d2", garrisonedSettlementId = "scene-1"),
+                deployment(id = "d3", garrisonedSettlementId = "scene-2"),
+            ),
+            null,
+        )
+        val oneFree = recalculateWarPressure(arrayOf(threat()), arrayOf(deployment(id = "d1")), null)
+        assertEquals(oneFree.pressurePerTurn, mixed.pressurePerTurn)
     }
 }

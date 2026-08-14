@@ -63,7 +63,7 @@ fun toBattleArmyState(raw: RawBattleArmy): BattleArmyState = BattleArmyState(
     maxHp = raw.maxHp,
     conditions = raw.conditions.mapNotNull { fromCamelCase<ArmyCondition>(it) }.toSet(),
     attackBonus = getArmyAttackBonus(raw.level),
-    ac = getArmyAc(raw.level),
+    ac = getArmyAc(raw.level) + (raw.defenseBonus ?: 0),
     routThreshold = routThresholdFor(raw.name, raw.maxHp),
     xp = raw.xp,
 )
@@ -96,6 +96,9 @@ suspend fun toBattleArmyStateFromActor(raw: RawBattleArmy): BattleArmyState {
         currentHp = raw.currentHp,
         conditions = raw.conditions.mapNotNull { fromCamelCase<ArmyCondition>(it) }.toSet(),
         xp = raw.xp,
+        // Actor-backed armies read AC from the sheet, so the garrison bonus is applied on top here
+        // too — otherwise it would silently apply only to workbook-fallback armies.
+        ac = state.ac + (raw.defenseBonus ?: 0),
     )
 }
 
@@ -201,6 +204,12 @@ suspend fun createArmyBattle(
     threat: RawWarThreat,
     attackers: List<BattleArmyInfo>,
     terrain: String?,
+    /**
+     * Flat AC bonus per army uuid, resolved by the caller — currently the Garrison-structure
+     * defence for armies garrisoned in the settlement under threat. Baked into the battle record
+     * so the row the GM reads and the AC the engine rolls against are the same number.
+     */
+    defenseBonusByUuid: Map<String, Int> = emptyMap(),
 ): RawArmyBattle {
     val attackerArmies = attackers.map { info ->
         val uuid = info.uuid
@@ -222,6 +231,7 @@ suspend fun createArmyBattle(
                     maxHp = state.maxHp,
                     conditions = emptyArray(),
                     xp = persistedXp,
+                    defenseBonus = defenseBonusByUuid[uuid]?.takeIf { it != 0 },
                 )
             } else {
                 // Actor not found or not a PF2EArmy — fall back to workbook
@@ -234,6 +244,7 @@ suspend fun createArmyBattle(
                     maxHp = maxHp,
                     conditions = emptyArray(),
                     xp = 0,
+                    defenseBonus = defenseBonusByUuid[uuid]?.takeIf { it != 0 },
                 )
             }
         } else {
@@ -247,6 +258,7 @@ suspend fun createArmyBattle(
                 maxHp = maxHp,
                 conditions = emptyArray(),
                 xp = 0,
+                defenseBonus = defenseBonusByUuid[uuid]?.takeIf { it != 0 },
             )
         }
     }.toTypedArray()
@@ -259,6 +271,7 @@ suspend fun createArmyBattle(
         maxHp = defenderMaxHp,
         conditions = emptyArray(),
         xp = 0,
+        defenseBonus = null,
     )
     return RawArmyBattle(
         id = id,

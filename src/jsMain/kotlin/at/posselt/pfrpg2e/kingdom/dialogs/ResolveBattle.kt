@@ -63,6 +63,8 @@ external interface BattleArmyDisplay {
     var conditions: String
     var isDestroyed: Boolean
     var isRouted: Boolean
+    /** Non-blank when the army fights with a bonus, e.g. "+1 AC (Garrison)". */
+    var defenseNote: String
 }
 
 @JsPlainObject
@@ -340,6 +342,9 @@ private fun RawBattleArmy.toDisplay(index: Int): BattleArmyDisplay = BattleArmyD
     currentHp = currentHp,
     maxHp = maxHp,
     conditions = conditions.map { t("kingdom.warfare.$it") }.joinToString(", "),
+    defenseNote = (defenseBonus ?: 0).takeIf { it != 0 }
+        ?.let { t("warBattle.garrisonDefenseNote", recordOf("bonus" to it.toString())) }
+        ?: "",
     isDestroyed = ArmyCondition.DESTROYED.value in conditions,
     isRouted = ArmyCondition.ROUTED.value in conditions,
 )

@@ -49,6 +49,7 @@ data class SiegePlan(
     val selection: List<SiegeTarget>,
     val defensiveStructures: Int,
     val availableStructures: Int,
+    val garrisonPresent: Boolean,
 )
 
 /**
@@ -61,16 +62,25 @@ fun planSiege(game: Game, kingdom: KingdomData, threat: RawWarThreat): SiegePlan
     val sceneId = threat.targetSettlementSceneId ?: return null
     val targets = siegeTargetsFor(game, kingdom, sceneId)
     val defensive = countDefensiveStructures(targets.map { it.structureId })
-    val damage = calculateSiegeDamage(
+    // An army garrisoned in the settlement spares one more structure on top of the walls.
+    val garrisonPresent = garrisonedArmyIdsFor(
+        settlementId = sceneId,
+        assignments = (kingdom.armyDeployments ?: emptyArray()).map {
+            GarrisonAssignment(armyId = it.armyActorUuid, garrisonedSettlementId = it.garrisonedSettlementId)
+        },
+    ).isNotEmpty()
+    val damage = siegeDamageWithGarrison(
         threatEscalation = threat.escalationLevel,
         maxEscalation = threat.maxEscalation,
         defensiveStructureCount = defensive,
+        garrisonPresent = garrisonPresent,
     )
     return SiegePlan(
         damage = damage,
         selection = targets.shuffled().take(damage.structuresDestroyed),
         defensiveStructures = defensive,
         availableStructures = targets.size,
+        garrisonPresent = garrisonPresent,
     )
 }
 
@@ -100,6 +110,7 @@ suspend fun postWarThreatArrivalOffer(
         context.siegeUnrest = plan.damage.unrestGain
         context.siegeCount = plan.damage.structuresDestroyed
         context.siegeDefences = plan.defensiveStructures
+        context.siegeGarrison = plan.garrisonPresent
         context.siegeTokenIds = plan.selection.joinToString(",") { it.tokenId }
         context.siegeNames = plan.selection.joinToString(", ") { it.name }
         context.siegeSpared = plan.damage.structuresDestroyed == 0

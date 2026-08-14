@@ -15,6 +15,13 @@ external interface RawBattleArmy {
     var maxHp: Int
     var conditions: Array<String>
     var xp: Int
+
+    /**
+     * Flat bonus to this army's AC for the whole battle. Currently granted to an army garrisoned in
+     * a settlement that has a Garrison structure, resolved once when the battle is created so the
+     * number the GM sees in the rows is the number the engine fights with.
+     */
+    var defenseBonus: Int?
 }
 
 /**

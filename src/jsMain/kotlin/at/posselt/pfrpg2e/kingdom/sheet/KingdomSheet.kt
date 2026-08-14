@@ -156,6 +156,11 @@ import at.posselt.pfrpg2e.kingdom.sheet.contexts.toShipmentRowContexts
 import at.posselt.pfrpg2e.kingdom.data.RawCaravanShipment
 import at.posselt.pfrpg2e.kingdom.dialogs.CaravanShipmentDialog
 import at.posselt.pfrpg2e.kingdom.computeCaravanRoute
+import at.posselt.pfrpg2e.kingdom.siegeTargetsFor
+import at.posselt.pfrpg2e.kingdom.garrisonDefensiveBonus
+import at.posselt.pfrpg2e.kingdom.GarrisonAssignment
+import at.posselt.pfrpg2e.kingdom.withGarrisonDefenders
+import at.posselt.pfrpg2e.kingdom.garrisonedArmyIdsFor
 import at.posselt.pfrpg2e.kingdom.caravanEtaTurns
 import at.posselt.pfrpg2e.kingdom.parseBulk
 import at.posselt.pfrpg2e.kingdom.CARAVAN_PARTY_SURCHARGE
@@ -724,10 +729,29 @@ class KingdomSheet(
                         val armiesByUuid = game.actors.contents
                             .filterIsInstance<PF2EArmy>()
                             .associateBy { it.uuid }
-                        val infos = (kingdom.armyDeployments ?: emptyArray())
+                        val deployments = kingdom.armyDeployments ?: emptyArray()
+                        val assignedUuids = deployments
                             .filter { it.assignedThreatId == threatId }
-                            .mapNotNull { deployment ->
-                                armiesByUuid[deployment.armyActorUuid]?.let {
+                            .map { it.armyActorUuid }
+                        // Armies garrisoned in the settlement under threat turn out to defend it —
+                        // that is what the garrison assignment is for. They join the kingdom's own
+                        // side: `attackers` is the PLAYER side here (determineBattleStatus reports
+                        // DEFEAT when every attacker falls), which is the sides trap this card
+                        // warned about.
+                        val garrisonedUuids = threat.targetSettlementSceneId?.let { settlementId ->
+                            garrisonedArmyIdsFor(
+                                settlementId = settlementId,
+                                assignments = deployments.map {
+                                    GarrisonAssignment(
+                                        armyId = it.armyActorUuid,
+                                        garrisonedSettlementId = it.garrisonedSettlementId,
+                                    )
+                                },
+                            )
+                        } ?: emptyList()
+                        val infos = withGarrisonDefenders(assignedUuids, garrisonedUuids)
+                            .mapNotNull { uuid ->
+                                armiesByUuid[uuid]?.let {
                                     BattleArmyInfo(
                                         uuid = it.uuid,
                                         name = it.name,
@@ -744,11 +768,23 @@ class KingdomSheet(
                             targetHexLocation = threat.targetHexLocation,
                             settlements = kingdom.settlements,
                         )
+                        // A garrison only fights harder if the settlement actually has a
+                        // Garrison structure to fight from; garrisoning in an undefended town
+                        // grants nothing beyond turning up.
+                        val settlementHasGarrison = threat.targetSettlementSceneId?.let { sid ->
+                            siegeTargetsFor(game, kingdom, sid).any { it.structureId.removeSuffix("-vk") == "garrison" }
+                        } == true
+                        val defenseBonuses = if (settlementHasGarrison) {
+                            garrisonedUuids.associateWith { garrisonDefensiveBonus(true) }
+                        } else {
+                            emptyMap()
+                        }
                         val created = createArmyBattle(
                             id = "battle-${kotlin.js.Date().getTime().toLong()}",
                             threat = threat,
                             attackers = infos,
                             terrain = terrain,
+                            defenseBonusByUuid = defenseBonuses,
                         )
                         // Transition assigned deployments to BATTLE status
                         val threatIdNonNull = threatId ?: return@buildPromise

@@ -7331,7 +7331,8 @@
         "dismiss": "Dismiss",
         "leveledUp": "{{name}} leveled up to level {{level}}!",
         "dismissed": "{{name}} level-up offer dismissed."
-      }
+      },
+      "garrisonDefenseNote": "+{bonus} AC (Garrison)"
     },
     "pacingAlertType": {
       "levelMismatch": "The party's level has drifted far from the chapter's intended level. Consider adjusting encounter difficulty or rewards.",

@@ -47,6 +47,7 @@
                 <p class="{{#if isDestroyed}}km-battle-army--destroyed{{/if}}">
                     <strong>{{name}}</strong> — HP {{currentHp}}/{{maxHp}}
                     {{#if conditions}} ({{conditions}}){{/if}}
+                    {{#if defenseNote}} <span class="km-battle-defense-note">{{defenseNote}}</span>{{/if}}
                 </p>
             {{/each}}
         </div>
@@ -57,6 +58,7 @@
                 <p class="{{#if isDestroyed}}km-battle-army--destroyed{{/if}}">
                     <strong>{{name}}</strong> — HP {{currentHp}}/{{maxHp}}
                     {{#if conditions}} ({{conditions}}){{/if}}
+                    {{#if defenseNote}} <span class="km-battle-defense-note">{{defenseNote}}</span>{{/if}}
                 </p>
             {{/each}}
         </div>
