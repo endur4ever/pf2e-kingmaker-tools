@@ -38,6 +38,10 @@ import at.posselt.pfrpg2e.utils.getAppFlag
 import at.posselt.pfrpg2e.utils.postChatMessage
 import at.posselt.pfrpg2e.utils.postChatTemplate
 import at.posselt.pfrpg2e.utils.t
+import kotlinx.coroutines.await
+import com.foundryvtt.core.AnyObject
+import at.posselt.pfrpg2e.utils.roll
+import at.posselt.pfrpg2e.utils.d20Check
 import at.posselt.pfrpg2e.utils.unsetAppFlag
 import at.posselt.pfrpg2e.utils.typeSafeUpdate
 import at.posselt.pfrpg2e.utils.setAppFlag
@@ -361,6 +365,75 @@ private val buttons = listOf(
                 postChatMessage(t("chatMessages.warRuin.applied", recordOf("ruin" to t("chatMessages.warRuin.$choice"))))
             }
         }
+    },
+    ChatButton("km-offer-deploy-army") { game, actor, event, button ->
+        // GM-confirmed apply buttons for a resolved Deploy Army activity. The activity's own text
+        // used to end "HP and Conditions need to be managed by hand"; these replace that.
+        if (!game.user.isGM) return@ChatButton
+        val choice = button.dataset["choice"] ?: return@ChatButton
+        val armyActorUuid = button.dataset["armyActorUuid"] ?: return@ChatButton
+        val cardId = button.dataset["cardId"] ?: return@ChatButton
+        val amount = button.dataset["amount"]?.toIntOrNull() ?: 0
+        if (choice == "dismiss") {
+            postChatMessage(t("chatMessages.deployArmy.dismissed"))
+            return@ChatButton
+        }
+        val army = fromUuidOfTypes(armyActorUuid, PF2EArmy::class)
+        if (army == null) {
+            ui.notifications.warn(t("chatMessages.deployArmy.noArmy"))
+            return@ChatButton
+        }
+        if (choice in army.appliedDeployKeys(cardId)) {
+            ui.notifications.warn(t("chatMessages.deployArmy.alreadyApplied"))
+            return@ChatButton
+        }
+        val summary = when (choice) {
+            DEPLOY_OFFER_FLAT_CHECK -> {
+                // Rolled at confirm time, not when the card was posted, so the GM sees the die.
+                val passed = d20Check(
+                    dc = amount,
+                    flavor = t("chatMessages.deployArmy.flatCheckFlavor", recordOf("army" to army.name)),
+                ).degreeOfSuccess.succeeded()
+                if (passed) {
+                    t("chatMessages.deployArmy.flatCheckPassed", recordOf("army" to army.name))
+                } else {
+                    val hp = army.system.attributes.hp
+                    val damaged = (hp.value - DEPLOY_ARMY_FLAT_CHECK_DAMAGE).coerceAtLeast(0)
+                    val update = js("{}")
+                    update["system.attributes.hp.value"] = damaged
+                    army.update(update.unsafeCast<AnyObject>()).await()
+                    t(
+                        "chatMessages.deployArmy.flatCheckFailed",
+                        recordOf("army" to army.name, "hp" to DEPLOY_ARMY_FLAT_CHECK_DAMAGE),
+                    )
+                }
+            }
+
+            DEPLOY_OFFER_UNREST -> {
+                val gained = roll("1d4", flavor = t("chatMessages.deployArmy.unrestFlavor"))
+                actor.getKingdom()?.let { kingdom ->
+                    kingdom.unrest += gained
+                    actor.setKingdom(kingdom)
+                }
+                t("chatMessages.deployArmy.unrestGained", recordOf("amount" to gained))
+            }
+
+            else -> {
+                val effect = DeployArmyEffect.entries.find { it.slug == choice } ?: return@ChatButton
+                if (!army.applyDeployEffect(effect)) {
+                    ui.notifications.error(
+                        t("chatMessages.deployArmy.effectMissing", recordOf("condition" to effect.slug)),
+                    )
+                    return@ChatButton
+                }
+                t(
+                    "chatMessages.deployArmy.conditionApplied",
+                    recordOf("condition" to t("armyConditionSlug.${effect.slug}"), "army" to army.name),
+                )
+            }
+        }
+        army.recordDeployKeyApplied(cardId, choice)
+        postChatMessage(summary)
     },
     ChatButton("km-offer-war-victory") { game, actor, event, button ->
         // GM-confirmed offer posted when a war battle against a faction-linked threat resolves as

@@ -91,11 +91,19 @@ class SyncBattleOutcomeHandler(
                             templateContext = recordOf(
                                 "armyName" to participant.name,
                                 "armyUuid" to uuid,
+                                // Without this the card's buttons were DEAD: bindChatButtons
+                                // resolves the kingdom actor from a data-kingdom-actor-uuid
+                                // ancestor before invoking any handler, so every click only
+                                // produced the "no kingdom" warning.
+                                "actorUuid" to kingdomActor.uuid,
                                 "currentXp" to participant.xp,
                                 "xpThreshold" to threshold,
                                 "nextLevel" to nextLevel,
                                 "offerId" to offerId,
-                            )
+                            ),
+                            // GM-confirmed like every other offer, so whisper it rather than
+                            // showing players a button only a GM can act on.
+                            whisper = game.users.filter { it.isGM }.mapNotNull { it.id }.toTypedArray(),
                         )
                     }
                 }

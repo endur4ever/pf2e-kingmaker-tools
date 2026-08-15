@@ -1,0 +1,28 @@
+<h2>{{localizeKM "chatMessages.deployArmy.offerTitle"}}</h2>
+<div class="km-deploy-army-offer">
+    <p>{{body}}</p>
+</div>
+<hr>
+<h3>{{localizeKM "chatMessages.companionAutonomy.gmActions"}}</h3>
+<div class="km-expedition-offers">
+    {{#each offers}}
+    <button type="button"
+            class="km-offer-deploy-army"
+            data-kingdom-actor-uuid="{{../actorUuid}}"
+            data-army-actor-uuid="{{../armyActorUuid}}"
+            data-card-id="{{../cardId}}"
+            data-choice="{{this.key}}"
+            data-amount="{{this.amount}}">
+        {{this.label}}
+    </button>
+    {{/each}}
+    <button type="button"
+            class="km-offer-deploy-army"
+            data-kingdom-actor-uuid="{{actorUuid}}"
+            data-army-actor-uuid="{{armyActorUuid}}"
+            data-card-id="{{cardId}}"
+            data-choice="dismiss"
+            data-amount="0">
+        {{localizeKM "chatMessages.deployArmy.dismiss"}}
+    </button>
+</div>

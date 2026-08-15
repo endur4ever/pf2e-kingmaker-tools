@@ -2281,6 +2281,24 @@
         "alreadyApplied": "That term has already been settled for this battle.",
         "noBattle": "This victory's battle is no longer on the kingdom sheet.",
         "noFaction": "This victory was not against a faction you have relations with, so there are no terms to settle."
+      },
+      "deployArmy": {
+        "offerTitle": "Deploy Army",
+        "body": "{army} has finished its march. Apply the consequences below.",
+        "condition": "Apply {condition} to {army}",
+        "conditionApplied": "{army} is now {condition}.",
+        "flatCheck": "Roll the DC {dc} flat check (1 HP on a failure)",
+        "flatCheckFlavor": "Deploy Army mishap — {army}",
+        "flatCheckPassed": "{army} came through the march unscathed.",
+        "flatCheckFailed": "{army} loses {hp} HP on the march.",
+        "unrest": "Roll {dice} Unrest",
+        "unrestFlavor": "Unrest from a lost army",
+        "unrestGained": "The kingdom gains {amount} Unrest over the missing army.",
+        "dismissed": "The GM waived the Deploy Army consequences.",
+        "alreadyApplied": "That consequence has already been applied for this deployment.",
+        "noArmy": "That army actor no longer exists.",
+        "effectMissing": "Could not find the “{condition}” army condition in the PF2e Kingmaker compendium. Apply it by hand.",
+        "dismiss": "Dismiss"
       }
     },
     "displayBars": {
@@ -4458,7 +4476,7 @@
       "deploy-army": {
         "title": "Deploy Army",
         "description": "<p>The army moves through your kingdom or beyond. Since this travel occurs over the course of the entire month that preceded the Kingdom turn, the ground an army covers when it deploys can be quite extensive. You can Deploy an Army with an Exploration, Boating, or Magic check. When you use an Exploration check, choose a location within 20 hexes of the army’s current hex. If the army’s starting point and ending point are connected by a road, increase the result one degree of success. Count roadless hexes that contain swamps or mountains, or each hex where you must cross a river or lake without the aid of a bridge, as two hexes. You can issue orders to force march. Doing so grants a +4 circumstance bonus on the check, but causes the army to increase its weary condition by 1 (or by 2, if you fail the check). When you use a Boating check, the army’s starting point and ending point must be connected by a body of water; choose any location within 20 hexes along this route. You must be at least master in Magic to attempt a Magic check. When you do so, choose any location within 30 hexes of the army’s current hex, then roll your check. If the army’s deployment causes it to cross your kingdom’s border, the DC increases by 5. If the army’s deployment causes it to cross an enemy kingdom’s border, the DC instead increases by 10.</p>",
-        "automationNotes": "HP and Conditions need to be managed by hand.",
+        "automationNotes": "Roll with the army's token selected: conditions, the mishap flat check and its HP loss, and Unrest are all offered as GM-confirmed buttons on the result card.",
         "modifiers": {
           "connectedByRoad": {
             "buttonLabel": "Starting and End Point connected by a Road",
@@ -7389,6 +7407,11 @@
         "warThreatsMaxEscalation": "War threats at max escalation",
         "companionsInjured": "Companions injured/unavailable"
       }
+    },
+    "armyConditionSlug": {
+      "efficient": "Efficient",
+      "weary": "Weary",
+      "lost": "Lost"
     }
   }
 }

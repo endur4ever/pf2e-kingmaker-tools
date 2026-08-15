@@ -35,6 +35,8 @@ import at.posselt.pfrpg2e.kingdom.AutomateResources
 import at.posselt.pfrpg2e.kingdom.KingdomActor
 import at.posselt.pfrpg2e.kingdom.KingdomData
 import at.posselt.pfrpg2e.kingdom.offerDefeatConsequences
+import at.posselt.pfrpg2e.kingdom.armies.getSelectedArmies
+import at.posselt.pfrpg2e.kingdom.offerDeployArmyOutcome
 import at.posselt.pfrpg2e.kingdom.offerWarVictory
 import at.posselt.pfrpg2e.kingdom.RawCouncilCooldowns
 import at.posselt.pfrpg2e.kingdom.RawEq
@@ -2631,6 +2633,11 @@ class KingdomSheet(
                             val events = when (activity.id) {
                                 else -> kingdom.getOngoingEvents()
                             }
+                            val deployedArmy = if (activity.id == "deploy-army") {
+                                game.getSelectedArmies().firstOrNull()
+                            } else {
+                                null
+                            }
                             kingdomCheckDialog(
                                 game = game,
                                 kingdom = kingdom,
@@ -2639,8 +2646,21 @@ class KingdomSheet(
                                 selectedLeader = game.getActiveLeader(),
                                 groups = groups,
                                 events = events,
-                                afterRoll = {
+                                afterRoll = { degree ->
                                     actor.recordActivityPerformed(activity.id)
+                                    if (activity.id == "deploy-army") {
+                                        // The army selected when the check was rolled is the one
+                                        // whose weary/mired badges modified it, so it is the one the
+                                        // outcome lands on. Captured before the dialog so a change
+                                        // of token selection mid-roll cannot retarget the effects.
+                                        offerDeployArmyOutcome(
+                                            game = game,
+                                            actor = actor,
+                                            army = deployedArmy,
+                                            degree = degree,
+                                            cardId = "deploy-${kotlin.js.Date().getTime().toLong()}",
+                                        )
+                                    }
                                     render()
                                 },
                             )
