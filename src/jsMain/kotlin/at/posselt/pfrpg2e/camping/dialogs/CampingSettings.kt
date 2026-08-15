@@ -27,6 +27,7 @@ import at.posselt.pfrpg2e.utils.asSequence
 import at.posselt.pfrpg2e.utils.buildPromise
 import at.posselt.pfrpg2e.utils.fromUuidTypeSafe
 import at.posselt.pfrpg2e.utils.fromUuidsOfTypes
+import at.posselt.pfrpg2e.camping.isWeatherEffectsEnabled
 import at.posselt.pfrpg2e.utils.t
 import com.foundryvtt.core.AnyObject
 import com.foundryvtt.core.Game
@@ -76,6 +77,7 @@ external interface CampingSettings {
     var resetTimeTrackingAfterOneDay: Boolean
     var hexSizeInMiles: Int
     var autoSucceedInClaimedHexes: Boolean
+    var enableWeatherEffects: Boolean
 }
 
 @JsExport
@@ -108,6 +110,7 @@ class CampingSettingsDataModel(
             boolean("autoApplyFatigued")
             boolean("resetTimeTrackingAfterOneDay")
             boolean("autoSucceedInClaimedHexes")
+            boolean("enableWeatherEffects")
         }
     }
 }
@@ -176,6 +179,7 @@ class CampingSettingsApplication(
             resetTimeTrackingAfterOneDay = camping.resetTimeTrackingAfterOneDay,
             hexSizeInMiles = camping.hexSizeInMiles,
             autoSucceedInClaimedHexes = camping.autoSucceedInClaimedHexes ?: false,
+            enableWeatherEffects = camping.isWeatherEffectsEnabled(),
         )
     }
 
@@ -283,6 +287,12 @@ class CampingSettingsApplication(
                             label = t("camping.autoSucceedInClaimedHexes"),
                             value = settings.autoSucceedInClaimedHexes,
                             help = t("camping.autoSucceedInClaimedHexesHelp"),
+                        ),
+                        CheckboxInput(
+                            name = "enableWeatherEffects",
+                            label = t("camping.enableWeatherEffects"),
+                            value = settings.enableWeatherEffects,
+                            help = t("camping.enableWeatherEffectsHelp"),
                         ),
                         Select(
                             name = "huntAndGatherTargetActorUuid",
@@ -429,6 +439,7 @@ class CampingSettingsApplication(
                             autoApplyFatigued.set( settings.autoApplyFatigued)
                             resetTimeTrackingAfterOneDay.set( settings.resetTimeTrackingAfterOneDay)
                             autoSucceedInClaimedHexes.set(settings.autoSucceedInClaimedHexes)
+                            enableWeatherEffects.set(settings.enableWeatherEffects)
                         }
                     }
                     close()

@@ -711,6 +711,7 @@ class CampingSheet(
                     )
                 ),
                 overrideDc = mealToCook.dc,
+                weather = game.currentWeatherModifiers(camping),
             )
         val existing = camping.cooking.results[recipeId]
         if (existing == null) {
@@ -767,6 +768,7 @@ class CampingSheet(
             ?: checkActor.campingActivityCheck(
                 data = campingCheckData,
                 overrideDc = recipe?.cookingLoreDC,
+                weather = game.currentWeatherModifiers(camping),
             ))?.let { result ->
             camping.campingActivities[activityId]?.result = result.toCamelCase()
             if (!activity.isPrepareCampsite()) {
@@ -1183,7 +1185,13 @@ class CampingSheet(
         val override = max(camping.minimumTravelSpeed ?: 0, travelSpeed)
         val forcedMarch = if (camping.forcedMarchActive == true) 1 else 0
         val result = calculateHexplorationActivities(override) + forcedMarch
-        return result / (camping.hexSizeInMiles.toDouble() / 12)
+        val scaled = result / (camping.hexSizeInMiles.toDouble() / 12)
+        // Applied after the hex-size scaling, so foul weather costs a flat activity per day rather
+        // than a proportion of one. This is the sole common ancestor of the sheet's displayed budget
+        // and splitRouteIntoDays, so both see the same number -- and the floor keeps it away from
+        // zero, which would divide by zero in getHexplorationActivitySeconds and make the route
+        // splitter treat every leg as its own day.
+        return applyWeatherToHexplorationActivities(scaled, game.currentWeatherModifiers(camping))
     }
 
     private fun getHexplorationActivitiesDuration(): String =
@@ -1872,7 +1880,11 @@ class CampingSheet(
             travelingFor = getTravelingFor(camping),
             restDuration = fullRestDuration.total.label,
             restDurationLeft = fullRestDuration.left?.label,
-            encounterDc = findEncounterDcModifier(camping, game.getPF2EWorldTime().time.isDay()),
+            encounterDc = findEncounterDcModifier(
+                camping,
+                game.getPF2EWorldTime().time.isDay(),
+                weatherDcDelta = game.currentWeatherModifiers(camping).encounterDcDelta,
+            ),
             section = t(section),
             prepareCampSection = prepareCampSection,
             campingActivitiesSection = campingActivitiesSection,

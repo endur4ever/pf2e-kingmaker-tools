@@ -18,6 +18,7 @@ import at.posselt.pfrpg2e.migrations.migrations.Migration46
 import at.posselt.pfrpg2e.migrations.migrations.Migration47
 import at.posselt.pfrpg2e.migrations.migrations.Migration48
 import at.posselt.pfrpg2e.migrations.migrations.Migration49
+import at.posselt.pfrpg2e.migrations.migrations.Migration53
 import at.posselt.pfrpg2e.migrations.migrations.Migration50
 import com.foundryvtt.core.Game
 import js.objects.unsafeJso
@@ -289,5 +290,20 @@ class MigrationBackfillsTest {
         val k = kingdom { it.settlements = arrayOf(unsafeJso<dynamic> { destroyedStructureIds = arrayOf("tok-1") }) }
         Migration50().migrateKingdom(game, k)
         assertEquals("tok-1", k.settlements[0].destroyedStructureIds[0].unsafeCast<String>())
+    }
+
+    // ── Migration53: camping.enableWeatherEffects ───────────────────────────────────────────────
+    @Test
+    fun migration53DefaultsWeatherEffectsOn() = runTest {
+        val c = camping()
+        Migration53().migrateCamping(game, c)
+        assertEquals(true, c.asDynamic().enableWeatherEffects.unsafeCast<Boolean>())
+    }
+
+    @Test
+    fun migration53PreservesAnExplicitOptOut() = runTest {
+        val c = camping { it.enableWeatherEffects = false }
+        Migration53().migrateCamping(game, c)
+        assertEquals(false, c.asDynamic().enableWeatherEffects.unsafeCast<Boolean>())
     }
 }

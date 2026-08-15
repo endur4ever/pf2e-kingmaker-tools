@@ -334,7 +334,7 @@ private suspend fun rollRandomEncounter(
     }
     val rollMode = fromCamelCase<RollMode>(camping.randomEncounterRollMode) ?: RollMode.GMROLL
     val proxyTable = camping.proxyRandomEncounterTableUuid?.let { fromUuidTypeSafe<RollTable>(it) }
-    val dc = findEncounterDcModifier(camping, isDay)
+    val dc = findEncounterDcModifier(camping, isDay, game.currentWeatherModifiers(camping).encounterDcDelta)
     val rollCheck = if (includeFlatCheck) {
         d20Check(
             dc = dc,
@@ -412,12 +412,20 @@ private suspend fun rollRandomEncounter(
     return false
 }
 
+/**
+ * The flat DC an encounter check rolls against.
+ *
+ * [weatherDcDelta] is passed in rather than read here because this function is deliberately free of
+ * a Game handle; every caller already has one. Zero when the weather-effects toggle is off.
+ */
 fun findEncounterDcModifier(
     camping: CampingData,
-    isDay: Boolean
+    isDay: Boolean,
+    weatherDcDelta: Int = 0,
 ): Int = (camping.findCurrentRegion()?.encounterDc ?: 0) +
         calculateModifierIncrease(camping, isDay) +
-        camping.encounterModifier
+        camping.encounterModifier +
+        weatherDcDelta
 
 private fun calculateModifierIncrease(camping: CampingData, isDay: Boolean): Int =
     camping.groupActivities().asSequence()

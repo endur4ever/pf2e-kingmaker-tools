@@ -648,7 +648,10 @@
       "travelRouteNoRoute": "Plan a route first — pick a start and end hex.",
       "travelRouteMoveToken": "Move the party token along the route",
       "confirmTravelRoute": "Travel {hexes} hex(es) over about {days} day(s)? Time advances hex by hex and an encounter check is rolled for each one; the journey stops where an encounter interrupts it.",
-      "travelRouteTimeAdvanceFailed": "World time could not be advanced — check your calendar module. The journey was stopped."
+      "travelRouteTimeAdvanceFailed": "World time could not be advanced — check your calendar module. The journey was stopped.",
+      "enableWeatherEffects": "Weather affects hexploration, encounters and camping",
+      "enableWeatherEffectsHelp": "When on, the day's weather changes the hexploration activity budget, shifts the random-encounter DC, and makes camping activity checks harder. Magnitudes are small: snow costs one hexploration activity and -2 on camp checks, rain and cold -1. Turn off to keep weather purely descriptive.",
+      "weatherCheckPenalty": "<p><i>The weather makes this harder ({penalty} to the check).</i></p>"
     },
     "settlementNav": {
       "status": "Status",

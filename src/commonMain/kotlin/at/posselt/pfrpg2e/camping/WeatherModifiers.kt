@@ -53,3 +53,16 @@ val WEATHER_MODIFIER_TABLE: Map<WeatherType, WeatherModifiers> = mapOf(
  */
 fun weatherModifiersFor(type: WeatherType, enabled: Boolean = true): WeatherModifiers =
     if (!enabled) NEUTRAL_WEATHER else WEATHER_MODIFIER_TABLE[type] ?: NEUTRAL_WEATHER
+
+/**
+ * The hexploration budget floor.
+ *
+ * The RAW speed table bottoms out at half an activity a day, and weather must not push a party below
+ * what the slowest possible speed already grants — nor to zero, which would make the day's budget
+ * divide by zero and the route splitter treat every leg as its own day.
+ */
+const val MIN_HEXPLORATION_ACTIVITIES = 0.5
+
+/** Apply [modifiers] to a day's hexploration activity budget, never dropping below the floor. */
+fun applyWeatherToHexplorationActivities(activities: Double, modifiers: WeatherModifiers): Double =
+    (activities + modifiers.hexplorationActivityDelta).coerceAtLeast(MIN_HEXPLORATION_ACTIVITIES)

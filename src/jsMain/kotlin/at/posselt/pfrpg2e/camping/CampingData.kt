@@ -212,6 +212,13 @@ external interface CampingData {
     /** Auto-succeed campsite preparation & cooking in claimed hexes (house rule) when enabled. */
     var autoSucceedInClaimedHexes: Boolean?
 
+    /**
+     * Whether the day's weather applies mechanical effects (hexploration budget, encounter DC,
+     * camping-check difficulty) rather than staying pure flavour. Nullable for back-compat; read
+     * via [isWeatherEffectsEnabled], which defaults it ON.
+     */
+    var enableWeatherEffects: Boolean?
+
     /** Rumors accumulated this camping session. */
     var rumors: Array<RawRumor>?
 

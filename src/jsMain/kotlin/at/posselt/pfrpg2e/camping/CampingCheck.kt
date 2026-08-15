@@ -110,17 +110,27 @@ fun PF2ECreature.getCampingCheckData(camping: CampingData, activityId: String): 
 suspend fun PF2ECreature.campingActivityCheck(
     data: CampingCheckData,
     overrideDc: Int? = null,
+    weather: WeatherModifiers = NEUTRAL_WEATHER,
 ): DegreeOfSuccess? {
     val activity = data.activityData.data
     val activityName = activity.name
     val skill = data.skill
-    val extraRollOptions = arrayOf("action:${activityName.slugify()}")
-    val dc = overrideDc ?: when (skill.dcType) {
+    // The weather is also a roll option, so a GM can hang their own PF2e rule elements off it.
+    val extraRollOptions = arrayOf("action:${activityName.slugify()}") +
+        if (weather.campingCheckPenalty != 0) arrayOf("weather-penalty") else emptyArray()
+    val baseDc = overrideDc ?: when (skill.dcType) {
         DcType.ACTOR_LEVEL -> getLevelBasedDC(level)
         DcType.ZONE -> data.region.zoneDc
         DcType.NONE -> askDc(activityName) ?: 0
         DcType.STATIC -> skill.dc ?: (askDc(activityName) ?: 0)
     }
+    // Folded into the DC rather than passed as a labelled modifier: StatisticRollParameters does
+    // take a `modifiers` array, but the ModifierPF2e binding is an empty stub with no constructor,
+    // so there is no way to build one. A -N penalty against DC is the same check math as rolling
+    // against DC + N, and it keeps PF2e's own degree computation (nat 1/20 adjustments included)
+    // authoritative -- the same trade-off, for the same reason, as the watch check in Resting.kt.
+    // The cost is that the breakdown cannot show it, so the result card names it instead.
+    val dc = baseDc - weather.campingCheckPenalty
 
     val result = performCampingCheck(
         attribute = skill.attribute,
@@ -140,6 +150,16 @@ suspend fun PF2ECreature.campingActivityCheck(
             degreeOfSuccess = result,
             message = config?.message,
             rollMode = rollMode,
+            // Weather cannot appear in PF2e's modifier breakdown (see the DC note above), so say it
+            // here: an unexplained DC swing is worse than no weather rule at all.
+            preHtml = if (weather.campingCheckPenalty != 0) {
+                t(
+                    "camping.weatherCheckPenalty",
+                    recordOf("penalty" to weather.campingCheckPenalty.toString()),
+                )
+            } else {
+                ""
+            },
         )
     }
     return result
