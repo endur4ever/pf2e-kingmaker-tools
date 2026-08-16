@@ -5,6 +5,7 @@ import at.posselt.pfrpg2e.kingdom.dialogs.postComplexDegreeOfSuccess
 import kotlinx.js.JsPlainObject
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.get
+import at.posselt.pfrpg2e.utils.fromUuidTypeSafe
 
 @JsPlainObject
 external interface UpgradeMetaContext {
@@ -59,5 +60,23 @@ suspend fun changeDegree(rollMeta: HTMLElement, mode: ChangeDegree) {
         console.error("Can not upgrade degree $degree")
     } else {
         postComplexDegreeOfSuccess(meta, changed)
+        // The lockout was written from the ORIGINAL degree by rollCheck. A GM adjustment supersedes
+        // that result, so re-derive it here -- otherwise an upgraded critical failure stayed locked
+        // for the full original timeout, and a degree downgraded INTO a failure was never locked at
+        // all. recordActivityUse now assigns the lock from the new degree, so both directions work.
+        val activityId = meta.activityId
+        if (activityId != null && activityTracksUsage(activityId)) {
+            fromUuidTypeSafe<KingdomActor>(meta.actorUuid)?.let { actor ->
+                actor.getKingdom()?.let { kingdom ->
+                    kingdom.activityUsage = recordActivityUse(
+                        kingdom.activityUsages(),
+                        activityId,
+                        changed,
+                        kingdom.currentTurn ?: 0,
+                    ).toRawActivityBlocks()
+                    actor.setKingdom(kingdom)
+                }
+            }
+        }
     }
 }

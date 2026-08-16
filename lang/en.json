@@ -5688,7 +5688,7 @@
       "send-diplomatic-envoy": {
         "title": "Send Diplomatic Envoy",
         "description": "<p>You send emissaries to another group to foster positive relations and communication. The DC of this check is the group’s Negotiation DC (see the sidebar on page 519). Attempts to Send a Diplomatic Envoy to a nation with which your kingdom is at war take a –4 circumstance penalty to the check and have the result worsened one degree. At the GM’s option, some wars might be so heated that this activity has no chance of success.</p>",
-        "automationNotes": "Critical Failure locks this activity out for 2 Kingdom turns (tracked automatically). The target group's diplomatic-relation state is still tracked manually.",
+        "automationNotes": "Critical Failure locks this activity out for 3 Kingdom turns (tracked automatically). The lockout is kingdom-wide rather than per-group.",
         "modifiers": {
           "atWar": {
             "name": "At War with Group",

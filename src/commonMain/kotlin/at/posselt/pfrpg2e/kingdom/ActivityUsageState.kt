@@ -35,7 +35,8 @@ private val timeoutRules: Map<String, TimeoutRule> = mapOf(
     "process-hidden-fees" to TimeoutRule(failure = 1, criticalFailure = 1),
     "supplementary-hunting" to TimeoutRule(failure = 1, criticalFailure = 1),
     "supernatural-solution" to TimeoutRule(criticalFailure = 2),
-    "send-diplomatic-envoy" to TimeoutRule(criticalFailure = 2),
+    // 3, not 2: the activity's own criticalFailure text says "for the next 3 Kingdom Turns".
+    "send-diplomatic-envoy" to TimeoutRule(criticalFailure = 3),
 )
 
 /** Activities whose DC climbs each consecutive Kingdom turn they are used. */
@@ -89,15 +90,26 @@ fun recordActivityUse(
     degree: DegreeOfSuccess,
     currentTurn: Int,
 ): List<ActivityUsage> {
+    if (!activityTracksUsage(activityId)) return usages
     val timeout = activityTimeoutTurns(activityId, degree)
     val escalates = activityEscalatesDc(activityId)
-    if (timeout == null && !escalates) return usages
     val existing = usages.find(activityId)
     val updated = (existing ?: ActivityUsage(activityId)).copy(
-        lockedUntilTurn = if (timeout != null) currentTurn + timeout + 1 else existing?.lockedUntilTurn,
+        // Assigned from the NEW degree unconditionally, so a superseding result can RELEASE a lock
+        // and not merely tighten one. Previously any non-failure degree returned the list
+        // untouched, which meant a Fame reroll -- the whole point of which is to undo a critical
+        // failure -- left the six-turn lockout it had just erased standing, and a GM upgrading a
+        // degree could never shorten one either.
+        lockedUntilTurn = if (timeout != null) currentTurn + timeout + 1 else null,
         usedThisTurn = if (escalates) true else (existing?.usedThisTurn ?: false),
     )
-    return usages.filter { it.activityId != activityId } + updated
+    val others = usages.filter { it.activityId != activityId }
+    // Drop an entry that now records nothing rather than persisting an empty husk.
+    return if (updated.lockedUntilTurn == null && updated.dcBump == 0 && !updated.usedThisTurn) {
+        others
+    } else {
+        others + updated
+    }
 }
 
 /**

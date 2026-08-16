@@ -28,7 +28,7 @@ class ActivityUsageStateTest {
         assertNull(activityTimeoutTurns("garrison-army", DegreeOfSuccess.FAILURE))
         assertEquals(4, activityTimeoutTurns("garrison-army", DegreeOfSuccess.CRITICAL_FAILURE))
         assertEquals(2, activityTimeoutTurns("supernatural-solution", DegreeOfSuccess.CRITICAL_FAILURE))
-        assertEquals(2, activityTimeoutTurns("send-diplomatic-envoy", DegreeOfSuccess.CRITICAL_FAILURE))
+        assertEquals(3, activityTimeoutTurns("send-diplomatic-envoy", DegreeOfSuccess.CRITICAL_FAILURE))
         assertEquals(1, activityTimeoutTurns("preventative-measures", DegreeOfSuccess.CRITICAL_FAILURE))
     }
 
@@ -144,5 +144,76 @@ class ActivityUsageStateTest {
         val locked = listOf(ActivityUsage("false-victory", lockedUntilTurn = 12, dcBump = 0))
         val ticked = tickActivityUsages(locked, nextTurn = 12) // 12 < 12 is false -> expired -> dropped
         assertTrue(ticked.isEmpty())
+    }
+
+    @Test
+    fun aRerollThatUndoesACriticalFailureReleasesTheLockout() {
+        // A Fame reroll exists precisely to undo a critical failure. recordActivityUse used to
+        // return the list untouched on any non-failure degree, so the six-turn False Victory
+        // lockout survived a reroll that had just erased the failure that caused it.
+        val locked = recordActivityUse(
+            emptyList(), "false-victory", DegreeOfSuccess.CRITICAL_FAILURE, currentTurn = 5,
+        )
+        assertEquals(12, activityLockedUntil(locked, "false-victory"))
+
+        val rerolled = recordActivityUse(
+            locked, "false-victory", DegreeOfSuccess.CRITICAL_SUCCESS, currentTurn = 5,
+        )
+        assertNull(activityLockedUntil(rerolled, "false-victory"))
+        assertFalse(isActivityLocked(rerolled, "false-victory", currentTurn = 6))
+    }
+
+    @Test
+    fun upgradingACriticalFailureShortensTheLockoutToTheNewDegree() {
+        // GM "Upgrade Degree": critical failure (6 turns) -> failure (1 turn).
+        val locked = recordActivityUse(
+            emptyList(), "false-victory", DegreeOfSuccess.CRITICAL_FAILURE, currentTurn = 5,
+        )
+        val upgraded = recordActivityUse(
+            locked, "false-victory", DegreeOfSuccess.FAILURE, currentTurn = 5,
+        )
+        assertEquals(7, activityLockedUntil(upgraded, "false-victory"))
+    }
+
+    @Test
+    fun downgradingIntoAFailureAppliesTheLockoutThatWasNeverWritten() {
+        // GM "Downgrade Degree": a success recorded nothing, so downgrading to critical failure
+        // has to create the lock from scratch rather than leave the activity free.
+        val fromSuccess = recordActivityUse(
+            emptyList(), "false-victory", DegreeOfSuccess.SUCCESS, currentTurn = 5,
+        )
+        assertNull(activityLockedUntil(fromSuccess, "false-victory"))
+
+        val downgraded = recordActivityUse(
+            fromSuccess, "false-victory", DegreeOfSuccess.CRITICAL_FAILURE, currentTurn = 5,
+        )
+        assertEquals(12, activityLockedUntil(downgraded, "false-victory"))
+    }
+
+    @Test
+    fun releasingALockKeepsAnEscalatingActivitysAccruedBump() {
+        // Clandestine Business has no timeout, so its entry exists purely for the DC climb; a
+        // superseding result must not wipe the bump on its way past.
+        val used = recordActivityUse(
+            emptyList(), "clandestine-business", DegreeOfSuccess.FAILURE, currentTurn = 3,
+        )
+        val ticked = tickActivityUsages(used, nextTurn = 4)
+        assertEquals(ESCALATING_DC_STEP, activityDcBump(ticked, "clandestine-business"))
+
+        val again = recordActivityUse(
+            ticked, "clandestine-business", DegreeOfSuccess.CRITICAL_SUCCESS, currentTurn = 4,
+        )
+        assertEquals(ESCALATING_DC_STEP, activityDcBump(again, "clandestine-business"))
+    }
+
+    @Test
+    fun theEnvoyLockoutMatchesTheActivitysOwnRulesText() {
+        // The shipped criticalFailure text says "for the next 3 Kingdom Turns".
+        assertEquals(3, activityTimeoutTurns("send-diplomatic-envoy", DegreeOfSuccess.CRITICAL_FAILURE))
+        val locked = recordActivityUse(
+            emptyList(), "send-diplomatic-envoy", DegreeOfSuccess.CRITICAL_FAILURE, currentTurn = 5,
+        )
+        assertTrue(isActivityLocked(locked, "send-diplomatic-envoy", currentTurn = 8))
+        assertFalse(isActivityLocked(locked, "send-diplomatic-envoy", currentTurn = 9))
     }
 }
