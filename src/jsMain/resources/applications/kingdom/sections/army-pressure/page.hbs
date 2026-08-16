@@ -124,6 +124,22 @@
                 {{else}}
                     <p class="km-army-empty">{{localizeKM "armyPressure.noThreats"}}</p>
                 {{/if}}
+                {{#if armyPressureContext.threatHistory.length}}
+                    <details class="km-threat-history">
+                        <summary>{{localizeKM "armyPressure.threatHistory"}} ({{armyPressureContext.threatHistory.length}})</summary>
+                        <ul class="km-threat-history-list">
+                            {{#each armyPressureContext.threatHistory}}
+                                <li>
+                                    <strong>{{this.name}}</strong>{{#if this.hiddenFromPlayers}} <i class="fa-solid fa-eye-slash km-threat-hidden" title="{{localizeKM "armyPressure.hiddenFromPlayers"}}"></i>{{/if}}
+                                    <span class="km-threat-status km-threat-status-{{this.status}}">{{this.statusLabel}}</span>
+                                    {{#if ../isGM}}
+                                        <button type="button" data-action="delete-war-threat" data-id="{{this.id}}" data-tooltip="{{localizeKM "armyPressure.deleteThreat"}}"><i class="fa-solid fa-trash"></i></button>
+                                    {{/if}}
+                                </li>
+                            {{/each}}
+                        </ul>
+                    </details>
+                {{/if}}
             </section>
 
             <section class="km-army-deployments">

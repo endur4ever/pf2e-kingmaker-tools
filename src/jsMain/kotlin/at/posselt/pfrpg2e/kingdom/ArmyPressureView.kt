@@ -60,9 +60,23 @@ data class ArmyPressureView(
     val enabled: Boolean,
     val showThreatDistance: Boolean,
     val threats: List<WarThreatView>,
+    /**
+     * Resolved threats old enough to have left the live board, shown in a collapsed history list.
+     *
+     * This is a VIEW partition, not a delete: a defeated threat is still referenced by the gazette
+     * and by any battle that named it, and silently destroying campaign history to tidy a table is
+     * a trade nobody asked for. Capped so a long campaign's board does not grow without bound.
+     */
+    val threatHistory: List<WarThreatView>,
     val deployments: List<ArmyDeploymentView>,
     val pressure: WarPressureView?,
 )
+
+/** How many turns a resolved threat stays on the live board before moving to history. */
+const val WAR_THREAT_HISTORY_AFTER_TURNS = 3
+
+/** Most historical threats kept in the view, newest first. */
+const val MAX_WAR_THREAT_HISTORY = 20
 
 private fun RawWarThreat.toView(deployments: Array<RawArmyDeployment>, isGM: Boolean): WarThreatView {
     val max = if (maxEscalation > 0) maxEscalation else 1
@@ -154,12 +168,23 @@ fun buildArmyPressureView(
 
     // Fog-of-war at the SOURCE: a non-GM view never carries hidden-threat data at all (the
     // NotesContext leak lesson — exclude here, never merely hide in the template).
-    val displayThreats = if (isGM) threatArray.toList() else threatArray.filter { it.isVisibleToPlayers() }
+    val visibleThreats = if (isGM) threatArray.toList() else threatArray.filter { it.isVisibleToPlayers() }
+    // A resolved threat lingers on the board briefly so the outcome is visible, then moves to
+    // history. Anything still ACTIVE stays regardless of age -- an old war is still a war.
+    val (historic, displayThreats) = visibleThreats.partition {
+        it.status != WarThreatStatus.ACTIVE.value &&
+            it.triggeredTurn != null &&
+            currentTurn - (it.triggeredTurn ?: 0) > WAR_THREAT_HISTORY_AFTER_TURNS
+    }
 
     return ArmyPressureView(
         enabled = settings.isArmyPressureBoardEnabled(),
         showThreatDistance = settings.shouldShowThreatDistance(),
         threats = displayThreats.map { it.toView(deploymentArray, isGM) },
+        threatHistory = historic
+            .sortedByDescending { it.triggeredTurn ?: 0 }
+            .take(MAX_WAR_THREAT_HISTORY)
+            .map { it.toView(deploymentArray, isGM) },
         deployments = deploymentArray.map { it.toView(settlementNames) },
         pressure = pressure?.toView(projection),
     )

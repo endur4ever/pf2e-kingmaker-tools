@@ -7376,7 +7376,9 @@
       "peaceStandingFloor": "Peace Treaty Standing Floor",
       "peaceStandingFloorHelp": "Signing peace raises the former enemy's standing to at least this value. It never lowers it. 0 is the middle of Indifferent — the war is over, but they are not your friends.",
       "peaceTributeRp": "Tribute Demand (RP)",
-      "peaceTributeRpHelp": "One-time Resource Points gained by demanding tribute instead of signing peace, at the cost of standing."
+      "peaceTributeRpHelp": "One-time Resource Points gained by demanding tribute instead of signing peace, at the cost of standing.",
+      "threatHistory": "Past Threats",
+      "deleteThreat": "Delete threat"
     },
     "warThreatStatus": {
       "active": "Active",

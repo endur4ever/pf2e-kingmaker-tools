@@ -87,12 +87,16 @@ class ArmyPressureViewTest {
 
     // ── Resolve Battle availability (roadmap #12, phase 4) ──────────────
 
-    private fun threat(id: String = "w1", status: String = "active") = RawWarThreat(
+    private fun threat(
+        id: String = "w1",
+        status: String = "active",
+        triggeredTurn: Int? = null,
+    ) = RawWarThreat(
         id = id, name = "Goblin Horde", description = "raiders", enemyFaction = null,
         escalationLevel = 1, maxEscalation = 4, eta = 2,
         targetSettlementSceneId = null, targetHexLocation = null,
         linkedQuestId = null, linkedEventId = null, pauseOnExpiry = false,
-        status = status, triggeredTurn = null,
+        status = status, triggeredTurn = triggeredTurn,
     )
 
     private fun deployment(assignedThreatId: String?) = RawArmyDeployment(
@@ -230,5 +234,66 @@ class ArmyPressureViewTest {
         assertEquals(2, gmView.threats.size)
         assertTrue(gmView.threats.first { it.id == "hidden" }.hiddenFromPlayers)
         assertFalse(gmView.threats.first { it.id == "visible" }.hiddenFromPlayers)
+    }
+
+    @Test
+    fun resolvedThreatsMoveToHistoryOnceTheyAreOldEnough() {
+        val view = buildArmyPressureView(
+            threats = arrayOf(
+                threat(id = "fresh", status = "defeated", triggeredTurn = 9),
+                threat(id = "old", status = "defeated", triggeredTurn = 2),
+            ),
+            deployments = emptyArray(),
+            pressure = null,
+            settings = settings(enabled = true, showDistance = true),
+            currentTurn = 10,
+        )
+        // Resolved recently -> still on the board so the outcome is visible.
+        assertEquals(listOf("fresh"), view.threats.map { it.id })
+        assertEquals(listOf("old"), view.threatHistory.map { it.id })
+    }
+
+    @Test
+    fun anActiveThreatNeverAgesOffTheBoard() {
+        // An old war is still a war; only RESOLVED threats retire.
+        val view = buildArmyPressureView(
+            threats = arrayOf(threat(id = "ancient", status = "active", triggeredTurn = 1)),
+            deployments = emptyArray(),
+            pressure = null,
+            settings = settings(enabled = true, showDistance = true),
+            currentTurn = 40,
+        )
+        assertEquals(listOf("ancient"), view.threats.map { it.id })
+        assertEquals(emptyList(), view.threatHistory.map { it.id })
+    }
+
+    @Test
+    fun hiddenThreatsStayHiddenInHistoryToo() {
+        // The fog-of-war exclusion must survive the partition -- history is built from the already
+        // player-filtered list, not from the raw array.
+        val hidden = RawWarThreat.copy(
+            threat(id = "secret", status = "defeated", triggeredTurn = 1),
+            visibleToPlayers = false,
+        )
+        val playerView = buildArmyPressureView(
+            threats = arrayOf(hidden),
+            deployments = emptyArray(),
+            pressure = null,
+            settings = settings(enabled = true, showDistance = true),
+            currentTurn = 10,
+            isGM = false,
+        )
+        assertEquals(emptyList(), playerView.threats.map { it.id })
+        assertEquals(emptyList(), playerView.threatHistory.map { it.id })
+
+        val gmView = buildArmyPressureView(
+            threats = arrayOf(hidden),
+            deployments = emptyArray(),
+            pressure = null,
+            settings = settings(enabled = true, showDistance = true),
+            currentTurn = 10,
+            isGM = true,
+        )
+        assertEquals(listOf("secret"), gmView.threatHistory.map { it.id })
     }
 }
