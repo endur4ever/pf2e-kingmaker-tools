@@ -1924,7 +1924,13 @@
         "noShipmentLocations": "Give at least one settlement or trade-partner faction a realm-map hex first (then you can also enter a custom hex for the other end).",
         "partyLocation": "The Party (current location)",
         "typeWithCapacity": "{type} — up to {bulk} Bulk",
-        "overCapacity": "This shipment is {bulk} Bulk, over this caravan's {capacity}-Bulk capacity. Pick a larger caravan or reduce the quantity."
+        "overCapacity": "This shipment is {bulk} Bulk, over this caravan's {capacity}-Bulk capacity. Pick a larger caravan or reduce the quantity.",
+        "cargoCommodity": "{amount} {commodity}",
+        "cargoRp": "{amount} RP",
+        "warOfferSummary": "{cargo} bound for {dest}, {turns} turn(s) out.",
+        "warOfferGone": "That shipment is no longer on the road.",
+        "warOfferRecalled": "The caravan turns for home; its cargo is back in the kingdom's stores.",
+        "warOfferPressedOn": "The caravan presses on into hostile territory. Raids against it are likelier now."
       },
       "creation": "Creation",
       "bonus": "Bonus",

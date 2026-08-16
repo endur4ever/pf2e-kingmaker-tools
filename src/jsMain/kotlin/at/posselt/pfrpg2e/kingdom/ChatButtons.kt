@@ -368,6 +368,34 @@ private val buttons = listOf(
             }
         }
     },
+    ChatButton("km-offer-caravan-recall") { game, actor, event, button ->
+        // War was declared on a partner while this shipment was on the road. Recall turns it around
+        // and brings the cargo home -- the card's rule is that nothing is silently confiscated.
+        if (!game.user.isGM) return@ChatButton
+        val caravanId = button.dataset["caravanId"] ?: return@ChatButton
+        actor.getKingdom()?.let { kingdom ->
+            if (!kingdom.recallCaravan(caravanId)) {
+                ui.notifications.warn(t("kingdom.caravans.warOfferGone"))
+                return@ChatButton
+            }
+            actor.setKingdom(kingdom)
+            postChatMessage(t("kingdom.caravans.warOfferRecalled"))
+        }
+    },
+    ChatButton("km-offer-caravan-press-on") { game, actor, event, button ->
+        // Press on: the shipment stays in transit and the war's raid DC penalty applies to it on
+        // every tick, exactly as it does for any other shipment to a hostile partner.
+        if (!game.user.isGM) return@ChatButton
+        val caravanId = button.dataset["caravanId"] ?: return@ChatButton
+        val stillRunning = actor.getKingdom()
+            ?.caravans
+            ?.any { it.id == caravanId && it.status == "inTransit" } == true
+        if (!stillRunning) {
+            ui.notifications.warn(t("kingdom.caravans.warOfferGone"))
+            return@ChatButton
+        }
+        postChatMessage(t("kingdom.caravans.warOfferPressedOn"))
+    },
     ChatButton("km-spend-banked-aid") { game, actor, event, button ->
         // RAW, Request Foreign Aid's bonus is applied to a check you have already seen fail. This
         // spends one banked bonus against THIS card's roll and reposts the corrected degree.

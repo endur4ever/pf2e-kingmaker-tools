@@ -332,6 +332,10 @@ import org.w3c.dom.get
 import org.w3c.dom.pointerevents.PointerEvent
 import kotlin.js.Promise
 import kotlin.math.max
+import at.posselt.pfrpg2e.kingdom.caravansInTransitTo
+import at.posselt.pfrpg2e.kingdom.recallCaravan
+import at.posselt.pfrpg2e.kingdom.postCaravanWarOffers
+import at.posselt.pfrpg2e.kingdom.partnersNewlyAtWar
 
 class KingdomSheet(
     private val game: Game,
@@ -3731,7 +3735,14 @@ class KingdomSheet(
             // faction's entire attitude history on every sheet save. Carry those three across by
             // position -- the form renders groups in kingdom order, and add/delete go through their
             // own data-action handlers, so the indices line up.
+            // Declaring war on a trade partner is a sheet edit, so this is where a shipment already
+            // on the road to them learns about it. Blocking new dispatches was only half the embargo.
+            val partnersBefore = kingdom.groups.associate { it.name to it.atWar }
             kingdom.groups = mergeSubmittedGroups(value.groups, kingdom.groups)
+            val newlyAtWar = partnersNewlyAtWar(
+                before = partnersBefore,
+                after = kingdom.groups.associate { it.name to it.atWar },
+            ).toSet()
             kingdom.skillRanks = value.skillRanks
             kingdom.abilityScores = value.abilityScores
             kingdom.milestones = value.milestones
@@ -3766,6 +3777,8 @@ class KingdomSheet(
 
             beforeKingdomUpdate(previousKingdom, kingdom)
             actor.setKingdom(kingdom)
+            // Posted after the persist so the offer cards refer to state that is already saved.
+            postCaravanWarOffers(game, actor, kingdom, newlyAtWar)
             // custom handling for values, that don't persist data on the document and therefore don't
             // trigger a rerender by default
             val needsReRender = bonusFeat != value.bonusFeat ||

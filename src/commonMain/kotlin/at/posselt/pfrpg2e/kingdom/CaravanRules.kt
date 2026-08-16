@@ -18,3 +18,13 @@ fun capCaravanBonusRd(bonusRd: Int, cap: Int): Int = bonusRd.coerceIn(0, cap.coe
  * separately as a GM-confirmed recall/press-on offer).
  */
 fun canDispatchCaravanTo(partnerAtWar: Boolean): Boolean = !partnerAtWar
+
+/**
+ * Partner names whose war flag just flipped on.
+ *
+ * Blocking new dispatches is only half of the embargo: shipments already on the road to a partner
+ * you have just declared war on need a decision, and taking it away from the GM silently would be
+ * the confiscation this card exists to prevent.
+ */
+fun partnersNewlyAtWar(before: Map<String, Boolean>, after: Map<String, Boolean>): List<String> =
+    after.filter { (name, atWar) -> atWar && before[name] == false }.keys.sorted()
