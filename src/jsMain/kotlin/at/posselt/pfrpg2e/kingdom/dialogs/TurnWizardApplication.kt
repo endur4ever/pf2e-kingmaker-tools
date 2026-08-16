@@ -113,6 +113,8 @@ import kotlin.js.Promise
 import kotlinx.coroutines.await
 import at.posselt.pfrpg2e.utils.asSequence
 import at.posselt.pfrpg2e.kingdom.logToCalendar
+import at.posselt.pfrpg2e.kingdom.PULL_TOGETHER_BASE_DC
+import at.posselt.pfrpg2e.kingdom.pullTogetherDcAfterTurn
 
 fun TickChange.toDisplayString(): String {
     return when {
@@ -280,6 +282,13 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
     kingdom.commodities = tickResult.commodities
     kingdom.councilCooldowns = tickResult.councilCooldowns
     kingdom.activityUsage = tickResult.activityUsage
+    // Pull Together: the flat-check DC decays by 1 per turn the feat goes unused, floored at its
+    // printed 11, and the once-per-turn allowance resets.
+    kingdom.pullTogetherCurrentDC = pullTogetherDcAfterTurn(
+        currentDc = kingdom.pullTogetherCurrentDC ?: PULL_TOGETHER_BASE_DC,
+        usedThisTurn = kingdom.pullTogetherUsedThisTurn == true,
+    )
+    kingdom.pullTogetherUsedThisTurn = false
     kingdom.modifiers = tickResult.modifiers
     kingdom.campaignQuests = tickResult.campaignQuests
     kingdom.warThreats = tickResult.warThreats

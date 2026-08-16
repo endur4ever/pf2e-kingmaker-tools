@@ -41,6 +41,7 @@ import kotlin.math.max
 import at.posselt.pfrpg2e.kingdom.data.RawBankedBonus
 import at.posselt.pfrpg2e.kingdom.FOREIGN_AID_ACTIVITIES
 import at.posselt.pfrpg2e.kingdom.buildBankedAidButton
+import at.posselt.pfrpg2e.kingdom.buildPullTogetherButton
 
 
 @Suppress("unused")
@@ -306,6 +307,8 @@ suspend fun postComplexDegreeOfSuccess(
     // here, on the failed result itself, and only when it would actually change the degree --
     // spending a +2 that leaves the failure a failure is a trap, not a choice.
     val aidHtml = buildBankedAidButton(kingdomActor, metaContext, changedDegreeOfSuccess)
+    // Pull Together: once a turn, a critical failure can be talked down to a failure on a flat check.
+    val pullTogetherHtml = buildPullTogetherButton(kingdomActor, changedDegreeOfSuccess)
     val notesContext = metaContext.notes
         ?.let { deserializeB64Json<Array<RawNote>>(it) }
         ?.filter { it.degree == null || it.degree == changedDegreeOfSuccess.value }
@@ -323,7 +326,7 @@ suspend fun postComplexDegreeOfSuccess(
         rollMode = rollMode,
         metaHtml = metaHtml,
         preHtml = "${activity?.description ?: event?.description}",
-        postHtml = notesHtml + postHtml + aidHtml,
+        postHtml = notesHtml + postHtml + aidHtml + pullTogetherHtml,
         message = message,
     )
     if (additionalMessages != null) {

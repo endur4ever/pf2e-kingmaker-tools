@@ -2110,6 +2110,13 @@
         "spent": "Banked aid spent: +{value}. The check is now a {degree}.",
         "gone": "That banked aid has already been spent.",
         "noLongerHelps": "That aid would no longer change this check's result."
+      },
+      "pullTogether": {
+        "offer": "Pull Together (DC {dc} flat check)",
+        "flavor": "Pull Together",
+        "succeeded": "The citizens pull together — the critical failure becomes a failure.",
+        "failed": "The call goes unheeded; the critical failure stands.",
+        "alreadyUsed": "Pull Together has already been used this Kingdom turn."
       }
     },
     "chatMessages": {
@@ -3364,12 +3371,12 @@
       "pull-together-vk": {
         "name": "Pull Together (V&K)",
         "text": "Your people are very reliable, and their swift decision‑making keeps most projects from getting too far off track. Once per Kingdom turn when you roll a critical failure on a Kingdom skill check, attempt a DC 11 flat check. If this succeeds, your citizens heed the call to put in extra work to mitigate the disaster; treat the Kingdom skill check result as failure instead. The DC of this flat check increases by 5 each time you subsequently use it, but it decreases by 1 (to a minimum of 11) for each Kingdom turn that passes when you do not use it.",
-        "automationNotes": "Not automated"
+        "automationNotes": "Automated: a critical failure on a Kingdom skill check offers the DC 11 flat check on its result card, once per Kingdom turn. The DC climbs by 5 per use and decays by 1 each turn you do not use it, floored at 11."
       },
       "pull-together": {
         "name": "Pull Together",
         "text": "Your people are very reliable, and their swift decision‑making keeps most projects from getting too far off track. Once per Kingdom turn when you roll a critical failure on a Kingdom skill check, attempt a DC 11 flat check. If this succeeds, your citizens heed the call to put in extra work to mitigate the disaster; treat the Kingdom skill check result as failure instead. The DC of this flat check increases by 5 each time you subsequently use it, but it decreases by 1 (to a minimum of 11) for each Kingdom turn that passes when you do not use it.",
-        "automationNotes": "Not automated"
+        "automationNotes": "Automated: a critical failure on a Kingdom skill check offers the DC 11 flat check on its result card, once per Kingdom turn. The DC climbs by 5 per use and decays by 1 each turn you do not use it, floored at 11."
       },
       "quality-of-life": {
         "name": "Quality of Life",

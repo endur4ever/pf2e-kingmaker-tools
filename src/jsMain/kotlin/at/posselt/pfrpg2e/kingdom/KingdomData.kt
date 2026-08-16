@@ -273,6 +273,14 @@ external interface KingdomData {
      * Nullable; Migration43 seeds it to an empty array.
      */
     var bankedBonuses: Array<RawBankedBonus>?
+
+    // Feat automation state (Migration45 seeds these). Nullable for back-compat; read through the
+    // helpers in FeatAutomationWiring.kt, which supply the RAW defaults.
+    var pullTogetherUsedThisTurn: Boolean?
+    var pullTogetherCurrentDC: Int?
+    var pullTogetherTurnsSinceLastUsed: Int?
+    var liquidateResourcesPenaltyNextTurn: Boolean?
+    var envyOfTheWorldFirstIgnoreUsed: Boolean?
     var campaignClocks: Array<CampaignClock>
     var questTemplates: Array<dynamic>
     var campaignQuests: Array<dynamic>

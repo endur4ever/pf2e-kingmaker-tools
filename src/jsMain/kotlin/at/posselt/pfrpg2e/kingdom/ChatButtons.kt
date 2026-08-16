@@ -60,6 +60,7 @@ import org.w3c.dom.HTMLElement
 import org.w3c.dom.get
 import at.posselt.pfrpg2e.kingdom.dialogs.postComplexDegreeOfSuccess
 import at.posselt.pfrpg2e.takeIfInstance
+import at.posselt.pfrpg2e.data.checks.DegreeOfSuccess
 
 private data class ChatButton(
     val buttonClass: String,
@@ -366,6 +367,38 @@ private val buttons = listOf(
             } else {
                 postChatMessage(t("chatMessages.warRuin.applied", recordOf("ruin" to t("chatMessages.warRuin.$choice"))))
             }
+        }
+    },
+    ChatButton("km-offer-pull-together") { game, actor, event, button ->
+        // "Once per Kingdom turn when you roll a critical failure ... attempt a DC 11 flat check.
+        // If this succeeds ... treat the Kingdom skill check result as failure instead."
+        if (!game.user.isGM) return@ChatButton
+        val meta = button.closest(".chat-message")
+            ?.querySelector(".km-upgrade-result")
+            ?.takeIfInstance<HTMLElement>()
+            ?.let { parseUpgradeMeta(it) }
+            ?: return@ChatButton
+        val kingdom = actor.getKingdom() ?: return@ChatButton
+        if (!canUsePullTogether(
+                isCriticalFailure = true,
+                alreadyUsedThisTurn = kingdom.pullTogetherUsedThisTurn == true,
+            )
+        ) {
+            ui.notifications.warn(t("kingdom.pullTogether.alreadyUsed"))
+            return@ChatButton
+        }
+        val dc = kingdom.pullTogetherDc()
+        val succeeded = d20Check(dc = dc, flavor = t("kingdom.pullTogether.flavor")).degreeOfSuccess.succeeded()
+        // The DC climbs on every USE, per the feat text, whether or not the flat check landed.
+        kingdom.pullTogetherUsedThisTurn = true
+        kingdom.pullTogetherCurrentDC = pullTogetherDcAfterUse(dc)
+        kingdom.pullTogetherTurnsSinceLastUsed = 0
+        actor.setKingdom(kingdom)
+        if (succeeded) {
+            postChatMessage(t("kingdom.pullTogether.succeeded"))
+            postComplexDegreeOfSuccess(meta, DegreeOfSuccess.FAILURE)
+        } else {
+            postChatMessage(t("kingdom.pullTogether.failed"))
         }
     },
     ChatButton("km-offer-caravan-recall") { game, actor, event, button ->
