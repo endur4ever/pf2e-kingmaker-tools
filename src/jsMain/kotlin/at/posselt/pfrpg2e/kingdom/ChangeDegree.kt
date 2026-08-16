@@ -18,9 +18,17 @@ external interface UpgradeMetaContext {
     val notes: String?
     val actorUuid: String
     val eventIndex: Int
+
+    /**
+     * The check's DC, total and die value, carried so a banked-aid spend can re-evaluate the degree
+     * from the same numbers the original roll used. Nullable because event/legacy cards predate them.
+     */
+    val dc: Int?
+    val total: Int?
+    val dieValue: Int?
 }
 
-private fun parseUpgradeMeta(elem: HTMLElement) =
+fun parseUpgradeMeta(elem: HTMLElement) =
     UpgradeMetaContext(
         rollMode = elem.dataset["rollMode"] ?: "",
         activityId = elem.dataset["activityId"],
@@ -31,6 +39,9 @@ private fun parseUpgradeMeta(elem: HTMLElement) =
         eventId = elem.dataset["eventId"],
         eventStageIndex = elem.dataset["eventStageIndex"]?.toInt() ?: 0,
         eventIndex = elem.dataset["eventIndex"]?.toInt() ?: 0,
+        dc = elem.dataset["dc"]?.toIntOrNull(),
+        total = elem.dataset["total"]?.toIntOrNull(),
+        dieValue = elem.dataset["dieValue"]?.toIntOrNull(),
     )
 
 enum class ChangeDegree {

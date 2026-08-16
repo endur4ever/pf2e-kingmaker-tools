@@ -58,6 +58,8 @@ import kotlinx.js.JsPlainObject
 import kotlinx.serialization.json.Json.Default.parseToJsonElement
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.get
+import at.posselt.pfrpg2e.kingdom.dialogs.postComplexDegreeOfSuccess
+import at.posselt.pfrpg2e.takeIfInstance
 
 private data class ChatButton(
     val buttonClass: String,
@@ -365,6 +367,44 @@ private val buttons = listOf(
                 postChatMessage(t("chatMessages.warRuin.applied", recordOf("ruin" to t("chatMessages.warRuin.$choice"))))
             }
         }
+    },
+    ChatButton("km-spend-banked-aid") { game, actor, event, button ->
+        // RAW, Request Foreign Aid's bonus is applied to a check you have already seen fail. This
+        // spends one banked bonus against THIS card's roll and reposts the corrected degree.
+        if (!game.user.isGM) return@ChatButton
+        val bonusId = button.dataset["bonusId"] ?: return@ChatButton
+        val meta = button.closest(".chat-message")
+            ?.querySelector(".km-upgrade-result")
+            ?.takeIfInstance<HTMLElement>()
+            ?.let { parseUpgradeMeta(it) }
+            ?: return@ChatButton
+        val dc = meta.dc ?: return@ChatButton
+        val total = meta.total ?: return@ChatButton
+        val dieValue = meta.dieValue ?: return@ChatButton
+        val kingdom = actor.getKingdom() ?: return@ChatButton
+        val bonus = kingdom.bankedBonusIds().zip(kingdom.bankedBonusList())
+            .firstOrNull { (id, _) -> id == bonusId }
+            ?.second
+        if (bonus == null) {
+            // Another card already spent it: these offers sit in chat and the bank is shared.
+            ui.notifications.warn(t("kingdom.bankedAid.gone"))
+            return@ChatButton
+        }
+        // Re-checked at confirm time, not just when the card was posted.
+        if (!aidWouldImprove(dc = dc, total = total, dieValue = dieValue, bonus = bonus.value)) {
+            ui.notifications.warn(t("kingdom.bankedAid.noLongerHelps"))
+            return@ChatButton
+        }
+        val improved = degreeAfterSpendingAid(dc = dc, total = total, dieValue = dieValue, bonus = bonus.value)
+        kingdom.bankedBonuses = kingdom.withoutBankedBonus(bonusId)
+        actor.setKingdom(kingdom)
+        postChatMessage(
+            t(
+                "kingdom.bankedAid.spent",
+                recordOf("value" to bonus.value, "degree" to t(improved)),
+            ),
+        )
+        postComplexDegreeOfSuccess(meta, improved)
     },
     ChatButton("km-offer-deploy-army") { game, actor, event, button ->
         // GM-confirmed apply buttons for a resolved Deploy Army activity. The activity's own text

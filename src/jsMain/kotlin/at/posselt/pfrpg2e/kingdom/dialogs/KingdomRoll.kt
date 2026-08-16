@@ -38,6 +38,9 @@ import at.posselt.pfrpg2e.utils.tpl
 import js.objects.recordOf
 import kotlinx.js.JsPlainObject
 import kotlin.math.max
+import at.posselt.pfrpg2e.kingdom.data.RawBankedBonus
+import at.posselt.pfrpg2e.kingdom.FOREIGN_AID_ACTIVITIES
+import at.posselt.pfrpg2e.kingdom.buildBankedAidButton
 
 
 @Suppress("unused")
@@ -157,6 +160,24 @@ suspend fun rollCheck(
     val degreeResult = determineDegree(result.degreeOfSuccess, upgrades, downgrades)
     val originalDegree = degreeResult.originalDegree
     val changed = degreeResult.changedDegree
+
+    // Request Foreign Aid banks its circumstance bonus instead of handing out a modifier to switch
+    // on before the NEXT roll. RAW the aid is applied to a future check AFTER you see that check
+    // fail -- reroll-insurance, a materially stronger mechanic than a pre-declared bonus.
+    if (activity != null && activity.id in FOREIGN_AID_ACTIVITIES && changed.succeeded()) {
+        val amount = if (changed == DegreeOfSuccess.CRITICAL_SUCCESS) 4 else 2
+        kingdomActor.getKingdom()?.let { k ->
+            k.bankedBonuses = (k.bankedBonuses ?: emptyArray()) + RawBankedBonus(
+                id = "aid-${kotlin.js.Date().getTime().toLong()}",
+                value = amount,
+                source = t("kingdom.bankedAid.source", recordOf("activity" to t(activity.title))),
+                gainedTurn = k.currentTurn ?: 0,
+                expiresTurn = null,
+            )
+            kingdomActor.setKingdom(k)
+            postChatMessage(t("kingdom.bankedAid.banked", recordOf("value" to amount)))
+        }
+    }
     val nonNullRollMode = rollMode ?: RollMode.PUBLICROLL
     val rollMeta = generateRollMeta(
         activity = activity,
@@ -200,6 +221,9 @@ suspend fun rollCheck(
             eventIndex = eventIndex,
             eventStageIndex = eventStageIndex,
             notes = serializeB64Json(notes.map { it.serialize() }.toTypedArray()),
+            dc = dc,
+            total = result.roll.total.toInt(),
+            dieValue = result.dieValue.value,
         )
         postComplexDegreeOfSuccess(context, changed)
     }
@@ -278,6 +302,10 @@ suspend fun postComplexDegreeOfSuccess(
     } else {
         ""
     }
+    // RAW, Request Foreign Aid's bonus is spent on a check you have ALREADY seen fail. Offer it
+    // here, on the failed result itself, and only when it would actually change the degree --
+    // spending a +2 that leaves the failure a failure is a trap, not a choice.
+    val aidHtml = buildBankedAidButton(kingdomActor, metaContext, changedDegreeOfSuccess)
     val notesContext = metaContext.notes
         ?.let { deserializeB64Json<Array<RawNote>>(it) }
         ?.filter { it.degree == null || it.degree == changedDegreeOfSuccess.value }
@@ -295,7 +323,7 @@ suspend fun postComplexDegreeOfSuccess(
         rollMode = rollMode,
         metaHtml = metaHtml,
         preHtml = "${activity?.description ?: event?.description}",
-        postHtml = notesHtml + postHtml,
+        postHtml = notesHtml + postHtml + aidHtml,
         message = message,
     )
     if (additionalMessages != null) {

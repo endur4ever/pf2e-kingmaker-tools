@@ -74,6 +74,7 @@ import js.array.component1
 import js.array.component2
 import kotlinx.js.JsPlainObject
 import at.posselt.pfrpg2e.kingdom.data.RawAccessGrant
+import at.posselt.pfrpg2e.kingdom.data.RawBankedBonus
 
 @JsPlainObject
 external interface KingdomSettings {
@@ -266,6 +267,12 @@ external interface KingdomData {
      * InspectSettlement. Nullable; Migration42 seeds it to an empty array.
      */
     var accessGrants: Array<RawAccessGrant>?
+
+    /**
+     * Circumstance bonuses banked by Request Foreign Aid, spendable on a later failed check.
+     * Nullable; Migration43 seeds it to an empty array.
+     */
+    var bankedBonuses: Array<RawBankedBonus>?
     var campaignClocks: Array<CampaignClock>
     var questTemplates: Array<dynamic>
     var campaignQuests: Array<dynamic>

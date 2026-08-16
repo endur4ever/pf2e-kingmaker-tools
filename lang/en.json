@@ -2096,7 +2096,15 @@
         "confirmEndTurn": "Are you sure you want to end turn {turn}? This will advance the kingdom to the next turn. You can undo this with \"Undo Last End Turn\" if needed."
       },
       "activityLockedUntilTurn": "Available again on turn {turn}",
-      "settlementGrantedBy": "{benefit} (granted by: {quest})"
+      "settlementGrantedBy": "{benefit} (granted by: {quest})",
+      "bankedAid": {
+        "source": "{activity}",
+        "banked": "Foreign aid banked: +{value} circumstance, spendable on a future failed check.",
+        "spend": "Spend banked aid (+{value}, from {source})",
+        "spent": "Banked aid spent: +{value}. The check is now a {degree}.",
+        "gone": "That banked aid has already been spent.",
+        "noLongerHelps": "That aid would no longer change this check's result."
+      }
     },
     "chatMessages": {
       "calendarBridgeMissing": "<strong>Kingmaker Tools:</strong> Seasons &amp; Stars is active, but the <em>Simple Calendar Compatibility Bridge</em> module is not. Calendar notes (expeditions, weather, end-of-turn and camp summaries) are being silently skipped. Install <a href=\"{url}\">the compatibility bridge</a> (package id <code>{packageId}</code>) to enable them. This notice appears only once.",
@@ -5558,7 +5566,7 @@
       "request-foreign-aid-vk": {
         "title": "Request Foreign Aid (V&K)",
         "description": "<p>When disaster strikes, you send out a call for help to another nation with whom you have diplomatic relations. The DC of this check starts at the other group’s Negotiation DC +2, but every subsequent Kingdom turn you Request Foreign Aid from the same group, the DC increases by 2. Every Kingdom turn that passes without Requesting Foreign Aid from that Group reduces the DC by 1 (until you reach the other group’s Negotiation DC +2). You may only attempt to request Foreign Aid with a given group once per Kingdom turn regardless of the number of leaders pursuing activities.</p>",
-        "automationNotes": "The DC climbs by 2 each consecutive Kingdom turn you request aid and drops by 1 each turn you skip it (tracked automatically, kingdom-wide rather than per-group). Circumstance bonuses are still applied before the roll.",
+        "automationNotes": "The DC climbs by 2 each consecutive Kingdom turn you request aid and drops by 1 each turn you skip it (tracked automatically, kingdom-wide rather than per-group). Success banks the circumstance bonus, spendable from a later failed check's result card.",
         "requirement": "You have diplomatic relations with the group you are requesting aid from.",
         "criticalSuccess": {
           "msg": "<p>Your ally’s aid grants a +4 circumstance bonus to any one Kingdom skill check attempted during the remainder of this Kingdom turn. You can choose to apply this bonus to any Kingdom skill check after the die is rolled, but must do so before the result is known. In addition, @gain2RolledResourceDice; this RP does not accrue into XP at the end of the turn if you don’t spend it.</p>",
@@ -5589,7 +5597,7 @@
         "title": "Request Foreign Aid",
         "description": "<p>When disaster strikes, you send out a call for help to another nation with whom you have diplomatic relations. The DC of this check is equal to the other group’s Negotiation DC +2 (see the sidebar on page 519).</p>",
         "requirement": "You have diplomatic relations with the group you are requesting aid from.",
-        "automationNotes": "Circumstance bonuses are not applied after, but before the roll",
+        "automationNotes": "Success banks the circumstance bonus. Spend it from the result card of a later FAILED check, as RAW intends, rather than switching it on before rolling.",
         "criticalSuccess": {
           "msg": "<p>Your ally’s aid grants a +4 circumstance bonus to any one Kingdom skill check attempted during the remainder of this Kingdom turn. You can choose to apply this bonus to any Kingdom skill check after the die is rolled, but must do so before the result is known. In addition, @gain2RolledResourceDice; this RP does not accrue into XP at the end of the turn if you don’t spend it.</p>",
           "modifiers": {
