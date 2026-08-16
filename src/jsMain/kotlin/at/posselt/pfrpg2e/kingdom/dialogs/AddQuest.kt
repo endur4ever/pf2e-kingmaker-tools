@@ -29,6 +29,7 @@ import org.w3c.dom.asList
 import org.w3c.dom.get
 import org.w3c.dom.pointerevents.PointerEvent
 import kotlin.js.Promise
+import at.posselt.pfrpg2e.kingdom.ACCESS_BENEFIT_TYPES
 
 @JsExport
 class QuestModel(
@@ -54,6 +55,10 @@ class QuestModel(
             int("ore")
             int("luxuries")
             string("rewardOther", nullable = true)
+            string("accessBenefitType", nullable = true)
+            string("accessValue", nullable = true)
+            int("accessAmount")
+            string("accessSettlementId", nullable = true)
             string("flavorTextCompleted")
             string("notes", nullable = true)
             boolean("hidden")
@@ -80,6 +85,10 @@ external interface AddQuestData {
     val ore: Int
     val luxuries: Int
     val rewardOther: String?
+    val accessBenefitType: String?
+    val accessValue: String?
+    val accessAmount: Int
+    val accessSettlementId: String?
     val flavorTextCompleted: String
     val notes: String?
     val hidden: Boolean
@@ -98,6 +107,8 @@ class AddQuest(
     private val existing: RawQuest? = null,
     private val prefillTitle: String? = null,
     private val prefillGiver: String? = null,
+    /** Settlements to scope an access-grant reward to; empty = kingdom-wide only. */
+    private val settlements: List<Pair<String, String>> = emptyList(),
     private val onSave: suspend (quest: RawQuest) -> Unit,
 ) : FormApp<AddQuestContext, AddQuestData>(
     title = t(if (existing != null) "kingdom.quests.editQuest" else "kingdom.quests.addQuest"),
@@ -132,6 +143,10 @@ class AddQuest(
             ore = q.rewards.ore ?: 0,
             luxuries = q.rewards.luxuries ?: 0,
             rewardOther = q.rewards.other ?: "",
+            accessBenefitType = q.rewards.accessBenefitType,
+            accessValue = q.rewards.accessValue ?: "",
+            accessAmount = q.rewards.accessAmount ?: 0,
+            accessSettlementId = q.rewards.accessSettlementId,
             flavorTextCompleted = q.flavorTextCompleted,
             notes = q.notes ?: "",
             hidden = q.hidden ?: false,
@@ -159,6 +174,10 @@ class AddQuest(
         ore = 0,
         luxuries = 0,
         rewardOther = "",
+        accessBenefitType = null,
+        accessValue = "",
+        accessAmount = 0,
+        accessSettlementId = null,
         flavorTextCompleted = "",
         notes = "",
         hidden = false,
@@ -222,6 +241,10 @@ class AddQuest(
                         ore = if (data.ore != 0) data.ore else null,
                         luxuries = if (data.luxuries != 0) data.luxuries else null,
                         other = data.rewardOther?.takeIf { it.isNotBlank() },
+                        accessBenefitType = data.accessBenefitType?.takeIf { it.isNotBlank() },
+                        accessValue = data.accessValue?.takeIf { it.isNotBlank() },
+                        accessAmount = data.accessAmount.takeIf { it > 0 },
+                        accessSettlementId = data.accessSettlementId?.takeIf { it.isNotBlank() },
                     ),
                     flavorTextCompleted = data.flavorTextCompleted,
                     notes = data.notes?.takeIf { it.isNotBlank() },
@@ -398,6 +421,44 @@ class AddQuest(
                 value = data.rewardOther ?: "",
                 required = false,
                 elementClasses = listOf("km-quest-reward-other-input"),
+            ),
+            Select(
+                name = "accessBenefitType",
+                label = t("kingdom.quests.fields.accessBenefitType"),
+                help = t("kingdom.quests.fields.accessBenefitTypeHelp"),
+                value = data.accessBenefitType ?: "",
+                options = listOf(SelectOption(t("kingdom.quests.fields.accessNone"), "")) +
+                    ACCESS_BENEFIT_TYPES.map { SelectOption(t("kingdom.quests.fields.access.$it"), it) },
+                required = false,
+                stacked = false,
+            ),
+            TextInput(
+                name = "accessValue",
+                label = t("kingdom.quests.fields.accessValue"),
+                help = t("kingdom.quests.fields.accessValueHelp"),
+                value = data.accessValue ?: "",
+                required = false,
+                stacked = false,
+            ),
+            NumberInput(
+                name = "accessAmount",
+                label = t("kingdom.quests.fields.accessAmount"),
+                help = t("kingdom.quests.fields.accessAmountHelp"),
+                value = data.accessAmount,
+                required = false,
+                stacked = false,
+            ),
+            Select(
+                name = "accessSettlementId",
+                label = t("kingdom.quests.fields.accessSettlement"),
+                help = t("kingdom.quests.fields.accessSettlementHelp"),
+                value = data.accessSettlementId ?: "",
+                // Blank = kingdom-wide, which is also the only option in a scene-less world; this
+                // dialog must stay usable for quests that grant no access at all.
+                options = listOf(SelectOption(t("kingdom.quests.fields.accessKingdomWide"), "")) +
+                    settlements.map { SelectOption(it.second, it.first) },
+                required = false,
+                stacked = false,
             ),
         )
         AddQuestContext(

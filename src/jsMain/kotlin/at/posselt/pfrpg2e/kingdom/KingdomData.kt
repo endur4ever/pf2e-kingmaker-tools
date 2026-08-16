@@ -73,6 +73,7 @@ import com.foundryvtt.pf2e.actor.PF2ENpc
 import js.array.component1
 import js.array.component2
 import kotlinx.js.JsPlainObject
+import at.posselt.pfrpg2e.kingdom.data.RawAccessGrant
 
 @JsPlainObject
 external interface KingdomSettings {
@@ -259,6 +260,12 @@ external interface KingdomData {
     var milestones: Array<MilestoneChoice>
     var companions: Array<RawCharacter>?
     var structureBlacklist: Array<String>?
+
+    /**
+     * Settlement benefits granted by completed quests, unioned with structure-derived access in
+     * InspectSettlement. Nullable; Migration42 seeds it to an empty array.
+     */
+    var accessGrants: Array<RawAccessGrant>?
     var campaignClocks: Array<CampaignClock>
     var questTemplates: Array<dynamic>
     var campaignQuests: Array<dynamic>

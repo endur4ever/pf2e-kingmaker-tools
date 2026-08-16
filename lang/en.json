@@ -982,7 +982,22 @@
           "ore": "Ore Reward",
           "luxuries": "Luxuries Reward",
           "rewardOther": "Other / Custom Reward",
-          "rewardOtherHelp": "Freeform bounty text for rewards that aren't tracked resources — a magic item, a title, a favor, land, etc."
+          "rewardOtherHelp": "Freeform bounty text for rewards that aren't tracked resources — a magic item, a title, a favor, land, etc.",
+          "accessBenefitType": "Grants Settlement Access",
+          "accessBenefitTypeHelp": "Completing this quest grants a lasting settlement benefit, unioned with what the settlement's structures already provide.",
+          "accessNone": "— None —",
+          "access": {
+            "trainer": "Class Trainer",
+            "crafting": "Crafting Access",
+            "itemLevel": "Item Purchase Level"
+          },
+          "accessValue": "Granted Trainer / Material",
+          "accessValueHelp": "For a trainer or crafting grant: what is unlocked, e.g. cleric or runes. Ignored for an item purchase level.",
+          "accessAmount": "Granted Item Purchase Level",
+          "accessAmountHelp": "For an item-level grant: the purchase level the settlement gains access to. The higher of this and the settlement's own level applies.",
+          "accessSettlement": "Access Applies To",
+          "accessSettlementHelp": "Which settlement gains the benefit. Kingdom-wide grants it everywhere.",
+          "accessKingdomWide": "— Kingdom-wide —"
         },
         "optional": "Optional"
       },
@@ -2080,7 +2095,8 @@
         "endTurnGmOnly": "Only the GM can end the kingdom turn.",
         "confirmEndTurn": "Are you sure you want to end turn {turn}? This will advance the kingdom to the next turn. You can undo this with \"Undo Last End Turn\" if needed."
       },
-      "activityLockedUntilTurn": "Available again on turn {turn}"
+      "activityLockedUntilTurn": "Available again on turn {turn}",
+      "settlementGrantedBy": "{benefit} (granted by: {quest})"
     },
     "chatMessages": {
       "calendarBridgeMissing": "<strong>Kingmaker Tools:</strong> Seasons &amp; Stars is active, but the <em>Simple Calendar Compatibility Bridge</em> module is not. Calendar notes (expeditions, weather, end-of-turn and camp summaries) are being silently skipped. Install <a href=\"{url}\">the compatibility bridge</a> (package id <code>{packageId}</code>) to enable them. This notice appears only once.",

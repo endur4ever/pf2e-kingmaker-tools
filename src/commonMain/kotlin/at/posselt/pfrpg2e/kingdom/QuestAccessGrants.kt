@@ -48,3 +48,14 @@ fun unionSettlementAccess(
     val itemLevel = (listOf(baseItemLevel) + applicable.filter { it.benefitType == "itemLevel" }.mapNotNull { it.amount }).max()
     return SettlementAccess(trainers, craftingAccess = crafting, itemLevel = itemLevel)
 }
+
+/** The benefit types a quest can grant. Persisted as strings, so they live in one place. */
+const val ACCESS_BENEFIT_TRAINER = "trainer"
+const val ACCESS_BENEFIT_CRAFTING = "crafting"
+const val ACCESS_BENEFIT_ITEM_LEVEL = "itemLevel"
+
+val ACCESS_BENEFIT_TYPES = listOf(ACCESS_BENEFIT_TRAINER, ACCESS_BENEFIT_CRAFTING, ACCESS_BENEFIT_ITEM_LEVEL)
+
+/** Drop every grant that came from [questId] — used when a completed quest is reopened. */
+fun List<AccessGrant>.withoutQuest(questId: String): List<AccessGrant> =
+    filterNot { it.sourceQuestId == questId }

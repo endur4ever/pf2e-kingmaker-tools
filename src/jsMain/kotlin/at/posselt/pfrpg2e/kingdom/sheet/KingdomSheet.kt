@@ -35,6 +35,10 @@ import at.posselt.pfrpg2e.kingdom.AutomateResources
 import at.posselt.pfrpg2e.kingdom.KingdomActor
 import at.posselt.pfrpg2e.kingdom.KingdomData
 import at.posselt.pfrpg2e.kingdom.offerDefeatConsequences
+import at.posselt.pfrpg2e.kingdom.accessGrantList
+import at.posselt.pfrpg2e.kingdom.toRawAccessGrants
+import at.posselt.pfrpg2e.kingdom.toAccessGrant
+import at.posselt.pfrpg2e.kingdom.withoutQuest
 import at.posselt.pfrpg2e.kingdom.armies.getSelectedArmies
 import at.posselt.pfrpg2e.kingdom.offerDeployArmyOutcome
 import at.posselt.pfrpg2e.kingdom.offerWarVictory
@@ -885,7 +889,7 @@ class KingdomSheet(
             }
 
             "add-quest" -> buildPromise {
-                AddQuest { quest ->
+                AddQuest(settlements = questSettlementOptions()) { quest ->
                     val current = getKingdom()
                     val quests = current.quests ?: emptyArray()
                     current.quests = quests + quest
@@ -924,6 +928,7 @@ class KingdomSheet(
                     val existing = (getKingdom().quests ?: emptyArray()).find { it.id == questId }
                     if (existing != null) {
                         AddQuest(
+                            settlements = questSettlementOptions(),
                             onSave = { updated ->
                                 val current = getKingdom()
                                 val quests = current.quests ?: emptyArray()
@@ -985,6 +990,14 @@ class KingdomSheet(
                         ).limitBy(storage)
                         kingdom.commodities.now = newCommodities
 
+                        // A quest can also grant lasting settlement access (a trainer, a crafting
+                        // material, a higher item-purchase level). Appended here so it rides the
+                        // same GM gate, the same status == "active" dedup, and the same single
+                        // persist as every other reward; reopen-quest revokes it by sourceQuestId.
+                        rewards.toAccessGrant(quest.id)?.let { grant ->
+                            kingdom.accessGrants = (kingdom.accessGrantList() + grant).toRawAccessGrants()
+                        }
+
                         // Record the ACTUAL applied deltas (post-clamp) so reopen reverses exactly.
                         quest.completionSnapshot = RawQuestCompletionSnapshot(
                             priorStatus = priorStatus,
@@ -1013,6 +1026,12 @@ class KingdomSheet(
                     val kingdom = getKingdom()
                     val quest = (kingdom.quests ?: emptyArray()).find { it.id == questId }
                     if (quest != null && quest.status == "completed") {
+                        // Revoke any access this quest granted, whether or not a completion snapshot
+                        // exists: grants are keyed by sourceQuestId, so they need no numeric delta to
+                        // reverse, and a legacy completion should not leave an unrevokable benefit.
+                        kingdom.accessGrants = kingdom.accessGrantList()
+                            .withoutQuest(quest.id)
+                            .toRawAccessGrants()
                         val snap = quest.completionSnapshot
                         if (snap != null) {
                             // Reverse each applied delta (coerced to legal floors). Deltas were captured
@@ -2670,6 +2689,10 @@ class KingdomSheet(
             }
         }
     }
+
+    /** (sceneId, name) pairs for the quest access-grant settlement picker. */
+    private fun questSettlementOptions(): List<Pair<String, String>> =
+        getKingdom().getAllSettlements(game).allSettlements.map { it.id to it.name }
 
     private suspend fun postAddToOngoingEvents(
         result: TableAndDraw?,

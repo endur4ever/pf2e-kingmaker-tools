@@ -649,6 +649,9 @@ private val buttons = listOf(
         AddQuest(
             prefillTitle = t("chatMessages.endTurn.diplomacyQuestTitle", recordOf("group" to faction)),
             prefillGiver = faction,
+            settlements = actor.getKingdom()
+                ?.let { k -> k.getAllSettlements(game).allSettlements.map { it.id to it.name } }
+                ?: emptyList(),
         ) { quest ->
             actor.getKingdom()?.let { kingdom ->
                 kingdom.quests = (kingdom.quests ?: emptyArray()) + quest

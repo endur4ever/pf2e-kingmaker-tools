@@ -66,6 +66,11 @@ import org.w3c.dom.HTMLElement
 import org.w3c.dom.get
 import org.w3c.dom.pointerevents.PointerEvent
 import kotlin.js.Promise
+import at.posselt.pfrpg2e.kingdom.appliesTo
+import at.posselt.pfrpg2e.kingdom.ACCESS_BENEFIT_CRAFTING
+import at.posselt.pfrpg2e.kingdom.ACCESS_BENEFIT_TRAINER
+import at.posselt.pfrpg2e.kingdom.unionSettlementAccess
+import at.posselt.pfrpg2e.kingdom.accessGrantList
 
 @JsPlainObject
 external interface LabelValueContext {
@@ -498,7 +503,18 @@ class InspectSettlement(
             .filter { it.second > 0 }
             .map { LabelValueContext(label = it.first, value = it.second) }
             .toTypedArray()
-        val basePurchaseLevel = parsed.itemPurchaseLevel
+        // Quest-granted access unions with the structure-derived access below. The item level is
+        // unioned HERE, before calculateAvailableItems consumes it, so a granted purchase level
+        // actually widens what the settlement can buy rather than only changing a displayed number.
+        val questGrants = kingdom.accessGrantList()
+        val grantedAccess = unionSettlementAccess(
+            settlementId = current.sceneId,
+            baseTrainers = parsed.trainers,
+            baseCrafting = parsed.craftingAccess,
+            baseItemLevel = parsed.itemPurchaseLevel,
+            grants = questGrants,
+        )
+        val basePurchaseLevel = grantedAccess.itemLevel
         val availableItems = calculateAvailableItems(
             settlementLevel = basePurchaseLevel,
             preventItemLevelPenalty = parsed.preventItemLevelPenalty,
@@ -579,6 +595,30 @@ class InspectSettlement(
         if ("specialized-artisan" in baseIds) {
             craftingList.add("${getStructureName("specialized-artisan")}: ${t("kingdom.crafting.other")}")
         }
+
+        // Structure-derived lines are pre-composed display strings ("Shrine: Cleric, Oracle"),
+        // while grants are bare ids, so dedup is done on the bare-id lists that unionSettlementAccess
+        // works with: a quest granting a trainer the settlement already has adds nothing, and only
+        // the genuinely new benefits get their own line naming the quest that granted them.
+        val questTitles = (kingdom.quests ?: emptyArray()).associate { it.id to it.title }
+        // The granted value is free text the GM typed, so it is shown verbatim rather than run
+        // through a localization key that would render raw for anything unexpected.
+        fun grantedExtras(type: String, alreadyProvided: List<String>) =
+            questGrants
+                .filter { it.appliesTo(current.sceneId) && it.benefitType == type }
+                .mapNotNull { grant -> grant.value?.let { grant to it } }
+                .filterNot { (_, value) -> value in alreadyProvided }
+                .map { (grant, value) ->
+                    t(
+                        "kingdom.settlementGrantedBy",
+                        recordOf(
+                            "benefit" to value,
+                            "quest" to (questTitles[grant.sourceQuestId] ?: grant.sourceQuestId),
+                        ),
+                    )
+                }
+        trainersList.addAll(grantedExtras(ACCESS_BENEFIT_TRAINER, parsed.trainers))
+        craftingList.addAll(grantedExtras(ACCESS_BENEFIT_CRAFTING, parsed.craftingAccess))
 
         val notes = parsed.notes.toTypedArray()
         InspectSettlementContext(

@@ -14,6 +14,18 @@ external interface RawQuestRewards {
     var ore: Int?
     var luxuries: Int?
     var other: String? // freeform / custom bounty reward text
+
+    /** Quest-granted settlement access: "trainer" | "crafting" | "itemLevel", or null for none. */
+    var accessBenefitType: String?
+
+    /** Trainer class id or crafting-material id, for trainer/crafting grants. */
+    var accessValue: String?
+
+    /** Item purchase level granted, for an "itemLevel" grant. */
+    var accessAmount: Int?
+
+    /** Settlement scene id the grant is scoped to; blank/null = kingdom-wide. */
+    var accessSettlementId: String?
 }
 
 /**
