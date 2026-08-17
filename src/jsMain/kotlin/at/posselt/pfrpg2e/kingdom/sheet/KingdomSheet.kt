@@ -398,6 +398,8 @@ class KingdomSheet(
     private var questFilterMax: String = ""
     private var questFilterHidden: String = "all"
     private var questFilterCategory: String = "all"
+    private var threatFilterStatus: String = "all"
+    private var threatSortMode: String = "eta"
 
     init {
         appHook.onDeleteScene { _, _, _ -> render() }
@@ -3618,12 +3620,86 @@ class KingdomSheet(
                 })
             }
         attachQuestFilter(htmlElement)
+        attachThreatFilter(htmlElement)
     }
 
     // Wires the quick-filter bar above the active quests grid. The inputs carry no
     // `name`, and we stopPropagation on their events, so they never feed the form's
     // submitOnChange (which would re-render and steal focus). Filter state is mirrored
     // into instance fields so it can be restored after an unrelated re-render.
+    /**
+     * Status filter and sort for the war-threats table.
+     *
+     * Mirrors attachQuestFilter: listeners stopPropagation so the sheet's submitOnChange does not
+     * re-render and steal focus, and the selection is mirrored into instance fields so it survives
+     * an unrelated re-render.
+     *
+     * "Arrived" is filtered on the row's derived data-arrived, not on data-status: WarThreatStatus
+     * has no such member, so a chip matching status="arrived" would match nothing forever.
+     */
+    private fun attachThreatFilter(htmlElement: HTMLElement) {
+        val bar = htmlElement.querySelector(".km-threat-filters")?.takeIfInstance<HTMLElement>() ?: return
+        val statusSelect = bar.querySelector(".km-threat-filter-status")
+        val sortSelect = bar.querySelector(".km-threat-filter-sort")
+        val clearBtn = bar.querySelector(".km-threat-filter-clear")
+        val countEl = bar.querySelector(".km-threat-filter-count")?.takeIfInstance<HTMLElement>()
+        val noMatches = htmlElement.querySelector(".km-threat-no-matches")?.takeIfInstance<HTMLElement>()
+        val rows = htmlElement.querySelectorAll(".km-threat-row").asList().filterIsInstance<HTMLElement>()
+        val body = rows.firstOrNull()?.parentElement
+
+        fun strVal(e: Element?): String = (e?.asDynamic()?.value as? String)?.trim() ?: ""
+        fun setVal(e: Element?, v: String) { e?.asDynamic()?.value = v }
+
+        val apply = {
+            val status = strVal(statusSelect).ifEmpty { "all" }
+            val sort = strVal(sortSelect).ifEmpty { "eta" }
+            var shown = 0
+            rows.forEach { row ->
+                val show = when (status) {
+                    "all" -> true
+                    "arrived" -> row.dataset["arrived"] == "1"
+                    else -> row.dataset["status"] == status
+                }
+                if (show) {
+                    row.classList.remove("km-threat-filtered-out")
+                    shown++
+                } else {
+                    row.classList.add("km-threat-filtered-out")
+                }
+            }
+            // Re-append in sorted order. ETA ascending (soonest first, unset last via its 9999
+            // sentinel, because Handlebars treats a real 0 as falsy); escalation descending.
+            body?.let { tbody ->
+                rows.sortedWith(
+                    if (sort == "escalation") {
+                        compareByDescending { it.dataset["escalation"]?.toIntOrNull() ?: 0 }
+                    } else {
+                        compareBy { it.dataset["eta"]?.toIntOrNull() ?: 9999 }
+                    }
+                ).forEach { tbody.appendChild(it) }
+            }
+            threatFilterStatus = status
+            threatSortMode = sort
+            countEl?.textContent = "$shown / ${rows.size}"
+            noMatches?.hidden = shown != 0 || rows.isEmpty()
+        }
+
+        setVal(statusSelect, threatFilterStatus)
+        setVal(sortSelect, threatSortMode)
+
+        listOfNotNull(statusSelect, sortSelect).forEach { c ->
+            c.addEventListener("change", { it.stopPropagation(); apply() })
+        }
+        clearBtn?.addEventListener("click", {
+            it.preventDefault()
+            it.stopPropagation()
+            setVal(statusSelect, "all")
+            setVal(sortSelect, "eta")
+            apply()
+        })
+        apply()
+    }
+
     private fun attachQuestFilter(htmlElement: HTMLElement) {
         val bar = htmlElement.querySelector(".km-quest-filters")?.takeIfInstance<HTMLElement>() ?: return
         val titleInput = bar.querySelector(".km-quest-filter-title")

@@ -2412,3 +2412,68 @@ fieldset.km-hex-editor-links {
         font-size: 18px;
     }
 }
+
+/* war-threat status filter + sort, mirroring the quests filter bar */
+.km-threat-filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.35rem;
+    font-size: var(--font-size-12);
+}
+
+.km-threat-filters label {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.km-threat-filter-count {
+    margin-left: auto;
+    opacity: 0.7;
+}
+
+.km-threat-row.km-threat-filtered-out {
+    display: none;
+}
+
+.km-threat-no-matches {
+    padding: 0.5rem;
+    opacity: 0.7;
+    font-style: italic;
+}
+
+.km-threat-history {
+    margin-top: 0.5rem;
+    font-size: var(--font-size-12);
+}
+
+.km-threat-history-list {
+    list-style: none;
+    margin: 0.25rem 0 0;
+    padding: 0;
+}
+
+.km-threat-history-list li {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.15rem 0;
+}
+
+.km-banked-aid-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.km-banked-aid-expired {
+    text-decoration: line-through;
+    opacity: 0.6;
+}
+
+.km-banked-aid-expiry {
+    margin-left: 0.4rem;
+    opacity: 0.7;
+}

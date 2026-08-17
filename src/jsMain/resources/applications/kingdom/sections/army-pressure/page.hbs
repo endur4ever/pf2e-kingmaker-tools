@@ -89,6 +89,26 @@
                 </h3>
                 {{#if armyPressureContext.hasThreats}}
                     <div class="km-table-scroll">
+                    <div class="km-threat-filters">
+                        <label>{{localizeKM "armyPressure.filter.status"}}
+                            <select class="km-threat-filter-status">
+                                <option value="all">{{localizeKM "armyPressure.filter.statusAll"}}</option>
+                                <option value="active">{{localizeKM "warThreatStatus.active"}}</option>
+                                <option value="arrived">{{localizeKM "armyPressure.filter.statusArrived"}}</option>
+                                <option value="defeated">{{localizeKM "warThreatStatus.defeated"}}</option>
+                                <option value="evaded">{{localizeKM "warThreatStatus.evaded"}}</option>
+                                <option value="expired">{{localizeKM "warThreatStatus.expired"}}</option>
+                            </select>
+                        </label>
+                        <label>{{localizeKM "armyPressure.filter.sort"}}
+                            <select class="km-threat-filter-sort">
+                                <option value="eta">{{localizeKM "armyPressure.filter.sortEta"}}</option>
+                                <option value="escalation">{{localizeKM "armyPressure.filter.sortEscalation"}}</option>
+                            </select>
+                        </label>
+                        <button type="button" class="km-threat-filter-clear">{{localizeKM "armyPressure.filter.clear"}}</button>
+                        <span class="km-threat-filter-count"></span>
+                    </div>
                     <table class="km-army-table">
                         <thead><tr>
                             <th>{{localizeKM "armyPressure.threatName"}}</th>
@@ -100,7 +120,11 @@
                         </tr></thead>
                         <tbody>
                         {{#each armyPressureContext.threats}}
-                            <tr>
+                            <tr class="km-threat-row"
+                                data-status="{{this.status}}"
+                                data-arrived="{{#if this.arrived}}1{{else}}0{{/if}}"
+                                data-eta="{{#if this.eta}}{{this.eta}}{{else}}9999{{/if}}"
+                                data-escalation="{{this.escalationPercent}}">
                                 <td><strong>{{this.name}}</strong>{{#if this.hiddenFromPlayers}} <i class="fa-solid fa-eye-slash km-threat-hidden" title="{{localizeKM "armyPressure.hiddenFromPlayers"}}"></i>{{/if}}{{#if this.enemyFaction}} <span class="km-threat-faction">({{this.enemyFaction}})</span>{{/if}}</td>
                                 <td>
                                     <div class="km-escalation-bar"><div class="km-escalation-fill" style="width: {{this.escalationPercent}}%"></div></div>
@@ -120,6 +144,7 @@
                         {{/each}}
                         </tbody>
                     </table>
+                    <p class="km-threat-no-matches" hidden>{{localizeKM "armyPressure.filter.noMatches"}}</p>
                     </div>
                 {{else}}
                     <p class="km-army-empty">{{localizeKM "armyPressure.noThreats"}}</p>

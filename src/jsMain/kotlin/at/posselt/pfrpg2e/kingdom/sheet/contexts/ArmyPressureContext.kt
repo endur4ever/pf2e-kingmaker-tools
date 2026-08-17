@@ -30,6 +30,13 @@ external interface ArmyThreatContext {
     val pauseOnExpiry: Boolean
     val canResolveBattle: Boolean
     val hiddenFromPlayers: Boolean
+
+    /**
+     * Whether the threat's ETA has run out. Derived, not persisted: WarThreatStatus has no
+     * "arrived" member — it is ACTIVE/DEFEATED/EVADED/EXPIRED — so a filter on arrival has to be
+     * computed from the countdown rather than matched against a status that does not exist.
+     */
+    val arrived: Boolean
 }
 
 @JsPlainObject
@@ -103,6 +110,7 @@ private fun WarThreatView.toContext() = ArmyThreatContext(
     pauseOnExpiry = pauseOnExpiry,
     canResolveBattle = canResolveBattle,
     hiddenFromPlayers = hiddenFromPlayers,
+    arrived = eta != null && (eta ?: 0) <= 0,
 )
 
 fun buildArmyPressureContext(view: ArmyPressureView): ArmyPressureContext {
