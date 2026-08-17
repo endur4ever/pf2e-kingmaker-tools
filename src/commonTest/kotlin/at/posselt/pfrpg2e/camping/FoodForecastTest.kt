@@ -59,4 +59,66 @@ class FoodForecastTest {
         assertEquals(Int.MAX_VALUE, f.daysOfFood)
         assertTrue(f.tonightCovered)
     }
+
+    @Test
+    fun ingredientsCanBindBeforeRationsDo() {
+        // A camp cooking recipes burns ingredients, not rations. Counting only rations would
+        // promise days the pantry cannot deliver -- the exact starvation-mid-route this warns about.
+        val f = computeFoodForecast(
+            FoodForecastInput(
+                rations = 100,
+                provisions = 0,
+                dailyConsumers = 4,
+                basicIngredients = 6,
+                specialIngredients = 99,
+                mealCostRations = 0,
+                mealCostBasicIngredients = 2,
+            )
+        )
+        // 6 basic / (4 consumers x 2) = 0 full days, despite 100 rations sitting there.
+        assertEquals(0, f.daysOfFood)
+    }
+
+    @Test
+    fun theScarcestStockDecidesTheForecast() {
+        val f = computeFoodForecast(
+            FoodForecastInput(
+                rations = 40, provisions = 0, dailyConsumers = 2,
+                basicIngredients = 20, specialIngredients = 3,
+                mealCostRations = 1, mealCostBasicIngredients = 1, mealCostSpecialIngredients = 1,
+            )
+        )
+        // rations 40/2=20, basic 20/2=10, special 3/2=1 -> special binds.
+        assertEquals(1, f.daysOfFood)
+    }
+
+    @Test
+    fun aStockWithNoDailyNeedNeverBinds() {
+        // Zero special ingredients must not read as "zero days" when no meal uses them.
+        val f = computeFoodForecast(
+            FoodForecastInput(
+                rations = 10, provisions = 0, dailyConsumers = 2,
+                basicIngredients = 0, specialIngredients = 0,
+                mealCostRations = 1,
+            )
+        )
+        assertEquals(5, f.daysOfFood)
+    }
+
+    @Test
+    fun anExactPlanTotalOverridesThePerConsumerEstimate() {
+        // Characters may each eat something different, so a caller holding the real plan passes the
+        // summed cost rather than an average that would be wrong for every mixed camp.
+        val f = computeFoodForecast(
+            FoodForecastInput(
+                rations = 0, provisions = 0, dailyConsumers = 4,
+                basicIngredients = 12,
+                mealCostRations = 1,
+                dailyRationsTotal = 0,
+                dailyBasicIngredientsTotal = 3,
+            )
+        )
+        // Rations need 0 (nobody eats plain), basic 12/3 = 4 days.
+        assertEquals(4, f.daysOfFood)
+    }
 }

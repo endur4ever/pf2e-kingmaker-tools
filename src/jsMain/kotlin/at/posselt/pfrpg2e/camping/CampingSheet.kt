@@ -1375,19 +1375,32 @@ class CampingSheet(
         // dailyConsumers = the camp roster (characters + companions present); RAW baseline is one
         // ration per consumer per day (mealCostRations defaults to 1) — the plain-meal fallback.
         val totalProvisions = camping.getTotalProvisions(actor, foodItems)
+        val parsedCookingChoices = camping.findCookingChoices(
+            charactersInCampByUuid = charactersByUuid,
+            recipesById = camping.getAllRecipes().associateBy { it.id },
+        )
+        // Computed after the meal plan, because the plan is what the party will actually eat: a camp
+        // cooking recipes burns ingredients rather than rations, and a forecast counting only
+        // rations would promise days the pantry cannot deliver. Costs are summed per planned meal
+        // rather than averaged, since each character may eat something different.
+        val plannedMeals = parsedCookingChoices.meals
         val foodForecast = computeFoodForecast(
             FoodForecastInput(
                 rations = (totalFood.rations - totalProvisions).coerceAtLeast(0),
                 provisions = totalProvisions,
                 dailyConsumers = actors.size,
+                basicIngredients = totalFood.basicIngredients,
+                specialIngredients = totalFood.specialIngredients,
+                dailyRationsTotal = plannedMeals.sumOf { it.cookingCost.rations }
+                    .takeIf { plannedMeals.isNotEmpty() },
+                dailyBasicIngredientsTotal = plannedMeals.sumOf { it.cookingCost.basicIngredients }
+                    .takeIf { plannedMeals.isNotEmpty() },
+                dailySpecialIngredientsTotal = plannedMeals.sumOf { it.cookingCost.specialIngredients }
+                    .takeIf { plannedMeals.isNotEmpty() },
             )
         )
         val foodDaysDisplay =
             if (foodForecast.daysOfFood >= Int.MAX_VALUE / 2) "∞" else foodForecast.daysOfFood.toString()
-        val parsedCookingChoices = camping.findCookingChoices(
-            charactersInCampByUuid = charactersByUuid,
-            recipesById = camping.getAllRecipes().associateBy { it.id },
-        )
         val recipesContext = getRecipeContext(
             parsedCookingChoices = parsedCookingChoices,
             foodItems = foodItems,
