@@ -44,6 +44,8 @@ import org.w3c.dom.HTMLElement
 import org.w3c.dom.get
 import at.posselt.pfrpg2e.kingdom.offerLiquidateResources
 import at.posselt.pfrpg2e.kingdom.qualityOfLifeLuxuryBonus
+import at.posselt.pfrpg2e.kingdom.envyIgnoresIncrease
+import at.posselt.pfrpg2e.kingdom.hasEnvyOfTheWorld
 
 private val fromStringRegex = Regex(
     "@(?<mode>gain|lose)" +
@@ -297,6 +299,19 @@ data class ResourceButton(
         // the total gained by 1." Upkeep collection has its own gated path (it writes commodities
         // directly rather than through this funnel); this covers every OTHER source -- activities,
         // events, quests, caravans -- so the feat is no longer Upkeep-only.
+        // Envy of the World: the first Unrest or Ruin increase of the turn is ignored outright,
+        // from ANY source -- previously only Upkeep unrest was covered. Later increases can still be
+        // ignored, but only for a Fame point, so those are offered rather than suppressed.
+        val isUnrestOrRuin = resource in listOf(
+            Resource.UNREST, Resource.CRIME, Resource.DECAY, Resource.CORRUPTION, Resource.STRIFE,
+        )
+        val envyFree = isUnrestOrRuin && turn == Turn.NOW &&
+            kingdom.hasEnvyOfTheWorld() &&
+            envyIgnoresIncrease(value, kingdom.envyOfTheWorldFirstIgnoreUsed == true)
+        if (envyFree) {
+            kingdom.envyOfTheWorldFirstIgnoreUsed = true
+            postChatMessage(t("kingdom.envy.ignored", recordOf("amount" to value)))
+        }
         val luxuryBonus = if (resource == Resource.LUXURIES && turn == Turn.NOW) {
             qualityOfLifeLuxuryBonus(
                 gained = value,
@@ -307,7 +322,8 @@ data class ResourceButton(
             0
         }
         if (luxuryBonus > 0) kingdom.luxuryBonusUsedThisTurn = true
-        val updatedValue = (setter?.get() ?: 0) + value + luxuryBonus
+        val effectiveValue = if (envyFree) 0 else value
+        val updatedValue = (setter?.get() ?: 0) + effectiveValue + luxuryBonus
         when (resource) {
             Resource.FAME -> when (turn) {
                 Turn.NOW -> setter?.set(updatedValue.coerceIn(0, maximumFame))

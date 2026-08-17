@@ -52,3 +52,19 @@ const val QUALITY_OF_LIFE_FEAT = "quality-of-life"
  */
 fun qualityOfLifeLuxuryBonus(gained: Int, bonusPerTurn: Int, alreadyUsedThisTurn: Boolean): Int =
     if (gained > 0 && !alreadyUsedThisTurn) bonusPerTurn else 0
+
+/** The level-20 kingdom FEATURE (not a feat) granting the Unrest/Ruin ignore. */
+const val ENVY_OF_THE_WORLD_FEATURE = "envy-of-the-world"
+
+/**
+ * Whether Envy of the World's FREE ignore applies to an increase of [gained].
+ *
+ * "The first time in a Kingdom turn when your kingdom would gain Unrest or Ruin, ignore that
+ * increase." First — not every time, which is what a level check alone amounts to — and an increase,
+ * so a zero or negative delta is not one and must not burn the turn's free ignore.
+ *
+ * Later increases in the same turn can still be ignored, but only by spending a Fame or Infamy
+ * point, which is a choice and therefore an offer rather than an automatic suppression.
+ */
+fun envyIgnoresIncrease(gained: Int, alreadyUsedThisTurn: Boolean): Boolean =
+    gained > 0 && !alreadyUsedThisTurn

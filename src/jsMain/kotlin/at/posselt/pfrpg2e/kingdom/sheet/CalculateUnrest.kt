@@ -15,6 +15,8 @@ import js.objects.recordOf
 import kotlinx.js.JsPlainObject
 import kotlin.math.abs
 import kotlin.math.min
+import at.posselt.pfrpg2e.kingdom.envyIgnoresIncrease
+import at.posselt.pfrpg2e.kingdom.hasEnvyOfTheWorld
 
 @Suppress("unused")
 @JsPlainObject
@@ -43,7 +45,13 @@ suspend fun adjustUnrest(
     ))
     val ruler = if (unrest.rulerVacant) roll(formula = "1d4", flavor = t("kingdom.rulerVacantGainingUnrest"), toChat = !suppressChat) else 0
     val newUnrest = unrest.war + unrest.secondaryTerritory + unrest.overcrowded + ruler
-    return if (kingdom.level >= 20 && newUnrest > 0) {
+    // Envy of the World ignores the FIRST Unrest or Ruin increase of a Kingdom turn. The old check
+    // was `kingdom.level >= 20`, which ignored EVERY Upkeep unrest increase, every turn, forever --
+    // both more generous than the feature's text and blind to whether the feature was even taken.
+    val envyIgnores = kingdom.hasEnvyOfTheWorld() &&
+        envyIgnoresIncrease(newUnrest, kingdom.envyOfTheWorldFirstIgnoreUsed == true)
+    return if (envyIgnores) {
+        kingdom.envyOfTheWorldFirstIgnoreUsed = true
         if (!suppressChat) {
             postChatMessage(t("kingdom.ignoringUnrestIncrease"))
         }

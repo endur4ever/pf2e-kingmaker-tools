@@ -47,3 +47,7 @@ suspend fun buildPullTogetherButton(
         ),
     )
 }
+
+/** Whether this kingdom has the level-20 Envy of the World feature. */
+fun KingdomData.hasEnvyOfTheWorld(): Boolean =
+    getChosenFeatures(getExplodedFeatures()).any { it.feature.id == ENVY_OF_THE_WORLD_FEATURE }

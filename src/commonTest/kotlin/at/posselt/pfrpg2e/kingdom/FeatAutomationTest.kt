@@ -69,4 +69,19 @@ class FeatAutomationTest {
     fun aKingdomWithoutTheFeatGetsNothing() {
         assertEquals(0, qualityOfLifeLuxuryBonus(gained = 5, bonusPerTurn = 0, alreadyUsedThisTurn = false))
     }
+
+    @Test
+    fun envyIgnoresOnlyTheFirstIncreaseOfTheTurn() {
+        // The old implementation was a bare `kingdom.level >= 20` check, which ignored EVERY Upkeep
+        // unrest increase every turn -- far more generous than "the first time in a Kingdom turn".
+        assertTrue(envyIgnoresIncrease(gained = 3, alreadyUsedThisTurn = false))
+        assertFalse(envyIgnoresIncrease(gained = 3, alreadyUsedThisTurn = true))
+    }
+
+    @Test
+    fun anIncreaseOfZeroDoesNotBurnTheFreeIgnore() {
+        // A turn with no unrest gain must leave the ignore available for a later, real increase.
+        assertFalse(envyIgnoresIncrease(gained = 0, alreadyUsedThisTurn = false))
+        assertFalse(envyIgnoresIncrease(gained = -2, alreadyUsedThisTurn = false))
+    }
 }
