@@ -43,6 +43,7 @@ import kotlin.text.Regex
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.get
 import at.posselt.pfrpg2e.kingdom.offerLiquidateResources
+import at.posselt.pfrpg2e.kingdom.qualityOfLifeLuxuryBonus
 
 private val fromStringRegex = Regex(
     "@(?<mode>gain|lose)" +
@@ -292,7 +293,21 @@ data class ResourceButton(
             Resource.CREATIVE_SOLUTION -> kingdom::creativeSolutions
             Resource.EVENT -> null
         }
-        val updatedValue = (setter?.get() ?: 0) + value
+        // Quality of Life: "The first time you gain Luxury Commodities in a Kingdom turn, increase
+        // the total gained by 1." Upkeep collection has its own gated path (it writes commodities
+        // directly rather than through this funnel); this covers every OTHER source -- activities,
+        // events, quests, caravans -- so the feat is no longer Upkeep-only.
+        val luxuryBonus = if (resource == Resource.LUXURIES && turn == Turn.NOW) {
+            qualityOfLifeLuxuryBonus(
+                gained = value,
+                bonusPerTurn = chosenFeats.sumOf { it.feat.increaseGainedLuxuriesOncePerTurnBy ?: 0 },
+                alreadyUsedThisTurn = kingdom.luxuryBonusUsedThisTurn == true,
+            )
+        } else {
+            0
+        }
+        if (luxuryBonus > 0) kingdom.luxuryBonusUsedThisTurn = true
+        val updatedValue = (setter?.get() ?: 0) + value + luxuryBonus
         when (resource) {
             Resource.FAME -> when (turn) {
                 Turn.NOW -> setter?.set(updatedValue.coerceIn(0, maximumFame))

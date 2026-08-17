@@ -86,7 +86,13 @@ suspend fun KingdomActor.upkeepCollectResources(game: Game, kingdom: KingdomData
             settlements.allSettlements,
             kingdomLevel = kingdom.level,
         ),
-        increaseGainedLuxuries = chosenFeats.sumOf { it.feat.increaseGainedLuxuriesOncePerTurnBy ?: 0 },
+        // Zero once the turn's single luxury bonus has already been spent elsewhere -- the feat
+        // says "the first time you gain Luxury Commodities in a Kingdom turn", not "during Upkeep".
+        increaseGainedLuxuries = if (kingdom.luxuryBonusUsedThisTurn == true) {
+            0
+        } else {
+            chosenFeats.sumOf { it.feat.increaseGainedLuxuriesOncePerTurnBy ?: 0 }
+        },
         settlements = settlements.allSettlements,
         expressionContext = kingdom.createSimpleContext(settlements),
         modifiers = kingdom.createModifiers(settlements),
@@ -96,6 +102,11 @@ suspend fun KingdomActor.upkeepCollectResources(game: Game, kingdom: KingdomData
     kingdom.resourceDice.now = resources.resourceDice
     kingdom.commodities.now.lumber = resources.lumber
     kingdom.commodities.now.luxuries = resources.luxuries
+    // calculateIncome applies the bonus only when luxuries were actually gained, so that is the
+    // condition under which the turn's one use is spent.
+    if (resources.luxuries > 0 && chosenFeats.any { (it.feat.increaseGainedLuxuriesOncePerTurnBy ?: 0) > 0 }) {
+        kingdom.luxuryBonusUsedThisTurn = true
+    }
     kingdom.commodities.now.stone = resources.stone
     kingdom.commodities.now.ore = resources.ore
     return resources

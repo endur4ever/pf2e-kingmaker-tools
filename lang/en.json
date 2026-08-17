@@ -3393,7 +3393,7 @@
       "quality-of-life": {
         "name": "Quality of Life",
         "text": "Your kingdom’s robust economy makes the creature comforts of civilization more readily available to all, and even finer luxuries are more easily had. The first time you gain Luxury Commodities in a Kingdom turn, increase the total gained by 1. All of your settlements are treated as 1 level higher than their actual level for the purposes of determining what sorts of magic items might be offered for sale at their markets and shops.",
-        "automationNotes": "Luxuries gained are only increased by 1 when collecting resources during the Upkeep phase"
+        "automationNotes": "Automated: the first Luxury Commodities gained in a Kingdom turn get +1, from any source — Upkeep collection, activities, events or quests — and settlements are treated as 1 level higher for market purposes."
       },
       "quick-recovery-status-bonus": {
         "name": "Quick Recovery (Status Bonus)",

@@ -19,6 +19,7 @@ import at.posselt.pfrpg2e.migrations.migrations.Migration47
 import at.posselt.pfrpg2e.migrations.migrations.Migration48
 import at.posselt.pfrpg2e.migrations.migrations.Migration49
 import at.posselt.pfrpg2e.migrations.migrations.Migration53
+import at.posselt.pfrpg2e.migrations.migrations.Migration54
 import at.posselt.pfrpg2e.migrations.migrations.Migration50
 import com.foundryvtt.core.Game
 import js.objects.unsafeJso
@@ -305,5 +306,13 @@ class MigrationBackfillsTest {
         val c = camping { it.enableWeatherEffects = false }
         Migration53().migrateCamping(game, c)
         assertEquals(false, c.asDynamic().enableWeatherEffects.unsafeCast<Boolean>())
+    }
+
+    // ── Migration54: kingdom.luxuryBonusUsedThisTurn ────────────────────────────────────────────
+    @Test
+    fun migration54SeedsTheLuxuryMarkerUnused() = runTest {
+        val k = kingdom()
+        Migration54().migrateKingdom(game, k)
+        assertEquals(false, k.luxuryBonusUsedThisTurn.unsafeCast<Boolean>())
     }
 }

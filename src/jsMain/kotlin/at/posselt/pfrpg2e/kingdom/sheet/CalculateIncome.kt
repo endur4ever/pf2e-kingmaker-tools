@@ -151,7 +151,12 @@ fun calculateProjectedResources(
         kingdomLevel = kingdomData.level,
         includeCurrent = false,
     )
-    val increaseGainedLuxuries = chosenFeats.sumOf { it.feat.increaseGainedLuxuriesOncePerTurnBy ?: 0 }
+    // Mirrors the collection path's gate so the forecast does not promise a bonus already spent.
+    val increaseGainedLuxuries = if (kingdomData.luxuryBonusUsedThisTurn == true) {
+        0
+    } else {
+        chosenFeats.sumOf { it.feat.increaseGainedLuxuriesOncePerTurnBy ?: 0 }
+    }
     val baseIncome = calculateIncome(
         realmData = realmData,
         resourceDice = resourceDice,

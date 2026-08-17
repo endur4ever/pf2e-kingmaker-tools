@@ -290,6 +290,8 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
         usedThisTurn = kingdom.pullTogetherUsedThisTurn == true,
     )
     kingdom.pullTogetherUsedThisTurn = false
+    // Quality of Life's luxury bonus is once per Kingdom turn.
+    kingdom.luxuryBonusUsedThisTurn = false
     // Liquidate Resources: the next turn rolls 4 fewer Resource Dice. Spending the penalty here
     // also clears the flag, which is what makes it the once-per-turn marker during the turn itself.
     if (kingdom.liquidateResourcesPenaltyNextTurn == true) {

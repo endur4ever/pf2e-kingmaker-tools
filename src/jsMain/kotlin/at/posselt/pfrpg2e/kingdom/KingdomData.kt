@@ -281,6 +281,12 @@ external interface KingdomData {
     var pullTogetherTurnsSinceLastUsed: Int?
     var liquidateResourcesPenaltyNextTurn: Boolean?
     var envyOfTheWorldFirstIgnoreUsed: Boolean?
+
+    /**
+     * Whether Quality of Life's once-per-turn luxury bonus has already been spent this turn.
+     * Nullable for back-compat; Migration54 seeds it false.
+     */
+    var luxuryBonusUsedThisTurn: Boolean?
     var campaignClocks: Array<CampaignClock>
     var questTemplates: Array<dynamic>
     var campaignQuests: Array<dynamic>

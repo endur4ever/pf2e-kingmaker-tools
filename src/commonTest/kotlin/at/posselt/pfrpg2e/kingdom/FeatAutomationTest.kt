@@ -50,4 +50,23 @@ class FeatAutomationTest {
         assertEquals(1, liquidatedRp())
         assertEquals(4, LIQUIDATE_RESOURCES_NEXT_TURN_RD_PENALTY)
     }
+
+    @Test
+    fun qualityOfLifeBoostsOnlyTheFirstLuxuryGainOfTheTurn() {
+        assertEquals(1, qualityOfLifeLuxuryBonus(gained = 3, bonusPerTurn = 1, alreadyUsedThisTurn = false))
+        assertEquals(0, qualityOfLifeLuxuryBonus(gained = 3, bonusPerTurn = 1, alreadyUsedThisTurn = true))
+    }
+
+    @Test
+    fun aGainOfZeroLuxuriesIsNotAGain() {
+        // The feat says "the first time you GAIN Luxury Commodities" -- collecting none must not
+        // burn the turn's single use, and must not conjure a luxury out of nothing.
+        assertEquals(0, qualityOfLifeLuxuryBonus(gained = 0, bonusPerTurn = 1, alreadyUsedThisTurn = false))
+        assertEquals(0, qualityOfLifeLuxuryBonus(gained = -2, bonusPerTurn = 1, alreadyUsedThisTurn = false))
+    }
+
+    @Test
+    fun aKingdomWithoutTheFeatGetsNothing() {
+        assertEquals(0, qualityOfLifeLuxuryBonus(gained = 5, bonusPerTurn = 0, alreadyUsedThisTurn = false))
+    }
 }

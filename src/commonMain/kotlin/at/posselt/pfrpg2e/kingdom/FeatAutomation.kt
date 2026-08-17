@@ -39,3 +39,16 @@ fun canLiquidateResources(currentRp: Int, expense: Int, alreadyUsedThisTurn: Boo
 
 /** RP left after liquidating — reduced to 1 (never fully to 0). */
 fun liquidatedRp(): Int = 1
+
+/** Feat id granting the once-per-turn luxury bonus. */
+const val QUALITY_OF_LIFE_FEAT = "quality-of-life"
+
+/**
+ * The extra Luxuries a gain of [gained] receives from Quality of Life.
+ *
+ * The feat reads: "The first time you gain Luxury Commodities in a Kingdom turn, increase the total
+ * gained by 1." So it applies to the first ACTUAL gain of the turn from any source — not merely the
+ * Upkeep collection, and not to a gain of zero, which is not a gain at all.
+ */
+fun qualityOfLifeLuxuryBonus(gained: Int, bonusPerTurn: Int, alreadyUsedThisTurn: Boolean): Int =
+    if (gained > 0 && !alreadyUsedThisTurn) bonusPerTurn else 0
