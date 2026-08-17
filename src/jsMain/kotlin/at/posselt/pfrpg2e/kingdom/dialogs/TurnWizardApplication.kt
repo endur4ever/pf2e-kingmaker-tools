@@ -116,6 +116,9 @@ import at.posselt.pfrpg2e.kingdom.logToCalendar
 import at.posselt.pfrpg2e.kingdom.PULL_TOGETHER_BASE_DC
 import at.posselt.pfrpg2e.kingdom.pullTogetherDcAfterTurn
 import at.posselt.pfrpg2e.kingdom.LIQUIDATE_RESOURCES_NEXT_TURN_RD_PENALTY
+import at.posselt.pfrpg2e.utils.d20Check
+import at.posselt.pfrpg2e.kingdom.postIrrigationPlagueOffer
+import at.posselt.pfrpg2e.kingdom.irrigationPlagueFlatCheckDc
 
 fun TickChange.toDisplayString(): String {
     return when {
@@ -294,6 +297,22 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
     kingdom.luxuryBonusUsedThisTurn = false
     // Envy of the World's free ignore is once per Kingdom turn.
     kingdom.envyOfTheWorldFirstIgnoreUsed = false
+
+    // Irrigation critical failures breed disease: each turn, a flat check whose DC climbs with the
+    // number of spoiled hexes, and a failure invites a Plague event. Rolled at the turn boundary
+    // because that is the module's one reliable per-turn chokepoint; RAW places it at the start of
+    // the Event phase, which this immediately precedes.
+    val spoiledHexes = kingdom.critFailedIrrigationHexes ?: 0
+    if (spoiledHexes > 0) {
+        val plagueDc = irrigationPlagueFlatCheckDc(spoiledHexes)
+        val passed = d20Check(
+            dc = plagueDc,
+            flavor = t("kingdom.irrigation.plagueCheck", recordOf("hexes" to spoiledHexes)),
+        ).degreeOfSuccess.succeeded()
+        if (!passed) {
+            postIrrigationPlagueOffer(game, actor)
+        }
+    }
     // Liquidate Resources: the next turn rolls 4 fewer Resource Dice. Spending the penalty here
     // also clears the flag, which is what makes it the once-per-turn marker during the turn itself.
     if (kingdom.liquidateResourcesPenaltyNextTurn == true) {

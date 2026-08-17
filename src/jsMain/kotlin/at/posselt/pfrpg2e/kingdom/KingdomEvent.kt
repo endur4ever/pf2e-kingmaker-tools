@@ -89,6 +89,18 @@ external interface RawOngoingKingdomEvent {
     var settlementSceneId: String?
     var secretLocation: Boolean?
     var becameContinuous: Boolean?
+
+    /**
+     * Failed Hire Adventurers attempts against this continuous event. Drives the escalated cost:
+     * "If you try to end the continuous event again, the cost in RP increases to 2 Resource Dice."
+     */
+    var hireAdventurersFailures: Int?
+
+    /**
+     * Set by a critical failure: "word spreads quickly through the region — you can no longer
+     * attempt to end this continuous event by Hiring Adventurers."
+     */
+    var hireAdventurersBlocked: Boolean?
 }
 
 data class OngoingEvent(

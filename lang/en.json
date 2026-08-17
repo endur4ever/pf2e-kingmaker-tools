@@ -2132,6 +2132,20 @@
       },
       "envy": {
         "ignored": "Envy of the World: the kingdom shrugs off an increase of {amount}."
+      },
+      "hireAdventurers": {
+        "costIncreased": "Word gets around: hiring adventurers against this event now costs {dice} Resource Dice.",
+        "blocked": "Word spreads through the region — this continuous event can no longer be ended by Hiring Adventurers."
+      },
+      "irrigation": {
+        "spoiled": "Failed irrigation works fester. Hexes breeding disease: {count}.",
+        "repaired": "Irrigation works repaired. Hexes breeding disease: {count}.",
+        "plagueCheck": "Irrigation disease check ({hexes} spoiled hex(es))",
+        "plagueTitle": "Disease in the Waterways",
+        "plagueBody": "The failed irrigation works have bred disease. A Plague event threatens the kingdom.",
+        "plagueAccept": "Add the Plague event",
+        "plagueAdded": "Plague takes hold in the kingdom.",
+        "plagueMissing": "The Plague event could not be found in the event registry."
       }
     },
     "chatMessages": {
@@ -4909,7 +4923,7 @@
       "hire-adventurers": {
         "title": "Hire Adventurers",
         "description": "<p>While the PCs can strike out themselves to deal with ongoing events, it’s often more efficient to Hire Adventurers. When you Hire Adventurers to help end an ongoing event, the DC is equal to your Control DC adjusted by the event’s level modifier. @lose1RolledResourceDice each time you attempt this activity. (or @lose1ResourcePoints if you have the <b>Practical Magic</b> Feat)</p>",
-        "automationNotes": "Cost increase from Critical Failure is not implemented",
+        "automationNotes": "Tracked per continuous event: a failure raises the cost to 2 Resource Dice and a critical failure closes the option for that event, both announced in chat. The Resource Dice are still spent with the cost button in the description.",
         "criticalSuccess": {
           "msg": "<p>You end the continuous event.</p>"
         },
@@ -4998,7 +5012,7 @@
       "irrigation": {
         "title": "Irrigation",
         "description": "<p>You send excavators to build waterways, canals, or drainage systems to convey water from areas that have natural access to a river or lake. Spend RP as determined by the hex’s most inhospitable terrain feature:</p> <ul> <li><b>Mountains</b>: @lose12ResourcePoints</li> <li><b>Swamps</b>: @lose8ResourcePoints</li> <li><b>Forests</b>: @lose4ResourcePoints</li> <li><b>Hills</b>: @lose2ResourcePoints</li> <li><b>Plains</b>: @lose1ResourcePoints</li> </ul> <p>Then attempt a basic check.</p>",
-        "automationNotes": "Critical Failure Flat Check increase is not automated",
+        "automationNotes": "Automated: a critical failure adds a disease-breeding hex and a later success repairs one. Each Kingdom turn a flat check runs whose DC rises with the number of spoiled hexes, and a failure offers the Plague event.",
         "requirement": "You control a hex adjacent to a river or lake that itself does not contain a river or lake.",
         "criticalSuccess": {
           "msg": "<p>The hex gains a river or lake terrain feature (or you change the effects of a previous critical failure at Irrigation in this hex into a failure); work with your GM to determine where these features appear in the hex. In addition, your workers were efficient and quick, and you regain half the RP you spent building the waterways.</p>"

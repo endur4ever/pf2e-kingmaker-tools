@@ -20,6 +20,7 @@ import at.posselt.pfrpg2e.migrations.migrations.Migration48
 import at.posselt.pfrpg2e.migrations.migrations.Migration49
 import at.posselt.pfrpg2e.migrations.migrations.Migration53
 import at.posselt.pfrpg2e.migrations.migrations.Migration54
+import at.posselt.pfrpg2e.migrations.migrations.Migration55
 import at.posselt.pfrpg2e.migrations.migrations.Migration50
 import com.foundryvtt.core.Game
 import js.objects.unsafeJso
@@ -314,5 +315,13 @@ class MigrationBackfillsTest {
         val k = kingdom()
         Migration54().migrateKingdom(game, k)
         assertEquals(false, k.luxuryBonusUsedThisTurn.unsafeCast<Boolean>())
+    }
+
+    // ── Migration55: kingdom.critFailedIrrigationHexes ──────────────────────────────────────────
+    @Test
+    fun migration55SeedsNoSpoiledIrrigationHexes() = runTest {
+        val k = kingdom()
+        Migration55().migrateKingdom(game, k)
+        assertEquals(0, k.critFailedIrrigationHexes.unsafeCast<Int>())
     }
 }

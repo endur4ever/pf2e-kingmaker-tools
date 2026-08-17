@@ -61,6 +61,7 @@ import org.w3c.dom.get
 import at.posselt.pfrpg2e.kingdom.dialogs.postComplexDegreeOfSuccess
 import at.posselt.pfrpg2e.takeIfInstance
 import at.posselt.pfrpg2e.data.checks.DegreeOfSuccess
+import at.posselt.pfrpg2e.kingdom.PLAGUE_EVENT_ID
 
 private data class ChatButton(
     val buttonClass: String,
@@ -367,6 +368,25 @@ private val buttons = listOf(
             } else {
                 postChatMessage(t("chatMessages.warRuin.applied", recordOf("ruin" to t("chatMessages.warRuin.$choice"))))
             }
+        }
+    },
+    ChatButton("km-offer-irrigation-plague") { game, actor, event, button ->
+        // Adds the Plague event after a failed Irrigation flat check. Resolved through getEvent so
+        // an id the registry cannot resolve never becomes an invisible ongoing entry -- the same
+        // guard the war-threat arrival offer uses.
+        if (!game.user.isGM) return@ChatButton
+        actor.getKingdom()?.let { kingdom ->
+            val plague = kingdom.getEvent(PLAGUE_EVENT_ID)
+            if (plague == null) {
+                ui.notifications.error(t("kingdom.irrigation.plagueMissing"))
+                return@ChatButton
+            }
+            kingdom.ongoingEvents = kingdom.ongoingEvents + RawOngoingKingdomEvent(
+                stage = 0,
+                id = PLAGUE_EVENT_ID,
+            )
+            actor.setKingdom(kingdom)
+            postChatMessage(t("kingdom.irrigation.plagueAdded"))
         }
     },
     ChatButton("km-offer-liquidate-resources") { game, actor, event, button ->

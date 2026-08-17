@@ -7,6 +7,10 @@ package at.posselt.pfrpg2e.kingdom
  * activity outcome text and unit-tested.
  */
 
+/** Activity ids these rules belong to. */
+const val HIRE_ADVENTURERS_ACTIVITY = "hire-adventurers"
+const val IRRIGATION_ACTIVITY = "irrigation"
+
 /** Hire Adventurers' escalated re-attempt cost (in Resource Dice) after a prior failure this event. */
 const val HIRE_ADVENTURERS_ESCALATED_RD_COST = 2
 

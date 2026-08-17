@@ -42,6 +42,9 @@ import at.posselt.pfrpg2e.kingdom.data.RawBankedBonus
 import at.posselt.pfrpg2e.kingdom.FOREIGN_AID_ACTIVITIES
 import at.posselt.pfrpg2e.kingdom.buildBankedAidButton
 import at.posselt.pfrpg2e.kingdom.buildPullTogetherButton
+import at.posselt.pfrpg2e.kingdom.hireAdventurersRdCost
+import at.posselt.pfrpg2e.kingdom.HIRE_ADVENTURERS_ACTIVITY
+import at.posselt.pfrpg2e.kingdom.IRRIGATION_ACTIVITY
 
 
 @Suppress("unused")
@@ -165,6 +168,58 @@ suspend fun rollCheck(
     // Request Foreign Aid banks its circumstance bonus instead of handing out a modifier to switch
     // on before the NEXT roll. RAW the aid is applied to a future check AFTER you see that check
     // fail -- reroll-insurance, a materially stronger mechanic than a pre-declared bonus.
+    // Irrigation: a critical failure leaves a hex breeding disease, and a later success in such a
+    // hex "changes the effects of a previous critical failure into a failure" -- so it undoes one.
+    if (activity != null && activity.id == IRRIGATION_ACTIVITY) {
+        val delta = when {
+            changed == DegreeOfSuccess.CRITICAL_FAILURE -> 1
+            changed.succeeded() -> -1
+            else -> 0
+        }
+        if (delta != 0) {
+            kingdomActor.getKingdom()?.let { k ->
+                val before = k.critFailedIrrigationHexes ?: 0
+                val after = (before + delta).coerceAtLeast(0)
+                if (after != before) {
+                    k.critFailedIrrigationHexes = after
+                    kingdomActor.setKingdom(k)
+                    postChatMessage(
+                        if (delta > 0) {
+                            t("kingdom.irrigation.spoiled", recordOf("count" to after))
+                        } else {
+                            t("kingdom.irrigation.repaired", recordOf("count" to after))
+                        },
+                    )
+                }
+            }
+        }
+    }
+
+    // Hire Adventurers escalates per CONTINUOUS EVENT, not kingdom-wide: a failure doubles the cost
+    // against that event, and a critical failure closes the option for it entirely.
+    if (activity != null && activity.id == HIRE_ADVENTURERS_ACTIVITY && event != null && !changed.succeeded()) {
+        kingdomActor.getKingdom()?.let { k ->
+            val ongoing = k.ongoingEvents.getOrNull(eventIndex)
+            if (ongoing != null) {
+                ongoing.hireAdventurersFailures = (ongoing.hireAdventurersFailures ?: 0) + 1
+                if (changed == DegreeOfSuccess.CRITICAL_FAILURE) {
+                    ongoing.hireAdventurersBlocked = true
+                }
+                kingdomActor.setKingdom(k)
+                postChatMessage(
+                    if (changed == DegreeOfSuccess.CRITICAL_FAILURE) {
+                        t("kingdom.hireAdventurers.blocked")
+                    } else {
+                        t(
+                            "kingdom.hireAdventurers.costIncreased",
+                            recordOf("dice" to hireAdventurersRdCost(baseRdCost = 1, hasFailedThisEvent = true)),
+                        )
+                    },
+                )
+            }
+        }
+    }
+
     if (activity != null && activity.id in FOREIGN_AID_ACTIVITIES && changed.succeeded()) {
         val amount = if (changed == DegreeOfSuccess.CRITICAL_SUCCESS) 4 else 2
         kingdomActor.getKingdom()?.let { k ->

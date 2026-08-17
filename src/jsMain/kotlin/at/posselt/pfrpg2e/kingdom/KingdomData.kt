@@ -287,6 +287,13 @@ external interface KingdomData {
      * Nullable for back-compat; Migration54 seeds it false.
      */
     var luxuryBonusUsedThisTurn: Boolean?
+
+    /**
+     * How many hexes hold a critically-failed Irrigation. Only the COUNT is tracked, because that is
+     * all the rule needs — the flat check's DC rises per such hex — and the activity carries no hex
+     * identity for the module to record. Which hexes they are stays the GM's to know.
+     */
+    var critFailedIrrigationHexes: Int?
     var campaignClocks: Array<CampaignClock>
     var questTemplates: Array<dynamic>
     var campaignQuests: Array<dynamic>
