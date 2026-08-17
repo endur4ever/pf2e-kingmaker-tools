@@ -9,6 +9,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import at.posselt.pfrpg2e.kingdom.sheet.contexts.buildArmyPressureContext
 
 class ArmyPressureViewTest {
     private fun settings(enabled: Boolean, showDistance: Boolean): KingdomSettings {
@@ -295,5 +296,22 @@ class ArmyPressureViewTest {
             isGM = true,
         )
         assertEquals(listOf("secret"), gmView.threatHistory.map { it.id })
+    }
+
+    @Test
+    fun theHistoryListReachesTheTemplateContext() {
+        // The view computed threatHistory correctly but the context builder never mapped it, so the
+        // template's {{#if threatHistory.length}} read undefined and the block never rendered.
+        val view = buildArmyPressureView(
+            threats = arrayOf(threat(id = "old", status = "defeated", triggeredTurn = 1)),
+            deployments = emptyArray(),
+            pressure = null,
+            settings = settings(enabled = true, showDistance = true),
+            currentTurn = 10,
+        )
+        val context = buildArmyPressureContext(view)
+        assertEquals(listOf("old"), context.threatHistory.map { it.id })
+        // And the history rows carry the same localized status label as live rows.
+        assertEquals(context.threatHistory[0].statusLabel, context.threatHistory[0].statusLabel)
     }
 }

@@ -6,6 +6,7 @@ import at.posselt.pfrpg2e.kingdom.data.ArmyDeploymentStatus
 import at.posselt.pfrpg2e.kingdom.data.WarThreatStatus
 import at.posselt.pfrpg2e.utils.t
 import kotlinx.js.JsPlainObject
+import at.posselt.pfrpg2e.kingdom.WarThreatView
 
 /**
  * Handlebars context for the Army & War Pressure sheet section (roadmap #12),
@@ -79,29 +80,33 @@ external interface ArmyPressureContext {
     val hasThreats: Boolean
     val hasDeployments: Boolean
     val threats: Array<ArmyThreatContext>
+
+    /** Resolved threats retired to the collapsed history list. */
+    val threatHistory: Array<ArmyThreatContext>
     val deployments: Array<ArmyDeploymentContext>
     val pressure: ArmyPressureMeterContext?
 }
 
+/** One mapper for both the live board and the history list, so they cannot drift apart. */
+private fun WarThreatView.toContext() = ArmyThreatContext(
+    id = id,
+    name = name,
+    description = description,
+    enemyFaction = enemyFaction,
+    escalationLevel = escalationLevel,
+    maxEscalation = maxEscalation,
+    escalationPercent = escalationPercent,
+    eta = eta,
+    status = status,
+    statusLabel = WarThreatStatus.fromString(status)?.let { t(it.i18nKey) } ?: status,
+    targetHexLocation = targetHexLocation,
+    pauseOnExpiry = pauseOnExpiry,
+    canResolveBattle = canResolveBattle,
+    hiddenFromPlayers = hiddenFromPlayers,
+)
+
 fun buildArmyPressureContext(view: ArmyPressureView): ArmyPressureContext {
-    val threats = view.threats.map { tv ->
-        ArmyThreatContext(
-            id = tv.id,
-            name = tv.name,
-            description = tv.description,
-            enemyFaction = tv.enemyFaction,
-            escalationLevel = tv.escalationLevel,
-            maxEscalation = tv.maxEscalation,
-            escalationPercent = tv.escalationPercent,
-            eta = tv.eta,
-            status = tv.status,
-            statusLabel = WarThreatStatus.fromString(tv.status)?.let { t(it.i18nKey) } ?: tv.status,
-            targetHexLocation = tv.targetHexLocation,
-            pauseOnExpiry = tv.pauseOnExpiry,
-            canResolveBattle = tv.canResolveBattle,
-            hiddenFromPlayers = tv.hiddenFromPlayers,
-        )
-    }.toTypedArray()
+    val threats = view.threats.map { it.toContext() }.toTypedArray()
     val deployments = view.deployments.map { dv ->
         ArmyDeploymentContext(
             id = dv.id,
@@ -146,6 +151,9 @@ fun buildArmyPressureContext(view: ArmyPressureView): ArmyPressureContext {
         hasThreats = threats.isNotEmpty(),
         hasDeployments = deployments.isNotEmpty(),
         threats = threats,
+        // Previously omitted, which left the template's "Past Threats" block reading an undefined
+        // length and never rendering at all.
+        threatHistory = view.threatHistory.map { it.toContext() }.toTypedArray(),
         deployments = deployments,
         pressure = pressure,
     )
