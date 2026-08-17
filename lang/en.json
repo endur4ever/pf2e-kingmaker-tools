@@ -7393,7 +7393,17 @@
       "peaceTributeRp": "Tribute Demand (RP)",
       "peaceTributeRpHelp": "One-time Resource Points gained by demanding tribute instead of signing peace, at the cost of standing.",
       "threatHistory": "Past Threats",
-      "deleteThreat": "Delete threat"
+      "deleteThreat": "Delete threat",
+      "filter": {
+        "status": "Status",
+        "statusAll": "All",
+        "statusArrived": "Arrived",
+        "sort": "Sort by",
+        "sortEta": "ETA",
+        "sortEscalation": "Escalation",
+        "clear": "Clear",
+        "noMatches": "No threats match this filter."
+      }
     },
     "warThreatStatus": {
       "active": "Active",
