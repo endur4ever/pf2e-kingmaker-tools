@@ -166,73 +166,17 @@ data class Settlement(
             SettlementSizeType.METROPOLIS -> 15
         }
 
+    /** Class trainers this settlement's structures grant, as bare ids. See TRAINER_ACCESS_SOURCES. */
     val trainers: List<String>
-        get() {
-            val baseIds = constructedStructures.map { it.id.removeSuffix("-vk") }.toSet()
-            val list = mutableListOf<String>()
-            if ("shrine" in baseIds) {
-                list.addAll(listOf("cleric", "oracle"))
-            }
-            if ("library" in baseIds) {
-                list.addAll(listOf("investigator", "thaumaturge", "psychic"))
-            }
-            if ("alchemy-laboratory" in baseIds) {
-                list.addAll(listOf("alchemist", "gunslinger", "inventor"))
-            }
-            if (baseIds.any { it.startsWith("tavern-") }) {
-                list.add("bard")
-            }
-            if ("arcanists-tower" in baseIds) {
-                list.addAll(listOf("wizard", "witch", "sorcerer", "magus"))
-            }
-            if ("garrison" in baseIds) {
-                list.addAll(listOf("fighter", "barbarian", "champion", "monk"))
-            }
-            if ("sacred-grove" in baseIds) {
-                list.addAll(listOf("druid", "kineticist", "summoner", "ranger"))
-            }
-            if ("thieves-guild" in baseIds) {
-                list.add("rogue")
-            }
-            if ("pier" in baseIds) {
-                list.add("swashbuckler")
-            }
-            return list.distinct()
-        }
+        get() = accessBenefitsFor(TRAINER_ACCESS_SOURCES, baseStructureIds)
 
+    /** Crafting access this settlement's structures grant, as bare ids. See CRAFTING_ACCESS_SOURCES. */
     val craftingAccess: List<String>
-        get() {
-            val baseIds = constructedStructures.map { it.id.removeSuffix("-vk") }.toSet()
-            val list = mutableListOf<String>()
-            if ("smithy" in baseIds || "foundry" in baseIds) {
-                list.add("metallic")
-            }
-            if ("stonemason" in baseIds) {
-                list.add("runes")
-            }
-            if ("tannery" in baseIds) {
-                list.add("leather")
-            }
-            if ("arcanists-tower" in baseIds) {
-                list.add("scrollsWandsStaves")
-            }
-            if ("luxury-store" in baseIds) {
-                list.add("amuletsRings")
-            }
-            if ("library" in baseIds) {
-                list.add("tomes")
-            }
-            if ("alchemy-laboratory" in baseIds) {
-                list.add("alchemical")
-            }
-            if ("lumberyard" in baseIds) {
-                list.add("wooden")
-            }
-            if ("specialized-artisan" in baseIds) {
-                list.add("other")
-            }
-            return list.distinct()
-        }
+        get() = accessBenefitsFor(CRAFTING_ACCESS_SOURCES, baseStructureIds)
+
+    /** Constructed structure ids with the `-vk` variant suffix stripped. */
+    val baseStructureIds: Set<String>
+        get() = constructedStructures.map { it.id.removeSuffix("-vk") }.toSet()
 
     fun canLevelUp(kingdomLevel: Int, capitalCanGrowOneSizeLarger: Boolean): SettlementLevelUpType? {
         // you can never level up if the settlement is overcrowded

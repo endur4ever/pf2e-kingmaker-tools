@@ -71,6 +71,9 @@ import at.posselt.pfrpg2e.kingdom.ACCESS_BENEFIT_CRAFTING
 import at.posselt.pfrpg2e.kingdom.ACCESS_BENEFIT_TRAINER
 import at.posselt.pfrpg2e.kingdom.unionSettlementAccess
 import at.posselt.pfrpg2e.kingdom.accessGrantList
+import at.posselt.pfrpg2e.data.kingdom.settlements.CRAFTING_ACCESS_SOURCES
+import at.posselt.pfrpg2e.data.kingdom.settlements.TRAINER_ACCESS_SOURCES
+import at.posselt.pfrpg2e.data.kingdom.settlements.AccessSource
 
 @JsPlainObject
 external interface LabelValueContext {
@@ -528,73 +531,22 @@ class InspectSettlement(
             }
         }.toRecord()
 
-        val trainersList = mutableListOf<String>()
-        val baseIds = parsed.constructedStructures.map { it.id.removeSuffix("-vk") }.toSet()
+        // Rendered from the SAME table Settlement.trainers/craftingAccess fold over, so the list a
+        // player reads and the list the quest-grant union dedupes against cannot drift apart. Each
+        // row names every structure that granted it, which also fixes a settlement holding both a
+        // structure and its -vk variant showing only one of the two names.
+        fun accessLines(sources: List<AccessSource>, i18nPrefix: String): MutableList<String> =
+            sources.mapNotNull { source ->
+                val granting = parsed.constructedStructures
+                    .filter { source.matches(it.id.removeSuffix("-vk")) }
+                if (granting.isEmpty()) return@mapNotNull null
+                val names = granting.map { it.name }.distinct().joinToString(" / ")
+                val benefits = source.benefits.joinToString(", ") { t("$i18nPrefix.$it") }
+                "$names: $benefits"
+            }.toMutableList()
 
-        fun getStructureName(baseId: String): String {
-            return parsed.constructedStructures.find { it.id.removeSuffix("-vk") == baseId }?.name ?: ""
-        }
-
-        if ("shrine" in baseIds) {
-            trainersList.add("${getStructureName("shrine")}: ${t("kingdom.class.cleric")}, ${t("kingdom.class.oracle")}")
-        }
-        if ("library" in baseIds) {
-            trainersList.add("${getStructureName("library")}: ${t("kingdom.class.investigator")}, ${t("kingdom.class.thaumaturge")}, ${t("kingdom.class.psychic")}")
-        }
-        if ("alchemy-laboratory" in baseIds) {
-            trainersList.add("${getStructureName("alchemy-laboratory")}: ${t("kingdom.class.alchemist")}, ${t("kingdom.class.gunslinger")}, ${t("kingdom.class.inventor")}")
-        }
-        val taverns = parsed.constructedStructures.filter { it.id.removeSuffix("-vk").startsWith("tavern-") }
-        if (taverns.isNotEmpty()) {
-            val names = taverns.map { it.name }.distinct().joinToString(" / ")
-            trainersList.add("$names: ${t("kingdom.class.bard")}")
-        }
-        if ("arcanists-tower" in baseIds) {
-            trainersList.add("${getStructureName("arcanists-tower")}: ${t("kingdom.class.wizard")}, ${t("kingdom.class.witch")}, ${t("kingdom.class.sorcerer")}, ${t("kingdom.class.magus")}")
-        }
-        if ("garrison" in baseIds) {
-            trainersList.add("${getStructureName("garrison")}: ${t("kingdom.class.fighter")}, ${t("kingdom.class.barbarian")}, ${t("kingdom.class.champion")}, ${t("kingdom.class.monk")}")
-        }
-        if ("sacred-grove" in baseIds) {
-            trainersList.add("${getStructureName("sacred-grove")}: ${t("kingdom.class.druid")}, ${t("kingdom.class.kineticist")}, ${t("kingdom.class.summoner")}, ${t("kingdom.class.ranger")}")
-        }
-        if ("thieves-guild" in baseIds) {
-            trainersList.add("${getStructureName("thieves-guild")}: ${t("kingdom.class.rogue")}")
-        }
-        if ("pier" in baseIds) {
-            trainersList.add("${getStructureName("pier")}: ${t("kingdom.class.swashbuckler")}")
-        }
-
-        val craftingList = mutableListOf<String>()
-        val metalStructures = parsed.constructedStructures.filter { it.id.removeSuffix("-vk") in setOf("smithy", "foundry") }
-        if (metalStructures.isNotEmpty()) {
-            val names = metalStructures.map { it.name }.distinct().joinToString(" / ")
-            craftingList.add("$names: ${t("kingdom.crafting.metallic")}")
-        }
-        if ("stonemason" in baseIds) {
-            craftingList.add("${getStructureName("stonemason")}: ${t("kingdom.crafting.runes")}")
-        }
-        if ("tannery" in baseIds) {
-            craftingList.add("${getStructureName("tannery")}: ${t("kingdom.crafting.leather")}")
-        }
-        if ("arcanists-tower" in baseIds) {
-            craftingList.add("${getStructureName("arcanists-tower")}: ${t("kingdom.crafting.scrollsWandsStaves")}")
-        }
-        if ("luxury-store" in baseIds) {
-            craftingList.add("${getStructureName("luxury-store")}: ${t("kingdom.crafting.amuletsRings")}")
-        }
-        if ("library" in baseIds) {
-            craftingList.add("${getStructureName("library")}: ${t("kingdom.crafting.tomes")}")
-        }
-        if ("alchemy-laboratory" in baseIds) {
-            craftingList.add("${getStructureName("alchemy-laboratory")}: ${t("kingdom.crafting.alchemical")}")
-        }
-        if ("lumberyard" in baseIds) {
-            craftingList.add("${getStructureName("lumberyard")}: ${t("kingdom.crafting.wooden")}")
-        }
-        if ("specialized-artisan" in baseIds) {
-            craftingList.add("${getStructureName("specialized-artisan")}: ${t("kingdom.crafting.other")}")
-        }
+        val trainersList = accessLines(TRAINER_ACCESS_SOURCES, "kingdom.class")
+        val craftingList = accessLines(CRAFTING_ACCESS_SOURCES, "kingdom.crafting")
 
         // Structure-derived lines are pre-composed display strings ("Shrine: Cleric, Oracle"),
         // while grants are bare ids, so dedup is done on the bare-id lists that unionSettlementAccess
