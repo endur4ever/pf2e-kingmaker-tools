@@ -5494,7 +5494,7 @@
       },
       "relocate-capital": {
         "title": "Relocate Capital",
-        "automationNotes": "3 turn timeout after moving capital is not tracked",
+        "automationNotes": "Automated: relocating locks the activity out for 3 Kingdom turns, however the check went — the restriction is on attempting it, not on the result.",
         "requirement": "One of your settlements that is not your current capital must contain a Castle, Palace, or Town Hall. All leaders must spend all of their leadership activities during the Activity phase of a Kingdom turn on this activity.",
         "description": "<p>The kingdom leaders announce that they are uprooting the seat of government from its current home and reestablishing it in another settlement. Attempt a check with a DC equal to the kingdom’s Control DC + 5. You cannot Relocate your Capital again for at least 3 Kingdom turns.</p>",
         "criticalSuccess": {
@@ -5524,10 +5524,11 @@
         },
         "criticalFailure": {
           "msg": "<p>You fail to reduce the targeted Ruin in a particularly public and embarrassing way. @gain1d4Unrest, and you cannot attempt to Repair Reputation for 3 Kingdom turns.</p>"
-        }
+        },
+        "automationNotes": "Automated: a failure locks this Ruin's Repair Reputation out for 1 Kingdom turn and a critical failure for 3. Each Ruin is tracked separately."
       },
       "repair-reputation-crime": {
-        "automationNotes": "Critical Failure timeout for 3 turns is not tracked",
+        "automationNotes": "Automated: a failure locks this Ruin's Repair Reputation out for 1 Kingdom turn and a critical failure for 3. Each Ruin is tracked separately.",
         "title": "Repair Reputation: Crime",
         "description": "<p>When things have gotten out of hand in the kingdom and the nation’s reputation has become damaged, you can focus efforts on a campaign to reassure the citizens and bring them closer together, stamp down crime, organize repairs and maintenance of public structures, or strive to adjust poor public opinions. </p><p>The skill used to Repair Reputation depends on which Ruin total you wish to reduce. If you wish to reduce your Corruption, you attempt an Arts check. If you wish to reduce your Crime, you attempt a Trade check. If you wish to reduce your Decay, you attempt an Engineering check. If you wish to reduce your Strife, you attempt an Intrigue check. In all cases, the DC is your Control DC + 2.</p>",
         "criticalSuccess": {
@@ -5557,7 +5558,8 @@
         },
         "criticalFailure": {
           "msg": "<p>You fail to reduce the targeted Ruin in a particularly public and embarrassing way. @gain1d4Unrest, and you cannot attempt to Repair Reputation for 3 Kingdom turns.</p>"
-        }
+        },
+        "automationNotes": "Automated: a failure locks this Ruin's Repair Reputation out for 1 Kingdom turn and a critical failure for 3. Each Ruin is tracked separately."
       },
       "repair-reputation-strife": {
         "title": "Repair Reputation: Strife",
@@ -5573,7 +5575,8 @@
         },
         "criticalFailure": {
           "msg": "<p>You fail to reduce the targeted Ruin in a particularly public and embarrassing way. @gain1d4Unrest, and you cannot attempt to Repair Reputation for 3 Kingdom turns.</p>"
-        }
+        },
+        "automationNotes": "Automated: a failure locks this Ruin's Repair Reputation out for 1 Kingdom turn and a critical failure for 3. Each Ruin is tracked separately."
       },
       "repair-the-flooded-mine": {
         "title": "Repair the Flooded Mine",

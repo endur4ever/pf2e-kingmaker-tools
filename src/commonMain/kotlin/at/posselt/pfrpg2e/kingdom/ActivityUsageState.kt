@@ -26,7 +26,12 @@ data class ActivityUsage(
 )
 
 /** Turns an activity is locked out for, keyed by the triggering degree of success. */
-private data class TimeoutRule(val failure: Int? = null, val criticalFailure: Int? = null)
+private data class TimeoutRule(
+    val failure: Int? = null,
+    val criticalFailure: Int? = null,
+    /** A lockout that applies however the check went, for activities you simply cannot repeat soon. */
+    val anyDegree: Int? = null,
+)
 
 private val timeoutRules: Map<String, TimeoutRule> = mapOf(
     "false-victory" to TimeoutRule(failure = 1, criticalFailure = 6),
@@ -37,6 +42,15 @@ private val timeoutRules: Map<String, TimeoutRule> = mapOf(
     "supernatural-solution" to TimeoutRule(criticalFailure = 2),
     // 3, not 2: the activity's own criticalFailure text says "for the next 3 Kingdom Turns".
     "send-diplomatic-envoy" to TimeoutRule(criticalFailure = 3),
+    // "You cannot Relocate your Capital again for at least 3 Kingdom turns" sits in the activity's
+    // DESCRIPTION, next to the DC — it is a restriction on attempting, not on any one outcome.
+    "relocate-capital" to TimeoutRule(anyDegree = 3),
+    // Repair Reputation ships as four separate activity ids, one per Ruin, so the per-activity
+    // lockout is exactly the per-Ruin scope the rules describe rather than an approximation of it.
+    "repair-reputation-corruption" to TimeoutRule(failure = 1, criticalFailure = 3),
+    "repair-reputation-crime" to TimeoutRule(failure = 1, criticalFailure = 3),
+    "repair-reputation-decay" to TimeoutRule(failure = 1, criticalFailure = 3),
+    "repair-reputation-strife" to TimeoutRule(failure = 1, criticalFailure = 3),
 )
 
 /** Activities whose DC climbs each consecutive Kingdom turn they are used. */
@@ -48,6 +62,7 @@ const val ESCALATING_DC_DECAY = 1
 /** Number of turns [activityId] is locked out for on [degree], or null if that degree has no timeout. */
 fun activityTimeoutTurns(activityId: String, degree: DegreeOfSuccess): Int? {
     val rule = timeoutRules[activityId] ?: return null
+    rule.anyDegree?.let { return it }
     return when (degree) {
         DegreeOfSuccess.FAILURE -> rule.failure
         DegreeOfSuccess.CRITICAL_FAILURE -> rule.criticalFailure

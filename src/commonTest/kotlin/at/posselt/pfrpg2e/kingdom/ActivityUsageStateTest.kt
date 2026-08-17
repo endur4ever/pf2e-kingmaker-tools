@@ -216,4 +216,38 @@ class ActivityUsageStateTest {
         assertTrue(isActivityLocked(locked, "send-diplomatic-envoy", currentTurn = 8))
         assertFalse(isActivityLocked(locked, "send-diplomatic-envoy", currentTurn = 9))
     }
+
+    @Test
+    fun relocatingTheCapitalLocksOutHoweverTheCheckWent() {
+        // "You cannot Relocate your Capital again for at least 3 Kingdom turns" is in the
+        // description next to the DC -- a restriction on attempting, not on any one outcome.
+        DegreeOfSuccess.entries.forEach { degree ->
+            assertEquals(3, activityTimeoutTurns("relocate-capital", degree), "degree $degree")
+        }
+        val locked = recordActivityUse(
+            emptyList(), "relocate-capital", DegreeOfSuccess.CRITICAL_SUCCESS, currentTurn = 5,
+        )
+        assertTrue(isActivityLocked(locked, "relocate-capital", currentTurn = 8))
+        assertFalse(isActivityLocked(locked, "relocate-capital", currentTurn = 9))
+    }
+
+    @Test
+    fun eachRuinsRepairReputationLocksOutIndependently() {
+        // Four separate activity ids, so the per-activity lockout IS the per-Ruin scope.
+        val locked = recordActivityUse(
+            emptyList(), "repair-reputation-crime", DegreeOfSuccess.CRITICAL_FAILURE, currentTurn = 5,
+        )
+        assertTrue(isActivityLocked(locked, "repair-reputation-crime", currentTurn = 8))
+        assertFalse(isActivityLocked(locked, "repair-reputation-decay", currentTurn = 6))
+    }
+
+    @Test
+    fun repairReputationFailureLocksOneTurnAndCriticalFailureThree() {
+        listOf("corruption", "crime", "decay", "strife").forEach { ruin ->
+            assertEquals(1, activityTimeoutTurns("repair-reputation-$ruin", DegreeOfSuccess.FAILURE))
+            assertEquals(3, activityTimeoutTurns("repair-reputation-$ruin", DegreeOfSuccess.CRITICAL_FAILURE))
+            // A success is not a setback and must not lock the Ruin out.
+            assertNull(activityTimeoutTurns("repair-reputation-$ruin", DegreeOfSuccess.SUCCESS))
+        }
+    }
 }
