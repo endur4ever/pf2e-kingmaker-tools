@@ -294,6 +294,12 @@ external interface KingdomData {
      * identity for the module to record. Which hexes they are stays the GM's to know.
      */
     var critFailedIrrigationHexes: Int?
+
+    /**
+     * Decadent Feasts' critical success shield: the next Unrest INCREASE this turn is negated, then
+     * it is spent. Nullable for back-compat; Migration56 seeds it false.
+     */
+    var decadentFeastsShieldActive: Boolean?
     var campaignClocks: Array<CampaignClock>
     var questTemplates: Array<dynamic>
     var campaignQuests: Array<dynamic>

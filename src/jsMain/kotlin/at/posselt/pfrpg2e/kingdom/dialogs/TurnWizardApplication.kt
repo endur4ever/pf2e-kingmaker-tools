@@ -297,6 +297,8 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
     kingdom.luxuryBonusUsedThisTurn = false
     // Envy of the World's free ignore is once per Kingdom turn.
     kingdom.envyOfTheWorldFirstIgnoreUsed = false
+    // Decadent Feasts' shield is explicitly "this Kingdom turn" and does not carry over.
+    kingdom.decadentFeastsShieldActive = false
 
     // Irrigation critical failures breed disease: each turn, a flat check whose DC climbs with the
     // number of spoiled hexes, and a failure invites a Plague event. Rolled at the turn boundary

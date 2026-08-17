@@ -45,6 +45,7 @@ import at.posselt.pfrpg2e.kingdom.buildPullTogetherButton
 import at.posselt.pfrpg2e.kingdom.hireAdventurersRdCost
 import at.posselt.pfrpg2e.kingdom.HIRE_ADVENTURERS_ACTIVITY
 import at.posselt.pfrpg2e.kingdom.IRRIGATION_ACTIVITY
+import at.posselt.pfrpg2e.kingdom.DECADENT_FEASTS_ACTIVITY
 
 
 @Suppress("unused")
@@ -168,6 +169,18 @@ suspend fun rollCheck(
     // Request Foreign Aid banks its circumstance bonus instead of handing out a modifier to switch
     // on before the NEXT roll. RAW the aid is applied to a future check AFTER you see that check
     // fail -- reroll-insurance, a materially stronger mechanic than a pre-declared bonus.
+    // Decadent Feasts: "the next time this Kingdom turn you suffer an effect that increases Unrest,
+    // do not increase your Unrest." Armed here; addUnrest spends it.
+    if (activity != null && activity.id == DECADENT_FEASTS_ACTIVITY &&
+        changed == DegreeOfSuccess.CRITICAL_SUCCESS
+    ) {
+        kingdomActor.getKingdom()?.let { k ->
+            k.decadentFeastsShieldActive = true
+            kingdomActor.setKingdom(k)
+            postChatMessage(t("kingdom.decadentFeasts.shieldArmed"))
+        }
+    }
+
     // Irrigation: a critical failure leaves a hex breeding disease, and a later success in such a
     // hex "changes the effects of a previous critical failure into a failure" -- so it undoes one.
     if (activity != null && activity.id == IRRIGATION_ACTIVITY) {

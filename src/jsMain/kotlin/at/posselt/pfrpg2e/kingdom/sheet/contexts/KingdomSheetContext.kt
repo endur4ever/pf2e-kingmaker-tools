@@ -36,6 +36,9 @@ external interface KingdomSheetContext : ValidatedHandlebarsContext {
 
     /** Banked Request Foreign Aid bonuses, shown in the Turn tab with their expiry. */
     val bankedBonusesContext: Array<BankedBonusContext>
+
+    /** Whether Decadent Feasts' unrest shield is currently armed. */
+    val decadentFeastsShieldActive: Boolean
     val controlDc: Int
     val unrestPenalty: Int
     val anarchyAt: Int

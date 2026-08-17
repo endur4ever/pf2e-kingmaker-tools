@@ -17,6 +17,7 @@ import kotlin.math.abs
 import kotlin.math.min
 import at.posselt.pfrpg2e.kingdom.envyIgnoresIncrease
 import at.posselt.pfrpg2e.kingdom.hasEnvyOfTheWorld
+import at.posselt.pfrpg2e.kingdom.negateUnrestIncrease
 
 @Suppress("unused")
 @JsPlainObject
@@ -90,7 +91,25 @@ suspend fun adjustUnrest(
 
 suspend fun KingdomData.addUnrest(amount: Int, chosenFeats: List<ChosenFeat>): Int {
     val anarchyAt = calculateAnarchy(chosenFeats)
-    val result = (unrest + amount).coerceIn(0, anarchyAt)
+    // Two effects can negate an unrest INCREASE, and one increase must not spend both. Envy of the
+    // World goes first because it is free and broader (it also covers Ruin), and only if it does not
+    // apply does Decadent Feasts' shield step in. A decrease trips neither.
+    val negation = negateUnrestIncrease(
+        unrestGain = amount,
+        envyAvailable = hasEnvyOfTheWorld() &&
+            envyIgnoresIncrease(amount, envyOfTheWorldFirstIgnoreUsed == true),
+        shieldActive = decadentFeastsShieldActive == true,
+    )
+    if (negation.envyUsed) {
+        envyOfTheWorldFirstIgnoreUsed = true
+        postChatMessage(t("kingdom.envy.ignored", recordOf("amount" to amount)))
+    }
+    if (negation.shieldUsed) {
+        decadentFeastsShieldActive = false
+        postChatMessage(t("kingdom.decadentFeasts.shieldSpent", recordOf("amount" to amount)))
+    }
+    val effective = negation.netUnrestGain
+    val result = (unrest + effective).coerceIn(0, anarchyAt)
     val difference = result - unrest
     if (difference > 0) {
         postChatMessage(t("kingdom.gainingNUnrest", recordOf("count" to difference)))

@@ -10,6 +10,7 @@ package at.posselt.pfrpg2e.kingdom
 /** Activity ids these rules belong to. */
 const val HIRE_ADVENTURERS_ACTIVITY = "hire-adventurers"
 const val IRRIGATION_ACTIVITY = "irrigation"
+const val DECADENT_FEASTS_ACTIVITY = "decadent-feasts"
 
 /** Hire Adventurers' escalated re-attempt cost (in Resource Dice) after a prior failure this event. */
 const val HIRE_ADVENTURERS_ESCALATED_RD_COST = 2
@@ -53,3 +54,34 @@ const val IRRIGATION_PLAGUE_FLAT_CHECK_BASE_DC = 4
 fun irrigationPlagueFlatCheckDc(critFailedIrrigationHexes: Int): Int =
     if (critFailedIrrigationHexes <= 0) 0
     else IRRIGATION_PLAGUE_FLAT_CHECK_BASE_DC + (critFailedIrrigationHexes - 1)
+
+/** How an unrest increase fared against the effects that can negate it. */
+data class UnrestNegation(
+    /** Unrest actually gained. */
+    val netUnrestGain: Int,
+    /** Whether Envy of the World's free once-per-turn ignore was spent. */
+    val envyUsed: Boolean,
+    /** Whether Decadent Feasts' shield was spent. */
+    val shieldUsed: Boolean,
+)
+
+/**
+ * Resolve an unrest increase against both effects that can negate one, in precedence order.
+ *
+ * Envy of the World goes first because it is free and broader — it also covers Ruin — so spending
+ * the feast shield while a free ignore sits unused would waste it. Crucially ONE increase can only
+ * consume ONE of them: a kingdom holding both must not lose both protections to a single event.
+ *
+ * Pure so the ORDER is testable. It previously lived inline in addUnrest, where reversing it broke
+ * nothing any test could see.
+ */
+fun negateUnrestIncrease(
+    unrestGain: Int,
+    envyAvailable: Boolean,
+    shieldActive: Boolean,
+): UnrestNegation {
+    if (unrestGain <= 0) return UnrestNegation(unrestGain, envyUsed = false, shieldUsed = false)
+    if (envyAvailable) return UnrestNegation(0, envyUsed = true, shieldUsed = false)
+    val shielded = applyUnrestShield(unrestGain, shieldActive)
+    return UnrestNegation(shielded.netUnrestGain, envyUsed = false, shieldUsed = shielded.shieldConsumed)
+}

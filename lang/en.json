@@ -2146,6 +2146,11 @@
         "plagueAccept": "Add the Plague event",
         "plagueAdded": "Plague takes hold in the kingdom.",
         "plagueMissing": "The Plague event could not be found in the event registry."
+      },
+      "decadentFeasts": {
+        "shieldArmed": "The feast's goodwill will absorb the next increase to Unrest this turn.",
+        "shieldSpent": "The feast's goodwill absorbs an increase of {amount} Unrest.",
+        "shieldActive": "Decadent Feasts: the next Unrest increase this turn is absorbed."
       }
     },
     "chatMessages": {
@@ -4478,7 +4483,7 @@
       "decadent-feasts": {
         "title": "Decadent Feasts",
         "description": "<p>Your goddess is more than just the goddess of undeath— she’s also the goddess of gluttony. And you are no fool; you understand the fear your goddess inspires in the living and knows that focusing on other aspects of her worship are more likely to result in positive growth for the nation. In order to distract the populace, you arrange for decadent feasts for the people, simultaneously feeding the hungry while camouflaging some of your faith’s more sinister aspects. @lose1d8Food and @lose1Luxuries, then attempt a basic Agriculture or Trade check to determine how effective the feasts are.</p>",
-        "automationNotes": "Preventing Unrest from the Critical Success result has to be done manually.",
+        "automationNotes": "Automated: a critical success arms a shield that absorbs the next Unrest increase this Kingdom turn, shown on the Turn tab while armed. Envy of the World, if present, takes precedence so one increase never spends both.",
         "criticalSuccess": {
           "msg": "<p>The people rejoice and glut themselves on the repast! @lose1d6Unrest, and the next time this Kingdom turn you suffer an effect that increases Unrest, do not increase your Unrest.</p>"
         },

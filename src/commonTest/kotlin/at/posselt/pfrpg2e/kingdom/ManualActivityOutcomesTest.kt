@@ -72,4 +72,79 @@ class ManualActivityOutcomesTest {
         // The escalated cost is a flat 2 Resource Dice, not a doubling of whatever the base was.
         assertEquals(2, hireAdventurersRdCost(baseRdCost = 3, hasFailedThisEvent = true))
     }
+
+    @Test
+    fun theFeastShieldAbsorbsAnIncreaseAndIsThenSpent() {
+        val first = applyUnrestShield(unrestGain = 3, shieldActive = true)
+        assertEquals(0, first.netUnrestGain)
+        assertTrue(first.shieldConsumed)
+
+        // Spent: the next increase lands in full.
+        val second = applyUnrestShield(unrestGain = 3, shieldActive = false)
+        assertEquals(3, second.netUnrestGain)
+        assertFalse(second.shieldConsumed)
+    }
+
+    @Test
+    fun aDecreaseDoesNotTripTheShield() {
+        // Losing unrest is not "an effect that increases Unrest", and must not waste the shield.
+        val r = applyUnrestShield(unrestGain = -2, shieldActive = true)
+        assertEquals(-2, r.netUnrestGain)
+        assertFalse(r.shieldConsumed)
+    }
+
+    @Test
+    fun aZeroChangeDoesNotTripTheShield() {
+        val r = applyUnrestShield(unrestGain = 0, shieldActive = true)
+        assertEquals(0, r.netUnrestGain)
+        assertFalse(r.shieldConsumed)
+    }
+
+    @Test
+    fun envyGoesFirstAndTheShieldSurvivesUntouched() {
+        // A kingdom holding both must not lose both protections to one event, and the FREE, broader
+        // one must go first -- spending the shield while an unused free ignore sits there wastes it.
+        val r = negateUnrestIncrease(unrestGain = 4, envyAvailable = true, shieldActive = true)
+        assertEquals(0, r.netUnrestGain)
+        assertTrue(r.envyUsed)
+        assertFalse(r.shieldUsed)
+    }
+
+    @Test
+    fun theShieldCoversTheIncreaseOnceEnvyIsSpent() {
+        val r = negateUnrestIncrease(unrestGain = 4, envyAvailable = false, shieldActive = true)
+        assertEquals(0, r.netUnrestGain)
+        assertFalse(r.envyUsed)
+        assertTrue(r.shieldUsed)
+    }
+
+    @Test
+    fun withNeitherAvailableTheUnrestLandsInFull() {
+        val r = negateUnrestIncrease(unrestGain = 4, envyAvailable = false, shieldActive = false)
+        assertEquals(4, r.netUnrestGain)
+        assertFalse(r.envyUsed)
+        assertFalse(r.shieldUsed)
+    }
+
+    @Test
+    fun aDecreaseSpendsNeitherProtection() {
+        val r = negateUnrestIncrease(unrestGain = -3, envyAvailable = true, shieldActive = true)
+        assertEquals(-3, r.netUnrestGain)
+        assertFalse(r.envyUsed)
+        assertFalse(r.shieldUsed)
+    }
+
+    @Test
+    fun oneIncreaseNeverSpendsBothNegations() {
+        // Envy of the World and the feast shield both negate the next unrest increase. addUnrest
+        // gives Envy precedence -- it is free and also covers Ruin -- and the shield must survive
+        // untouched, or a kingdom with both loses two protections to one event.
+        val envyApplies = envyIgnoresIncrease(gained = 4, alreadyUsedThisTurn = false)
+        assertTrue(envyApplies)
+        // Because Envy handled it, the shield is never consulted -- modelled here by the shield
+        // still absorbing a LATER increase in full.
+        val later = applyUnrestShield(unrestGain = 4, shieldActive = true)
+        assertEquals(0, later.netUnrestGain)
+        assertTrue(later.shieldConsumed)
+    }
 }

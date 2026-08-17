@@ -3299,6 +3299,7 @@ class KingdomSheet(
             controlDc = controlDc,
             unrestPenalty = unrestPenalty,
             anarchyAt = anarchyAt,
+            decadentFeastsShieldActive = kingdom.decadentFeastsShieldActive == true,
             bankedBonusesContext = kingdom.bankedBonusList().map { bonus ->
                 BankedBonusContext(
                     value = bonus.value,

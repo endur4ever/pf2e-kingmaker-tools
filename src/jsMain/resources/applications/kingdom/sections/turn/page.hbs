@@ -74,6 +74,9 @@
                 <td>{{> formElement resourcePointsContext.next }}</td>
             </tr>
         </table>
+        {{#if decadentFeastsShieldActive}}
+            <p class="km-unrest-shield"><i class="fa-solid fa-shield-heart"></i> {{localizeKM "kingdom.decadentFeasts.shieldActive"}}</p>
+        {{/if}}
         {{#if bankedBonusesContext.length}}
             <fieldset class="km-banked-aid">
                 <legend>{{localizeKM "kingdom.bankedAid.title"}}</legend>
