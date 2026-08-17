@@ -369,6 +369,29 @@ private val buttons = listOf(
             }
         }
     },
+    ChatButton("km-offer-liquidate-resources") { game, actor, event, button ->
+        // "...you may instead reduce your RP to 1 and treat the expense as if it were paid in full.
+        // At the start of your next Kingdom turn, roll 4 fewer Resource Dice than normal."
+        if (!game.user.isGM) return@ChatButton
+        actor.getKingdom()?.let { kingdom ->
+            if (kingdom.liquidateUsedThisTurn()) {
+                ui.notifications.warn(t("kingdom.liquidate.alreadyUsed"))
+                return@ChatButton
+            }
+            kingdom.resourcePoints.now = liquidatedRp()
+            kingdom.liquidateResourcesPenaltyNextTurn = true
+            actor.setKingdom(kingdom)
+            postChatMessage(
+                t(
+                    "kingdom.liquidate.applied",
+                    recordOf(
+                        "rp" to liquidatedRp(),
+                        "dice" to LIQUIDATE_RESOURCES_NEXT_TURN_RD_PENALTY,
+                    ),
+                ),
+            )
+        }
+    },
     ChatButton("km-offer-pull-together") { game, actor, event, button ->
         // "Once per Kingdom turn when you roll a critical failure ... attempt a DC 11 flat check.
         // If this succeeds ... treat the Kingdom skill check result as failure instead."

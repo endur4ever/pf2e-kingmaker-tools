@@ -42,6 +42,7 @@ import kotlin.math.abs
 import kotlin.text.Regex
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.get
+import at.posselt.pfrpg2e.kingdom.offerLiquidateResources
 
 private val fromStringRegex = Regex(
     "@(?<mode>gain|lose)" +
@@ -389,4 +390,13 @@ suspend fun executeResourceButton(
     )
     beforeKingdomUpdate(previous, kingdom)
     actor.setKingdom(kingdom)
+    // Liquidate Resources triggers on a forced expense that empties the treasury. This is the one
+    // funnel every RP change flows through, so it is the only place that sees the before/after pair.
+    offerLiquidateResources(
+        game = game,
+        actor = actor,
+        kingdom = kingdom,
+        previousRp = previous.resourcePoints.now,
+        chosenFeats = chosenFeats,
+    )
 }

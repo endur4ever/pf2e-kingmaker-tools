@@ -115,6 +115,7 @@ import at.posselt.pfrpg2e.utils.asSequence
 import at.posselt.pfrpg2e.kingdom.logToCalendar
 import at.posselt.pfrpg2e.kingdom.PULL_TOGETHER_BASE_DC
 import at.posselt.pfrpg2e.kingdom.pullTogetherDcAfterTurn
+import at.posselt.pfrpg2e.kingdom.LIQUIDATE_RESOURCES_NEXT_TURN_RD_PENALTY
 
 fun TickChange.toDisplayString(): String {
     return when {
@@ -289,6 +290,19 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
         usedThisTurn = kingdom.pullTogetherUsedThisTurn == true,
     )
     kingdom.pullTogetherUsedThisTurn = false
+    // Liquidate Resources: the next turn rolls 4 fewer Resource Dice. Spending the penalty here
+    // also clears the flag, which is what makes it the once-per-turn marker during the turn itself.
+    if (kingdom.liquidateResourcesPenaltyNextTurn == true) {
+        kingdom.resourceDice.next =
+            (kingdom.resourceDice.next - LIQUIDATE_RESOURCES_NEXT_TURN_RD_PENALTY).coerceAtLeast(0)
+        kingdom.liquidateResourcesPenaltyNextTurn = false
+        postChatMessage(
+            t(
+                "kingdom.liquidate.penaltyApplied",
+                recordOf("dice" to LIQUIDATE_RESOURCES_NEXT_TURN_RD_PENALTY),
+            ),
+        )
+    }
     kingdom.modifiers = tickResult.modifiers
     kingdom.campaignQuests = tickResult.campaignQuests
     kingdom.warThreats = tickResult.warThreats

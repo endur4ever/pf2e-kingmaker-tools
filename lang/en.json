@@ -2109,7 +2109,11 @@
         "spend": "Spend banked aid (+{value}, from {source})",
         "spent": "Banked aid spent: +{value}. The check is now a {degree}.",
         "gone": "That banked aid has already been spent.",
-        "noLongerHelps": "That aid would no longer change this check's result."
+        "noLongerHelps": "That aid would no longer change this check's result.",
+        "title": "Banked Foreign Aid",
+        "expiry": "Expires",
+        "noExpiry": "never",
+        "help": "Spend a banked bonus from the result card of a failed check, when it would change the outcome."
       },
       "pullTogether": {
         "offer": "Pull Together (DC {dc} flat check)",
@@ -2117,6 +2121,14 @@
         "succeeded": "The citizens pull together — the critical failure becomes a failure.",
         "failed": "The call goes unheeded; the critical failure stands.",
         "alreadyUsed": "Pull Together has already been used this Kingdom turn."
+      },
+      "liquidate": {
+        "title": "Liquidate Resources",
+        "body": "That expense of {spent} RP emptied the treasury. The kingdom's economy can liquidate resources in an emergency.",
+        "accept": "Liquidate: keep {rp} RP, roll {dice} fewer Resource Dice next turn",
+        "applied": "Resources liquidated: {rp} RP retained, and {dice} fewer Resource Dice next Kingdom turn.",
+        "penaltyApplied": "Liquidated resources: rolling {dice} fewer Resource Dice this turn.",
+        "alreadyUsed": "Liquidate Resources has already been used this Kingdom turn."
       }
     },
     "chatMessages": {
@@ -3334,7 +3346,7 @@
       "liquidate-resources": {
         "name": "Liquidate Resources",
         "text": "Your kingdom’s economy can liquidate resources in an emergency when funding runs out. The first time during a Kingdom turn in which you are forced to spend RP as the result of a failed skill check or a dangerous event, and that expense reduces you to 0 RP, you may instead reduce your RP to 1 and treat the expense as if it were paid in full. At the start of your next Kingdom turn, roll 4 fewer Resource Dice than normal.",
-        "automationNotes": "Not automated"
+        "automationNotes": "Automated: a forced expense that empties the treasury offers a GM-confirmed liquidation, keeping 1 RP and rolling 4 fewer Resource Dice next Kingdom turn. Once per turn."
       },
       "muddle-through-vk": {
         "name": "Muddle Through (V&K)",

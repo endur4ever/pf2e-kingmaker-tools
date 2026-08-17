@@ -74,6 +74,20 @@
                 <td>{{> formElement resourcePointsContext.next }}</td>
             </tr>
         </table>
+        {{#if bankedBonusesContext.length}}
+            <fieldset class="km-banked-aid">
+                <legend>{{localizeKM "kingdom.bankedAid.title"}}</legend>
+                <ul class="km-banked-aid-list">
+                    {{#each bankedBonusesContext}}
+                        <li{{#if this.expired}} class="km-banked-aid-expired"{{/if}}>
+                            <strong>+{{this.value}}</strong> {{this.source}}
+                            <span class="km-banked-aid-expiry">{{localizeKM "kingdom.bankedAid.expiry"}}: {{this.expiry}}</span>
+                        </li>
+                    {{/each}}
+                </ul>
+                <p class="km-banked-aid-help">{{localizeKM "kingdom.bankedAid.help"}}</p>
+            </fieldset>
+        {{/if}}
         {{#if isGM}}
             <div class="km-bonus-resource-dice">
                 <label>{{localizeKM "kingdom.bonusResourceDice"}}</label>

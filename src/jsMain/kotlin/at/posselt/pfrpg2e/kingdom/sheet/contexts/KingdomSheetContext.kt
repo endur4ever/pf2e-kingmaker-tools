@@ -33,6 +33,9 @@ external interface KingdomSheetContext : ValidatedHandlebarsContext {
     val caravans: Array<CaravanRowContext>
     val shipments: Array<ShipmentRowContext>
     val ruinContext: Array<RuinContext>
+
+    /** Banked Request Foreign Aid bonuses, shown in the Turn tab with their expiry. */
+    val bankedBonusesContext: Array<BankedBonusContext>
     val controlDc: Int
     val unrestPenalty: Int
     val anarchyAt: Int
@@ -121,4 +124,16 @@ external interface KingdomSheetContext : ValidatedHandlebarsContext {
 external interface QuestTimerChangeContext {
     val questName: String
     val changeLabel: String
+}
+
+/** One banked circumstance bonus, for the Turn tab list. */
+@JsPlainObject
+external interface BankedBonusContext {
+    val value: Int
+    val source: String
+    val gainedTurn: Int
+    /** Already-localized expiry text: a turn number, or "never". */
+    val expiry: String
+    /** True once the bonus has lapsed — shown struck through rather than hidden. */
+    val expired: Boolean
 }

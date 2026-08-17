@@ -336,6 +336,9 @@ import at.posselt.pfrpg2e.kingdom.caravansInTransitTo
 import at.posselt.pfrpg2e.kingdom.recallCaravan
 import at.posselt.pfrpg2e.kingdom.postCaravanWarOffers
 import at.posselt.pfrpg2e.kingdom.partnersNewlyAtWar
+import at.posselt.pfrpg2e.kingdom.isExpired
+import at.posselt.pfrpg2e.kingdom.bankedBonusList
+import at.posselt.pfrpg2e.kingdom.sheet.contexts.BankedBonusContext
 
 class KingdomSheet(
     private val game: Game,
@@ -3294,6 +3297,15 @@ class KingdomSheet(
             controlDc = controlDc,
             unrestPenalty = unrestPenalty,
             anarchyAt = anarchyAt,
+            bankedBonusesContext = kingdom.bankedBonusList().map { bonus ->
+                BankedBonusContext(
+                    value = bonus.value,
+                    source = bonus.source,
+                    gainedTurn = bonus.gainedTurn,
+                    expiry = bonus.expiresTurn?.toString() ?: t("kingdom.bankedAid.noExpiry"),
+                    expired = bonus.isExpired(kingdom.currentTurn ?: 0),
+                )
+            }.toTypedArray(),
             ruinContext = kingdom.ruin.toContext(
                 automateStats,
                 kingdom.parseRuins(
