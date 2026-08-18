@@ -2151,7 +2151,10 @@
         "shieldArmed": "The feast's goodwill will absorb the next increase to Unrest this turn.",
         "shieldSpent": "The feast's goodwill absorbs an increase of {amount} Unrest.",
         "shieldActive": "Decadent Feasts: the next Unrest increase this turn is absorbed."
-      }
+      },
+      "noGroupsGm": "No factions yet — add your first trade partner or rival.",
+      "noGroupsPlayer": "No factions have been recorded yet.",
+      "addGroup": "Add Faction"
     },
     "chatMessages": {
       "calendarBridgeMissing": "<strong>Kingmaker Tools:</strong> Seasons &amp; Stars is active, but the <em>Simple Calendar Compatibility Bridge</em> module is not. Calendar notes (expeditions, weather, end-of-turn and camp summaries) are being silently skipped. Install <a href=\"{url}\">the compatibility bridge</a> (package id <code>{packageId}</code>) to enable them. This notice appears only once.",

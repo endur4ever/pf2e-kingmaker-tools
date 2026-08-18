@@ -21,11 +21,11 @@ fun KingdomData.applyWarStanding(factionName: String, delta: Int, reason: String
     if (delta != 0) {
         group.standing = applyStandingDelta(group.standing, delta)
     }
-    group.standingLog = (group.standingLog ?: emptyArray()) + RawFactionStandingEntry(
+    group.addStandingEntry(RawFactionStandingEntry(
         turn = currentTurn ?: 0,
         delta = delta,
         reason = reason,
-    )
+    ))
     return true
 }
 

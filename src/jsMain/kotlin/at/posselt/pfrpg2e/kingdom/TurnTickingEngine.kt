@@ -442,11 +442,7 @@ object TurnTickingEngine {
 						delta = factionStandingDriftPerTurn,
 						reason = "kingdom.factionStanding.drift",
 					)
-					val newLog = if (group.standingLog != null) {
-						group.standingLog!! + logEntry
-					} else {
-						arrayOf(logEntry)
-					}
+					val newLog = appendStandingEntry(group.standingLog, logEntry)
 					val drifted = RawGroup.copy(group, standing = after, standingLog = newLog)
 					if (shouldOfferWarThreat(before, after)) warThreatOffers++
 					if (shouldOfferDiplomacyQuest(before, after)) diplomacyQuestOffers++

@@ -62,3 +62,16 @@ fun shouldOfferDiplomacyQuest(before: Int?, after: Int): Boolean {
     val isFriendly = attitudeFor(after) >= FactionAttitude.FRIENDLY
     return !wasFriendly && isFriendly
 }
+
+/**
+ * How many standing-log entries a faction keeps.
+ *
+ * The log is appended to on every passive drift tick, so an untouched faction accrues one entry per
+ * Kingdom turn forever. A century of play is 100 entries; older ones are history nobody reads and
+ * weight in every save of the kingdom flag.
+ */
+const val MAX_STANDING_LOG_ENTRIES = 100
+
+/** The most recent [max] entries, oldest first, dropping anything beyond the cap. */
+fun <T> pruneStandingLog(entries: List<T>, max: Int = MAX_STANDING_LOG_ENTRIES): List<T> =
+    if (entries.size <= max) entries else entries.takeLast(max)

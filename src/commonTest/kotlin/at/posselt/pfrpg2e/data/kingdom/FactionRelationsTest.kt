@@ -87,4 +87,32 @@ class FactionRelationsTest {
     fun diplomacyQuestNotOfferedWhenStayingBelowFriendly() {
         assertFalse(shouldOfferDiplomacyQuest(0, applyStandingDelta(0, 5))) // Indifferent -> Indifferent
     }
+
+    @Test
+    fun aShortStandingLogIsLeftAlone() {
+        val log = (1..10).toList()
+        assertEquals(log, pruneStandingLog(log))
+    }
+
+    @Test
+    fun aLogExactlyAtTheCapIsLeftAlone() {
+        val log = (1..MAX_STANDING_LOG_ENTRIES).toList()
+        assertEquals(log, pruneStandingLog(log))
+    }
+
+    @Test
+    fun anOverlongLogKeepsTheMostRecentEntries() {
+        // The log gains an entry every passive drift tick, so an untouched faction would otherwise
+        // accrue one per Kingdom turn forever. Oldest go first; order is preserved.
+        val log = (1..MAX_STANDING_LOG_ENTRIES + 25).toList()
+        val pruned = pruneStandingLog(log)
+        assertEquals(MAX_STANDING_LOG_ENTRIES, pruned.size)
+        assertEquals(26, pruned.first())
+        assertEquals(MAX_STANDING_LOG_ENTRIES + 25, pruned.last())
+    }
+
+    @Test
+    fun theCapIsAHundredEntries() {
+        assertEquals(100, MAX_STANDING_LOG_ENTRIES)
+    }
 }

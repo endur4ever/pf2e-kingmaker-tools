@@ -339,6 +339,7 @@ import at.posselt.pfrpg2e.kingdom.partnersNewlyAtWar
 import at.posselt.pfrpg2e.kingdom.isExpired
 import at.posselt.pfrpg2e.kingdom.bankedBonusList
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.BankedBonusContext
+import at.posselt.pfrpg2e.kingdom.addStandingEntry
 
 class KingdomSheet(
     private val game: Game,
@@ -1352,6 +1353,7 @@ class KingdomSheet(
             }
 
             "add-group" -> buildPromise {
+                if (!game.user.isGM) return@buildPromise
                 val kingdom = getKingdom()
                 val realm = game.getRealmData(actor, kingdom)
                 kingdom.groups = kingdom.groups + RawGroup(
@@ -1368,6 +1370,7 @@ class KingdomSheet(
             }
 
             "delete-group" -> buildPromise {
+                if (!game.user.isGM) return@buildPromise
                 val index = target.dataset["index"]?.toInt() ?: 0
                 val kingdom = getKingdom()
                 val group = kingdom.groups.getOrNull(index)
@@ -1380,6 +1383,7 @@ class KingdomSheet(
             }
 
             "annex-group" -> buildPromise {
+                if (!game.user.isGM) return@buildPromise
                 val index = target.dataset["index"]?.toInt() ?: 0
                 val kingdom = getKingdom()
                 val group = kingdom.groups.getOrNull(index)
@@ -1411,11 +1415,11 @@ class KingdomSheet(
                         group.allianceLevel = null
                         kingdom.unrest = kingdom.unrest + 2
                         
-                        group.standingLog = (group.standingLog ?: emptyArray()) + RawFactionStandingEntry(
+                        group.addStandingEntry(RawFactionStandingEntry(
                             turn = kingdom.currentTurn ?: 0,
                             delta = 0,
                             reason = "kingdom.factionStanding.annexation",
-                        )
+                        ))
                         
                         actor.setKingdom(kingdom)
                         
@@ -1445,6 +1449,7 @@ class KingdomSheet(
             }
 
             "adjust-standing" -> {
+                if (!game.user.isGM) return
                 val index = target.dataset["index"]?.toInt() ?: 0
                 val group = getKingdom().groups.getOrNull(index)
                 if (group != null) {
@@ -1466,11 +1471,11 @@ class KingdomSheet(
                                     } else {
                                         reason
                                     }
-                                    g.standingLog = (g.standingLog ?: emptyArray()) + RawFactionStandingEntry(
+                                    g.addStandingEntry(RawFactionStandingEntry(
                                         turn = kingdom.currentTurn ?: 0,
                                         delta = delta,
                                         reason = logReason,
-                                    )
+                                    ))
                                     g.allianceLevel = allianceLevel
                                     actor.setKingdom(kingdom)
                                 }

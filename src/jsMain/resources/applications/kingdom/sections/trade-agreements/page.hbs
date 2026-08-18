@@ -1,7 +1,7 @@
 <div {{#if (ne currentNavEntry 'tradeAgreements')}}hidden{{/if}} class="km-kingdom-sheet-content">
     <div class="km-kingdom-sheet-sub-content km-kingdom-sheet-trade-agreements">
         <section>
-            <h2>{{localizeKM "kingdom.groups"}}  <span class="km-header-right-align"><button type="button" data-action="add-group"><i class="fa-solid fa-plus"></i></button></span></h2>
+            <h2>{{localizeKM "kingdom.groups"}}  {{#if isGM}}<span class="km-header-right-align"><button type="button" data-action="add-group"><i class="fa-solid fa-plus"></i></button></span>{{/if}}</h2>
             <table>
                 <thead>
                 <tr>
@@ -26,9 +26,11 @@
                         <td>{{> formElement relations}}</td>
                         <td>{{> formElement hexKey}}</td>
                         <td>{{attitude}} ({{standing}})
-                            <button type="button" data-action="adjust-standing" data-index="{{@index}}" data-tooltip="{{localizeKM "kingdom.adjustStanding"}}">
-                                <i class="fa-solid fa-scale-balanced"></i>
-                            </button>
+                            {{#if ../isGM}}
+                                <button type="button" data-action="adjust-standing" data-index="{{@index}}" data-tooltip="{{localizeKM "kingdom.adjustStanding"}}">
+                                    <i class="fa-solid fa-scale-balanced"></i>
+                                </button>
+                            {{/if}}
                         </td>
                         <td>
                             {{#if allianceLevel}}
@@ -42,9 +44,20 @@
                                 {{/if}}
                             {{/if}}
                         </td>
-                        <td><button type="button" data-action="delete-group" data-index="{{@index}}">
+                        <td>{{#if ../isGM}}<button type="button" data-action="delete-group" data-index="{{@index}}">
                             <i class="fa-solid fa-trash"></i>
-                        </button></td>
+                        </button>{{/if}}</td>
+                    </tr>
+                {{else}}
+                    <tr class="km-groups-empty">
+                        <td colspan="9">
+                            {{#if isGM}}
+                                {{localizeKM "kingdom.noGroupsGm"}}
+                                <button type="button" data-action="add-group"><i class="fa-solid fa-plus"></i> {{localizeKM "kingdom.addGroup"}}</button>
+                            {{else}}
+                                {{localizeKM "kingdom.noGroupsPlayer"}}
+                            {{/if}}
+                        </td>
                     </tr>
                 {{/each}}
                 </tbody>

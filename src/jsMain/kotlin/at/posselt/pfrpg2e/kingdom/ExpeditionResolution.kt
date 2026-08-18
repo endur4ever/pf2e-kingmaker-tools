@@ -621,13 +621,13 @@ suspend fun applyExpeditionRewardToKingdom(
         val group = kingdom.groups.find { it.name == targetFactionName }
         if (group != null) {
             group.standing = applyStandingDelta(group.standing, factionDelta)
-            group.standingLog = (group.standingLog ?: emptyArray()) + RawFactionStandingEntry(
+            group.addStandingEntry(RawFactionStandingEntry(
                 // +1 for the same reason as the chronicle stamp: applied during turn N,
                 // reported by the record built with the incremented turn number.
                 turn = (kingdom.currentTurn ?: 0) + 1,
                 delta = factionDelta,
                 reason = "kingdom.factionStanding.expedition",
-            )
+            ))
             postChatMessage(t("kingdom.expeditionFactionStandingApplied", recordOf("name" to targetFactionName, "delta" to factionDelta)))
         } else {
             // Faction was renamed or removed between launch and apply. Don't silently drop the
