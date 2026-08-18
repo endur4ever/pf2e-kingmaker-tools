@@ -408,6 +408,11 @@ ul.km-camping-actors {
     height: calc(100vh - 310px);
     position: relative;
 
+    /* Footprint of the prev/next nav arrows: their 20px width plus 35px padding each side.
+       The eating-total panel clears this so the two never overlap. Declared once here so a
+       change to the arrow's padding cannot silently push it back over the panel. */
+    --km-camping-nav-arrow-width: 90px;
+
     #km-camping-content-wrapper {
         display: flex;
         align-items: center;
@@ -804,7 +809,10 @@ ul.km-camping-actors {
         border-radius: 5px;
         border: 1px solid;
         top: calc(50% - 165px);
-        right: 10px;
+        /* Sits inboard of the next-section arrow. Previously right: 10px, which put it directly
+           under the arrow's hit area -- the arrow was raised above it, so it covered the food
+           readout instead. Clearing the arrow fixes both rather than trading one for the other. */
+        right: calc(var(--km-camping-nav-arrow-width) + 10px);
         z-index: 2;
 
         h2 {
@@ -827,7 +835,8 @@ ul.km-camping-actors {
     button.km-camping-previous,
     button.km-camping-next {
         position: absolute;
-        /* keep nav arrows above the eating-total panel so they're never covered */
+        /* Above the background and content; the eating-total panel now sits clear of this
+           footprint, so this no longer has to win an overlap with it. */
         z-index: 3;
         top: calc(50% - 100px);
         height: 200px;
