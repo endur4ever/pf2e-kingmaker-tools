@@ -6028,20 +6028,21 @@
       },
       "improve-settlement": {
         "criticalFailure": {
-          "msg": "MISSING: activities.improve-settlement.criticalFailure.msg"
+          "msg": "<p>The works go badly wrong. The settlement is not upgraded and the wasted effort costs you @lose1d4ResourcePoints.</p>"
         },
         "criticalSuccess": {
-          "msg": "MISSING: activities.improve-settlement.criticalSuccess.msg"
+          "msg": "<p>The works go far better than planned. The settlement is ready to upgrade, and you spend half the Resource Points.</p>"
         },
-        "description": "MISSING: activities.improve-settlement.description",
+        "description": "<p>You send your best workers to improve one of your non-capital settlements to the next settlement type. Attempt an Engineering or Industry check.</p><p>Spend the resources for the tier you are upgrading to:</p><ul><li><b>Town</b>: 5 Stone, 5 Ore, 5 Lumber, 1 Luxury, 10 RP</li><li><b>City</b>: 10 Stone, 10 Ore, 10 Lumber, 3 Luxuries, 25 RP</li><li><b>Metropolis</b>: 20 Stone, 20 Ore, 20 Lumber, 5 Luxuries, 50 RP</li></ul><p>Kingdom level restrictions still apply: Town requires kingdom level 3, City 9, Metropolis 15.</p>",
         "failure": {
-          "msg": "MISSING: activities.improve-settlement.failure.msg"
+          "msg": "<p>The works stall. The settlement is not upgraded and you spend no resources, but the activity is used.</p>"
         },
-        "special": "MISSING: activities.improve-settlement.special",
+        "special": "<p>After upgrading, place the structures for the new tier, plus enough houses to avoid overcrowding:</p><ul><li><b>Town</b>: Bridge (if it has 4 Water Borders), 4 Wooden Walls, General Store, Lumberyard, Granary</li><li><b>City</b>: 4 Stone Walls, Stockyard, Stonemason, Magic Shop</li><li><b>Metropolis</b>: Foundry, Secure Warehouse, Sewer System, Occult Shop</li></ul><p>Use these settlement levels when buying items: Town 3, City 9, Metropolis 15.</p>",
         "success": {
-          "msg": "MISSING: activities.improve-settlement.success.msg"
+          "msg": "<p>The settlement is ready to upgrade. Spend the listed resources.</p>"
         },
-        "title": "MISSING: activities.improve-settlement.title"
+        "title": "Improve Settlement",
+        "automationNotes": "The house rule as written has no check; this module adds an Engineering/Industry check so the activity behaves like its siblings. A success offers a GM-confirmed button that deducts the tier's cost and lists the structures to place — a settlement's tier is derived from the structures actually built on its scene, so building them is what completes the upgrade. Requires the “Can Upgrade Non-Capital Settlements” module setting."
       }
     },
     "events": {

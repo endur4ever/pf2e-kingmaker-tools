@@ -35,7 +35,7 @@ class ImproveSettlementTest {
     fun capitalCannotBeImproved() {
         assertFalse(
             canImproveSettlement(
-                currentTier = SettlementSizeType.VILLAGE, isCapital = true,
+                currentTier = SettlementSizeType.VILLAGE, isCapital = true, kingdomLevel = 20,
                 availableStone = 99, availableOre = 99, availableLumber = 99, availableLuxuries = 99, availableRp = 99,
             ),
         )
@@ -45,7 +45,7 @@ class ImproveSettlementTest {
     fun metropolisCannotBeImprovedFurther() {
         assertFalse(
             canImproveSettlement(
-                currentTier = SettlementSizeType.METROPOLIS, isCapital = false,
+                currentTier = SettlementSizeType.METROPOLIS, isCapital = false, kingdomLevel = 20,
                 availableStone = 99, availableOre = 99, availableLumber = 99, availableLuxuries = 99, availableRp = 99,
             ),
         )
@@ -56,7 +56,7 @@ class ImproveSettlementTest {
         // Village -> Town costs 5/5/5/1/10 exactly.
         assertTrue(
             canImproveSettlement(
-                currentTier = SettlementSizeType.VILLAGE, isCapital = false,
+                currentTier = SettlementSizeType.VILLAGE, isCapital = false, kingdomLevel = 20,
                 availableStone = 5, availableOre = 5, availableLumber = 5, availableLuxuries = 1, availableRp = 10,
             ),
         )
@@ -67,15 +67,65 @@ class ImproveSettlementTest {
         // One RP short of the Village->Town cost.
         assertFalse(
             canImproveSettlement(
-                currentTier = SettlementSizeType.VILLAGE, isCapital = false,
+                currentTier = SettlementSizeType.VILLAGE, isCapital = false, kingdomLevel = 20,
                 availableStone = 5, availableOre = 5, availableLumber = 5, availableLuxuries = 1, availableRp = 9,
             ),
         )
         // One luxury short.
         assertFalse(
             canImproveSettlement(
-                currentTier = SettlementSizeType.VILLAGE, isCapital = false,
+                currentTier = SettlementSizeType.VILLAGE, isCapital = false, kingdomLevel = 20,
                 availableStone = 5, availableOre = 5, availableLumber = 5, availableLuxuries = 0, availableRp = 10,
+            ),
+        )
+    }
+
+    @Test
+    fun aKingdomTooLowLevelCannotUpgradeEvenWithFullCoffers() {
+        // "(kingdom level restrictions still apply)" -- previously deferred to "the existing
+        // settlement-size logic", which never re-checked it on this path, so a level-1 kingdom
+        // could buy a Town.
+        assertFalse(
+            canImproveSettlement(
+                currentTier = SettlementSizeType.VILLAGE, isCapital = false, kingdomLevel = 2,
+                availableStone = 99, availableOre = 99, availableLumber = 99, availableLuxuries = 99, availableRp = 99,
+            ),
+        )
+    }
+
+    @Test
+    fun theLevelThresholdIsInclusive() {
+        // Town requires exactly kingdom level 3.
+        assertTrue(
+            canImproveSettlement(
+                currentTier = SettlementSizeType.VILLAGE, isCapital = false, kingdomLevel = 3,
+                availableStone = 99, availableOre = 99, availableLumber = 99, availableLuxuries = 99, availableRp = 99,
+            ),
+        )
+    }
+
+    @Test
+    fun eachTierUsesTheSharedSizeTablesLevelRequirement() {
+        // Read from settlementSizeData rather than duplicated here, so the house rule and the
+        // vanilla size table cannot drift into disagreeing about when a tier is legal.
+        assertEquals(3, requiredKingdomLevelFor(SettlementSizeType.TOWN))
+        assertEquals(9, requiredKingdomLevelFor(SettlementSizeType.CITY))
+        assertEquals(15, requiredKingdomLevelFor(SettlementSizeType.METROPOLIS))
+    }
+
+    @Test
+    fun higherTiersGateOnTheirOwnLevel() {
+        // Level 9 allows City but not Metropolis.
+        assertTrue(
+            canImproveSettlement(
+                currentTier = SettlementSizeType.TOWN, isCapital = false, kingdomLevel = 9,
+                availableStone = 99, availableOre = 99, availableLumber = 99, availableLuxuries = 99, availableRp = 99,
+            ),
+        )
+        assertFalse(
+            canImproveSettlement(
+                currentTier = SettlementSizeType.CITY, isCapital = false, kingdomLevel = 9,
+                availableStone = 99, availableOre = 99, availableLumber = 99, availableLuxuries = 99, availableRp = 99,
             ),
         )
     }

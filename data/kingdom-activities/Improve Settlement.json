@@ -23,5 +23,6 @@
   },
   "criticalFailure": {
     "msg": "activities.improve-settlement.criticalFailure.msg"
-  }
+  },
+  "automationNotes": "activities.improve-settlement.automationNotes"
 }

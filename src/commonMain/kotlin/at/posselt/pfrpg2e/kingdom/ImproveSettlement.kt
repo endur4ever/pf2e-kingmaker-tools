@@ -1,6 +1,7 @@
 package at.posselt.pfrpg2e.kingdom
 
 import at.posselt.pfrpg2e.data.kingdom.settlements.SettlementSizeType
+import at.posselt.pfrpg2e.data.kingdom.settlements.settlementSizeData
 
 /**
  * Pure prerequisite/cost math for the "Improve Settlement (Civic, Downtime)" house-rule activity
@@ -9,6 +10,9 @@ import at.posselt.pfrpg2e.data.kingdom.settlements.SettlementSizeType
  * canUpgradeNonCapital gate, GM-confirmed upgrade offer) consume these; the numbers live here so
  * they stay pinned to the doc and unit-tested.
  */
+
+/** Activity id of the house-rule Improve Settlement activity. */
+const val IMPROVE_SETTLEMENT_ACTIVITY = "improve-settlement"
 
 /** Resources consumed to upgrade a settlement to a given tier. */
 data class ImproveSettlementCost(
@@ -43,14 +47,23 @@ fun improveSettlementPurchaseLevel(target: SettlementSizeType): Int = when (targ
     SettlementSizeType.VILLAGE -> 1
 }
 
+/** The kingdom level a tier requires, from the shared settlement-size table. */
+fun requiredKingdomLevelFor(tier: SettlementSizeType): Int =
+    settlementSizeData.first { it.type == tier }.requiredKingdomLevel
+
 /**
  * Whether Improve Settlement can be applied: the settlement is not the capital, is below the maximum
- * tier, and the kingdom can pay the next tier's commodity + RP cost. (Kingdom-level restrictions on
- * settlement size are enforced separately by the existing settlement-size logic.)
+ * tier, the kingdom is high enough level for that tier, and it can pay the tier's commodity + RP cost.
+ *
+ * The level check is the doc's "(kingdom level restrictions still apply)". It was previously deferred
+ * to "the existing settlement-size logic", but nothing on this path re-checked it: the predicate
+ * happily approved a Village to Town upgrade at kingdom level 1, where the shared size table requires
+ * level 3.
  */
 fun canImproveSettlement(
     currentTier: SettlementSizeType,
     isCapital: Boolean,
+    kingdomLevel: Int,
     availableStone: Int,
     availableOre: Int,
     availableLumber: Int,
@@ -59,6 +72,7 @@ fun canImproveSettlement(
 ): Boolean {
     if (isCapital) return false
     val next = nextSettlementTier(currentTier) ?: return false
+    if (kingdomLevel < requiredKingdomLevelFor(next)) return false
     val cost = improveSettlementCost(next) ?: return false
     return availableStone >= cost.stone &&
         availableOre >= cost.ore &&

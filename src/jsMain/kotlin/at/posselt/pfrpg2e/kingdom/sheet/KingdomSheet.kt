@@ -340,6 +340,7 @@ import at.posselt.pfrpg2e.kingdom.isExpired
 import at.posselt.pfrpg2e.kingdom.bankedBonusList
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.BankedBonusContext
 import at.posselt.pfrpg2e.kingdom.addStandingEntry
+import at.posselt.pfrpg2e.kingdom.IMPROVE_SETTLEMENT_ACTIVITY
 
 class KingdomSheet(
     private val game: Game,
@@ -3103,6 +3104,13 @@ class KingdomSheet(
         } else {
             (kingdom.activityBlacklist.toSet() + vkActivityIds - vkToBaseActivityIds.values.toSet()).toTypedArray()
         }
+        // Improve Settlement is a house rule behind its own toggle. It ships enabled: true, so
+        // without this it showed on every kingdom sheet regardless of the setting.
+        val houseRuleGated = if (game.settings.pfrpg2eKingdomCampingWeather.getCanUpgradeNonCapital()) {
+            effectiveBlacklist.toSet()
+        } else {
+            effectiveBlacklist.toSet() + IMPROVE_SETTLEMENT_ACTIVITY
+        }
         val effectiveStructureBlacklist = if (kingdom.settings.vanceAndKerensharaXP) {
             // V&K ON: hide base counterparts, show V&K variants
             vkToBaseStructureIds.values.toSet()
@@ -3114,7 +3122,7 @@ class KingdomSheet(
         val activities = toActivitiesContext(
             actor = actor,
             activities = kingdom.getAllActivities(),
-            activityBlacklist = effectiveBlacklist.toSet(),
+            activityBlacklist = houseRuleGated,
             unlockedActivities = globalBonuses.unlockedActivities,
             allowCapitalInvestment = settlements.current?.allowCapitalInvestment == true,
             kingdomSkillRanks = kingdomSkillRanks,
