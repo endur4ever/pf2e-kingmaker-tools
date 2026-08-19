@@ -759,6 +759,8 @@
           "visibilityHidden": "Nur verborgene",
           "clear": "Filter zurücksetzen",
           "noMatches": "Keine Quests entsprechen den aktuellen Filtern.",
+          "showAll": "Show all ({count} more)",
+          "showFewer": "Show fewer",
           "category": "Filter by category",
           "categoryAll": "All categories"
         },

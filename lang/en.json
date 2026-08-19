@@ -967,7 +967,9 @@
           "category": "Filter by category",
           "categoryAll": "All categories",
           "clear": "Clear filters",
-          "noMatches": "No quests match the current filters."
+          "noMatches": "No quests match the current filters.",
+          "showAll": "Show all ({count} more)",
+          "showFewer": "Show fewer"
         },
         "completed": "Quest Completed",
         "flavorTextCompleted": "Completion Story / Details",

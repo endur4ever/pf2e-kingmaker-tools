@@ -32,7 +32,12 @@ import at.posselt.pfrpg2e.data.kingdom.settlements.SettlementLayoutType
 import at.posselt.pfrpg2e.data.kingdom.settlements.SettlementLevelUpType
 import at.posselt.pfrpg2e.data.kingdom.settlements.SettlementType
 import at.posselt.pfrpg2e.kingdom.AutomateResources
+import at.posselt.pfrpg2e.kingdom.COMPLETED_QUESTS_DEFAULT_LIMIT
+import at.posselt.pfrpg2e.kingdom.CompletedQuestEntry
+import at.posselt.pfrpg2e.kingdom.CompletedQuestFilter
 import at.posselt.pfrpg2e.kingdom.KingdomActor
+import at.posselt.pfrpg2e.kingdom.filterCompletedQuests
+import at.posselt.pfrpg2e.kingdom.pageCompletedQuests
 import at.posselt.pfrpg2e.kingdom.KingdomData
 import at.posselt.pfrpg2e.kingdom.offerDefeatConsequences
 import at.posselt.pfrpg2e.kingdom.accessGrantList
@@ -401,6 +406,10 @@ class KingdomSheet(
     private var questFilterMax: String = ""
     private var questFilterHidden: String = "all"
     private var questFilterCategory: String = "all"
+
+    // Whether the completed-quest archive is expanded past its default cap. Lives here rather than
+    // in the DOM because reopening a quest calls setKingdom(), which re-renders the whole sheet.
+    private var completedQuestsExpanded: Boolean = false
     private var threatFilterStatus: String = "all"
     private var threatSortMode: String = "eta"
 
@@ -3732,6 +3741,13 @@ class KingdomSheet(
         val noMatches = htmlElement.querySelector(".km-quest-no-matches")?.takeIfInstance<HTMLElement>()
         val cards = htmlElement.querySelectorAll(".km-quests-grid .km-quest-card").asList()
             .filterIsInstance<HTMLElement>()
+        // Scoped to .km-completed-section on purpose: .km-quests-list is also used by the personal
+        // quests block, and an unscoped selector would silently pull those rows into the pager.
+        val rows = htmlElement.querySelectorAll(".km-completed-section .km-quest-row").asList()
+            .filterIsInstance<HTMLElement>()
+        val completedCountEl = htmlElement.querySelector(".km-completed-quest-count")?.takeIfInstance<HTMLElement>()
+        val completedNoMatches = htmlElement.querySelector(".km-completed-no-matches")?.takeIfInstance<HTMLElement>()
+        val expandBtn = htmlElement.querySelector(".km-completed-expand-btn")?.takeIfInstance<HTMLElement>()
 
         fun strVal(e: Element?): String = (e?.asDynamic()?.value as? String)?.trim() ?: ""
         fun setVal(e: Element?, v: String) { e?.asDynamic()?.value = v }
@@ -3764,6 +3780,57 @@ class KingdomSheet(
                     card.classList.add("km-quest-filtered-out")
                 }
             }
+            // Completed/failed archive, driven by the SAME bar values computed above -- one filter
+            // state, not two. The decision itself is delegated to the pure, unit-tested core, and
+            // rows are only class-toggled, never removed, so every row keeps its live data-id
+            // reopen button (regression guard: aa1d3322).
+            val entries = rows.mapNotNull { row ->
+                val rowId = row.dataset["id"] ?: return@mapNotNull null
+                val rowHidden = row.dataset["hidden"] == "1"
+                // Visibility is applied OUTSIDE the core: CompletedQuestFilter has no visibility
+                // member and adding one would change an already-green tested contract.
+                val visible = when (hiddenMode) {
+                    "hidden" -> rowHidden
+                    "visible" -> !rowHidden
+                    else -> true
+                }
+                if (!visible) null else CompletedQuestEntry(
+                    id = rowId,
+                    title = row.dataset["title"] ?: "",
+                    level = row.dataset["level"]?.toIntOrNull(),
+                    category = row.dataset["category"],
+                )
+            }
+            val page = pageCompletedQuests(
+                filterCompletedQuests(
+                    entries,
+                    CompletedQuestFilter(
+                        titleQuery = q,
+                        minLevel = min,
+                        maxLevel = max,
+                        category = categoryMode.takeIf { it != "all" },
+                    ),
+                ),
+                limit = COMPLETED_QUESTS_DEFAULT_LIMIT,
+                expanded = completedQuestsExpanded,
+            )
+            val shownIds = page.shown.mapTo(mutableSetOf()) { it.id }
+            rows.forEach { row ->
+                if ((row.dataset["id"] ?: "") in shownIds) {
+                    row.classList.remove("km-quest-filtered-out")
+                } else {
+                    row.classList.add("km-quest-filtered-out")
+                }
+            }
+            completedCountEl?.textContent = "${page.shown.size} / ${rows.size}"
+            completedNoMatches?.hidden = page.total != 0 || rows.isEmpty()
+            expandBtn?.hidden = page.hiddenCount == 0 && !completedQuestsExpanded
+            expandBtn?.textContent = if (completedQuestsExpanded) {
+                t("kingdom.quests.filter.showFewer")
+            } else {
+                t("kingdom.quests.filter.showAll", recordOf("count" to page.hiddenCount))
+            }
+
             questFilterTitle = strVal(titleInput)
             questFilterMin = strVal(minInput)
             questFilterMax = strVal(maxInput)
@@ -3794,6 +3861,14 @@ class KingdomSheet(
             setVal(maxInput, "")
             setVal(hiddenSelect, "all")
             setVal(categorySelect, "all")
+            // Deliberately does NOT reset completedQuestsExpanded: "clear filters" is about the
+            // filter bar, not about how much of the archive the GM chose to unfold.
+            applyFilter()
+        })
+        expandBtn?.addEventListener("click", {
+            it.preventDefault()
+            it.stopPropagation()
+            completedQuestsExpanded = !completedQuestsExpanded
             applyFilter()
         })
         applyFilter()

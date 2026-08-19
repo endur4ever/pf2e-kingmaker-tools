@@ -1204,6 +1204,50 @@
         display: none;
     }
 
+    /* The completed archive filters by hiding ROWS rather than removing them from the context, so
+       every collapsed row keeps its live data-id reopen button (see aa1d3322). .km-quest-row is
+       display:flex, and 0,2,0 beats 0,1,0 — no !important needed. */
+    .km-quest-row.km-quest-filtered-out {
+        display: none;
+    }
+
+    .km-completed-quest-footer {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 6px 0 2px;
+    }
+
+    .km-completed-quest-count {
+        font-size: 0.8em;
+        opacity: 0.65;
+        white-space: nowrap;
+    }
+
+    .km-completed-expand-btn {
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        background: rgba(255, 255, 255, 0.07);
+        border-radius: 4px;
+        padding: 4px 12px;
+        font-size: 0.75em;
+        width: auto;
+        line-height: normal;
+        cursor: pointer;
+        transition: background-color 120ms ease, transform 120ms ease;
+
+        &:hover {
+            background: rgba(255, 255, 255, 0.16);
+            transform: translateY(-1px);
+        }
+    }
+
+    .km-completed-no-matches {
+        padding: 14px;
+        text-align: center;
+        font-style: italic;
+        opacity: 0.7;
+    }
+
     .km-quest-no-matches {
         padding: 14px;
         text-align: center;

@@ -55,6 +55,33 @@ class CompletedQuestFilterTest {
     }
 
     @Test
+    fun collapsingKeepsTheNEWESTEntriesNotTheOldest() {
+        // The existing paging tests assert only SIZES, so take(limit) and takeLast(limit) are
+        // indistinguishable to them -- yet that is exactly the difference between showing the most
+        // recent 25 quests and showing the 25 oldest, which is the whole point of the collapse.
+        // The input contract is newest-first, so the kept slice must be the FRONT of the list.
+        val many = (1..40).map { quest(it.toString(), "Quest $it") }
+        val page = pageCompletedQuests(many, limit = 25, expanded = false)
+        assertEquals("1", page.shown.first().id, "the newest quest must survive the collapse")
+        assertEquals("25", page.shown.last().id, "the 25 kept must be the newest 25, not the oldest")
+    }
+
+    @Test
+    fun expandingPreservesTheOriginalOrder() {
+        val many = (1..40).map { quest(it.toString(), "Quest $it") }
+        val page = pageCompletedQuests(many, limit = 25, expanded = true)
+        assertEquals(many.map { it.id }, page.shown.map { it.id })
+    }
+
+    @Test
+    fun pagingNeverInventsOrReordersEntries() {
+        // A slice must be a genuine prefix of the input -- no reordering, no duplicates.
+        val many = (1..40).map { quest(it.toString(), "Quest $it") }
+        val shown = pageCompletedQuests(many, limit = 10, expanded = false).shown
+        assertEquals(many.take(10).map { it.id }, shown.map { it.id })
+    }
+
+    @Test
     fun pagingExpandedShowsEverything() {
         val many = (1..40).map { quest(it.toString(), "Quest $it") }
         val page = pageCompletedQuests(many, limit = 25, expanded = true)

@@ -12,7 +12,7 @@
                 {{/if}}
             </h2>
 
-            {{#if activeQuests.length}}
+            {{#if (or activeQuests.length completedQuests.length)}}
             <div class="km-quest-filters">
                 <div class="km-quest-filter-field km-quest-filter-search">
                     <i class="fa-solid fa-magnifying-glass"></i>
@@ -48,6 +48,8 @@
                 <span class="km-quest-filter-count"></span>
             </div>
             <div class="km-quest-no-matches" hidden>{{localizeKM "kingdom.quests.filter.noMatches"}}</div>
+            {{/if}}
+            {{#if activeQuests.length}}
             <div class="km-quests-grid">
                 {{#each activeQuests}}
                 <div class="km-quest-card km-quest-active{{#if hidden}} km-quest-hidden{{/if}}" data-id="{{id}}"
@@ -245,7 +247,13 @@
             {{#if completedQuests.length}}
             <div class="km-quests-list">
                 {{#each completedQuests}}
-                <div class="km-quest-row km-quest-{{status}}{{#if hidden}} km-quest-hidden{{/if}}" data-id="{{id}}">
+                {{!-- data-level deliberately has NO {{else}}0 fallback (unlike the active cards):
+                     an empty attribute parses to null, and filterCompletedQuests excludes level-less
+                     quests from BOTH bounds, which is the tested contract of the pure core.
+                     data-category keeps the {{else}}side fallback because campaign-generated quests
+                     emit no category at all and would otherwise vanish whenever one is selected. --}}
+                <div class="km-quest-row km-quest-{{status}}{{#if hidden}} km-quest-hidden{{/if}}" data-id="{{id}}"
+                     data-title="{{title}}" data-level="{{#if level}}{{level}}{{/if}}" data-hidden="{{#if hidden}}1{{else}}0{{/if}}" data-category="{{#if category}}{{category}}{{else}}side{{/if}}">
                     <div class="km-quest-row-main">
                         <div class="km-quest-row-header">
                             <span class="km-quest-row-title">
@@ -309,6 +317,16 @@
                 </div>
                 {{/each}}
             </div>
+            {{!-- Depth 0 here: no {{#each}} is open, so NEVER use ../ in this block. The button
+                  ships hidden with empty text; attachQuestFilter fills it, because the collapsed
+                  count is only known once the filter has run. type="button" is required — the
+                  sheet root is a <form>. No data-action: the click is bound in attachQuestFilter
+                  so it can re-filter WITHOUT a render(), which would steal input focus. --}}
+            <div class="km-completed-quest-footer">
+                <span class="km-completed-quest-count"></span>
+                <button type="button" class="km-completed-expand-btn" hidden></button>
+            </div>
+            <div class="km-completed-no-matches" hidden>{{localizeKM "kingdom.quests.filter.noMatches"}}</div>
             {{else}}
             <div class="km-empty-quests">
                 <p>No completed quests recorded.</p>
