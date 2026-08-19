@@ -5,6 +5,8 @@ import at.posselt.pfrpg2e.kingdom.data.RawCompanionExpedition
 import at.posselt.pfrpg2e.kingdom.data.RawCharacter
 import at.posselt.pfrpg2e.kingdom.data.RawExpeditionChronicleEntry
 import kotlinx.js.JsPlainObject
+import at.posselt.pfrpg2e.kingdom.groupChronicleByTurn
+import at.posselt.pfrpg2e.kingdom.ChronicleEntry
 
 @JsPlainObject
 external interface ExpeditionRowContext {
@@ -39,9 +41,39 @@ external interface ExpeditionRowContext {
     val gmNotes: String
 }
 
+/** One recorded chronicle line. */
+@JsPlainObject
+external interface ChronicleRowContext {
+    val title: String
+    val companionNames: String
+    val outcomeDegree: String
+    val outcomeLabel: String
+    /** Already-localized "+3 RP, Pitax +2" style summary; blank when the run yielded nothing. */
+    val rewardsSummary: String
+    val hasRewards: Boolean
+}
+
+/** A turn's worth of chronicle lines, newest turn first. */
+@JsPlainObject
+external interface ChronicleTurnContext {
+    val turn: Int
+    val entries: Array<ChronicleRowContext>
+}
+
 @JsPlainObject
 external interface ExpeditionsContext {
     val items: Array<ExpeditionRowContext>
+
+    /**
+     * The recorded expedition chronicle, grouped newest turn first.
+     *
+     * Shown to players as well as GMs: it is the party's own history of completed missions. Chronicle
+     * entries carry no expedition id and no visibility flag, so there is nothing to join back to
+     * RawCompanionExpedition.visibleToPlayers — that flag governs the in-progress board, where
+     * secrecy actually matters, not the record of what already happened.
+     */
+    val chronicleTurns: Array<ChronicleTurnContext>
+    val hasChronicle: Boolean
     val isGM: Boolean
     val hasExpeditions: Boolean
     val hasAwaitingResolution: Boolean
@@ -51,6 +83,7 @@ external interface ExpeditionsContext {
 fun Array<RawCompanionExpedition>.toExpeditionsContext(
     isGM: Boolean,
     companions: Array<RawCharacter>,
+    chronicle: Array<RawExpeditionChronicleEntry> = emptyArray(),
     localize: (String) -> String = { it },
 ): ExpeditionsContext {
     val companionNameMap = companions.associateBy(
@@ -118,8 +151,44 @@ fun Array<RawCompanionExpedition>.toExpeditionsContext(
             )
         }
         .toTypedArray()
+    val chronicleTurns = groupChronicleByTurn(
+        chronicle.map {
+            ChronicleEntry(
+                turn = it.turn,
+                companionName = it.companionNames,
+                summary = it.title,
+                appliedAt = it.appliedAt,
+            )
+        },
+    ).map { group ->
+        ChronicleTurnContext(
+            turn = group.turn,
+            entries = group.entries.mapIndexed { index, entry ->
+                val raw = chronicle.filter { it.turn == group.turn }.getOrNull(index)
+                val rewards = buildList {
+                    val rp = raw?.lootRp ?: 0
+                    if (rp != 0) add(localize("kingdom.expeditions.chronicleRp") + " " + rp)
+                    val delta = raw?.factionStandingDelta ?: 0
+                    if (delta != 0) {
+                        val sign = if (delta > 0) "+" else ""
+                        add((raw?.targetFactionName ?: "") + " " + sign + delta)
+                    }
+                }
+                ChronicleRowContext(
+                    title = entry.summary,
+                    companionNames = entry.companionName,
+                    outcomeDegree = raw?.outcomeDegree ?: "",
+                    outcomeLabel = localize("degreeOfSuccess." + (raw?.outcomeDegree ?: "success")),
+                    rewardsSummary = rewards.joinToString(", "),
+                    hasRewards = rewards.isNotEmpty(),
+                )
+            }.toTypedArray(),
+        )
+    }.toTypedArray()
     return ExpeditionsContext(
         items = items,
+        chronicleTurns = chronicleTurns,
+        hasChronicle = chronicleTurns.isNotEmpty(),
         isGM = isGM,
         hasExpeditions = items.isNotEmpty(),
         hasAwaitingResolution = items.any { it.isAwaitingResolution },

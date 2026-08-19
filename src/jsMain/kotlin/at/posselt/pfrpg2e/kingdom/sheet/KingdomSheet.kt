@@ -3484,6 +3484,7 @@ class KingdomSheet(
             expeditionsContext = (kingdom.companionExpeditions ?: emptyArray()).toExpeditionsContext(
                 isGM = isGM,
                 companions = kingdom.companions ?: emptyArray(),
+                chronicle = kingdom.expeditionChronicle ?: emptyArray(),
             ) { t(it) },
             partyInfluenceContext = buildPartyInfluenceContext(
                 companions = (kingdom.companions ?: emptyArray()).map {

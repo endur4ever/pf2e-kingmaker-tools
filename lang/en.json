@@ -1294,7 +1294,11 @@
           "clearMonsters": "Clear Monsters",
           "protectSettlement": "Protect Settlement",
           "recoverArtifact": "Recover Artifact"
-        }
+        },
+        "chronicle": "Chronicle",
+        "chronicleEmpty": "No expeditions have been completed yet.",
+        "chronicleRp": "RP",
+        "chronicleTurn": "Turn"
       },
       "reduceDCToBuildLumberStructures": "Reduce DC for building Structures made out of Lumber by 2",
       "expandMagicUse": "Expand Magic Use",

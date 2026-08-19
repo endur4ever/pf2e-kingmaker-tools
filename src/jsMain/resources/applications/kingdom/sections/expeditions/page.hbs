@@ -124,6 +124,31 @@
                 <p>{{localizeKM "kingdom.expeditions.noExpeditions"}}</p>
             </div>
             {{/if}}
+
+            {{#if expeditionsContext.hasChronicle}}
+                <details class="km-expedition-chronicle">
+                    <summary><i class="fa-solid fa-scroll"></i> {{localizeKM "kingdom.expeditions.chronicle"}}</summary>
+                    {{#each expeditionsContext.chronicleTurns}}
+                        <div class="km-chronicle-turn">
+                            <h4>{{localizeKM "kingdom.expeditions.chronicleTurn"}} {{this.turn}}</h4>
+                            <ul class="km-chronicle-list">
+                                {{#each this.entries}}
+                                    <li class="km-chronicle-row km-chronicle-{{this.outcomeDegree}}">
+                                        <span class="km-chronicle-title">{{this.title}}</span>
+                                        <span class="km-chronicle-companions">{{this.companionNames}}</span>
+                                        <span class="km-chronicle-outcome">{{this.outcomeLabel}}</span>
+                                        {{#if this.hasRewards}}
+                                            <span class="km-chronicle-rewards">{{this.rewardsSummary}}</span>
+                                        {{/if}}
+                                    </li>
+                                {{/each}}
+                            </ul>
+                        </div>
+                    {{/each}}
+                </details>
+            {{else}}
+                <p class="km-chronicle-empty">{{localizeKM "kingdom.expeditions.chronicleEmpty"}}</p>
+            {{/if}}
         </section>
     </div>
 </div>
