@@ -244,6 +244,25 @@
                     </div>
                 </details>
 
+                <details class="km-travel-log">
+                    <summary><i class="fa-solid fa-scroll"></i> {{localizeKM "camping.travelLog"}}{{#if travelJournalRows}} ({{travelJournalCount}}){{/if}}</summary>
+                    <div class="km-travel-log-content">
+                        {{#if travelJournalRows}}
+                            <ul class="km-travel-log-entries">
+                                {{#each travelJournalRows}}
+                                    <li class="km-travel-log-entry km-travel-log-{{kindValue}}">
+                                        <span class="km-travel-log-date">{{worldDate}}</span>
+                                        <span class="km-travel-log-kind">{{kindLabel}}</span>
+                                        <span class="km-travel-log-detail">{{detail}}</span>
+                                    </li>
+                                {{/each}}
+                            </ul>
+                        {{else}}
+                            <p class="km-travel-log-empty">{{localizeKM "camping.travelLogEmpty"}}</p>
+                        {{/if}}
+                    </div>
+                </details>
+
                 <h1>{{section}}</h1>
                 {{#if setWatchesSection}}
                 <div class="km-camping-watch-controls">

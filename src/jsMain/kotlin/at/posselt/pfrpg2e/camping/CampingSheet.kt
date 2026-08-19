@@ -264,6 +264,9 @@ external interface CampingSheetContext : ValidatedHandlebarsContext {
 
     /** Selectable hexploration activity types for the +1 control. */
     var hexplorationActivityOptions: Array<TravelJournalOption>
+
+    /** Number of journal entries, shown in the collapsed summary so the log advertises its content. */
+    var travelJournalCount: Int
     var hexplorationActivitiesMax: String
     var adventuringFor: String
     var travelingFor: String
@@ -1957,6 +1960,7 @@ class CampingSheet(
                     )
                 }
                 .toTypedArray(),
+            travelJournalCount = camping.travelJournalList().size,
             hexplorationActivityOptions = HEXPLORATION_ACTIVITY_TYPES
                 .map { TravelJournalOption(value = it, label = t(it)) }
                 .toTypedArray(),

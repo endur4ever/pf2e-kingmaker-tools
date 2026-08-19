@@ -1308,32 +1308,53 @@ ul.km-camping-actors {
     }
 }
 
-/* Travel Log — read-only exploration trail, newest first. Player-visible: it is the party's own
-   history, not GM information. Collapsed by default so it never crowds the camping controls. */
-#km-travel-log {
-    margin: 4px 0;
-    font-size: 13px;
+/* Travel Log — read-only exploration trail, newest first. Sits beside the route planner inside the
+   scrolling content wrapper and copies its panel styling; the camping HEADER is not ordinary flow
+   (the time-tracker bar positions its children absolutely) so nothing may be added there. */
+.km-travel-log {
+    margin: 10px 20px;
+    background: rgba(0, 0, 0, 0.75);
+    border: 1px solid var(--secondary-km);
+    border-radius: 5px;
+    padding: 8px 12px;
+    color: white;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 
     summary {
-        cursor: pointer;
         font-weight: bold;
-        padding: 2px 4px;
+        font-size: 1.1em;
+        cursor: pointer;
+        outline: none;
+        user-select: none;
+        color: var(--secondary-km);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+
+        &:hover {
+            color: #AFF1DA;
+        }
+    }
+
+    .km-travel-log-content {
+        margin-top: 6px;
     }
 
     .km-travel-log-entries {
         list-style: none;
         margin: 0;
-        padding: 2px 4px;
-        max-height: 14em;
+        padding: 0;
+        max-height: 16em;
         overflow-y: auto;
     }
 
     .km-travel-log-entry {
         display: grid;
-        grid-template-columns: 7em 8em 1fr;
-        gap: 6px;
-        padding: 1px 0;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+        grid-template-columns: 8em 8em 1fr;
+        gap: 8px;
+        padding: 2px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+        font-size: 13px;
     }
 
     .km-travel-log-date {
@@ -1351,12 +1372,12 @@ ul.km-camping-actors {
     }
 
     .km-travel-log-encounter .km-travel-log-kind {
-        color: rgb(150, 0, 0);
+        color: #ff9c9c;
     }
 
     .km-travel-log-empty {
-        opacity: 0.7;
-        padding: 2px 4px;
+        opacity: 0.75;
         margin: 0;
+        font-size: 13px;
     }
 }
