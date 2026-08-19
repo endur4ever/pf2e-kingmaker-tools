@@ -9,6 +9,7 @@ import at.posselt.pfrpg2e.app.forms.Select
 import at.posselt.pfrpg2e.app.forms.SelectOption
 import at.posselt.pfrpg2e.app.forms.formContext
 import at.posselt.pfrpg2e.app.prompt
+import at.posselt.pfrpg2e.camping.calculateProvisions
 import at.posselt.pfrpg2e.camping.findCurrentRegion
 import at.posselt.pfrpg2e.camping.getCamping
 import at.posselt.pfrpg2e.camping.getCampingActors
@@ -118,50 +119,5 @@ suspend fun subsistMacro(game: Game, actor: Actor?) {
                 speaker = chosenActor
             )
         }
-    }
-}
-
-private fun calculateProvisions(
-    isForager: Boolean,
-    hasCoyoteCloak: Boolean,
-    hasCoyoteCloakGreat: Boolean,
-    degree: DegreeOfSuccess,
-    survivalProficiency: Proficiency = Proficiency.UNTRAINED,
-): Int {
-    val criticalMultiplier = if (hasCoyoteCloakGreat) {
-        4
-    } else if (hasCoyoteCloak) {
-        2
-    } else {
-        1
-    }
-
-    val increaseSuccessBy = if (isForager) {
-        when (survivalProficiency) {
-            Proficiency.UNTRAINED -> 4
-            Proficiency.TRAINED -> 4
-            Proficiency.EXPERT -> 8
-            Proficiency.MASTER -> 16
-            Proficiency.LEGENDARY -> 32
-        }
-    } else {
-        0
-    }
-    val increaseCriticalSuccessBy = if (isForager) {
-        when (survivalProficiency) {
-            Proficiency.UNTRAINED -> 8
-            Proficiency.TRAINED -> 8
-            Proficiency.EXPERT -> 16
-            Proficiency.MASTER -> 32
-            Proficiency.LEGENDARY -> 64
-        }
-    } else {
-        1
-    }
-    return when (degree) {
-        DegreeOfSuccess.CRITICAL_FAILURE -> 0
-        DegreeOfSuccess.FAILURE -> 0
-        DegreeOfSuccess.SUCCESS -> 1 + increaseSuccessBy
-        DegreeOfSuccess.CRITICAL_SUCCESS -> 1 + increaseCriticalSuccessBy * criticalMultiplier
     }
 }
