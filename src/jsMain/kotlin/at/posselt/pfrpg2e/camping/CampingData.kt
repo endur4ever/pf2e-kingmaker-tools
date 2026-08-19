@@ -230,22 +230,36 @@ external interface CampingData {
 
     /** Transient: the result text rolled for the current (un-committed) encounter preview. */
     var lastEncounterResult: String?
+
+    /**
+     * Consecutive nights each camper has gone without food, keyed by actor UUID with dots
+     * replaced (see [actorRecordKey]). Advanced once per night at daily preparations; being fed
+     * resets that camper's entry to zero.
+     *
+     * Unlike [downtimeHoursSpent] this deliberately survives the nightly reset — carrying hunger
+     * across nights is the entire mechanic.
+     *
+     * Nullable for camping data saved before this field existed.
+     */
+    var daysWithoutFood: Record<String, Int>?
 }
 
 /**
  * Foundry flattens flag objects on `.` when persisting, so an actor UUID (which contains dots,
- * e.g. `Scene.x.Token.y.Actor.z`) cannot be used directly as a [downtimeHoursSpent] key — it
- * would be mangled into nested objects on save. Replace dots so the key round-trips intact.
- * (The same reason `cooking.actorMeals` is keyed by `actor.id` rather than the UUID.)
+ * e.g. `Scene.x.Token.y.Actor.z`) cannot be used directly as a key in any per-actor record on
+ * camping data — it would be mangled into nested objects on save. Replace dots so the key
+ * round-trips intact. (The same reason `cooking.actorMeals` is keyed by `actor.id` rather than
+ * the UUID.) Shared by [downtimeHoursSpent] and [daysWithoutFood] so the trap is only avoided
+ * in one place.
  */
-private fun downtimeHoursKey(actorUuid: String): String = actorUuid.replace('.', '_')
+private fun actorRecordKey(actorUuid: String): String = actorUuid.replace('.', '_')
 
 /**
  * Remaining downtime hours for [actorUuid] this session, clamped to
  * `[0, MAX_DOWNTIME_HOURS]`. Derived purely from [CampingData.downtimeHoursSpent].
  */
 fun CampingData.downtimeHoursRemaining(actorUuid: String): Int {
-    val spent = downtimeHoursSpent?.get(downtimeHoursKey(actorUuid)) ?: 0
+    val spent = downtimeHoursSpent?.get(actorRecordKey(actorUuid)) ?: 0
     return (CampingActivityScheduler.MAX_DOWNTIME_HOURS - spent)
         .coerceIn(0, CampingActivityScheduler.MAX_DOWNTIME_HOURS)
 }
@@ -257,7 +271,7 @@ fun CampingData.downtimeHoursRemaining(actorUuid: String): Int {
  */
 fun CampingData.spendDowntimeHours(actorUuid: String, hours: Int) {
     val spent = downtimeHoursSpent ?: recordOf()
-    val key = downtimeHoursKey(actorUuid)
+    val key = actorRecordKey(actorUuid)
     spent[key] = (spent[key] ?: 0) + hours
     downtimeHoursSpent = spent
 }
@@ -269,9 +283,20 @@ fun CampingData.spendDowntimeHours(actorUuid: String, hours: Int) {
  */
 fun CampingData.refundDowntimeHours(actorUuid: String, hours: Int) {
     val spent = downtimeHoursSpent ?: return
-    val key = downtimeHoursKey(actorUuid)
+    val key = actorRecordKey(actorUuid)
     spent[key] = ((spent[key] ?: 0) - hours).coerceAtLeast(0)
     downtimeHoursSpent = spent
+}
+
+/** Consecutive nights [actorUuid] has gone unfed; zero for anyone who has never missed a meal. */
+fun CampingData.daysWithoutFoodFor(actorUuid: String): Int =
+    daysWithoutFood?.get(actorRecordKey(actorUuid)) ?: 0
+
+/** Records [actorUuid]'s new hunger count for the night. Pass 0 when they were fed. */
+fun CampingData.setDaysWithoutFood(actorUuid: String, days: Int) {
+    val record = daysWithoutFood ?: recordOf()
+    record[actorRecordKey(actorUuid)] = days.coerceAtLeast(0)
+    daysWithoutFood = record
 }
 
 /**
@@ -293,10 +318,10 @@ fun moveNoCheckDowntimeCharge(
     if (previousActorUuid == newActorUuid) {
         return result
     }
-    val chargeKey = downtimeHoursKey(newActorUuid)
+    val chargeKey = actorRecordKey(newActorUuid)
     result[chargeKey] = (result[chargeKey] ?: 0) + CampingActivityScheduler.DOWNTIME_HOURS_PER_ACTIVITY
     if (previousActorUuid != null) {
-        val refundKey = downtimeHoursKey(previousActorUuid)
+        val refundKey = actorRecordKey(previousActorUuid)
         result[refundKey] = ((result[refundKey] ?: 0) - refundHours).coerceAtLeast(0)
     }
     return result
@@ -452,6 +477,7 @@ fun getDefaultCamping(game: Game): CampingData {
         learnedCompanionActivitiesByActor = recordOf(),
         watchSlots = emptyArray(),
         downtimeHoursSpent = recordOf(),
+        daysWithoutFood = recordOf(),
         regionSettings = RegionSettings(
             regions = arrayOf(
                 RegionSetting(

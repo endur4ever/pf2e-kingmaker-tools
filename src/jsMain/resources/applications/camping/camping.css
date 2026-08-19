@@ -291,6 +291,40 @@ ul.km-camping-actors {
             color: #fff;
             border-color: #ffb3b3;
         }
+
+        /* Hunger badge. Bottom-right is the only free corner on the 7em tile: the activity check
+           and chosen-meal thumbnail both sit top-left, and the downtime hours sit bottom-left. */
+        .km-camping-actor-hungry {
+            position: absolute;
+            bottom: 4px;
+            /* The clear-actor button is a full-height strip down the right edge of the tile, so
+               the bottom-right corner is NOT free -- offset past it. Measured, not guessed. */
+            right: 22px;
+            min-width: 18px;
+            padding: 1px 6px;
+            border-radius: 10px;
+            background-color: rgba(0, 0, 0, 0.78);
+            color: rgb(231, 209, 177);
+            border: 1px solid rgb(231, 209, 177);
+            box-shadow: 0 0 4px 1px black;
+            font-size: 13px;
+            line-height: 18px;
+            font-weight: bold;
+            text-align: center;
+            pointer-events: none;
+            z-index: 2;
+
+            i {
+                margin-right: 3px;
+                opacity: 0.85;
+            }
+        }
+
+        .km-camping-actor-hungry.km-camping-actor-hungry-critical {
+            background-color: rgba(120, 0, 0, 0.88);
+            color: #fff;
+            border-color: #ffb3b3;
+        }
     }
 
 

@@ -133,6 +133,12 @@
                         {{downtimeHoursRemaining}}<span class="km-hours-unit">{{localizeKM "camping.hoursSymbol"}}</span>
                     </div>
                 {{/if}}
+                {{#if hungryDays}}
+                    <div class="km-camping-actor-hungry{{#if hungryCritical}} km-camping-actor-hungry-critical{{/if}}"
+                         title="{{localizeKM "camping.hungryDaysHelp" days=hungryDays}}">
+                        <i class="fa-solid fa-drumstick-bite"></i>{{hungryDays}}
+                    </div>
+                {{/if}}
                 <button class="km-camping-action"
                         data-action="clear-actor"
                         type="button"

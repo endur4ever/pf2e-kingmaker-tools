@@ -22,6 +22,7 @@ import at.posselt.pfrpg2e.migrations.migrations.Migration53
 import at.posselt.pfrpg2e.migrations.migrations.Migration54
 import at.posselt.pfrpg2e.migrations.migrations.Migration55
 import at.posselt.pfrpg2e.migrations.migrations.Migration56
+import at.posselt.pfrpg2e.migrations.migrations.Migration57
 import at.posselt.pfrpg2e.migrations.migrations.Migration50
 import com.foundryvtt.core.Game
 import js.objects.unsafeJso
@@ -332,5 +333,22 @@ class MigrationBackfillsTest {
         val k = kingdom()
         Migration56().migrateKingdom(game, k)
         assertEquals(false, k.decadentFeastsShieldActive.unsafeCast<Boolean>())
+    }
+
+    // ── Migration57: camping.daysWithoutFood ────────────────────────────────────────────────────
+    @Test
+    fun migration57SeedsAnEmptyStarvationLedger() = runTest {
+        val c = camping()
+        Migration57().migrateCamping(game, c)
+        assertEquals(0, js("Object").keys(c.daysWithoutFood).unsafeCast<Array<String>>().size)
+    }
+
+    @Test
+    fun migration57PreservesHungerAlreadyRecorded() = runTest {
+        // Re-running migrations must not feed a starving party. The record is the only history of
+        // how long anyone has gone without food, so clobbering it silently resets the mechanic.
+        val c = camping { it.daysWithoutFood = js("({'Actor_abc': 3})") }
+        Migration57().migrateCamping(game, c)
+        assertEquals(3, c.daysWithoutFood!!["Actor_abc"])
     }
 }

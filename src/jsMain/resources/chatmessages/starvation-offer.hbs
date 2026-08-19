@@ -1,0 +1,18 @@
+<h2>{{localizeKM "camping.starvationOfferTitle"}}</h2>
+<p>{{localizeKM "camping.starvationOfferBody"}}</p>
+<ul>
+    {{#each actors}}
+        <li>{{name}} — {{localizeKM "camping.hungryDaysHelp" days=days}}</li>
+    {{/each}}
+</ul>
+<hr>
+<div class="km-starvation-offers">
+    {{#each actors}}
+        <button type="button"
+                class="km-offer-starvation"
+                data-actor-uuid="{{uuid}}"
+                data-condition="{{condition}}">
+            {{localizeKM "camping.starvationOfferApply"}} — {{name}}
+        </button>
+    {{/each}}
+</div>

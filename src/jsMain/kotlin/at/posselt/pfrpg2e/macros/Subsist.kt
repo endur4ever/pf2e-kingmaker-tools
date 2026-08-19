@@ -1,37 +1,25 @@
 package at.posselt.pfrpg2e.macros
 
-import at.posselt.pfrpg2e.actor.hasFeat
-import at.posselt.pfrpg2e.actor.investedArmor
-import at.posselt.pfrpg2e.actor.proficiency
 import at.posselt.pfrpg2e.app.forms.CheckboxInput
-import at.posselt.pfrpg2e.app.forms.FormElementContext
 import at.posselt.pfrpg2e.app.forms.Select
 import at.posselt.pfrpg2e.app.forms.SelectOption
 import at.posselt.pfrpg2e.app.forms.formContext
 import at.posselt.pfrpg2e.app.prompt
-import at.posselt.pfrpg2e.camping.calculateProvisions
-import at.posselt.pfrpg2e.camping.findCurrentRegion
 import at.posselt.pfrpg2e.camping.getCamping
 import at.posselt.pfrpg2e.camping.getCampingActors
-import at.posselt.pfrpg2e.data.actor.Proficiency
-import at.posselt.pfrpg2e.data.checks.DegreeOfSuccess
-import at.posselt.pfrpg2e.data.regions.Terrain
-import at.posselt.pfrpg2e.fromCamelCase
+import at.posselt.pfrpg2e.camping.postSubsistProvisionsOffer
+import at.posselt.pfrpg2e.camping.rollSubsist
+import at.posselt.pfrpg2e.camping.subsistDefaults
 import at.posselt.pfrpg2e.takeIfInstance
 import at.posselt.pfrpg2e.utils.asSequence
-import at.posselt.pfrpg2e.utils.postChatTemplate
 import at.posselt.pfrpg2e.utils.t
 import com.foundryvtt.core.Game
 import com.foundryvtt.core.documents.Actor
 import com.foundryvtt.core.ui
-import com.foundryvtt.pf2e.actions.CheckDC
-import com.foundryvtt.pf2e.actions.SingleCheckActionUseOptions
 import com.foundryvtt.pf2e.actor.PF2ECharacter
-import com.foundryvtt.pf2e.pf2e
 import js.array.component1
 import js.array.component2
 import js.objects.recordOf
-import kotlinx.coroutines.await
 import kotlinx.js.JsPlainObject
 
 @JsPlainObject
@@ -39,18 +27,6 @@ external interface SubsistData {
     val skill: String
     val dc: Int
     val subsistPenalty: Boolean
-}
-
-@Suppress("unused")
-@JsPlainObject
-external interface AskActorSubmitData {
-    val name: String
-}
-
-@Suppress("unused")
-@JsPlainObject
-external interface AskActorContext {
-    val formRows: Array<FormElementContext>
 }
 
 suspend fun subsistMacro(game: Game, actor: Actor?) {
@@ -65,10 +41,9 @@ suspend fun subsistMacro(game: Game, actor: Actor?) {
     val skills = chosenActor.skills.asSequence()
         .map { SelectOption(label = it.component2().label, value = it.component1()) }
         .toList()
-    val currentRegion = camping?.findCurrentRegion()
-    val defaultDc = currentRegion?.zoneDc ?: 15
-    val isUrban = currentRegion?.terrain?.let { fromCamelCase<Terrain>(it) } == Terrain.URBAN
-    val defaultSkill = if (isUrban) "society" else "survival"
+    val defaults = subsistDefaults(camping)
+    val defaultDc = defaults.dc
+    val defaultSkill = defaults.skill
     prompt<SubsistData, Unit>(
         title = t("macros.subsist.title"),
         templatePath = "components/forms/form.hbs",
@@ -93,31 +68,15 @@ suspend fun subsistMacro(game: Game, actor: Actor?) {
             )
         )
     ) {
-        val options = SingleCheckActionUseOptions(
-            difficultyClass = CheckDC(value = it.dc),
-            rollOptions = if (it.subsistPenalty) arrayOf("action:subsist:after-exploration") else emptyArray(),
-            statistic = it.skill,
-            actors = arrayOf(chosenActor),
+        val result = rollSubsist(
+            game = game,
+            actor = chosenActor,
+            skill = it.skill,
+            dc = it.dc,
+            subsistPenalty = it.subsistPenalty,
         )
-        val result = game.pf2e.actions.get("subsist")?.use(options)?.await()?.firstOrNull()
-        val degree = fromCamelCase<DegreeOfSuccess>(result?.outcome!!)!!
-        val provisions = calculateProvisions(
-            survivalProficiency = chosenActor.skills["survival"]?.proficiency ?: Proficiency.UNTRAINED,
-            isForager = chosenActor.hasFeat("forager"),
-            hasCoyoteCloak = chosenActor.investedArmor("coyote-cloak"),
-            hasCoyoteCloakGreat = chosenActor.investedArmor("coyote-cloak-greater"),
-            degree = degree
-        )
-        if (provisions > 0) {
-            postChatTemplate(
-                templateContext = recordOf(
-                    "provisions" to provisions,
-                    "actorUuid" to chosenActor.uuid,
-                    "actorName" to chosenActor.name,
-                ),
-                templatePath = "chatmessages/subsist.hbs",
-                speaker = chosenActor
-            )
+        if (result != null) {
+            postSubsistProvisionsOffer(chosenActor, result.provisions)
         }
     }
 }

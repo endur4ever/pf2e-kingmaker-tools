@@ -3,6 +3,7 @@ package at.posselt.pfrpg2e.camping
 import at.posselt.pfrpg2e.actions.ActionDispatcher
 import at.posselt.pfrpg2e.actions.ActionMessage
 import at.posselt.pfrpg2e.actions.handlers.ApplyMealEffects
+import at.posselt.pfrpg2e.actions.handlers.ApplyStarvation
 import at.posselt.pfrpg2e.actions.handlers.GainProvisions
 import at.posselt.pfrpg2e.actions.handlers.LearnSpecialRecipeData
 import at.posselt.pfrpg2e.data.checks.RollMode
@@ -80,6 +81,26 @@ fun bindCampingChatEventListeners(game: Game, dispatcher: ActionDispatcher) {
                         data = GainProvisions(
                             quantity = quantity,
                             actorUuid = actorUuid,
+                        ).unsafeCast<AnyObject>()
+                    )
+                )
+            }
+        }
+    }
+    bindChatClick(".km-offer-starvation") { _, el, _ ->
+        // The handler is GM-only by policy; this guard makes a player's click a silent no-op
+        // instead of a rejected socket message.
+        if (!game.user.isGM) return@bindChatClick
+        buildPromise {
+            val actorUuid = el.dataset["actorUuid"]
+            val condition = el.dataset["condition"]
+            if (actorUuid != null && condition != null) {
+                dispatcher.dispatch(
+                    ActionMessage(
+                        action = "applyStarvation",
+                        data = ApplyStarvation(
+                            actorUuid = actorUuid,
+                            condition = condition,
                         ).unsafeCast<AnyObject>()
                     )
                 )

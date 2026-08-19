@@ -29,6 +29,8 @@ import at.posselt.pfrpg2e.camping.dialogs.play
 import at.posselt.pfrpg2e.camping.getActorsInCamp
 import at.posselt.pfrpg2e.camping.getAllActivities
 import at.posselt.pfrpg2e.camping.getAllRecipes
+import at.posselt.pfrpg2e.camping.postStarvationOffer
+import at.posselt.pfrpg2e.camping.tickNightlyStarvation
 import at.posselt.pfrpg2e.camping.groupActivities
 import at.posselt.pfrpg2e.camping.doesNotRequireACheck
 import at.posselt.pfrpg2e.camping.repetitionsOrDefault
@@ -478,7 +480,16 @@ private suspend fun completeDailyPreparations(
     Object.values(camping.campingActivities).forEach { it.result = null }
     Object.values(camping.cooking.results).forEach { it.result = null }
     camping.resetDowntimeHours()
+    // Hunger advances BEFORE the persist so it rides this single save. Deliberately not part of
+    // resetDowntimeHours() above -- downtime resets nightly, hunger accumulates across nights.
+    val starvationCrossings = tickNightlyStarvation(
+        game = game,
+        camping = camping,
+        party = party,
+        actors = actors,
+    )
     campingActor.setCamping(camping)
+    postStarvationOffer(game, starvationCrossings)
 
     val additionalHealing = additionalHealingPerActorAfterRest(recipes, camping, actors)
     runCatching {

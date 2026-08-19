@@ -134,6 +134,14 @@ external interface CampingSheetActor : BaseActorContext {
     // Signed Perception modifier ("+7") shown on watch-slot chips; null outside the
     // watch section or when the actor has no Perception statistic (loot, vehicles).
     val perceptionLabel: String?
+
+    // Consecutive nights this actor has gone unfed. Null when zero, so the template's
+    // {{#if hungryDays}} hides the badge entirely for anyone who has been eating.
+    val hungryDays: Int?
+
+    // True once the count is past this actor's Constitution-derived endurance -- i.e. the GM has
+    // been offered a condition for them. Drives the alarm colour.
+    val hungryCritical: Boolean?
 }
 
 @Suppress("unused")
@@ -1838,7 +1846,13 @@ class CampingSheet(
                     } else {
                         null
                     }
+                    val hungryDays = camping.daysWithoutFoodFor(uuid)
                     CampingSheetActor(
+                        hungryDays = hungryDays.takeIf { it > 0 },
+                        hungryCritical = starvationSeverity(
+                            daysWithoutFood = hungryDays,
+                            constitutionModifier = actorConstitutionModifier(actor),
+                        ) != StarvationSeverity.NONE,
                         image = actor.img,
                         uuid = uuid,
                         name = actor.name,

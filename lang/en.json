@@ -651,7 +651,12 @@
       "travelRouteTimeAdvanceFailed": "World time could not be advanced — check your calendar module. The journey was stopped.",
       "enableWeatherEffects": "Weather affects hexploration, encounters and camping",
       "enableWeatherEffectsHelp": "When on, the day's weather changes the hexploration activity budget, shifts the random-encounter DC, and makes camping activity checks harder. Magnitudes are small: snow costs one hexploration activity and -2 on camp checks, rain and cold -1. Turn off to keep weather purely descriptive.",
-      "weatherCheckPenalty": "<p><i>The weather makes this harder ({penalty} to the check).</i></p>"
+      "weatherCheckPenalty": "<p><i>The weather makes this harder ({penalty} to the check).</i></p>",
+      "hungryDaysHelp": "Hungry: {days, plural, =1 {1 night} other {# nights}} without food",
+      "starvationOfferTitle": "Starvation",
+      "starvationOfferBody": "These campers have gone past what they can endure without food. Nothing has been applied — confirm each one you want to take effect.",
+      "starvationOfferApply": "Apply Fatigued",
+      "starvationApplied": "{name} is fatigued from starvation."
     },
     "settlementNav": {
       "status": "Status",

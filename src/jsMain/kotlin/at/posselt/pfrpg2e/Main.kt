@@ -4,6 +4,7 @@ import at.posselt.pfrpg2e.actions.ActionDispatcher
 import at.posselt.pfrpg2e.actions.handlers.AddHuntAndGatherResultHandler
 import at.posselt.pfrpg2e.actions.handlers.ApplyMealEffectsHandler
 import at.posselt.pfrpg2e.actions.handlers.ClearMealEffectsHandler
+import at.posselt.pfrpg2e.actions.handlers.ApplyStarvationHandler
 import at.posselt.pfrpg2e.actions.handlers.GainProvisionsHandler
 import at.posselt.pfrpg2e.actions.handlers.LearnSpecialRecipeHandler
 import at.posselt.pfrpg2e.actions.handlers.OpenCampingSheetHandler
@@ -98,6 +99,7 @@ fun main() {
                 LearnSpecialRecipeHandler(),
                 ApplyMealEffectsHandler(game = game),
                 GainProvisionsHandler(),
+            ApplyStarvationHandler(),
                 OpenKingdomSheetHandler(game = game),
             )
         ).apply {

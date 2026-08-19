@@ -2,6 +2,7 @@ package at.posselt.pfrpg2e.actions
 
 import at.posselt.pfrpg2e.actions.handlers.ActionHandler
 import at.posselt.pfrpg2e.actions.handlers.AddHuntAndGatherResultHandler
+import at.posselt.pfrpg2e.actions.handlers.ApplyStarvationHandler
 import at.posselt.pfrpg2e.actions.handlers.ApplyMealEffectsHandler
 import at.posselt.pfrpg2e.actions.handlers.ClearMealEffectsHandler
 import at.posselt.pfrpg2e.actions.handlers.ExecutionMode
@@ -137,6 +138,8 @@ class ActionDispatcherSecurityTest {
             OpenCampingSheetHandler(game).action to OriginatorPolicy.GM_ONLY,
             OpenKingdomSheetHandler(game).action to OriginatorPolicy.GM_ONLY,
             SyncBattleOutcomeHandler(game).action to OriginatorPolicy.GM_ONLY,
+            // starvation conditions are GM-confirmed; a player must never be able to apply one
+            ApplyStarvationHandler().action to OriginatorPolicy.GM_ONLY,
         )
         val actual: List<Pair<String, OriginatorPolicy>> = listOf(
             AddHuntAndGatherResultHandler(),
@@ -148,6 +151,7 @@ class ActionDispatcherSecurityTest {
             OpenCampingSheetHandler(game),
             OpenKingdomSheetHandler(game),
             SyncBattleOutcomeHandler(game),
+            ApplyStarvationHandler(),
         ).map { it.action to it.originatorPolicy }
         assertEquals(expected, actual)
     }
