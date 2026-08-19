@@ -11,12 +11,23 @@ import com.foundryvtt.kingmaker.kingmaker
 import com.pixijs.Point
 
 /**
- * Gets the party's current hex key from the token position on the active hex-grid scene.
- * Returns null if no active scene, not a hex grid, or party token not found.
+ * Gets the party's current hex key from the party token's position on the hex map.
+ *
+ * The scene is chosen by [hexSceneSource]: the configured hexploration scene
+ * ([CampingData.worldSceneId]) when there is one, otherwise the active scene. Preferring the
+ * configured map is what keeps hex rules working once the GM switches to a campsite or battle
+ * map, which is exactly when camping activities are rolled.
+ *
+ * Returns null when no hex map is available or the party has no token on it.
  */
-fun getPartyCurrentHexKey(game: Game, actor: CampingActor): String? {
-    val scene = game.scenes.active
-    if (scene == null || !scene.grid.isHexagonal) return null
+fun getPartyCurrentHexKey(game: Game, actor: CampingActor, camping: CampingData?): String? {
+    val configured = camping?.worldSceneId?.let { game.scenes.get(it) }
+    val active = game.scenes.active
+    val scene = when (hexSceneSource(configured?.grid?.isHexagonal, active?.grid?.isHexagonal)) {
+        HexSceneSource.CONFIGURED -> configured
+        HexSceneSource.ACTIVE -> active
+        HexSceneSource.NONE -> null
+    } ?: return null
     val token = scene.tokens.contents.find { it.actorId == actor.id } ?: return null
     val grid = scene.grid
     val center = Point(
@@ -33,8 +44,8 @@ fun getPartyCurrentHexKey(game: Game, actor: CampingActor): String? {
  * Returns false if no active scene, not a hex grid, party token not found,
  * or no kingdom/hex state available.
  */
-fun isPartyHexClaimed(game: Game, actor: CampingActor): Boolean {
-    val hexKey = getPartyCurrentHexKey(game, actor) ?: return false
+fun isPartyHexClaimed(game: Game, actor: CampingActor, camping: CampingData?): Boolean {
+    val hexKey = getPartyCurrentHexKey(game, actor, camping) ?: return false
 
     // Get hex state from kingmaker.state.hexes
     val hexState = com.foundryvtt.kingmaker.kingmaker.state.hexes[hexKey]

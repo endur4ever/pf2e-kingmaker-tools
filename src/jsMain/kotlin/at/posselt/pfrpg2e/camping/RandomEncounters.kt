@@ -268,7 +268,7 @@ private fun checkEncounterHexFilter(
     category: EncounterCategory,
 ): EncounterFilterDecision {
     // Get the party's current hex key from the token position
-    val hexKey = getPartyCurrentHexKey(game, actor) ?: return EncounterFilterDecision.ALLOW
+    val hexKey = getPartyCurrentHexKey(game, actor, camping) ?: return EncounterFilterDecision.ALLOW
 
     // Get hex state from kingmaker.state.hexes
     val hexState = com.foundryvtt.kingmaker.kingmaker.state.hexes[hexKey]
@@ -346,7 +346,7 @@ private suspend fun rollRandomEncounter(
     }
     if (rollCheck) {
         // Party hex state, looked up once for both the per-hex override and the combat filter.
-        val hexKey = getPartyCurrentHexKey(game, actor)
+        val hexKey = getPartyCurrentHexKey(game, actor, camping)
         val hexState = hexKey?.let { com.foundryvtt.kingmaker.kingmaker.state.hexes[it] }
         val hexClaimed = hexState?.claimed == true
         val hexCleared = hexState?.cleared == true

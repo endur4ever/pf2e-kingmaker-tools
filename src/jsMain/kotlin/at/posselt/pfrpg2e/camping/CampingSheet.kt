@@ -660,7 +660,7 @@ class CampingSheet(
         activityId: String,
     ): DegreeOfSuccess? {
         if (camping.autoSucceedInClaimedHexes != true) return null
-        if (!autoSucceedInClaimedHexes(true, isPartyHexClaimed(game, actor), activityId)) return null
+        if (!autoSucceedInClaimedHexes(true, isPartyHexClaimed(game, actor, camping), activityId)) return null
         postChatMessage(t("camping.autoSuccessInOwnLands"), isHtml = true)
         return DegreeOfSuccess.SUCCESS
     }
