@@ -2179,9 +2179,15 @@ class CampingSheet(
         }
 
         val summary = summarizeTravelExecution(plan, legsCompleted, stoppedAt)
+        // Re-read before writing. getCamping() hands back a deepClone, and the leg loop's
+        // rollRandomEncounter does its OWN getCamping/setCamping -- so `camping` above is a stale
+        // copy taken before the journey started. Saving it here silently discarded everything the
+        // encounter path had just persisted, most visibly lastEncounterCategory/lastEncounterResult,
+        // which meant an encounter that stopped a route lost its own preview data.
+        val latest = actor.getCamping() ?: camping
         // The party ends the journey wherever it actually stopped.
-        camping.travelStartHex = path.getOrNull(legsCompleted) ?: path.lastOrNull()
-        actor.setCamping(camping)
+        latest.travelStartHex = path.getOrNull(legsCompleted) ?: path.lastOrNull()
+        actor.setCamping(latest)
         postTravelSummary(summary, destinationHexKey = path.lastOrNull())
     }
 
