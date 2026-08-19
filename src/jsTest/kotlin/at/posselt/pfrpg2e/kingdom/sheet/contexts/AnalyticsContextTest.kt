@@ -2,6 +2,7 @@ package at.posselt.pfrpg2e.kingdom.sheet.contexts
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /**
@@ -73,5 +74,24 @@ class AnalyticsContextTest {
 
     private fun filterMetrics(isGM: Boolean): List<Pair<String, String>> {
         return if (isGM) allMetrics else allMetrics.filter { (key, _) -> key in playerSafeKeys }
+    }
+
+    @Test
+    fun `players get no target level band`() {
+        // The level SERIES is player-safe, but the band around it is derived from the GM's
+        // pacing-alert settings -- a line telling the party what level the GM expects them to be.
+        assertNull(analyticsLevelTarget(isGM = false, chapterTargetLevel = 7, avgPartyLevel = 5))
+        assertNull(analyticsLevelTarget(isGM = false, chapterTargetLevel = null, avgPartyLevel = 5))
+    }
+
+    @Test
+    fun `the GM band prefers the configured chapter target`() {
+        assertEquals(7, analyticsLevelTarget(isGM = true, chapterTargetLevel = 7, avgPartyLevel = 5))
+    }
+
+    @Test
+    fun `the GM band falls back to the party average when unset`() {
+        assertEquals(5, analyticsLevelTarget(isGM = true, chapterTargetLevel = null, avgPartyLevel = 5))
+        assertNull(analyticsLevelTarget(isGM = true, chapterTargetLevel = null, avgPartyLevel = null))
     }
 }

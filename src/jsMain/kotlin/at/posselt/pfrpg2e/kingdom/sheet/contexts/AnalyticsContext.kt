@@ -53,3 +53,14 @@ fun <T> filterAnalyticsMetricsForUser(
     isGM: Boolean,
 ): List<Pair<String, T>> =
     if (isGM) allMetrics else allMetrics.filter { (key, _) -> key in analyticsPlayerSafeMetricKeys }
+
+/**
+ * The level the analytics "target level" band should centre on, or null to draw no band.
+ *
+ * The band is derived from the GM's pacing-alert settings — the chapter target level and its
+ * mismatch range are balance knobs from a GM-facing feature — so it is withheld from players even
+ * though the LEVEL SERIES itself is player-safe. The card's rule for this tab is "where in doubt,
+ * exclude", and a line telling the party what level the GM expects them to be is not in doubt.
+ */
+fun analyticsLevelTarget(isGM: Boolean, chapterTargetLevel: Int?, avgPartyLevel: Int?): Int? =
+    if (!isGM) null else chapterTargetLevel ?: avgPartyLevel

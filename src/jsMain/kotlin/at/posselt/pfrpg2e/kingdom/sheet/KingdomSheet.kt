@@ -341,6 +341,7 @@ import at.posselt.pfrpg2e.kingdom.bankedBonusList
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.BankedBonusContext
 import at.posselt.pfrpg2e.kingdom.addStandingEntry
 import at.posselt.pfrpg2e.kingdom.IMPROVE_SETTLEMENT_ACTIVITY
+import at.posselt.pfrpg2e.kingdom.sheet.contexts.analyticsLevelTarget
 
 class KingdomSheet(
     private val game: Game,
@@ -3235,7 +3236,11 @@ class KingdomSheet(
                     if (key == "level") {
                         val partyLevels = actor.partyMembers().map { it.system.details.level.value }
                         val avgPartyLevel = if (partyLevels.isNotEmpty()) partyLevels.sum() / partyLevels.size else null
-                        val targetLevel = kingdom.settings.pacingChapterTargetLevel() ?: avgPartyLevel
+                        val targetLevel = analyticsLevelTarget(
+                            isGM = isGM,
+                            chapterTargetLevel = kingdom.settings.pacingChapterTargetLevel(),
+                            avgPartyLevel = avgPartyLevel,
+                        )
                         val range = kingdom.settings.pacingLevelMismatchRange()
                         if (targetLevel != null) {
                             val upperVal = (targetLevel + range).toDouble()
