@@ -25,6 +25,7 @@ import at.posselt.pfrpg2e.migrations.migrations.Migration56
 import at.posselt.pfrpg2e.migrations.migrations.Migration57
 import at.posselt.pfrpg2e.migrations.migrations.Migration58
 import at.posselt.pfrpg2e.migrations.migrations.Migration59
+import at.posselt.pfrpg2e.migrations.migrations.Migration60
 import at.posselt.pfrpg2e.migrations.migrations.Migration50
 import com.foundryvtt.core.Game
 import js.objects.unsafeJso
@@ -383,5 +384,20 @@ class MigrationBackfillsTest {
         val c = camping { it.campingSessionId = 7 }
         Migration59().migrateCamping(game, c)
         assertEquals(7, c.campingSessionId)
+    }
+
+    // ── Migration60: camping.travelJournal ──────────────────────────────────────────────────────
+    @Test
+    fun migration60SeedsAnEmptyTravelJournal() = runTest {
+        val c = camping()
+        Migration60().migrateCamping(game, c)
+        assertEquals(0, size(c.travelJournal))
+    }
+
+    @Test
+    fun migration60PreservesAJournalAlreadyBeingWritten() = runTest {
+        val c = camping { it.travelJournal = js("[{worldDate:'d1',kind:'rest'}]") }
+        Migration60().migrateCamping(game, c)
+        assertEquals(1, size(c.travelJournal))
     }
 }

@@ -222,6 +222,16 @@ external interface CampingData {
     /** Rumors accumulated this camping session. */
     var rumors: Array<RawRumor>?
 
+    /**
+     * Capped, append-only record of what happened while exploring — hexes entered, hexploration
+     * activities spent, encounters, rests and notable meals. Oldest first; pruned to
+     * [MAX_TRAVEL_JOURNAL_ENTRIES]. See TravelJournal.kt for the append/prune core.
+     *
+     * Nullable for camping data saved before this field existed; [travelJournalList] reads it
+     * defensively, so it never needs to be seeded.
+     */
+    var travelJournal: Array<RawTravelJournalEntry>?
+
     /** Active merchant stock surfaced by Merchant-category encounters. */
     var merchantStock: Array<RawMerchantStock>?
 

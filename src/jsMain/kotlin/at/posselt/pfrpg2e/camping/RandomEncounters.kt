@@ -156,6 +156,19 @@ private suspend fun showEncounterPreview(
 ) {
     camping.lastEncounterCategory = category.value
     camping.lastEncounterResult = resultText
+    // Journal it on the SAME instance this function is about to save. Camping data is a
+    // player-owned actor flag, so a second read-modify-write here would race this one and lose
+    // entries; and the write is GM-gated because reads are deep clones.
+    if (game.user.isGM) {
+        camping.appendTravelEntry(
+            TravelJournalEntry(
+                worldDate = game.travelJournalWorldDate(),
+                kind = TravelJournalKind.ENCOUNTER,
+                hexKey = getPartyCurrentHexKey(game, actor, camping),
+                note = resultText.takeIf { it.isNotBlank() },
+            )
+        )
+    }
     actor.setCamping(camping)
 
     // A rumor is always offered as a potential quest hook so the GM can convert it

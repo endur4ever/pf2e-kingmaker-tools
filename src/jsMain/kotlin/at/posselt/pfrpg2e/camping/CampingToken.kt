@@ -9,6 +9,7 @@ import com.foundryvtt.core.documents.TokenDocument
 import com.foundryvtt.core.documents.onMoveToken
 import com.foundryvtt.core.grid.GridOffset2D
 import com.foundryvtt.core.helpers.TypedHooks
+import com.foundryvtt.kingmaker.KingmakerHex
 import com.foundryvtt.kingmaker.kingmaker
 import com.foundryvtt.pf2e.actor.PF2EParty
 import com.pixijs.Point
@@ -42,6 +43,22 @@ fun registerCampingTokenMove(game: Game) {
                         ?.let {
                             camping.currentRegion = it.name
                         }
+                    // Leave a trail. This hook is the only seam that sees BOTH a manual GM drag and
+                    // a programmatic route leg, and shouldRecordHexEntry makes double-logging
+                    // impossible by construction: a move that re-fires produces the same key twice
+                    // in a row and the second is suppressed. Uses Kingmaker's own hex key rather
+                    // than re-deriving one, so it matches kingmaker.state.hexes exactly.
+                    findKingmakerHex(offset)?.key?.toString()?.let { hexKey ->
+                        if (shouldRecordHexEntry(camping.travelJournalList(), hexKey)) {
+                            camping.appendTravelEntry(
+                                TravelJournalEntry(
+                                    worldDate = game.travelJournalWorldDate(),
+                                    kind = TravelJournalKind.ENTERED_HEX,
+                                    hexKey = hexKey,
+                                )
+                            )
+                        }
+                    }
                     buildPromise {
                         actor.setCamping(camping)
                     }
@@ -74,15 +91,16 @@ fun updateCampingRegion(event: TokenEnterEvent, region: String): Promise<Unit> {
     }
 }
 
-private fun findKingmakerHexRegion(offset: GridOffset2D): String? {
+private fun findKingmakerHex(offset: GridOffset2D): KingmakerHex? {
     // kingmaker hexes start at i 0 and not -1 so we need to add 1
     // furthermore, all uneven rows need to be shifted one right
     val offsetJ = if (abs(offset.i) % 2 == 1) 1 else 0
     return kingmaker.region.hexes
         .find { it.offset.i == (offset.i + 1) && it.offset.j == (offset.j + offsetJ) }
-        ?.zone
-        ?.id
 }
+
+private fun findKingmakerHexRegion(offset: GridOffset2D): String? =
+    findKingmakerHex(offset)?.zone?.id
 
 /**
  * A Kingmaker map zone.

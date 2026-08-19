@@ -84,6 +84,7 @@ import kotlinx.datetime.LocalTime
 import kotlinx.js.JsPlainObject
 import org.w3c.dom.HTMLButtonElement
 import org.w3c.dom.HTMLElement
+import org.w3c.dom.HTMLSelectElement
 import org.w3c.dom.get
 import org.w3c.dom.pointerevents.PointerEvent
 import kotlin.js.Promise
@@ -257,6 +258,12 @@ external interface CampingSheetContext : ValidatedHandlebarsContext {
     var night: NightModes
     var hexplorationActivityDuration: String
     var hexplorationActivitiesAvailable: Int
+
+    /** Travel-journal rows, NEWEST FIRST for display. Empty when nothing has been recorded. */
+    var travelJournalRows: Array<TravelJournalRow>
+
+    /** Selectable hexploration activity types for the +1 control. */
+    var hexplorationActivityOptions: Array<TravelJournalOption>
     var hexplorationActivitiesMax: String
     var adventuringFor: String
     var travelingFor: String
@@ -730,6 +737,17 @@ class CampingSheet(
         } else {
             existing.result = result?.toCamelCase()
         }
+        // Notable meals only. Every night has a meal; journaling all of them would bury the trail
+        // in noise, so only the criticals -- the ones a table actually remembers -- get a line.
+        if (result == DegreeOfSuccess.CRITICAL_SUCCESS || result == DegreeOfSuccess.CRITICAL_FAILURE) {
+            camping.appendTravelEntry(
+                mealEntry(
+                    game = game,
+                    recipeName = mealToCook.recipe.name,
+                    note = t(result),
+                )
+            )
+        }
         actor.setCamping(camping)
     }
 
@@ -1178,7 +1196,27 @@ class CampingSheet(
     }
 
     private suspend fun advanceHexplorationActivities(target: HTMLElement) {
-        val seconds = getHexplorationActivitySeconds() * (target.dataset["activities"]?.toInt() ?: 0)
+        val activities = target.dataset["activities"]?.toInt() ?: 0
+        val seconds = getHexplorationActivitySeconds() * activities
+        // Only SPENDING an activity is a journal line. The -1 button is a correction, not something
+        // the party did, so it records nothing -- the same distinction the companion influence
+        // buttons draw between an attempt and an undo.
+        if (activities > 0) {
+            val chosen = (element.querySelector("#km-hexploration-activity") as? HTMLSelectElement)
+                ?.value
+                ?.takeIf { it.isNotBlank() }
+                ?: HEXPLORATION_ACTIVITY_TYPES.first()
+            actor.getCamping()?.let { camping ->
+                camping.appendTravelEntry(
+                    hexplorationActivityEntry(
+                        game = game,
+                        activityType = chosen,
+                        hexKey = getPartyCurrentHexKey(game, actor, camping),
+                    )
+                )
+                actor.setCamping(camping)
+            }
+        }
         game.time.advance(seconds).await()
     }
 
@@ -1902,6 +1940,26 @@ class CampingSheet(
             night = nightModes,
             hexplorationActivityDuration = hexplorationActivityDuration,
             hexplorationActivitiesAvailable = hexplorationActivitiesAvailable,
+            travelJournalRows = camping.travelJournalList()
+                .asReversed()
+                .map { entry ->
+                    TravelJournalRow(
+                        worldDate = entry.worldDate,
+                        kindLabel = t(entry.kind),
+                        kindValue = entry.kind.value,
+                        detail = listOfNotNull(
+                            entry.activityType?.let { key -> if (key.contains('.')) t(key) else key },
+                            entry.hexKey?.let { key ->
+                                key.toIntOrNull()?.let { "${it / 1000}.${it % 1000}" } ?: key
+                            },
+                            entry.note,
+                        ).joinToString(" — "),
+                    )
+                }
+                .toTypedArray(),
+            hexplorationActivityOptions = HEXPLORATION_ACTIVITY_TYPES
+                .map { TravelJournalOption(value = it, label = t(it)) }
+                .toTypedArray(),
             hexplorationActivitiesMax = hexplorationActivitiesMax,
             adventuringFor = getAdventuringFor(camping),
             travelingFor = getTravelingFor(camping),

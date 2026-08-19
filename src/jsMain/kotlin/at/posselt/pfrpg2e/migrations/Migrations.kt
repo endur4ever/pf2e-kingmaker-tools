@@ -51,6 +51,7 @@ import at.posselt.pfrpg2e.migrations.migrations.Migration56
 import at.posselt.pfrpg2e.migrations.migrations.Migration57
 import at.posselt.pfrpg2e.migrations.migrations.Migration58
 import at.posselt.pfrpg2e.migrations.migrations.Migration59
+import at.posselt.pfrpg2e.migrations.migrations.Migration60
 import at.posselt.pfrpg2e.settings.pfrpg2eKingdomCampingWeather
 import at.posselt.pfrpg2e.utils.isFirstGM
 import at.posselt.pfrpg2e.utils.openJournal
@@ -128,6 +129,7 @@ internal val migrations = listOf(
     Migration57(),
     Migration58(),
     Migration59(),
+    Migration60(),
 )
 
 private val latestMigrationVersion = migrations.maxOfOrNull { it.version }!!

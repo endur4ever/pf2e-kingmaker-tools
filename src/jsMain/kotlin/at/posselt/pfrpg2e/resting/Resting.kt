@@ -30,7 +30,12 @@ import at.posselt.pfrpg2e.camping.getActorsInCamp
 import at.posselt.pfrpg2e.camping.getAllActivities
 import at.posselt.pfrpg2e.camping.getAllRecipes
 import at.posselt.pfrpg2e.camping.nextCampingSessionId
+import at.posselt.pfrpg2e.camping.appendTravelEntry
 import at.posselt.pfrpg2e.camping.postStarvationOffer
+import at.posselt.pfrpg2e.camping.TravelJournalKind
+import at.posselt.pfrpg2e.camping.restEntry
+import at.posselt.pfrpg2e.camping.travelJournalDaySummary
+import at.posselt.pfrpg2e.camping.travelJournalList
 import at.posselt.pfrpg2e.camping.tickNightlyStarvation
 import at.posselt.pfrpg2e.camping.groupActivities
 import at.posselt.pfrpg2e.camping.doesNotRequireACheck
@@ -492,6 +497,10 @@ private suspend fun completeDailyPreparations(
         party = party,
         actors = actors,
     )
+    // A completed rest is a journal line. Appended before the single persist above so it rides
+    // that save rather than adding a second write; not GM-gated because a rest runs on exactly one
+    // client (whoever pressed the button) and gating would drop player-initiated rests.
+    camping.appendTravelEntry(restEntry(game))
     campingActor.setCamping(camping)
     postStarvationOffer(game, starvationCrossings)
 
@@ -513,7 +522,15 @@ private suspend fun completeDailyPreparations(
 
     // Hang-prone calendar side effects run last and detached (fire-and-forget) so a misconfigured
     // Seasons & Stars calendar can never abort or block the camp reset + healing above.
-    buildPromise { logToCalendar(title = "Camp Rest Completed", content = summaryContent) }
+    // Give Simple Calendar / Seasons & Stars users the exploration trail too, not just the rest.
+    // logToCalendar already no-ops when no calendar bridge is present, and an empty journal yields
+    // an empty summary, so this adds nothing when there is nothing to say.
+    val travelSummary = travelJournalDaySummary(
+        journal = camping.travelJournalList(),
+        kindLabels = TravelJournalKind.entries.associateWith { t(it) },
+    )
+    val calendarContent = if (travelSummary.isBlank()) summaryContent else "$summaryContent<hr>$travelSummary"
+    buildPromise { logToCalendar(title = "Camp Rest Completed", content = calendarContent) }
     game.time.advance(secondsToAdvance)
         .catch {
             console.error("[km] camping rest: failed to advance world time", it)

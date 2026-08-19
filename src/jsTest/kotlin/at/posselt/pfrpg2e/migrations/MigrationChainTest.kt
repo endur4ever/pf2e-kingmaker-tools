@@ -20,8 +20,8 @@ class MigrationChainTest {
     private val game = unsafeJso<Game>()
 
     @Test
-    fun registeredVersionsAreContiguous17To59() {
-        assertEquals((17..59).toList(), migrations.map { it.version })
+    fun registeredVersionsAreContiguous17To60() {
+        assertEquals((17..60).toList(), migrations.map { it.version })
     }
 
     @Test
