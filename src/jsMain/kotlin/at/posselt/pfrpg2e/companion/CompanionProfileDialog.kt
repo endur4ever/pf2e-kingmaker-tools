@@ -1,7 +1,9 @@
 package at.posselt.pfrpg2e.companion
 
 import at.posselt.pfrpg2e.companion.applyCompanionXp
+import at.posselt.pfrpg2e.camping.campingSessionIdOf
 import at.posselt.pfrpg2e.camping.getCampingActors
+import at.posselt.pfrpg2e.camping.campingSessionIdOf
 import at.posselt.pfrpg2e.camping.getCamping
 import at.posselt.pfrpg2e.settings.Pfrpg2eKingdomCampingWeatherSettings
 import at.posselt.pfrpg2e.app.HandlebarsRenderContext
@@ -59,12 +61,16 @@ class CompanionProfileDialog(
     }
 
     /**
-     * Durable id of the current camping session, or null when there is no camp. Reuses the camping
-     * system's own per-session marker (dailyPrepsAtTime, the world-time stamp of the last daily
-     * preparations) so the once-per-session cap and the camping oncePerSession reset can't drift.
+     * Durable id of the current camping session, or null when there is no camp.
+     *
+     * Reads [CampingData.campingSessionId], which is advanced in the same place the camping
+     * activity results are cleared, so this cap and the camping oncePerSession lock cannot drift.
+     * It deliberately does NOT use dailyPrepsAtTime: that stamp is also rewritten by the 24h
+     * auto-reset in persistPassedTime and by the sheet's reset-time-tracker button, so a party
+     * that merely advanced the clock a day would silently get its attempts back.
      */
     private fun currentCampingSessionId(): String? =
-        game.getCampingActors().firstOrNull()?.getCamping()?.dailyPrepsAtTime?.toString()
+        campingSessionIdOf(game.getCampingActors().firstOrNull()?.getCamping()?.campingSessionId)
 
     /**
      * House-rule once-per-camping-session gate for a companion Influence/Discover attempt. Blocks

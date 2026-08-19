@@ -24,6 +24,7 @@ import at.posselt.pfrpg2e.migrations.migrations.Migration55
 import at.posselt.pfrpg2e.migrations.migrations.Migration56
 import at.posselt.pfrpg2e.migrations.migrations.Migration57
 import at.posselt.pfrpg2e.migrations.migrations.Migration58
+import at.posselt.pfrpg2e.migrations.migrations.Migration59
 import at.posselt.pfrpg2e.migrations.migrations.Migration50
 import com.foundryvtt.core.Game
 import js.objects.unsafeJso
@@ -367,5 +368,20 @@ class MigrationBackfillsTest {
         val k = kingdom { it.milestones = js("[{id:'a',completed:false,enabled:true,offerDismissed:true}]") }
         Migration58().migrateKingdom(game, k)
         assertEquals(true, k.milestones[0].offerDismissed)
+    }
+
+    // ── Migration59: camping.campingSessionId ───────────────────────────────────────────────────
+    @Test
+    fun migration59SeedsTheSessionCounter() = runTest {
+        val c = camping()
+        Migration59().migrateCamping(game, c)
+        assertEquals(0, c.campingSessionId)
+    }
+
+    @Test
+    fun migration59PreservesASessionCounterAlreadyRunning() = runTest {
+        val c = camping { it.campingSessionId = 7 }
+        Migration59().migrateCamping(game, c)
+        assertEquals(7, c.campingSessionId)
     }
 }

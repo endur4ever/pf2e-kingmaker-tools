@@ -232,6 +232,18 @@ external interface CampingData {
     var lastEncounterResult: String?
 
     /**
+     * Advances by one each time a camping session completes, in the same place the camping
+     * activity results are cleared. Identifies "this camping session" for once-per-session caps.
+     *
+     * Deliberately NOT [dailyPrepsAtTime]: that is also rewritten by the 24h auto-reset in
+     * persistPassedTime and by the sheet's reset-time-tracker button, neither of which is a
+     * camping session, so anything keyed on it drifts from the oncePerSession activity lock.
+     *
+     * Nullable for camping data saved before this field existed.
+     */
+    var campingSessionId: Int?
+
+    /**
      * Consecutive nights each camper has gone without food, keyed by actor UUID with dots
      * replaced (see [actorRecordKey]). Advanced once per night at daily preparations; being fed
      * resets that camper's entry to zero.
@@ -478,6 +490,7 @@ fun getDefaultCamping(game: Game): CampingData {
         watchSlots = emptyArray(),
         downtimeHoursSpent = recordOf(),
         daysWithoutFood = recordOf(),
+        campingSessionId = 0,
         regionSettings = RegionSettings(
             regions = arrayOf(
                 RegionSetting(

@@ -29,6 +29,7 @@ import at.posselt.pfrpg2e.camping.dialogs.play
 import at.posselt.pfrpg2e.camping.getActorsInCamp
 import at.posselt.pfrpg2e.camping.getAllActivities
 import at.posselt.pfrpg2e.camping.getAllRecipes
+import at.posselt.pfrpg2e.camping.nextCampingSessionId
 import at.posselt.pfrpg2e.camping.postStarvationOffer
 import at.posselt.pfrpg2e.camping.tickNightlyStarvation
 import at.posselt.pfrpg2e.camping.groupActivities
@@ -479,6 +480,9 @@ private suspend fun completeDailyPreparations(
     camping.dailyPrepsAtTime = game.time.worldTimeSeconds + secondsToAdvance
     Object.values(camping.campingActivities).forEach { it.result = null }
     Object.values(camping.cooking.results).forEach { it.result = null }
+    // Clearing those results IS the oncePerSession reset. Advance the session counter in the same
+    // breath so anything keyed on it (the companion once-per-session cap) can never drift from it.
+    camping.campingSessionId = nextCampingSessionId(camping.campingSessionId)
     camping.resetDowntimeHours()
     // Hunger advances BEFORE the persist so it rides this single save. Deliberately not part of
     // resetDowntimeHours() above -- downtime resets nightly, hunger accumulates across nights.
