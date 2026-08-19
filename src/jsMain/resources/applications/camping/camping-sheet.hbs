@@ -42,11 +42,6 @@
             </div>
         </div>
         {{#if isGM}}
-            <select id="km-hexploration-activity" title="{{localizeKM "camping.hexActivityType"}}">
-                {{#each hexplorationActivityOptions}}
-                    <option value="{{value}}">{{label}}</option>
-                {{/each}}
-            </select>
             <button class="km-camping-action {{#if night.advanceHex}}night-mode{{/if}}"
                     id="km-camping-plus-hexploration"
                     type="button"
@@ -86,22 +81,6 @@
             </button>
         {{/if}}
     </div>
-    <details id="km-travel-log">
-        <summary>{{localizeKM "camping.travelLog"}}</summary>
-        {{#if travelJournalRows}}
-            <ul class="km-travel-log-entries">
-                {{#each travelJournalRows}}
-                    <li class="km-travel-log-entry km-travel-log-{{kindValue}}">
-                        <span class="km-travel-log-date">{{worldDate}}</span>
-                        <span class="km-travel-log-kind">{{kindLabel}}</span>
-                        <span class="km-travel-log-detail">{{detail}}</span>
-                    </li>
-                {{/each}}
-            </ul>
-        {{else}}
-            <p class="km-travel-log-empty">{{localizeKM "camping.travelLogEmpty"}}</p>
-        {{/if}}
-    </details>
     <div id="km-camping-hexploration" class="km-row">
         <div id="km-adventuring-for"><b>{{localizeKM "camping.adventuringDuration"}}</b> <span title="{{localizeKM "camping.travelingFor" duration=travelingFor}}">{{adventuringFor}}</span>
             {{#if isGM}}
