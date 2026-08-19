@@ -2328,7 +2328,7 @@
         "award": "Award milestone",
         "dismiss": "Dismiss",
         "gmActions": "GM: award or dismiss this milestone.",
-        "offerBody": "The kingdom has reached a milestone: <strong>{name}</strong> (+{xp} XP). Award it?",
+        "offerBody": "The kingdom has reached a milestone: {name} (+{xp} XP). Award it?",
         "offerTitle": "Milestone reached!",
         "awarded": "Milestone awarded: {name} (+{xp} XP).",
         "dismissed": "Milestone offer dismissed: {name}."

@@ -23,6 +23,7 @@ import at.posselt.pfrpg2e.migrations.migrations.Migration54
 import at.posselt.pfrpg2e.migrations.migrations.Migration55
 import at.posselt.pfrpg2e.migrations.migrations.Migration56
 import at.posselt.pfrpg2e.migrations.migrations.Migration57
+import at.posselt.pfrpg2e.migrations.migrations.Migration58
 import at.posselt.pfrpg2e.migrations.migrations.Migration50
 import com.foundryvtt.core.Game
 import js.objects.unsafeJso
@@ -350,5 +351,21 @@ class MigrationBackfillsTest {
         val c = camping { it.daysWithoutFood = js("({'Actor_abc': 3})") }
         Migration57().migrateCamping(game, c)
         assertEquals(3, c.daysWithoutFood!!["Actor_abc"])
+    }
+
+    // ── Migration58: kingdom.milestones[].offerDismissed ────────────────────────────────────────
+    @Test
+    fun migration58SeedsEveryMilestoneAsNotYetDismissed() = runTest {
+        val k = kingdom { it.milestones = js("[{id:'a',completed:false,enabled:true}]") }
+        Migration58().migrateKingdom(game, k)
+        assertEquals(false, k.milestones[0].offerDismissed)
+    }
+
+    @Test
+    fun migration58PreservesADismissalAlreadyRecorded() = runTest {
+        // Re-running migrations must not start nagging a GM who already declined the house rule.
+        val k = kingdom { it.milestones = js("[{id:'a',completed:false,enabled:true,offerDismissed:true}]") }
+        Migration58().migrateKingdom(game, k)
+        assertEquals(true, k.milestones[0].offerDismissed)
     }
 }

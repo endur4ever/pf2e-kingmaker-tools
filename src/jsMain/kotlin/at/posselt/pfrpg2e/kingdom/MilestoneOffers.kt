@@ -3,6 +3,7 @@ package at.posselt.pfrpg2e.kingdom
 import at.posselt.pfrpg2e.camping.routing.FoundryTravelProvider
 import at.posselt.pfrpg2e.data.kingdom.extractRegionData
 import at.posselt.pfrpg2e.data.kingdom.getRoadHexKeys
+import at.posselt.pfrpg2e.data.kingdom.milestoneOfferAnswered
 import at.posselt.pfrpg2e.data.kingdom.regionFullyClaimed
 import at.posselt.pfrpg2e.data.kingdom.roadConnectedToCapital
 import at.posselt.pfrpg2e.utils.postChatTemplate
@@ -29,13 +30,22 @@ suspend fun detectAndOfferMilestones(game: Game, actor: KingdomActor, kingdom: K
     val gmUserIds = game.users.filter { it.isGM }.mapNotNull { it.id }.toTypedArray()
     if (gmUserIds.isEmpty()) return
 
-    val completedIds = kingdom.milestones.filter { it.completed }.map { it.id }.toSet()
-    if (MILESTONE_ROAD_TO_CAPITAL in completedIds && MILESTONE_REGION_CLAIMED in completedIds) return
+    // Both detectors are LEVEL-triggered on standing world state: the road stays built and the
+    // claimed region stays claimed, so every End Turn re-detects the same thing forever. An offer is
+    // therefore suppressed once it has been ANSWERED either way -- awarded (completed) or refused
+    // (offerDismissed) -- not merely once it has been posted. Suppressing on "completed" alone let a
+    // GM who declined the house rule get the identical card again every turn for the rest of the
+    // campaign, with no way to stop it.
+    val answeredIds = kingdom.milestones
+        .filter { milestoneOfferAnswered(it.completed, it.offerDismissed) }
+        .map { it.id }
+        .toSet()
+    if (MILESTONE_ROAD_TO_CAPITAL in answeredIds && MILESTONE_REGION_CLAIMED in answeredIds) return
 
     val regionData = runCatching { extractRegionData(kingdom) }.getOrNull() ?: return
     val fired = mutableListOf<String>()
 
-    if (MILESTONE_ROAD_TO_CAPITAL !in completedIds) {
+    if (MILESTONE_ROAD_TO_CAPITAL !in answeredIds) {
         val capital = regionData.capitalHexKey
         if (capital != null) {
             val roadSet = runCatching { getRoadHexKeys(kingmaker.state.hexes) }.getOrNull() ?: emptySet()
@@ -49,7 +59,7 @@ suspend fun detectAndOfferMilestones(game: Game, actor: KingdomActor, kingdom: K
         }
     }
 
-    if (MILESTONE_REGION_CLAIMED !in completedIds) {
+    if (MILESTONE_REGION_CLAIMED !in answeredIds) {
         val regionSets = Object.values(regionData.regionHexKeys).unsafeCast<Array<Set<String>>>()
         val anyFull = regionSets.any { regionFullyClaimed(it, kingmaker.state.hexes) }
         if (anyFull) fired.add(MILESTONE_REGION_CLAIMED)

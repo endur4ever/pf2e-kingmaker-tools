@@ -1992,13 +1992,6 @@
         },
         "title": "Compagnon Expédition Complete: {title}"
       },
-      "milestone": {
-        "award": "MISSING: chatMessages.jalon.attribuer",
-        "dismiss": "MISSING: chatMessages.jalon.ignorer",
-        "gmActions": "MISSING: chatMessages.jalon.actions MJ",
-        "offerBody": "MISSING: chatMessages.jalon.coprs de l'offre",
-        "offerTitle": "MISSING: chatMessages.jalon.titre de l'offre"
-      },
       "questDeadline": {
         "extendTurns": "Extend by {turns} Tours",
         "extended": "Quest \"{name}\" extended by {turns} tours.",
@@ -3360,12 +3353,6 @@
       },
       "win-your-first-war-encounter": {
         "name": "Win your first War Encounter (V&K)"
-      },
-      "claim-all-hexes-in-a-region": {
-        "name": "MISSING: jalons.revendiquer-all-hexagoneagonees-in-a-région.nom"
-      },
-      "connect-settlement-to-capital-via-roads": {
-        "name": "MISSING: jalons.relier-colonie-to-capitalee-via-routes.nom"
       }
     },
     "charters": {
@@ -5659,23 +5646,6 @@
         "criticalFailure": {
           "msg": "<p>You accidentally form incorrect assumptions about your military tactics. The next time you roll a failure on an Army activity this Kingdom turn, it becomes a critical failure instead.</p>"
         }
-      },
-      "improve-settlement": {
-        "criticalFailure": {
-          "msg": "MISSING: activities.améliorer-colonie.criticalÉchec.msg"
-        },
-        "criticalSuccess": {
-          "msg": "MISSING: activities.améliorer-colonie.criticalSuccès.msg"
-        },
-        "description": "MISSING: activities.améliorer-colonie.description",
-        "failure": {
-          "msg": "MISSING: activities.améliorer-colonie.échec.msg"
-        },
-        "special": "MISSING: activities.améliorer-colonie.spécial",
-        "success": {
-          "msg": "MISSING: activities.améliorer-colonie.succès.msg"
-        },
-        "title": "MISSING: activities.améliorer-colonie.titre"
       }
     },
     "events": {

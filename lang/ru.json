@@ -1992,13 +1992,6 @@
         },
         "title": "Спутник Экспедиция Complete: {title}"
       },
-      "milestone": {
-        "award": "MISSING: chatСообщениеs.веха.наградить",
-        "dismiss": "MISSING: chatСообщениеs.веха.отклонить",
-        "gmActions": "MISSING: chatСообщениеs.веха.действия МН",
-        "offerBody": "MISSING: chatСообщениеs.веха.текст предложения",
-        "offerTitle": "MISSING: chatСообщениеs.веха.заголовок предложения"
-      },
       "questDeadline": {
         "extendTurns": "Extend by {turns} Ходs",
         "extended": "Quest \"{name}\" extended by {turns} ходs.",
@@ -3360,12 +3353,6 @@
       },
       "win-your-first-war-encounter": {
         "name": "Win your first War Encounter (V&K)"
-      },
-      "claim-all-hexes-in-a-region": {
-        "name": "MISSING: вехаs.присвоить-all-гексes-in-a-регион.имя"
-      },
-      "connect-settlement-to-capital-via-roads": {
-        "name": "MISSING: вехаs.соединить-поселение-to-столица-via-дорогаs.имя"
       }
     },
     "charters": {
@@ -5659,23 +5646,6 @@
         "criticalFailure": {
           "msg": "<p>You accidentally form incorrect assumptions about your military tactics. The next time you roll a failure on an Army activity this Kingdom turn, it becomes a critical failure instead.</p>"
         }
-      },
-      "improve-settlement": {
-        "criticalFailure": {
-          "msg": "MISSING: activities.улучшить-поселение.criticalНеудача.msg"
-        },
-        "criticalSuccess": {
-          "msg": "MISSING: activities.улучшить-поселение.criticalУспех.msg"
-        },
-        "description": "MISSING: activities.улучшить-поселение.описание",
-        "failure": {
-          "msg": "MISSING: activities.улучшить-поселение.неудача.msg"
-        },
-        "special": "MISSING: activities.улучшить-поселение.особый",
-        "success": {
-          "msg": "MISSING: activities.улучшить-поселение.успех.msg"
-        },
-        "title": "MISSING: activities.улучшить-поселение.название"
       }
     },
     "events": {

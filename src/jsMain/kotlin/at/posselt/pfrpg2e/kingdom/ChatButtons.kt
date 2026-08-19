@@ -1141,6 +1141,24 @@ private val buttons = listOf(
         val kingdom = actor.getKingdom() ?: return@ChatButton
         val milestone = kingdom.getMilestones().find { it.id == milestoneId } ?: return@ChatButton
         if (action == "dismiss") {
+            // Record the refusal. Detection is level-triggered on standing world state, so without
+            // persisting this the identical offer re-posts on every subsequent End Turn forever.
+            val existingChoice = kingdom.milestones.find { it.id == milestoneId }
+            if (existingChoice?.offerDismissed != true) {
+                kingdom.milestones = if (existingChoice == null) {
+                    kingdom.milestones + MilestoneChoice(
+                        id = milestoneId,
+                        completed = false,
+                        enabled = true,
+                        offerDismissed = true,
+                    )
+                } else {
+                    kingdom.milestones.map {
+                        if (it.id == milestoneId) MilestoneChoice.copy(it, offerDismissed = true) else it
+                    }.toTypedArray()
+                }
+                actor.setKingdom(kingdom)
+            }
             postChatMessage(t("chatMessages.milestone.dismissed", recordOf("name" to milestone.name)))
             return@ChatButton
         }
@@ -1152,6 +1170,7 @@ private val buttons = listOf(
                 id = milestoneId,
                 completed = false,
                 enabled = true,
+                offerDismissed = false,
             )
         }
         val previous = deepClone(kingdom)

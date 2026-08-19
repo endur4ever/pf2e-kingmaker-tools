@@ -47,6 +47,56 @@ class MilestoneDetectorsTest {
     }
 
     @Test
+    fun `a settlement merely ADJACENT to the road network is not connected`() {
+        // The existing "no road" tests hand the BFS an empty neighbour function, so it fails for
+        // want of adjacency and never reaches the both-endpoints rule at all -- deleting that rule
+        // leaves them green. This is the case that actually pins it: there IS a complete road chain
+        // running past the settlement to the capital, but the settlement's own hex has no road on
+        // it. Standing next to a road is not being on it, so the milestone must not fire.
+        val roadHexes = setOf("hex-mid", "hex-capital")
+        val neighbors = { key: String ->
+            when (key) {
+                "hex-settlement" -> setOf("hex-mid")
+                "hex-mid" -> setOf("hex-settlement", "hex-capital")
+                "hex-capital" -> setOf("hex-mid")
+                else -> emptySet()
+            }
+        }
+
+        val result = roadConnectedToCapital("hex-settlement", "hex-capital", roadHexes, neighbors)
+
+        assertFalse(result, "The settlement's own hex must carry a road, not merely touch one")
+    }
+
+    @Test
+    fun `a capital merely ADJACENT to the road network is not connected`() {
+        // Same rule from the other end: the road stops one hex short of the capital.
+        val roadHexes = setOf("hex-settlement", "hex-mid")
+        val neighbors = { key: String ->
+            when (key) {
+                "hex-settlement" -> setOf("hex-mid")
+                "hex-mid" -> setOf("hex-settlement", "hex-capital")
+                "hex-capital" -> setOf("hex-mid")
+                else -> emptySet()
+            }
+        }
+
+        val result = roadConnectedToCapital("hex-settlement", "hex-capital", roadHexes, neighbors)
+
+        assertFalse(result, "The capital's own hex must carry a road, not merely touch one")
+    }
+
+    @Test
+    fun `an identical settlement and capital hex needs no road at all`() {
+        // The same-hex short circuit sits ABOVE the both-endpoints rule, so a capital that is its
+        // own settlement trivially qualifies even with no roads built anywhere. Pinning this stops
+        // a future reorder of those two checks from silently changing the answer.
+        val result = roadConnectedToCapital("hex-1", "hex-1", emptySet(), { emptySet() })
+
+        assertTrue(result, "A settlement that IS the capital is connected by definition")
+    }
+
+    @Test
     fun `roadConnectedToCapital returns true for direct road connection`() {
         val roadHexes = setOf("hex-settlement", "hex-capital")
         val neighbors = { key: String ->

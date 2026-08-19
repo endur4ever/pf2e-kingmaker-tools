@@ -1992,13 +1992,6 @@
         },
         "title": "同伴 远征 Complete: {title}"
       },
-      "milestone": {
-        "award": "MISSING: chat消息s.里程碑.授予",
-        "dismiss": "MISSING: chat消息s.里程碑.关闭",
-        "gmActions": "MISSING: chat消息s.里程碑.GM操作",
-        "offerBody": "MISSING: chat消息s.里程碑.提议内容",
-        "offerTitle": "MISSING: chat消息s.里程碑.提议标题"
-      },
       "questDeadline": {
         "extendTurns": "Extend by {turns} 回合s",
         "extended": "Quest \"{name}\" extended by {turns} 回合s.",
@@ -3360,12 +3353,6 @@
       },
       "win-your-first-war-encounter": {
         "name": "Win your first War Encounter (V&K)"
-      },
-      "claim-all-hexes-in-a-region": {
-        "name": "MISSING: 里程碑s.宣称-all-六边形es-in-a-区域.名称"
-      },
-      "connect-settlement-to-capital-via-roads": {
-        "name": "MISSING: 里程碑s.连接-定居点-to-首都-via-道路s.名称"
       }
     },
     "charters": {
@@ -5659,23 +5646,6 @@
         "criticalFailure": {
           "msg": "<p>You accidentally form incorrect assumptions about your military tactics. The next time you roll a failure on an Army activity this Kingdom turn, it becomes a critical failure instead.</p>"
         }
-      },
-      "improve-settlement": {
-        "criticalFailure": {
-          "msg": "MISSING: activities.改善-定居点.critical失败.msg"
-        },
-        "criticalSuccess": {
-          "msg": "MISSING: activities.改善-定居点.critical成功.msg"
-        },
-        "description": "MISSING: activities.改善-定居点.描述",
-        "failure": {
-          "msg": "MISSING: activities.改善-定居点.失败.msg"
-        },
-        "special": "MISSING: activities.改善-定居点.特殊",
-        "success": {
-          "msg": "MISSING: activities.改善-定居点.成功.msg"
-        },
-        "title": "MISSING: activities.改善-定居点.标题"
       }
     },
     "events": {
