@@ -8,4 +8,8 @@
     <p><button {{#unless hasCamping}}disabled{{/unless}} data-action="export-camping" type="button">{{localizeKM "applications.actorActions.exportCamping"}}</button></p>
     <p><button data-action="import-camping" type="button">{{localizeKM "applications.actorActions.importCamping"}}</button></p>
     <p><button {{#unless hasCamping}}disabled{{/unless}} data-action="reset-camping" type="button">{{localizeKM "applications.actorActions.deleteCamping"}}</button></p>
+
+    <h2>{{localizeKM "applications.actorActions.campaignBackup"}}</h2>
+    <p class="km-backup-note">{{localizeKM "applications.actorActions.campaignBackupNote"}}</p>
+    <p><button data-action="export-campaign" type="button">{{localizeKM "applications.actorActions.exportCampaign"}}</button></p>
 </div>

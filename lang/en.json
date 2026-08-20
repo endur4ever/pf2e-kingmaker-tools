@@ -278,7 +278,10 @@
         "importKingdom": "Import Kingdom",
         "exportCamping": "Export Camping",
         "deleteCamping": "Delete Camping",
-        "importCamping": "Import Camping"
+        "importCamping": "Import Camping",
+        "campaignBackup": "Whole Campaign",
+        "campaignBackupNote": "Backs up kingdom and camping data for every party actor, plus all module settings. Does NOT include the official Kingmaker module's hex claims or scene drawings — those stay with the world.",
+        "exportCampaign": "Back Up Whole Campaign"
       },
       "cancel": "Cancel"
     },

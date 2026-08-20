@@ -17,6 +17,7 @@ import at.posselt.pfrpg2e.kingdom.setKingdom
 import at.posselt.pfrpg2e.migrations.currentSchemaVersion
 import at.posselt.pfrpg2e.migrations.migrateCampingDataFrom
 import at.posselt.pfrpg2e.migrations.migrateKingdomDataFrom
+import at.posselt.pfrpg2e.kingdom.exportCampaignBackup
 import at.posselt.pfrpg2e.planImport
 import at.posselt.pfrpg2e.settings.pfrpg2eKingdomCampingWeather
 import at.posselt.pfrpg2e.utils.buildPromise
@@ -68,6 +69,13 @@ class ActorActions(
         when (target.dataset["action"]) {
             "export-kingdom" -> actor.getKingdom()?.let {
                 downloadJson(buildEnvelope("kingdom", it), "Kingdom-${actor.uuid}.json")
+                close()
+            }
+
+            // Whole-campaign backup: world-scoped rather than actor-scoped, but this dialog is the
+            // module's existing GM-gated export surface, so it is where a GM already looks.
+            "export-campaign" -> buildPromise {
+                game.exportCampaignBackup()
                 close()
             }
 
