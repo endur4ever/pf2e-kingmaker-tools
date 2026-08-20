@@ -67,7 +67,7 @@ The following gaps from the original audit have since been shipped in code. They
 | Original Gap | Status | Implementation |
 |--------------|--------|----------------|
 | **Fame/Infamy auto-add at turn start** (Gap 1) | ✅ Shipped | `TurnTickingEngine.kt` advances fame `next→now`; `KingdomSheet.kt` has `gain-fame` button for manual +1 |
-| **Water-adjacent Mill consumption reduction** (Gap G1 in Appendix C) | ✅ Shipped | `WaterAdjacency.kt` consumed by `modifiers/evaluation/EvaluateStructures.kt` |
+| **Water-adjacent Mill consumption reduction** (Gap G1 in Appendix C) | ✅ Shipped | `kingdom/modifiers/evaluation/EvaluateStructures.kt:228` — `waterAdjacentMillBonus`, computed inline from `waterBorders >= 1` plus a constructed `mill`. NOTE: this does **not** read `data/kingdom/WaterAdjacency.kt`; that table is currently referenced only by its own test and is unused by main source. |
 | **No-roll camping downtime fix** (from `docs/todo.md`) | ✅ Shipped | No-roll activities (e.g., Enhance Weapons) charge 2h downtime at commit; sheet shows hours spent and disables at 8h |
 
 ---
