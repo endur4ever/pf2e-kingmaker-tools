@@ -3,8 +3,7 @@
   "name": "structures.aiudara-gate.name",
   "notes": "structures.aiudara-gate.notes",
   "traits": [
-    "building",
-    "gate"
+    "building"
   ],
   "affectsDowntime": false,
   "level": 10,
