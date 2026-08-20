@@ -180,7 +180,13 @@
         </div>
         <div id="km-camping-content-wrapper">
             <div class="km-camping-activities-wrapper">
-                <details class="km-route-planner" {{#if travelStartHexSelect.value}}open{{/if}}>
+{{#if forcedMarchOverLimit}}
+                <div class="km-forced-march-banner">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    {{localizeKM "camping.forcedMarchOverLimitBanner" days=forcedMarchDays maxDays=forcedMarchMaxDays}}
+                </div>
+                {{/if}}
+                                <details class="km-route-planner" {{#if travelStartHexSelect.value}}open{{/if}}>
                     <summary><i class="fa-solid fa-map-directions"></i> {{localizeKM "camping.routePlanner"}}</summary>
                     <div class="km-route-planner-content">
                         <div class="km-row">

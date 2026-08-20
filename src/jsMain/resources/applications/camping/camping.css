@@ -1381,3 +1381,27 @@ ul.km-camping-actors {
         font-size: 13px;
     }
 }
+
+/* Forced-march warning. Lives in the scrolling content body beside the route planner, never in the
+   camping header -- that region positions its children absolutely and does not tolerate new flow. */
+.km-forced-march-banner {
+    /* The activities wrapper is position:absolute, so it is shrink-to-fit: its WIDEST child sets
+       the width of every sibling. A full sentence here would stretch the route planner and travel
+       log. width:0 + min-width:100% keeps this banner out of that intrinsic-width calculation and
+       then fills whatever width the real content establishes. Measured, not assumed. */
+    width: 0;
+    min-width: calc(100% - 40px);
+    box-sizing: border-box;
+    margin: 10px 20px;
+    padding: 8px 12px;
+    border: 1px solid #ffb3b3;
+    border-radius: 5px;
+    background: rgba(120, 0, 0, 0.85);
+    color: #fff;
+    font-size: 13px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+
+    i {
+        margin-right: 6px;
+    }
+}

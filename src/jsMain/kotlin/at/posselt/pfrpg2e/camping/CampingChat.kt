@@ -101,6 +101,7 @@ fun bindCampingChatEventListeners(game: Game, dispatcher: ActionDispatcher) {
                         data = ApplyStarvation(
                             actorUuid = actorUuid,
                             condition = condition,
+                            messageKey = el.dataset["messageKey"],
                         ).unsafeCast<AnyObject>()
                     )
                 )

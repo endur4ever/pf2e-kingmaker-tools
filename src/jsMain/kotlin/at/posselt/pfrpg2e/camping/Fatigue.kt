@@ -7,6 +7,7 @@ import at.posselt.pfrpg2e.utils.isFirstGM
 import at.posselt.pfrpg2e.utils.worldTimeSeconds
 import at.posselt.pfrpg2e.weather.getCurrentWeatherType
 import com.foundryvtt.core.Game
+import com.foundryvtt.pf2e.actor.PF2ECharacter
 import com.foundryvtt.core.helpers.TypedHooks
 import com.foundryvtt.core.helpers.onUpdateWorldTime
 import com.foundryvtt.pf2e.actor.PF2EActor
@@ -32,7 +33,24 @@ suspend fun persistPassedTime(game: Game, deltaInSeconds: Int) {
             camping.persistPassedTime(deltaInSeconds)
         }
         if (camping.forcedMarchActive) {
+            val maxDays = forcedMarchMaxDays(
+                it.members.filterIsInstance<PF2ECharacter>().map { c -> c.abilities.con.mod },
+            )
+            val before = forcedMarchDays(camping.secondsSpentForcedMarching)
             camping.secondsSpentForcedMarching += deltaInSeconds
+            val after = forcedMarchDays(camping.secondsSpentForcedMarching)
+            it.setCamping(camping)
+            // Edge-triggered, so marching on past exhaustion does not re-ask every night. This runs
+            // inside the isFirstGM-gated world-time hook, so exactly one client posts the offer.
+            if (crossedForcedMarchLimit(before, after, maxDays)) {
+                postForcedMarchOffer(
+                    game = game,
+                    campers = camping.getActorsInCamp().mapNotNull { a -> a.uuid to (a.name ?: return@mapNotNull null) },
+                    days = after,
+                    maxDays = maxDays,
+                )
+            }
+            return@let
         }
         it.setCamping(camping)
     }

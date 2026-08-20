@@ -289,6 +289,9 @@ external interface CampingSheetContext : ValidatedHandlebarsContext {
     var forcedMarch: FormElementContext
     var forcedMarchDays: Int
     var forcedMarchMaxDays: Int
+
+    /** True while the party has marched past its endurance; drives the warning banner. */
+    var forcedMarchOverLimit: Boolean
     var recipes: Array<RecipeContext>
     var totalFoodCost: FoodCost
     var availableFood: FoodCost
@@ -2027,6 +2030,7 @@ class CampingSheet(
             ).toContext(),
             forcedMarchDays = forcedMarchDays(),
             forcedMarchMaxDays = forcedMarchMaxDays(),
+            forcedMarchOverLimit = forcedMarchOverLimit(forcedMarchDays(), forcedMarchMaxDays()),
             sheetBackground = background,
             travelStartHexSelect = travelStartHexSelect,
             travelEndHexSelect = travelEndHexSelect,

@@ -44,3 +44,30 @@ suspend fun postStarvationOffer(game: Game, crossings: List<StarvationCrossing>)
         whisper = gmUserIds,
     )
 }
+
+/**
+ * Whispers the GM a fatigue offer the night a party marches past its endurance.
+ *
+ * Posted only on the crossing (see [crossedForcedMarchLimit]), so pushing on for a further week
+ * does not re-ask every night. Nothing is applied here; each button applies one camper's fatigue.
+ */
+suspend fun postForcedMarchOffer(
+    game: Game,
+    campers: List<Pair<String, String>>,
+    days: Int,
+    maxDays: Int,
+) {
+    if (campers.isEmpty()) return
+    val gmUserIds = game.users.filter { it.isGM }.mapNotNull { it.id }.toTypedArray()
+    // An empty whisper array posts publicly rather than to nobody.
+    if (gmUserIds.isEmpty()) return
+    postChatTemplate(
+        templatePath = "chatmessages/forced-march-offer.hbs",
+        templateContext = recordOf(
+            "days" to days,
+            "maxDays" to maxDays,
+            "actors" to campers.map { (uuid, name) -> recordOf("uuid" to uuid, "name" to name) }.toTypedArray(),
+        ),
+        whisper = gmUserIds,
+    )
+}

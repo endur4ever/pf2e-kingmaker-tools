@@ -1,0 +1,19 @@
+<h2>{{localizeKM "camping.forcedMarchOfferTitle"}}</h2>
+<p>{{localizeKM "camping.forcedMarchOfferBody" days=days maxDays=maxDays}}</p>
+<ul>
+    {{#each actors}}
+        <li>{{name}}</li>
+    {{/each}}
+</ul>
+<hr>
+<div class="km-starvation-offers">
+    {{#each actors}}
+        <button type="button"
+                class="km-offer-starvation"
+                data-actor-uuid="{{uuid}}"
+                data-condition="fatigued"
+                data-message-key="camping.forcedMarchFatigueApplied">
+            {{localizeKM "camping.forcedMarchOfferApply"}} — {{name}}
+        </button>
+    {{/each}}
+</div>

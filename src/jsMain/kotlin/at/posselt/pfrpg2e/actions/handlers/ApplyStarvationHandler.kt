@@ -15,10 +15,21 @@ import kotlinx.js.JsPlainObject
 external interface ApplyStarvation {
     val actorUuid: String
     val condition: String
+
+    /**
+     * i18n key for the confirmation line. Nullable so cards posted before this field existed —
+     * and any still sitting in chat scrollback — keep reporting starvation.
+     */
+    val messageKey: String?
 }
 
 /**
- * Applies a starvation condition to one camper, on the GM's explicit confirmation.
+ * Applies a camping condition to one camper, on the GM's explicit confirmation.
+ *
+ * The action is still named `applyStarvation` because that string is baked into every offer card
+ * already sitting in chat scrollback; renaming it would make those buttons dead. It now serves any
+ * GM-confirmed camping condition — starvation and forced-march fatigue — distinguished by
+ * [ApplyStarvation.messageKey].
  *
  * Starvation is never auto-applied: the nightly tick only counts nights and whispers an offer card
  * to the GM, and this runs when they press the button. Inherits [ActionHandler]'s deny-by-default
@@ -38,7 +49,7 @@ class ApplyStarvationHandler : ActionHandler("applyStarvation") {
             actor.toggleCondition(condition)
         }
         postChatMessage(
-            t("camping.starvationApplied", recordOf("name" to (actor.name ?: ""))),
+            t(data.messageKey ?: "camping.starvationApplied", recordOf("name" to (actor.name ?: ""))),
             speaker = actor,
         )
     }
