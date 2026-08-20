@@ -2335,6 +2335,10 @@ class KingdomSheet(
             }
 
             "dispatch-caravan" -> buildPromise {
+                // Caravan dispatch and recall move real resources -- goods, gold and RP -- so they
+                // are GM-only. The template gate is presentation: players are OWNERs of the party
+                // actor, so an ungated handler is reachable regardless of what the sheet renders.
+                if (!game.user.isGM) return@buildPromise
                 val kingdom = getKingdom()
                 val claimedHexes = runCatching {
                     kingmaker.state.hexes.asSequence()
@@ -2428,6 +2432,10 @@ class KingdomSheet(
             }
 
             "recall-caravan" -> buildPromise {
+                // Caravan dispatch and recall move real resources -- goods, gold and RP -- so they
+                // are GM-only. The template gate is presentation: players are OWNERs of the party
+                // actor, so an ungated handler is reachable regardless of what the sheet renders.
+                if (!game.user.isGM) return@buildPromise
                 val id = target.dataset["caravanId"]
                 checkNotNull(id)
                 val current = getKingdom()
@@ -2450,6 +2458,10 @@ class KingdomSheet(
             }
 
             "dispatch-shipment" -> buildPromise {
+                // Caravan dispatch and recall move real resources -- goods, gold and RP -- so they
+                // are GM-only. The template gate is presentation: players are OWNERs of the party
+                // actor, so an ungated handler is reachable regardless of what the sheet renders.
+                if (!game.user.isGM) return@buildPromise
                 val kingdom = getKingdom()
                 fun hexCoords(h: String) =
                     h.toIntOrNull()?.let { " (${it / 1000}.${it % 1000})" } ?: " ($h)"
@@ -2594,6 +2606,10 @@ class KingdomSheet(
             }
 
             "recall-shipment" -> buildPromise {
+                // Caravan dispatch and recall move real resources -- goods, gold and RP -- so they
+                // are GM-only. The template gate is presentation: players are OWNERs of the party
+                // actor, so an ungated handler is reachable regardless of what the sheet renders.
+                if (!game.user.isGM) return@buildPromise
                 val id = target.dataset["shipmentId"]
                 checkNotNull(id)
                 val current = getKingdom()

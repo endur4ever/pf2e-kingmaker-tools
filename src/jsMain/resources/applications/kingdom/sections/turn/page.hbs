@@ -449,19 +449,21 @@
         </section>
         <section class="km-kingdom-sheet-section">
             <h2>{{localizeKM "kingdom.caravans.title"}}</h2>
+            {{#if isGM}}
             <p class="km-turn-buttons">
                 <button type="button" data-action="dispatch-caravan"><i class="fa-solid fa-truck-fast"></i> {{localizeKM "kingdom.caravans.dispatch"}}</button>
                 <button type="button" data-action="dispatch-shipment"><i class="fa-solid fa-box-open"></i> {{localizeKM "kingdom.caravans.dispatchShipment"}}</button>
             </p>
+            {{/if}}
             {{#if caravans.length}}
                 <ul class="km-caravans">
                     {{#each caravans}}
                         <li class="km-caravan">
                             <span class="km-caravan-summary">{{summary}}</span>
                             <span class="km-caravan-eta">{{localizeKM "kingdom.caravans.eta" turns=turnsRemaining}}</span>
-                            {{#if recallable}}
+                            {{#if recallable}}{{#if @root.isGM}}
                                 <button type="button" class="km-btn-sm" data-action="recall-caravan" data-caravan-id="{{id}}">{{localizeKM "kingdom.caravans.recall"}}</button>
-                            {{/if}}
+                            {{/if}}{{/if}}
                         </li>
                     {{/each}}
                 </ul>
@@ -473,9 +475,9 @@
                         <li class="km-caravan">
                             <span class="km-caravan-summary">{{summary}}</span>
                             <span class="km-caravan-eta">{{localizeKM "kingdom.caravans.eta" turns=turnsRemaining}}</span>
-                            {{#if recallable}}
+                            {{#if recallable}}{{#if @root.isGM}}
                                 <button type="button" class="km-btn-sm" data-action="recall-shipment" data-shipment-id="{{id}}">{{localizeKM "kingdom.caravans.recall"}}</button>
-                            {{/if}}
+                            {{/if}}{{/if}}
                         </li>
                     {{/each}}
                 </ul>
