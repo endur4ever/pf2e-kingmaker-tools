@@ -136,6 +136,11 @@ class ActorActions(
         migrate: suspend (fromVersion: Int, data: dynamic) -> Unit,
         apply: suspend (data: dynamic) -> Unit,
     ) {
+        // Import overwrites a party actor's entire kingdom or camping state. The dialog is only
+        // reachable from a GM-gated actor-directory icon, but players OWN the party actor, so the
+        // UI gate is presentation rather than authorization -- the same distinction that left the
+        // caravan dispatch handlers open. Guard the mutation itself.
+        if (!game.user.isGM) return
         val parsed = runCatching { JSON.parse<Any?>(json).asDynamic() }.getOrNull()
         if (parsed == null || parsed == undefined) {
             ui.notifications.error(t("kingdom.import.parseError"))
