@@ -30,10 +30,23 @@ The package is available through the [module registry](https://foundryvtt.com/pa
 This module ships with implementations for all the extra mechanics provided in the best sandbox PFRPG 2e adventure,
 including optional and popular homebrew from Vance & Kerenshara:
 
-* Camping Sheet
-* Kingdom Sheet
-* Weather
-* Combat Tracks
+* **Camping Sheet** — activities, watches, meals & recipes, hunt & gather with terrain/season/weather
+  yields, forced-march endurance, starvation tracking, and a travel journal of where the party has been
+* **Kingdom Sheet** — the full kingdom turn, structures and settlements, leadership, ruin & unrest
+* **Turn Wizard** — a guided, phase-gated end-turn flow with a preview before anything is committed
+* **Session Prep & Gazette** — a per-turn narrative digest and event log, exportable to a journal
+* **Factions & Diplomacy** — faction standing, alliance tiers, and diplomatic expeditions
+* **War Pressure & Battles** — army threats, escalation, battle resolution and GM-confirmed consequences
+* **Caravans & Shipments** — trade routes with raid risk, dispatch and recall
+* **Companion Expeditions** — send companions on off-screen pursuits; they level and return with results
+* **Quests** — campaign and personal quests, with search, filtering and a completed archive
+* **Analytics & Turn History** — recorded turns, milestones and XP
+* **Homebrew Rule Profiles** — swap rule variants per table, importable and exportable
+* **Calendar Integration** — Simple Calendar / Seasons & Stars notes for weather, rests and turns
+* **Backup & Restore** — per-actor export/import plus a one-click whole-campaign backup
+* **Player-facing views** — read-only sheets so players can follow the kingdom without GM controls
+* **Weather**
+* **Combat Tracks**
 
 ### House Rules & GM Tips
 

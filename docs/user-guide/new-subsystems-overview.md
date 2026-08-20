@@ -1,4 +1,4 @@
-# New Subsystems Overview (June/July 202im)
+# New Subsystems Overview (June/July 2026)
 
 This guide provides an overview of the major subsystems implemented during the June and July 2026 feature waves for the Kingmaker Campaign Automation module.
 
