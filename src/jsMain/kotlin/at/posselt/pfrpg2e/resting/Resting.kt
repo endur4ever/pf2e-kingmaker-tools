@@ -33,6 +33,7 @@ import at.posselt.pfrpg2e.camping.nextCampingSessionId
 import at.posselt.pfrpg2e.camping.appendTravelEntry
 import at.posselt.pfrpg2e.camping.postStarvationOffer
 import at.posselt.pfrpg2e.camping.TravelJournalKind
+import at.posselt.pfrpg2e.camping.resetForcedMarch
 import at.posselt.pfrpg2e.camping.restEntry
 import at.posselt.pfrpg2e.camping.travelJournalDaySummary
 import at.posselt.pfrpg2e.camping.travelJournalList
@@ -489,6 +490,8 @@ private suspend fun completeDailyPreparations(
     // breath so anything keyed on it (the companion once-per-session cap) can never drift from it.
     camping.campingSessionId = nextCampingSessionId(camping.campingSessionId)
     camping.resetDowntimeHours()
+    // A full night's rest is what recovers forced-march endurance.
+    camping.resetForcedMarch()
     // Hunger advances BEFORE the persist so it rides this single save. Deliberately not part of
     // resetDowntimeHours() above -- downtime resets nightly, hunger accumulates across nights.
     val starvationCrossings = tickNightlyStarvation(

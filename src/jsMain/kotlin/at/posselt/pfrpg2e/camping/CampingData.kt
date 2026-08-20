@@ -358,6 +358,17 @@ fun CampingData.resetDowntimeHours() {
     downtimeHoursSpent?.let { spent ->
         js.objects.Object.keys(spent).forEach { spent[it] = 0 }
     }
+}
+
+/**
+ * Clears accumulated forced-march time. Only a full night's rest recovers the party's endurance,
+ * so this is called from daily preparations and nowhere else.
+ *
+ * It used to live inside [resetDowntimeHours], which meant two unrelated actions silently wiped the
+ * count: the sheet's "reset activities" button, and un-ticking the Forced March checkbox. Both are
+ * ordinary mis-clicks, and the count is the only record of how long the party has been pushing.
+ */
+fun CampingData.resetForcedMarch() {
     secondsSpentForcedMarching = 0
 }
 

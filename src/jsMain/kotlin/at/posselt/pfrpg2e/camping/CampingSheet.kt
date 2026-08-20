@@ -2074,10 +2074,10 @@ class CampingSheet(
                 )
             }.toMutableRecord()
             camping.travelModeActive = value.travelModeActive
+            // Stopping the march does NOT undo it: the accumulated days stand until the party
+            // actually rests. Zeroing here meant a mis-click on the checkbox erased the only record
+            // of how long they had been pushing.
             camping.forcedMarchActive = value.forcedMarchActive
-            if (!value.forcedMarchActive) {
-                camping.secondsSpentForcedMarching = 0
-            }
             camping.travelStartHex = value.travelStartHex
             camping.travelEndHex = value.travelEndHex
             // The control is GM-gated, so it is absent from a player's form. Only honour it from
