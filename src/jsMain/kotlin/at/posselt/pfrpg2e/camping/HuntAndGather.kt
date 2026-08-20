@@ -29,7 +29,7 @@ private suspend fun getHuntAndGatherQuantities(
             4
         }
         return FoodAmount(
-            basicIngredients = applyForagingModifier(2 * regionDc, foraging),
+            basicIngredients = basicForageYield(DegreeOfSuccess.CRITICAL_SUCCESS, regionDc, foraging),
             specialIngredients = applyForagingModifier(specialIngredients, foraging),
             rations = 0,
         )
@@ -43,19 +43,24 @@ private suspend fun getHuntAndGatherQuantities(
         }
         val specialIngredients = roll("${dice}d4", t("camping.specialIngredients"))
         return FoodAmount(
-            basicIngredients = applyForagingModifier(regionDc, foraging),
+            basicIngredients = basicForageYield(DegreeOfSuccess.SUCCESS, regionDc, foraging),
             specialIngredients = applyForagingModifier(specialIngredients, foraging),
             rations = 0,
         )
     } else if (degreeOfSuccess == DegreeOfSuccess.FAILURE) {
         return FoodAmount(
-            basicIngredients = regionDc,
+            // Modified like every other degree: conditions act on the land, not the roll. Leaving
+            // failure flat made a lean-day SUCCESS yield HALF of a FAILURE.
+            basicIngredients = basicForageYield(DegreeOfSuccess.FAILURE, regionDc, foraging),
             specialIngredients = 0,
             rations = 0,
         )
     } else {
         return FoodAmount(
-            basicIngredients = min(roll("1d4", t("camping.basicIngredients")), regionDc),
+            basicIngredients = applyForagingModifier(
+                min(roll("1d4", t("camping.basicIngredients")), regionDc),
+                foraging,
+            ),
             specialIngredients = 0,
             rations = 0,
         )

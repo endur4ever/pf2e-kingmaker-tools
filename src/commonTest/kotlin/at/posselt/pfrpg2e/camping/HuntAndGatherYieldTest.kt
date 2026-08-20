@@ -1,5 +1,6 @@
 package at.posselt.pfrpg2e.camping
 
+import at.posselt.pfrpg2e.data.checks.DegreeOfSuccess
 import at.posselt.pfrpg2e.data.regions.Season
 import at.posselt.pfrpg2e.data.regions.Terrain
 import at.posselt.pfrpg2e.data.regions.WeatherType
@@ -66,5 +67,56 @@ class HuntAndGatherYieldTest {
         assertEquals(0, applyForagingModifier(0, ForagingModifier(1.25, ForagingTrend.BOUNTIFUL)))
         // Neutral is a no-op.
         assertEquals(7, applyForagingModifier(7, ForagingModifier.NEUTRAL))
+    }
+
+    @Test
+    fun aSuccessfulForageNeverYieldsLessBasicThanAFailedOne() {
+        // The inversion this rule exists to prevent. Failure's basic yield was a flat regionDc while
+        // success was scaled, so on a lean day (clamped to 0.5x) a SUCCESS returned HALF of a
+        // FAILURE -- a party on a snowy winter desert day was better off botching the check.
+        // Table-driven over every terrain x season x weather combination, at several region DCs.
+        for (terrain in Terrain.entries) {
+            for (season in Season.entries) {
+                for (weather in WeatherType.entries) {
+                    val mod = foragingYieldModifier(terrain, season, weather)
+                    for (dc in listOf(1, 4, 12, 20, 35)) {
+                        val success = basicForageYield(DegreeOfSuccess.SUCCESS, dc, mod)
+                        val failure = basicForageYield(DegreeOfSuccess.FAILURE, dc, mod)
+                        assertTrue(
+                            success >= failure,
+                            "success ($success) < failure ($failure) for $terrain/$season/$weather at dc $dc",
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    fun aCriticalSuccessAlwaysBeatsAPlainOne() {
+        for (terrain in Terrain.entries) {
+            for (weather in WeatherType.entries) {
+                val mod = foragingYieldModifier(terrain, Season.WINTER, weather)
+                for (dc in listOf(1, 12, 35)) {
+                    assertTrue(
+                        basicForageYield(DegreeOfSuccess.CRITICAL_SUCCESS, dc, mod) >=
+                            basicForageYield(DegreeOfSuccess.SUCCESS, dc, mod),
+                        "crit success below success for $terrain/$weather at dc $dc",
+                    )
+                }
+            }
+        }
+    }
+
+    @Test
+    fun conditionsScaleEveryDegreeByTheSameRule() {
+        // Basic yield is equal on success and failure by design; a success is distinguished by the
+        // special ingredients it also returns. Any future change that scales one degree but not
+        // another reintroduces the inversion.
+        val lean = foragingYieldModifier(Terrain.DESERT, Season.WINTER, WeatherType.SNOWY)
+        assertEquals(
+            basicForageYield(DegreeOfSuccess.SUCCESS, 12, lean),
+            basicForageYield(DegreeOfSuccess.FAILURE, 12, lean),
+        )
     }
 }

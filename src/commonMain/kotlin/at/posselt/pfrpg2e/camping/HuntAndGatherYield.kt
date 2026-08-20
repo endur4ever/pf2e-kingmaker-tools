@@ -1,5 +1,6 @@
 package at.posselt.pfrpg2e.camping
 
+import at.posselt.pfrpg2e.data.checks.DegreeOfSuccess
 import at.posselt.pfrpg2e.data.regions.Season
 import at.posselt.pfrpg2e.data.regions.Terrain
 import at.posselt.pfrpg2e.data.regions.WeatherType
@@ -77,3 +78,24 @@ fun applyForagingModifier(yield: Int, modifier: ForagingModifier): Int {
     val rounded = kotlin.math.floor(scaled + 0.5).toInt()
     return maxOf(1, rounded)
 }
+
+/**
+ * Basic-ingredient yield for a forage of [degree] in a region of [regionDc], after [modifier].
+ *
+ * Exists so one rule governs every degree. Applying the modifier to successes ONLY inverted the
+ * degrees: failure's basic yield is a flat regionDc, so on a lean day (down to 0.5x) a SUCCESS
+ * returned half of what a FAILURE returned, and a party was better off botching the check on a
+ * snowy winter desert day than passing it.
+ *
+ * Conditions act on the land, not on the forager, so they scale every degree equally. That restores
+ * the original design, in which basic yield is equal on success and failure and a success is
+ * distinguished by the special ingredients it also returns.
+ *
+ * Critical failure is not covered here — its yield is a die roll, so it lives with the caller.
+ */
+fun basicForageYield(degree: DegreeOfSuccess, regionDc: Int, modifier: ForagingModifier): Int =
+    when (degree) {
+        DegreeOfSuccess.CRITICAL_SUCCESS -> applyForagingModifier(2 * regionDc, modifier)
+        DegreeOfSuccess.SUCCESS, DegreeOfSuccess.FAILURE -> applyForagingModifier(regionDc, modifier)
+        DegreeOfSuccess.CRITICAL_FAILURE -> applyForagingModifier(regionDc, modifier)
+    }
