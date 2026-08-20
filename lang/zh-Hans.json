@@ -3956,6 +3956,11 @@
         },
         "criticalFailure": {
           "msg": "<p>The item is destroyed.</p>"
+        },
+        "structure": {
+          "shrine": "Shrine",
+          "temple": "Temple",
+          "cathedral": "Cathedral"
         }
       },
       "clandestine-business": {
