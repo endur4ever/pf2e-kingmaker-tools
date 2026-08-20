@@ -280,7 +280,7 @@ You use your fleet to ship materials or transport skilled builders and specialis
 
 Kingmaker throws a lot of cursed items at the players with detrimental effects. It can be fun to let them remove an item's downsides.
 
-You can remove curses from an item using a successful Magic counteract check. Your counteract level is your (kingdom level / 2) rounded up and the DC is an incredibly hard (+10) DC based on the item's level. In addition, you need to pay luxuries and have access to specific structures to prepare the ritual based on the item's level:
+You can remove curses from an item using a successful Magic counteract check. Your counteract level is your (kingdom level / 2) rounded up and the DC is the counteract DC for the item's level (its level-based DC). This lands on the same baseline as your Control DC, so cleansing an item of your kingdom's own level is about as hard as a routine kingdom check, and scales either side of that. In addition, you need to pay luxuries and have access to specific structures to prepare the ritual based on the item's level:
 
 * **1-5**: 1 Luxury, Shrine
 * **6-10**: 2 Luxuries, Temple

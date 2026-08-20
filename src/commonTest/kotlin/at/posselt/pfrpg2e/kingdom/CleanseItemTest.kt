@@ -15,11 +15,26 @@ class CleanseItemTest {
     }
 
     @Test
-    fun dcIsIncrediblyHardForTheItemLevel() {
-        // Incredibly hard = the item-level DC plus 10.
-        assertEquals(getLevelBasedDC(3) + 10, cleanseItemPlan(itemLevel = 3, kingdomLevel = 10).dc)
-        assertEquals(getLevelBasedDC(17) + 10, cleanseItemPlan(itemLevel = 17, kingdomLevel = 10).dc)
-        assertEquals(getLevelBasedDC(0) + 10, cleanseItemPlan(itemLevel = 0, kingdomLevel = 10).dc)
+    fun dcIsTheCounteractDcForTheItemLevel() {
+        // PF2e's counteract DC against a level-N item is that level's level-based DC. Deliberately
+        // NOT +10 on top: the kingdom Control DC shares the same 14 + level + level/3 base, so this
+        // makes cleansing an item of the kingdom's own level exactly as hard as a routine kingdom
+        // check. A flat +10 made it the hardest action in the game (DC 50 at level 20 vs a Control
+        // DC of 40), which is why the original reading was dropped.
+        assertEquals(15, cleanseItemPlan(itemLevel = 1, kingdomLevel = 1).dc)
+        assertEquals(20, cleanseItemPlan(itemLevel = 5, kingdomLevel = 1).dc)
+        assertEquals(27, cleanseItemPlan(itemLevel = 10, kingdomLevel = 1).dc)
+        assertEquals(40, cleanseItemPlan(itemLevel = 20, kingdomLevel = 1).dc)
+    }
+
+    @Test
+    fun theDcTracksTheItemNotTheKingdom() {
+        // A powerful kingdom does not get a discount on a dangerous item, and a weak one is not
+        // punished for a trinket -- only the counteract LEVEL scales with the kingdom.
+        assertEquals(
+            cleanseItemPlan(itemLevel = 12, kingdomLevel = 1).dc,
+            cleanseItemPlan(itemLevel = 12, kingdomLevel = 20).dc,
+        )
     }
 
     @Test

@@ -2,15 +2,12 @@ package at.posselt.pfrpg2e.kingdom
 
 import at.posselt.pfrpg2e.data.checks.getLevelBasedDC
 
-/** The "incredibly hard" difficulty adjustment (PF2e: +10 on the level-based DC). */
-private const val INCREDIBLY_HARD_ADJUSTMENT = 10
-
 /**
  * Derived requirements for the Cleanse Item leadership activity (house-rules.md): a kingdom-scale
  * Magic counteract to remove a curse from an item.
  *
  * @param counteractLevel The kingdom's counteract level — kingdom level halved, rounded up.
- * @param dc The check DC — an incredibly-hard DC for the item's level (the item-level DC + 10).
+ * @param dc The check DC — the counteract DC for the item's level.
  * @param luxuryCost Luxuries required to prepare the ritual, by item level band.
  * @param requiredStructure The lowest structure that qualifies to prepare the ritual.
  */
@@ -35,7 +32,13 @@ enum class CleanseItemStructure(val value: String) {
  * Pure — the dialog reads these numbers; tests pin them to the house-rules table:
  *
  *  - counteract level = ceil(kingdomLevel / 2)
- *  - DC = incredibly-hard DC for the item level (getLevelBasedDC(itemLevel) + 10)
+ *  - DC = the level-based DC for the ITEM's level — PF2e's counteract DC against a level-N item.
+ *
+ *    Deliberately NOT the "incredibly hard" (+10) reading the prose in house-rules.md invited. The
+ *    kingdom Control DC is 14 + level + level/3 + size, i.e. the SAME base as getLevelBasedDC, so
+ *    this makes cleansing an item of the kingdom's own level exactly as hard as a routine kingdom
+ *    check, and scales naturally either side of that. A flat +10 on top made it the hardest thing a
+ *    kingdom could attempt, which overpriced an activity meant to be usable.
  *  - 1-5: 1 Luxury, Shrine · 6-10: 2 Luxuries, Temple · 11-15: 4 Luxuries, Temple · 16+: 8, Cathedral
  */
 fun cleanseItemPlan(itemLevel: Int, kingdomLevel: Int): CleanseItemPlan {
@@ -48,7 +51,7 @@ fun cleanseItemPlan(itemLevel: Int, kingdomLevel: Int): CleanseItemPlan {
     }
     return CleanseItemPlan(
         counteractLevel = (kingdomLevel.coerceAtLeast(1) + 1) / 2,
-        dc = getLevelBasedDC(level) + INCREDIBLY_HARD_ADJUSTMENT,
+        dc = getLevelBasedDC(level),
         luxuryCost = luxuryCost,
         requiredStructure = structure,
     )
