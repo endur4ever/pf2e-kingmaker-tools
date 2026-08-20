@@ -244,6 +244,12 @@ object Pfrpg2eKingdomCampingWeatherSettings {
     fun getLatestMigrationBackup(): String =
         game.settings.getString("latestMigrationBackup")
 
+    suspend fun setPreviousMigrationBackup(value: String) =
+        game.settings.setString("previousMigrationBackup", value)
+
+    fun getPreviousMigrationBackup(): String =
+        game.settings.getString("previousMigrationBackup")
+
     suspend fun setHomebrewProfileRegistry(value: String) =
         game.settings.setString("homebrewProfileRegistry", value)
 
@@ -453,6 +459,9 @@ object Pfrpg2eKingdomCampingWeatherSettings {
             "currentWeatherFx" to "none",
             "currentWeatherType" to "sunny",
             "latestMigrationBackup" to "{}",
+            // Second slot. createBackups rotates latest -> previous before each write, so re-running
+            // migrations cannot destroy the only good copy of the pre-migration state.
+            "previousMigrationBackup" to "{}",
             // JSON-serialized HomebrewProfileRegistry (managed via the Homebrew Profile Manager)
             "homebrewProfileRegistry" to "{}",
         )

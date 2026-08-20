@@ -1,5 +1,6 @@
 package at.posselt.pfrpg2e.kingdom
 
+import kotlin.test.assertNull
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -41,5 +42,20 @@ class MigrationBackupRestoreTest {
         assertEquals(listOf("a", "b"), identical.restorable)
         assertEquals(emptyList(), identical.missingFromWorld)
         assertEquals(emptyList(), identical.extraInWorld)
+    }
+
+    @Test
+    fun anUnwrittenSlotIsNotABackup() {
+        // The world setting defaults to "{}", so this is the state of every world that has never
+        // run a migration. Offering it as a restore point would hand the GM an empty rollback.
+        assertNull(backupSlotContent("{}"))
+        assertNull(backupSlotContent("  {}  "))
+        assertNull(backupSlotContent(""))
+        assertNull(backupSlotContent(null))
+    }
+
+    @Test
+    fun aRealBackupSurvivesTheEmptyCheck() {
+        assertEquals("""{"version":42}""", backupSlotContent("""{"version":42}"""))
     }
 }

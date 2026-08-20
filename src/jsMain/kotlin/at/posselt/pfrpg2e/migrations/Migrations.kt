@@ -52,6 +52,9 @@ import at.posselt.pfrpg2e.migrations.migrations.Migration57
 import at.posselt.pfrpg2e.migrations.migrations.Migration58
 import at.posselt.pfrpg2e.migrations.migrations.Migration59
 import at.posselt.pfrpg2e.migrations.migrations.Migration60
+import at.posselt.pfrpg2e.kingdom.BackupSlots
+import at.posselt.pfrpg2e.kingdom.backupSlotContent
+import at.posselt.pfrpg2e.kingdom.rotateBackupSlots
 import at.posselt.pfrpg2e.settings.pfrpg2eKingdomCampingWeather
 import at.posselt.pfrpg2e.utils.isFirstGM
 import at.posselt.pfrpg2e.utils.openJournal
@@ -76,9 +79,19 @@ private suspend fun createBackups(
             it.id!! to it.getKingdom()
         }.toRecord()
     )
-    game.settings.pfrpg2eKingdomCampingWeather.setLatestMigrationBackup(
-        JSON.stringify(backup)
+    // Rotate rather than overwrite. A single slot meant a second migration run -- which is exactly
+    // what happens when a GM reloads after a failed one -- destroyed the only good copy of the
+    // pre-migration state, leaving hand-editing flags as the sole recovery.
+    val settings = game.settings.pfrpg2eKingdomCampingWeather
+    val rotated = rotateBackupSlots(
+        slots = BackupSlots(
+            latest = backupSlotContent(settings.getLatestMigrationBackup()),
+            previous = backupSlotContent(settings.getPreviousMigrationBackup()),
+        ),
+        newBackup = JSON.stringify(backup),
     )
+    rotated.previous?.let { settings.setPreviousMigrationBackup(it) }
+    rotated.latest?.let { settings.setLatestMigrationBackup(it) }
 }
 
 internal val migrations = listOf(

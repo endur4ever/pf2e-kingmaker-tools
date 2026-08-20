@@ -54,3 +54,13 @@ fun reconcileBackupActors(
         extraInWorld = worldActorIds.distinct().filter { it !in backupSet },
     )
 }
+
+/**
+ * Whether a stored backup slot actually holds a backup.
+ *
+ * The world settings that carry these slots default to the literal string "{}", so a naive
+ * non-null/non-empty check treats a never-written slot as a real backup — the restore dialog would
+ * then offer a GM an empty "backup" to roll back to, which is worse than offering none.
+ */
+fun backupSlotContent(raw: String?): String? =
+    raw?.takeIf { it.isNotBlank() && it.trim() != "{}" }
