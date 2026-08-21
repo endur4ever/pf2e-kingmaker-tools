@@ -70,3 +70,7 @@ graphify-out/
 /test.txt
 /tmp.json
 *.bak
+
+# Python bytecode from the repo guard scripts
+__pycache__/
+*.pyc
