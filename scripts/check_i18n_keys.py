@@ -95,6 +95,17 @@ def find_flat_dotted(node, path=""):
     return bad
 
 
+def lookup_value(root, key):
+    """Like resolve(), but returns the STRING value rather than a boolean."""
+    cur = root
+    for part in key.split("."):
+        if isinstance(cur, dict) and part in cur:
+            cur = cur[part]
+        else:
+            return None
+    return cur if isinstance(cur, str) else None
+
+
 def resolve(root, key):
     cur = root
     for part in key.split("."):
@@ -290,10 +301,59 @@ def get_value_by_key(d, key):
     return cur if isinstance(cur, str) else None
 
 
+GAZETTE_SRC = os.path.join(ROOT, "src", "jsMain", "kotlin", "at", "posselt", "pfrpg2e",
+                           "kingdom", "TurnHistory.kt")
+
+
+def check_gazette_resolver():
+    """Check 6: formatTurnGazette's defaultLocalize must match lang/en.json verbatim.
+
+    formatTurnGazette takes an injected localizer so its pure unit tests stay green in the
+    headless harness, where t() returns the raw key. defaultLocalize is therefore a SECOND,
+    hand-maintained copy of the same English strings that production reads from en.json.
+
+    Nothing else can catch a divergence: the i18n guard cannot see keys that only appear as
+    string literals inside a Kotlin `when`, and the gazette tests assert against defaultLocalize,
+    so they stay green while production silently renders different text. This check is what makes
+    the two copies stay honest.
+    """
+    if not os.path.exists(GAZETTE_SRC):
+        return 0
+    src = open(GAZETTE_SRC, encoding="utf-8").read()
+    start = src.find("fun defaultLocalize")
+    if start == -1:
+        return 0
+    block = src[start:src.index("\n}", start)]
+    pairs = re.findall(r'"(kingdom\.turnGazette\.[\w]+)"\s*->\s*"(.*?)"\s*$', block, re.M)
+    if not pairs:
+        print("[i18n] GAZETTE: could not parse defaultLocalize — check the guard, not the code")
+        return 1
+    root = load_root()
+    problems = []
+    for key, kotlin in pairs:
+        # Kotlin writes ${dyn.foo}; en.json writes {foo}
+        normalised = re.sub(r"\$\{dyn\.(\w+)\}", r"{\1}", kotlin)
+        expected = lookup_value(root, key)
+        if expected is None:
+            problems.append((key, normalised, "<missing from lang/en.json>"))
+        elif expected != normalised:
+            problems.append((key, normalised, expected))
+    if problems:
+        print(f"[i18n] {len(problems)} GAZETTE DIVERGENCE(S) between defaultLocalize "
+              f"(TurnHistory.kt) and lang/en.json — the two copies must stay identical:")
+        for key, kotlin, expected in problems:
+            print(f"    \u2717 {key}")
+            print(f"        defaultLocalize: {kotlin}")
+            print(f"        lang/en.json   : {expected}")
+        return 1
+    print(f"[i18n] GAZETTE OK — all {len(pairs)} defaultLocalize strings match lang/en.json.")
+    return 0
+
+
 def main():
     parser = argparse.ArgumentParser(description="i18n key guard for pf2e-kingmaker-tools")
     parser.add_argument("--parity", action="store_true", help="Run cross-language parity check only")
-    parser.add_argument("--all", action="store_true", help="Run all checks (1-5)")
+    parser.add_argument("--all", action="store_true", help="Run all checks (1-6)")
     args = parser.parse_args()
     
     if args.parity:
@@ -366,8 +426,10 @@ def main():
     
     # Run parity check if --all specified
     if args.all:
-        parity_problems = check_parity()
-        if parity_problems:
+        failed = 0
+        failed += check_parity() or 0
+        failed += check_gazette_resolver() or 0
+        if failed:
             return 1
     
     return 0
