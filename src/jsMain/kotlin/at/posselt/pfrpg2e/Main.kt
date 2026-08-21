@@ -51,6 +51,7 @@ import at.posselt.pfrpg2e.macros.editStructureMacro
 import at.posselt.pfrpg2e.macros.exportActiveGearSettingsProfileMacro
 import at.posselt.pfrpg2e.macros.importGearSettingsProfileMacro
 import at.posselt.pfrpg2e.macros.manageGearSettingsProfilesMacro
+import at.posselt.pfrpg2e.macros.manageHomebrewProfilesMacro
 import at.posselt.pfrpg2e.macros.resetHeroPointsMacro
 import at.posselt.pfrpg2e.macros.rollExplorationSkillCheckMacro
 import at.posselt.pfrpg2e.macros.rollPartyCheckMacro
@@ -233,6 +234,7 @@ fun main() {
                 createFoodMacro = { buildPromise { createFoodMacro(game, actionDispatcher) } },
                 showAllNpcHpBarsMacro = { buildPromise { game.showAllNpcHpBars() }},
                 manageGearSettingsProfilesMacro = { buildPromise { manageGearSettingsProfilesMacro() } },
+                manageHomebrewProfilesMacro = { buildPromise { manageHomebrewProfilesMacro(game) } },
                 importGearSettingsProfileMacro = { buildPromise { importGearSettingsProfileMacro(game) } },
                 exportActiveGearSettingsProfileMacro = { buildPromise { exportActiveGearSettingsProfileMacro(game) } },
                 restMacro = { actorUuid ->

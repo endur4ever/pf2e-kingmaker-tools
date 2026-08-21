@@ -30,6 +30,7 @@ external interface ToolsMacros {
     val openSheet: (type: String, id: String) -> Unit
     val showAllNpcHpBarsMacro: () -> Unit
     val manageGearSettingsProfilesMacro: () -> Unit
+    val manageHomebrewProfilesMacro: () -> Unit
     val importGearSettingsProfileMacro: () -> Unit
     val exportActiveGearSettingsProfileMacro: () -> Unit
     val restMacro: (actorUuid: String) -> Unit
