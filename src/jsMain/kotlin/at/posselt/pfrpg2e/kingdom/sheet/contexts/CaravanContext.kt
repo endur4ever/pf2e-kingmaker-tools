@@ -9,13 +9,27 @@ import kotlinx.js.JsPlainObject
 @JsPlainObject
 external interface CaravanRowContext {
     val id: String
+    /** Whole route as one line, kept for the row's hover title. */
     val summary: String
+    /** Who is on the far end: the trade partner when there is one, else the destination. */
+    val partner: String
+    val cargo: String
+    /** Null when the route cannot be resolved right now, rather than showing a misleading number. */
+    val raidDc: Int?
+    val etaTurns: Int
     val turnsRemaining: Int
     val recallable: Boolean
 }
 
-/** Builds the caravan-board rows from the kingdom's in-transit caravans. */
-fun Array<RawCaravan>.toCaravanRowContexts(): Array<CaravanRowContext> =
+/**
+ * Builds the caravan-board rows from the kingdom's in-transit caravans.
+ *
+ * [raidDcOf] is injected because resolving a raid DC needs the live hex grid, which this file must
+ * stay clear of. It returns null when the route cannot be walked, and the row then omits the DC.
+ */
+fun Array<RawCaravan>.toCaravanRowContexts(
+    raidDcOf: (RawCaravan) -> Int? = { null },
+): Array<CaravanRowContext> =
     filter { it.status == "inTransit" }
         .map { caravan ->
             val cargo = caravan.cargoCommodity
@@ -24,6 +38,10 @@ fun Array<RawCaravan>.toCaravanRowContexts(): Array<CaravanRowContext> =
             CaravanRowContext(
                 id = caravan.id,
                 summary = "$cargo: ${caravan.originLabel} → ${caravan.destLabel}",
+                partner = caravan.partnerName ?: caravan.destLabel,
+                cargo = cargo,
+                raidDc = raidDcOf(caravan),
+                etaTurns = caravan.etaTurns,
                 turnsRemaining = caravan.turnsRemaining,
                 recallable = caravan.status == "inTransit",
             )
@@ -35,12 +53,18 @@ fun Array<RawCaravan>.toCaravanRowContexts(): Array<CaravanRowContext> =
 external interface ShipmentRowContext {
     val id: String
     val summary: String
+    val partner: String
+    val cargo: String
+    val raidDc: Int?
+    val etaTurns: Int
     val turnsRemaining: Int
     val recallable: Boolean
 }
 
 /** Builds the shipment-board rows from the kingdom's in-transit shipments. */
-fun Array<RawCaravanShipment>.toShipmentRowContexts(): Array<ShipmentRowContext> =
+fun Array<RawCaravanShipment>.toShipmentRowContexts(
+    raidDcOf: (RawCaravanShipment) -> Int? = { null },
+): Array<ShipmentRowContext> =
     filter { it.status == "inTransit" }
         .map { shipment ->
             val typeLabel = when (shipment.caravanType) {
@@ -52,9 +76,13 @@ fun Array<RawCaravanShipment>.toShipmentRowContexts(): Array<ShipmentRowContext>
             ShipmentRowContext(
                 id = shipment.id,
                 summary = "$cargo: ${shipment.originLabel} → ${shipment.destLabel}",
+                // An item shipment has no diplomatic partner, only a destination settlement.
+                partner = shipment.destLabel,
+                cargo = cargo,
+                raidDc = raidDcOf(shipment),
+                etaTurns = shipment.etaTurns,
                 turnsRemaining = shipment.turnsRemaining,
                 recallable = shipment.status == "inTransit",
             )
         }
         .toTypedArray()
-

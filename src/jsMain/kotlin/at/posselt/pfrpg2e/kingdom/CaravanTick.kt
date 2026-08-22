@@ -142,6 +142,23 @@ fun caravanRaidDc(
     return dc.coerceIn(5, 40)
 }
 
+/**
+ * Raid DC for an item shipment. Shipments roll down the same roads through the same hexes as
+ * commodity caravans, so they take the same route modifiers from [caravanRaidDc] -- including the
+ * road discount, which an earlier inline copy of this formula silently withheld from them.
+ *
+ * An item delivery has no trade partner at the far end, only a destination settlement, so standing
+ * and war never apply.
+ */
+fun shipmentRaidDc(safety: CaravanRouteSafety, baseDc: Int = CARAVAN_BASE_RAID_DC): Int =
+    caravanRaidDc(
+        baseDc = baseDc,
+        partnerStanding = null,
+        atWar = false,
+        claimedFraction = safety.claimedFraction,
+        fullyRoadedThroughClaimed = safety.fullyRoadedThroughClaimed,
+    )
+
 /** Bonus Resource Dice granted per Commodity sold, scaled by the partner's standing and treaty tier. */
 fun caravanRdPerCommodity(
     standing: Int?,

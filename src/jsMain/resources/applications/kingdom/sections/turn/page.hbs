@@ -459,11 +459,15 @@
                 <ul class="km-caravans">
                     {{#each caravans}}
                         <li class="km-caravan">
-                            <span class="km-caravan-summary">{{summary}}</span>
-                            <span class="km-caravan-eta">{{localizeKM "kingdom.caravans.eta" turns=turnsRemaining}}</span>
-                            {{#if recallable}}{{#if @root.isGM}}
-                                <button type="button" class="km-btn-sm" data-action="recall-caravan" data-caravan-id="{{id}}">{{localizeKM "kingdom.caravans.recall"}}</button>
-                            {{/if}}{{/if}}
+                            <span class="km-caravan-partner" title="{{summary}}">{{partner}}</span>
+                            <span class="km-caravan-cargo">{{cargo}}</span>
+                            <span class="km-caravan-raid">{{#if raidDc}}{{localizeKM "kingdom.caravans.raidDc" dc=raidDc}}{{/if}}</span>
+                            <span class="km-caravan-eta">{{localizeKM "kingdom.caravans.etaOf" turns=turnsRemaining total=etaTurns}}</span>
+                            <span class="km-caravan-actions">
+                                {{#if recallable}}{{#if @root.isGM}}
+                                    <button type="button" class="km-btn-sm" data-action="recall-caravan" data-caravan-id="{{id}}">{{localizeKM "kingdom.caravans.recall"}}</button>
+                                {{/if}}{{/if}}
+                            </span>
                         </li>
                     {{/each}}
                 </ul>
@@ -499,11 +503,15 @@
                 <ul class="km-caravans">
                     {{#each shipments}}
                         <li class="km-caravan">
-                            <span class="km-caravan-summary">{{summary}}</span>
-                            <span class="km-caravan-eta">{{localizeKM "kingdom.caravans.eta" turns=turnsRemaining}}</span>
-                            {{#if recallable}}{{#if @root.isGM}}
-                                <button type="button" class="km-btn-sm" data-action="recall-shipment" data-shipment-id="{{id}}">{{localizeKM "kingdom.caravans.recall"}}</button>
-                            {{/if}}{{/if}}
+                            <span class="km-caravan-partner" title="{{summary}}">{{partner}}</span>
+                            <span class="km-caravan-cargo">{{cargo}}</span>
+                            <span class="km-caravan-raid">{{#if raidDc}}{{localizeKM "kingdom.caravans.raidDc" dc=raidDc}}{{/if}}</span>
+                            <span class="km-caravan-eta">{{localizeKM "kingdom.caravans.etaOf" turns=turnsRemaining total=etaTurns}}</span>
+                            <span class="km-caravan-actions">
+                                {{#if recallable}}{{#if @root.isGM}}
+                                    <button type="button" class="km-btn-sm" data-action="recall-shipment" data-shipment-id="{{id}}">{{localizeKM "kingdom.caravans.recall"}}</button>
+                                {{/if}}{{/if}}
+                            </span>
                         </li>
                     {{/each}}
                 </ul>

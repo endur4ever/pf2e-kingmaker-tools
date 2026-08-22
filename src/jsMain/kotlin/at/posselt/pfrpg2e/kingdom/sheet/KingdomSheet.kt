@@ -174,6 +174,11 @@ import at.posselt.pfrpg2e.kingdom.sheet.contexts.toShipmentRowContexts
 import at.posselt.pfrpg2e.kingdom.data.RawCaravanShipment
 import at.posselt.pfrpg2e.kingdom.dialogs.CaravanShipmentDialog
 import at.posselt.pfrpg2e.kingdom.computeCaravanRoute
+import at.posselt.pfrpg2e.kingdom.map.routeHexSafety
+import at.posselt.pfrpg2e.kingdom.shipmentRaidDc
+import at.posselt.pfrpg2e.kingdom.caravanRouteSafety
+import at.posselt.pfrpg2e.kingdom.caravanRaidDc
+import at.posselt.pfrpg2e.kingdom.CARAVAN_BASE_RAID_DC
 import at.posselt.pfrpg2e.kingdom.siegeTargetsFor
 import at.posselt.pfrpg2e.kingdom.garrisonDefensiveBonus
 import at.posselt.pfrpg2e.kingdom.GarrisonAssignment
@@ -3382,7 +3387,27 @@ class KingdomSheet(
                     )
                 }
                 .toTypedArray(),
-            caravans = (kingdom.caravans ?: emptyArray()).toCaravanRowContexts(),
+            caravans = (kingdom.caravans ?: emptyArray()).toCaravanRowContexts { caravan ->
+                // Same helpers the End-Turn tick and the map overlay use, so the DC shown on the
+                // board is the DC the caravan will actually be rolled against.
+                runCatching {
+                    val path = computeCaravanRoute(
+                        KingmakerHexGridProvider(),
+                        caravan.originHexKey,
+                        caravan.destHexKey,
+                    )?.path.orEmpty()
+                    if (path.isEmpty()) return@runCatching null
+                    val safety = caravanRouteSafety(path.map(::routeHexSafety))
+                    val partner = kingdom.groups.find { it.name == caravan.partnerName }
+                    caravanRaidDc(
+                        baseDc = CARAVAN_BASE_RAID_DC,
+                        partnerStanding = partner?.standing,
+                        atWar = partner?.atWar == true,
+                        claimedFraction = safety.claimedFraction,
+                        fullyRoadedThroughClaimed = safety.fullyRoadedThroughClaimed,
+                    )
+                }.getOrNull()
+            },
             shipmentHistory = kingdom.shipmentHistoryList()
                 .asReversed()
                 .map { entry ->
@@ -3399,7 +3424,13 @@ class KingdomSheet(
             shipmentHistoryDelivered = shipmentOutcomeCounts(kingdom.shipmentHistoryList())[ShipmentOutcome.DELIVERED] ?: 0,
             shipmentHistoryRaided = shipmentOutcomeCounts(kingdom.shipmentHistoryList())[ShipmentOutcome.RAIDED] ?: 0,
             shipmentHistoryRecalled = shipmentOutcomeCounts(kingdom.shipmentHistoryList())[ShipmentOutcome.RECALLED] ?: 0,
-            shipments = (kingdom.shipments ?: emptyArray()).toShipmentRowContexts(),
+            shipments = (kingdom.shipments ?: emptyArray()).toShipmentRowContexts { shipment ->
+                // A shipment already stores the path it is walking, so this needs no pathfinding.
+                runCatching {
+                    shipment.path.takeIf { it.isNotEmpty() }
+                        ?.let { shipmentRaidDc(caravanRouteSafety(it.map(::routeHexSafety))) }
+                }.getOrNull()
+            },
             sizeInput = sizeInput.toContext(),
             size = realm.size,
             kingdomSize = t(realm.sizeInfo.type),

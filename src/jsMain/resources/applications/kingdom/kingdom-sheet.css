@@ -860,20 +860,34 @@
         margin: 0;
         padding: 0;
 
+        /* The list itself is the grid, not each row: column tracks are then measured across every
+           row, so partner/cargo/DC/ETA line up down the board. That only holds while each row
+           emits exactly five cells, which is why the action cell is always rendered. */
+        display: grid;
+        grid-template-columns: minmax(5em, 12em) 1fr max-content max-content max-content;
+        gap: 0.2rem 0.5em;
+        align-items: center;
+
         .km-caravan {
-            display: flex;
-            align-items: center;
-            gap: 0.5em;
-            padding: 0.2rem 0;
+            display: contents;
+        }
 
-            .km-caravan-summary {
-                flex-grow: 1;
-            }
+        .km-caravan-partner {
+            font-weight: bold;
+        }
 
-            .km-caravan-eta {
-                opacity: 0.8;
-                font-size: 0.9em;
-            }
+        .km-caravan-partner,
+        .km-caravan-cargo {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .km-caravan-raid,
+        .km-caravan-eta {
+            opacity: 0.8;
+            font-size: 0.9em;
+            white-space: nowrap;
         }
     }
 
@@ -2319,6 +2333,26 @@ fieldset.km-hex-editor-links {
    aggressive label truncation. CSS-only — no template or logic changes.
    ============================================================================ */
 @media (max-width: 768px) {
+    /* Below this the fixed DC/ETA/action tracks eat the whole row and the cargo column collapses
+       to zero, hiding what the caravan is actually carrying. Give partner and cargo a line of
+       their own and let the small facts share the next one. */
+    .km-kingdom-sheet .km-caravans {
+        grid-template-columns: minmax(5em, 12em) 1fr;
+    }
+
+    .km-kingdom-sheet .km-caravans .km-caravan-raid {
+        grid-column: 1;
+    }
+
+    .km-kingdom-sheet .km-caravans .km-caravan-eta,
+    .km-kingdom-sheet .km-caravans .km-caravan-actions {
+        grid-column: 2;
+    }
+
+    .km-kingdom-sheet .km-caravans .km-caravan-actions {
+        justify-self: end;
+    }
+
     /* Use the whole viewport for the window frame (Foundry centres a 1200px
        window; pin it full-screen so it can't float partly off-screen). */
     .application.km-kingdom-sheet,

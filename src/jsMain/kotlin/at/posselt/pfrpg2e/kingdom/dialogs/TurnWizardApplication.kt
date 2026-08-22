@@ -50,11 +50,12 @@ import at.posselt.pfrpg2e.kingdom.data.RawGroup
 import at.posselt.pfrpg2e.kingdom.computeCaravanRoute
 import at.posselt.pfrpg2e.kingdom.postWarThreatArrivalOffer
 import at.posselt.pfrpg2e.kingdom.map.routeHexSafety
+import at.posselt.pfrpg2e.kingdom.CaravanRouteSafety
 import at.posselt.pfrpg2e.kingdom.caravanRouteSafety
+import at.posselt.pfrpg2e.kingdom.shipmentRaidDc
 import at.posselt.pfrpg2e.kingdom.map.KingmakerHexGridProvider
 import com.foundryvtt.kingmaker.kingmaker
 import at.posselt.pfrpg2e.utils.postChatMessage
-import kotlin.math.roundToInt
 import js.array.component1
 import js.array.component2
 import at.posselt.pfrpg2e.settings.pfrpg2eKingdomCampingWeather
@@ -431,22 +432,17 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
     // Caravan shipments: tick active/in-transit shipments en route.
     val inTransitShipments = (kingdom.shipments ?: emptyArray()).filter { it.status == "inTransit" }
     if (inTransitShipments.isNotEmpty()) {
-        val claimedHexes = runCatching {
-            kingmaker.state.hexes.asSequence()
-                .filter { (_, hex) -> hex.claimed == true }
-                .map { (key, _) -> key }
-                .toSet()
-        }.getOrDefault(emptySet())
-
         val shipmentResult = tickShipments(
             inTransitShipments.map { shipment ->
-                val routeHexes = shipment.path
-                val claimedCount = routeHexes.count { it in claimedHexes }
-                val claimedFraction = if (routeHexes.isEmpty()) 1.0 else claimedCount.toDouble() / routeHexes.size
-                val raidDc = (CARAVAN_BASE_RAID_DC - (claimedFraction * 4).roundToInt()).coerceAtLeast(5)
+                // Same route-safety helper the caravans and the map overlay use. This used to be an
+                // inline copy that scored only claimed hexes (never cleared ones), ignored roads
+                // entirely, and read an empty route as perfectly safe rather than unknown.
+                val safety = runCatching {
+                    caravanRouteSafety(shipment.path.map { routeHexSafety(it) })
+                }.getOrDefault(CaravanRouteSafety(claimedFraction = 0.0, fullyRoadedThroughClaimed = false))
                 ShipmentTickInput(
                     shipment = shipment,
-                    raidDc = raidDc,
+                    raidDc = shipmentRaidDc(safety),
                     raidRoll = kotlin.random.Random.nextInt(1, 21),
                 )
             }

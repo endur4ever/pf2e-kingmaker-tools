@@ -1979,7 +1979,9 @@
         "warOfferSummary": "{cargo} bound for {dest}, {turns} turn(s) out.",
         "warOfferGone": "That shipment is no longer on the road.",
         "warOfferRecalled": "The caravan turns for home; its cargo is back in the kingdom's stores.",
-        "warOfferPressedOn": "The caravan presses on into hostile territory. Raids against it are likelier now."
+        "warOfferPressedOn": "The caravan presses on into hostile territory. Raids against it are likelier now.",
+        "raidDc": "Raid DC {dc}",
+        "etaOf": "{turns}/{total} turns"
       },
       "creation": "Creation",
       "bonus": "Bonus",
