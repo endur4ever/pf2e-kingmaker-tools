@@ -6,6 +6,13 @@ import at.posselt.pfrpg2e.kingdom.data.RawTurnRecord
 import com.foundryvtt.core.AnyObject
 
 /**
+ * How many turn records are retained. The live append drops the oldest past this, and the workbook
+ * importer reports how many its backfill will trim — both must mean the same number, so it lives
+ * here rather than as a default-argument literal in each place.
+ */
+const val TURN_HISTORY_CAP = 100
+
+/**
  * Pure logic for turn-history recording (gap analysis item 2).
  *
  * [appendTurnRecord] appends a new record to the history array, keeping the
@@ -18,7 +25,7 @@ import com.foundryvtt.core.AnyObject
 fun appendTurnRecord(
     history: Array<RawTurnRecord>?,
     record: RawTurnRecord,
-    cap: Int = 100,
+    cap: Int = TURN_HISTORY_CAP,
 ): Array<RawTurnRecord> {
     val base = history ?: emptyArray()
     val combined = base + record

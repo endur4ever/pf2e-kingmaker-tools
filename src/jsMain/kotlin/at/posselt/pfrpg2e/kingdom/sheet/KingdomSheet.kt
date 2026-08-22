@@ -60,6 +60,7 @@ import at.posselt.pfrpg2e.kingdom.BASE_ABILITY_BOOSTS
 import at.posselt.pfrpg2e.kingdom.vkExtraAbilityBoosts
 import at.posselt.pfrpg2e.kingdom.vkInitialSkillSlots
 import at.posselt.pfrpg2e.campaign.CampaignClockManager
+import at.posselt.pfrpg2e.kingdom.dialogs.importTurnHistoryDialog
 import at.posselt.pfrpg2e.kingdom.dialogs.CampaignClockDialog
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.CampaignClockContext
 import at.posselt.pfrpg2e.kingdom.extractSeries
@@ -562,6 +563,13 @@ class KingdomSheet(
                 event.preventDefault()
                 event.stopPropagation()
                 currentNavEntry = target.dataset["link"]?.let { MainNavEntry.fromString(it) } ?: MainNavEntry.TURN
+                render()
+            }
+
+            "import-turn-history" -> buildPromise {
+                // Backfill pre-migration turns from the workbook. GM-guarded inside the dialog too:
+                // players are OWNERs of the party actor, so a template gate is not authorization.
+                importTurnHistoryDialog(game, actor)
                 render()
             }
 

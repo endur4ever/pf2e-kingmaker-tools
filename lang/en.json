@@ -2182,7 +2182,22 @@
       },
       "noGroupsGm": "No factions yet — add your first trade partner or rival.",
       "noGroupsPlayer": "No factions have been recorded yet.",
-      "addGroup": "Add Faction"
+      "addGroup": "Add Faction",
+      "turnHistoryImport": {
+        "button": "Import turn history",
+        "help": "Backfill turns from the Google Sheets workbook so Analytics can chart your whole campaign.",
+        "title": "Import Turn History",
+        "rowsLabel": "Pasted rows",
+        "rowsHelp": "Paste rows from the workbook History or Turn-Tracker sheet (tab- or comma-separated). A header line is detected automatically; otherwise the column order is turn, fame, RP, consumption, unrest, XP, notes.",
+        "nothingParsed": "No rows could be read ({errors} error(s)). Check the columns and try again.",
+        "confirmParsed": "{count} turn(s) read successfully. Nothing is written until you confirm.",
+        "previewRow": "Turn {turn} — Fame {fame}, RP {rp}, Consumption {consumption}, Unrest {unrest}",
+        "andMore": "...and {count} more",
+        "confirmErrors": "{count} row(s) could not be read and will be skipped:",
+        "confirmCollisions": "{count} turn(s) already in history will be REPLACED by the imported rows: {turns}",
+        "confirmTrimmed": "History keeps the newest {cap} turns, so {count} of the oldest will be dropped after merging.",
+        "imported": "Imported {count} turn(s) into history."
+      }
     },
     "chatMessages": {
       "calendarBridgeMissing": "<strong>Kingmaker Tools:</strong> Seasons &amp; Stars is active, but the <em>Simple Calendar Compatibility Bridge</em> module is not. Calendar notes (expeditions, weather, end-of-turn and camp summaries) are being silently skipped. Install <a href=\"{url}\">the compatibility bridge</a> (package id <code>{packageId}</code>) to enable them. This notice appears only once.",
