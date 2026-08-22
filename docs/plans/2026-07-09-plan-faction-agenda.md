@@ -217,13 +217,33 @@ fun completeGoal(
 
 **Constraint:** `TurnTickingEngine.tick()` is **preview-safe** — it must produce identical output for preview and commit. No `Date`, no `Math.random()`, no `kotlin.random.Random`.
 
-**Decision:** The agenda engine runs **inside `TurnTickingEngine.tick()`** (monthly, End Turn). It receives a deterministic RNG function derived from the kingdom's persistent `turnSeed` (stored on `KingdomData` or derived from `currentTurn` + `kingdom.id`).
+**Decision:** The agenda engine runs **inside `TurnTickingEngine.tick()`** (monthly, End Turn). It receives a deterministic RNG seeded from `currentTurn` plus a stable kingdom identity (see the note below — `KingdomData` has no `id`).
 
 ```kotlin
 // In TurnTickingEngine.kt, before calling advanceAllAgendas:
-val turnSeed = (kingdom.id.hashCode() * 31 + currentTurn).toInt()
-val rng: (Int) -> Int = { salt -> turnSeed + salt * 1664525 + 1013904223 } // LCG, pure
+// NOTE: KingdomData has NO `id` field (verified 2026-08-20) — use `name`, which every kingdom has,
+// or thread the ACTOR uuid in from the caller if a rename must not reshuffle the sequence.
+val turnSeed = kingdom.name.hashCode() * 31 + currentTurn
+
+// A real LCG ITERATES its state. The earlier draft of this plan proposed
+//     rng(salt) = turnSeed + salt * 1664525 + 1013904223
+// which is linear in `salt`, not an LCG at all: consecutive salts differ by a constant, so
+// rng(salt) % 10 yields only TWO distinct buckets (8,3,8,3,...) because 1664525 % 10 == 5.
+// Weighted move selection built on it would have picked from a tiny subset of the move table
+// forever — the weights would have been decorative. Iterate instead:
+class TurnRng(seed: Int) {
+    private var state: Int = seed
+    /** Next value in [0, bound). Pure w.r.t. the seed: same seed + same call order = same sequence. */
+    fun next(bound: Int): Int {
+        state = state * 1664525 + 1013904223
+        return ((state ushr 1) % bound).let { if (it < 0) it + bound else it }
+    }
+}
 ```
+
+> The engine must consume the RNG in a **fixed call order**, since the sequence depends on how many
+> times `next` has been called. Iterate factions in a stable order (sorted by name), never by map
+> iteration order, or preview and commit can diverge even with the same seed.
 
 - The RNG is **pure** (function `Int -> Int`), seeded per turn.
 - All randomness (move selection, target picking) routes through this RNG.
