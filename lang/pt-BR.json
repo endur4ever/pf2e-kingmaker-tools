@@ -4302,6 +4302,26 @@
           "shrine": "Shrine",
           "temple": "Temple",
           "cathedral": "Cathedral"
+        },
+        "dropHelp": "Arraste o item amaldiçoado para a caixa abaixo.",
+        "dropHere": "Solte um item aqui",
+        "itemLevel": "Nível {level}",
+        "dc": "CD",
+        "counteractLevel": "Nível de anulação",
+        "luxuryCost": "Luxos necessários",
+        "requiredStructure": "Requer",
+        "settlement": "Realizado em",
+        "roll": "Rolar a purificação",
+        "ritualAt": "Realizado em {settlement} como anulação de nível {counteractLevel}.",
+        "halvedCost": "Um sucesso crítico consumiu apenas metade dos materiais.",
+        "payCost": "Gastar {luxuries} Luxos",
+        "paid": "{luxuries} Luxos gastos no ritual de purificação.",
+        "cannotAfford": "Este ritual precisa de {luxuries} Luxos; o reino tem {available}.",
+        "error": {
+          "noItem": "Arraste um item para a janela primeiro.",
+          "unreadableItem": "Não foi possível ler esse item.",
+          "noSettlements": "Nenhum assentamento pode sediar este ritual.",
+          "noQualifyingSettlement": "Nenhum assentamento tem {structure} ainda."
         }
       },
       "clandestine-business": {

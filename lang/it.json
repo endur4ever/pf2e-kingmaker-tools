@@ -4302,6 +4302,26 @@
           "shrine": "Shrine",
           "temple": "Temple",
           "cathedral": "Cathedral"
+        },
+        "dropHelp": "Trascina l'oggetto maledetto nel riquadro sottostante.",
+        "dropHere": "Trascina qui un oggetto",
+        "itemLevel": "Livello {level}",
+        "dc": "CD",
+        "counteractLevel": "Livello di annullamento",
+        "luxuryCost": "Beni di lusso richiesti",
+        "requiredStructure": "Richiede",
+        "settlement": "Eseguito a",
+        "roll": "Tira la purificazione",
+        "ritualAt": "Eseguito a {settlement} come annullamento di livello {counteractLevel}.",
+        "halvedCost": "Un successo critico ha consumato solo metà dei materiali.",
+        "payCost": "Spendi {luxuries} beni di lusso",
+        "paid": "Spesi {luxuries} beni di lusso per il rituale.",
+        "cannotAfford": "Questo rituale richiede {luxuries} beni di lusso; il regno ne ha {available}.",
+        "error": {
+          "noItem": "Trascina prima un oggetto sulla finestra.",
+          "unreadableItem": "Impossibile leggere questo oggetto.",
+          "noSettlements": "Nessun insediamento può ospitare questo rituale.",
+          "noQualifyingSettlement": "Nessun insediamento possiede ancora {structure}."
         }
       },
       "clandestine-business": {

@@ -104,6 +104,15 @@ private val buttons = listOf(
             )
         }
     },
+    ChatButton("km-cleanse-pay") { _, actor, _, button ->
+        val luxuries = button.dataset["luxuries"]?.toInt() ?: 0
+        actor.getKingdom()?.let { kingdom ->
+            kingdom.commodities.now.luxuries = (kingdom.commodities.now.luxuries - luxuries)
+                .coerceIn(0, Int.MAX_VALUE)
+            actor.setKingdom(kingdom)
+            postChatMessage(t("activities.cleanse-item.paid", recordOf("luxuries" to luxuries)))
+        }
+    },
     ChatButton("km-gain-lose") { game, actor, event, button ->
         val activityId = button.closest(".chat-message")
             ?.querySelector(".km-upgrade-result")

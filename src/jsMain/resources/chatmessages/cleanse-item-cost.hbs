@@ -1,0 +1,13 @@
+<h3>{{localizeKM "activities.cleanse-item.title"}}: {{itemName}}</h3>
+<p>{{localizeKM "activities.cleanse-item.ritualAt" settlement=settlementName counteractLevel=counteractLevel}}</p>
+{{#if halved}}<p>{{localizeKM "activities.cleanse-item.halvedCost"}}</p>{{/if}}
+{{#if affordable}}
+    <button type="button"
+            data-luxuries="{{luxuries}}"
+            data-kingdom-actor-uuid="{{actorUuid}}"
+            class="km-cleanse-pay">
+        {{localizeKM "activities.cleanse-item.payCost" luxuries=luxuries}}
+    </button>
+{{else}}
+    <p class="km-cleanse-blocked">{{localizeKM "activities.cleanse-item.cannotAfford" luxuries=luxuries available=available}}</p>
+{{/if}}

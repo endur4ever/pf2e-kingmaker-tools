@@ -2557,6 +2557,41 @@ fieldset.km-hex-editor-links {
 }
 
 /* Caravan delivery history — collapsible, newest first, colour-coded by outcome. */
+.km-cleanse-drop {
+    border: 2px dashed rgba(0, 0, 0, 0.35);
+    border-radius: 4px;
+    padding: 12px;
+    margin: 6px 0;
+    text-align: center;
+    min-height: 3em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+.km-cleanse-drop.km-cleanse-filled {
+    border-style: solid;
+    border-color: rgba(76, 154, 76, 0.85);
+}
+.km-cleanse-level {
+    opacity: 0.8;
+    font-size: 0.9em;
+}
+.km-cleanse-plan {
+    list-style: none;
+    margin: 6px 0;
+    padding: 0;
+}
+.km-cleanse-plan li {
+    display: flex;
+    justify-content: space-between;
+    padding: 1px 0;
+}
+.km-cleanse-blocked {
+    color: #a33;
+    font-style: italic;
+}
+
 .km-shipment-history {
     margin: 8px 0;
 }

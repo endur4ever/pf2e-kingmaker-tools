@@ -173,6 +173,9 @@ import at.posselt.pfrpg2e.kingdom.sheet.contexts.toCaravanRowContexts
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.toShipmentRowContexts
 import at.posselt.pfrpg2e.kingdom.data.RawCaravanShipment
 import at.posselt.pfrpg2e.kingdom.dialogs.CaravanShipmentDialog
+import at.posselt.pfrpg2e.kingdom.CleanseItemSettlement
+import at.posselt.pfrpg2e.kingdom.dialogs.openCleanseItemDialog
+import at.posselt.pfrpg2e.kingdom.rollCleanseItem
 import at.posselt.pfrpg2e.kingdom.computeCaravanRoute
 import at.posselt.pfrpg2e.kingdom.map.routeHexSafety
 import at.posselt.pfrpg2e.kingdom.shipmentRaidDc
@@ -2714,6 +2717,35 @@ class KingdomSheet(
                                 game.getSelectedArmies().firstOrNull()
                             } else {
                                 null
+                            }
+                            // Cleanse Item is the one activity whose DC is not the kingdom's own:
+                            // it counteracts a specific item, so it needs the item picked before
+                            // the check exists. Prepare first, then roll against that DC.
+                            if (activity.id == "cleanse-item") {
+                                openCleanseItemDialog(
+                                    kingdomLevel = kingdom.level,
+                                    settlements = kingdom.getAllSettlements(game).allSettlements.map { settlement ->
+                                        CleanseItemSettlement(
+                                            id = settlement.id,
+                                            name = settlement.name,
+                                            structureNames = settlement.constructedStructures.map { it.name }.toSet(),
+                                        )
+                                    },
+                                ) { preparation ->
+                                    buildPromise {
+                                        rollCleanseItem(
+                                            game = game,
+                                            actor = actor,
+                                            kingdom = kingdom,
+                                            activity = activity,
+                                            preparation = preparation,
+                                            groups = groups,
+                                            events = events,
+                                        )
+                                        render()
+                                    }
+                                }
+                                return@buildPromise
                             }
                             kingdomCheckDialog(
                                 game = game,

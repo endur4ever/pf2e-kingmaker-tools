@@ -4302,6 +4302,26 @@
           "shrine": "Shrine",
           "temple": "Temple",
           "cathedral": "Cathedral"
+        },
+        "dropHelp": "Faites glisser l'objet maudit sur la zone ci-dessous.",
+        "dropHere": "Déposez un objet ici",
+        "itemLevel": "Niveau {level}",
+        "dc": "DD",
+        "counteractLevel": "Niveau de neutralisation",
+        "luxuryCost": "Produits de luxe requis",
+        "requiredStructure": "Nécessite",
+        "settlement": "Effectué à",
+        "roll": "Lancer la purification",
+        "ritualAt": "Effectué à {settlement} comme neutralisation de niveau {counteractLevel}.",
+        "halvedCost": "Un succès critique n'a consommé que la moitié des matériaux.",
+        "payCost": "Dépenser {luxuries} produits de luxe",
+        "paid": "{luxuries} produits de luxe dépensés pour le rituel.",
+        "cannotAfford": "Ce rituel nécessite {luxuries} produits de luxe ; le royaume en a {available}.",
+        "error": {
+          "noItem": "Faites d'abord glisser un objet sur la fenêtre.",
+          "unreadableItem": "Cet objet n'a pas pu être lu.",
+          "noSettlements": "Aucune colonie ne peut accueillir ce rituel.",
+          "noQualifyingSettlement": "Aucune colonie ne possède encore {structure}."
         }
       },
       "clandestine-business": {

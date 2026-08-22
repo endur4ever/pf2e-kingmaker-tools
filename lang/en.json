@@ -4424,6 +4424,26 @@
         },
         "criticalFailure": {
           "msg": "<p>The item is destroyed.</p>"
+        },
+        "dropHelp": "Drag the cursed item onto the box below.",
+        "dropHere": "Drop an item here",
+        "itemLevel": "Level {level}",
+        "dc": "DC",
+        "counteractLevel": "Counteract level",
+        "luxuryCost": "Luxuries required",
+        "requiredStructure": "Requires",
+        "settlement": "Performed at",
+        "roll": "Roll the cleansing",
+        "ritualAt": "Performed at {settlement} as a level {counteractLevel} counteract.",
+        "halvedCost": "A critical success consumed only half the materials.",
+        "payCost": "Spend {luxuries} Luxuries",
+        "paid": "Spent {luxuries} Luxuries on the cleansing ritual.",
+        "cannotAfford": "This ritual needs {luxuries} Luxuries; the kingdom has {available}.",
+        "error": {
+          "noItem": "Drag an item onto the dialog first.",
+          "unreadableItem": "That item could not be read.",
+          "noSettlements": "No settlement can host this ritual.",
+          "noQualifyingSettlement": "No settlement has a {structure} yet."
         }
       },
       "clandestine-business": {

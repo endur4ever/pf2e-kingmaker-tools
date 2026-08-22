@@ -1,5 +1,6 @@
 package at.posselt.pfrpg2e.kingdom
 
+import at.posselt.pfrpg2e.data.checks.DegreeOfSuccess
 import at.posselt.pfrpg2e.data.checks.getLevelBasedDC
 
 /**
@@ -56,3 +57,39 @@ fun cleanseItemPlan(itemLevel: Int, kingdomLevel: Int): CleanseItemPlan {
         requiredStructure = structure,
     )
 }
+
+/** A settlement as the Cleanse Item gate sees it: a name and what has actually been built there. */
+data class CleanseItemSettlement(
+    val id: String,
+    val name: String,
+    val structureNames: Set<String>,
+)
+
+/**
+ * Whether a settlement holding [structureNames] can prepare a ritual needing this structure.
+ *
+ * The enum is ordered by capability, so anything at or above the requirement qualifies: a
+ * cathedral prepares a ritual that only asks for a shrine. Requiring an exact match would tell a
+ * kingdom that built a cathedral it cannot perform the simplest cleansing, which is nonsense.
+ */
+fun CleanseItemStructure.satisfiedBy(structureNames: Set<String>): Boolean =
+    CleanseItemStructure.entries
+        .filter { it.ordinal >= ordinal }
+        .any { candidate -> structureNames.any { it.trim().equals(candidate.value, ignoreCase = true) } }
+
+/** The settlements that could host the ritual, in the order given. Empty means the activity is blocked. */
+fun eligibleCleanseSettlements(
+    settlements: List<CleanseItemSettlement>,
+    required: CleanseItemStructure,
+): List<CleanseItemSettlement> =
+    settlements.filter { required.satisfiedBy(it.structureNames) }
+
+/**
+ * Luxuries actually consumed by an attempt, which is not the same as the luxuries it required.
+ *
+ * A critical success "consumes only half the materials"; every other outcome burns the lot, a
+ * failed cleansing included -- the ritual was still performed. Halving rounds UP so the cheapest
+ * band still costs something: a critical success on a level-1 item must not make the ritual free.
+ */
+fun cleanseItemLuxuryCharge(luxuryCost: Int, degree: DegreeOfSuccess): Int =
+    if (degree == DegreeOfSuccess.CRITICAL_SUCCESS) (luxuryCost + 1) / 2 else luxuryCost

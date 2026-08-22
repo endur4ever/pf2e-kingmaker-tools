@@ -4302,6 +4302,26 @@
           "shrine": "Shrine",
           "temple": "Temple",
           "cathedral": "Cathedral"
+        },
+        "dropHelp": "Перетащите проклятый предмет в поле ниже.",
+        "dropHere": "Перетащите предмет сюда",
+        "itemLevel": "Уровень {level}",
+        "dc": "КС",
+        "counteractLevel": "Уровень противодействия",
+        "luxuryCost": "Требуется роскоши",
+        "requiredStructure": "Требует",
+        "settlement": "Проводится в",
+        "roll": "Бросок очищения",
+        "ritualAt": "Проведено в {settlement} как противодействие уровня {counteractLevel}.",
+        "halvedCost": "Критический успех израсходовал лишь половину материалов.",
+        "payCost": "Потратить роскоши: {luxuries}",
+        "paid": "На ритуал очищения потрачено роскоши: {luxuries}.",
+        "cannotAfford": "Ритуалу нужно роскоши: {luxuries}; у королевства {available}.",
+        "error": {
+          "noItem": "Сначала перетащите предмет в окно.",
+          "unreadableItem": "Не удалось прочитать этот предмет.",
+          "noSettlements": "Ни одно поселение не может провести этот ритуал.",
+          "noQualifyingSettlement": "Ни в одном поселении ещё нет {structure}."
         }
       },
       "clandestine-business": {

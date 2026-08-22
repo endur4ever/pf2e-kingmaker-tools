@@ -4302,6 +4302,26 @@
           "shrine": "Shrine",
           "temple": "Temple",
           "cathedral": "Cathedral"
+        },
+        "dropHelp": "Przeciągnij przeklęty przedmiot na pole poniżej.",
+        "dropHere": "Upuść tu przedmiot",
+        "itemLevel": "Poziom {level}",
+        "dc": "ST",
+        "counteractLevel": "Poziom zniesienia",
+        "luxuryCost": "Wymagane dobra luksusowe",
+        "requiredStructure": "Wymaga",
+        "settlement": "Wykonano w",
+        "roll": "Rzuć na oczyszczenie",
+        "ritualAt": "Wykonano w {settlement} jako zniesienie poziomu {counteractLevel}.",
+        "halvedCost": "Krytyczny sukces zużył tylko połowę materiałów.",
+        "payCost": "Wydaj {luxuries} dóbr luksusowych",
+        "paid": "Wydano {luxuries} dóbr luksusowych na rytuał.",
+        "cannotAfford": "Ten rytuał wymaga {luxuries} dóbr luksusowych; królestwo ma {available}.",
+        "error": {
+          "noItem": "Najpierw przeciągnij przedmiot na okno.",
+          "unreadableItem": "Nie udało się odczytać tego przedmiotu.",
+          "noSettlements": "Żadna osada nie może przeprowadzić tego rytuału.",
+          "noQualifyingSettlement": "Żadna osada nie ma jeszcze {structure}."
         }
       },
       "clandestine-business": {

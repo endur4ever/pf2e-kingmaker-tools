@@ -1,0 +1,31 @@
+<div class="km-cleanse-item">
+    <p>{{localizeKM "activities.cleanse-item.dropHelp"}}</p>
+    <div class="km-cleanse-drop {{#if hasItem}}km-cleanse-filled{{/if}}">
+        {{#if hasItem}}
+            <b>{{itemName}}</b> <span class="km-cleanse-level">{{localizeKM "activities.cleanse-item.itemLevel" level=itemLevel}}</span>
+        {{else}}
+            <em>{{localizeKM "activities.cleanse-item.dropHere"}}</em>
+        {{/if}}
+    </div>
+    {{#if hasItem}}
+        <ul class="km-cleanse-plan">
+            <li>{{localizeKM "activities.cleanse-item.dc"}}: <b>{{dc}}</b></li>
+            <li>{{localizeKM "activities.cleanse-item.counteractLevel"}}: <b>{{counteractLevel}}</b></li>
+            <li>{{localizeKM "activities.cleanse-item.luxuryCost"}}: <b>{{luxuryCost}}</b></li>
+            <li>{{localizeKM "activities.cleanse-item.requiredStructure"}}: <b>{{requiredStructure}}</b></li>
+        </ul>
+        {{#if hasEligibleSettlement}}
+            {{#each formRows}}
+                {{> formElement this}}
+            {{/each}}
+        {{else}}
+            <p class="km-cleanse-blocked">{{localizeKM "activities.cleanse-item.error.noQualifyingSettlement" structure=requiredStructure}}</p>
+        {{/if}}
+    {{/if}}
+    <div class="km-form-actions">
+        <button type="button" class="km-btn km-btn-save" data-action="km-cleanse-roll"
+                {{#unless canRoll}}disabled{{/unless}}>
+            {{localizeKM "activities.cleanse-item.roll"}}
+        </button>
+    </div>
+</div>

@@ -4302,6 +4302,26 @@
           "shrine": "Shrine",
           "temple": "Temple",
           "cathedral": "Cathedral"
+        },
+        "dropHelp": "将被诅咒的物品拖到下面的框中。",
+        "dropHere": "将物品拖放到此处",
+        "itemLevel": "{level} 级",
+        "dc": "DC",
+        "counteractLevel": "解消等级",
+        "luxuryCost": "所需奢侈品",
+        "requiredStructure": "需要",
+        "settlement": "执行地点",
+        "roll": "进行净化检定",
+        "ritualAt": "在 {settlement} 以 {counteractLevel} 级解消执行。",
+        "halvedCost": "大成功仅消耗了一半材料。",
+        "payCost": "花费 {luxuries} 奢侈品",
+        "paid": "净化仪式花费了 {luxuries} 奢侈品。",
+        "cannotAfford": "此仪式需要 {luxuries} 奢侈品；王国只有 {available}。",
+        "error": {
+          "noItem": "请先将物品拖到对话框中。",
+          "unreadableItem": "无法读取该物品。",
+          "noSettlements": "没有聚落能举行此仪式。",
+          "noQualifyingSettlement": "尚无聚落拥有{structure}。"
         }
       },
       "clandestine-business": {

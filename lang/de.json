@@ -4302,6 +4302,26 @@
           "shrine": "Shrine",
           "temple": "Temple",
           "cathedral": "Cathedral"
+        },
+        "dropHelp": "Ziehe den verfluchten Gegenstand auf das Feld unten.",
+        "dropHere": "Gegenstand hierher ziehen",
+        "itemLevel": "Stufe {level}",
+        "dc": "SG",
+        "counteractLevel": "Aufhebungsstufe",
+        "luxuryCost": "Benötigte Luxusgüter",
+        "requiredStructure": "Benötigt",
+        "settlement": "Durchgeführt in",
+        "roll": "Reinigung würfeln",
+        "ritualAt": "Durchgeführt in {settlement} als Aufhebung der Stufe {counteractLevel}.",
+        "halvedCost": "Ein kritischer Erfolg verbrauchte nur die Hälfte des Materials.",
+        "payCost": "{luxuries} Luxusgüter ausgeben",
+        "paid": "{luxuries} Luxusgüter für das Reinigungsritual ausgegeben.",
+        "cannotAfford": "Dieses Ritual benötigt {luxuries} Luxusgüter; das Königreich hat {available}.",
+        "error": {
+          "noItem": "Ziehe zuerst einen Gegenstand auf den Dialog.",
+          "unreadableItem": "Dieser Gegenstand konnte nicht gelesen werden.",
+          "noSettlements": "Keine Siedlung kann dieses Ritual durchführen.",
+          "noQualifyingSettlement": "Noch keine Siedlung besitzt {structure}."
         }
       },
       "clandestine-business": {
