@@ -327,6 +327,13 @@ external interface KingdomData {
     /** Commodity market / caravan economy — in-transit caravans, nullable for back-compat. */
     var caravans: Array<RawCaravan>?
 
+    /**
+     * Resolved caravan/shipment outcomes, oldest first, capped at [SHIPMENT_HISTORY_CAP].
+     * Nullable for kingdoms saved before this field existed; [shipmentHistoryList] reads it
+     * defensively so it never needs seeding.
+     */
+    var shipmentHistory: Array<RawShipmentHistoryEntry>?
+
     /** Active caravan shipments for equipment/supplies. */
     var shipments: Array<RawCaravanShipment>?
 

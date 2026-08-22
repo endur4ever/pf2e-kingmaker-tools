@@ -2113,6 +2113,17 @@
         "excluded": "NOT included in this backup and therefore NOT restored: {sections}.",
         "destructive": "This overwrites current data. It cannot be undone.",
         "restored": "Restored {kingdoms} kingdom(s), {camping} camping actor(s) and {settings} setting(s)."
+      },
+      "shipmentHistory": {
+        "title": "Delivery history",
+        "turn": "Turn",
+        "empty": "No caravans have resolved yet. Deliveries, raids and recalls will be recorded here.",
+        "rd": "+{rd} RD",
+        "outcome": {
+          "delivered": "Delivered",
+          "raided": "Raided",
+          "recalled": "Recalled"
+        }
       }
     },
     "chatMessages": {

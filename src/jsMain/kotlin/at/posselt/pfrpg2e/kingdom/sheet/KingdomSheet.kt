@@ -164,7 +164,11 @@ import at.posselt.pfrpg2e.kingdom.map.KingmakerHexGridProvider
 import at.posselt.pfrpg2e.kingdom.dialogs.CaravanDispatchDialog
 import at.posselt.pfrpg2e.kingdom.dialogs.CaravanHexOption
 import at.posselt.pfrpg2e.kingdom.dialogs.CaravanPartnerOption
+import at.posselt.pfrpg2e.kingdom.ShipmentOutcome
+import at.posselt.pfrpg2e.kingdom.shipmentHistoryList
+import at.posselt.pfrpg2e.kingdom.shipmentOutcomeCounts
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.CaravanRowContext
+import at.posselt.pfrpg2e.kingdom.sheet.contexts.ShipmentHistoryRowContext
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.toCaravanRowContexts
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.toShipmentRowContexts
 import at.posselt.pfrpg2e.kingdom.data.RawCaravanShipment
@@ -3379,6 +3383,22 @@ class KingdomSheet(
                 }
                 .toTypedArray(),
             caravans = (kingdom.caravans ?: emptyArray()).toCaravanRowContexts(),
+            shipmentHistory = kingdom.shipmentHistoryList()
+                .asReversed()
+                .map { entry ->
+                    ShipmentHistoryRowContext(
+                        turn = entry.turn,
+                        partner = entry.partner,
+                        cargo = entry.cargo,
+                        outcome = entry.outcome.name.lowercase(),
+                        outcomeLabel = t("kingdom.shipmentHistory.outcome.${entry.outcome.name.lowercase()}"),
+                        rd = entry.rdGained?.let { t("kingdom.shipmentHistory.rd", recordOf("rd" to it)) } ?: "",
+                    )
+                }
+                .toTypedArray(),
+            shipmentHistoryDelivered = shipmentOutcomeCounts(kingdom.shipmentHistoryList())[ShipmentOutcome.DELIVERED] ?: 0,
+            shipmentHistoryRaided = shipmentOutcomeCounts(kingdom.shipmentHistoryList())[ShipmentOutcome.RAIDED] ?: 0,
+            shipmentHistoryRecalled = shipmentOutcomeCounts(kingdom.shipmentHistoryList())[ShipmentOutcome.RECALLED] ?: 0,
             shipments = (kingdom.shipments ?: emptyArray()).toShipmentRowContexts(),
             sizeInput = sizeInput.toContext(),
             size = realm.size,

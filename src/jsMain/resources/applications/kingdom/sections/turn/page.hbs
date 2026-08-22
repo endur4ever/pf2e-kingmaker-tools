@@ -468,6 +468,32 @@
                     {{/each}}
                 </ul>
             {{/if}}
+            {{!-- Delivery history. This file is a REGISTERED PARTIAL, and a partial gets no
+                  parent frame, so any outer-scope value reached from inside an each block must use
+                  @root. Nothing in this block needs one, and it should stay that way. --}}
+            <details class="km-shipment-history">
+                <summary>
+                    {{localizeKM "kingdom.shipmentHistory.title"}}
+                    <span class="km-badge km-badge-delivered">{{shipmentHistoryDelivered}}</span>
+                    <span class="km-badge km-badge-raided">{{shipmentHistoryRaided}}</span>
+                    <span class="km-badge km-badge-recalled">{{shipmentHistoryRecalled}}</span>
+                </summary>
+                {{#if shipmentHistory.length}}
+                    <ul class="km-shipment-history-list">
+                        {{#each shipmentHistory}}
+                            <li class="km-shipment-history-row km-shipment-{{outcome}}">
+                                <span class="km-shipment-turn">{{localizeKM "kingdom.shipmentHistory.turn"}} {{turn}}</span>
+                                <span class="km-shipment-outcome">{{outcomeLabel}}</span>
+                                <span class="km-shipment-partner">{{partner}}</span>
+                                <span class="km-shipment-cargo">{{cargo}}</span>
+                                <span class="km-shipment-rd">{{rd}}</span>
+                            </li>
+                        {{/each}}
+                    </ul>
+                {{else}}
+                    <p class="km-shipment-history-empty">{{localizeKM "kingdom.shipmentHistory.empty"}}</p>
+                {{/if}}
+            </details>
             {{#if shipments.length}}
                 <h3 style="margin-top: 10px; font-size: 1.1em; opacity: 0.9;">{{localizeKM "kingdom.caravans.equipmentShipments"}}</h3>
                 <ul class="km-caravans">

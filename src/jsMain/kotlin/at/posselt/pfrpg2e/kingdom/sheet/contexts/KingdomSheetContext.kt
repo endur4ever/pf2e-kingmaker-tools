@@ -31,6 +31,14 @@ external interface KingdomSheetContext : ValidatedHandlebarsContext {
     val worksitesContext: Array<WorkSiteContext>
     val unclaimedWorksites: Array<UnclaimedWorksiteContext>
     val caravans: Array<CaravanRowContext>
+
+    /** Resolved caravan/shipment outcomes, NEWEST first for display. */
+    val shipmentHistory: Array<ShipmentHistoryRowContext>
+
+    /** Per-outcome tallies shown as badges on the history header. */
+    val shipmentHistoryDelivered: Int
+    val shipmentHistoryRaided: Int
+    val shipmentHistoryRecalled: Int
     val shipments: Array<ShipmentRowContext>
     val ruinContext: Array<RuinContext>
 

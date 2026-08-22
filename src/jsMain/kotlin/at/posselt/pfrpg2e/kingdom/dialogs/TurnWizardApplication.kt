@@ -33,6 +33,8 @@ import at.posselt.pfrpg2e.kingdom.CaravanTickInput
 import at.posselt.pfrpg2e.kingdom.caravanRaidDc
 import at.posselt.pfrpg2e.kingdom.caravanBonusRdCap
 import at.posselt.pfrpg2e.kingdom.caravanRdPerCommodity
+import at.posselt.pfrpg2e.kingdom.appendShipment
+import at.posselt.pfrpg2e.kingdom.caravanEventToHistory
 import at.posselt.pfrpg2e.kingdom.tickCaravans
 import at.posselt.pfrpg2e.kingdom.tickShipments
 import at.posselt.pfrpg2e.kingdom.ShipmentTickInput
@@ -382,6 +384,11 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
         )
         kingdom.caravans = caravanResult.remaining.toTypedArray()
         caravanEvents = caravanResult.events
+        // Record every resolved caravan to the delivery history. Appended to the in-hand kingdom so
+        // it rides the turn's existing persist rather than adding a second write.
+        caravanResult.events.forEach { event ->
+            caravanEventToHistory(event, currentTurn)?.let { kingdom.appendShipment(it) }
+        }
         if (caravanResult.bonusResourceDice != 0) {
             kingdom.bonusResourceDice = kingdom.bonusResourceDice + caravanResult.bonusResourceDice
         }

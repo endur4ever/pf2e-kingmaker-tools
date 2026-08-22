@@ -2521,3 +2521,57 @@ fieldset.km-hex-editor-links {
     margin-left: 0.4rem;
     opacity: 0.7;
 }
+
+/* Caravan delivery history — collapsible, newest first, colour-coded by outcome. */
+.km-shipment-history {
+    margin: 8px 0;
+}
+
+.km-shipment-history summary {
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.km-shipment-history .km-badge {
+    display: inline-block;
+    min-width: 1.4em;
+    padding: 0 5px;
+    margin-left: 4px;
+    border-radius: 8px;
+    font-size: 0.75em;
+    text-align: center;
+}
+
+.km-badge-delivered { background: rgba(76, 154, 76, 0.85); color: #fff; }
+.km-badge-raided    { background: rgba(170, 51, 51, 0.85); color: #fff; }
+.km-badge-recalled  { background: rgba(201, 154, 46, 0.85); color: #fff; }
+
+.km-shipment-history-list {
+    list-style: none;
+    margin: 6px 0 0;
+    padding: 0;
+    max-height: 16em;
+    overflow-y: auto;
+}
+
+.km-shipment-history-row {
+    display: grid;
+    grid-template-columns: 5em 6em 7em 1fr auto;
+    gap: 8px;
+    padding: 2px 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+    font-size: 0.9em;
+}
+
+.km-shipment-raided .km-shipment-outcome { color: #a33; font-weight: bold; }
+.km-shipment-partner {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.km-shipment-history-empty {
+    opacity: 0.7;
+    font-style: italic;
+    margin: 6px 0 0;
+}
