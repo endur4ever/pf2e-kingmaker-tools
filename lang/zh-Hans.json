@@ -7617,7 +7617,8 @@
         "calendar-bridge": "Calendar notes",
         "party-actor": "Party actor with camping data",
         "kingdom": "Kingdom configured",
-        "map-scenes": "Campaign map scenes"
+        "map-scenes": "Campaign map scenes",
+        "climate": "气候表"
       },
       "fix": {
         "kingmakerModule": "Install and enable the official Pathfinder Kingmaker module — hex claims, token mappings and region data all come from it.",
@@ -7625,7 +7626,22 @@
         "calendarBridge": "Seasons & Stars is active but the Simple Calendar Compatibility Bridge is not. Calendar notes for weather, rests and turns are being skipped. Install foundryvtt-simple-calendar-compat.",
         "partyActor": "Create a party actor and open its camping sheet once, so camping data exists.",
         "kingdom": "Create a kingdom on your party actor to use the kingdom sheet.",
-        "mapScenes": "Pick your regional map scene(s) in the module settings so hex features and travel work."
+        "mapScenes": "Pick your regional map scene(s) in the module settings so hex features and travel work.",
+        "climate": "气候表每年的每个月都需要一行。"
+      },
+      "action": {
+        "create-kingdom": "创建王国",
+        "pick-map-scenes": "选择地图场景",
+        "restore-climate": "恢复被窃之地气候"
+      },
+      "done": {
+        "climate": "气候已恢复为被窃之地默认值。",
+        "mapScenes": "已配置 {count} 个地图场景。"
+      },
+      "error": {
+        "gmOnly": "只有 GM 才能更改世界设置。",
+        "noPartyActor": "尚无队伍角色；请先创建一个。",
+        "noScenes": "此世界没有可选场景。"
       }
     }
   }

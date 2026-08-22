@@ -68,6 +68,14 @@
 .km-setup-check.km-setup-warn { border-left-color: #c99a2e; }
 .km-setup-check.km-setup-fail { border-left-color: #a33; }
 
+.km-setup-action {
+    margin-top: 4px;
+    width: auto;
+    padding: 0 8px;
+    line-height: 1.8;
+    font-size: 0.9em;
+}
+
 .km-setup-fix {
     font-size: 0.9em;
     opacity: 0.85;

@@ -13,11 +13,19 @@ package at.posselt.pfrpg2e.kingdom
 /** A single setup check's severity. FAIL blocks a healthy setup; WARN is advisory. */
 enum class CheckStatus { PASS, WARN, FAIL }
 
-/** One evaluated setup check with a stable id (for i18n) and an optional fix hint id. */
+/**
+ * One evaluated setup check with a stable id (for i18n) and an optional fix hint id.
+ *
+ * [actionId] names a one-click fix the report can offer as a button. It is only ever set on a check
+ * that is not passing: offering to "fix" something already correct invites a GM to overwrite work
+ * they meant to keep. Checks whose fix is installing or enabling another module have no action,
+ * because nothing this module can do from a button resolves them.
+ */
 data class SetupCheck(
     val id: String,
     val status: CheckStatus,
     val fixHintId: String? = null,
+    val actionId: String? = null,
 )
 
 /** A snapshot of the live world state the wizard probes (assembled in jsMain). */
@@ -30,7 +38,15 @@ data class SetupState(
     val hasPartyActor: Boolean,
     val kingdomConfigured: Boolean,
     val campaignMapScenesConfigured: Boolean,
+    /**
+     * How many months the climate table holds. Weather rolls read one row per month of the
+     * calendar year, so any count other than [MONTHS_IN_A_YEAR] leaves months unrollable.
+     */
+    val climateMonthCount: Int,
 )
+
+/** A Golarion year, and therefore the number of rows a complete climate table needs. */
+const val MONTHS_IN_A_YEAR = 12
 
 /**
  * Evaluate the world into ordered setup checks. Hard preconditions fail; nice-to-haves warn:
@@ -72,11 +88,22 @@ fun evaluateSetupChecks(state: SetupState): List<SetupCheck> = listOf(
         id = "kingdom",
         status = if (state.kingdomConfigured) CheckStatus.PASS else CheckStatus.WARN,
         fixHintId = if (state.kingdomConfigured) null else "setupWizard.fix.kingdom",
+        actionId = if (state.kingdomConfigured) null else "create-kingdom",
     ),
     SetupCheck(
         id = "map-scenes",
         status = if (state.campaignMapScenesConfigured) CheckStatus.PASS else CheckStatus.WARN,
         fixHintId = if (state.campaignMapScenesConfigured) null else "setupWizard.fix.mapScenes",
+        actionId = if (state.campaignMapScenesConfigured) null else "pick-map-scenes",
+    ),
+    // A climate table is seeded with the Stolen Lands months, so a wrong count means it was edited
+    // into an unusable shape rather than simply never set up. Any count is left alone otherwise: a
+    // GM who retuned the DCs for their own region has a valid table, not a broken one.
+    SetupCheck(
+        id = "climate",
+        status = if (state.climateMonthCount == MONTHS_IN_A_YEAR) CheckStatus.PASS else CheckStatus.WARN,
+        fixHintId = if (state.climateMonthCount == MONTHS_IN_A_YEAR) null else "setupWizard.fix.climate",
+        actionId = if (state.climateMonthCount == MONTHS_IN_A_YEAR) null else "restore-climate",
     ),
 )
 

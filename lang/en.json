@@ -7617,7 +7617,8 @@
         "calendar-bridge": "Calendar notes",
         "party-actor": "Party actor with camping data",
         "kingdom": "Kingdom configured",
-        "map-scenes": "Campaign map scenes"
+        "map-scenes": "Campaign map scenes",
+        "climate": "Climate table"
       },
       "fix": {
         "kingmakerModule": "Install and enable the official Pathfinder Kingmaker module — hex claims, token mappings and region data all come from it.",
@@ -7625,7 +7626,22 @@
         "calendarBridge": "Seasons & Stars is active but the Simple Calendar Compatibility Bridge is not. Calendar notes for weather, rests and turns are being skipped. Install foundryvtt-simple-calendar-compat.",
         "partyActor": "Create a party actor and open its camping sheet once, so camping data exists.",
         "kingdom": "Create a kingdom on your party actor to use the kingdom sheet.",
-        "mapScenes": "Pick your regional map scene(s) in the module settings so hex features and travel work."
+        "mapScenes": "Pick your regional map scene(s) in the module settings so hex features and travel work.",
+        "climate": "The climate table needs one row per month of the year."
+      },
+      "action": {
+        "create-kingdom": "Create the kingdom",
+        "pick-map-scenes": "Pick map scenes",
+        "restore-climate": "Restore the Stolen Lands climate"
+      },
+      "done": {
+        "climate": "Climate restored to the Stolen Lands defaults.",
+        "mapScenes": "{count} map scene(s) configured."
+      },
+      "error": {
+        "gmOnly": "Only a GM can change world setup.",
+        "noPartyActor": "No party actor exists yet; create one first.",
+        "noScenes": "This world has no scenes to pick from."
       }
     }
   }

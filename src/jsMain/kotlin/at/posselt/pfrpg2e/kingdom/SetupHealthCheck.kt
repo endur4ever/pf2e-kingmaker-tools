@@ -43,6 +43,10 @@ fun Game.probeSetupState(): SetupState = SetupState(
         .getCampaignMapSceneIds()
         .split(',')
         .any { it.isNotBlank() },
+    // A malformed stored setting reads as no months rather than throwing the whole report away.
+    climateMonthCount = runCatching {
+        Pfrpg2eKingdomCampingWeatherSettings.getClimateSettings().months.size
+    }.getOrDefault(0),
 )
 
 /** GM-only: run the checks against the live world and whisper the report. */
@@ -58,6 +62,8 @@ suspend fun Game.postSetupHealthCheck() {
             "status" to check.status.name.lowercase(),
             "label" to t("setupWizard.check.${check.id}"),
             "fix" to (check.fixHintId?.let { t(it) } ?: ""),
+            "actionId" to (check.actionId ?: ""),
+            "actionLabel" to (check.actionId?.let { t("setupWizard.action.$it") } ?: ""),
         )
     }.toTypedArray()
     postChatTemplate(

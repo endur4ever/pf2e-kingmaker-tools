@@ -7617,7 +7617,8 @@
         "calendar-bridge": "Calendar notes",
         "party-actor": "Party actor with camping data",
         "kingdom": "Kingdom configured",
-        "map-scenes": "Campaign map scenes"
+        "map-scenes": "Campaign map scenes",
+        "climate": "Klimatabelle"
       },
       "fix": {
         "kingmakerModule": "Install and enable the official Pathfinder Kingmaker module — hex claims, token mappings and region data all come from it.",
@@ -7625,7 +7626,22 @@
         "calendarBridge": "Seasons & Stars is active but the Simple Calendar Compatibility Bridge is not. Calendar notes for weather, rests and turns are being skipped. Install foundryvtt-simple-calendar-compat.",
         "partyActor": "Create a party actor and open its camping sheet once, so camping data exists.",
         "kingdom": "Create a kingdom on your party actor to use the kingdom sheet.",
-        "mapScenes": "Pick your regional map scene(s) in the module settings so hex features and travel work."
+        "mapScenes": "Pick your regional map scene(s) in the module settings so hex features and travel work.",
+        "climate": "Die Klimatabelle braucht eine Zeile pro Monat des Jahres."
+      },
+      "action": {
+        "create-kingdom": "Königreich erstellen",
+        "pick-map-scenes": "Kartenszenen auswählen",
+        "restore-climate": "Klima der Gestohlenen Lande wiederherstellen"
+      },
+      "done": {
+        "climate": "Klima auf die Standardwerte der Gestohlenen Lande zurückgesetzt.",
+        "mapScenes": "{count} Kartenszene(n) konfiguriert."
+      },
+      "error": {
+        "gmOnly": "Nur ein SL kann die Welteinrichtung ändern.",
+        "noPartyActor": "Es existiert noch kein Gruppen-Akteur; erstelle zuerst einen.",
+        "noScenes": "Diese Welt hat keine Szenen zur Auswahl."
       }
     }
   }

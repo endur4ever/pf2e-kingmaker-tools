@@ -14,9 +14,60 @@ class SetupWizardChecksTest {
         hasPartyActor = true,
         kingdomConfigured = true,
         campaignMapScenesConfigured = true,
+        climateMonthCount = MONTHS_IN_A_YEAR,
     )
 
     private fun status(checks: List<SetupCheck>, id: String) = checks.first { it.id == id }.status
+
+    private fun action(checks: List<SetupCheck>, id: String) = checks.first { it.id == id }.actionId
+
+    @Test
+    fun aHealthyWorldOffersNoFixButtonsAtAll() {
+        // A button beside a passing check invites a GM to overwrite settings they meant to keep.
+        assertTrue(evaluateSetupChecks(fullyConfigured).all { it.actionId == null })
+    }
+
+    @Test
+    fun theFixableChecksCarryTheirAction() {
+        val checks = evaluateSetupChecks(
+            fullyConfigured.copy(
+                kingdomConfigured = false,
+                campaignMapScenesConfigured = false,
+                climateMonthCount = 0,
+            ),
+        )
+        assertEquals("create-kingdom", action(checks, "kingdom"))
+        assertEquals("pick-map-scenes", action(checks, "map-scenes"))
+        assertEquals("restore-climate", action(checks, "climate"))
+    }
+
+    @Test
+    fun aMissingModuleOffersNoButtonBecauseNoButtonCouldFixIt() {
+        val checks = evaluateSetupChecks(fullyConfigured.copy(libWrapperActive = false, kingmakerModuleActive = false))
+        assertEquals(null, action(checks, "libwrapper"))
+        assertEquals(null, action(checks, "kingmaker-module"))
+    }
+
+    @Test
+    fun aCompleteClimateTablePasses() {
+        assertEquals(CheckStatus.PASS, status(evaluateSetupChecks(fullyConfigured), "climate"))
+    }
+
+    @Test
+    fun aClimateTableMissingMonthsWarnsRatherThanFails() {
+        // Weather still rolls for the months that are there, so this must not block a setup.
+        val checks = evaluateSetupChecks(fullyConfigured.copy(climateMonthCount = 11))
+        assertEquals(CheckStatus.WARN, status(checks, "climate"))
+        assertTrue(setupIsReady(checks))
+    }
+
+    @Test
+    fun aClimateTableWithTooManyMonthsIsAlsoWrong() {
+        assertEquals(
+            CheckStatus.WARN,
+            status(evaluateSetupChecks(fullyConfigured.copy(climateMonthCount = 13)), "climate"),
+        )
+    }
 
     @Test
     fun aFullyConfiguredWorldIsAllPassAndReady() {

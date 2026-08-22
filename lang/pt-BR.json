@@ -7617,7 +7617,8 @@
         "calendar-bridge": "Calendar notes",
         "party-actor": "Party actor with camping data",
         "kingdom": "Kingdom configured",
-        "map-scenes": "Campaign map scenes"
+        "map-scenes": "Campaign map scenes",
+        "climate": "Tabela de clima"
       },
       "fix": {
         "kingmakerModule": "Install and enable the official Pathfinder Kingmaker module — hex claims, token mappings and region data all come from it.",
@@ -7625,7 +7626,22 @@
         "calendarBridge": "Seasons & Stars is active but the Simple Calendar Compatibility Bridge is not. Calendar notes for weather, rests and turns are being skipped. Install foundryvtt-simple-calendar-compat.",
         "partyActor": "Create a party actor and open its camping sheet once, so camping data exists.",
         "kingdom": "Create a kingdom on your party actor to use the kingdom sheet.",
-        "mapScenes": "Pick your regional map scene(s) in the module settings so hex features and travel work."
+        "mapScenes": "Pick your regional map scene(s) in the module settings so hex features and travel work.",
+        "climate": "A tabela de clima precisa de uma linha por mês do ano."
+      },
+      "action": {
+        "create-kingdom": "Criar o reino",
+        "pick-map-scenes": "Escolher cenas do mapa",
+        "restore-climate": "Restaurar o clima das Terras Roubadas"
+      },
+      "done": {
+        "climate": "Clima restaurado para os padrões das Terras Roubadas.",
+        "mapScenes": "{count} cena(s) de mapa configurada(s)."
+      },
+      "error": {
+        "gmOnly": "Apenas um GM pode alterar a configuração do mundo.",
+        "noPartyActor": "Ainda não existe um ator de grupo; crie um primeiro.",
+        "noScenes": "Este mundo não tem cenas para escolher."
       }
     }
   }

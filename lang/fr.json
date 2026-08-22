@@ -7617,7 +7617,8 @@
         "calendar-bridge": "Calendar notes",
         "party-actor": "Party actor with camping data",
         "kingdom": "Kingdom configured",
-        "map-scenes": "Campaign map scenes"
+        "map-scenes": "Campaign map scenes",
+        "climate": "Table de climat"
       },
       "fix": {
         "kingmakerModule": "Install and enable the official Pathfinder Kingmaker module — hex claims, token mappings and region data all come from it.",
@@ -7625,7 +7626,22 @@
         "calendarBridge": "Seasons & Stars is active but the Simple Calendar Compatibility Bridge is not. Calendar notes for weather, rests and turns are being skipped. Install foundryvtt-simple-calendar-compat.",
         "partyActor": "Create a party actor and open its camping sheet once, so camping data exists.",
         "kingdom": "Create a kingdom on your party actor to use the kingdom sheet.",
-        "mapScenes": "Pick your regional map scene(s) in the module settings so hex features and travel work."
+        "mapScenes": "Pick your regional map scene(s) in the module settings so hex features and travel work.",
+        "climate": "La table de climat a besoin d'une ligne par mois de l'année."
+      },
+      "action": {
+        "create-kingdom": "Créer le royaume",
+        "pick-map-scenes": "Choisir les scènes de carte",
+        "restore-climate": "Restaurer le climat des Terres Volées"
+      },
+      "done": {
+        "climate": "Climat restauré aux valeurs par défaut des Terres Volées.",
+        "mapScenes": "{count} scène(s) de carte configurée(s)."
+      },
+      "error": {
+        "gmOnly": "Seul un MJ peut modifier la configuration du monde.",
+        "noPartyActor": "Aucun acteur de groupe n'existe encore ; créez-en un d'abord.",
+        "noScenes": "Ce monde n'a aucune scène à choisir."
       }
     }
   }

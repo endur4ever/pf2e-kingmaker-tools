@@ -350,6 +350,45 @@ def check_gazette_resolver():
     return 0
 
 
+SETUP_CHECKS_SRC = "src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/SetupWizardChecks.kt"
+
+
+def check_setup_wizard_keys():
+    """Check 7: every setup check id and action id must have a label in every locale.
+
+    The health-check card localizes its rows with t("setupWizard.check.$id") and its buttons with
+    t("setupWizard.action.$actionId") -- keys assembled at runtime from the ids in
+    SetupWizardChecks.kt. Check 2 scans for literal key strings, so a dynamically built key is
+    invisible to it: adding a check to the pure function and forgetting its label ships a row
+    titled with the raw key, and every guard still passes. This reads the ids out of the source
+    and demands a label for each, in all locales.
+    """
+    if not os.path.exists(SETUP_CHECKS_SRC):
+        return 0
+    src = open(SETUP_CHECKS_SRC, encoding="utf-8").read()
+    check_ids = re.findall(r'^\s*id = "([\w-]+)",', src, re.M)
+    action_ids = re.findall(r'actionId = if \([^)]*\) null else "([\w-]+)"', src)
+    if not check_ids:
+        print("[i18n] SETUP: could not parse check ids -- check the guard, not the code")
+        return 1
+    problems = []
+    for path in sorted(glob.glob("lang/*.json")):
+        root = json.load(open(path, encoding="utf-8")).get(NS, {})
+        for cid in check_ids:
+            if not isinstance(lookup_value(root, f"setupWizard.check.{cid}"), str):
+                problems.append((path, f"setupWizard.check.{cid}"))
+        for aid in set(action_ids):
+            if not isinstance(lookup_value(root, f"setupWizard.action.{aid}"), str):
+                problems.append((path, f"setupWizard.action.{aid}"))
+    if problems:
+        print(f"[i18n] SETUP: {len(problems)} missing setup wizard key(s):")
+        for path, key in problems:
+            print(f"  {path}: {key}")
+        return 1
+    print(f"[i18n] SETUP OK -- {len(check_ids)} check(s) and {len(set(action_ids))} action(s) localized everywhere.")
+    return 0
+
+
 def main():
     parser = argparse.ArgumentParser(description="i18n key guard for pf2e-kingmaker-tools")
     parser.add_argument("--parity", action="store_true", help="Run cross-language parity check only")
@@ -429,6 +468,7 @@ def main():
         failed = 0
         failed += check_parity() or 0
         failed += check_gazette_resolver() or 0
+        failed += check_setup_wizard_keys() or 0
         if failed:
             return 1
     

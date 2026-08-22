@@ -31,6 +31,7 @@ import at.posselt.pfrpg2e.kingdom.getKingdomActors
 import at.posselt.pfrpg2e.kingdom.armies.createArmyCompendiumEntries
 import at.posselt.pfrpg2e.kingdom.armies.registerArmyConsumptionHooks
 import at.posselt.pfrpg2e.kingdom.bindChatButtons
+import at.posselt.pfrpg2e.kingdom.bindSetupHealthCheckButtons
 import at.posselt.pfrpg2e.kingdom.warnIfCalendarNotesUnsupported
 import at.posselt.pfrpg2e.kingdom.registerContextMenus
 import at.posselt.pfrpg2e.kingdom.map.registerHexGridSync
@@ -125,6 +126,7 @@ fun main() {
         }
 
         bindChatButtons(game)
+        bindSetupHealthCheckButtons(game, actionDispatcher)
         registerMacroDropHooks(game)
 
         buildPromise {

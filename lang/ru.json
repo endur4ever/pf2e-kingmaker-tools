@@ -7617,7 +7617,8 @@
         "calendar-bridge": "Calendar notes",
         "party-actor": "Party actor with camping data",
         "kingdom": "Kingdom configured",
-        "map-scenes": "Campaign map scenes"
+        "map-scenes": "Campaign map scenes",
+        "climate": "Таблица климата"
       },
       "fix": {
         "kingmakerModule": "Install and enable the official Pathfinder Kingmaker module — hex claims, token mappings and region data all come from it.",
@@ -7625,7 +7626,22 @@
         "calendarBridge": "Seasons & Stars is active but the Simple Calendar Compatibility Bridge is not. Calendar notes for weather, rests and turns are being skipped. Install foundryvtt-simple-calendar-compat.",
         "partyActor": "Create a party actor and open its camping sheet once, so camping data exists.",
         "kingdom": "Create a kingdom on your party actor to use the kingdom sheet.",
-        "mapScenes": "Pick your regional map scene(s) in the module settings so hex features and travel work."
+        "mapScenes": "Pick your regional map scene(s) in the module settings so hex features and travel work.",
+        "climate": "Таблице климата нужна одна строка на каждый месяц года."
+      },
+      "action": {
+        "create-kingdom": "Создать королевство",
+        "pick-map-scenes": "Выбрать сцены карты",
+        "restore-climate": "Восстановить климат Украденных земель"
+      },
+      "done": {
+        "climate": "Климат восстановлен до значений Украденных земель.",
+        "mapScenes": "Настроено сцен карты: {count}."
+      },
+      "error": {
+        "gmOnly": "Только ГМ может менять настройки мира.",
+        "noPartyActor": "Актёр партии ещё не создан; сначала создайте его.",
+        "noScenes": "В этом мире нет сцен для выбора."
       }
     }
   }

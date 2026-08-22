@@ -9,6 +9,9 @@
         <li class="km-setup-check km-setup-{{status}}">
             <strong>{{label}}</strong>
             {{#if fix}}<div class="km-setup-fix">{{fix}}</div>{{/if}}
+            {{#if actionId}}
+                <button type="button" class="km-setup-action" data-setup-action="{{actionId}}">{{actionLabel}}</button>
+            {{/if}}
         </li>
     {{/each}}
 </ul>
