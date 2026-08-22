@@ -32,6 +32,7 @@ external interface ToolsMacros {
     val manageGearSettingsProfilesMacro: () -> Unit
     val manageHomebrewProfilesMacro: () -> Unit
     val setupHealthCheckMacro: () -> Unit
+    val restoreMigrationBackupMacro: () -> Unit
     val importGearSettingsProfileMacro: () -> Unit
     val exportActiveGearSettingsProfileMacro: () -> Unit
     val restMacro: (actorUuid: String) -> Unit

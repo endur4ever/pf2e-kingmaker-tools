@@ -52,6 +52,7 @@ import at.posselt.pfrpg2e.macros.exportActiveGearSettingsProfileMacro
 import at.posselt.pfrpg2e.macros.importGearSettingsProfileMacro
 import at.posselt.pfrpg2e.macros.manageGearSettingsProfilesMacro
 import at.posselt.pfrpg2e.macros.manageHomebrewProfilesMacro
+import at.posselt.pfrpg2e.macros.restoreMigrationBackupMacro
 import at.posselt.pfrpg2e.macros.setupHealthCheckMacro
 import at.posselt.pfrpg2e.macros.resetHeroPointsMacro
 import at.posselt.pfrpg2e.macros.rollExplorationSkillCheckMacro
@@ -237,6 +238,7 @@ fun main() {
                 manageGearSettingsProfilesMacro = { buildPromise { manageGearSettingsProfilesMacro() } },
                 manageHomebrewProfilesMacro = { buildPromise { manageHomebrewProfilesMacro(game) } },
                 setupHealthCheckMacro = { buildPromise { setupHealthCheckMacro(game) } },
+                restoreMigrationBackupMacro = { buildPromise { restoreMigrationBackupMacro(game) } },
                 importGearSettingsProfileMacro = { buildPromise { importGearSettingsProfileMacro(game) } },
                 exportActiveGearSettingsProfileMacro = { buildPromise { exportActiveGearSettingsProfileMacro(game) } },
                 restMacro = { actorUuid ->

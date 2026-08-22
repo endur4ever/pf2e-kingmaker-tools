@@ -9,7 +9,27 @@
       "upgradingFromTo": "Upgrading from {fromVersion} to {toVersion}",
       "doNotClose": "Running migrations, please do not close the window",
       "runningMigration": "Running migration version {version}",
-      "successful": "Migration successful"
+      "successful": "Migration successful",
+      "restore": {
+        "title": "Restore Pre-Migration Backup",
+        "noBackups": "No pre-migration backup exists in this world yet. One is written automatically before each migration run.",
+        "chooseSlot": "Backup to restore",
+        "chooseSlotHelp": "Two backups are kept, so a second migration run cannot destroy the only good copy.",
+        "slotLabel": "{slot} — schema v{version}, {kingdoms} kingdom(s), {camping} camping actor(s)",
+        "slot": {
+          "latest": "Most recent",
+          "previous": "Previous"
+        },
+        "slotGone": "That backup is no longer available — it may have been rotated out while the dialog was open.",
+        "confirmIntro": "Restore the backup taken at schema version {version}?",
+        "confirmRestoring": "Will overwrite: {kingdoms} kingdom actor(s) and {camping} camping actor(s).",
+        "confirmMissing": "{count} actor(s) in the backup no longer exist in this world and cannot be restored.",
+        "confirmUntouched": "{count} actor(s) exist in this world but not in the backup — they will be left untouched.",
+        "confirmSchemaReset": "The world schema version will be reset to {version} so migrations re-run cleanly on next load.",
+        "confirmDestructive": "This overwrites current kingdom and camping data. It cannot be undone.",
+        "inWorldWarning": "This backup lives INSIDE this world — a corrupted world can lose it too. For off-world safety use ‘Back Up Whole Campaign’ on the party actor.",
+        "restored": "Restored {kingdoms} kingdom(s) and {camping} camping actor(s); schema version reset to {version}."
+      }
     },
     "diceFaces": {
       "d4": "D4",
