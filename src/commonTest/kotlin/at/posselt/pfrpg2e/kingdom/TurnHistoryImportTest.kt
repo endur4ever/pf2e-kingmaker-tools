@@ -82,4 +82,42 @@ class TurnHistoryImportTest {
         assertEquals(listOf(1, 2, 3), plan.keptTurns)
         assertEquals(0, plan.trimmed)
     }
+
+    @Test
+    fun aTurnPastedTwiceIsNotKeptTwice() {
+        // importedTurns is a LIST, so a workbook paste with a duplicated row (an easy spreadsheet
+        // mistake) reaches here with the same turn number twice. Without de-duplication that turn
+        // appears twice in keptTurns, the cap arithmetic counts it twice, and the caller building
+        // the record union would write two records for one turn.
+        val plan = planTurnHistoryMerge(
+            existingTurns = emptyList(),
+            importedTurns = listOf(1, 2, 2, 3, 3, 3),
+            cap = 100,
+        )
+        assertEquals(listOf(1, 2, 3), plan.keptTurns)
+        assertEquals(0, plan.trimmed)
+    }
+
+    @Test
+    fun duplicatesInTheImportDoNotInflateTheCapTrim() {
+        // Six pasted rows covering three distinct turns must not be counted as six against the cap.
+        val plan = planTurnHistoryMerge(
+            existingTurns = emptyList(),
+            importedTurns = listOf(1, 1, 2, 2, 3, 3),
+            cap = 3,
+        )
+        assertEquals(listOf(1, 2, 3), plan.keptTurns)
+        assertEquals(0, plan.trimmed, "three distinct turns fit a cap of three")
+    }
+
+    @Test
+    fun aDuplicatedTurnThatAlsoCollidesIsReportedOnce() {
+        val plan = planTurnHistoryMerge(
+            existingTurns = listOf(5),
+            importedTurns = listOf(5, 5, 6),
+            cap = 100,
+        )
+        assertEquals(listOf(5), plan.collisions, "one collision, not two")
+        assertEquals(listOf(5, 6), plan.keptTurns)
+    }
 }
