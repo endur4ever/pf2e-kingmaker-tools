@@ -179,7 +179,8 @@
         "importCamping": "Import Camping",
         "campaignBackup": "Whole Campaign",
         "campaignBackupNote": "Backs up kingdom and camping data for every party actor, plus all module settings. Does NOT include the official Kingmaker module's hex claims or scene drawings — those stay with the world.",
-        "exportCampaign": "Back Up Whole Campaign"
+        "exportCampaign": "Back Up Whole Campaign",
+        "restoreCampaign": "Restore Campaign Backup"
       },
       "cancel": "Cancel"
     },
@@ -2095,6 +2096,23 @@
         "confirmCollisions": "{count} turn(s) already in history will be REPLACED by the imported rows: {turns}",
         "confirmTrimmed": "History keeps the newest {cap} turns, so {count} of the oldest will be dropped after merging.",
         "imported": "Imported {count} turn(s) into history."
+      },
+      "campaignRestore": {
+        "title": "Restore Campaign Backup",
+        "fileLabel": "Campaign backup JSON",
+        "unreadable": "That file could not be read as a campaign backup.",
+        "tooNew": "This backup was made by a newer version of the module (schema v{bundle}, this build understands v{current}). Update the module before restoring it.",
+        "nothingSelected": "No sections were selected, so nothing was restored.",
+        "sectionActors": "Restore actor data ({kingdoms} kingdom(s), {camping} camping actor(s))",
+        "sectionSettings": "Restore module settings ({count})",
+        "confirmIntro": "Restore this campaign backup (schema v{version})?",
+        "confirmOlder": "The backup is older than this module; restored data will be migrated forward on next load.",
+        "confirmActors": "Will overwrite {kingdoms} kingdom actor(s) and {camping} camping actor(s) that match by UUID.",
+        "confirmSettings": "Will overwrite {count} module setting(s).",
+        "confirmSkipped": "{count} setting(s) in the backup are no longer used and will be skipped: {keys}",
+        "excluded": "NOT included in this backup and therefore NOT restored: {sections}.",
+        "destructive": "This overwrites current data. It cannot be undone.",
+        "restored": "Restored {kingdoms} kingdom(s), {camping} camping actor(s) and {settings} setting(s)."
       }
     },
     "chatMessages": {

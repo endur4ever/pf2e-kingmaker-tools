@@ -18,6 +18,7 @@ import at.posselt.pfrpg2e.migrations.currentSchemaVersion
 import at.posselt.pfrpg2e.migrations.migrateCampingDataFrom
 import at.posselt.pfrpg2e.migrations.migrateKingdomDataFrom
 import at.posselt.pfrpg2e.kingdom.exportCampaignBackup
+import at.posselt.pfrpg2e.kingdom.promptRestoreSections
 import at.posselt.pfrpg2e.planImport
 import at.posselt.pfrpg2e.settings.pfrpg2eKingdomCampingWeather
 import at.posselt.pfrpg2e.utils.buildPromise
@@ -74,6 +75,22 @@ class ActorActions(
 
             // Whole-campaign backup: world-scoped rather than actor-scoped, but this dialog is the
             // module's existing GM-gated export surface, so it is where a GM already looks.
+            "restore-campaign" -> buildPromise {
+                if (game.user.isGM) {
+                    val json = jsonFilePicker(
+                        title = t("kingdom.campaignRestore.title"),
+                        label = t("kingdom.campaignRestore.fileLabel"),
+                    )
+                    val parsed = runCatching { JSON.parse<Any?>(json).asDynamic() }.getOrNull()
+                    if (parsed == null) {
+                        ui.notifications.error(t("kingdom.campaignRestore.unreadable"))
+                    } else {
+                        promptRestoreSections(game, parsed)
+                    }
+                }
+                close()
+            }
+
             "export-campaign" -> buildPromise {
                 game.exportCampaignBackup()
                 close()
