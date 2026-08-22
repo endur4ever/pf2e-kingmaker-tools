@@ -1,0 +1,14 @@
+<h2>{{localizeKM "setupWizard.title"}}</h2>
+{{#if ready}}
+    <p>{{localizeKM "setupWizard.ready"}}</p>
+{{else}}
+    <p>{{localizeKM "setupWizard.notReady"}}</p>
+{{/if}}
+<ul class="km-setup-checks">
+    {{#each checks}}
+        <li class="km-setup-check km-setup-{{status}}">
+            <strong>{{label}}</strong>
+            {{#if fix}}<div class="km-setup-fix">{{fix}}</div>{{/if}}
+        </li>
+    {{/each}}
+</ul>

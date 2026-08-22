@@ -7540,6 +7540,27 @@
       "encounter": "Encounter",
       "rest": "Rest",
       "meal": "Meal"
+    },
+    "setupWizard": {
+      "title": "Kingmaker Tools — Setup Check",
+      "ready": "Your world looks ready. Any warnings below are optional improvements.",
+      "notReady": "Something needs attention before the module will work correctly.",
+      "check": {
+        "kingmaker-module": "Official Pathfinder Kingmaker module",
+        "libwrapper": "libWrapper",
+        "calendar-bridge": "Calendar notes",
+        "party-actor": "Party actor with camping data",
+        "kingdom": "Kingdom configured",
+        "map-scenes": "Campaign map scenes"
+      },
+      "fix": {
+        "kingmakerModule": "Install and enable the official Pathfinder Kingmaker module — hex claims, token mappings and region data all come from it.",
+        "libWrapper": "Install and enable libWrapper. Without it, advancing the world clock during a rest can fail silently.",
+        "calendarBridge": "Seasons & Stars is active but the Simple Calendar Compatibility Bridge is not. Calendar notes for weather, rests and turns are being skipped. Install foundryvtt-simple-calendar-compat.",
+        "partyActor": "Create a party actor and open its camping sheet once, so camping data exists.",
+        "kingdom": "Create a kingdom on your party actor to use the kingdom sheet.",
+        "mapScenes": "Pick your regional map scene(s) in the module settings so hex features and travel work."
+      }
     }
   }
 }

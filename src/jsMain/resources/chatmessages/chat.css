@@ -50,3 +50,25 @@
 .km-apply-modifier-effect {
     height: auto;
 }
+/* Setup health check: pass/warn/fail rows. Colour is the only signal that scans, so each status
+   gets a left border rather than relying on the label text. */
+.km-setup-checks {
+    list-style: none;
+    margin: 6px 0 0;
+    padding: 0;
+}
+
+.km-setup-check {
+    padding: 3px 0 3px 8px;
+    border-left: 3px solid transparent;
+    margin-bottom: 3px;
+}
+
+.km-setup-check.km-setup-pass { border-left-color: #4c9a4c; }
+.km-setup-check.km-setup-warn { border-left-color: #c99a2e; }
+.km-setup-check.km-setup-fail { border-left-color: #a33; }
+
+.km-setup-fix {
+    font-size: 0.9em;
+    opacity: 0.85;
+}

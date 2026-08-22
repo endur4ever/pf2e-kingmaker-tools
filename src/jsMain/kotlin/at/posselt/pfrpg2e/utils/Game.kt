@@ -31,6 +31,7 @@ external interface ToolsMacros {
     val showAllNpcHpBarsMacro: () -> Unit
     val manageGearSettingsProfilesMacro: () -> Unit
     val manageHomebrewProfilesMacro: () -> Unit
+    val setupHealthCheckMacro: () -> Unit
     val importGearSettingsProfileMacro: () -> Unit
     val exportActiveGearSettingsProfileMacro: () -> Unit
     val restMacro: (actorUuid: String) -> Unit
