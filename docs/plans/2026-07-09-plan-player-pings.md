@@ -97,16 +97,33 @@ The feed and whisper derive from **existing durable records**. Audited by readin
 | **Expedition chronicle** `RawExpeditionChronicleEntry` | `kingdom/data/RawCompanionExpedition.kt` | `turn: Int` **and** `appliedAt: String` (ISO) | ✅ **Timestamped.** Durable "expedition returned/resolved" rows. |
 | **Quests** `RawQuest` | `kingdom/data/RawQuest.kt` | `createdAt: Double?` + `updatedAt: Double?` (epoch millis) + `completionSnapshot.turn: Int` | ✅ **Timestamped enough.** "Completed" = `status=="completed"` with `completionSnapshot.turn` + `updatedAt`. |
 | **In-flight expedition** `RawCompanionExpedition` | `kingdom/data/RawCompanionExpedition.kt` | `createdAt: String?` only; **no** resolution/return timestamp (uses live `status` + `daysRemaining`) | ⚠️ **Partial.** Live status drives the *whisper* line ("your expedition returns this turn"); the durable *feed* row uses the chronicle entry instead. No new field needed. |
-| **Caravans** `RawCaravan` | `kingdom/data/RawCaravan.kt` | **none** — only `turnsRemaining`, `status`; the row is *removed* on arrival | ❌ **Not independently timestamped.** Raid/arrival surface only as transient `CaravanEvent` chat lines folded into `RawTurnRecord.notes/playerNotes` at End Turn. |
+| **Caravans** `RawCaravan` + `kingdom.shipmentHistory` | `kingdom/data/RawCaravan.kt`, `kingdom/ShipmentHistoryData.kt` | `RawCaravan` itself: **none** (the row is removed on arrival). But `RawShipmentHistoryEntry { turn, partner, cargo, outcome, rdGained }` now persists every resolved shipment. | ✅ **Durable, turn-stamped** (landed after this plan was drafted — the card anticipated it as "caravan history once gap0709-caravan-panel lands"). Not wall-clock stamped: see the design consequence below. |
 | **War threats** `RawWarThreat` | `kingdom/data/RawWarThreat.kt` | `visibleToPlayers: Boolean?`; escalation/arrival are transient | ❌ **Not independently timestamped.** Arrival captured only inside the turn record (`clockEvents`/notes). |
 | **Deeds chronicle** (sibling plan `2026-07-09-plan-deeds-chronicle.md`) | not built | would carry `turn` + timestamp by design | ⛔ **Does not exist yet** — optional feed source, existence-gated. |
 | **Petition inbox** (sibling plan `2026-07-09-plan-petition-inbox.md`) | not built | TBD | ⛔ **Does not exist yet** — optional whisper line, existence-gated. |
 
-**Design consequence (this is the load-bearing decision):** v1 derives **caravan-raided / war-threat** feed items from the **already-timestamped `RawTurnRecord.playerNotes`** (turn granularity), NOT from a new per-event log. That gives "caravans raided" as a feed item keyed on the turn record's `timestamp`, with **no new persistence and no migration**. Only if a future version wants each caravan as its own dismissible, per-caravan-jump-linked row would we add a persisted timestamped event log (see §2.4 / Migration49). We explicitly do **not** do that in v1.
+**Design consequence (this is the load-bearing decision), revised:** when this plan was drafted, the
+only durable trace of a caravan raid was prose inside `RawTurnRecord.playerNotes`, so v1 proposed
+deriving the feed item by reading that text. **`kingdom.shipmentHistory` has since landed**, giving a
+structured row per resolved shipment, so v1 should read that instead — matching on
+`outcome == "raided"` rather than pattern-matching a sentence a GM may have rewritten. The sibling
+NPC-memory plan draws the same line for the same reason: GM prose is not a machine-readable event
+source.
+
+**War threats** keep the `playerNotes` derivation; they still have no durable per-event row.
+
+**Ordering.** `shipmentHistory` entries carry `turn: Int`, not millis, while the feed sorts on
+`occurredAtMillis` against `cursor.lastSeenAtMillis`. Map a shipment row to the `timestamp` of the
+`RawTurnRecord` bearing the same `turn` — that field exists and is ISO. Granularity is therefore
+per-turn, exactly as the prose path already was, so this composes with the existing cursor without
+changing it. **Still no new persistence and no migration** for this feature.
+
+Only if a future version wants each caravan as its own dismissible, per-caravan-jump-linked row would
+a wall-clock-stamped event log be needed. We explicitly do **not** do that in v1.
 
 ### 2.4 Migration — **NOT NEEDED** (justified)
 
-- Per-user state lives in **User flags**, which have **no schema version and no migration runner** — the migration chain (`Migrations.kt`, currently ending at **`Migration48`**, contiguity asserted by `MigrationChainTest`) only versions the kingdom/camping flag. A new User-flag key simply appears; absent = default. **No Migration49 for this feature.**
+- Per-user state lives in **User flags**, which have **no schema version and no migration runner** — the migration chain (`Migrations.kt`, ending at **`Migration61`**, contiguity asserted by `MigrationChainTest`) only versions the kingdom/camping flag. A new User-flag key simply appears; absent = default. **No Migration49 for this feature.**
 - No new **kingdom-side** field is required either. `lastPlayerPingsTurn` is a free-form actor app-flag (same class as `lastRecapTurn`), which the existing code adds without a migration.
 - **Cleanup instead of migration:** stale User flags are harmless (a `lastSeenAtMillis` from a deleted world just makes everything read as "seen"). Provide a light housekeeping path:
   - On kingdom **reset/delete**, and on module **downgrade**, best-effort `game.user.unsetAppFlag("playerPings")` for the local user (we cannot iterate other users' flags without GM socket calls — out of scope).
@@ -450,7 +467,7 @@ The pure `deriveUnreadFeed` takes visibility **pre-resolved** (`FeedRecord.visib
 - **No live/socket push.** Badge + readiness update **on render only**. A player marking Ready updates the GM strip only when the GM's Turn Wizard next renders (best-effort local re-render if open on the same client; no cross-client socket in v1).
 - **No per-user leadership-slot attribution** — the cap is kingdom-wide (§3.3).
 - **No blocking.** Readiness never gates End Turn; `canCommit` stays `!hasAnyOverCap`.
-- **No new persisted per-event log** for caravans/war threats — derived from `RawTurnRecord.playerNotes` at turn granularity (§2.3). (A per-caravan log would be Migration49; not v1.)
+- **No new persisted per-event log** for this feature — caravan rows come from the existing `kingdom.shipmentHistory`, war threats from `RawTurnRecord.playerNotes`, both at turn granularity (§2.3). (A wall-clock-stamped per-caravan log is not v1.)
 - **No petition/deed sources unless those features exist** — both are sibling *plans* only (`2026-07-09-plan-petition-inbox.md`, `2026-07-09-plan-deeds-chronicle.md`); their lines/items are existence-gated and silently absent otherwise.
 - **No AI/LLM prose** — pure i18n templates.
 - **No cross-kingdom aggregation** — one kingdom per world.
