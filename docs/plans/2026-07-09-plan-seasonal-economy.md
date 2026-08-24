@@ -92,13 +92,13 @@ The active profile is reached exactly as the existing rules are, via
 `RuleResolutionHelper.getActiveProfile(registry)` where `registry` is the persisted
 `HomebrewProfileRegistry` (`activeProfileId` + `profiles`).
 
-### 2.2 Idempotency marker — `KingdomData.kt` (jsMain, `RawKingdomData` external interface)
+### 2.2 Idempotency marker — `KingdomData.kt` (jsMain, `KingdomData` external interface)
 
 The spring-flood offer is an *event*, so it must not re-fire on every End Turn inside the same spring,
 nor on re-preview. One nullable marker records the last world-year we offered a flood in:
 
 ```kotlin
-// RawKingdomData — ADDITION only (nullable for migration safety)
+// KingdomData (KingdomData.kt:205) -- ADDITION only (nullable for migration safety)
 var lastSeasonalFloodYear: Int?   // world calendar year the spring-flood offer last fired; null = never
 ```
 
@@ -135,15 +135,17 @@ data class SeasonalEconomyModifiers(
 }
 ```
 
-### 2.4 Migration — **Migration49** (Gregory sequences the real number at implementation)
+### 2.4 Migration — **Migration66**
 
-The chain currently ends at `Migration48` (`migrations/Migrations.kt`); `MigrationChainTest` asserts
-contiguity, so the next contiguous number is proposed as **Migration49**.
+The chain ends at `Migration61` (`migrations/Migrations.kt`) and `MigrationChainTest` asserts
+contiguity. 62–65 are claimed by the downtime-projects, scheduled-pressure, petition-inbox and
+npc-memory plans, so this takes **Migration66**. Whichever of the five is implemented first should
+re-check the chain rather than trust these reservations.
 
 ```kotlin
-// Migration49: initialize the seasonal-economy idempotency marker; bump schema version.
-class Migration49 : Migration(version = 49) {
-    override fun migrateKingdom(game: Game, kingdomActor: KingdomActor, kingdom: RawKingdomData) {
+// Migration66: initialize the seasonal-economy idempotency marker; bump schema version.
+class Migration66 : Migration(version = 66) {
+    override fun migrateKingdom(game: Game, kingdomActor: KingdomActor, kingdom: KingdomData) {
         if (kingdom.lastSeasonalFloodYear == undefined) {
             kingdom.lastSeasonalFloodYear = null   // never offered yet
         }
@@ -152,7 +154,7 @@ class Migration49 : Migration(version = 49) {
 ```
 
 - **Non-breaking.** The added `HomebrewRules.seasonalEconomy` field defaults to `false` under kotlinx
-  deserialization; the `RawKingdomData` marker is nullable. Existing saves load unchanged and behave
+  deserialization; the `KingdomData` marker is nullable. Existing saves load unchanged and behave
   exactly as RAW until a profile turns the gate on.
 
 ---
@@ -392,20 +394,30 @@ ChatButton("km-offer-seasonal-flood") { game, actor, event, button ->
 
 ## 6. Interactions with Existing Systems (the four concrete seams)
 
-All four seams were read and **CONFIRMED** to exist at the signatures below.
+All four seams were read and confirmed against the tree.
+
+> **These signatures are a snapshot and must be re-verified before implementation.** Seam 3 already
+> drifted once: `caravanRaidDc` gained a fifth parameter (`fullyRoadedThroughClaimed`) in
+> `baf72f9f9` on 2026-08-12, after this plan was written on 2026-07-15, moving the function from
+> line 82 to 130. The table below is refreshed as of that change. A "CONFIRMED" seam table ages
+> exactly as fast as the code it points at.
 
 | # | Seam (file:line) | Verified signature today | Change |
 |---|------------------|--------------------------|--------|
 | 1 | **`calculateIncome`** — `src/commonMain/.../kingdom/resources/Income.kt:28` | `calculateIncome(realmData, resourceDice, increaseGainedLuxuries): Income` | Add `seasonal: SeasonalEconomyModifiers = SeasonalEconomyModifiers.none(...)`; wrap the lumber/ore/stone worksite `.income` with `applyWorksiteMultiplier(_, seasonal.commodityWorksiteMultiplier)`. Callers `collectResources` + `calculateProjectedResources` (`sheet/CalculateIncome.kt`) pass the turn's modifiers. |
 | 2 | **`calculateConsumption`** — `src/commonMain/.../kingdom/resources/Consumption.kt:23` | `calculateConsumption(settlements, realmData, armyConsumption, now, expressionContext, modifiers): Consumption` | Add `seasonal` param; scale the `food` term (`= applyWorksiteMultiplier(farmlands.resources, seasonal.farmlandFoodMultiplier)`) and add `seasonal.foodConsumptionDelta` into `consumers`. |
-| 3 | **`caravanRaidDc`** — `src/jsMain/.../kingdom/CaravanTick.kt:82` (pure fn; unit-tested via `CaravanTickTest.kt`) | `caravanRaidDc(baseDc, partnerStanding, atWar, claimedFraction): Int` | Add `seasonalDcDelta: Int = 0`; add it before the final `coerceIn(5, 40)`. `performEndTurn`'s caravan tick passes `seasonal.caravanRaidDcDelta`. |
+| 3 | **`caravanRaidDc`** — `src/jsMain/.../kingdom/CaravanTick.kt:130` (pure fn; unit-tested) | `caravanRaidDc(baseDc, partnerStanding, atWar, claimedFraction, fullyRoadedThroughClaimed = false): Int` | Add `seasonalDcDelta: Int = 0`; add it before the final `coerceIn(5, 40)`, i.e. **after** the road discount, so winter and a built-out trade road compose rather than one masking the other. `performEndTurn`'s caravan tick passes `seasonal.caravanRaidDcDelta`; `shipmentRaidDc` delegates here and inherits it. |
 | 4 | **Season source** — `getSeasonForMonth` `src/commonMain/.../data/regions/Weather.kt:95` + `Game.getCurrentMonth()` `utils/Time.kt:27` | `getSeasonForMonth(monthZeroIndexed: Int): Season` | **Reused, not modified** — imported by `SeasonalEconomy.kt` as the season source. |
 
 Plus the river-crossing interaction: `riverCrossingCostDelta` composes with the existing
-`travelCostRiverNoBridgeAdditional` game setting
-(`settings/Pfrpg2eKingdomCampingWeatherSettings.kt:426`), read where the river-no-bridge travel
-surcharge is applied (caravan routing / hexploration travel cost). Winter subtracts 1, floored at 0:
-`max(0, getTravelCostRiverNoBridgeAdditional() + seasonal.riverCrossingCostDelta)`.
+river-no-bridge surcharge. **That value has two sources and the implementer must pick deliberately:**
+the world setting `getTravelCostRiverNoBridgeAdditional()`
+(`settings/Pfrpg2eKingdomCampingWeatherSettings.kt:439`) and the gear-settings profile field
+`HomebrewRules.travelCostRiverNoBridgeAdditional`, resolved by
+`GearSettingsResolutionHelper.kt:72` as `profile?.settings?.hex?.travelCostRiverNoBridgeAdditional ?: 0`.
+Apply the delta to whichever the travel-cost path actually reads, once — adding it to both would
+double-count. Winter subtracts 1, floored at 0:
+`max(0, <resolved surcharge> + seasonal.riverCrossingCostDelta)`.
 
 Profile plumbing: `HomebrewRules.kt` (new field) + `RuleResolutionHelper.kt`
 (`isSeasonalEconomyEnabled`) + `HomebrewProfileRegistry` (unchanged; reached via `getActiveProfile`).
@@ -456,7 +468,7 @@ Profile plumbing: `HomebrewRules.kt` (new field) + `RuleResolutionHelper.kt`
 | `floodOffer_firesOncePerSpring` | Two consecutive spring End Turns emit the flood card once; second is suppressed by `lastSeasonalFloodYear`. |
 | `floodOffer_stampsMarkerOnDismiss` | Dismiss also stamps the marker (no re-offer this spring). |
 | `gateOff_noBadgeNoOfferRawNumbers` | Profile off → no badge, no flood card, and income/consumption equal the RAW baseline. |
-| `migration49_initsMarkerNull` | Migration49 sets `lastSeasonalFloodYear = null` on a pre-existing kingdom and bumps schema version. |
+| `migration66_initsMarkerNull` | Migration66 sets `lastSeasonalFloodYear = null` on a pre-existing kingdom and bumps schema version. |
 
 ### 7.3 Manual Foundry verification checklist
 
@@ -483,7 +495,7 @@ Profile plumbing: `HomebrewRules.kt` (new field) + `RuleResolutionHelper.kt`
 | Phase | Title | Deliverable | Key files |
 |-------|-------|-------------|-----------|
 | **1** | **Pure core + profile gate** | `SeasonalEconomy.kt` (`SeasonalEconomyModifiers`, `seasonalModifiers`, `applyWorksiteMultiplier`), `HomebrewRules.seasonalEconomy` field + `gregory()` opt-in, `RuleResolutionHelper.isSeasonalEconomyEnabled`, full commonTest. **Inert** — nothing wired yet. | `kingdom/resources/SeasonalEconomy.kt`, `homebrew/HomebrewRules.kt`, `homebrew/RuleResolutionHelper.kt`, `SeasonalEconomyTest.kt` |
-| **2** | **Economy seam wiring + migration** | Thread `seasonal` into `calculateIncome`, `calculateConsumption`, `caravanRaidDc` and their callers (`sheet/CalculateIncome.kt`, `performEndTurn` caravan tick); resolve season once per turn via `getCurrentMonth`; river-freeze composes with `travelCostRiverNoBridgeAdditional`; `RawKingdomData.lastSeasonalFloodYear` + **Migration49**. | `Income.kt`, `Consumption.kt`, `CaravanTick.kt`, `sheet/CalculateIncome.kt`, `TurnTickingEngine.kt`, `KingdomData.kt`, `migrations/migrations/Migration49.kt` |
+| **2** | **Economy seam wiring + migration** | Thread `seasonal` into `calculateIncome`, `calculateConsumption`, `caravanRaidDc` and their callers (`sheet/CalculateIncome.kt`, `performEndTurn` caravan tick); resolve season once per turn via `getCurrentMonth`; river-freeze composes with `travelCostRiverNoBridgeAdditional`; `KingdomData.lastSeasonalFloodYear` + **Migration66**. | `Income.kt`, `Consumption.kt`, `CaravanTick.kt`, `sheet/CalculateIncome.kt`, `TurnTickingEngine.kt`, `KingdomData.kt`, `migrations/migrations/Migration66.kt` |
 | **3** | **Turn-tab badge UI** | `SeasonalEconomyBadgeContext`, badge partial + Turn-tab include, partial registration, `kingdom.seasonalEconomy.*` i18n (reusing `season.*`). | `sheet/contexts/SeasonalEconomyContext.kt`, `sections/turn/seasonal-badge.hbs`, `Main.kt` (partial registration), `KingdomSheet.kt`, `lang/en.json` |
 | **4** | **Spring-flood offer + QA** | `km-offer-seasonal-flood` handler (spawn-event + dismiss, idempotent via marker), flood offer chat template, spring End-Turn emission, `data/events/spring-flood` event asset, jsTest + manual checklist. | `ChatButtons.kt`, `chatmessages/seasonal-flood-offer.hbs`, `TurnTickingEngine.kt`/`TurnWizardApplication.kt` (emission), `data/events/…`, `SeasonalEconomyTest.kt` (jsTest) |
 
