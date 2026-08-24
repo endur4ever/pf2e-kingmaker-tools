@@ -1,462 +1,308 @@
-# NPC Memory Ledger — Named NPCs Remember What the Kingdom Did
+# Plan: NPC memory ledger — named NPCs remember what the kingdom did
 
-> **Status:** Plan only — no implementation yet  
-> **Date:** 2026-07-09  
-> **Roadmap item:** Follow-on to the shipped *Living settlement population* feature  
-> **Depends on:** Living settlement population (`PopulationDialogs.kt`, `RawNpcEntry`), Turn history gazette (`TurnHistory.kt`), Settlement life events generator (`docs/plans/2026-07-09-plan-settlement-life.md`), Faction-standing GM-offer pattern (`ChatButtons.kt` `km-offer-*`)  
-> **Branch:** `kingmaker.5`
+Card: `t_0169a788`. Parent: `t_7a8a72b4` (`2026-07-09-plan-settlement-life.md`).
 
----
+## 1. Problem statement
 
-## 1. Problem Statement + Player/GM Value
+Every settlement carries a `RawPopulationRoster` of named residents with occupations, and none of
+them ever notices anything. The kingdom floods, wars, prospers and expands; Svetlana the Innkeeper is
+the same inert row she was forty turns ago.
 
-**Problem.** The living settlement population feature ships named NPCs with occupations and roster CRUD, but these NPCs are inert data — they sit in a list and never *react* to kingdom history. Players build a Theater, and Svetlana the Innkeeper doesn’t remember the grand opening festival. A dragon burns the northern hex, and Aldarn the Rat Catcher shows no awareness. The world lacks continuity; NPCs are amnesiac bystanders to the kingdom’s story.
+Turn history already records what happened. This plan lets a **small, GM-chosen** set of roster NPCs
+accumulate memories from that history, shifting a personal attitude that at thresholds emits a
+GM-confirmed offer — the guildmaster who has watched three caravans raided arrives at court.
 
-**Value to the GM.**  
-- **Organic storytelling:** Named NPCs reference past events in dialogue (“I still smell smoke from when the orcs burned Millfield”), creating emergent narratives without GM invention.  
-- **Mechanical hooks:** Accumulated memories trigger GM-confirmed offers (e.g., “The druid whose grove you saved arrives at court seeking aid”), turning history into adventure seeds.  
-- **Player agency:** Players see tangible consequences of their kingdom decisions reflected in NPC attitudes, reinforcing that their actions matter.  
-- **Zero GM overhead:** Memories accrue automatically from turn records; the GM only interacts when thresholds are crossed via familiar offer cards.
+## 2. What is actually matchable today
 
-**Value to the players.**  
-- **World feels alive:** “Remember when we cleared the spider lair? Old Man Henderson gave us discount healing potions last market day.”  
-- **Reputation matters:** Helping a faction’s NPC improves disposition with that faction, unlocking dialogue options or minor aid.  
-- **Emergent quests:** Long-standing grudges or friendships surface organically (e.g., a blacksmith whose shop you refused to protect during a raid now charges double).
+The card asks this first, and it decides the whole feature: **`RawTurnRecord` stores per-turn
+aggregate state, not discrete events.** Its complete field list is:
 
-**Non-goal.** This is *not* an LLM-powered narrative engine. Memory entries are template-driven, deterministic, and tightly scoped to avoid hallucination or GM workload.
+`turn`, `timestamp`, `fame`, `resourcePoints`, `consumption`, `unrest`, `xpAwarded`, `clockEvents`,
+`warPressure`, `pressurePerTurn`, `notes`, `playerNotes`, `level`, `size`, `ruinCorruption`,
+`ruinCrime`, `ruinDecay`, `ruinStrife`.
 
----
+### 2.1 Matchable from `RawTurnRecord`
 
-## 2. Data Model
+Because the record is state, rules match **thresholds and deltas between consecutive records**, not
+verbs.
 
-### 2.1 Memory-rule schema (data-driven JSON)
+| Signal | Basis |
+| --- | --- |
+| unrest crossed up / fell to 0 | `unrest` vs previous record |
+| any ruin track worsened / all cleared | `ruinCorruption` / `ruinCrime` / `ruinDecay` / `ruinStrife` |
+| the realm grew | `size` increased |
+| the kingdom advanced | `level` increased |
+| renown peaked | `fame` at its maximum |
+| war pressure rose / was relieved | `warPressure` vs previous |
+| lean year | `consumption` exceeded `resourcePoints` |
+| a campaign clock fired | `clockEvents` contains an id |
 
-Content lives in **`data/npc-memories/*.json`** — one file per memory template. The existing `CombineJsonFiles` Gradle task already processes `data/` subdirectories, so this directory is combined into `build/generated/data/npc-memories.json` with zero build-glue changes.
+`notes` and `playerNotes` are **free GM prose and are deliberately not matchable**. Pattern-matching
+narrative text would fire on a turn of point-of-view and is exactly the LLM-adjacent guessing the
+card puts out of scope.
 
-**One template file** (`data/npc-memories/razed-forest.json`):
+### 2.2 Matchable from other per-turn kingdom state
+
+Turn records are not the only dated history. These carry a turn number and are equally usable:
+
+| Signal | Source |
+| --- | --- |
+| a caravan was raided / delivered / recalled, and with whom | `kingdom.shipmentHistory` — `RawShipmentHistoryEntry { turn, partner, cargo, outcome, rdGained }` |
+| a milestone was earned | `kingdom.milestones` — `MilestoneChoice.completed` |
+| a war threat arrived | `kingdom.warThreats` — `status`, `triggeredTurn` |
+| a quest was completed | `kingdom.quests` — `RawQuest.status` |
+
+This is what makes "the caravan raids survived" from the card's concept genuinely available.
+
+### 2.3 NOT recorded anywhere — would need new capture first
+
+An earlier draft's headline template was `razed-forest`, matching:
+
+```json
+"matcher": { "hexTerrain": "forest", "kingdomAction": ["cleared", "burned", "razed"] }
+```
+
+**`hexTerrain`, `kingdomAction` and `farmOutput` do not exist** — not on `RawTurnRecord`, not
+anywhere — yet they sat in a table captioned "subset of `RawTurnRecord` fields that are matchable
+TODAY". The flagship example could never have fired.
+
+Per-hex terrain and what was done to a hex live in the Kingmaker module's own state, which turn
+history never captures. So these remain unavailable until something records them:
+
+- which hex was cleared, razed or worksited, and its terrain
+- festivals or specific structures being raised
+- battles won "nearby" an NPC
+
+A druid whose grove was logged is a good scene and is **out of scope until hex-event capture exists**,
+which is its own card. Saying so is better than shipping a rule that silently never fires.
+
+Its attitude deltas were keyed `"druid"`, `"ranger"`, `"logger"` as well. The occupation vocabulary
+is `npcOccupations` (`Settlement.kt:34`), 45 values, capitalised: **`Druid` and `Logger` are not
+among them.** `Ranger` and `Woodcutter` are.
+
+## 3. Data model
+
+### 3.1 Memories hang off the roster NPC
+
+The parent plan already fixes the shape: it casts by `RawNpcEntry.id` and names this feature's seam
+explicitly (`castNpcIds: Array<String> // roster RawNpcEntry.ids`). So memories belong on
+`RawNpcEntry`, in `RawPopulationRoster` on `RawSettlement`.
+
+```kotlin
+// jsMain: kingdom/structures/RawSettlement.kt -- additive, nullable
+external interface RawNpcEntry {
+    var id: String
+    var name: String
+    var occupation: String
+    var notes: String?
+
+    /** GM opted this resident into memory tracking. Null/false = untracked. */
+    var memoryTracked: Boolean?
+    /** Oldest first. Null on legacy data. */
+    var memoryLog: Array<RawNpcMemoryEntry>?
+    /** Cached sum of deltas; null = never computed. */
+    var attitudeScore: Int?
+}
+
+@JsPlainObject
+external interface RawNpcMemoryEntry {
+    var ruleId: String
+    var turn: Int
+    var delta: Int
+    /** Interpolation values for the entry's i18n key, e.g. the partner's name. */
+    var subject: String?
+}
+```
+
+An earlier draft put `memoryLog` and `attitudeScore` on **`RawCharacter`** and justified it with
+"`RawCharacter` … is already persisted … via `PopulationDialogs.kt` for roster NPCs". That is not
+true: `PopulationDialogs.kt:50` constructs `RawNpcEntry`. `RawCharacter` is the companion type —
+name, `actorUuid`, travel coordinates — and it **has no `id` field at all**, so a memory written
+there could not be attributed to a resident. It would also have put this plan and its parent on
+different NPC types, which the card exists to prevent.
+
+**Migration.** Nullable additive fields on an interface nested inside `RawSettlement`. Every nullable
+array on `KingdomData` is seeded by convention (`quests`/23, `companionExpeditions`/40,
+`caravans`/44, `warThreats`/46, `shipmentHistory`/61), so this seeds too — but it walks
+settlements → roster → npcs rather than a top-level field. **`Migration65`**; 62, 63 and 64 are
+claimed by the downtime, scheduler and petition plans respectively.
+
+### 3.2 Rule schema
+
+`data/npc-memory-rules/*.json`, one file per rule, combined by the existing `CombineJsonFiles`
+Gradle task, validated by a new `schemas/npc-memory-rule.json` in the `./gradlew check` sweep.
 
 ```json
 {
-  "id": "razed-forest",
-  "name": "npcMemory.razedForest.name",
-  "gazette": "npcMemory.razedForest.gazette",
-  "scope": "hex",                    // hex | settlement | kingdom | faction
-  "matcher": {
-    "hexTerrain": "forest",
-    "kingdomAction": ["cleared", "burned", "razed"]
-  },
-  "memory": {
-    "entry": "rememberedForestRazed",
-    "attitudeDelta": {
-      "druid": -2,
-      "ranger": -1,
-      "logger": +1
-    }
-  },
-  "cooldownTurns": 0                // 0/null = no cooldown per NPC
+  "id": "caravan-raided",
+  "source": "shipmentHistory",
+  "match": { "outcome": "raided" },
+  "entryKey": "npcMemory.caravanRaided.entry",
+  "deltas": { "Merchant": -2, "Teamster": -2, "Guard": -1, "Soldier": 1 },
+  "defaultDelta": 0,
+  "cooldownTurns": 1
 }
 ```
 
-Field semantics:
-
-| Field | Type | Meaning |
-|-------|------|---------|
-| `id` | string | Stable template id (kebab-case) |
-| `name` / `gazette` | string | i18n keys (nested under `npcMemory.*`); `gazette` interpolates scope + match details |
-| `scope` | enum | Geographic scope of the triggering event (`hex`, `settlement`, `kingdom`, `faction`) |
-| `matcher` | object | Fields to match against `RawTurnRecord` (see §2.2) |
-| `memory.entry` | string | Key for the memory entry added to the NPC’s log (i18n key) |
-| `memory.attitudeDelta` | object | Mapping of NPC role → attitude adjustment (integer) |
-| `cooldownTurns` | int? | Turns before this memory can trigger again *for the same NPC* (0/null = no cooldown) |
-
-**Matcher fields** (subset of `RawTurnRecord` fields that are matchable TODAY):
-
-| Field | Type | Example values |
-|-------|------|----------------|
-| `unrest` | Int | `> 5` (unrest threshold) |
-| `consumption` | Int | `> farmOutput` (famine indicator) |
-| `warPressure` | Int? | `> 0` (active war pressure) |
-| `clockEvents` | Array<String>? | Contains `"festival"` |
-| Custom kingdom actions | String | `"cleared"`, `"burned"`, `"razed"`, `"festivalHosted"` (see §3.2) |
-
-### 2.2 `Raw*` interfaces (jsMain, all `@JsPlainObject`, nullable for migration safety)
-
-```kotlin
-// NpcMemory.kt — the loaded catalog (matches the JSON schema)
-@JsPlainObject
-external interface RawNpcMemory {
-    var id: String
-    var name: String
-    var gazette: String
-    var scope: String          // "hex" | "settlement" | "kingdom" | "faction"
-    var matcher: RawNpcMemoryMatcher
-    var memory: RawNpcMemoryEffect
-    var cooldownTurns: Int?
-}
-
-@JsPlainObject
-external interface RawNpcMemoryMatcher {
-    var hexTerrain: String?        // e.g. "forest", "swamp" (matches RawHex.terrain)
-    var kingdomAction: Array<String>? // e.g. ["cleared", "burned"] (custom actions)
-    var unrestGte: Int?            // e.g. 5
-    var consumptionGte: Int?       // e.g. farmOutput + 1
-    var warPressureGt: Int?        // e.g. 0
-    var clockEventsContains: String? // e.g. "festival"
-    // Extensible: add more RawTurnRecord fields as needed
-}
-
-@JsPlainObject
-external interface RawNpcMemoryEffect {
-    var entry: String            // i18n key for memory log entry
-    var attitudeDelta: RawStringToIntMap // e.g. { "druid": -2, "ranger": -1 }
-}
-
-@JsPlainObject
-external interface RawStringToIntMap  // keys: NPC role strings; values: attitude delta
-```
-
-### 2.3 NPC memory storage (added to `RawCharacter`)
-
-```kotlin
-// In RawCharacter.kt (jsMain `kingdom/data/`)
-@JsPlainObject
-external interface RawCharacter {
-    // ... existing fields ...
-    var memoryLog: Array<RawNpcMemoryEntry>?   // NEW — null on legacy data
-    var attitudeScore: Int?                    // NEW — cached sum of deltas; null = uninitialized
-}
-
-// Existing factory literal in RawCharacter.kt appends:
-//     ..., memoryLog: null, attitudeScore: null
-```
-
-```kotlin
-@JsPlainObject
-external interface RawNpcMemoryEntry {
-    var templateId: String      // RawNpcMemory.id that generated this
-    var turn: Int               // kingdom turn when memory was formed
-    var details: String?        // i18n key with interpolation data (e.g. "memory.forestRazed.hex=12x05")
-}
-```
-
-### 2.4 Persistence justification
-
-- `memoryLog` and `attitudeScore` live on `RawCharacter`, which is already persisted via the kingdom flag (`actor.setAppFlag` / `getAppFlag`) for companions and via `PopulationDialogs.kt` for roster NPCs.  
-- No new top-level `KingdomData` field is needed — memory is inherently NPC-scoped.  
-- Migration: `MigrationNN` backfills `memoryLog = []` and `attitudeScore = 0` for all existing `RawCharacter` instances (companions + roster NPCs).
-
-### 2.5 Attitude model
-
-- **Scale:** -100 (Hostile) to +100 (Helpful), mirroring faction standing bands.  
-- **Neutral start:** New NPCs start at 0 (Indifferent).  
-- **Decay:** Optional linear decay of 1 point per turn toward 0 (configurable via house rule; default off to maintain simplicity).  
-- **Faction interaction:** If an NPC belongs to a faction (`RawGroup`), their attitude score is *separate* from faction standing — no double-counting. Faction standing drift (from `FactionRelations.kt`) affects all faction members equally; NPC attitude is personal history.  
-- **Thresholds:** Uses the same bands as faction attitude:  
-  `<= -50` Hostile, `-49..-15` Unfriendly, `-14..14` Indifferent, `15..49` Friendly, `>= 50` Helpful.
-
----
-
-## 3. Engine Design
-
-### 3.1 Location & purity
-
-`src/commonMain/kotlin/at/posselt/pfrpg2e/kingdom/NpcMemoryEngine.kt` — pure, no Foundry/`Game`/`Date`/`Math.random`. Uses the project’s blessed pure RNG (`SeededRng`) only for tie-breaking in deterministic selection (though matching is primarily rule-based). Unit-tested in `src/commonTest/.../NpcMemoryEngineTest.kt`.
-
-### 3.2 Core types & signatures
-
-```kotlin
-package at.posselt.pfrpg2e.kingdom
-
-import at.posselt.pfrpg2e.kingdom.data.RawTurnRecord
-import at.posselt.pfrpg2e.kingdom.data.RawCharacter
-import at.posselt.pfrpg2e.kingdom.data.RawNpcMemory
-import at.posselt.pfrpg2e.kingdom.data.RawNpcMemoryEntry
-import at.posselt.pfrpg2e.data.kingdom.settlements.NpcEntry
-
-/** Pure input for one NPC evaluated against one turn record. */
-data class NpcMemoryInput(
-    val npc: NpcEntry,                     // From populationRoster.npcs or companion
-    val turnRecord: RawTurnRecord,         // The kingdom turn being processed
-    val kingdomSeed: Int                   // Stable per-world seed (actor.id.hashCode())
-)
-
-/** Output of processing one NPC-turn pair. */
-data class NpcMemoryResult(
-    val npcId: String,                     // npc.id or companion.name/actorUuid
-    val memoriesGained: List<NpcMemoryEntry>,
-    val attitudeDelta: Int                 // Sum of applicable attitude deltas
-)
-
-object NpcMemoryEngine {
-    /** 
-     * Process all NPCs for ONE kingdom turn. 
-     * Returns updates for NPCs who gained memories or attitude shifts.
-     */
-    fun processTurn(
-        npcs: List<NpcEntry>,              // All roster NPCs + companions
-        turnRecord: RawTurnRecord,
-        catalog: List<RawNpcMemory>,
-        kingdomSeed: Int
-    ): List<NpcMemoryResult> {
-        // Implementation: deterministic, side-effect-free
-    }
-
-    /** 
-     * Check if a single NPC matches a single memory template for a given turn record. 
-     * Pure function used by processTurn.
-     */
-    private fun checkMatch(
-        input: NpcMemoryInput,
-        template: RawNpcMemory
-    ): Option<NpcMemoryEffect> { /* ... */ }
-
-    /** 
-     * Deterministic tiebreaker for when multiple templates match (rare). 
-     * Uses kingdomSeed + npcId + templateId to pick one.
-     */
-    private fun selectMatchingTemplate(
-        matches: List<RawNpcMemory>,
-        npcId: String,
-        kingdomSeed: Int
-    ): RawNpcMemory { /* ... */ }
-}
-```
-
-### 3.3 Tick surface (monthly End Turn)
-
-The engine is invoked from the **existing monthly End-Turn path**, alongside the `TurnTickingEngine.tick()` call, in **`KingdomUpkeep.performEndTurn`** (jsMain):
-
-```kotlin
-// In performEndTurn, after the pure economic tick, on the monthly cadence (End Turn only):
-val npcs = kingdom.getAllNpcs(game) // companions + populationRoster.npcs
-val turnRecord = TurnHistory.buildTurnRecord(...) // current turn's record
-val npcUpdates = NpcMemoryEngine.processTurn(
-    npcs = npcs,
-    turnRecord = turnRecord,
-    catalog = translateNpcMemories(), // jsMain: loads ./npc-memories.json
-    kingdomSeed = actor.id.hashCode()
-)
-// Apply updates to NPC memoryLog and attitudeScore via typeSafeUpdate on kingdom flag
-```
-
-**Critical constraints:**  
-- **Monthly only** — never interacts with `DailyTickHooks` or `DailyTickEngine` (respects the existing tick split).  
-- **Deterministic** — same `(npcs, turnRecord, catalog, kingdomSeed)` always yields same `npcUpdates` → preview equals commit.  
-- **No side effects** — `processTurn` returns updates to be applied by the caller; zero direct mutation of kingdom state.
-
-### 3.4 Threshold checking & offer generation
-
-After applying attitude deltas, the system checks if any NPC crossed an attitude threshold (Hostile ←→ Unfriendly, Unfriendly ←→ Indifferent, etc.). For each crossing:
-
-1. Determine direction (e.g., Unfriendly → Hostile = negative crossing).  
-2. Check if the crossing was caused by *this turn’s* attitude delta (avoid repeat spam).  
-3. If yes, generate a **GM-confirmed offer** using the existing `km-offer-*` pattern:  
-   - **Hostile crossed** → `km-offer-npc-hostile` (opens dialog to spawn a war threat or vengeance quest)  
-   - **Helpful crossed** → `km-offer-npc-helpful` (opens dialog to spawn a boon quest or alliance offer)  
-   - Other band crossings → optional flavor-only notice (no mechanical hook)  
-
-Offer data includes:  
-- NPC name and role  
-- Old and new attitude bands  
-- List of memories that contributed to the shift (limited to 3 most recent)  
-- Suggested quest/threat concepts based on memory themes  
-
----
-
-## 4. UI
-
-### 4.1 NPC memory log (read-only, GM-only)
-
-A new **“Memories”** tab in the **Companion Profile Dialog** (`CompanionProfileDialog.kt`) and **Population Edit Dialog** (`PopulationEditDialog.kt`):  
-- Shows chronological list of memory entries (most recent first).  
-- Each entry: localized memory text + turn number (e.g., “Remembered the Burning of Oakhold (Turn 12)”).  
-- Hover/tooltip shows full details (matched turn record fields).  
-- GM-only; players learn through play, not UI (per spec).  
-
-### 4.2 Attitude indicator (optional visual cue)
-
-In the **Roster Panel** (`RosterPanel.kt`) and **Companion Portrait**:  
-- Small colored dot or bar next to NPC name indicating current attitude band (uses same colors as faction standing).  
-- Tooltip shows exact score and band (e.g., “Attitude: -12 (Unfriendly)”).  
-- Purely visual; no mechanical effect beyond what’s already in attitude score.
-
-### 4.3 Memory-triggered offer UX (GM-confirmed) offer cards
-
-New `ChatButton` entries in `ChatButtons.kt`:  
-- `km-offer-npc-hostile`: “[NPC] bears a grudge — spend RP to appease or prepare for hostility?”  
-- `km-offer-npc-helpful`: “[NPC] feels indebted — request aid, information, or a favor?”  
-
-Each follows the established pattern:  
-1. GM gate → `actor.getKingdom()`  
-2. Locate NPC by `data-npc-id` (matches `RawCharacter.name` or `actorUuid`)  
-3. Idempotency guard via `memoryLog` entry timestamp or temporary flag  
-4. Open appropriate dialog (`AddQuest` or `AddWarThreat`) prefilled with context  
-5. On save: apply effects (e.g., spawn quest, adjust faction standing via `applyStandingDelta`)  
-6. Post confirmation chat message  
-
-### 4.4 i18n namespace
-
-All keys nested under `pf2e-kingmaker-tools` → **`npcMemory.*`** in `lang/en.json` (nested objects, never flat-dotted):
-
-```json
-"npcMemory": {
-  "razedForest": {
-    "name": "Razed Forest",
-    "gazette": "The forest at {hexKey} was burned or cleared this turn.",
-    "entry": "Remembered the razing of {hexKey}"
-  },
-  "offerHostile": "{name} now views your kingdom with hostility",
-  "offerHelpful": "{name} feels grateful toward your kingdom"
-}
-```
-
----
-
-## 5. Chat/Offer Surfaces (GM-Confirmed Only)
-
-### 5.1 Offer handler pattern
-
-Two new `ChatButton`s in `ChatButtons.kt`:  
-- `km-offer-npc-hostile`  
-- `km-offer-npc-helpful`  
-
-Shared handler logic (simplified):
-
-```kotlin
-ChatButton("kmoffer-npc-hostile") { game, actor, event, button ->
-    if (!game.user.isGM) return@ChatButton
-    val npcId = button.dataset["npcId"] ?: return@ChatButton
-    val kingdom = actor.getKingdom() ?: return@ChatButton
-    
-    val npc = kingdom.getNpcById(npcId) ?: return@ChatButton
-    if (npc.attitudeMarkedAsOfferedHostile == true) return@ChatButton // idempotency
-    
-    val dialog = NPCHostilityOfferDialog(
-        npc = npc,
-        contributingMemories = npc.recentMemories(3),
-        onConfirm = { 
-            val quest = buildVengeanceQuest(npc, contributingMemories)
-            kingdom.quests = kingdom.quests + quest
-            npc.attitudeMarkedAsOfferedHostile = true
-            actor.setKingdom(kingdom)
-        }
-    ).launch()
-    
-    postChatMessage(t("npcMemory.offer.hostile", recordOf("name" to npc.name)))
-}
-```
-
-### 5.2 Offer types
-
-| Offer Button | Trigger Condition | Action on Confirm |
-|--------------|-------------------|-------------------|
-| `km-offer-npc-hostile` | Attitude crossed into Hostile band (<= -50) | Opens dialog to: spawn vengeance quest, apply faction standing penalty, or ignore |
-| `km-offer-npc-helpful` | Attitude entered Helpful band (>= 50) | Opens dialog to: request aid, information, minor gift, or trigger alliance quest |
-
-**No auto-application:** All mechanical effects require explicit GM confirmation via the offer dialog — never silent.
-
----
-
-## 6. Interactions with Existing Systems
-
-| System | File(s) | Interaction |
-|--------|---------|-------------|
-| **Living settlement population** | `PopulationDialogs.kt`, `RawNpcEntry`, `RawCharacter` | Source of NPCs; `memoryLog` and `attitudeScore` stored on `RawCharacter` |
-| **Turn history / gazette** | `TurnHistory.kt` (`formatTurnGazette`) | Considers adding a “Notable NPC memories” section to gazette (low priority; flavor only) |
-| **Faction standing** | `FactionRelations.kt`, `RawGroup` | NPC attitude is *separate* from faction standing; no double-counting |
-| **Companion system** | `RawCharacter`, `CompanionProfileDialog.kt` | Companions participate fully in memory system |
-| **Settlement life events** | `docs/plans/2026-07-09-plan-settlement-life.md` | Life events that affect NPCs (e.g., feuds) generate matching turn records for memory processing |
-| **Kingdom events** | `data/events/`, `TurnTickingEngine` | Standard kingdom events (battles, festivals, etc.) produce matchable fields in `RawTurnRecord` |
-| **Offer pattern** | `ChatButtons.kt` | New `km-offer-npc-*` buttons follow established `km-offer-*` contract |
-| **Migrations** | `migrations/Migrations.kt` | New migration backfills `memoryLog` and `attitudeScore` |
-
-### 6.1 Explicit OUT-OF-SCOPE list
-
-- **No LLM-generated memory text:** All memory entries are fixed i18n templates with deterministic interpolation.  
-- **No persistent NPC personality traits:** Only attitude score and memory log; no drifting traits like “brave” or “greedy”.  
-- **No automatic NPC migration or relocation:** Memories affect attitude only; NPCs don’t change settlements based on memory.  
-- **No cross-NPC memory sharing:** One NPC’s memories don’t influence another’s (avoids gossip chains and complexity).  
-- **No memory decay by default:** Attitude score persists unless modified by new memories (decay is optional house rule).  
-- **No player-facing memory UI:** Players learn about NPC memories exclusively through in-game dialogue and quest offers.
-
----
-
-## 7. Test Plan
-
-### 7.1 commonTest — pure logic (`NpcMemoryEngineTest.kt`, ~20 tests)
-
-- `processTurn` returns correct memories/given attitude delta for matcher combinations  
-- Idempotency: processing same `(npc, turnRecord, catalog)` twice yields same result  
-- Determinism: same inputs + same `kingdomSeed` = same outputs  
-- Threshold crossing detection fires exactly once per crossing  
-- Attitude delta sums correctly from multiple matching memories  
-- Cool-down prevents re-triggering same template for same NPC  
-
-### 7.2 jsTest — integration + memory persistence (~10 tests)
-
-- `RawCharacter` factory includes `memoryLog: null`, `attitudeScore: null`  
-- `typeSafeUpdate` correctly merges `memoryLog` arrays and updates `attitudeScore`  
-- JSON round-trip fidelity of `RawNpcMemoryEntry` and `RawNpcMemory`  
-- `NpcMemoryEngine` integration via `KingdomUpkeep.performEndTurn`  
-- Offer button handler correctly gates on GM, finds NPC, respects idempotency  
-- Attitude score clamping at -100/+100 bounds  
-
-### 7.3 Manual Foundry verification checklist
-
-1. **Memory accrual:**  
-   - Trigger a kingdom event matching a memory template (e.g., burn a forest hex)  
-   - End turn → check affected NPCs’ memory log contains the expected entry  
-   - Verify attitude score shifted by the template’s delta  
-
-2. **Threshold offers:**  
-   - Accumulate enough negative memories to push an NPC into Hostile band  
-   - End turn → confirm `km-offer-npc-hostile` appears in chat  
-   - Confirm dialog opens with correct NPC name and contributing memories  
-   - On confirm: verify quest/spawned threat appears and attitude marked as offered  
-
-3. **Persistence:**  
-   - Save and reload world → verify memory logs and attitude scores intact  
-   - Verify new NPCs start with empty memory log and attitude score 0  
-
-4. **Preview/commit parity:**  
-   - Open Turn Wizard → verify predicted memory accruals match actual End Turn results  
-
-5. **Interaction with settlement life events:**  
-   - Trigger a settlement life event that generates a matching turn record (e.g., feud)  
-   - Verify NPCs involved receive appropriate memory entries  
-
-6. **Interaction with faction standing:**  
-   - Assign NPC to a faction → shift faction standing via diplomacy  
-   - Verify NPC attitude score is independent of faction standing shifts  
-
-7. **i18n guard:**  
-   - Run `python3 scripts/check_i18n_keys.py` → zero unresolved/flat keys  
-
----
-
-## 8. Phasing
-
-Each phase is independently committable and sized for one worker card.
-
-| Phase | Key Changes | Deliverable |
-|-------|-------------|-------------|
-| **1** | Data model & pure engine | `RawNpcMemory`, `RawNpcMemoryEntry`, `RawCharacter.memoryLog`/`attitudeScore`; `NpcMemoryEngine.kt` + tests; MigrationNN stub |
-| **2** | Memory processing integration | Hook into `KingdomUpkeep.performEndTurn`; apply memory/log updates; jsTest + parity tests |
-| **3** | Threshold detection & offers | Attitude band crossing logic; `km-offer-npc-hostile`/`km-offer-npc-helpful` handlers; basic dialogs |
-| **4** | NPC memory log UI | “Memories” tab in `CompanionProfileDialog` and `PopulationEditDialog`; read-only display |
-| **5** | Attitude indicator & polish | Visual attitude cue in Roster Panel/Companion Portrait; i18n completion; `check_i18n_keys.py` validation |
-| **6** | Migration & QA | Final migration script; full manual verification checklist; `SettlementLifeCatalogTest`-style sanity check for memory templates |
-
-**Dependencies:** Phases 1→2→3→4→5→6. Phase 2 requires Phase 1; Phase 3 requires Phase 2; etc.
-
----
-
-> **End of Plan.** Ready for Gregory's review. On approval, implementation cards follow the phasing table.  
-> 
-> *Plan-only card honored: NO changes under src/, lang/, data/, or packs/ — a single design/implementation plan doc as required by the roadmap Planning rule.*  
-> 
-> *Contains all 8 required sections (problem/value; data model with exact Raw* interfaces + nullable fields + MigrationNN; engine design with concrete commonMain signatures + correct monthly End-Turn tick surface; UI/templates/i18n namespace; GM-confirmed km-offer-* surfaces; interactions + explicit out-of-scope; commonTest+jsTest+manual test plan; 2-5 independently-committable phases).*  
-> 
-> *Memory tables as data-driven JSON under data/npc-memories/*.json — the existing CombineJsonFiles gradle task bundles it with ZERO build-glue changes (like data/events/), + a validateNpcMemories schema task. Pure NpcMemoryEngine processes RawTurnRecord against RawNpcMemory catalog; attitudeScore on RawCharacter tracks cumulative delta with thresholds matching FactionRelations bands. NPC-memory seam noted: settlement life events from plan-settlement-life.md generate matchable turn records that feed this system. RawCharacter never mutated directly — updates via typeSafeUpdate on kingdom flag.*  
-> 
-> *Ready for Gregory's review; implementation cards to be created only after approval (per the Planning rule).*
+`source` is a **closed set** naming §2.1/§2.2 origins: `turnRecord`, `shipmentHistory`, `milestones`,
+`warThreats`, `quests`. `match` keys are validated against that source's real fields by the schema, so
+a rule cannot reference a field that does not exist — the failure this plan shipped.
+
+`deltas` key on **`npcOccupations` values verbatim**, capitalisation included. An occupation absent
+from `deltas` gets `defaultDelta`, so most residents are unmoved by most events, which is the point.
+
+## 4. Starter rules
+
+Seventeen, all using only §2.1 and §2.2 sources.
+
+| id | source | fires when | who moves |
+| --- | --- | --- | --- |
+| `unrest-spike` | turnRecord | `unrest` rose ≥ 3 in one turn | Guard +1, Soldier +1, Merchant −2, Innkeeper −1 |
+| `unrest-calmed` | turnRecord | `unrest` reached 0 from ≥ 5 | Merchant +2, Innkeeper +2, Priest +1 |
+| `decay-worsens` | turnRecord | `ruinDecay` increased | Carpenter −2, Mason −2, Cobbler −1 |
+| `crime-worsens` | turnRecord | `ruinCrime` increased | Merchant −2, Jeweler −2, Guard −1 |
+| `corruption-worsens` | turnRecord | `ruinCorruption` increased | Scribe −2, Priest −2 |
+| `strife-worsens` | turnRecord | `ruinStrife` increased | Priest −2, Healer −1 |
+| `ruins-cleared` | turnRecord | all four ruins 0, having been nonzero | Priest +2, Healer +2, Mason +1 |
+| `realm-expanded` | turnRecord | `size` increased | Farmer +1, Shepherd +1, Ranger +1, Miner +1 |
+| `kingdom-advanced` | turnRecord | `level` increased | Scribe +2, Merchant +1 |
+| `renown-peaked` | turnRecord | `fame` at maximum | Innkeeper +2, Tavern Keeper +2, Painter +1 |
+| `war-looms` | turnRecord | `warPressure` increased | Soldier +1, Fletcher +1, Farmer −2, Shepherd −2 |
+| `war-relieved` | turnRecord | `warPressure` reached 0 | Farmer +2, Shepherd +2, Soldier −1 |
+| `lean-year` | turnRecord | `consumption` exceeded `resourcePoints` | Farmer −2, Miller −2, Baker −2, Butcher −1 |
+| `clock-fired` | turnRecord | `clockEvents` contains the rule's id | Scribe +1 |
+| `caravan-raided` | shipmentHistory | `outcome == raided` | Merchant −2, Teamster −2, Guard −1, Soldier +1 |
+| `caravan-delivered` | shipmentHistory | `outcome == delivered` | Merchant +1, Teamster +1, Brewer +1 |
+| `milestone-earned` | milestones | a milestone completed this turn | Priest +1, Scribe +1, Painter +1 |
+
+Every occupation named is in `npcOccupations`, verbatim.
+
+## 5. Attitude model
+
+**Scale −50…+50**, clamped, starting at 0. Bands: `≤ −25` hostile, `−24…−10` unfriendly,
+`−9…9` indifferent, `10…24` friendly, `≥ 25` helpful.
+
+**Decay:** 1 point toward 0 per turn, only for NPCs with no memory formed that turn. Without it a
+single bad decade fixes an NPC's opinion permanently; with it, a grudge fades unless renewed.
+
+**No double-counting with faction standing.** Faction standing moves for *the faction*, and
+`FactionRelations` drift already applies it to every member. An NPC's attitude is **personal history
+only**: no rule reads or writes `RawGroup.standing`, and no faction drift touches `attitudeScore`.
+Where both exist, the UI shows them as two separate lines rather than a sum — they answer different
+questions ("does Pitax like us" vs "does this guildmaster").
+
+## 6. Tracking, caps and retention
+
+All three were absent from the earlier draft; all three are mandated.
+
+**Flagging.** A **Track memory** toggle on the roster entry in `PopulationDialogs`, writing
+`memoryTracked`. Untracked NPCs are skipped entirely — no log, no attitude, no cost.
+
+**Cap: `MAX_TRACKED_NPCS = 10` across the whole kingdom.** The toggle refuses beyond it and says
+which NPCs are tracked. Ten is a cast; forty is a spreadsheet, and every tracked NPC is evaluated
+against every rule every turn.
+
+**Retention: `MEMORY_LOG_CAP = 30` entries per NPC**, oldest trimmed first. `attitudeScore` is a
+**running total and is NOT recomputed from the log**, so trimming an old memory does not silently
+revise an NPC's opinion. Untracking an NPC keeps the log — retracking resumes a history rather than
+starting a stranger.
+
+**Cooldown.** `cooldownTurns` per rule per NPC, so a war that raises pressure for six straight turns
+does not write six identical memories.
+
+## 7. Offers
+
+Crossing a band boundary — not every delta — posts one GM-whispered card,
+`chatmessages/npc-attitude-shift.hbs`: the NPC, their settlement, the new band, and the memories that
+moved them.
+
+Buttons `km-offer-npc-encounter`, `km-offer-npc-quest`, `km-offer-npc-note`: spawn an encounter,
+spawn a quest through the existing generator, or write a scene note and dismiss. A fourth path is
+just closing the card. Handlers begin `if (!game.user.isGM) return`.
+
+Band crossings are **edge-triggered**: an NPC sitting at hostile does not re-offer every turn.
+
+## 8. UI
+
+**GM-only, on the roster entry.** Players learn an NPC's feelings by playing, not by reading a score.
+
+| Piece | Path |
+| --- | --- |
+| Log panel | `applications/kingdom/npc-memory-log.hbs` (inside the existing NPC edit dialog) |
+| Context | `kingdom/sheet/contexts/NpcMemoryContext.kt` |
+| Offer card | `chatmessages/npc-attitude-shift.hbs` |
+| i18n | `pf2e-kingmaker-tools.kingdom.npcMemory.*` |
+
+`NpcMemoryContext` is populated only when `game.user.isGM` — not merely hidden in the template, since
+players are OWNERs of the party actor. Entry text uses **literal** i18n keys mapped from `ruleId` in
+a `when`; `t("npcMemory.$ruleId.entry")` is invisible to `check_i18n_keys.py` and would ship as a raw
+key with every guard green. Because rules are data-driven, extend that guard with a check that every
+id in `data/npc-memory-rules/` has its entry key in all eight locales.
+
+## 9. Interactions and out of scope
+
+**Reads:** `RawTurnRecord` history, `kingdom.shipmentHistory`, `milestones`, `warThreats`, `quests`,
+the population roster.
+**Writes:** `RawNpcEntry.memoryTracked` / `memoryLog` / `attitudeScore`, and on confirm the encounter,
+quest or note the GM chose.
+
+**Shared with the parent plan:** both address residents by `RawNpcEntry.id` and neither mutates the
+roster's identity fields. Settlement life casts NPCs into scene slots; this records what they
+remember. They may reference the same NPC and must not fight over the row.
+
+**Out of scope:** LLM prose of any kind — entries are template text only; matching `notes`;
+per-hex or terrain-based memories until hex-event capture exists (§2.3); player-visible attitude;
+NPC-initiated action without a GM offer; memories for companions (`RawCharacter`) — a different type
+with a different purpose.
+
+## 10. Test plan
+
+**commonTest** (`NpcMemoryEngineTest`)
+- Delta rules fire on the transition and not on the steady state: unrest 2→6 fires `unrest-spike`,
+  6→6 does not.
+- `ruins-cleared` requires all four at 0 **and** a nonzero predecessor.
+- An occupation absent from `deltas` receives `defaultDelta`, not the first entry.
+- `cooldownTurns` suppresses a repeat for the same NPC while allowing a different NPC's.
+- Attitude clamps at ±50 and never exceeds it however many memories accumulate.
+- Decay moves toward 0 only on a turn with no new memory, and never past 0.
+- Band crossing is edge-triggered: one offer on entering hostile, none while remaining there.
+- `MEMORY_LOG_CAP` trims oldest first and leaves `attitudeScore` unchanged — the trim must not
+  revise an opinion.
+- `MAX_TRACKED_NPCS` refuses the eleventh.
+- Untracked NPCs produce nothing at all.
+- A rule naming an unknown `source` is skipped, and the other rules still evaluate.
+
+**jsTest** — Raw↔model round trip preserving all three nullable fields; `Migration65` walking
+settlements→roster→npcs and idempotent on a second run; rule JSON parsed against the schema;
+`NpcMemoryContext` null for a non-GM.
+
+**Mutation-check every new test**: make the delta comparison `>=`, ignore cooldown, recompute
+attitude from the trimmed log, drop the tracked check — and confirm the mutation *compiled* before
+believing a "survived" result.
+
+**Manual Foundry checklist**
+1. Track three residents; try to track an eleventh → refused with the current list named.
+2. End Turn with unrest rising 3 → only tracked NPCs of the named occupations gain the memory.
+3. End Turn again with unrest flat → no new memory; attitude decays 1 toward 0.
+4. Raid a caravan → the merchant and teamster remember it; the soldier moves the other way.
+5. Push an NPC across into hostile → one offer card; next turn, still hostile, no second card.
+6. Confirm the quest option → a quest spawns; dismiss on another → nothing changes.
+7. Untrack then retrack an NPC → the log is intact.
+8. Log in as a player → no memory panel, no attitude anywhere.
+
+## 11. Phasing
+
+**Phase 1 — pure core.** `NpcMemory.kt` in `commonMain`: rule evaluation over a state-delta input,
+attitude accumulation, clamping, decay, cooldown, band crossing, caps. Full commonTest suite. Nothing
+wired.
+
+**Phase 2 — data and schema.** `schemas/npc-memory-rule.json`, the seventeen rules, the
+`check_i18n_keys.py` catalog check, and the `RawNpcEntry` fields with `Migration65`.
+
+**Phase 3 — tick.** End Turn evaluation over tracked NPCs, reading §2.2 sources alongside turn
+records; memories written, no UI.
+
+**Phase 4 — flagging, log panel and offers.** The Track toggle with its cap, the GM-only log,
+`npc-attitude-shift.hbs` and its three buttons, i18n across all eight locales.
+
+Phases 1–3 are invisible to players, which is what makes phase 4 safe.
