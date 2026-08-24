@@ -1,0 +1,134 @@
+package at.posselt.pfrpg2e.kingdom.xp
+
+/**
+ * Pure core of the party XP ledger (`docs/plans/2026-07-09-plan-xp-ledger.md`).
+ *
+ * This ledger is **party (PC) XP only**. Party XP and kingdom XP are two separate currencies with
+ * two separate award paths — PC XP lives on `PF2ECharacter.system.details.xp` and is granted
+ * through `updateXP`, kingdom XP lives on `KingdomData.xp` and is granted through
+ * `gainXp`/`levelUp` — and conflating them is the failure mode the plan exists to avoid:
+ * confirming a hex-clear award through the kingdom path would level up the *kingdom*. Nothing in
+ * this file reads or writes kingdom XP; `MilestoneOffers.kt` owns that side.
+ */
+
+enum class XpSourceKind(val value: String) {
+    HEX_RECONNOITERED("hexReconnoitered"), SITE_CLEARED("siteCleared"),
+    QUEST_COMPLETED("questCompleted"), EXPEDITION_RESOLVED("expeditionResolved"),
+    RP_ENCOUNTER("rpEncounter"), MANUAL("manual");
+
+    companion object {
+        fun fromValue(value: String?): XpSourceKind? = entries.find { it.value == value }
+    }
+}
+
+enum class XpOfferStatus(val value: String) {
+    OFFERED("offered"), CONFIRMED("confirmed"), DISMISSED("dismissed");
+
+    companion object {
+        fun fromValue(value: String?): XpOfferStatus? = entries.find { it.value == value }
+    }
+}
+
+/**
+ * One observed beat, from offer through answer.
+ *
+ * [timestamp] is an ISO string the **caller** supplies: no clock in here keeps every function
+ * deterministic, and `RawTurnRecord` already stores time exactly this way. [sourceRef] — hex key,
+ * quest id, expedition id — is the double-count key [proposeEntry] guards on. [grantedAmount] is
+ * what the GM actually confirmed, null while unanswered: the amount is editable at confirm time,
+ * so the ledger records what was granted, never merely what was proposed.
+ */
+data class XpLedgerEntry(
+    val id: String,
+    val turn: Int,
+    val timestamp: String,
+    val sourceKind: XpSourceKind,
+    val sourceRef: String,
+    val proposedAmount: Int,
+    val grantedAmount: Int? = null,
+    val status: XpOfferStatus = XpOfferStatus.OFFERED,
+    val note: String? = null,
+)
+
+/** Cap on **answered** (confirmed or dismissed) entries, in the same shape as
+ *  `appendShipmentHistory`: the stored flag must stay bounded, but only answered history is
+ *  trimmable — an unanswered offer is pending work. */
+const val XP_LEDGER_CAP = 500
+
+/**
+ * [candidate], unless this exact beat is already in the ledger — then null.
+ *
+ * The guard is the `(sourceKind, sourceRef)` pair in **any** status: a hex cleared, re-populated
+ * by the GM and cleared again reports the same key, and a dismissed offer must not re-propose —
+ * awarding twice for one sourceRef is the failure this returns null for. The same sourceRef under
+ * a different kind is a different beat and passes. [XpSourceKind.MANUAL] candidates always pass:
+ * a GM who genuinely wants a second award adds one deliberately, and it shows up as such in the
+ * history.
+ */
+fun proposeEntry(existing: List<XpLedgerEntry>, candidate: XpLedgerEntry): XpLedgerEntry? {
+    if (candidate.sourceKind == XpSourceKind.MANUAL) return candidate
+    val duplicate = existing.any {
+        it.sourceKind == candidate.sourceKind && it.sourceRef == candidate.sourceRef
+    }
+    return if (duplicate) null else candidate
+}
+
+/**
+ * Append [entry], trimming the oldest **answered** entries once they exceed [cap].
+ *
+ * Offered entries are never pruned, no matter how many there are: an unanswered offer is pending
+ * XP the party earned, and silently dropping it loses the award. If offers alone ever exceed the
+ * cap that is a bug in the offer generator, not a pruning problem.
+ */
+fun appendEntry(
+    existing: List<XpLedgerEntry>,
+    entry: XpLedgerEntry,
+    cap: Int = XP_LEDGER_CAP,
+): List<XpLedgerEntry> {
+    val all = existing + entry
+    val answered = all.filter { it.status != XpOfferStatus.OFFERED }
+    if (answered.size <= cap) return all
+    val drop = answered.take(answered.size - cap).toSet()
+    return all.filterNot { it in drop }
+}
+
+/**
+ * Sum of [XpLedgerEntry.grantedAmount] over confirmed entries.
+ *
+ * Never [XpLedgerEntry.proposedAmount]: the confirm row's amount field is editable, and an
+ * edited-down confirm must not report the proposed figure. A confirmed entry that somehow lacks a
+ * granted amount contributes zero rather than borrowing the proposal.
+ */
+fun confirmedTotal(entries: List<XpLedgerEntry>): Int =
+    entries.filter { it.status == XpOfferStatus.CONFIRMED }.sumOf { it.grantedAmount ?: 0 }
+
+/**
+ * Per-source-kind granted totals for the ledger header, confirmed entries only.
+ *
+ * Offered and dismissed entries granted nothing, so they contribute nothing; a kind with no
+ * confirmed entries is absent rather than zero, because the header lists where XP actually came
+ * from, not every kind that exists.
+ */
+fun totalsByKind(entries: List<XpLedgerEntry>): Map<XpSourceKind, Int> =
+    entries.filter { it.status == XpOfferStatus.CONFIRMED }
+        .groupBy { it.sourceKind }
+        .mapValues { (_, entriesOfKind) -> entriesOfKind.sumOf { it.grantedAmount ?: 0 } }
+
+/** What the ledger says was granted, against what a PC actually holds. */
+data class XpReconciliation(val ledgerTotal: Int, val actualLifetimeXp: Int, val drift: Int)
+
+/**
+ * Reconcile the ledger against [actualLifetimeXp].
+ *
+ * Drift is expected and not an error — combat XP and hand edits never pass through the ledger —
+ * so this reports a number, never a correction: positive drift is the steady state of a party
+ * that fights, and nothing here writes anything back.
+ */
+fun reconcile(entries: List<XpLedgerEntry>, actualLifetimeXp: Int): XpReconciliation {
+    val ledgerTotal = confirmedTotal(entries)
+    return XpReconciliation(
+        ledgerTotal = ledgerTotal,
+        actualLifetimeXp = actualLifetimeXp,
+        drift = actualLifetimeXp - ledgerTotal,
+    )
+}
