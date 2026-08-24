@@ -1,7 +1,7 @@
 {
     "title": "Kingdom Building, Camping & Weather",
     "description": "A collection of utilities to run the most popular adventure for PFRPG 2e",
-    "version": "6.3.3-debug",
+    "version": "6.3.3",
     "scripts": [
         "dist/api/patches.js",
         "dist/main.js"
@@ -186,7 +186,6 @@
     },
     "compatibility": {
         "minimum": "14",
-        "maximum": "14",
         "verified": "14"
     }
 }
