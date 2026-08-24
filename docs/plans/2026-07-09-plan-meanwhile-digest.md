@@ -163,11 +163,28 @@ fun computeInterestScore(input: ScoringInput, weights: ScoringWeights): Double {
 | Source | `magnitudeNorm` Formula | Max Reference |
 |--------|------------------------|---------------|
 | Faction drift | `abs(delta) / 100.0` | ±100 standing scale |
-| Caravan | `cargoLost / max(cargoAmount, 1)` for raids; `deliveredAmount / capacity` for arrivals | Cargo capacity |
+| Caravan | see the note below — **not computable from `CaravanEvent` as written** | — |
 | Campaign clock | `1.0` if expired/triggered this turn; `turnsRemaining / maxTurns` otherwise | Clock duration |
 | Expedition | `1.0` for crit success/fail; `0.7` for success; `0.4` for failure; `0.1` for in-progress | DegreeOfSuccess |
 | War threat | `escalationLevel / maxEscalation`; `1.0` if triggered this turn | Threat max escalation |
 | Weather | `eventLevel / partyLevel` clamped [0,1] for hazardous events; `0.2` for flavor | Party level |
+
+> **Caravan magnitude needs one field added first.** The formula above referenced
+> `cargoAmount` and `capacity`. `CaravanEvent` (`CaravanTick.kt`) carries `kind`, `summary`,
+> `partnerName`, `bonusResourceDice`, `deliveredCommodity`, `deliveredAmount`, `cargoLost` and
+> `turnsRemaining` — and **no cargo size and no id**, so it cannot be joined back to its
+> `RawCaravan` to read `cargoAmount`. `capacity` does not exist anywhere in the caravan model at all.
+>
+> **Recommended: add `cargoAmount: Int = 0` to `CaravanEvent`.** There is direct precedent — the
+> event already carries `partnerName` for exactly this reason, and its comment says why: *"Carried on
+> the event so the shipment history can record who a delivery or raid involved; the summary string is
+> display text and matching against it would break the moment it is reworded or translated."* The
+> same argument applies to cargo size. One defaulted field, no persistence change.
+>
+> **Fallback if that is not wanted:** score raids and arrivals on absolute size against a fixed
+> reference rather than a ratio — `min(1.0, cargoLost / 20.0)` for raids and
+> `min(1.0, deliveredAmount / 20.0)` for arrivals — accepting that a small caravan losing everything
+> scores lower than a large one losing half. That is worse fiction but needs no code change.
 
 **Relevance scoring rules (deterministic, no RNG):**
 - `1.0`: involves kingdom capital, PC-owned caravan, active companion, faction at war/allied.
