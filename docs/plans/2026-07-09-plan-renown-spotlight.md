@@ -185,7 +185,7 @@ only number the war/quest/caravan systems ever read. This separation is asserted
 
 ### 2.6 Migration
 
-**Migration49** (the chain currently ends at `Migration61`; `MigrationChainTest`
+**Migration49** *(placeholder — not free; see caveat)* (the chain currently ends at `Migration61`; `MigrationChainTest`
 `registeredVersionsAreContiguous17To48` guards contiguity, so the new class must be registered in
 `Migrations.kt` and the assertion bumped to `…17To49`). *Gregory sequences the real number at
 implementation time if other migrations land first.*

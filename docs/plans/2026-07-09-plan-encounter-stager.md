@@ -142,7 +142,7 @@ pattern.
 
 > The migration chain currently ends at **`Migration61`** (`migrations/Migrations.kt`,
 > `internal val migrations = listOf(...)`; `MigrationChainTest` asserts contiguity). This plan
-> proposes **`Migration49`**; **Gregory sequences the real number at implementation time** in
+> proposes **`Migration49`** *(placeholder — not free; see caveat)*; **Gregory sequences the real number at implementation time** in
 > case other in-flight work claims 49 first.
 
 > ⚠️ **The number in this section is stale and must be re-derived at implementation.** The chain

@@ -122,7 +122,7 @@ These mirror existing tick dials (`factionStandingDriftPerTurn`, `rpToXpConversi
 
 ### 2.3 Migration49
 
-Migration chain currently ends at **`Migration61`** (`migrations/Migrations.kt`, `MigrationChainTest` asserts contiguity). Propose **`Migration49`** (Gregory sequences the real number). Following the `Migration47` template:
+Migration chain currently ends at **`Migration61`** (`migrations/Migrations.kt`, `MigrationChainTest` asserts contiguity). Propose **`Migration49`** *(placeholder — not free; see caveat)* (Gregory sequences the real number). Following the `Migration47` template:
 
 > ⚠️ **The number in this section is stale and must be re-derived at implementation.** The chain
 > ends at `Migration61`, not 48, and 62–67 are already proposed by the downtime-projects,

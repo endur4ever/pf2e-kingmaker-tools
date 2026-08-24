@@ -221,7 +221,7 @@ record is the idempotency guard (same idea as `RawWarThreat.offerConsumed`).
 
 ### 2.4 Migration
 
-**Migration49** (chain currently ends at `Migration61`; `MigrationChainTest` asserts
+**Migration49** *(placeholder — not free; see caveat)* (chain currently ends at `Migration61`; `MigrationChainTest` asserts
 contiguity — Gregory assigns the real next number). Backfills `lifeEventHistory = []` on every
 settlement, mirroring `Migration31` (which backfilled `populationRoster`):
 

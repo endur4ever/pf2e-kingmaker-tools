@@ -119,7 +119,7 @@ The link is a **soft foreign key**: `factionRef` is a `RawGroup.name`. If a GM r
 
 ### 2.3 Migration — `Migration49`
 
-The migration chain currently ends at **`Migration61`** (`src/jsMain/kotlin/at/posselt/pfrpg2e/migrations/Migrations.kt`; `MigrationChainTest` asserts contiguity). Propose **`Migration49`**. **Gregory sequences the real number at implementation** in case other branches land migrations first.
+The migration chain currently ends at **`Migration61`** (`src/jsMain/kotlin/at/posselt/pfrpg2e/migrations/Migrations.kt`; `MigrationChainTest` asserts contiguity). Propose **`Migration49`** *(placeholder — not free; see caveat)*. **Gregory sequences the real number at implementation** in case other branches land migrations first.
 
 > ⚠️ **The number in this section is stale and must be re-derived at implementation.** The chain
 > ends at `Migration61`, not 48, and 62–67 are already proposed by the downtime-projects,

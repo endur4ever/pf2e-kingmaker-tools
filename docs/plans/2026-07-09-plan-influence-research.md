@@ -200,7 +200,7 @@ external interface RawSubsystemStore {
 
 ### 2.5 Migration
 
-Propose **`Migration49`** (next free slot after `Migration48`; `internal val migrations = listOf(...)` in `src/jsMain/kotlin/at/posselt/pfrpg2e/migrations/Migrations.kt` currently ends at `Migration61()`, and `MigrationChainTest` asserts contiguity).
+Propose **`Migration49`** *(placeholder — not free; see caveat)* (next free slot after `Migration48`; `internal val migrations = listOf(...)` in `src/jsMain/kotlin/at/posselt/pfrpg2e/migrations/Migrations.kt` currently ends at `Migration61()`, and `MigrationChainTest` asserts contiguity).
 
 > ⚠️ **The number in this section is stale and must be re-derived at implementation.** The chain
 > ends at `Migration61`, not 48, and 62–67 are already proposed by the downtime-projects,

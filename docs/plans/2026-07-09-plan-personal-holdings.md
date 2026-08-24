@@ -164,7 +164,7 @@ reuse that exact pattern:
 - `ownerUserId` is a **denormalised convenience cache** for a fast first-pass filter and for
   holdings whose actor can't currently resolve; it is never the sole source of truth.
 
-### 2.4 Migration — propose `Migration49` (Gregory sequences the real number)
+### 2.4 Migration — propose `Migration49` *(placeholder — not free; see caveat)* (Gregory sequences the real number)
 
 The chain currently ends at `Migration61` (`src/jsMain/kotlin/at/posselt/pfrpg2e/migrations/migrations/Migration48.kt`);
 `MigrationChainTest` asserts contiguity with `assertEquals((17..48).toList(), migrations.map { it.version })`.

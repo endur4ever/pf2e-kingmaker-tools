@@ -208,7 +208,7 @@ is a named constant, not a magic literal.
 ### 2.4 Migration49
 
 The chain currently ends at **`Migration61`** (`migrations/Migrations.kt`; `MigrationChainTest`
-asserts contiguity). Propose **`Migration49`** (Gregory sequences the real number at
+asserts contiguity). Propose **`Migration49`** *(placeholder — not free; see caveat)* (Gregory sequences the real number at
 implementation time if the chain has advanced):
 
 > ⚠️ **The number in this section is stale and must be re-derived at implementation.** The chain
