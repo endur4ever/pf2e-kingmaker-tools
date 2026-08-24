@@ -175,14 +175,26 @@ fun computeInterestScore(input: ScoringInput, weights: ScoringWeights): Double {
 > `turnsRemaining` — and **no cargo size and no id**, so it cannot be joined back to its
 > `RawCaravan` to read `cargoAmount`. `capacity` does not exist anywhere in the caravan model at all.
 >
-> **Recommended: add `cargoAmount: Int = 0` to `CaravanEvent`.** There is direct precedent — the
+> **The prose templates need the same thing, and more.** §3.5's caravan templates use `{origin}`,
+> `{destination}` and `{commodity}`. None of the three is reachable either: `originLabel` and
+> `destLabel` live on `RawCaravan`, and the RAIDED event is constructed without
+> `deliveredCommodity` (`CaravanTick.kt:247`), so `{commodity}` in `raidLoss` renders empty. Of the
+> seven placeholders those templates use, only `lost`, `bonusRD`, `amount` and `partner` resolve
+> today.
+>
+> **Recommended: widen `CaravanEvent` by four defaulted fields** — `cargoAmount`, `cargoCommodity`,
+> `originLabel`, `destLabel` — and populate them at every construction site. All four are already in
+> scope there: the RAIDED constructor at `CaravanTick.kt:247` has `caravan` in hand and reads
+> `caravan.partnerName` on the very same line. There is direct precedent — the
 > event already carries `partnerName` for exactly this reason, and its comment says why: *"Carried on
 > the event so the shipment history can record who a delivery or raid involved; the summary string is
 > display text and matching against it would break the moment it is reworded or translated."* The
-> same argument applies to cargo size. One defaulted field, no persistence change.
+> same argument applies to cargo size, route labels and commodity. Defaulted fields on a transient
+> result type; no persistence change and no migration.
 >
-> **Fallback if that is not wanted:** score raids and arrivals on absolute size against a fixed
-> reference rather than a ratio — `min(1.0, cargoLost / 20.0)` for raids and
+> **Fallback if that is not wanted:** drop `{origin}`/`{destination}`/`{commodity}` from the caravan
+> templates and reword them around the partner alone, and score raids and arrivals on absolute size
+> against a fixed reference rather than a ratio — `min(1.0, cargoLost / 20.0)` for raids and
 > `min(1.0, deliveredAmount / 20.0)` for arrivals — accepting that a small caravan losing everything
 > scores lower than a large one losing half. That is worse fiction but needs no code change.
 
