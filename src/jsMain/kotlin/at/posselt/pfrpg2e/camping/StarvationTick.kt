@@ -34,8 +34,22 @@ data class StarvationCrossing(
  * That is deliberate: an NPC follower with no Constitution to read should not get a *better*
  * endurance than the party, and a GM who disagrees can feed them.
  */
-fun actorConstitutionModifier(actor: PF2EActor): Int =
-    runCatching { (actor as? PF2ECharacter)?.abilities?.con?.mod }.getOrNull() ?: 0
+/**
+ * Constitution modifier for starvation thresholds, 0 when the actor genuinely has none.
+ *
+ * The typed facade declares `abilities` only on [PF2ECharacter], but an NPC camper -- a companion
+ * added to the party -- carries a real Constitution in system data. Reading only the typed path
+ * treated every NPC as Con 0, so they starved on the same clock as a vehicle. Vehicles and other
+ * actors with no abilities block still fall through to 0, which is correct for them.
+ */
+fun actorConstitutionModifier(actor: PF2EActor): Int {
+    // Guarded SEPARATELY from the fallback below. A single runCatching around both would let a
+    // throw from the typed check -- `as?` against an external class resolves through CONFIG.PF2E,
+    // which is absent outside a live Foundry -- swallow the fallback too and silently yield 0.
+    val typed = runCatching { (actor as? PF2ECharacter)?.abilities?.con?.mod }.getOrNull()
+    if (typed != null) return typed
+    return runCatching { actor.asDynamic().system?.abilities?.con?.mod as? Int }.getOrNull() ?: 0
+}
 
 /**
  * Resolves tonight's eating for [actors] and advances their hunger counters on [camping].
