@@ -65,8 +65,25 @@ petition silently robs a player of a decision.
 ## 3. Template catalog
 
 Data-driven JSON under `data/petitions/`, one file per template, validated by a new
-`schemas/petition.json` in the `./gradlew check` sweep alongside `validateMilestones`. Text is
-i18n keys only; no prose in the data files.
+`schemas/petition.json`. Text is i18n keys only; no prose in the data files.
+
+**Build glue this needs (it is not automatic).** `CombineJsonFiles` *is* automatic — it walks
+`data/` one level deep and emits `<dirname>.json` per subdirectory (`buildSrc/.../CombineJsonFiles.kt`),
+so the new directory is bundled with no change. Validation is **not**: each validator is an
+explicitly registered task, e.g.
+
+```kotlin
+tasks.register<JsonSchemaValidator>("validateMilestones") {
+    outputs.upToDateWhen { true }
+    schema = layout.projectDirectory.file("src/commonMain/resources/schemas/milestone.json")
+    files = layout.projectDirectory.dir("data/milestones")
+}
+```
+
+and is then named in the `check` task's `dependsOn` list (`build.gradle.kts:121-134`). So this
+schema needs its own `tasks.register<JsonSchemaValidator>` plus a line in that list, or it is written
+and never run.
+
 
 ```json
 {
