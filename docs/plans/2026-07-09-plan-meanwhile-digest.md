@@ -163,40 +163,23 @@ fun computeInterestScore(input: ScoringInput, weights: ScoringWeights): Double {
 | Source | `magnitudeNorm` Formula | Max Reference |
 |--------|------------------------|---------------|
 | Faction drift | `abs(delta) / 100.0` | ±100 standing scale |
-| Caravan | see the note below — **not computable from `CaravanEvent` as written** | — |
+| Caravan | `cargoLost / max(cargoAmount, 1)` for raids; `deliveredAmount / max(cargoAmount, 1)` for arrivals | pre-tick cargo |
 | Campaign clock | `1.0` if expired/triggered this turn; `turnsRemaining / maxTurns` otherwise | Clock duration |
 | Expedition | `1.0` for crit success/fail; `0.7` for success; `0.4` for failure; `0.1` for in-progress | DegreeOfSuccess |
 | War threat | `escalationLevel / maxEscalation`; `1.0` if triggered this turn | Threat max escalation |
 | Weather | `eventLevel / partyLevel` clamped [0,1] for hazardous events; `0.2` for flavor | Party level |
 
-> **Caravan magnitude needs one field added first.** The formula above referenced
-> `cargoAmount` and `capacity`. `CaravanEvent` (`CaravanTick.kt`) carries `kind`, `summary`,
-> `partnerName`, `bonusResourceDice`, `deliveredCommodity`, `deliveredAmount`, `cargoLost` and
-> `turnsRemaining` — and **no cargo size and no id**, so it cannot be joined back to its
-> `RawCaravan` to read `cargoAmount`. `capacity` does not exist anywhere in the caravan model at all.
+> **`CaravanEvent` now carries this context.** It was widened with four defaulted fields —
+> `cargoAmount`, `cargoCommodity`, `originLabel`, `destLabel` — populated at every construction site,
+> so both the magnitude formula and §3.5's prose templates resolve without touching persistence.
 >
-> **The prose templates need the same thing, and more.** §3.5's caravan templates use `{origin}`,
-> `{destination}` and `{commodity}`. None of the three is reachable either: `originLabel` and
-> `destLabel` live on `RawCaravan`, and the RAIDED event is constructed without
-> `deliveredCommodity` (`CaravanTick.kt:247`), so `{commodity}` in `raidLoss` renders empty. Of the
-> seven placeholders those templates use, only `lost`, `bonusRD`, `amount` and `partner` resolve
-> today.
+> `cargoAmount` is the cargo as it stood **before** the tick: `advanced()` returns a new caravan
+> rather than mutating, so reading it at the event site gives the pre-raid figure. That is the
+> denominator the score needs — losing 2 of 10 is not losing 2 of 2.
 >
-> **Recommended: widen `CaravanEvent` by four defaulted fields** — `cargoAmount`, `cargoCommodity`,
-> `originLabel`, `destLabel` — and populate them at every construction site. All four are already in
-> scope there: the RAIDED constructor at `CaravanTick.kt:247` has `caravan` in hand and reads
-> `caravan.partnerName` on the very same line. There is direct precedent — the
-> event already carries `partnerName` for exactly this reason, and its comment says why: *"Carried on
-> the event so the shipment history can record who a delivery or raid involved; the summary string is
-> display text and matching against it would break the moment it is reworded or translated."* The
-> same argument applies to cargo size, route labels and commodity. Defaulted fields on a transient
-> result type; no persistence change and no migration.
->
-> **Fallback if that is not wanted:** drop `{origin}`/`{destination}`/`{commodity}` from the caravan
-> templates and reword them around the partner alone, and score raids and arrivals on absolute size
-> against a fixed reference rather than a ratio — `min(1.0, cargoLost / 20.0)` for raids and
-> `min(1.0, deliveredAmount / 20.0)` for arrivals — accepting that a small caravan losing everything
-> scores lower than a large one losing half. That is worse fiction but needs no code change.
+> Magnitude: `cargoLost / max(cargoAmount, 1)` for raids, `deliveredAmount / max(cargoAmount, 1)` for
+> arrivals. The `{origin}`, `{destination}` and `{commodity}` placeholders now resolve for raid beats
+> too — the RAIDED event previously carried no commodity at all.
 
 **Relevance scoring rules (deterministic, no RNG):**
 - `1.0`: involves kingdom capital, PC-owned caravan, active companion, faction at war/allied.

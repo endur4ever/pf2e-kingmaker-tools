@@ -48,6 +48,20 @@ data class CaravanEvent(
     val deliveredAmount: Int = 0,
     val cargoLost: Int = 0,
     val turnsRemaining: Int = 0,
+    /**
+     * Cargo size as it stood BEFORE this tick, so a loss can be scored against what was actually
+     * being carried. `advanced()` returns a new caravan rather than mutating, so reading
+     * `caravan.cargoAmount` at the point the event is built gives the pre-raid figure.
+     */
+    val cargoAmount: Int = 0,
+    /** What was carried: a commodity id for caravans, the item name for shipments. */
+    val cargoCommodity: String? = null,
+    /**
+     * Route endpoints, carried for the same reason as [partnerName]: the summary string is display
+     * text, and parsing it back out would break the moment it is reworded or translated.
+     */
+    val originLabel: String? = null,
+    val destLabel: String? = null,
 )
 
 data class CaravanTickInput(
@@ -236,7 +250,7 @@ fun tickCaravans(inputs: List<CaravanTickInput>, bonusRdCap: Int? = null): Carav
         }
 
         if (amount <= 0) {
-            events.add(CaravanEvent(CaravanEventKind.LOST, summary, partnerName = caravan.partnerName, cargoLost = caravan.cargoAmount))
+            events.add(CaravanEvent(CaravanEventKind.LOST, summary, partnerName = caravan.partnerName, cargoAmount = caravan.cargoAmount, cargoCommodity = caravan.cargoCommodity, originLabel = caravan.originLabel, destLabel = caravan.destLabel, cargoLost = caravan.cargoAmount))
             continue
         }
 
@@ -244,7 +258,7 @@ fun tickCaravans(inputs: List<CaravanTickInput>, bonusRdCap: Int? = null): Carav
         if (turnsRemaining > 0) {
             remaining.add(caravan.advanced(cargoAmount = amount, turnsRemaining = turnsRemaining))
             if (lost > 0) {
-                events.add(CaravanEvent(CaravanEventKind.RAIDED, summary, partnerName = caravan.partnerName, cargoLost = lost, turnsRemaining = turnsRemaining))
+                events.add(CaravanEvent(CaravanEventKind.RAIDED, summary, partnerName = caravan.partnerName, cargoAmount = caravan.cargoAmount, cargoCommodity = caravan.cargoCommodity, originLabel = caravan.originLabel, destLabel = caravan.destLabel, cargoLost = lost, turnsRemaining = turnsRemaining))
             }
             continue
         }
@@ -253,7 +267,7 @@ fun tickCaravans(inputs: List<CaravanTickInput>, bonusRdCap: Int? = null): Carav
         if (caravan.kind == "sellToPartner") {
             val rd = (amount * input.rdPerCommodity).roundToInt()
             bonusRd += rd
-            events.add(CaravanEvent(CaravanEventKind.DELIVERED, summary, partnerName = caravan.partnerName, bonusResourceDice = rd, cargoLost = lost))
+            events.add(CaravanEvent(CaravanEventKind.DELIVERED, summary, partnerName = caravan.partnerName, cargoAmount = caravan.cargoAmount, cargoCommodity = caravan.cargoCommodity, originLabel = caravan.originLabel, destLabel = caravan.destLabel, bonusResourceDice = rd, cargoLost = lost))
         } else {
             val commodity = caravan.cargoCommodity
             if (commodity != null) {
@@ -263,9 +277,14 @@ fun tickCaravans(inputs: List<CaravanTickInput>, bonusRdCap: Int? = null): Carav
                 CaravanEvent(
                     CaravanEventKind.DELIVERED,
                     summary,
+                    partnerName = caravan.partnerName,
                     deliveredCommodity = commodity,
                     deliveredAmount = amount,
                     cargoLost = lost,
+                    cargoAmount = caravan.cargoAmount,
+                    cargoCommodity = caravan.cargoCommodity,
+                    originLabel = caravan.originLabel,
+                    destLabel = caravan.destLabel,
                 )
             )
         }
@@ -348,7 +367,7 @@ fun tickShipments(inputs: List<ShipmentTickInput>): ShipmentTickResult {
         }
 
         if (quantity <= 0) {
-            events.add(CaravanEvent(CaravanEventKind.LOST, summary, partnerName = shipment.destLabel, cargoLost = shipment.itemQuantity))
+            events.add(CaravanEvent(CaravanEventKind.LOST, summary, partnerName = shipment.destLabel, cargoAmount = shipment.itemQuantity, cargoCommodity = shipment.itemName, originLabel = shipment.originLabel, destLabel = shipment.destLabel, cargoLost = shipment.itemQuantity))
             continue
         }
 
@@ -359,7 +378,7 @@ fun tickShipments(inputs: List<ShipmentTickInput>): ShipmentTickResult {
         val nextHexKey = if (path.isNotEmpty() && progressIdx >= 0 && progressIdx < path.size) path[progressIdx] else shipment.destHexKey
 
         if (lost > 0) {
-            events.add(CaravanEvent(CaravanEventKind.RAIDED, summary, partnerName = shipment.destLabel, cargoLost = lost, turnsRemaining = turnsRemaining))
+            events.add(CaravanEvent(CaravanEventKind.RAIDED, summary, partnerName = shipment.destLabel, cargoAmount = shipment.itemQuantity, cargoCommodity = shipment.itemName, originLabel = shipment.originLabel, destLabel = shipment.destLabel, cargoLost = lost, turnsRemaining = turnsRemaining))
         }
 
         if (turnsRemaining > 0) {
@@ -367,7 +386,7 @@ fun tickShipments(inputs: List<ShipmentTickInput>): ShipmentTickResult {
         } else {
             val arrivedShipment = shipment.delivered(itemQuantity = quantity)
             delivered.add(arrivedShipment)
-            events.add(CaravanEvent(CaravanEventKind.DELIVERED, summary, partnerName = shipment.destLabel, deliveredAmount = quantity, cargoLost = lost))
+            events.add(CaravanEvent(CaravanEventKind.DELIVERED, summary, partnerName = shipment.destLabel, cargoAmount = shipment.itemQuantity, cargoCommodity = shipment.itemName, originLabel = shipment.originLabel, destLabel = shipment.destLabel, deliveredAmount = quantity, cargoLost = lost))
         }
     }
 
