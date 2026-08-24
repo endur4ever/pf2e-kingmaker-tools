@@ -123,12 +123,12 @@ a wall-clock-stamped event log be needed. We explicitly do **not** do that in v1
 
 ### 2.4 Migration — **NOT NEEDED** (justified)
 
-- Per-user state lives in **User flags**, which have **no schema version and no migration runner** — the migration chain (`Migrations.kt`, ending at **`Migration61`**, contiguity asserted by `MigrationChainTest`) only versions the kingdom/camping flag. A new User-flag key simply appears; absent = default. **No Migration49 for this feature.**
+- Per-user state lives in **User flags**, which have **no schema version and no migration runner** — the migration chain (`Migrations.kt`, ending at **`Migration61`**, contiguity asserted by `MigrationChainTest`) only versions the kingdom/camping flag. A new User-flag key simply appears; absent = default. **This feature needs no migration at all.**
 - No new **kingdom-side** field is required either. `lastPlayerPingsTurn` is a free-form actor app-flag (same class as `lastRecapTurn`), which the existing code adds without a migration.
 - **Cleanup instead of migration:** stale User flags are harmless (a `lastSeenAtMillis` from a deleted world just makes everything read as "seen"). Provide a light housekeeping path:
   - On kingdom **reset/delete**, and on module **downgrade**, best-effort `game.user.unsetAppFlag("playerPings")` for the local user (we cannot iterate other users' flags without GM socket calls — out of scope).
   - `readyForTurn` is self-expiring: it is only "ready" when `readyForTurn == currentTurn`, so last turn's value is inert; no cleanup needed.
-- **Escape hatch (documented, not built):** *if* a later version adds a discrete persisted caravan/war-threat event log for per-event feed rows, that log lives on the **kingdom actor** and would need **Migration49** (initialize `caravanEventLog = []`). v1 avoids it by deriving from `RawTurnRecord`.
+- **Escape hatch (documented, not built):** *if* a later version adds a discrete persisted caravan/war-threat event log for per-event feed rows, that log lives on the **kingdom actor** and would need a migration of its own, numbered against the chain at that time rather than reserved here (62–67 are already spoken for by other unimplemented plans). v1 avoids it entirely: caravan rows come from `kingdom.shipmentHistory` and war threats from `RawTurnRecord`.
 
 ---
 
