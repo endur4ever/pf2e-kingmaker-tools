@@ -65,19 +65,20 @@ class UntestedChainMigrationsTest {
     }
 
     @Test
-    fun migration17SilentlyZeroesACostItCannotParse() = runTest {
-        // Documents real, already-shipped behaviour rather than asserting what we might prefer:
-        // the regex demands "<digits> <currency>", so a cost written without a space -- "5gp" --
-        // does not match and the value is LOST, falling back to 0 gp. Anyone who typed a homebrew
-        // cost that way had it silently zeroed on upgrade. This migration has long since run in the
-        // wild, so it must not be changed now; the test exists so the behaviour is at least known.
+    fun migration17KeepsACostTypedWithoutASpace() = runTest {
+        // This used to assert the opposite, pinning real data loss: the regex demanded
+        // "<digits> <currency>", so "5gp" matched nothing and the value fell back to 0. The
+        // argument for leaving it was that the migration had already run in the wild -- but it
+        // still runs for any world below schema 17, so it would have gone on destroying costs.
+        // Nothing downstream reads this value, so worlds migrated before and after the fix simply
+        // differ by the fix. Already-zeroed costs cannot be recovered; only future runs improve.
         val c = camping { it.cooking = unsafeJso<dynamic> { homebrewMeals = arrayOf(meal("5gp"), meal("free"), meal("")) } }
         Migration17().migrateCamping(game, c)
         val meals = c.cooking.homebrewMeals
-        assertEquals(0, meals[0].cost.value, "\"5gp\" without a space parses to 0 -- known data loss")
+        assertEquals(5, meals[0].cost.value, "\"5gp\" must keep its value")
         assertEquals("gp", meals[0].cost.currency)
-        assertEquals(0, meals[1].cost.value)
-        assertEquals(0, meals[2].cost.value)
+        assertEquals(0, meals[1].cost.value, "text with no number is genuinely 0")
+        assertEquals(0, meals[2].cost.value, "empty is 0")
     }
 
     @Test
