@@ -2,6 +2,9 @@ package at.posselt.pfrpg2e.kingdom
 
 import at.posselt.pfrpg2e.camping.routing.FoundryTravelProvider
 import at.posselt.pfrpg2e.data.kingdom.extractRegionData
+import at.posselt.pfrpg2e.kingdom.deeds.DeedCatalogEntry
+import at.posselt.pfrpg2e.kingdom.deeds.DeedInputs
+import at.posselt.pfrpg2e.kingdom.deeds.undetectedDeeds
 import at.posselt.pfrpg2e.data.kingdom.getRoadHexKeys
 import at.posselt.pfrpg2e.data.kingdom.milestoneOfferAnswered
 import at.posselt.pfrpg2e.data.kingdom.regionFullyClaimed
@@ -43,27 +46,50 @@ suspend fun detectAndOfferMilestones(game: Game, actor: KingdomActor, kingdom: K
     if (MILESTONE_ROAD_TO_CAPITAL in answeredIds && MILESTONE_REGION_CLAIMED in answeredIds) return
 
     val regionData = runCatching { extractRegionData(kingdom) }.getOrNull() ?: return
-    val fired = mutableListOf<String>()
 
-    if (MILESTONE_ROAD_TO_CAPITAL !in answeredIds) {
+    // The expensive topology probes stay gated on answeredIds exactly as before -- an answered
+    // milestone's BFS is money for nothing -- so the probes feed counts into the pure detection
+    // core rather than deciding anything themselves. undetectedDeeds re-applies the answered
+    // filter, which is harmless: a gated probe reports 0 and its detector cannot fire anyway.
+    val settlementsRoadedToCapital = if (MILESTONE_ROAD_TO_CAPITAL !in answeredIds) {
         val capital = regionData.capitalHexKey
         if (capital != null) {
             val roadSet = runCatching { getRoadHexKeys(kingmaker.state.hexes) }.getOrNull() ?: emptySet()
             val provider = FoundryTravelProvider()
             val neighbors: (String) -> Set<String> = { provider.getAdjacentHexKeys(it).toSet() }
             val settlementHexes = Object.values(regionData.settlementHexKeys).unsafeCast<Array<String>>()
+            // any {} not count {}: the detector needs >= 1, and the original short-circuited at
+            // the first connected settlement -- counting them all would run one BFS per settlement
+            // for an answer that cannot change past the first hit.
             val connected = settlementHexes.any { hex ->
                 hex != capital && roadConnectedToCapital(hex, capital, roadSet, neighbors)
             }
-            if (connected) fired.add(MILESTONE_ROAD_TO_CAPITAL)
+            if (connected) 1 else 0
+        } else {
+            0
         }
+    } else {
+        0
     }
 
-    if (MILESTONE_REGION_CLAIMED !in answeredIds) {
+    val regionsFullyClaimed = if (MILESTONE_REGION_CLAIMED !in answeredIds) {
         val regionSets = Object.values(regionData.regionHexKeys).unsafeCast<Array<Set<String>>>()
-        val anyFull = regionSets.any { regionFullyClaimed(it, kingmaker.state.hexes) }
-        if (anyFull) fired.add(MILESTONE_REGION_CLAIMED)
+        if (regionSets.any { regionFullyClaimed(it, kingmaker.state.hexes) }) 1 else 0
+    } else {
+        0
     }
+
+    val fired = undetectedDeeds(
+        catalog = listOf(
+            DeedCatalogEntry(MILESTONE_ROAD_TO_CAPITAL, "road-to-capital"),
+            DeedCatalogEntry(MILESTONE_REGION_CLAIMED, "region-fully-claimed"),
+        ),
+        answeredIds = answeredIds,
+        inputs = DeedInputs(
+            settlementsRoadedToCapital = settlementsRoadedToCapital,
+            regionsFullyClaimed = regionsFullyClaimed,
+        ),
+    )
 
     for (id in fired) {
         val milestone = kingdom.getMilestones().find { it.id == id } ?: continue
