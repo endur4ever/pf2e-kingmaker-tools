@@ -1,6 +1,8 @@
 package at.posselt.pfrpg2e.kingdom
 
+import at.posselt.pfrpg2e.WarningCadence
 import at.posselt.pfrpg2e.evaluateCalendarNoteSupport
+import at.posselt.pfrpg2e.shouldPostWarning
 import at.posselt.pfrpg2e.settings.Pfrpg2eKingdomCampingWeatherSettings
 import at.posselt.pfrpg2e.shouldWarnAboutMissingCalendarBridge
 import at.posselt.pfrpg2e.utils.isFirstGM
@@ -42,6 +44,9 @@ private const val WARNING_TIME_ADVANCE_FAILED = "time-advance-failed"
 private fun Game.isModuleActive(id: String): Boolean =
     modules.get(id)?.active == true
 
+/** Warnings already shown on THIS client since load; cleared by a reload, unlike the world setting. */
+private val sessionShownWarnings = mutableSetOf<String>()
+
 private fun dismissedWarnings(): Set<String> =
     Pfrpg2eKingdomCampingWeatherSettings.getDismissedCalendarWarnings()
         .split(',')
@@ -55,17 +60,22 @@ private suspend fun markWarningShown(key: String) {
 }
 
 /**
- * Posts [html] as a GM-whispered chat message exactly once per world for the given [key], recording
- * the key so it never re-fires. Only the acting (first) GM posts — that client both has write access
+ * Posts [html] as a GM-whispered chat message at the given [cadence] for [key]. A world-scoped
+ * warning records the key so it never re-fires; a session-scoped one returns after a reload. Only the acting (first) GM posts — that client both has write access
  * to the world setting and avoids duplicate posts from other connected GM clients.
  */
-private suspend fun Game.postOneTimeGmWarning(key: String, html: String) {
+private suspend fun Game.postOneTimeGmWarning(
+    key: String,
+    html: String,
+    cadence: WarningCadence = WarningCadence.ONCE_PER_WORLD,
+) {
     if (!isFirstGM()) return
-    if (key in dismissedWarnings()) return
+    if (!shouldPostWarning(key, cadence, dismissedWarnings(), sessionShownWarnings)) return
     val gmUserIds = users.filter { it.isGM }.mapNotNull { it.id }.toTypedArray()
     if (gmUserIds.isEmpty()) return
     postChatMessage(html, isHtml = true, whisper = gmUserIds)
-    markWarningShown(key)
+    sessionShownWarnings.add(key)
+    if (cadence == WarningCadence.ONCE_PER_WORLD) markWarningShown(key)
 }
 
 /**
@@ -92,10 +102,17 @@ suspend fun Game.warnIfCalendarNotesUnsupported() {
 
 /**
  * Fire-and-forget: elevate a rejected rest-time `game.time.advance(...)` from console-only to a
- * one-time GM chat warning. The usual cause is a misconfigured Seasons & Stars calendar (the
+ * per-session GM chat warning. The usual cause is a misconfigured Seasons & Stars calendar (the
  * "Calendar not found" fallback), which otherwise leaves the GM with no feedback that the world clock
  * never moved.
  */
 suspend fun Game.warnCalendarTimeAdvanceFailed() {
-    postOneTimeGmWarning(WARNING_TIME_ADVANCE_FAILED, t("chatMessages.calendarTimeAdvanceFailed"))
+    // Once per SESSION, not once per world: a calendar that refuses to advance the clock fails
+    // again on every single rest, and a warning shown once ever leaves the GM with a permanently
+    // broken clock and no signal after that first message scrolls out of the log.
+    postOneTimeGmWarning(
+        WARNING_TIME_ADVANCE_FAILED,
+        t("chatMessages.calendarTimeAdvanceFailed"),
+        cadence = WarningCadence.ONCE_PER_SESSION,
+    )
 }
