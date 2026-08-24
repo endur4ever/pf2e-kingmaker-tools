@@ -455,6 +455,23 @@ Magic counteract that removes an item's curse, `docs/house-rules.md:279`). This 
 cursed items *enter* play; Cleanse Item is where they *leave* cursed state. i18n:
 `chatMessages.lootAward.cursedHint` → *"{{name}} is cursed — see the Cleanse Item ritual."*
 
+> **Upgrade available since this plan was written.** When drafted, `cleanseItemPlan` was pure logic
+> with **no callers** — there was no ritual a GM could actually run, so a text pointer was the most
+> this could offer. The activity now has a real dialog (`dialogs/CleanseItemDialog.kt`,
+> `openCleanseItemDialog(kingdomLevel, settlements, onPrepared)`), reached from the Leadership
+> activity flow, which computes DC, counteract level, luxury cost and the qualifying settlements from
+> the item's level and gates on shrine/temple/cathedral.
+>
+> So the cursed line should be a **button**, not a sentence: `km-offer-loot-cleanse`, carrying the
+> awarded item's uuid, opening that dialog for it.
+>
+> One seam is missing for that. `openCleanseItemDialog` selects its item by **drag-and-drop only** —
+> it takes no pre-seeded item — so a button would open an empty dialog and ask the GM to drag the
+> item they just awarded. Either accept that (still better than hunting for the activity), or add an
+> optional `preselected: PF2EItem? = null` parameter to `openCleanseItemDialog` as part of this
+> feature. **Recommend the parameter**: it is a few lines, and the whole point of the cross-link is
+> that the GM should not have to re-find an item the module just handed out.
+
 ---
 
 ## 6. Interactions With Existing Systems (+ Out of Scope)
