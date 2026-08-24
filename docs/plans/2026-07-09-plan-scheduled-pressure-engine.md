@@ -99,9 +99,9 @@ rather than throwing**, so one bad row cannot take down the day's whole tick.
 **Storage:** `var scheduledPressures: Array<RawScheduledPressure>?` on `KingdomData`, beside
 `campaignClocks` (line 303), `quests` (210) and `warThreats` (319).
 
-**Migration:** seeds `emptyArray()`. ⚠️ The downtime-projects plan
-(`2026-07-09-plan-downtime-projects.md`) also claims **Migration62**, the next free number. Whichever
-lands first takes 62; the second must bump and update `MigrationChainTest`'s hardcoded range.
+**Migration:** `Migration63` seeds `emptyArray()`. 62 is claimed by the downtime-projects plan
+(`2026-07-09-plan-downtime-projects.md`), so this takes the next number; both must be registered
+in `Migrations.kt` and included in `MigrationChainTest`'s hardcoded range.
 
 ## 4. Engine
 
