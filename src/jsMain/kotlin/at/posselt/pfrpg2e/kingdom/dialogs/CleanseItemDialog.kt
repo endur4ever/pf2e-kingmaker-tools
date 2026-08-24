@@ -84,9 +84,19 @@ class CleanseItemModel(
     }
 }
 
+/**
+ * An item's level from PF2e system data, 0 when it has none.
+ *
+ * Level is not on the typed facade, so this reaches through `system.level.value`. Guarded, because
+ * a GM can drop anything droppable here -- including items whose type carries no level at all.
+ */
+fun cleanseItemLevelOf(item: PF2EItem): Int =
+    runCatching { item.asDynamic().system?.level?.value as? Int }.getOrNull() ?: 0
+
 private class CleanseItemDialog(
     private val kingdomLevel: Int,
     private val settlements: List<CleanseItemSettlement>,
+    preselected: PF2EItem?,
     private val onPrepared: (CleanseItemPreparation) -> Unit,
 ) : FormApp<CleanseItemContext, CleanseItemData>(
     title = t("activities.cleanse-item.title"),
@@ -95,9 +105,11 @@ private class CleanseItemDialog(
     id = "kmCleanseItem",
     width = 520,
 ) {
-    private var itemUuid: String? = null
-    private var itemName: String = ""
-    private var itemLevel: Int = 0
+    // Seeded when the caller already knows the item -- e.g. the cursed row of a loot award, where
+    // making the GM drag back an item the module just handed them is the friction this removes.
+    private var itemUuid: String? = preselected?.uuid
+    private var itemName: String = preselected?.name ?: ""
+    private var itemLevel: Int = preselected?.let(::cleanseItemLevelOf) ?: 0
     private var settlementId: String? = null
 
     init {
@@ -114,8 +126,7 @@ private class CleanseItemDialog(
                 } else {
                     itemUuid = uuid
                     itemName = item.name ?: ""
-                    // Level lives in PF2e system data, which is not on the typed facade.
-                    itemLevel = (item.asDynamic().system?.level?.value as? Int) ?: 0
+                    itemLevel = cleanseItemLevelOf(item)
                     render()
                 }
             }
@@ -199,15 +210,19 @@ private class CleanseItemDialog(
 /**
  * Opens the preparation dialog. [onPrepared] runs only when the GM submits a choice: a dialog
  * dismissed without one simply performs no activity, which is what dismissing it means.
+ *
+ * [preselected] fills the item in advance for callers that already have one; null leaves the drop
+ * zone empty, which is the activity-menu path.
  */
 fun openCleanseItemDialog(
     kingdomLevel: Int,
     settlements: List<CleanseItemSettlement>,
+    preselected: PF2EItem? = null,
     onPrepared: (CleanseItemPreparation) -> Unit,
 ) {
     if (settlements.isEmpty()) {
         ui.notifications.error(t("activities.cleanse-item.error.noSettlements"))
         return
     }
-    CleanseItemDialog(kingdomLevel, settlements, onPrepared).render(true)
+    CleanseItemDialog(kingdomLevel, settlements, preselected, onPrepared).render(true)
 }

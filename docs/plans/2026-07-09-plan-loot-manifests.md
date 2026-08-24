@@ -465,12 +465,12 @@ cursed items *enter* play; Cleanse Item is where they *leave* cursed state. i18n
 > So the cursed line should be a **button**, not a sentence: `km-offer-loot-cleanse`, carrying the
 > awarded item's uuid, opening that dialog for it.
 >
-> One seam is missing for that. `openCleanseItemDialog` selects its item by **drag-and-drop only** —
-> it takes no pre-seeded item — so a button would open an empty dialog and ask the GM to drag the
-> item they just awarded. Either accept that (still better than hunting for the activity), or add an
-> optional `preselected: PF2EItem? = null` parameter to `openCleanseItemDialog` as part of this
-> feature. **Recommend the parameter**: it is a few lines, and the whole point of the cross-link is
-> that the GM should not have to re-find an item the module just handed out.
+> **That seam now exists.** `openCleanseItemDialog` takes an optional
+> `preselected: PF2EItem? = null`; passing a resolved item fills the drop zone and derives DC,
+> counteract level, luxury cost and the qualifying settlements from its level immediately. Null
+> keeps the empty drop zone, which is the activity-menu path. So `km-offer-loot-cleanse` resolves the
+> awarded item's uuid and hands it straight over — the GM never re-finds an item the module just
+> gave them.
 
 ---
 
