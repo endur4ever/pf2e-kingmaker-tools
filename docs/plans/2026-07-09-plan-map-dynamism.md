@@ -64,7 +64,7 @@ external interface KingmakerState { val hexes: ReadonlyRecord<String, HexState> 
 - The `HexState` fields are **`val` (read-only)** and there is **no turn/timestamp field**. A re-wild timer ("turns since cleared without claim") therefore **cannot be stored on `kingmaker.state`**. It must live on our **kingdom flag** as a side-table keyed by hex.
 - Writing any hex flag back (lapsing `cleared`) is a **GM-only DataModel write** via `state.updateSource({hexes:{[key]:…}})` + `state.save()`. This is exactly the annexation path already in `KingdomSheet.kt:1252-1263`. Player clients cannot do this (memory lesson: embedded-doc / `kingmaker.state` writes are GM-only) — hence every re-wild is an offer applied by a GM.
 
-Threat position: `RawWarThreat` (kingdom flag `warThreats: Array<RawWarThreat>?`) already has `targetSettlementSceneId: String?` and `targetHexLocation: String?` (a hex-key string, parsed with `toIntOrNull` in `ArmyBattleView.kt:299`). There is **no "current position" field** — a static threat is only ever *at* its target — so migration needs one.
+Threat position: `RawWarThreat` (kingdom flag `warThreats: Array<RawWarThreat>?`) already has `targetSettlementSceneId: String?` and `targetHexLocation: String?` (a hex-key string, parsed with `toIntOrNull` in `ArmyBattleView.kt:304`). There is **no "current position" field** — a static threat is only ever *at* its target — so migration needs one.
 
 ### 2.2 New external interfaces (all `@JsPlainObject`, nullable for migration safety)
 
@@ -167,7 +167,7 @@ class Migration49 : Migration(49) {
 
 ### 3.1 Pure core (commonMain) — no Foundry / no JS interop
 
-Adjacency and hex distance are **Foundry-runtime coupled** — `KingmakerHexGridProvider.getAdjacentHexKeys` reads `kingmaker.region`, and `kingmaker.state.hexes` is the live map. The pure core therefore never touches them directly; it takes **injected closures**, exactly as `roadConnectedToCapital(...)` takes a `neighborsProvider` and `MilestoneOffers.kt:43` injects `provider.getAdjacentHexKeys`. This keeps the logic unit-testable against fakes (the same pattern `WarThreatSnapshot` / `detectNewlyTriggeredThreats` uses to keep war-threat logic in commonMain).
+Adjacency and hex distance are **Foundry-runtime coupled** — `KingmakerHexGridProvider.getAdjacentHexKeys` reads `kingmaker.region` (`MilestoneOffers.kt:53` shows the injected-closure shape), and `kingmaker.state.hexes` is the live map. The pure core therefore never touches them directly; it takes **injected closures**, exactly as `roadConnectedToCapital(...)` takes a `neighborsProvider` and `MilestoneOffers.kt:43` injects `provider.getAdjacentHexKeys`. This keeps the logic unit-testable against fakes (the same pattern `WarThreatSnapshot` / `detectNewlyTriggeredThreats` uses to keep war-threat logic in commonMain).
 
 **File:** `src/commonMain/kotlin/.../kingdom/MapDynamism.kt`
 
@@ -265,7 +265,27 @@ fun reconcileRewild(
 Notes on the JS adapter (`jsMain`) that feeds these:
 - `adjacency` = `KingmakerHexGridProvider().getAdjacentHexKeys`.
 - `distanceToTarget` = BFS over `kingmaker.region` hexes from the target settlement/threat hex, memoized per target for the turn (computed once, wrapped in a closure). This keeps the *core* free of graph traversal while remaining deterministic.
-- `hexStates` = every hex in `kingmaker.state.hexes` projected to `HexClearState` (or restricted to the union of existing trackers + currently cleared-unclaimed hexes, to bound the list).
+- `hexStates` = the union of hexes that already carry a re-wild tracker and hexes currently
+  `cleared && !claimed`. **Not every hex on the map** — see the cost bound below.
+
+#### Cost discipline (the card asks for a position; here it is)
+
+Both engines run inside `TurnTickingEngine.tick`, which executes **twice per End Turn** — once for
+the Turn Wizard preview and once on commit — so anything expensive is paid twice.
+
+| Engine | Iterates | Bound |
+| --- | --- | --- |
+| Threat migration | `warThreats.filter { it.wanders == true }` | number of *wandering* threats — single digits in practice, never map size |
+| Re-wild | existing trackers ∪ `cleared && !claimed` hexes | number of *cleared-unclaimed* hexes, which shrinks as the kingdom claims |
+
+Finding the second set requires one pass over `kingmaker.state.hexes` to test two booleans per hex.
+That is a few hundred in-memory property reads on a Stolen Lands map, **once per kingdom turn**, and
+is acceptable at monthly cadence. It would **not** be acceptable daily, which is one more reason both
+mechanics sit on `TurnTickingEngine` and neither is added to `DailyTickHooks`.
+
+The invariant to hold at implementation: **no per-tick work proportional to map size beyond that
+single boolean pass**, and no pathfinding per hex — threat steps use one BFS per wandering threat,
+not one per hex.
 - `RawRewildTracker` ⇄ `RewildTrackerSnapshot` is a trivial field copy (mirrors `RawWarThreat` ⇄ `WarThreatSnapshot`).
 
 ### 3.2 Determinism / preview parity invariant
