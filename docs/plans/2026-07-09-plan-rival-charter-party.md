@@ -149,7 +149,14 @@ The link is a **soft foreign key**: `factionRef` is a `RawGroup.name`. If a GM r
 
 ### 2.3 Migration — `Migration49`
 
-The migration chain currently ends at **`Migration48`** (`src/jsMain/kotlin/at/posselt/pfrpg2e/migrations/Migrations.kt`; imports and the `migrations = listOf(...)` both terminate at `Migration48()`; `MigrationChainTest` asserts contiguity, `latestMigrationVersion = migrations.maxOfOrNull { it.version }!!`). Propose **`Migration49`**. **Gregory sequences the real number at implementation** — note the sibling *Rival Realms* plan also claims `49`; if both land, whichever ships second takes `50`.
+The migration chain currently ends at **`Migration61`** (`src/jsMain/kotlin/at/posselt/pfrpg2e/migrations/Migrations.kt`; imports and the `migrations = listOf(...)` both terminate at `Migration48()`; `MigrationChainTest` asserts contiguity, `latestMigrationVersion = migrations.maxOfOrNull { it.version }!!`). Propose **`Migration49`**. **Gregory sequences the real number at implementation** — note the sibling *Rival Realms* plan also claims `49`; if both land, whichever ships second takes `50`.
+
+> ⚠️ **The number in this section is stale and must be re-derived at implementation.** The chain
+> ends at `Migration61`, not 48, and 62–67 are already proposed by the downtime-projects,
+> scheduled-pressure, petition-inbox, npc-memory, seasonal-economy and loot-manifests plans. Nine
+> unimplemented plans currently name `Migration49`, so it is not free for any of them. Take the
+> next contiguous number when this actually lands, and update `MigrationChainTest`.
+
 
 ```kotlin
 class Migration49 : Migration(49) {

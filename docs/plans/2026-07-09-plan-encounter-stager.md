@@ -140,10 +140,17 @@ pattern.
 - **Pending-encounter manifest (Phase 3): `Migration49`** — no-op backfill that leaves
   `encounterManifest` null for existing hexes. Registered for chain contiguity only.
 
-> The migration chain currently ends at **`Migration48`** (`migrations/Migrations.kt`,
+> The migration chain currently ends at **`Migration61`** (`migrations/Migrations.kt`,
 > `internal val migrations = listOf(...)`; `MigrationChainTest` asserts contiguity). This plan
 > proposes **`Migration49`**; **Gregory sequences the real number at implementation time** in
 > case other in-flight work claims 49 first.
+
+> ⚠️ **The number in this section is stale and must be re-derived at implementation.** The chain
+> ends at `Migration61`, not 48, and 62–67 are already proposed by the downtime-projects,
+> scheduled-pressure, petition-inbox, npc-memory, seasonal-economy and loot-manifests plans. Nine
+> unimplemented plans currently name `Migration49`, so it is not free for any of them. Take the
+> next contiguous number when this actually lands, and update `MigrationChainTest`.
+
 
 ---
 

@@ -185,10 +185,17 @@ only number the war/quest/caravan systems ever read. This separation is asserted
 
 ### 2.6 Migration
 
-**Migration49** (the chain currently ends at `Migration48`; `MigrationChainTest`
+**Migration49** (the chain currently ends at `Migration61`; `MigrationChainTest`
 `registeredVersionsAreContiguous17To48` guards contiguity, so the new class must be registered in
 `Migrations.kt` and the assertion bumped to `…17To49`). *Gregory sequences the real number at
 implementation time if other migrations land first.*
+
+> ⚠️ **The number in this section is stale and must be re-derived at implementation.** The chain
+> ends at `Migration61`, not 48, and 62–67 are already proposed by the downtime-projects,
+> scheduled-pressure, petition-inbox, npc-memory, seasonal-economy and loot-manifests plans. Nine
+> unimplemented plans currently name `Migration49`, so it is not free for any of them. Take the
+> next contiguous number when this actually lands, and update `MigrationChainTest`.
+
 
 ```kotlin
 // migrations/migrations/Migration49.kt

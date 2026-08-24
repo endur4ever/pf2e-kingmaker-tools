@@ -200,7 +200,14 @@ external interface RawSubsystemStore {
 
 ### 2.5 Migration
 
-Propose **`Migration49`** (next free slot after `Migration48`; `internal val migrations = listOf(...)` in `src/jsMain/kotlin/at/posselt/pfrpg2e/migrations/Migrations.kt` currently ends at `Migration48()`, and `MigrationChainTest` asserts contiguity).
+Propose **`Migration49`** (next free slot after `Migration48`; `internal val migrations = listOf(...)` in `src/jsMain/kotlin/at/posselt/pfrpg2e/migrations/Migrations.kt` currently ends at `Migration61()`, and `MigrationChainTest` asserts contiguity).
+
+> ⚠️ **The number in this section is stale and must be re-derived at implementation.** The chain
+> ends at `Migration61`, not 48, and 62–67 are already proposed by the downtime-projects,
+> scheduled-pressure, petition-inbox, npc-memory, seasonal-economy and loot-manifests plans. Nine
+> unimplemented plans currently name `Migration49`, so it is not free for any of them. Take the
+> next contiguous number when this actually lands, and update `MigrationChainTest`.
+
 
 > Gregory sequences the real number at implementation time; if other cards land first, bump accordingly and keep the `listOf` contiguous.
 

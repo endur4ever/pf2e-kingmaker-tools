@@ -166,8 +166,15 @@ reuse that exact pattern:
 
 ### 2.4 Migration — propose `Migration49` (Gregory sequences the real number)
 
-The chain currently ends at `Migration48` (`src/jsMain/kotlin/at/posselt/pfrpg2e/migrations/migrations/Migration48.kt`);
+The chain currently ends at `Migration61` (`src/jsMain/kotlin/at/posselt/pfrpg2e/migrations/migrations/Migration48.kt`);
 `MigrationChainTest` asserts contiguity with `assertEquals((17..48).toList(), migrations.map { it.version })`.
+
+> ⚠️ **The number in this section is stale and must be re-derived at implementation.** The chain
+> ends at `Migration61`, not 48, and 62–67 are already proposed by the downtime-projects,
+> scheduled-pressure, petition-inbox, npc-memory, seasonal-economy and loot-manifests plans. Nine
+> unimplemented plans currently name `Migration49`, so it is not free for any of them. Take the
+> next contiguous number when this actually lands, and update `MigrationChainTest`.
+
 
 New file `Migration49.kt`, following the `Migration48` template (idempotent, `dynamic`):
 

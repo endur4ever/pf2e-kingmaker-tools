@@ -221,9 +221,16 @@ record is the idempotency guard (same idea as `RawWarThreat.offerConsumed`).
 
 ### 2.4 Migration
 
-**Migration49** (chain currently ends at `Migration48`; `MigrationChainTest` asserts
+**Migration49** (chain currently ends at `Migration61`; `MigrationChainTest` asserts
 contiguity — Gregory assigns the real next number). Backfills `lifeEventHistory = []` on every
 settlement, mirroring `Migration31` (which backfilled `populationRoster`):
+
+> ⚠️ **The number in this section is stale and must be re-derived at implementation.** The chain
+> ends at `Migration61`, not 48, and 62–67 are already proposed by the downtime-projects,
+> scheduled-pressure, petition-inbox, npc-memory, seasonal-economy and loot-manifests plans. Nine
+> unimplemented plans currently name `Migration49`, so it is not free for any of them. Take the
+> next contiguous number when this actually lands, and update `MigrationChainTest`.
+
 
 ```kotlin
 class Migration49 : Migration(49) {
