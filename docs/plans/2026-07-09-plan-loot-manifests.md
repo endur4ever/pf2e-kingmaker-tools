@@ -162,13 +162,15 @@ var pacingLastRealizedLootImbalance: String?         // fire-once state for the 
 Not a camping flag, not a world setting: this is kingdom-scoped campaign state, consistent with every
 other kingdom subsystem.
 
-### 2.6 Migration — `Migration49`
+### 2.6 Migration — `Migration67`
 
-The chain currently ends at `Migration48` (`Migrations.kt:108`; `MigrationChainTest` asserts
-contiguity). Add **`Migration49`** (Gregory assigns the real next number when landing):
+The chain ends at `Migration61` (`Migrations.kt:147`; `MigrationChainTest` asserts contiguity).
+62–66 are reserved by the downtime-projects, scheduled-pressure, petition-inbox, npc-memory and
+seasonal-economy plans, so this takes **`Migration67`**. None of the six is implemented yet, so
+whichever lands first should re-check the chain rather than trust these reservations.
 
 ```kotlin
-class Migration49 : Migration(49) {
+class Migration67 : Migration(67) {
     override suspend fun migrateKingdom(game: Game, kingdom: dynamic) {
         // Ledger: initialise to empty so append is always safe.
         if (kingdom.treasureLedger == null) kingdom.treasureLedger = emptyArray<dynamic>()
@@ -187,7 +189,7 @@ class Migration49 : Migration(49) {
 }
 ```
 
-Register in `Migrations.kt` `migrations` list. **Non-breaking**: absent `lootManifest` = the hex has
+Register in the `Migrations.kt` `migrations` list. **Non-breaking**: absent `lootManifest` = the hex has
 no treasure; an empty `treasureLedger` = nothing awarded yet. Follows the `Migration48` field-seed
 shape exactly.
 
@@ -528,7 +530,7 @@ Concrete edits:
 | **Party inventory** | `TurnWizardApplication.kt:389-409`, `PF2EActor.kt:64` | Award reuses `addToInventory` on the `PF2EParty` (`KingdomActor`); records `createdItemId` for undo. |
 | **Cleanse Item house rule** | `CleanseItem.kt`, sibling `gap0709-cleanse-item` | Consumes the `cursed` flag; award chat cross-links the ritual (§5.4). |
 | **Turn history / gazette** | `TurnHistory.kt` / `formatTurnGazette` | *Optional* one public line per award turn ("The party recovered treasure from hex 12.4"), gp/cursed omitted. Player-safe. |
-| **Migrations** | `Migrations.kt` | Register `Migration49` (§2.6). |
+| **Migrations** | `Migrations.kt` | Register `Migration67` (§2.6). |
 | **Daily tick** | `DailyTickHooks.kt` | **No interaction** — award is a button; pacing reads monthly. |
 
 ### 6.3 Explicit OUT OF SCOPE
@@ -583,7 +585,7 @@ Concrete edits:
 | `clear posts offer only when manifest present & unawarded` | no manifest → no card; already awarded → no card. |
 | `treasure ledger context is GM-only` | `isGM=false` → empty context (no rows, no gp) before template. |
 | `End Turn feeds realized loot into pacing` | ledger above tolerance → `REALIZED_LOOT_IMBALANCE` in `firedPacingAlerts`. |
-| `Migration49` | pre-49 kingdom → `treasureLedger==[]`, guard flags seeded, existing data intact. |
+| `Migration67` | pre-67 kingdom → `treasureLedger==[]`, guard flags seeded, existing data intact. |
 
 ### 7.4 Manual Foundry checklist
 
@@ -609,7 +611,7 @@ Build/verify per repo convention: `python3 scripts/check_i18n_keys.py`, then
 
 | Phase | Title | Deliverable | Key files |
 |-------|-------|-------------|-----------|
-| **1** | **Data model + migration + pure engine** | `RawLootManifestEntry`, `RawLootLedgerItem`, `RawTreasureLedgerEntry`; `RawHexContent`/`KingdomData` field additions; `Migration49` (registered); `LootLedger.kt` (`ledgerTotals`, `wealthLevelForGp`, `pacingLootInput`, `assembleLedgerEntry`, `capLedger`) with full `commonTest`. | `RawHexContent.kt`, `RawLootManifest.kt`, `KingdomData.kt`, `Migration49.kt`, `Migrations.kt`, `LootLedger.kt`, `LootLedgerTest.kt` |
+| **1** | **Data model + migration + pure engine** | `RawLootManifestEntry`, `RawLootLedgerItem`, `RawTreasureLedgerEntry`; `RawHexContent`/`KingdomData` field additions; `Migration67` (registered); `LootLedger.kt` (`ledgerTotals`, `wealthLevelForGp`, `pacingLootInput`, `assembleLedgerEntry`, `capLedger`) with full `commonTest`. | `RawHexContent.kt`, `RawLootManifest.kt`, `KingdomData.kt`, `Migration67.kt`, `Migrations.kt`, `LootLedger.kt`, `LootLedgerTest.kt` |
 | **2** | **Pacing augmentation** | `severityForDiff` refactor + `evaluateRealizedLootImbalance`/`trackRealizedLootImbalance`; `REALIZED_LOOT_IMBALANCE` type; wire the realized track into End Turn beside the settlement track; `pacingLastRealizedLootImbalance` state. Tests. | `PacingAlerts.kt`, `RawPacingAlert.kt`, `TurnWizardApplication.kt`, `PacingAlertsTest.kt`, `lang/en.json` |
 | **3** | **Manifest editor UX** | Loot drop zone + rows in `HexContentManager` (drop → resolve name/price/cursed; collect from DOM on Save); list-row summary; context/i18n. | `HexContentManager.kt`, `hex-content-manager.hbs`, `lang/en.json` |
 | **4** | **Award offers + ledger view + QA** | `km-offer-loot-award` handler (party-stash write, per-item/all/dismiss, idempotent, cursed cross-link); `loot-award-offer.hbs`; clear-transition trigger + inline Award button; GM-only Treasure Ledger section + `TreasureLedgerContext`; `jsTest` + manual checklist. | `ChatButtons.kt`, `HexContentManager.kt`, `chatmessages/loot-award-offer.hbs`, `TreasureLedgerContext.kt`, ledger `.hbs`, `LootManifestTest.kt` |
