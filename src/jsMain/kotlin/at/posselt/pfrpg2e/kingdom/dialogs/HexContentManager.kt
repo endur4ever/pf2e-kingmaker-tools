@@ -11,6 +11,10 @@ import at.posselt.pfrpg2e.kingdom.KingdomActor
 import at.posselt.pfrpg2e.kingdom.getKingdom
 import at.posselt.pfrpg2e.kingdom.setKingdom
 import at.posselt.pfrpg2e.kingdom.data.RawHexContent
+import at.posselt.pfrpg2e.kingdom.data.RawLootManifestEntry
+import at.posselt.pfrpg2e.kingdom.data.toModel
+import at.posselt.pfrpg2e.kingdom.loot.manifestTotals
+import js.objects.recordOf
 import at.posselt.pfrpg2e.utils.buildPromise
 import at.posselt.pfrpg2e.utils.buildUuid
 import at.posselt.pfrpg2e.utils.t
@@ -52,6 +56,23 @@ external interface HexContentEntryContext {
     val linkedDocCount: Int
     val hasWarThreat: Boolean
     val hasLinks: Boolean
+
+    /** Loot manifest summary for the list row (loot-manifests SS4.1). */
+    val hasManifest: Boolean
+    val lootSummary: String
+    val manifestAwarded: Boolean
+}
+
+/** One editable manifest row; collected back from the DOM on Save, never through the scalar schema. */
+@JsPlainObject
+external interface HexLootRowContext {
+    val uuid: String
+    val link: String
+    val name: String
+    val quantity: Int
+    val gpValue: Double
+    val cursed: Boolean
+    val note: String
 }
 
 // A kingdom quest the GM can toggle on/off as a hex reference.
@@ -78,6 +99,9 @@ external interface HexContentManagerContext : ValidatedHandlebarsContext {
     val visibilityOptions: Array<SelectOption>
     val linkedQuestChoices: Array<HexQuestChoiceContext>
     val linkedDocs: Array<HexLinkedDocContext>
+    val lootRows: Array<HexLootRowContext>
+    val lootSummary: String
+    val manifestAwarded: Boolean
     val isEditing: Boolean
     val editId: String?
     val isAdding: Boolean
@@ -156,6 +180,37 @@ class HexContentManager(
             }
             Unit
         }
+        // A DEDICATED zone so item drops cannot mix with reference-link drops (plan SS4.1).
+        on(".km-hex-loot-zone", "dragover") { event ->
+            event.asDynamic().preventDefault()
+            Unit
+        }
+        on(".km-hex-loot-zone", "drop") { event ->
+            event.asDynamic().preventDefault()
+            val raw = event.asDynamic().dataTransfer?.getData("text/plain") as? String
+            raw?.let { toGenericRef(it) }?.let { ref ->
+                buildPromise { addDroppedLootItem(ref.uuid) }
+            }
+            Unit
+        }
+        on(".km-hex-loot-list", "click") { event ->
+            val target = event.asDynamic().target
+            val remove = if (target != null && target != undefined) target.closest(".km-hex-loot-remove") else null
+            if (remove != null && remove != undefined) {
+                event.asDynamic().preventDefault()
+                val row = remove.closest(".km-hex-loot-row")
+                if (row != null && row != undefined) {
+                    row.remove()
+                    refreshLootSummary()
+                }
+            }
+            Unit
+        }
+        on(".km-hex-loot-list", "change") { _ ->
+            refreshLootSummary()
+            Unit
+        }
+
         on(".km-hex-link-list", "click") { event ->
             val target = event.asDynamic().target
             val remove = if (target != null && target != undefined) target.closest(".km-hex-link-remove") else null
@@ -199,6 +254,90 @@ class HexContentManager(
         chip.innerHTML = "$link <a class=\"km-hex-link-remove\" data-uuid=\"$uuid\" " +
             "title=\"${t("kingdom.hexContent.removeLink")}\">×</a>"
         list.appendChild(chip)
+    }
+
+    /**
+     * Append a manifest row for a dropped item, pre-filling price and the cursed trait from the
+     * document so the GM edits rather than types. Duplicates are allowed: two of the same item at
+     * different notes/prices is a legitimate manifest, unlike a duplicate reference link.
+     */
+    private suspend fun addDroppedLootItem(uuid: String) {
+        val root = element ?: return
+        val list = root.querySelector(".km-hex-loot-list") ?: return
+        val doc = fromUuid(uuid).await()
+        val name = (doc?.asDynamic()?.name as? String) ?: uuid
+        val gp = runCatching {
+            (doc?.asDynamic()?.system?.price?.value?.gp as? Number)?.toDouble()
+        }.getOrNull() ?: 0.0
+        val cursed = runCatching {
+            val traits = doc?.asDynamic()?.system?.traits?.value
+            traits != null && traits != undefined && (traits.includes("cursed") as? Boolean) == true
+        }.getOrDefault(false)
+        val link = TextEditor.enrichHTML(buildUuid(uuid, name)).await()
+        val row = document.createElement("div")
+        row.className = "km-hex-loot-row"
+        row.setAttribute("data-uuid", uuid)
+        row.setAttribute("data-name", name)
+        row.innerHTML = buildLootRowHtml(link, quantity = 1, gpValue = gp, cursed = cursed, note = "")
+        list.appendChild(row)
+        refreshLootSummary()
+    }
+
+    private fun buildLootRowHtml(
+        link: String,
+        quantity: Int,
+        gpValue: Double,
+        cursed: Boolean,
+        note: String,
+    ): String =
+        """<span class="km-hex-loot-link">$link</span>
+        <input type="number" class="km-hex-loot-qty" min="0" value="$quantity" title="${t("kingdom.hexContent.loot.quantity")}">
+        <input type="number" class="km-hex-loot-gp" min="0" step="0.01" value="$gpValue" title="${t("kingdom.hexContent.loot.gpValue")}">
+        <label class="km-hex-loot-cursed" title="${t("kingdom.hexContent.loot.cursed")}">
+            <input type="checkbox" ${if (cursed) "checked" else ""}> ${t("kingdom.hexContent.loot.cursedShort")}
+        </label>
+        <input type="text" class="km-hex-loot-note" value="$note" placeholder="${t("kingdom.hexContent.loot.note")}">
+        <a class="km-hex-loot-remove" title="${t("kingdom.hexContent.loot.remove")}">×</a>"""
+
+    /** Reads the rows exactly as the collection on Save will, so the line can never disagree. */
+    private fun refreshLootSummary() {
+        val root = element ?: return
+        val target = root.querySelector(".km-hex-loot-summary") ?: return
+        val items = collectLootManifest().mapNotNull { it.toModel() }
+        val totals = manifestTotals(items)
+        target.textContent = t(
+            "kingdom.hexContent.loot.summary",
+            recordOf(
+                "count" to items.size.toString(),
+                "gp" to totals.totalGp.toString(),
+                "cursed" to totals.cursedCount.toString(),
+            ),
+        )
+    }
+
+    /**
+     * The manifest is a VARIABLE-LENGTH array, so it is read back from the DOM like the link
+     * chips rather than through the scalar HexContentManagerModel schema (plan SS4.1).
+     */
+    private fun collectLootManifest(): Array<RawLootManifestEntry> {
+        val root = element ?: return emptyArray()
+        val rows = root.querySelectorAll(".km-hex-loot-list .km-hex-loot-row")
+        val result = mutableListOf<RawLootManifestEntry>()
+        for (i in 0 until rows.length) {
+            val row = rows[i] as? Element ?: continue
+            val entry = js("{}").unsafeCast<RawLootManifestEntry>()
+            entry.itemUuid = row.getAttribute("data-uuid")
+            entry.name = row.getAttribute("data-name")
+            entry.quantity = (row.querySelector(".km-hex-loot-qty") as? HTMLInputElement)
+                ?.value?.toIntOrNull() ?: 1
+            entry.gpValue = (row.querySelector(".km-hex-loot-gp") as? HTMLInputElement)
+                ?.value?.toDoubleOrNull() ?: 0.0
+            entry.cursed = (row.querySelector(".km-hex-loot-cursed input") as? HTMLInputElement)?.checked == true
+            entry.note = (row.querySelector(".km-hex-loot-note") as? HTMLInputElement)
+                ?.value?.takeIf { it.isNotBlank() }
+            result.add(entry)
+        }
+        return result.toTypedArray()
     }
 
     private fun collectLinkedQuestIds(): Array<String> {
@@ -355,6 +494,7 @@ class HexContentManager(
         val questIds = collectLinkedQuestIds().takeIf { it.isNotEmpty() }
         val uuids = collectLinkedUuids().takeIf { it.isNotEmpty() }
         val warThreatId = (formData["linkedWarThreatId"] as? String)?.takeIf { it.isNotBlank() }
+        val manifest = collectLootManifest().takeIf { it.isNotEmpty() }
 
         if (editingId != null) {
             val idx = contents.indexOfFirst { it.id == editingId }
@@ -376,7 +516,13 @@ class HexContentManager(
                     linkedUuids = uuids,
                     linkedWarThreatId = warThreatId,
                     icon = formData["icon"] as? String,
-                )
+                ).also { created -> created.lootManifest = manifest }.also { updated ->
+                    updated.lootManifest = manifest
+                    // The rebuild above would DROP these; an edited hex must keep its award
+                    // history or a re-clear could double-grant.
+                    updated.manifestAwarded = existing.manifestAwarded
+                    updated.manifestAwardedTurn = existing.manifestAwardedTurn
+                }
             }
         } else {
             val newId = "hexcontent-${kotlin.js.js("Date.now()")}"
@@ -467,6 +613,8 @@ class HexContentManager(
             val questCount = questIdsOf(content).size
             val docCount = uuidsOf(content).size
             val hasThreat = !content.linkedWarThreatId.isNullOrBlank()
+            val manifestItems = (content.lootManifest ?: emptyArray()).mapNotNull { it.toModel() }
+            val manifestTotalsForRow = manifestTotals(manifestItems)
             HexContentEntryContext(
                 id = content.id,
                 hexKey = content.hexKey,
@@ -481,6 +629,16 @@ class HexContentManager(
                 linkedDocCount = docCount,
                 hasWarThreat = hasThreat,
                 hasLinks = questCount > 0 || docCount > 0 || hasThreat,
+                hasManifest = manifestItems.isNotEmpty(),
+                lootSummary = t(
+                    "kingdom.hexContent.loot.summary",
+                    recordOf(
+                        "count" to manifestItems.size.toString(),
+                        "gp" to manifestTotalsForRow.totalGp.toString(),
+                        "cursed" to manifestTotalsForRow.cursedCount.toString(),
+                    ),
+                ),
+                manifestAwarded = content.manifestAwarded == true,
             )
         }.toTypedArray()
 
@@ -599,6 +757,27 @@ class HexContentManager(
             )
         }.toTypedArray()
 
+        // Manifest rows for the editor, resolved to clickable links like the reference chips.
+        val editingManifest = (editingContent?.lootManifest ?: emptyArray()).mapNotNull { it.toModel() }
+        val editingTotals = manifestTotals(editingManifest)
+        val lootRows = (editingContent?.lootManifest ?: emptyArray()).mapNotNull { raw ->
+            val model = raw.toModel() ?: return@mapNotNull null
+            val uuid = raw.itemUuid.orEmpty()
+            HexLootRowContext(
+                uuid = uuid,
+                link = if (uuid.isNotBlank()) {
+                    TextEditor.enrichHTML(buildUuid(uuid, model.name)).await()
+                } else {
+                    model.name
+                },
+                name = model.name,
+                quantity = model.qty,
+                gpValue = model.gpValue,
+                cursed = model.cursed,
+                note = model.note.orEmpty(),
+            )
+        }.toTypedArray()
+
         HexContentManagerContext(
             partId = parent.partId,
             isFormValid = isFormValid,
@@ -609,6 +788,16 @@ class HexContentManager(
             visibilityOptions = visibilityOptions.toTypedArray(),
             linkedQuestChoices = linkedQuestChoices,
             linkedDocs = linkedDocs,
+            lootRows = lootRows,
+            lootSummary = t(
+                "kingdom.hexContent.loot.summary",
+                recordOf(
+                    "count" to editingManifest.size.toString(),
+                    "gp" to editingTotals.totalGp.toString(),
+                    "cursed" to editingTotals.cursedCount.toString(),
+                ),
+            ),
+            manifestAwarded = editingContent?.manifestAwarded == true,
             isEditing = editingId != null,
             isAdding = isAdding,
             editId = editingId,

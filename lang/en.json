@@ -2140,7 +2140,19 @@
                 "clear": "Clear",
                 "save": "Save",
                 "cancel": "Cancel",
-                "noContent": "No hex content yet. Click \"Add Content to Hex\" to get started."
+                "noContent": "No hex content yet. Click \"Add Content to Hex\" to get started.",
+                "loot": {
+                    "title": "Loot manifest",
+                    "dropHint": "Drop items here to prep this hex’s treasure",
+                    "quantity": "Quantity",
+                    "gpValue": "GP value each",
+                    "cursed": "Cursed item",
+                    "cursedShort": "cursed",
+                    "note": "Note",
+                    "remove": "Remove item",
+                    "summary": "{count} items · {gp} gp · {cursed} cursed",
+                    "awardedBadge": "already awarded"
+                }
             },
             "homebrewProfile": {
                 "title": "Homebrew Rules Profile",

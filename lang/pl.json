@@ -1952,7 +1952,19 @@
                 "clear": "Clear",
                 "save": "Save",
                 "cancel": "Cancel",
-                "noContent": "No hex content yet. Click \"Add Content to Hex\" to get started."
+                "noContent": "No hex content yet. Click \"Add Content to Hex\" to get started.",
+                "loot": {
+                    "title": "Spis łupu",
+                    "dropHint": "Upuść tu przedmioty, aby przygotować skarb tego heksu",
+                    "quantity": "Ilość",
+                    "gpValue": "Wartość w sz (szt.)",
+                    "cursed": "Przedmiot przeklęty",
+                    "cursedShort": "przeklęty",
+                    "note": "Notatka",
+                    "remove": "Usuń przedmiot",
+                    "summary": "{count} przedmiotów · {gp} sz · {cursed} przeklętych",
+                    "awardedBadge": "już przyznano"
+                }
             },
             "homebrewProfile": {
                 "title": "Homebrew Rules Profile",

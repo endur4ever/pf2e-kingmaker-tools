@@ -1952,7 +1952,19 @@
                 "clear": "Clear",
                 "save": "Save",
                 "cancel": "Cancel",
-                "noContent": "No hex content yet. Click \"Add Content to Hex\" to get started."
+                "noContent": "No hex content yet. Click \"Add Content to Hex\" to get started.",
+                "loot": {
+                    "title": "Elenco del bottino",
+                    "dropHint": "Trascina qui gli oggetti per preparare il tesoro di questo esagono",
+                    "quantity": "Quantità",
+                    "gpValue": "Valore in mo (cad.)",
+                    "cursed": "Oggetto maledetto",
+                    "cursedShort": "maledetto",
+                    "note": "Nota",
+                    "remove": "Rimuovi oggetto",
+                    "summary": "{count} oggetti · {gp} mo · {cursed} maledetti",
+                    "awardedBadge": "già assegnato"
+                }
             },
             "homebrewProfile": {
                 "title": "Homebrew Rules Profile",

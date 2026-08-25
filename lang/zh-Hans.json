@@ -1952,7 +1952,19 @@
                 "clear": "Clear",
                 "save": "Save",
                 "cancel": "Cancel",
-                "noContent": "No hex content yet. Click \"Add Content to Hex\" to get started."
+                "noContent": "No hex content yet. Click \"Add Content to Hex\" to get started.",
+                "loot": {
+                    "title": "战利品清单",
+                    "dropHint": "将物品拖到此处，为该六角格准备宝藏",
+                    "quantity": "数量",
+                    "gpValue": "单价（金币）",
+                    "cursed": "诅咒物品",
+                    "cursedShort": "诅咒",
+                    "note": "备注",
+                    "remove": "移除物品",
+                    "summary": "{count} 件 · {gp} 金币 · {cursed} 件诅咒",
+                    "awardedBadge": "已发放"
+                }
             },
             "homebrewProfile": {
                 "title": "Homebrew Rules Profile",

@@ -32,6 +32,29 @@
                         </span>
                         {{/each}}
                     </div>
+                <div class="km-hex-links-group km-hex-loot-group">
+                    <label class="km-hex-links-label"><i class="fa-solid fa-coins"></i> {{localizeKM "kingdom.hexContent.loot.title"}}
+                        {{#if manifestAwarded}}<span class="km-hex-loot-awarded">{{localizeKM "kingdom.hexContent.loot.awardedBadge"}}</span>{{/if}}
+                    </label>
+                    <div class="km-hex-loot-zone">
+                        <i class="fa-solid fa-hand-pointer"></i> {{localizeKM "kingdom.hexContent.loot.dropHint"}}
+                    </div>
+                    <div class="km-hex-loot-list">
+                        {{#each lootRows}}
+                        <div class="km-hex-loot-row" data-uuid="{{this.uuid}}" data-name="{{this.name}}">
+                            <span class="km-hex-loot-link">{{{this.link}}}</span>
+                            <input type="number" class="km-hex-loot-qty" min="0" value="{{this.quantity}}" title="{{localizeKM 'kingdom.hexContent.loot.quantity'}}">
+                            <input type="number" class="km-hex-loot-gp" min="0" step="0.01" value="{{this.gpValue}}" title="{{localizeKM 'kingdom.hexContent.loot.gpValue'}}">
+                            <label class="km-hex-loot-cursed" title="{{localizeKM 'kingdom.hexContent.loot.cursed'}}">
+                                <input type="checkbox" {{#if this.cursed}}checked{{/if}}> {{localizeKM "kingdom.hexContent.loot.cursedShort"}}
+                            </label>
+                            <input type="text" class="km-hex-loot-note" value="{{this.note}}" placeholder="{{localizeKM 'kingdom.hexContent.loot.note'}}">
+                            <a class="km-hex-loot-remove" title="{{localizeKM 'kingdom.hexContent.loot.remove'}}">×</a>
+                        </div>
+                        {{/each}}
+                    </div>
+                    <div class="km-hex-loot-summary">{{lootSummary}}</div>
+                </div>
                 </div>
             </div>
             <div class="km-form-actions">
@@ -72,6 +95,29 @@
                         </span>
                         {{/each}}
                     </div>
+                <div class="km-hex-links-group km-hex-loot-group">
+                    <label class="km-hex-links-label"><i class="fa-solid fa-coins"></i> {{localizeKM "kingdom.hexContent.loot.title"}}
+                        {{#if manifestAwarded}}<span class="km-hex-loot-awarded">{{localizeKM "kingdom.hexContent.loot.awardedBadge"}}</span>{{/if}}
+                    </label>
+                    <div class="km-hex-loot-zone">
+                        <i class="fa-solid fa-hand-pointer"></i> {{localizeKM "kingdom.hexContent.loot.dropHint"}}
+                    </div>
+                    <div class="km-hex-loot-list">
+                        {{#each lootRows}}
+                        <div class="km-hex-loot-row" data-uuid="{{this.uuid}}" data-name="{{this.name}}">
+                            <span class="km-hex-loot-link">{{{this.link}}}</span>
+                            <input type="number" class="km-hex-loot-qty" min="0" value="{{this.quantity}}" title="{{localizeKM 'kingdom.hexContent.loot.quantity'}}">
+                            <input type="number" class="km-hex-loot-gp" min="0" step="0.01" value="{{this.gpValue}}" title="{{localizeKM 'kingdom.hexContent.loot.gpValue'}}">
+                            <label class="km-hex-loot-cursed" title="{{localizeKM 'kingdom.hexContent.loot.cursed'}}">
+                                <input type="checkbox" {{#if this.cursed}}checked{{/if}}> {{localizeKM "kingdom.hexContent.loot.cursedShort"}}
+                            </label>
+                            <input type="text" class="km-hex-loot-note" value="{{this.note}}" placeholder="{{localizeKM 'kingdom.hexContent.loot.note'}}">
+                            <a class="km-hex-loot-remove" title="{{localizeKM 'kingdom.hexContent.loot.remove'}}">×</a>
+                        </div>
+                        {{/each}}
+                    </div>
+                    <div class="km-hex-loot-summary">{{lootSummary}}</div>
+                </div>
                 </div>
             </div>
             <div class="km-form-actions">
@@ -106,12 +152,13 @@
                                     <span class="km-badge km-badge-{{this.visibility}}">{{this.visibilityName}}</span>
                                 </td>
                                 <td class="km-hex-links-cell">
+                                    {{#if this.hasManifest}}<span class="km-hex-link-count km-hex-loot-count{{#if this.manifestAwarded}} km-hex-loot-count-awarded{{/if}}" title="{{this.lootSummary}}"><i class="fa-solid fa-coins"></i></span>{{/if}}
                                     {{#if this.hasLinks}}
                                         {{#if this.linkedQuestCount}}<span class="km-hex-link-count" title="{{localizeKM 'kingdom.hexContent.linkedQuests'}}"><i class="fa-solid fa-scroll"></i> {{this.linkedQuestCount}}</span>{{/if}}
                                         {{#if this.linkedDocCount}}<span class="km-hex-link-count" title="{{localizeKM 'kingdom.hexContent.linkedDocuments'}}"><i class="fa-solid fa-link"></i> {{this.linkedDocCount}}</span>{{/if}}
                                         {{#if this.hasWarThreat}}<span class="km-hex-link-count" title="{{localizeKM 'kingdom.hexContent.linkedWarThreat'}}"><i class="fa-solid fa-skull"></i></span>{{/if}}
                                     {{else}}
-                                        <span class="km-hex-no-links">—</span>
+                                        {{#unless this.hasManifest}}<span class="km-hex-no-links">—</span>{{/unless}}
                                     {{/if}}
                                 </td>
                                 <td class="km-actions">

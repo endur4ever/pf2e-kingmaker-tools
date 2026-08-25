@@ -2150,6 +2150,89 @@
         background: rgba(238, 155, 58, 0.08);
     }
 
+    /* Loot manifest editor (loot-manifests phase 3) */
+    .km-hex-loot-zone {
+        border: 2px dashed rgba(238, 155, 58, 0.45);
+        border-radius: 6px;
+        padding: 10px;
+        text-align: center;
+        font-size: 0.85em;
+        opacity: 0.85;
+        transition: border-color 150ms ease, background 150ms ease;
+    }
+
+    .km-hex-loot-zone:hover {
+        border-color: var(--secondary-km, #ee9b3a);
+        background: rgba(238, 155, 58, 0.08);
+    }
+
+    .km-hex-loot-row {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        margin-top: 4px;
+    }
+
+    .km-hex-loot-link {
+        flex: 1 1 auto;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .km-hex-loot-qty {
+        flex: 0 0 3.5rem;
+    }
+
+    .km-hex-loot-gp {
+        flex: 0 0 5rem;
+    }
+
+    .km-hex-loot-cursed {
+        flex: 0 0 auto;
+        display: flex;
+        align-items: center;
+        gap: 3px;
+        font-size: 0.8em;
+        white-space: nowrap;
+    }
+
+    .km-hex-loot-note {
+        flex: 0 1 8rem;
+        min-width: 0;
+    }
+
+    .km-hex-loot-remove {
+        flex: 0 0 auto;
+        cursor: pointer;
+        padding: 0 4px;
+        opacity: 0.7;
+    }
+
+    .km-hex-loot-remove:hover {
+        opacity: 1;
+        color: var(--color-level-error, #c53131);
+    }
+
+    .km-hex-loot-summary {
+        margin-top: 5px;
+        font-size: 0.85em;
+        opacity: 0.8;
+    }
+
+    .km-hex-loot-awarded {
+        margin-left: 6px;
+        font-size: 0.75em;
+        padding: 1px 6px;
+        border-radius: 8px;
+        background: rgba(44, 138, 44, 0.25);
+    }
+
+    .km-hex-loot-count-awarded {
+        opacity: 0.55;
+    }
+
     .km-hex-link-list {
         display: flex;
         flex-wrap: wrap;
