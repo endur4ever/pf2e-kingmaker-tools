@@ -179,6 +179,11 @@ import at.posselt.pfrpg2e.kingdom.rollCleanseItem
 import at.posselt.pfrpg2e.kingdom.computeCaravanRoute
 import at.posselt.pfrpg2e.kingdom.currentSeasonalModifiers
 import at.posselt.pfrpg2e.kingdom.forecast.buildForecast
+import at.posselt.pfrpg2e.kingdom.pings.buildPlayerFeed
+import at.posselt.pfrpg2e.kingdom.pings.pingsCursor
+import at.posselt.pfrpg2e.kingdom.pings.savePingsCursor
+import at.posselt.pfrpg2e.kingdom.pings.unreadFeed
+import at.posselt.pfrpg2e.kingdom.sheet.contexts.buildPingsPanelContext
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.buildForecastPanelContext
 import at.posselt.pfrpg2e.kingdom.map.routeHexSafety
 import at.posselt.pfrpg2e.kingdom.shipmentRaidDc
@@ -414,6 +419,10 @@ class KingdomSheet(
 
     /** Transient per-open horizon for the Session Prep forecast (plan phase 4); resets on reopen. */
     private var forecastHorizonDays: Int = 7
+
+    /** Bell panel visibility + the newest millis shown while it was open; closing marks them seen. */
+    private var pingsPanelOpen: Boolean = false
+    private var pingsOpenedMaxMillis: Double? = null
     private var bonusFeat: String? = null
     private var showDetailedMatrix: Boolean = false
     private val openedDetails = mutableSetOf<String>()
@@ -575,6 +584,38 @@ class KingdomSheet(
                 event.stopPropagation()
                 currentCharacterSheetNavEntry = target.dataset["link"] ?: "Creation"
                 render()
+            }
+
+            "toggle-pings" -> {
+                if (!pingsPanelOpen) {
+                    pingsPanelOpen = true
+                    pingsOpenedMaxMillis = getKingdom()
+                        ?.let { buildPlayerFeed(it).maxOfOrNull { item -> item.occurredAtMillis } }
+                    render()
+                } else {
+                    // Closing marks everything that was on screen as seen: turn-granularity items
+                    // share one timestamp, so the whole turn clears together (plan §2.3).
+                    pingsPanelOpen = false
+                    val snapshot = pingsOpenedMaxMillis
+                    pingsOpenedMaxMillis = null
+                    buildPromise {
+                        if (snapshot != null) {
+                            val cursor = game.user.pingsCursor()
+                            val newSeen = maxOf(snapshot, cursor.lastSeenAtMillis ?: Double.NEGATIVE_INFINITY)
+                            game.user.savePingsCursor(cursor.copy(lastSeenAtMillis = newSeen))
+                        }
+                        render()
+                    }
+                }
+            }
+
+            "dismiss-ping" -> {
+                val id = target.dataset["id"] ?: return
+                buildPromise {
+                    val cursor = game.user.pingsCursor()
+                    game.user.savePingsCursor(cursor.copy(dismissedIds = cursor.dismissedIds + id))
+                    render()
+                }
             }
 
             "set-forecast-horizon" -> {
@@ -3650,6 +3691,10 @@ class KingdomSheet(
             ),
             pacingAlertContext = buildPacingAlertContext(
                 buildPacingAlertView(kingdom.pacingAlerts)
+            ),
+            pingsContext = buildPingsPanelContext(
+                unreadFeed(buildPlayerFeed(kingdom), game.user.pingsCursor()),
+                open = pingsPanelOpen,
             ),
             sessionPrepContext = buildSessionPrepContext(
                 forecast = buildForecastPanelContext(buildForecast(game, actor, horizonDays = forecastHorizonDays)),

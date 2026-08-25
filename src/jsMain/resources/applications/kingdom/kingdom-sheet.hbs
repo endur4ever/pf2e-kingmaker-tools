@@ -8,6 +8,37 @@
             </div>
             <div class="km-kingdom-sheet-active-level">{{> formElement levelInput }}</div>
         </div>
+        {{#if pingsContext}}
+        {{!-- Unread-feed bell: rendered for EVERY user; the feed behind it is already
+              player-safe (playerNotes only), so no isGM gate belongs here. --}}
+        <div class="km-pings">
+            <button type="button" class="km-pings-bell" data-action="toggle-pings"
+                    data-tooltip="{{localizeKM "kingdom.pings.bellTooltip"}}">
+                <i class="fa-solid fa-bell"></i>
+                {{#if pingsContext.hasUnread}}<span class="km-pings-badge">{{pingsContext.unreadCount}}</span>{{/if}}
+            </button>
+            {{#if pingsContext.open}}
+            <div class="km-pings-panel">
+                <div class="km-pings-panel-title">{{localizeKM "kingdom.pings.panelTitle"}}</div>
+                {{#if pingsContext.hasUnread}}
+                <ul class="km-pings-list">
+                    {{#each pingsContext.items}}
+                    <li class="km-pings-item">
+                        <button type="button" class="km-pings-jump" data-action="change-nav"
+                                data-link="{{this.target}}">{{this.label}}</button>
+                        <button type="button" class="km-pings-dismiss" data-action="dismiss-ping"
+                                data-id="{{this.id}}"
+                                data-tooltip="{{localizeKM "kingdom.pings.dismiss"}}"><i class="fa-solid fa-xmark"></i></button>
+                    </li>
+                    {{/each}}
+                </ul>
+                {{else}}
+                <div class="km-pings-empty">{{localizeKM "kingdom.pings.empty"}}</div>
+                {{/if}}
+            </div>
+            {{/if}}
+        </div>
+        {{/if}}
     </header>
 
     {{> tabs mainNav}}

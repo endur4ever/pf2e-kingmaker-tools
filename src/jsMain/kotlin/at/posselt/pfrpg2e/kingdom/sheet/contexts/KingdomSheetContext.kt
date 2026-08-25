@@ -121,6 +121,9 @@ external interface KingdomSheetContext : ValidatedHandlebarsContext {
     val armyPressureContext: ArmyPressureContext
     val pacingAlertContext: PacingAlertContext
     val sessionPrepContext: SessionPrepContext
+
+    /** Unread feed bell for the CURRENT user; null only when the kingdom itself is missing. */
+    val pingsContext: PingsPanelContext?
     val showDetailedMatrix: Boolean
     val campaignClocks: CampaignClockContext
     val generatedQuestCount: Int
