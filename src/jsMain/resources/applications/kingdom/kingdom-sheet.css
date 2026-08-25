@@ -2681,6 +2681,9 @@ fieldset.km-hex-editor-links {
 }
 
 .km-kingdom-sheet .km-pings-panel {
+    /* explicitly dark surface, so the text color must be explicit too -- the sheet
+       may be light-themed and buttons never inherit color from their parent anyway */
+    color: var(--color-light-2, #ddd);
     position: absolute;
     top: calc(100% + 0.25rem);
     right: 0;
@@ -2717,6 +2720,7 @@ fieldset.km-hex-editor-links {
 }
 
 .km-kingdom-sheet .km-pings-jump {
+    color: inherit;
     flex: 1;
     text-align: left;
     background: none;
@@ -2731,6 +2735,7 @@ fieldset.km-hex-editor-links {
 }
 
 .km-kingdom-sheet .km-pings-dismiss {
+    color: inherit;
     flex: 0 0 auto;
     background: none;
     border: none;
