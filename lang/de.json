@@ -2129,6 +2129,16 @@
       },
       "deadlines": {
         "fired": "Frist: {name} tritt ein (Vorkommen {escalation})."
+      },
+      "forecast": {
+        "companionArrives": "{name} trifft ein",
+        "expeditionResolves": "{title} wird abgeschlossen",
+        "caravanRisk": "Karawane nach {partner} riskiert einen Überfall",
+        "shipmentRisk": "Lieferung von {name} ist unterwegs",
+        "clockEvent": "{label}",
+        "threatArrives": "{name} erreicht die Grenze",
+        "questDeadline": "{name} erreicht die Frist",
+        "ruinThreshold": "Kriegsdruck überschreitet die Ruin-Schwelle"
       }
     },
     "chatMessages": {

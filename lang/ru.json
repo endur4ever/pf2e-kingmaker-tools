@@ -2129,6 +2129,16 @@
       },
       "deadlines": {
         "fired": "Срок: {name} наступает (повторение {escalation})."
+      },
+      "forecast": {
+        "companionArrives": "{name} прибывает",
+        "expeditionResolves": "{title} завершается",
+        "caravanRisk": "Караван в {partner} рискует попасть в набег",
+        "shipmentRisk": "Груз {name} в пути",
+        "clockEvent": "{label}",
+        "threatArrives": "{name} достигает границы",
+        "questDeadline": "{name} достигает срока",
+        "ruinThreshold": "Военное давление пересекает порог разорения"
       }
     },
     "chatMessages": {

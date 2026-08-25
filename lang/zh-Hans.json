@@ -2129,6 +2129,16 @@
       },
       "deadlines": {
         "fired": "期限：{name} 触发（第 {escalation} 次）。"
+      },
+      "forecast": {
+        "companionArrives": "{name} 抵达",
+        "expeditionResolves": "{title} 完成",
+        "caravanRisk": "前往 {partner} 的商队面临劫掠风险",
+        "shipmentRisk": "{name} 的货物在途中",
+        "clockEvent": "{label}",
+        "threatArrives": "{name} 抵达边境",
+        "questDeadline": "{name} 到达期限",
+        "ruinThreshold": "战争压力越过毁灭阈值"
       }
     },
     "chatMessages": {

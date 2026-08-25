@@ -2129,6 +2129,16 @@
       },
       "deadlines": {
         "fired": "Échéance : {name} se déclenche (occurrence {escalation})."
+      },
+      "forecast": {
+        "companionArrives": "{name} arrive",
+        "expeditionResolves": "{title} se conclut",
+        "caravanRisk": "La caravane vers {partner} risque un raid",
+        "shipmentRisk": "La cargaison de {name} est en route",
+        "clockEvent": "{label}",
+        "threatArrives": "{name} atteint la frontière",
+        "questDeadline": "{name} atteint son échéance",
+        "ruinThreshold": "La pression de guerre franchit le seuil de ruine"
       }
     },
     "chatMessages": {

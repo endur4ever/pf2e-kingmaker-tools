@@ -2129,6 +2129,16 @@
       },
       "deadlines": {
         "fired": "Termin: {name} następuje (wystąpienie {escalation})."
+      },
+      "forecast": {
+        "companionArrives": "{name} przybywa",
+        "expeditionResolves": "{title} dobiega końca",
+        "caravanRisk": "Karawana do {partner} ryzykuje najazd",
+        "shipmentRisk": "Przesyłka {name} jest w drodze",
+        "clockEvent": "{label}",
+        "threatArrives": "{name} dociera do granicy",
+        "questDeadline": "{name} osiąga termin",
+        "ruinThreshold": "Presja wojenna przekracza próg ruiny"
       }
     },
     "chatMessages": {

@@ -2251,6 +2251,16 @@
       },
       "deadlines": {
         "fired": "Deadline: {name} fires (occurrence {escalation})."
+      },
+      "forecast": {
+        "companionArrives": "{name} arrives",
+        "expeditionResolves": "{title} resolves",
+        "caravanRisk": "Caravan to {partner} runs the raid gauntlet",
+        "shipmentRisk": "Shipment of {name} is on the road",
+        "clockEvent": "{label}",
+        "threatArrives": "{name} arrives at the border",
+        "questDeadline": "{name} reaches its deadline",
+        "ruinThreshold": "War pressure crosses the ruin threshold"
       }
     },
     "chatMessages": {
