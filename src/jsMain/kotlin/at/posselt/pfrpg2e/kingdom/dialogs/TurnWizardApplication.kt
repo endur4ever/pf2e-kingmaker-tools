@@ -1486,16 +1486,25 @@ suspend fun postQuestDeadlineOffer(game: Game, actor: KingdomActor, quest: dynam
     val title = quest.title as String
     val questId = quest.id as String
 
+    // The template localizes in place and gates its buttons on isGM, so the context must supply
+    // exactly what it READS -- name, questId, extendTurns, actorUuid, isGM. It previously supplied
+    // a different set (pre-localized title/body/labels the template never reads, and neither
+    // isGM nor actorUuid), which shipped this card with a blank quest name and NO buttons at all.
+    val gmUserIds = game.users.filter { it.isGM }.mapNotNull { it.id }.toTypedArray()
+    // An EMPTY whisper array posts PUBLICLY rather than to nobody, and a quest deadline is GM
+    // information -- so no GM connected means no card, exactly like the other offer posters.
+    if (gmUserIds.isEmpty()) return
+
     val context = js("{}")
-    context.title = t("chatMessages.questDeadline.offerTitle")
-    context.body = t("chatMessages.questDeadline.offerBody", recordOf("name" to title))
+    context.name = title
     context.questId = questId
     context.extendTurns = DEFAULT_QUEST_EXTEND_TURNS
-    context.failNowLabel = t("chatMessages.questDeadline.failNow")
-    context.extendLabel = t("chatMessages.questDeadline.extendTurns", recordOf("turns" to DEFAULT_QUEST_EXTEND_TURNS.toString()))
+    context.actorUuid = actor.uuid
+    context.isGM = true
 
     postChatTemplate(
         templatePath = "chatmessages/quest-deadline-offer.hbs",
         templateContext = context,
+        whisper = gmUserIds,
     )
 }
