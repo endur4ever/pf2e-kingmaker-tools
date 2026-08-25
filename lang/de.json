@@ -572,7 +572,29 @@
             "forcedMarchOfferTitle": "Forced March Exhaustion",
             "forcedMarchOfferBody": "The party has marched {days} days against a limit of {maxDays}. Nothing has been applied — confirm each character you want fatigued.",
             "forcedMarchOfferApply": "Apply Fatigued",
-            "forcedMarchFatigueApplied": "{name} is fatigued from forced marching."
+            "forcedMarchFatigueApplied": "{name} is fatigued from forced marching.",
+            "downtime": {
+                "addProject": "Projekt für Ausfallzeit beginnen",
+                "pc": "Charakter",
+                "kindLabel": "Tätigkeit",
+                "kind": {
+                    "craft": "Gegenstand herstellen",
+                    "retrain": "Umschulen",
+                    "earnIncome": "Einkommen verdienen",
+                    "ritual": "Ritual wirken",
+                    "unknown": "Unbekannt"
+                },
+                "targetRef": "Ziel",
+                "targetRefHelp": "Gegenstand-UUID, Talentname oder Ritualname — worauf sich die Tätigkeit bezieht.",
+                "settlement": "Siedlung",
+                "daysTotal": "Benötigte Tage",
+                "dailyCostGp": "Kosten pro Tag (GM)",
+                "dailyCostGpHelp": "0 = kostenlos. Für den SL notiert; nichts wird automatisch abgezogen.",
+                "formIncomplete": "Wähle zuerst Charakter, Tätigkeit und Namen.",
+                "daysTooShort": "Ein Projekt braucht mindestens einen Tag.",
+                "settlementMissing": "Wähle die Siedlung, in der gearbeitet wird.",
+                "prereqMissing": "{settlement} hat kein Gebäude für diese Arbeit — benötigt wird eines von: {structures}."
+            }
         },
         "settlementNav": {
             "status": "Status",

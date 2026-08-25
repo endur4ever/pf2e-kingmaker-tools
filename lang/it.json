@@ -572,7 +572,29 @@
             "forcedMarchOfferTitle": "Forced March Exhaustion",
             "forcedMarchOfferBody": "The party has marched {days} days against a limit of {maxDays}. Nothing has been applied — confirm each character you want fatigued.",
             "forcedMarchOfferApply": "Apply Fatigued",
-            "forcedMarchFatigueApplied": "{name} is fatigued from forced marching."
+            "forcedMarchFatigueApplied": "{name} is fatigued from forced marching.",
+            "downtime": {
+                "addProject": "Avvia progetto di attività secondaria",
+                "pc": "Personaggio",
+                "kindLabel": "Attività",
+                "kind": {
+                    "craft": "Fabbricare un oggetto",
+                    "retrain": "Riqualificarsi",
+                    "earnIncome": "Guadagnare",
+                    "ritual": "Celebrare un rituale",
+                    "unknown": "Sconosciuta"
+                },
+                "targetRef": "Obiettivo",
+                "targetRefHelp": "UUID dell’oggetto, nome del talento o del rituale — ciò su cui lavora l’attività.",
+                "settlement": "Insediamento",
+                "daysTotal": "Giorni richiesti",
+                "dailyCostGp": "Costo al giorno (mo)",
+                "dailyCostGpHelp": "0 = gratuito. Annotato per il GM; nulla viene detratto automaticamente.",
+                "formIncomplete": "Prima scegli personaggio, attività e nome.",
+                "daysTooShort": "Un progetto richiede almeno un giorno.",
+                "settlementMissing": "Scegli l’insediamento che ospita il lavoro.",
+                "prereqMissing": "{settlement} non ha una struttura per questo lavoro — serve una tra: {structures}."
+            }
         },
         "settlementNav": {
             "status": "Status",

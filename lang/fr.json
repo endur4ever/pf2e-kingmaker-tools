@@ -572,7 +572,29 @@
             "forcedMarchOfferTitle": "Forced March Exhaustion",
             "forcedMarchOfferBody": "The party has marched {days} days against a limit of {maxDays}. Nothing has been applied — confirm each character you want fatigued.",
             "forcedMarchOfferApply": "Apply Fatigued",
-            "forcedMarchFatigueApplied": "{name} is fatigued from forced marching."
+            "forcedMarchFatigueApplied": "{name} is fatigued from forced marching.",
+            "downtime": {
+                "addProject": "Commencer un projet d’intermède",
+                "pc": "Personnage",
+                "kindLabel": "Activité",
+                "kind": {
+                    "craft": "Fabriquer un objet",
+                    "retrain": "Se reconvertir",
+                    "earnIncome": "Gagner un revenu",
+                    "ritual": "Accomplir un rituel",
+                    "unknown": "Inconnue"
+                },
+                "targetRef": "Cible",
+                "targetRefHelp": "UUID d’objet, nom de don ou nom de rituel — ce sur quoi porte l’activité.",
+                "settlement": "Colonie",
+                "daysTotal": "Jours requis",
+                "dailyCostGp": "Coût par jour (po)",
+                "dailyCostGpHelp": "0 = gratuit. Noté pour le MJ ; rien n’est déduit automatiquement.",
+                "formIncomplete": "Choisissez d’abord un personnage, une activité et un nom.",
+                "daysTooShort": "Un projet demande au moins un jour.",
+                "settlementMissing": "Choisissez la colonie qui accueille le travail.",
+                "prereqMissing": "{settlement} n’a aucun bâtiment pour ce travail — il faut l’un de : {structures}."
+            }
         },
         "settlementNav": {
             "status": "Status",
