@@ -56,4 +56,16 @@ external interface RawWarThreat {
      * -- new threats, unsettled -- becomes offerable again on its own merits.
      */
     var peaceSettled: Boolean?
+
+    /** True = this threat physically migrates one step toward its target each turn
+     * (docs/plans/2026-07-09-plan-map-dynamism.md SS2.2). Null/false = static, today's behavior. */
+    var wanders: Boolean?
+
+    /** Hex key where the threat's radius currently sits. Null => treat as at targetHexLocation.
+     * Advances ONLY on a GM-accepted migration offer, never automatically. */
+    var currentHexLocation: String?
+
+    /** Per-turn idempotency guard: the turn whose migration offer was already resolved (advance
+     * OR hold), so a held threat re-offers NEXT turn rather than immediately. */
+    var migrationConsumedTurn: Int?
 }

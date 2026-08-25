@@ -28,6 +28,7 @@ import at.posselt.pfrpg2e.kingdom.data.MilestoneChoice
 import at.posselt.pfrpg2e.kingdom.data.RawAbilityBoostChoices
 import at.posselt.pfrpg2e.kingdom.data.RawAbilityScores
 import at.posselt.pfrpg2e.kingdom.data.RawArmyDeployment
+import at.posselt.pfrpg2e.kingdom.data.RawRewildTracker
 import at.posselt.pfrpg2e.kingdom.data.RawCaravan
 import at.posselt.pfrpg2e.kingdom.data.RawCaravanShipment
 import at.posselt.pfrpg2e.kingdom.data.RawArmyBattle
@@ -164,6 +165,13 @@ external interface KingdomSettings {
     /** Meanwhile digest (End Turn interlude card). Null = enabled with MAX_DIGEST_BEATS. */
     var meanwhileDigestEnabled: Boolean?
     var meanwhileDigestMaxBeats: Int?
+
+    /** Map dynamism (docs/plans/2026-07-09-plan-map-dynamism.md SS2.2): all null-safe dials.
+     * Migration steps and re-wilds are ALWAYS GM offers; these only control what gets proposed. */
+    var threatMigrationEnabled: Boolean?
+    var threatMigrationSpeed: Int?
+    /** Turns a hex sits cleared-and-unclaimed before a re-wild offer; 0 = never. */
+    var rewildDelayTurns: Int?
 }
 
 @JsPlainObject
@@ -355,6 +363,11 @@ external interface KingdomData {
 
     /** Bonus resource dice granted by the GM this turn (e.g. from events). Applied during collection, then reset. */
     var bonusResourceDice: Int
+
+    /** Re-wild side-table (map-dynamism SS2.2): WHEN each cleared-unclaimed hex entered that
+     * state. The authoritative cleared/claimed booleans stay in kingmaker.state; this only times
+     * the pressure, and cleared flips only on a GM-accepted offer. */
+    var rewildTrackers: Array<RawRewildTracker>?
 
     /** Active and historical companion expeditions. Null when no expeditions have been dispatched. */
     var companionExpeditions: Array<RawCompanionExpedition>?
