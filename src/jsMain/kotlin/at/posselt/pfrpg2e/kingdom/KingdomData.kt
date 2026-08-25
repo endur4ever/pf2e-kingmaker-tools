@@ -9,6 +9,7 @@ import at.posselt.pfrpg2e.data.kingdom.KingdomSkill
 import at.posselt.pfrpg2e.data.kingdom.KingdomSkillRanks
 import at.posselt.pfrpg2e.data.kingdom.RuinValues
 import at.posselt.pfrpg2e.kingdom.data.RawCompanionExpedition
+import at.posselt.pfrpg2e.kingdom.data.RawPcDowntimeProject
 import at.posselt.pfrpg2e.kingdom.data.RawExpeditionChronicleEntry
 import at.posselt.pfrpg2e.data.kingdom.calculateScore
 import at.posselt.pfrpg2e.data.kingdom.leaders.Leader
@@ -355,6 +356,9 @@ external interface KingdomData {
 
     /** Capped durable chronicle of applied expedition rewards — survives pruneResolvedExpeditions. Newest last, cap ~100. */
     var expeditionChronicle: Array<RawExpeditionChronicleEntry>?
+
+    /** PC downtime projects ticked by the world clock. Null on kingdoms saved before Migration62. */
+    var downtimeProjects: Array<RawPcDowntimeProject>?
 }
 
 fun RawLeaderKingdomSkills.hasSkill(leader: Leader, skill: KingdomSkill) =

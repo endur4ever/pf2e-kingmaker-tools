@@ -3,6 +3,11 @@ package at.posselt.pfrpg2e.kingdom
 import at.posselt.pfrpg2e.camping.getActiveCamping
 import at.posselt.pfrpg2e.kingdom.data.RawCharacter
 import at.posselt.pfrpg2e.kingdom.data.RawCompanionExpedition
+import at.posselt.pfrpg2e.kingdom.data.toModel
+import at.posselt.pfrpg2e.kingdom.downtime.DowntimeProject
+import at.posselt.pfrpg2e.kingdom.downtime.DowntimeStatus
+import at.posselt.pfrpg2e.kingdom.downtime.prerequisiteMet
+import at.posselt.pfrpg2e.kingdom.downtime.tickDowntimeProjects
 import at.posselt.pfrpg2e.resting.DAY_SECONDS
 import at.posselt.pfrpg2e.settings.pfrpg2eKingdomCampingWeather
 import at.posselt.pfrpg2e.utils.buildPromise
@@ -55,6 +60,7 @@ fun registerDailyTickHooks(game: Game) {
 					tickCompanionTravel(game, daysPassed)
 					tickCompanionExpeditions(game, daysPassed)
 					tickPersonalQuests(game, daysPassed)
+					tickPcDowntimeProjects(game, daysPassed)
 				}
 		}
 	}
@@ -386,4 +392,51 @@ private fun cubeRound(q: Double, r: Double, s: Double): HexagonalGridCube2D {
 		rs = -rq - rr
 	}
 	return HexagonalGridCube2D(q = rq.toInt(), r = rr.toInt(), s = rs.toInt())
+}
+
+/**
+ * Ticks PC downtime projects by the number of day boundaries crossed
+ * (`docs/plans/2026-07-09-plan-downtime-projects.md` §6, phase 2).
+ *
+ * Rows whose stored kind or status this build does not recognise are left UNTOUCHED in storage —
+ * they are skipped by the model mapping, never deleted, so a newer build's projects survive a
+ * round-trip through an older one. Eligibility re-checks the hosting settlement's structures every
+ * tick: a razed smithy pauses the craft (via the pure engine) instead of letting it complete
+ * somewhere that no longer exists. Phase 2 is state-only by design — the completion offer card is
+ * phase 4, so a completed project simply rests at completed until then.
+ */
+private suspend fun tickPcDowntimeProjects(game: Game, daysPassed: Int) {
+	game.getKingdomActors().forEach { actor ->
+		val kingdom = actor.getKingdom() ?: return@forEach
+		val raws = kingdom.downtimeProjects ?: return@forEach
+		if (raws.isEmpty()) return@forEach
+		val models = raws.mapNotNull { it.toModel() }
+		if (models.none { it.status == DowntimeStatus.IN_PROGRESS }) return@forEach
+
+		// Settlements are only resolved when some in-progress project actually names one.
+		val settlements = if (models.any { it.status == DowntimeStatus.IN_PROGRESS && it.settlementId != null }) {
+			runCatching { kingdom.getAllSettlements(game).allSettlements }.getOrDefault(emptyList())
+		} else {
+			emptyList()
+		}
+		val stillEligible: (DowntimeProject) -> Boolean = eligible@{ project ->
+			val settlementId = project.settlementId ?: return@eligible true
+			val settlement = settlements.find { it.id == settlementId } ?: return@eligible false
+			prerequisiteMet(project.kind, settlement.constructedStructures.map { it.name }.toSet())
+		}
+		val outcome = tickDowntimeProjects(models, daysPassed, stillEligible)
+		if (outcome.completed.isEmpty() && outcome.paused.isEmpty() &&
+			outcome.projects == models
+		) {
+			return@forEach
+		}
+		val byId = outcome.projects.associateBy { it.id }
+		for (raw in raws) {
+			val next = byId[raw.id] ?: continue // unknown-kind rows keep their stored state
+			raw.daysRemaining = next.daysRemaining
+			raw.status = next.status.value
+			raw.pauseReason = next.pauseReason
+		}
+		actor.setKingdom(kingdom)
+	}
 }
