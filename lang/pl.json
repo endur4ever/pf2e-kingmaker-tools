@@ -2147,6 +2147,14 @@
         "atEndTurn": "Na koniec tury",
         "risk": "ST najazdu {dc} — {percent}% bezpiecznie",
         "setHorizon": "Horyzont prognozy: {days} dni"
+      },
+      "pings": {
+        "turnGazette": "Tura {turn}: {notes}",
+        "caravanRaided": "Karawana do {partner} została napadnięta ({cargo})",
+        "caravanDelivered": "Karawana dostarczyła do {partner} ({cargo})",
+        "caravanRecalled": "Karawana do {partner} została odwołana",
+        "expeditionResolved": "{companions} wrócili: {title}",
+        "questCompleted": "Zadanie ukończone: {title}"
       }
     },
     "chatMessages": {

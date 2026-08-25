@@ -2147,6 +2147,14 @@
         "atEndTurn": "В конце хода",
         "risk": "КС набега {dc} — {percent}% безопасно",
         "setHorizon": "Горизонт прогноза: {days} дн."
+      },
+      "pings": {
+        "turnGazette": "Ход {turn}: {notes}",
+        "caravanRaided": "Караван в {partner} подвергся набегу ({cargo})",
+        "caravanDelivered": "Караван доставил груз в {partner} ({cargo})",
+        "caravanRecalled": "Караван в {partner} был отозван",
+        "expeditionResolved": "{companions} вернулись: {title}",
+        "questCompleted": "Задание выполнено: {title}"
       }
     },
     "chatMessages": {

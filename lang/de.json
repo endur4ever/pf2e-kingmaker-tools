@@ -2147,6 +2147,14 @@
         "atEndTurn": "Am Zugende",
         "risk": "Überfall-SG {dc} — {percent}% sicher",
         "setHorizon": "Prognosehorizont: {days} Tage"
+      },
+      "pings": {
+        "turnGazette": "Zug {turn}: {notes}",
+        "caravanRaided": "Eine Karawane nach {partner} wurde überfallen ({cargo})",
+        "caravanDelivered": "Eine Karawane lieferte an {partner} ({cargo})",
+        "caravanRecalled": "Eine Karawane nach {partner} wurde zurückgerufen",
+        "expeditionResolved": "{companions} kehrten zurück: {title}",
+        "questCompleted": "Quest abgeschlossen: {title}"
       }
     },
     "chatMessages": {

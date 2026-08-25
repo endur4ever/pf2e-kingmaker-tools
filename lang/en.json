@@ -2269,6 +2269,14 @@
         "atEndTurn": "At End Turn",
         "risk": "Raid DC {dc} — {percent}% safe",
         "setHorizon": "Forecast horizon: {days} days"
+      },
+      "pings": {
+        "turnGazette": "Turn {turn}: {notes}",
+        "caravanRaided": "A caravan to {partner} was raided ({cargo})",
+        "caravanDelivered": "A caravan delivered to {partner} ({cargo})",
+        "caravanRecalled": "A caravan to {partner} was recalled",
+        "expeditionResolved": "{companions} returned: {title}",
+        "questCompleted": "Quest completed: {title}"
       }
     },
     "chatMessages": {

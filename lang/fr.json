@@ -2147,6 +2147,14 @@
         "atEndTurn": "À la fin du tour",
         "risk": "DD de raid {dc} — {percent}% sûr",
         "setHorizon": "Horizon de prévision : {days} jours"
+      },
+      "pings": {
+        "turnGazette": "Tour {turn} : {notes}",
+        "caravanRaided": "Une caravane vers {partner} a été attaquée ({cargo})",
+        "caravanDelivered": "Une caravane a livré à {partner} ({cargo})",
+        "caravanRecalled": "Une caravane vers {partner} a été rappelée",
+        "expeditionResolved": "{companions} sont revenus : {title}",
+        "questCompleted": "Quête terminée : {title}"
       }
     },
     "chatMessages": {

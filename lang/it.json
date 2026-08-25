@@ -2147,6 +2147,14 @@
         "atEndTurn": "A fine turno",
         "risk": "CD incursione {dc} — {percent}% sicuro",
         "setHorizon": "Orizzonte di previsione: {days} giorni"
+      },
+      "pings": {
+        "turnGazette": "Turno {turn}: {notes}",
+        "caravanRaided": "Una carovana verso {partner} è stata assalita ({cargo})",
+        "caravanDelivered": "Una carovana ha consegnato a {partner} ({cargo})",
+        "caravanRecalled": "Una carovana verso {partner} è stata richiamata",
+        "expeditionResolved": "{companions} sono tornati: {title}",
+        "questCompleted": "Missione completata: {title}"
       }
     },
     "chatMessages": {

@@ -2147,6 +2147,14 @@
         "atEndTurn": "回合结束时",
         "risk": "劫掠 DC {dc} — {percent}% 安全",
         "setHorizon": "预报范围：{days} 天"
+      },
+      "pings": {
+        "turnGazette": "回合 {turn}：{notes}",
+        "caravanRaided": "前往 {partner} 的商队遭到劫掠（{cargo}）",
+        "caravanDelivered": "商队已送达 {partner}（{cargo}）",
+        "caravanRecalled": "前往 {partner} 的商队被召回",
+        "expeditionResolved": "{companions} 归来：{title}",
+        "questCompleted": "任务完成：{title}"
       }
     },
     "chatMessages": {
