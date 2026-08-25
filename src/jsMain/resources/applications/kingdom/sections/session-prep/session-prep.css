@@ -234,3 +234,29 @@
         font-size: 0.95em;
     }
 }
+
+/* Next-session forecast (GM-only by data; see page.hbs) */
+.km-forecast-item {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+}
+.km-forecast-day {
+    min-width: 5.5em;
+    font-size: 0.85em;
+    opacity: 0.8;
+    white-space: nowrap;
+}
+.km-forecast-risk {
+    margin-left: auto;
+    font-size: 0.85em;
+    color: #a33;
+    white-space: nowrap;
+}
+.km-forecast-endturn-heading {
+    margin: 6px 0 2px;
+    font-size: 0.9em;
+    opacity: 0.85;
+}
+.km-forecast-threat .km-session-prep-item__name { color: #a33; }
+.km-forecast-expiration .km-session-prep-item__name { font-weight: bold; }

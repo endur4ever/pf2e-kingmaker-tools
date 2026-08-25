@@ -2138,7 +2138,14 @@
         "clockEvent": "{label}",
         "threatArrives": "{name} 抵达边境",
         "questDeadline": "{name} 到达期限",
-        "ruinThreshold": "战争压力越过毁灭阈值"
+        "ruinThreshold": "战争压力越过毁灭阈值",
+        "title": "下次会话预报",
+        "horizon": "{days} 天 + 回合结束",
+        "empty": "地平线上一片平静——接下来几天看起来很安宁。",
+        "today": "今天",
+        "inDays": "{days} 天后",
+        "atEndTurn": "回合结束时",
+        "risk": "劫掠 DC {dc} — {percent}% 安全"
       }
     },
     "chatMessages": {

@@ -2260,7 +2260,14 @@
         "clockEvent": "{label}",
         "threatArrives": "{name} arrives at the border",
         "questDeadline": "{name} reaches its deadline",
-        "ruinThreshold": "War pressure crosses the ruin threshold"
+        "ruinThreshold": "War pressure crosses the ruin threshold",
+        "title": "Next Session Forecast",
+        "horizon": "{days} days + End Turn",
+        "empty": "Nothing on the horizon — the next few days look quiet.",
+        "today": "today",
+        "inDays": "in {days} days",
+        "atEndTurn": "At End Turn",
+        "risk": "Raid DC {dc} — {percent}% safe"
       }
     },
     "chatMessages": {

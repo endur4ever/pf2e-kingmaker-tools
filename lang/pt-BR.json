@@ -2138,7 +2138,14 @@
         "clockEvent": "{label}",
         "threatArrives": "{name} chega à fronteira",
         "questDeadline": "{name} atinge o prazo",
-        "ruinThreshold": "A pressão de guerra cruza o limiar de ruína"
+        "ruinThreshold": "A pressão de guerra cruza o limiar de ruína",
+        "title": "Previsão da próxima sessão",
+        "horizon": "{days} dias + fim do turno",
+        "empty": "Nada no horizonte — os próximos dias parecem calmos.",
+        "today": "hoje",
+        "inDays": "em {days} dias",
+        "atEndTurn": "No fim do turno",
+        "risk": "CD de ataque {dc} — {percent}% seguro"
       }
     },
     "chatMessages": {

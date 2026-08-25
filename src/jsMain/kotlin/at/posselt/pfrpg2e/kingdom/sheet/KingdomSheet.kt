@@ -178,6 +178,8 @@ import at.posselt.pfrpg2e.kingdom.dialogs.openCleanseItemDialog
 import at.posselt.pfrpg2e.kingdom.rollCleanseItem
 import at.posselt.pfrpg2e.kingdom.computeCaravanRoute
 import at.posselt.pfrpg2e.kingdom.currentSeasonalModifiers
+import at.posselt.pfrpg2e.kingdom.forecast.buildForecast
+import at.posselt.pfrpg2e.kingdom.sheet.contexts.buildForecastPanelContext
 import at.posselt.pfrpg2e.kingdom.map.routeHexSafety
 import at.posselt.pfrpg2e.kingdom.shipmentRaidDc
 import at.posselt.pfrpg2e.kingdom.caravanRouteSafety
@@ -3642,7 +3644,8 @@ class KingdomSheet(
                 buildPacingAlertView(kingdom.pacingAlerts)
             ),
             sessionPrepContext = buildSessionPrepContext(
-                buildSessionPrepView(
+                forecast = buildForecastPanelContext(buildForecast(game, actor, horizonDays = 7)),
+                view = buildSessionPrepView(
                     quests = kingdom.quests,
                     clocks = kingdom.campaignClocks,
                     events = kingdom.campaignKingdomEvents,

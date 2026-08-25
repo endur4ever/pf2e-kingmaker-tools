@@ -59,6 +59,9 @@ external interface SessionPrepContext {
     val isGM: Boolean
     val hasAnything: Boolean
     val totalCount: Int
+
+    /** Null for players AND when the forecast could not be built — absence removes the panel. */
+    val forecast: ForecastPanelContext?
 }
 
 private fun List<SessionPrepEntry>.toContexts(): Array<SessionPrepEntryContext> =
@@ -99,8 +102,12 @@ private fun List<TurnRecentEntry>.toTurnContexts(): Array<TurnRecentEntryContext
         )
     }.toTypedArray()
 
-fun buildSessionPrepContext(view: SessionPrepView): SessionPrepContext =
+fun buildSessionPrepContext(
+    view: SessionPrepView,
+    forecast: ForecastPanelContext? = null,
+): SessionPrepContext =
     SessionPrepContext(
+        forecast = forecast,
         openQuests = view.openQuests.toContexts(),
         activeClocks = view.activeClocks.toContexts(),
         unresolvedEvents = view.unresolvedEvents.toContexts(),

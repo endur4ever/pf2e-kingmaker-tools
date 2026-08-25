@@ -2138,7 +2138,14 @@
         "clockEvent": "{label}",
         "threatArrives": "{name} erreicht die Grenze",
         "questDeadline": "{name} erreicht die Frist",
-        "ruinThreshold": "Kriegsdruck überschreitet die Ruin-Schwelle"
+        "ruinThreshold": "Kriegsdruck überschreitet die Ruin-Schwelle",
+        "title": "Prognose für die nächste Sitzung",
+        "horizon": "{days} Tage + Zugende",
+        "empty": "Nichts am Horizont — die nächsten Tage wirken ruhig.",
+        "today": "heute",
+        "inDays": "in {days} Tagen",
+        "atEndTurn": "Am Zugende",
+        "risk": "Überfall-SG {dc} — {percent}% sicher"
       }
     },
     "chatMessages": {

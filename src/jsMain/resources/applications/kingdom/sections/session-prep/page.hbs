@@ -21,6 +21,41 @@
             <p class="km-session-prep-empty-all"><i class="fa-solid fa-mug-hot"></i> {{localizeKM "kingdom.sessionPrep.emptyAll"}}</p>
         {{/unless}}
 
+        {{#if sessionPrepContext.forecast}}
+        {{!-- Next-session forecast. GM-only by DATA: the context is null for players, so this
+              block never receives anything to leak -- the if is layout, not the gate. Risk rows
+              carry the stake and the odds, never an outcome. --}}
+        <section class="km-session-prep-section km-forecast">
+            <h3><i class="fa-solid fa-crystal-ball"></i> {{localizeKM "kingdom.forecast.title"}}
+                <span class="km-session-prep-count">{{localizeKM "kingdom.forecast.horizon" days=sessionPrepContext.forecast.horizonDays}}</span></h3>
+            {{#if sessionPrepContext.forecast.hasBeats}}
+                {{#if sessionPrepContext.forecast.dated.length}}
+                <ul class="km-session-prep-list">
+                    {{#each sessionPrepContext.forecast.dated}}
+                        <li class="km-session-prep-item km-forecast-item km-forecast-{{this.kindClass}}">
+                            <span class="km-forecast-day">{{this.dayLabel}}</span>
+                            <span class="km-session-prep-item__name">{{this.label}}</span>
+                        </li>
+                    {{/each}}
+                </ul>
+                {{/if}}
+                {{#if sessionPrepContext.forecast.endTurn.length}}
+                <h4 class="km-forecast-endturn-heading">{{localizeKM "kingdom.forecast.atEndTurn"}}</h4>
+                <ul class="km-session-prep-list">
+                    {{#each sessionPrepContext.forecast.endTurn}}
+                        <li class="km-session-prep-item km-forecast-item km-forecast-{{this.kindClass}}">
+                            <span class="km-session-prep-item__name">{{this.label}}</span>
+                            {{#if this.risk}}<span class="km-forecast-risk">{{this.risk}}</span>{{/if}}
+                        </li>
+                    {{/each}}
+                </ul>
+                {{/if}}
+            {{else}}
+                <p class="km-session-prep-empty">{{localizeKM "kingdom.forecast.empty"}}</p>
+            {{/if}}
+        </section>
+        {{/if}}
+
         <section class="km-session-prep-section">
             <h3><i class="fa-solid fa-scroll"></i> {{localizeKM "kingdom.sessionPrep.openQuests"}} <span class="km-session-prep-count">{{sessionPrepContext.openQuests.length}}</span></h3>
             {{#if sessionPrepContext.openQuests.length}}

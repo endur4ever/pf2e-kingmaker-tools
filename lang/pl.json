@@ -2138,7 +2138,14 @@
         "clockEvent": "{label}",
         "threatArrives": "{name} dociera do granicy",
         "questDeadline": "{name} osiąga termin",
-        "ruinThreshold": "Presja wojenna przekracza próg ruiny"
+        "ruinThreshold": "Presja wojenna przekracza próg ruiny",
+        "title": "Prognoza na następną sesję",
+        "horizon": "{days} dni + koniec tury",
+        "empty": "Nic na horyzoncie — najbliższe dni wyglądają spokojnie.",
+        "today": "dzisiaj",
+        "inDays": "za {days} dni",
+        "atEndTurn": "Na koniec tury",
+        "risk": "ST najazdu {dc} — {percent}% bezpiecznie"
       }
     },
     "chatMessages": {

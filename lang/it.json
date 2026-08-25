@@ -2138,7 +2138,14 @@
         "clockEvent": "{label}",
         "threatArrives": "{name} raggiunge il confine",
         "questDeadline": "{name} raggiunge la scadenza",
-        "ruinThreshold": "La pressione bellica supera la soglia di rovina"
+        "ruinThreshold": "La pressione bellica supera la soglia di rovina",
+        "title": "Previsione della prossima sessione",
+        "horizon": "{days} giorni + fine turno",
+        "empty": "Nulla all'orizzonte — i prossimi giorni sembrano tranquilli.",
+        "today": "oggi",
+        "inDays": "tra {days} giorni",
+        "atEndTurn": "A fine turno",
+        "risk": "CD incursione {dc} — {percent}% sicuro"
       }
     },
     "chatMessages": {
