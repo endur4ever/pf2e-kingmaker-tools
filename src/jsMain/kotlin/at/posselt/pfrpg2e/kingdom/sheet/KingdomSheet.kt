@@ -411,6 +411,9 @@ class KingdomSheet(
     private var noCharter = getKingdom().charter.type == null
     private var currentCharacterSheetNavEntry: String = if (noCharter) "Creation" else "$initialKingdomLevel"
     private var currentNavEntry: MainNavEntry = if (noCharter) MainNavEntry.KINGDOM else MainNavEntry.TURN
+
+    /** Transient per-open horizon for the Session Prep forecast (plan phase 4); resets on reopen. */
+    private var forecastHorizonDays: Int = 7
     private var bonusFeat: String? = null
     private var showDetailedMatrix: Boolean = false
     private val openedDetails = mutableSetOf<String>()
@@ -571,6 +574,11 @@ class KingdomSheet(
                 event.preventDefault()
                 event.stopPropagation()
                 currentCharacterSheetNavEntry = target.dataset["link"] ?: "Creation"
+                render()
+            }
+
+            "set-forecast-horizon" -> {
+                forecastHorizonDays = target.dataset["days"]?.toIntOrNull() ?: 7
                 render()
             }
 
@@ -3644,7 +3652,7 @@ class KingdomSheet(
                 buildPacingAlertView(kingdom.pacingAlerts)
             ),
             sessionPrepContext = buildSessionPrepContext(
-                forecast = buildForecastPanelContext(buildForecast(game, actor, horizonDays = 7)),
+                forecast = buildForecastPanelContext(buildForecast(game, actor, horizonDays = forecastHorizonDays)),
                 view = buildSessionPrepView(
                     quests = kingdom.quests,
                     clocks = kingdom.campaignClocks,

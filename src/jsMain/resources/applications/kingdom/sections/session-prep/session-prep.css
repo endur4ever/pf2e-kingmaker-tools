@@ -260,3 +260,33 @@
 }
 .km-forecast-threat .km-session-prep-item__name { color: #a33; }
 .km-forecast-expiration .km-session-prep-item__name { font-weight: bold; }
+
+.km-forecast-horizons {
+    display: inline-flex;
+    gap: 2px;
+    margin-left: 6px;
+}
+.km-forecast-horizon {
+    width: auto;
+    padding: 0 7px;
+    line-height: 1.5;
+    font-size: 0.75em;
+    opacity: 0.75;
+}
+.km-forecast-horizon--active {
+    opacity: 1;
+    font-weight: bold;
+    text-decoration: underline;
+}
+.km-forecast-jump {
+    width: auto;
+    background: none;
+    border: none;
+    padding: 0;
+    text-align: left;
+    cursor: pointer;
+    font: inherit;
+}
+.km-forecast-jump:hover {
+    text-decoration: underline;
+}

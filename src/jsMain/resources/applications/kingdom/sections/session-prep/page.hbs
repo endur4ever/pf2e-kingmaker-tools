@@ -27,14 +27,22 @@
               carry the stake and the odds, never an outcome. --}}
         <section class="km-session-prep-section km-forecast">
             <h3><i class="fa-solid fa-crystal-ball"></i> {{localizeKM "kingdom.forecast.title"}}
-                <span class="km-session-prep-count">{{localizeKM "kingdom.forecast.horizon" days=sessionPrepContext.forecast.horizonDays}}</span></h3>
+                <span class="km-forecast-horizons">
+                    {{#each sessionPrepContext.forecast.horizonChoices}}
+                        <button type="button"
+                                class="km-forecast-horizon{{#if this.active}} km-forecast-horizon--active{{/if}}"
+                                data-action="set-forecast-horizon" data-days="{{this.days}}"
+                                title="{{localizeKM "kingdom.forecast.setHorizon" days=this.days}}">{{this.days}}</button>
+                    {{/each}}
+                </span></h3>
             {{#if sessionPrepContext.forecast.hasBeats}}
                 {{#if sessionPrepContext.forecast.dated.length}}
                 <ul class="km-session-prep-list">
                     {{#each sessionPrepContext.forecast.dated}}
                         <li class="km-session-prep-item km-forecast-item km-forecast-{{this.kindClass}}">
                             <span class="km-forecast-day">{{this.dayLabel}}</span>
-                            <span class="km-session-prep-item__name">{{this.label}}</span>
+                            <button type="button" class="km-forecast-jump" data-action="change-nav"
+                                    data-link="{{this.target}}">{{this.label}}</button>
                         </li>
                     {{/each}}
                 </ul>
@@ -44,7 +52,8 @@
                 <ul class="km-session-prep-list">
                     {{#each sessionPrepContext.forecast.endTurn}}
                         <li class="km-session-prep-item km-forecast-item km-forecast-{{this.kindClass}}">
-                            <span class="km-session-prep-item__name">{{this.label}}</span>
+                            <button type="button" class="km-forecast-jump" data-action="change-nav"
+                                    data-link="{{this.target}}">{{this.label}}</button>
                             {{#if this.risk}}<span class="km-forecast-risk">{{this.risk}}</span>{{/if}}
                         </li>
                     {{/each}}

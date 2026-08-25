@@ -2145,7 +2145,8 @@
         "today": "oggi",
         "inDays": "tra {days} giorni",
         "atEndTurn": "A fine turno",
-        "risk": "CD incursione {dc} — {percent}% sicuro"
+        "risk": "CD incursione {dc} — {percent}% sicuro",
+        "setHorizon": "Orizzonte di previsione: {days} giorni"
       }
     },
     "chatMessages": {

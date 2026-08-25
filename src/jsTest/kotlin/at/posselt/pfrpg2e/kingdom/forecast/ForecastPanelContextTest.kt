@@ -53,4 +53,26 @@ class ForecastPanelContextTest {
         val panel = buildForecastPanelContext(ForecastResult(emptyList(), horizonDays = 7))!!
         assertEquals(false, panel.hasBeats)
     }
+
+    @Test
+    fun horizonChoicesMarkExactlyTheActiveOne() {
+        val panel = buildForecastPanelContext(ForecastResult(emptyList(), horizonDays = 14))!!
+        assertEquals(listOf(3, 7, 14), panel.horizonChoices.map { it.days })
+        assertEquals(listOf(false, false, true), panel.horizonChoices.map { it.active })
+    }
+
+    @Test
+    fun everyBeatCarriesItsJumpTarget() {
+        // Targets are MainNavEntry values consumed by the sheet's EXISTING change-nav action --
+        // a wrong value here is a dead button, the recurring sheet-button bug.
+        val panel = buildForecastPanelContext(
+            ForecastResult(
+                beats = listOf(
+                    ForecastBeat(dayOffset = 2, kind = ForecastKind.ARRIVAL, labelKey = FORECAST_KEY_COMPANION_ARRIVES, target = "roster"),
+                ),
+                horizonDays = 7,
+            ),
+        )!!
+        assertEquals("roster", panel.dated[0].target)
+    }
 }

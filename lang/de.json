@@ -2145,7 +2145,8 @@
         "today": "heute",
         "inDays": "in {days} Tagen",
         "atEndTurn": "Am Zugende",
-        "risk": "Überfall-SG {dc} — {percent}% sicher"
+        "risk": "Überfall-SG {dc} — {percent}% sicher",
+        "setHorizon": "Prognosehorizont: {days} Tage"
       }
     },
     "chatMessages": {

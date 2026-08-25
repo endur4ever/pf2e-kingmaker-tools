@@ -2145,7 +2145,8 @@
         "today": "сегодня",
         "inDays": "через {days} дн.",
         "atEndTurn": "В конце хода",
-        "risk": "КС набега {dc} — {percent}% безопасно"
+        "risk": "КС набега {dc} — {percent}% безопасно",
+        "setHorizon": "Горизонт прогноза: {days} дн."
       }
     },
     "chatMessages": {

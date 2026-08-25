@@ -27,6 +27,15 @@ external interface ForecastBeatContext {
     /** "Raid DC 13 — 40% safe" for RISK beats; null elsewhere. Stake and odds, never an outcome. */
     val risk: String?
     val isEndTurn: Boolean
+    /** MainNavEntry value the row jumps to via the sheet's existing change-nav action. */
+    val target: String
+}
+
+@Suppress("unused")
+@JsPlainObject
+external interface ForecastHorizonChoice {
+    val days: Int
+    val active: Boolean
 }
 
 @Suppress("unused")
@@ -36,6 +45,8 @@ external interface ForecastPanelContext {
     val endTurn: Array<ForecastBeatContext>
     val hasBeats: Boolean
     val horizonDays: Int
+    /** 3/7/14, active flag precomputed so the template needs no comparison helper. */
+    val horizonChoices: Array<ForecastHorizonChoice>
 }
 
 private fun ForecastBeat.toContext(): ForecastBeatContext {
@@ -53,6 +64,7 @@ private fun ForecastBeat.toContext(): ForecastBeatContext {
             null
         },
         isEndTurn = dayOffset == null,
+        target = target,
     )
 }
 
@@ -64,5 +76,8 @@ fun buildForecastPanelContext(result: ForecastResult?): ForecastPanelContext? {
         endTurn = beats.filter { it.isEndTurn }.toTypedArray(),
         hasBeats = beats.isNotEmpty(),
         horizonDays = result.horizonDays,
+        horizonChoices = intArrayOf(3, 7, 14).map {
+            ForecastHorizonChoice(days = it, active = it == result.horizonDays)
+        }.toTypedArray(),
     )
 }

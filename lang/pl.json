@@ -2145,7 +2145,8 @@
         "today": "dzisiaj",
         "inDays": "za {days} dni",
         "atEndTurn": "Na koniec tury",
-        "risk": "ST najazdu {dc} — {percent}% bezpiecznie"
+        "risk": "ST najazdu {dc} — {percent}% bezpiecznie",
+        "setHorizon": "Horyzont prognozy: {days} dni"
       }
     },
     "chatMessages": {

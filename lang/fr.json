@@ -2145,7 +2145,8 @@
         "today": "aujourd'hui",
         "inDays": "dans {days} jours",
         "atEndTurn": "À la fin du tour",
-        "risk": "DD de raid {dc} — {percent}% sûr"
+        "risk": "DD de raid {dc} — {percent}% sûr",
+        "setHorizon": "Horizon de prévision : {days} jours"
       }
     },
     "chatMessages": {

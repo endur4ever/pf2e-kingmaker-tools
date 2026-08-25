@@ -2145,7 +2145,8 @@
         "today": "今天",
         "inDays": "{days} 天后",
         "atEndTurn": "回合结束时",
-        "risk": "劫掠 DC {dc} — {percent}% 安全"
+        "risk": "劫掠 DC {dc} — {percent}% 安全",
+        "setHorizon": "预报范围：{days} 天"
       }
     },
     "chatMessages": {

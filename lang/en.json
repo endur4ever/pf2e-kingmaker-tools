@@ -2267,7 +2267,8 @@
         "today": "today",
         "inDays": "in {days} days",
         "atEndTurn": "At End Turn",
-        "risk": "Raid DC {dc} — {percent}% safe"
+        "risk": "Raid DC {dc} — {percent}% safe",
+        "setHorizon": "Forecast horizon: {days} days"
       }
     },
     "chatMessages": {
