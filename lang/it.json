@@ -7693,7 +7693,8 @@
             "levelMismatch": "The party's level has drifted far from the chapter's intended level. Consider adjusting encounter difficulty or rewards.",
             "stagnation": "Unrest hasn't changed in several turns — the kingdom feels static. Consider introducing an event or complication.",
             "turnGap": "Many turns have passed without a campaign-altering event. Consider triggering one to keep momentum.",
-            "lootImbalance": "Item access is out of step with the party's level. Consider adjusting available rewards."
+            "lootImbalance": "Item access is out of step with the party's level. Consider adjusting available rewards.",
+            "realizedLootImbalance": "Bottino ottenuto molto sopra il livello del gruppo"
         },
         "pacingAlertSeverity": {
             "warning": "Warning",

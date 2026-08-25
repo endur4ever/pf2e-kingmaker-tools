@@ -3,6 +3,7 @@ package at.posselt.pfrpg2e.kingdom
 import at.posselt.pfrpg2e.kingdom.data.PacingAlertSeverity
 import at.posselt.pfrpg2e.kingdom.data.PacingAlertType
 import at.posselt.pfrpg2e.kingdom.data.RawPacingAlert
+import at.posselt.pfrpg2e.kingdom.loot.RealizedLootInput
 import kotlin.math.abs
 
 /**
@@ -41,6 +42,16 @@ private fun alert(
     relatedEntityId = relatedEntityId,
 )
 
+/**
+ * The shared diff -> severity rule: within [range] is fine, past double it is critical. Extracted
+ * so the settlement proxy and the realized-loot track cannot drift apart on what "too far" means.
+ */
+private fun severityForDiff(diff: Int, range: Int): PacingAlertSeverity? = when {
+    diff <= range -> null
+    diff > range * 2 -> PacingAlertSeverity.CRITICAL
+    else -> PacingAlertSeverity.WARNING
+}
+
 /** Settlement item access far above the party's level — breaks wealth-by-level. */
 fun evaluateLootImbalance(
     itemAccessLevel: Int,
@@ -49,11 +60,33 @@ fun evaluateLootImbalance(
     turn: Int,
     relatedEntityId: String? = null,
 ): RawPacingAlert? {
-    val diff = itemAccessLevel - partyLevel
-    if (diff <= range) return null
-    val severity = if (diff > range * 2) PacingAlertSeverity.CRITICAL else PacingAlertSeverity.WARNING
+    val severity = severityForDiff(itemAccessLevel - partyLevel, range) ?: return null
     return alert(PacingAlertType.LOOT_IMBALANCE, severity, turn, relatedEntityId)
 }
+
+/**
+ * Treasure actually awarded implies a level far above the party's (loot-manifests SS6.1).
+ *
+ * A SECOND, independent signal beside [evaluateLootImbalance]: that one asks "can players buy
+ * items above their level?", this one asks "have they been handed too much?". Both are real
+ * risks, and each keeps its own fire-once state so they cannot fight over severity.
+ */
+fun evaluateRealizedLootImbalance(input: RealizedLootInput, range: Int): RawPacingAlert? {
+    val severity = severityForDiff(input.impliedWealthLevel - input.partyLevel, range) ?: return null
+    return alert(
+        PacingAlertType.REALIZED_LOOT_IMBALANCE,
+        severity,
+        input.turn,
+        relatedEntityId = "treasure-ledger",
+    )
+}
+
+fun trackRealizedLootImbalance(
+    input: RealizedLootInput,
+    range: Int,
+    previousSeverity: String?,
+): PacingStateTrack =
+    trackSeverityChange(evaluateRealizedLootImbalance(input, range), previousSeverity)
 
 /** Like [trackLevelMismatch] but for settlement item access (fires only on severity change). */
 fun trackLootImbalance(

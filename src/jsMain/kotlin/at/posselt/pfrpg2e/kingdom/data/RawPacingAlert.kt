@@ -36,7 +36,11 @@ enum class PacingAlertType : Translatable, ValueEnum {
     LEVEL_MISMATCH,
     STAGNATION,
     TURN_GAP,
-    LOOT_IMBALANCE;
+    LOOT_IMBALANCE,
+
+    /** Treasure actually handed out implies a level well above the party's (loot-manifests SS6.1).
+     * Independent of LOOT_IMBALANCE, which measures settlement SHOP ACCESS -- a different risk. */
+    REALIZED_LOOT_IMBALANCE;
 
     companion object {
         fun fromString(value: String) = fromCamelCase<PacingAlertType>(value)

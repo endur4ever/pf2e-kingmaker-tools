@@ -74,6 +74,9 @@ import at.posselt.pfrpg2e.kingdom.parseRuins
 import at.posselt.pfrpg2e.kingdom.trackUnrestStagnation
 import at.posselt.pfrpg2e.kingdom.trackLevelMismatch
 import at.posselt.pfrpg2e.kingdom.trackLootImbalance
+import at.posselt.pfrpg2e.kingdom.trackRealizedLootImbalance
+import at.posselt.pfrpg2e.kingdom.loot.pacingLootInput
+import at.posselt.pfrpg2e.kingdom.data.toModel
 import at.posselt.pfrpg2e.kingdom.pacingMaxTurnGap
 import at.posselt.pfrpg2e.kingdom.pacingMinUnrestDelta
 import at.posselt.pfrpg2e.kingdom.pacingLevelMismatchRange
@@ -557,6 +560,23 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
                 kingdom.pacingLastLootImbalance = lootTrack.severity
                 lootTrack.alert?.let { firedPacingAlerts.add(it) }
             }
+
+            // Realized loot — treasure actually AWARDED vs the target level (loot-manifests SS6.1).
+            // A second, independent track: the settlement metric above asks whether players can
+            // BUY above their level, this one whether they have been HANDED too much. Its own
+            // fire-once field, so the two cannot fight over severity. Runs even with an empty
+            // ledger (implied level 1 simply never exceeds the range).
+            val realizedTrack = trackRealizedLootImbalance(
+                input = pacingLootInput(
+                    ledger = (kingdom.treasureLedger ?: emptyArray()).map { it.toModel() },
+                    partyLevel = targetLevel,
+                    turn = currentTurn,
+                ),
+                range = kingdom.settings.pacingLootImbalanceRange(),
+                previousSeverity = kingdom.pacingLastRealizedLootImbalance,
+            )
+            kingdom.pacingLastRealizedLootImbalance = realizedTrack.severity
+            realizedTrack.alert?.let { firedPacingAlerts.add(it) }
         }
     }
 

@@ -152,3 +152,63 @@ fun realizedGpInWindow(
     }
     return sum
 }
+
+/**
+ * Treasure a party of four is expected to gain DURING each level, from the PF2e Treasure by Level
+ * table (index 0 = level 1). RAW rules data, not house tuning -- the same category as the
+ * leadership-activity caps -- but worth a spot-check against the book before anyone tunes an
+ * alert threshold on it.
+ */
+val TREASURE_PER_LEVEL_GP: List<Double> = listOf(
+    175.0, 300.0, 500.0, 850.0, 1350.0,
+    2000.0, 2900.0, 4000.0, 5700.0, 8000.0,
+    11500.0, 16500.0, 25000.0, 36500.0, 54500.0,
+    82500.0, 128000.0, 208000.0, 355000.0, 490000.0,
+)
+
+/**
+ * Cumulative expected wealth: entry i is everything a party should hold on reaching level i+1.
+ * Derived by summation rather than typed out, so the two tables cannot drift apart.
+ */
+val PARTY_WEALTH_BY_LEVEL: List<Double> = TREASURE_PER_LEVEL_GP.runningReduce { acc, v -> acc + v }
+
+/**
+ * The level [totalGp] of realized treasure implies: the highest level whose cumulative expected
+ * wealth the party has actually reached.
+ *
+ * Returns 1 below the first threshold (a party with nothing is still level 1, not level 0) and
+ * caps at the table's length -- past level 20 the curve has nothing left to say, and an
+ * unbounded extrapolation would fire a CRITICAL alert on every late campaign forever.
+ */
+fun wealthLevelForGp(totalGp: Double): Int {
+    // Below the first threshold there is no index to find, so the floor is answered here rather
+    // than by a clamp; past it indexOfLast always matches (>= 0) and can never exceed the last
+    // index, so the 1..size range holds by construction -- a clamp would be unreachable code.
+    if (totalGp < (PARTY_WEALTH_BY_LEVEL.firstOrNull() ?: return 1)) return 1
+    return PARTY_WEALTH_BY_LEVEL.indexOfLast { totalGp >= it } + 1
+}
+
+/**
+ * What the realized-loot pacing track compares (plan SS3.4, SS6.1).
+ *
+ * [impliedWealthLevel] converts the ledger's LIFETIME gp onto the same level axis the settlement
+ * proxy already uses, so one comparator serves both. Lifetime rather than a window: wealth-by-level
+ * is a cumulative curve, and comparing one turn's haul against a cumulative expectation would
+ * never fire.
+ */
+data class RealizedLootInput(
+    val impliedWealthLevel: Int,
+    val partyLevel: Int,
+    val turn: Int,
+)
+
+fun pacingLootInput(
+    ledger: List<TreasureLedgerEntry>,
+    partyLevel: Int,
+    turn: Int,
+): RealizedLootInput =
+    RealizedLootInput(
+        impliedWealthLevel = wealthLevelForGp(ledger.sumOf { it.totalGp }),
+        partyLevel = partyLevel,
+        turn = turn,
+    )
