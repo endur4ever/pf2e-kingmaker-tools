@@ -2321,7 +2321,12 @@
                 "warThreat": {
                     "escalated": "Угроза {name} нарастает (уровень {level}/{max}). Давление на королевство растёт."
                 }
-            }
+            },
+            "meanwhileDigestSettings": "Дайджест «Тем временем»",
+            "meanwhileDigestEnabled": "Публиковать карту интерлюдии в конце хода",
+            "meanwhileDigestEnabledHelp": "Одна публичная карта для чтения вслух «Тем временем в Украденных Землях» на каждый конец хода.",
+            "meanwhileDigestMaxBeats": "Макс. событий на карту",
+            "meanwhileDigestMaxBeatsHelp": "1–6; интерлюдия намеренно остаётся короткой (по умолчанию 4)."
         },
         "chatMessages": {
             "annexation": {

@@ -2321,7 +2321,12 @@
                 "warThreat": {
                     "escalated": "Zagrożenie {name} narasta (poziom {level}/{max}). Presja na królestwo rośnie."
                 }
-            }
+            },
+            "meanwhileDigestSettings": "Skrót „Tymczasem”",
+            "meanwhileDigestEnabled": "Publikuj kartę przerywnika na koniec tury",
+            "meanwhileDigestEnabledHelp": "Jedna publiczna karta do odczytania „Tymczasem na Skradzionych Ziemiach” na koniec tury.",
+            "meanwhileDigestMaxBeats": "Maks. scen na kartę",
+            "meanwhileDigestMaxBeatsHelp": "1–6; przerywnik celowo pozostaje krótki (domyślnie 4)."
         },
         "chatMessages": {
             "annexation": {

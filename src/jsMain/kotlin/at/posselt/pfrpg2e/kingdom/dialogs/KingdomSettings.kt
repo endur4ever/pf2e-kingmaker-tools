@@ -27,6 +27,7 @@ import at.posselt.pfrpg2e.kingdom.pacingLootImbalanceRange
 import at.posselt.pfrpg2e.kingdom.modifiers.evaluation.UntrainedProficiencyMode
 import at.posselt.pfrpg2e.toCamelCase
 import at.posselt.pfrpg2e.utils.buildPromise
+import at.posselt.pfrpg2e.kingdom.digest.MAX_DIGEST_BEATS
 import at.posselt.pfrpg2e.utils.t
 import at.posselt.pfrpg2e.utils.toRecord
 import com.foundryvtt.core.AnyObject
@@ -104,6 +105,8 @@ class KingdomSettingsDataModel(
             boolean("enableAnarchyActivityGating")
             boolean("enableStrictPhaseGating")
             boolean("enableCalendarMonthEndTurn")
+            boolean("meanwhileDigestEnabled")
+            int("meanwhileDigestMaxBeats")
             boolean("vkCharterExtraSkills")
             boolean("vkHeartlandExtraSkills")
             boolean("vkExtraAbilityBoost")
@@ -565,6 +568,24 @@ class KingdomSettingsApplication(
                             label = t("kingdom.enableCalendarMonthEndTurn"),
                             value = settings.enableCalendarMonthEndTurn == true,
                             help = t("kingdom.enableCalendarMonthEndTurnHelp"),
+                        ),
+                    ),
+                ),
+                Section(
+                    legend = t("kingdom.meanwhileDigestSettings"),
+                    formRows = listOf(
+                        CheckboxInput(
+                            name = "meanwhileDigestEnabled",
+                            label = t("kingdom.meanwhileDigestEnabled"),
+                            // null = enabled: the card ships on by default
+                            value = settings.meanwhileDigestEnabled != false,
+                            help = t("kingdom.meanwhileDigestEnabledHelp"),
+                        ),
+                        NumberInput(
+                            name = "meanwhileDigestMaxBeats",
+                            label = t("kingdom.meanwhileDigestMaxBeats"),
+                            value = settings.meanwhileDigestMaxBeats ?: MAX_DIGEST_BEATS,
+                            help = t("kingdom.meanwhileDigestMaxBeatsHelp"),
                         ),
                     ),
                 ),

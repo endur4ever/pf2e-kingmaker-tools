@@ -2321,7 +2321,12 @@
                 "warThreat": {
                     "escalated": "{name}威胁升级（第 {level}/{max} 阶段）。王国承受的压力上升。"
                 }
-            }
+            },
+            "meanwhileDigestSettings": "“与此同时”摘要",
+            "meanwhileDigestEnabled": "回合结束时发布插曲卡片",
+            "meanwhileDigestEnabledHelp": "每次回合结束发布一张公开朗读卡片“与此同时，在盗贼之地”。",
+            "meanwhileDigestMaxBeats": "每张卡片最多节拍数",
+            "meanwhileDigestMaxBeatsHelp": "1–6；插曲有意保持简短（默认 4）。"
         },
         "chatMessages": {
             "annexation": {

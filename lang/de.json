@@ -2321,7 +2321,12 @@
                 "warThreat": {
                     "escalated": "Die Bedrohung {name} eskaliert (Stufe {level}/{max}). Der Druck auf das Königreich steigt."
                 }
-            }
+            },
+            "meanwhileDigestSettings": "Unterdessen-Digest",
+            "meanwhileDigestEnabled": "Zwischenspiel-Karte beim Zugende posten",
+            "meanwhileDigestEnabledHelp": "Eine öffentliche Vorlese-Karte „Unterdessen in den Gestohlenen Landen“ pro Zugende.",
+            "meanwhileDigestMaxBeats": "Max. Momente pro Karte",
+            "meanwhileDigestMaxBeatsHelp": "1–6; das Zwischenspiel bleibt bewusst kurz (Standard 4)."
         },
         "chatMessages": {
             "addHuntAndGather": {

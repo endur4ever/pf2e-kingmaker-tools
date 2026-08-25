@@ -160,6 +160,10 @@ external interface KingdomSettings {
     var vkHeartlandExtraSkills: Boolean?
     var vkExtraAbilityBoost: Boolean?
     var enableCalendarMonthEndTurn: Boolean?
+
+    /** Meanwhile digest (End Turn interlude card). Null = enabled with MAX_DIGEST_BEATS. */
+    var meanwhileDigestEnabled: Boolean?
+    var meanwhileDigestMaxBeats: Int?
 }
 
 @JsPlainObject

@@ -194,6 +194,12 @@ external interface DigestCardContext {
  * (window 1, the SS2.1 default); an older record means missed turns and a stale baseline.
  * No beats => no card, never an empty one.
  */
+/** Null = on: the digest ships enabled and a GM opts OUT (kingdom settings). */
+fun digestEnabled(setting: Boolean?): Boolean = setting != false
+
+/** The GM's beat budget, clamped to the plan's 1..6; null = MAX_DIGEST_BEATS. */
+fun digestBeatCap(setting: Int?): Int = (setting ?: MAX_DIGEST_BEATS).coerceIn(1, 6)
+
 /** The full End Turn event assembly, extracted so the feed-kind threading is testable. */
 fun buildEndTurnDigestEvents(
     caravanEvents: List<CaravanEvent>,
@@ -225,7 +231,10 @@ suspend fun postEndTurnDigest(
     preTickThreats: List<RawWarThreat>,
     postTickThreats: List<RawWarThreat>,
     turn: Int,
+    enabledSetting: Boolean? = null,
+    maxBeatsSetting: Int? = null,
 ) {
+    if (!digestEnabled(enabledSetting)) return
     val events = buildEndTurnDigestEvents(
         caravanEvents = caravanEvents,
         shipmentEvents = shipmentEvents,
@@ -236,7 +245,11 @@ suspend fun postEndTurnDigest(
     )
     val previousBeatIds = runCatching { digestDedupBaseline(actor.lastDigestRecord(), turn) }
         .getOrDefault(emptySet())
-    val beats = selectDigestBeats(events, previousBeatIds)
+    val beats = selectDigestBeats(
+        events,
+        previousBeatIds,
+        cap = digestBeatCap(maxBeatsSetting),
+    )
     if (beats.isEmpty()) return
     // This tail runs AFTER the tick is committed; a failure here (missing template in a partial
     // deploy, a rejected flag write) must degrade to a missing card, never abort commitTurn's

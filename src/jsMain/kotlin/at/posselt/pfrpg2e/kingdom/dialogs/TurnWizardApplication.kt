@@ -756,6 +756,8 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
         preTickThreats = preTickThreats,
         postTickThreats = kingdom.warThreats?.toList() ?: emptyList(),
         turn = currentTurn,
+        enabledSetting = kingdom.settings.meanwhileDigestEnabled,
+        maxBeatsSetting = kingdom.settings.meanwhileDigestMaxBeats,
     )
 
     val changesText = tickResult.changes

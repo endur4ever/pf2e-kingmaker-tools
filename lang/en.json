@@ -2443,7 +2443,12 @@
                 "warThreat": {
                     "escalated": "The {name} threat escalates (stage {level}/{max}). Pressure on the kingdom rises."
                 }
-            }
+            },
+            "meanwhileDigestSettings": "Meanwhile Digest",
+            "meanwhileDigestEnabled": "Post the End Turn interlude card",
+            "meanwhileDigestEnabledHelp": "One public read-aloud \"Meanwhile in the Stolen Lands\" card per End Turn.",
+            "meanwhileDigestMaxBeats": "Max beats per card",
+            "meanwhileDigestMaxBeatsHelp": "1–6; the interlude stays short by design (default 4)."
         },
         "chatMessages": {
             "calendarBridgeMissing": "<strong>Kingmaker Tools:</strong> Seasons &amp; Stars is active, but the <em>Simple Calendar Compatibility Bridge</em> module is not. Calendar notes (expeditions, weather, end-of-turn and camp summaries) are being silently skipped. Install <a href=\"{url}\">the compatibility bridge</a> (package id <code>{packageId}</code>) to enable them. This notice appears only once.",

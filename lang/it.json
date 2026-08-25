@@ -2321,7 +2321,12 @@
                 "warThreat": {
                     "escalated": "La minaccia {name} si intensifica (livello {level}/{max}). La pressione sul regno cresce."
                 }
-            }
+            },
+            "meanwhileDigestSettings": "Digest «Nel frattempo»",
+            "meanwhileDigestEnabled": "Pubblica la carta interludio a fine turno",
+            "meanwhileDigestEnabledHelp": "Una carta pubblica da leggere ad alta voce «Nel frattempo, nelle Terre Rubate» per ogni fine turno.",
+            "meanwhileDigestMaxBeats": "Momenti max per carta",
+            "meanwhileDigestMaxBeatsHelp": "1–6; l’interludio resta breve di proposito (predefinito 4)."
         },
         "chatMessages": {
             "annexation": {

@@ -2321,7 +2321,12 @@
                 "warThreat": {
                     "escalated": "La menace {name} s’intensifie (niveau {level}/{max}). La pression sur le royaume augmente."
                 }
-            }
+            },
+            "meanwhileDigestSettings": "Digest « Pendant ce temps »",
+            "meanwhileDigestEnabled": "Publier la carte d’interlude en fin de tour",
+            "meanwhileDigestEnabledHelp": "Une carte publique à lire à voix haute « Pendant ce temps, dans les Terres Volées » par fin de tour.",
+            "meanwhileDigestMaxBeats": "Temps forts max par carte",
+            "meanwhileDigestMaxBeatsHelp": "1–6 ; l’interlude reste court à dessein (4 par défaut)."
         },
         "chatMessages": {
             "annexation": {

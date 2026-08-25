@@ -240,6 +240,18 @@ class DigestAdapterTest {
     }
 
     @Test
+    fun configDefaultsAreOnAndFourWithHardClamps() {
+        assertTrue(digestEnabled(null), "null = shipped-on default")
+        assertTrue(digestEnabled(true))
+        assertEquals(false, digestEnabled(false))
+        assertEquals(MAX_DIGEST_BEATS, digestBeatCap(null))
+        assertEquals(1, digestBeatCap(0), "0 clamps up -- disabling is the checkbox, not the cap")
+        assertEquals(1, digestBeatCap(-3))
+        assertEquals(6, digestBeatCap(99), "plan's 1..6 ceiling")
+        assertEquals(3, digestBeatCap(3))
+    }
+
+    @Test
     fun selectionCapsAndDedupsPerRoute() {
         // two events on the same route: per-source dedup keeps the higher-scoring one
         val sameRoute = caravanDigestEvents(

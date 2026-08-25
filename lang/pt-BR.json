@@ -2321,7 +2321,12 @@
                 "warThreat": {
                     "escalated": "A ameaça {name} se intensifica (nível {level}/{max}). A pressão sobre o reino aumenta."
                 }
-            }
+            },
+            "meanwhileDigestSettings": "Resumo “Enquanto isso”",
+            "meanwhileDigestEnabled": "Publicar a carta de interlúdio no fim do turno",
+            "meanwhileDigestEnabledHelp": "Uma carta pública para leitura em voz alta “Enquanto isso, nas Terras Roubadas” por fim de turno.",
+            "meanwhileDigestMaxBeats": "Máx. de cenas por carta",
+            "meanwhileDigestMaxBeatsHelp": "1–6; o interlúdio permanece curto de propósito (padrão 4)."
         },
         "chatMessages": {
             "annexation": {
