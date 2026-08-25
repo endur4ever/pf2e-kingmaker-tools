@@ -2173,34 +2173,40 @@
         margin-top: 4px;
     }
 
+    /* The NAME is the row's most important column, so it gets the largest share and a floor it
+       never shrinks past; the note yields first when the row is tight. Without the floor the
+       name is the only freely-shrinkable item and collapses to nothing. */
     .km-hex-loot-link {
-        flex: 1 1 auto;
-        min-width: 0;
+        flex: 3 1 7rem;
+        min-width: 5rem;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
     }
 
     .km-hex-loot-qty {
-        flex: 0 0 3.5rem;
+        flex: 0 0 3.2rem;
+        min-width: 3.2rem;
     }
 
     .km-hex-loot-gp {
-        flex: 0 0 5rem;
+        flex: 0 0 4.5rem;
+        min-width: 4.5rem;
     }
 
     .km-hex-loot-cursed {
-        flex: 0 0 auto;
+        flex: 0 1 auto;
         display: flex;
         align-items: center;
         gap: 3px;
         font-size: 0.8em;
         white-space: nowrap;
+        overflow: hidden;
     }
 
     .km-hex-loot-note {
-        flex: 0 1 8rem;
-        min-width: 0;
+        flex: 1 1 4rem;
+        min-width: 3rem;
     }
 
     .km-hex-loot-remove {
