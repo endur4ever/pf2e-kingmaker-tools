@@ -8,6 +8,7 @@ import at.posselt.pfrpg2e.kingdom.data.toModel
 import at.posselt.pfrpg2e.kingdom.pressure.ScheduledPressure
 import at.posselt.pfrpg2e.kingdom.pressure.dueFirings
 import at.posselt.pfrpg2e.kingdom.pressure.buildPressureDigestContext
+import at.posselt.pfrpg2e.kingdom.pressure.isPressureResolved
 import at.posselt.pfrpg2e.utils.postChatTemplate
 import at.posselt.pfrpg2e.kingdom.downtime.DowntimeProject
 import at.posselt.pfrpg2e.kingdom.downtime.DowntimeStatus
@@ -472,14 +473,7 @@ private suspend fun tickScheduledPressures(game: Game, worldTime: Int, daysPasse
 
 		val isResolved: (ScheduledPressure) -> Boolean = resolved@{ schedule ->
 			val raw = rawById[schedule.id] ?: return@resolved false
-			val ref = raw.resolveConditionRef ?: return@resolved false
-			when (raw.resolveConditionKind) {
-				"questCompleted" -> kingdom.quests?.any { it.id == ref && it.status == "completed" } == true
-				"threatResolved" -> kingdom.warThreats?.any {
-					it.id == ref && (it.status != WarThreatStatus.ACTIVE.value || it.peaceSettled == true)
-				} == true
-				else -> false
-			}
+			isPressureResolved(raw, kingdom)
 		}
 
 		val firings = dueFirings(models, fromDay, toDay, isResolved)

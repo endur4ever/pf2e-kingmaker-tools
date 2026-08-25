@@ -2156,7 +2156,54 @@
                 "encounterPrompt": "{name}: rozegraj spotkanie \"{ref}\" (eskalacja {escalation} — rozważ podniesienie ST/surowości).",
                 "escalationHint": "Eskalacja {count}: rozważ podniesienie ST/surowości — nigdy nie stosowane automatycznie.",
                 "allConfirmed": "Zatwierdzono {count} zdarzeń.",
-                "allDismissed": "Odrzucono {count} zdarzeń."
+                "allDismissed": "Odrzucono {count} zdarzeń.",
+                "title": "Terminy",
+                "manage": "Zarządzaj",
+                "none": "Brak zaplanowanych nacisków.",
+                "nextFiring": "Następne uruchomienie",
+                "addSchedule": "Dodaj zaplanowany nacisk",
+                "editSchedule": "Edytuj zaplanowany nacisk",
+                "presetLabel": "Szablon",
+                "startInDays": "Pierwsze uruchomienie za (dni)",
+                "endInDays": "Kończy się po (dniach)",
+                "endInDaysHelp": "0 = bez końca. Szablon „Pora Rozkwitu” używa 90 dni — dostosuj do rzeczywistego ostatniego dnia pory.",
+                "recurrenceLabel": "Powtarzanie",
+                "payloadKindLabel": "Efekt",
+                "beatTextLabel": "Tekst fabularny",
+                "beatTextHelp": "Publikowany publicznie po zatwierdzeniu (tylko postBeat).",
+                "eventRefLabel": "Wydarzenie królestwa (spawnEvent)",
+                "clockRefLabel": "Zegar kampanii (advanceClock)",
+                "encounterRefLabel": "Odniesienie spotkania (spawnEncounter)",
+                "resolveKindLabel": "Rozwiązuje się, gdy",
+                "resolveKindHelp": "Sprawdzane przy każdym ticku; rozwiązany plan zawiesza się bez uruchomienia.",
+                "resolveRefLabel": "Powiązany wpis",
+                "noSelection": "—",
+                "preset": {
+                    "custom": "Własny",
+                    "trollSightingsName": "Obserwacje trolli",
+                    "cultEventsName": "Kultowe wydarzenia Pory Rozkwitu",
+                    "stagLordName": "Termin Jeleniego Pana",
+                    "stagLordBeat": "Cierpliwość Brevoy się kończy: przybywa wysłannik z konsekwencjami niespłaconego długu wobec korony."
+                },
+                "recurrence": {
+                    "none": "Jednorazowe",
+                    "daily": "Codziennie",
+                    "weekly": "Co tydzień",
+                    "monthly": "Co miesiąc",
+                    "unknown": "Nieznane"
+                },
+                "resolve": {
+                    "none": "Nigdy (ręcznie)",
+                    "questCompleted": "Zadanie ukończone",
+                    "threatResolved": "Zagrożenie rozwiązane"
+                },
+                "countdown": {
+                    "inDays": "za {days} dni",
+                    "ended": "zakończone",
+                    "resolved": "rozwiązane",
+                    "inactive": "nieaktywne",
+                    "unknown": "—"
+                }
             },
             "forecast": {
                 "companionArrives": "{name} przybywa",

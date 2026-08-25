@@ -2278,7 +2278,54 @@
                 "encounterPrompt": "{name}: run encounter \"{ref}\" (escalation {escalation} — consider a DC/severity step).",
                 "escalationHint": "Escalation {count}: consider a DC/severity step — never applied automatically.",
                 "allConfirmed": "{count} firings confirmed.",
-                "allDismissed": "{count} firings dismissed."
+                "allDismissed": "{count} firings dismissed.",
+                "title": "Deadlines",
+                "manage": "Manage",
+                "none": "No scheduled pressures.",
+                "nextFiring": "Next firing",
+                "addSchedule": "Add Scheduled Pressure",
+                "editSchedule": "Edit Scheduled Pressure",
+                "presetLabel": "Preset",
+                "startInDays": "First firing in (days)",
+                "endInDays": "Ends after (days)",
+                "endInDaysHelp": "0 = no end. The Season of Bloom preset uses 90 days — adjust to the season’s real last day.",
+                "recurrenceLabel": "Recurrence",
+                "payloadKindLabel": "Payload",
+                "beatTextLabel": "Beat text",
+                "beatTextHelp": "Posted publicly on confirm (postBeat payloads only).",
+                "eventRefLabel": "Kingdom event (spawnEvent)",
+                "clockRefLabel": "Campaign clock (advanceClock)",
+                "encounterRefLabel": "Encounter reference (spawnEncounter)",
+                "resolveKindLabel": "Resolves when",
+                "resolveKindHelp": "Polled each tick; a resolved schedule suspends without firing.",
+                "resolveRefLabel": "Linked record",
+                "noSelection": "—",
+                "preset": {
+                    "custom": "Custom",
+                    "trollSightingsName": "Troll Sightings",
+                    "cultEventsName": "Season of Bloom cult events",
+                    "stagLordName": "Stag Lord deadline",
+                    "stagLordBeat": "Brevoy’s patience runs out: an envoy arrives with consequences for the unpaid debt to the crown."
+                },
+                "recurrence": {
+                    "none": "One-shot",
+                    "daily": "Daily",
+                    "weekly": "Weekly",
+                    "monthly": "Monthly",
+                    "unknown": "Unknown"
+                },
+                "resolve": {
+                    "none": "Never (manual)",
+                    "questCompleted": "Quest completed",
+                    "threatResolved": "Threat resolved"
+                },
+                "countdown": {
+                    "inDays": "in {days} days",
+                    "ended": "ended",
+                    "resolved": "resolved",
+                    "inactive": "inactive",
+                    "unknown": "—"
+                }
             },
             "forecast": {
                 "companionArrives": "{name} arrives",

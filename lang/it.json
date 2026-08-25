@@ -2156,7 +2156,54 @@
                 "encounterPrompt": "{name}: esegui l’incontro \"{ref}\" (escalation {escalation} — valuta un aumento di CD/severità).",
                 "escalationHint": "Escalation {count}: valuta un aumento di CD/severità — mai applicato in automatico.",
                 "allConfirmed": "{count} attivazioni confermate.",
-                "allDismissed": "{count} attivazioni ignorate."
+                "allDismissed": "{count} attivazioni ignorate.",
+                "title": "Scadenze",
+                "manage": "Gestisci",
+                "none": "Nessuna pressione programmata.",
+                "nextFiring": "Prossima attivazione",
+                "addSchedule": "Aggiungi pressione programmata",
+                "editSchedule": "Modifica pressione programmata",
+                "presetLabel": "Modello",
+                "startInDays": "Prima attivazione tra (giorni)",
+                "endInDays": "Termina dopo (giorni)",
+                "endInDaysHelp": "0 = senza fine. Il modello «Stagione della Fioritura» usa 90 giorni — regola sull’ultimo giorno reale della stagione.",
+                "recurrenceLabel": "Ricorrenza",
+                "payloadKindLabel": "Effetto",
+                "beatTextLabel": "Testo narrativo",
+                "beatTextHelp": "Pubblicato pubblicamente alla conferma (solo postBeat).",
+                "eventRefLabel": "Evento del regno (spawnEvent)",
+                "clockRefLabel": "Orologio di campagna (advanceClock)",
+                "encounterRefLabel": "Riferimento incontro (spawnEncounter)",
+                "resolveKindLabel": "Si risolve quando",
+                "resolveKindHelp": "Controllato a ogni tick; un piano risolto si sospende senza attivarsi.",
+                "resolveRefLabel": "Registro collegato",
+                "noSelection": "—",
+                "preset": {
+                    "custom": "Personalizzato",
+                    "trollSightingsName": "Avvistamenti di troll",
+                    "cultEventsName": "Eventi del culto della Fioritura",
+                    "stagLordName": "Scadenza del Signore dei Cervi",
+                    "stagLordBeat": "La pazienza del Brevoy si esaurisce: arriva un emissario con le conseguenze del debito non pagato alla corona."
+                },
+                "recurrence": {
+                    "none": "Singola",
+                    "daily": "Giornaliera",
+                    "weekly": "Settimanale",
+                    "monthly": "Mensile",
+                    "unknown": "Sconosciuta"
+                },
+                "resolve": {
+                    "none": "Mai (manuale)",
+                    "questCompleted": "Missione completata",
+                    "threatResolved": "Minaccia risolta"
+                },
+                "countdown": {
+                    "inDays": "tra {days} giorni",
+                    "ended": "terminata",
+                    "resolved": "risolta",
+                    "inactive": "inattiva",
+                    "unknown": "—"
+                }
             },
             "forecast": {
                 "companionArrives": "{name} arriva",

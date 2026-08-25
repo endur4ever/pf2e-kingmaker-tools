@@ -2156,7 +2156,54 @@
                 "encounterPrompt": "{name}: conduza o encontro \"{ref}\" (escalada {escalation} — considere um passo de CD/severidade).",
                 "escalationHint": "Escalada {count}: considere um passo de CD/severidade — nunca aplicado automaticamente.",
                 "allConfirmed": "{count} disparos confirmados.",
-                "allDismissed": "{count} disparos dispensados."
+                "allDismissed": "{count} disparos dispensados.",
+                "title": "Prazos",
+                "manage": "Gerenciar",
+                "none": "Nenhuma pressão agendada.",
+                "nextFiring": "Próximo disparo",
+                "addSchedule": "Adicionar pressão agendada",
+                "editSchedule": "Editar pressão agendada",
+                "presetLabel": "Modelo",
+                "startInDays": "Primeiro disparo em (dias)",
+                "endInDays": "Termina após (dias)",
+                "endInDaysHelp": "0 = sem fim. O modelo “Estação do Florescimento” usa 90 dias — ajuste ao último dia real da estação.",
+                "recurrenceLabel": "Recorrência",
+                "payloadKindLabel": "Efeito",
+                "beatTextLabel": "Texto narrativo",
+                "beatTextHelp": "Publicado publicamente ao confirmar (somente postBeat).",
+                "eventRefLabel": "Evento do reino (spawnEvent)",
+                "clockRefLabel": "Relógio de campanha (advanceClock)",
+                "encounterRefLabel": "Referência de encontro (spawnEncounter)",
+                "resolveKindLabel": "Resolve quando",
+                "resolveKindHelp": "Verificado a cada tick; um plano resolvido suspende sem disparar.",
+                "resolveRefLabel": "Registro vinculado",
+                "noSelection": "—",
+                "preset": {
+                    "custom": "Personalizado",
+                    "trollSightingsName": "Avistamentos de trolls",
+                    "cultEventsName": "Eventos do culto do Florescimento",
+                    "stagLordName": "Prazo do Senhor Cervo",
+                    "stagLordBeat": "A paciência de Brevoy se esgota: um emissário chega com consequências pela dívida não paga à coroa."
+                },
+                "recurrence": {
+                    "none": "Único",
+                    "daily": "Diária",
+                    "weekly": "Semanal",
+                    "monthly": "Mensal",
+                    "unknown": "Desconhecida"
+                },
+                "resolve": {
+                    "none": "Nunca (manual)",
+                    "questCompleted": "Missão concluída",
+                    "threatResolved": "Ameaça resolvida"
+                },
+                "countdown": {
+                    "inDays": "em {days} dias",
+                    "ended": "encerrado",
+                    "resolved": "resolvido",
+                    "inactive": "inativo",
+                    "unknown": "—"
+                }
             },
             "forecast": {
                 "companionArrives": "{name} chega",

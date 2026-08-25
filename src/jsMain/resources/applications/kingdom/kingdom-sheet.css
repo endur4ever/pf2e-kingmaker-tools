@@ -2752,3 +2752,43 @@ fieldset.km-hex-editor-links {
     opacity: 0.7;
     padding: 0.25rem;
 }
+
+/* Deadlines section (scheduled pressures, Campaign tab) */
+.km-kingdom-sheet .km-deadlines h2 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.km-kingdom-sheet .km-deadlines-manage {
+    width: auto;
+    font-size: 0.7em;
+    padding: 0.2rem 0.6rem;
+    line-height: 1.4;
+}
+
+.km-kingdom-sheet .km-deadline-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.km-kingdom-sheet .km-deadline-table th {
+    text-align: left;
+    font-size: 0.85em;
+    opacity: 0.75;
+    padding: 0.2rem 0.4rem;
+    border-bottom: 1px solid rgba(153, 153, 153, 0.5);
+}
+
+.km-kingdom-sheet .km-deadline-table td {
+    padding: 0.25rem 0.4rem;
+}
+
+.km-kingdom-sheet .km-deadline-inactive {
+    opacity: 0.5;
+}
+
+.km-kingdom-sheet .km-deadline-resolved td:first-child::after {
+    content: " \2713";
+    color: var(--color-level-success, #2c8a2c);
+}

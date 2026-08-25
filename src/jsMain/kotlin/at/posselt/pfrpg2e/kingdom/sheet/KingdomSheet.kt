@@ -83,7 +83,9 @@ import at.posselt.pfrpg2e.kingdom.data.RawCommodities
 import at.posselt.pfrpg2e.kingdom.data.RawQuestCompletionSnapshot
 import at.posselt.pfrpg2e.kingdom.data.limitBy
 import at.posselt.pfrpg2e.kingdom.data.RawConsumption
+import at.posselt.pfrpg2e.utils.t
 import at.posselt.pfrpg2e.utils.typeSafeUpdate
+import at.posselt.pfrpg2e.utils.worldTimeSeconds
 import com.foundryvtt.core.grid.GridOffset2D
 import at.posselt.pfrpg2e.kingdom.data.RawFactionStandingEntry
 import at.posselt.pfrpg2e.kingdom.data.RawGroup
@@ -179,6 +181,9 @@ import at.posselt.pfrpg2e.kingdom.rollCleanseItem
 import at.posselt.pfrpg2e.kingdom.computeCaravanRoute
 import at.posselt.pfrpg2e.kingdom.currentSeasonalModifiers
 import at.posselt.pfrpg2e.kingdom.forecast.buildForecast
+import at.posselt.pfrpg2e.resting.DAY_SECONDS
+import at.posselt.pfrpg2e.kingdom.dialogs.DeadlinesDialog
+import at.posselt.pfrpg2e.kingdom.sheet.contexts.buildDeadlinesContext
 import at.posselt.pfrpg2e.kingdom.pings.buildPlayerFeed
 import at.posselt.pfrpg2e.kingdom.pings.postPlayerPings
 import at.posselt.pfrpg2e.kingdom.pings.pingsCursor
@@ -1580,6 +1585,10 @@ class KingdomSheet(
             "configure-heartlands" -> HeartlandManagement(kingdomActor = actor).launch()
             "configure-feats" -> FeatManagement(kingdomActor = actor).launch()
             "open-clock-dialog" -> CampaignClockDialog(kingdomActor = actor).launch()
+
+            "manage-deadlines" -> {
+                if (game.user.isGM) DeadlinesDialog(kingdomActor = actor).launch()
+            }
             "structures-import" -> buildPromise { importStructures() }
 
             "create-settlement" -> {
@@ -3719,6 +3728,11 @@ class KingdomSheet(
             ),
             showDetailedMatrix = showDetailedMatrix,
             campaignClocks = kingdom.campaignClocks.toDashboardContext(isGM),
+            deadlines = buildDeadlinesContext(
+                isGM = isGM,
+                kingdom = kingdom,
+                currentDay = game.time.worldTimeSeconds.floorDiv(DAY_SECONDS),
+            ),
             generatedQuestCount = generatedQuestCount,
             activeEventCount = activeEventCount,
             questTimerChanges = emptyArray(),

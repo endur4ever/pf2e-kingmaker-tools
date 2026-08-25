@@ -2156,7 +2156,54 @@
                 "encounterPrompt": "{name}：进行遭遇“{ref}”（升级 {escalation}——可考虑提高 DC/强度）。",
                 "escalationHint": "升级 {count}：可考虑提高 DC/强度——绝不会自动套用。",
                 "allConfirmed": "已确认 {count} 次触发。",
-                "allDismissed": "已忽略 {count} 次触发。"
+                "allDismissed": "已忽略 {count} 次触发。",
+                "title": "期限",
+                "manage": "管理",
+                "none": "没有定时压力。",
+                "nextFiring": "下次触发",
+                "addSchedule": "添加定时压力",
+                "editSchedule": "编辑定时压力",
+                "presetLabel": "预设",
+                "startInDays": "首次触发（天后）",
+                "endInDays": "结束于（天后）",
+                "endInDaysHelp": "0 = 不结束。“繁花季”预设使用 90 天——请调整为该季节真正的最后一天。",
+                "recurrenceLabel": "重复",
+                "payloadKindLabel": "效果",
+                "beatTextLabel": "剧情文本",
+                "beatTextHelp": "确认后公开发布（仅限 postBeat）。",
+                "eventRefLabel": "王国事件（spawnEvent）",
+                "clockRefLabel": "战役时钟（advanceClock）",
+                "encounterRefLabel": "遭遇引用（spawnEncounter）",
+                "resolveKindLabel": "解决条件",
+                "resolveKindHelp": "每次时间推进时检查；已解决的计划会暂停而不触发。",
+                "resolveRefLabel": "关联记录",
+                "noSelection": "—",
+                "preset": {
+                    "custom": "自定义",
+                    "trollSightingsName": "巨魔目击",
+                    "cultEventsName": "繁花季邪教事件",
+                    "stagLordName": "雄鹿领主期限",
+                    "stagLordBeat": "布雷沃伊的耐心耗尽：一名使者到来，为未偿还王室的债务带来后果。"
+                },
+                "recurrence": {
+                    "none": "一次性",
+                    "daily": "每天",
+                    "weekly": "每周",
+                    "monthly": "每月",
+                    "unknown": "未知"
+                },
+                "resolve": {
+                    "none": "从不（手动）",
+                    "questCompleted": "任务完成",
+                    "threatResolved": "威胁解除"
+                },
+                "countdown": {
+                    "inDays": "{days} 天后",
+                    "ended": "已结束",
+                    "resolved": "已解决",
+                    "inactive": "未启用",
+                    "unknown": "—"
+                }
             },
             "forecast": {
                 "companionArrives": "{name} 抵达",

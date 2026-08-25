@@ -124,6 +124,9 @@ external interface KingdomSheetContext : ValidatedHandlebarsContext {
 
     /** Unread feed bell for the CURRENT user; null only when the kingdom itself is missing. */
     val pingsContext: PingsPanelContext?
+
+    /** Deadlines rows for the Campaign tab. GM-only by DATA -- null for players. */
+    val deadlines: Array<DeadlineRowContext>?
     val showDetailedMatrix: Boolean
     val campaignClocks: CampaignClockContext
     val generatedQuestCount: Int

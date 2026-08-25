@@ -2156,7 +2156,54 @@
                 "encounterPrompt": "{name}: проведите столкновение «{ref}» (эскалация {escalation} — рассмотрите шаг КС/тяжести).",
                 "escalationHint": "Эскалация {count}: рассмотрите шаг КС/тяжести — никогда не применяется автоматически.",
                 "allConfirmed": "Подтверждено срабатываний: {count}.",
-                "allDismissed": "Отклонено срабатываний: {count}."
+                "allDismissed": "Отклонено срабатываний: {count}.",
+                "title": "Сроки",
+                "manage": "Управлять",
+                "none": "Нет запланированных угроз.",
+                "nextFiring": "Следующее срабатывание",
+                "addSchedule": "Добавить запланированную угрозу",
+                "editSchedule": "Изменить запланированную угрозу",
+                "presetLabel": "Шаблон",
+                "startInDays": "Первое срабатывание через (дней)",
+                "endInDays": "Заканчивается через (дней)",
+                "endInDaysHelp": "0 = без конца. Шаблон «Сезон цветения» использует 90 дней — подстройте под реальный последний день сезона.",
+                "recurrenceLabel": "Повторение",
+                "payloadKindLabel": "Эффект",
+                "beatTextLabel": "Сюжетный текст",
+                "beatTextHelp": "Публикуется открыто при подтверждении (только postBeat).",
+                "eventRefLabel": "Событие королевства (spawnEvent)",
+                "clockRefLabel": "Часы кампании (advanceClock)",
+                "encounterRefLabel": "Ссылка на столкновение (spawnEncounter)",
+                "resolveKindLabel": "Завершается, когда",
+                "resolveKindHelp": "Проверяется каждый тик; завершённый план приостанавливается без срабатывания.",
+                "resolveRefLabel": "Связанная запись",
+                "noSelection": "—",
+                "preset": {
+                    "custom": "Свой",
+                    "trollSightingsName": "Появления троллей",
+                    "cultEventsName": "Культовые события Сезона цветения",
+                    "stagLordName": "Срок Оленьего Лорда",
+                    "stagLordBeat": "Терпение Бревоя иссякает: прибывает посланник с последствиями за неуплаченный долг короне."
+                },
+                "recurrence": {
+                    "none": "Однократно",
+                    "daily": "Ежедневно",
+                    "weekly": "Еженедельно",
+                    "monthly": "Ежемесячно",
+                    "unknown": "Неизвестно"
+                },
+                "resolve": {
+                    "none": "Никогда (вручную)",
+                    "questCompleted": "Задание выполнено",
+                    "threatResolved": "Угроза устранена"
+                },
+                "countdown": {
+                    "inDays": "через {days} дн.",
+                    "ended": "завершено",
+                    "resolved": "решено",
+                    "inactive": "неактивно",
+                    "unknown": "—"
+                }
             },
             "forecast": {
                 "companionArrives": "{name} прибывает",

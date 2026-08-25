@@ -103,3 +103,28 @@ fun dueFirings(
     }
     return out.sortedBy { it.day }
 }
+
+/**
+ * The next day this schedule will fire STRICTLY after [afterDay], or null when it never will
+ * (inactive, resolved, one-shot already fired, or recurrence ended). Mirrors [dueFirings]'
+ * stepping exactly -- the Deadlines rows must show the same day the tick will actually fire on.
+ */
+fun nextFiringDay(
+    schedule: ScheduledPressure,
+    afterDay: Int,
+    resolved: Boolean = false,
+): Int? {
+    if (!schedule.active || resolved) return null
+    val floor = maxOf(afterDay, schedule.lastFiredDay ?: Int.MIN_VALUE)
+    val ceiling = schedule.endDay ?: Int.MAX_VALUE
+    val stride = schedule.recurrence.strideDays()
+    if (stride == null) {
+        return schedule.startDay.takeIf { it > floor && it <= ceiling }
+    }
+    var day = schedule.startDay
+    if (day <= floor) {
+        val steps = (floor - day) / stride + 1
+        day += steps * stride
+    }
+    return day.takeIf { it <= ceiling }
+}

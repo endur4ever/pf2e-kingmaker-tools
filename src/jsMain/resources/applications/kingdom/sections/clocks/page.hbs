@@ -84,6 +84,45 @@
         {{/if}}
     </section>
 
+    {{#if isGM}}
+    {{!-- isGM here is LAYOUT (an empty array is falsy in Handlebars, and the Manage button must
+          show for a GM with zero schedules); authorization is the DATA: deadlines is null for
+          players, so a mis-gated template still has nothing to leak. --}}
+    <section class="km-kingdom-sheet-section km-deadlines">
+        <h2>{{localizeKM "kingdom.deadlines.title"}}
+            <button type="button" class="km-deadlines-manage" data-action="manage-deadlines">
+                {{localizeKM "kingdom.deadlines.manage"}}
+            </button>
+        </h2>
+        {{#if deadlines.length}}
+            <table class="km-deadline-table">
+                <thead>
+                <tr>
+                    <th>{{localizeKM "applications.name"}}</th>
+                    <th>{{localizeKM "kingdom.deadlines.nextFiring"}}</th>
+                    <th>{{localizeKM "kingdom.deadlines.recurrenceLabel"}}</th>
+                    <th>{{localizeKM "kingdom.deadlines.payloadKindLabel"}}</th>
+                    <th>{{localizeKM "kingdom.deadlines.resolveKindLabel"}}</th>
+                </tr>
+                </thead>
+                <tbody>
+                {{#each deadlines}}
+                    <tr class="km-deadline-row{{#if this.inactive}} km-deadline-inactive{{/if}}{{#if this.resolved}} km-deadline-resolved{{/if}}">
+                        <td>{{this.name}}</td>
+                        <td>{{this.countdownLabel}}</td>
+                        <td>{{this.recurrenceLabel}}</td>
+                        <td>{{this.payloadLabel}}</td>
+                        <td>{{#if this.resolveLabel}}{{this.resolveLabel}}{{else}}&mdash;{{/if}}</td>
+                    </tr>
+                {{/each}}
+                </tbody>
+            </table>
+        {{else}}
+            <p>{{localizeKM "kingdom.deadlines.none"}}</p>
+        {{/if}}
+    </section>
+    {{/if}}
+
     {{#if armyPressureContext.enabled}}
     <section class="km-kingdom-sheet-section km-kingdom-sheet-section-war-pressure">
         <h2>{{localizeKM "armyPressure.title"}}</h2>

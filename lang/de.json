@@ -2156,7 +2156,54 @@
                 "encounterPrompt": "{name}: Begegnung \"{ref}\" durchführen (Eskalation {escalation} — SG/Schweregrad-Stufe erwägen).",
                 "escalationHint": "Eskalation {count}: SG/Schweregrad-Stufe erwägen — nie automatisch angewendet.",
                 "allConfirmed": "{count} Auslösungen bestätigt.",
-                "allDismissed": "{count} Auslösungen verworfen."
+                "allDismissed": "{count} Auslösungen verworfen.",
+                "title": "Fristen",
+                "manage": "Verwalten",
+                "none": "Keine geplanten Ereignisse.",
+                "nextFiring": "Nächste Auslösung",
+                "addSchedule": "Geplantes Ereignis hinzufügen",
+                "editSchedule": "Geplantes Ereignis bearbeiten",
+                "presetLabel": "Vorlage",
+                "startInDays": "Erste Auslösung in (Tagen)",
+                "endInDays": "Endet nach (Tagen)",
+                "endInDaysHelp": "0 = kein Ende. Die Vorlage „Jahreszeit der Blüte“ nutzt 90 Tage — an den echten letzten Tag der Jahreszeit anpassen.",
+                "recurrenceLabel": "Wiederholung",
+                "payloadKindLabel": "Wirkung",
+                "beatTextLabel": "Erzähltext",
+                "beatTextHelp": "Wird bei Bestätigung öffentlich gepostet (nur postBeat).",
+                "eventRefLabel": "Königreichsereignis (spawnEvent)",
+                "clockRefLabel": "Kampagnenuhr (advanceClock)",
+                "encounterRefLabel": "Begegnungsreferenz (spawnEncounter)",
+                "resolveKindLabel": "Endet, wenn",
+                "resolveKindHelp": "Wird bei jedem Tick geprüft; ein erledigter Plan pausiert ohne auszulösen.",
+                "resolveRefLabel": "Verknüpfter Eintrag",
+                "noSelection": "—",
+                "preset": {
+                    "custom": "Benutzerdefiniert",
+                    "trollSightingsName": "Troll-Sichtungen",
+                    "cultEventsName": "Kultereignisse der Blütezeit",
+                    "stagLordName": "Hirschfürst-Frist",
+                    "stagLordBeat": "Brevoys Geduld ist am Ende: Ein Gesandter trifft ein — mit Konsequenzen für die unbezahlte Schuld an die Krone."
+                },
+                "recurrence": {
+                    "none": "Einmalig",
+                    "daily": "Täglich",
+                    "weekly": "Wöchentlich",
+                    "monthly": "Monatlich",
+                    "unknown": "Unbekannt"
+                },
+                "resolve": {
+                    "none": "Nie (manuell)",
+                    "questCompleted": "Quest abgeschlossen",
+                    "threatResolved": "Bedrohung beendet"
+                },
+                "countdown": {
+                    "inDays": "in {days} Tagen",
+                    "ended": "beendet",
+                    "resolved": "erledigt",
+                    "inactive": "inaktiv",
+                    "unknown": "—"
+                }
             },
             "forecast": {
                 "companionArrives": "{name} trifft ein",

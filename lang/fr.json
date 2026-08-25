@@ -2156,7 +2156,54 @@
                 "encounterPrompt": "{name} : lancer la rencontre « {ref} » (escalade {escalation} — envisager un palier de DD/sévérité).",
                 "escalationHint": "Escalade {count} : envisager un palier de DD/sévérité — jamais appliqué automatiquement.",
                 "allConfirmed": "{count} déclenchements confirmés.",
-                "allDismissed": "{count} déclenchements ignorés."
+                "allDismissed": "{count} déclenchements ignorés.",
+                "title": "Échéances",
+                "manage": "Gérer",
+                "none": "Aucune pression programmée.",
+                "nextFiring": "Prochain déclenchement",
+                "addSchedule": "Ajouter une pression programmée",
+                "editSchedule": "Modifier la pression programmée",
+                "presetLabel": "Modèle",
+                "startInDays": "Premier déclenchement dans (jours)",
+                "endInDays": "Se termine après (jours)",
+                "endInDaysHelp": "0 = sans fin. Le modèle « Saison de floraison » utilise 90 jours — ajustez au vrai dernier jour de la saison.",
+                "recurrenceLabel": "Récurrence",
+                "payloadKindLabel": "Effet",
+                "beatTextLabel": "Texte narratif",
+                "beatTextHelp": "Publié publiquement à la confirmation (postBeat uniquement).",
+                "eventRefLabel": "Événement de royaume (spawnEvent)",
+                "clockRefLabel": "Horloge de campagne (advanceClock)",
+                "encounterRefLabel": "Référence de rencontre (spawnEncounter)",
+                "resolveKindLabel": "Se résout quand",
+                "resolveKindHelp": "Vérifié à chaque tick ; un plan résolu se suspend sans se déclencher.",
+                "resolveRefLabel": "Enregistrement lié",
+                "noSelection": "—",
+                "preset": {
+                    "custom": "Personnalisé",
+                    "trollSightingsName": "Observations de trolls",
+                    "cultEventsName": "Événements cultistes de la Floraison",
+                    "stagLordName": "Échéance du Seigneur-Cerf",
+                    "stagLordBeat": "La patience du Brévoy s’épuise : un émissaire arrive, porteur de conséquences pour la dette impayée à la couronne."
+                },
+                "recurrence": {
+                    "none": "Unique",
+                    "daily": "Quotidien",
+                    "weekly": "Hebdomadaire",
+                    "monthly": "Mensuel",
+                    "unknown": "Inconnu"
+                },
+                "resolve": {
+                    "none": "Jamais (manuel)",
+                    "questCompleted": "Quête accomplie",
+                    "threatResolved": "Menace résolue"
+                },
+                "countdown": {
+                    "inDays": "dans {days} jours",
+                    "ended": "terminé",
+                    "resolved": "résolu",
+                    "inactive": "inactif",
+                    "unknown": "—"
+                }
             },
             "forecast": {
                 "companionArrives": "{name} arrive",
