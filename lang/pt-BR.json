@@ -2326,7 +2326,27 @@
             "meanwhileDigestEnabled": "Publicar a carta de interlúdio no fim do turno",
             "meanwhileDigestEnabledHelp": "Uma carta pública para leitura em voz alta “Enquanto isso, nas Terras Roubadas” por fim de turno.",
             "meanwhileDigestMaxBeats": "Máx. de cenas por carta",
-            "meanwhileDigestMaxBeatsHelp": "1–6; o interlúdio permanece curto de propósito (padrão 4)."
+            "meanwhileDigestMaxBeatsHelp": "1–6; o interlúdio permanece curto de propósito (padrão 4).",
+            "mapDynamism": {
+                "title": "Mudanças no mapa",
+                "age": "limpo há {turns} turnos",
+                "advance": "Avançar",
+                "hold": "Reter",
+                "rewild": "Deixar voltar ao selvagem",
+                "keep": "Manter limpo",
+                "advanced": "{name} avança para {hex}.",
+                "alreadyResolved": "{name} já foi resolvido neste turno.",
+                "noRegion": "O mapa da região de Kingmaker não está disponível.",
+                "rewilded": "{hex} voltou ao estado selvagem.",
+                "rewildFailed": "Não foi possível reverter {hex} — veja o console."
+            },
+            "mapDynamismSettings": "Dinâmica do mapa",
+            "threatMigrationEnabled": "Ameaças errantes",
+            "threatMigrationEnabledHelp": "A cada fim de turno, ameaças errantes propõem um passo rumo ao alvo — confirmado pelo Mestre, nunca automático.",
+            "threatMigrationSpeed": "Hexes por passo aceito",
+            "threatMigrationSpeedHelp": "Quanto a ameaça avança ao clicar Avançar (padrão 1).",
+            "rewildDelayTurns": "Reverter após (turnos)",
+            "rewildDelayTurnsHelp": "Turnos que um hex fica limpo e não reivindicado antes da oferta; 0 = nunca."
         },
         "chatMessages": {
             "annexation": {
@@ -7621,7 +7641,9 @@
                 "sortEscalation": "Escalation",
                 "clear": "Clear",
                 "noMatches": "No threats match this filter."
-            }
+            },
+            "wanders": "Vagueia rumo ao alvo",
+            "wandersHelp": "Propõe um passo de hex por turno como oferta confirmada pelo Mestre. Exige um hex alvo."
         },
         "warThreatStatus": {
             "active": "Active",

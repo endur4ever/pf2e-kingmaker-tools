@@ -2326,7 +2326,27 @@
             "meanwhileDigestEnabled": "Zwischenspiel-Karte beim Zugende posten",
             "meanwhileDigestEnabledHelp": "Eine öffentliche Vorlese-Karte „Unterdessen in den Gestohlenen Landen“ pro Zugende.",
             "meanwhileDigestMaxBeats": "Max. Momente pro Karte",
-            "meanwhileDigestMaxBeatsHelp": "1–6; das Zwischenspiel bleibt bewusst kurz (Standard 4)."
+            "meanwhileDigestMaxBeatsHelp": "1–6; das Zwischenspiel bleibt bewusst kurz (Standard 4).",
+            "mapDynamism": {
+                "title": "Kartenänderungen",
+                "age": "seit {turns} Zügen geräumt",
+                "advance": "Vorrücken",
+                "hold": "Halten",
+                "rewild": "Verwildern lassen",
+                "keep": "Geräumt lassen",
+                "advanced": "{name} rückt nach {hex} vor.",
+                "alreadyResolved": "{name} wurde diesen Zug bereits entschieden.",
+                "noRegion": "Die Kingmaker-Regionskarte ist nicht verfügbar.",
+                "rewilded": "{hex} ist verwildert.",
+                "rewildFailed": "{hex} konnte nicht verwildern — siehe Konsole."
+            },
+            "mapDynamismSettings": "Kartendynamik",
+            "threatMigrationEnabled": "Wandernde Bedrohungen",
+            "threatMigrationEnabledHelp": "Wandernde Bedrohungen schlagen jedes Zugende einen Schritt zum Ziel vor — SL-bestätigt, nie automatisch.",
+            "threatMigrationSpeed": "Hexfelder pro Schritt",
+            "threatMigrationSpeedHelp": "Wie weit eine Bedrohung bei „Vorrücken“ zieht (Standard 1).",
+            "rewildDelayTurns": "Verwildern nach (Zügen)",
+            "rewildDelayTurnsHelp": "Züge, die ein Hex geräumt und unbeansprucht liegt, bevor Verwilderung angeboten wird; 0 = nie."
         },
         "chatMessages": {
             "addHuntAndGather": {
@@ -7621,7 +7641,9 @@
                 "sortEscalation": "Escalation",
                 "clear": "Clear",
                 "noMatches": "No threats match this filter."
-            }
+            },
+            "wanders": "Wandert zum Ziel",
+            "wandersHelp": "Schlägt pro Zug einen Hexschritt als SL-bestätigtes Angebot vor. Braucht ein Zielhex."
         },
         "warThreatStatus": {
             "active": "Active",

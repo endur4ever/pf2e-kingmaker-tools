@@ -107,6 +107,9 @@ class KingdomSettingsDataModel(
             boolean("enableCalendarMonthEndTurn")
             boolean("meanwhileDigestEnabled")
             int("meanwhileDigestMaxBeats")
+            boolean("threatMigrationEnabled")
+            int("threatMigrationSpeed")
+            int("rewildDelayTurns")
             boolean("vkCharterExtraSkills")
             boolean("vkHeartlandExtraSkills")
             boolean("vkExtraAbilityBoost")
@@ -586,6 +589,29 @@ class KingdomSettingsApplication(
                             label = t("kingdom.meanwhileDigestMaxBeats"),
                             value = settings.meanwhileDigestMaxBeats ?: MAX_DIGEST_BEATS,
                             help = t("kingdom.meanwhileDigestMaxBeatsHelp"),
+                        ),
+                    ),
+                ),
+                Section(
+                    legend = t("kingdom.mapDynamismSettings"),
+                    formRows = listOf(
+                        CheckboxInput(
+                            name = "threatMigrationEnabled",
+                            label = t("kingdom.threatMigrationEnabled"),
+                            value = settings.threatMigrationEnabled == true,
+                            help = t("kingdom.threatMigrationEnabledHelp"),
+                        ),
+                        NumberInput(
+                            name = "threatMigrationSpeed",
+                            label = t("kingdom.threatMigrationSpeed"),
+                            value = settings.threatMigrationSpeed ?: 1,
+                            help = t("kingdom.threatMigrationSpeedHelp"),
+                        ),
+                        NumberInput(
+                            name = "rewildDelayTurns",
+                            label = t("kingdom.rewildDelayTurns"),
+                            value = settings.rewildDelayTurns ?: 6,
+                            help = t("kingdom.rewildDelayTurnsHelp"),
                         ),
                     ),
                 ),

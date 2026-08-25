@@ -2326,7 +2326,27 @@
             "meanwhileDigestEnabled": "Публиковать карту интерлюдии в конце хода",
             "meanwhileDigestEnabledHelp": "Одна публичная карта для чтения вслух «Тем временем в Украденных Землях» на каждый конец хода.",
             "meanwhileDigestMaxBeats": "Макс. событий на карту",
-            "meanwhileDigestMaxBeatsHelp": "1–6; интерлюдия намеренно остаётся короткой (по умолчанию 4)."
+            "meanwhileDigestMaxBeatsHelp": "1–6; интерлюдия намеренно остаётся короткой (по умолчанию 4).",
+            "mapDynamism": {
+                "title": "Изменения карты",
+                "age": "расчищен {turns} ходов назад",
+                "advance": "Продвинуть",
+                "hold": "Удержать",
+                "rewild": "Дать одичать",
+                "keep": "Оставить расчищенным",
+                "advanced": "{name} продвигается к {hex}.",
+                "alreadyResolved": "{name} уже решено в этом ходу.",
+                "noRegion": "Карта региона Kingmaker недоступна.",
+                "rewilded": "{hex} снова одичал.",
+                "rewildFailed": "Не удалось одичить {hex} — см. консоль."
+            },
+            "mapDynamismSettings": "Динамика карты",
+            "threatMigrationEnabled": "Блуждающие угрозы",
+            "threatMigrationEnabledHelp": "Каждый конец хода блуждающие угрозы предлагают шаг к цели — подтверждается ведущим, никогда автоматически.",
+            "threatMigrationSpeed": "Гексов за принятый шаг",
+            "threatMigrationSpeedHelp": "Насколько угроза продвигается по «Продвинуть» (по умолчанию 1).",
+            "rewildDelayTurns": "Одичание через (ходов)",
+            "rewildDelayTurnsHelp": "Сколько ходов гекс лежит расчищенным и незанятым до предложения; 0 = никогда."
         },
         "chatMessages": {
             "annexation": {
@@ -7621,7 +7641,9 @@
                 "sortEscalation": "Escalation",
                 "clear": "Clear",
                 "noMatches": "No threats match this filter."
-            }
+            },
+            "wanders": "Блуждает к цели",
+            "wandersHelp": "Предлагает один шаг гекса за ход как предложение ведущему. Нужен целевой гекс."
         },
         "warThreatStatus": {
             "active": "Active",

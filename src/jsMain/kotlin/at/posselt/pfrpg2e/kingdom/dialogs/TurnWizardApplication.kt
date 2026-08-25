@@ -10,6 +10,7 @@ import at.posselt.pfrpg2e.kingdom.restoreTurnWizardState
 import com.foundryvtt.pf2e.item.PF2EItem
 import at.posselt.pfrpg2e.kingdom.getPerformedActivities
 import at.posselt.pfrpg2e.kingdom.digest.postEndTurnDigest
+import at.posselt.pfrpg2e.kingdom.mapdynamism.postMapDynamismOffers
 import at.posselt.pfrpg2e.kingdom.pings.TurnReadiness
 import at.posselt.pfrpg2e.kingdom.pings.pingsReadyForTurn
 import at.posselt.pfrpg2e.kingdom.pings.readinessStrip
@@ -759,6 +760,10 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
         enabledSetting = kingdom.settings.meanwhileDigestEnabled,
         maxBeatsSetting = kingdom.settings.meanwhileDigestMaxBeats,
     )
+
+    // Map dynamism (plan SS3.3): reconcile the re-wild timers and offer any threat steps /
+    // re-wilds as ONE GM card. Offers only -- the shared map changes in the click handlers.
+    postMapDynamismOffers(game, actor, kingdom, currentTurn)
 
     val changesText = tickResult.changes
         .map { it.toDisplayString() }

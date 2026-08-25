@@ -2326,7 +2326,27 @@
             "meanwhileDigestEnabled": "Publikuj kartę przerywnika na koniec tury",
             "meanwhileDigestEnabledHelp": "Jedna publiczna karta do odczytania „Tymczasem na Skradzionych Ziemiach” na koniec tury.",
             "meanwhileDigestMaxBeats": "Maks. scen na kartę",
-            "meanwhileDigestMaxBeatsHelp": "1–6; przerywnik celowo pozostaje krótki (domyślnie 4)."
+            "meanwhileDigestMaxBeatsHelp": "1–6; przerywnik celowo pozostaje krótki (domyślnie 4).",
+            "mapDynamism": {
+                "title": "Zmiany mapy",
+                "age": "oczyszczono {turns} tur temu",
+                "advance": "Naprzód",
+                "hold": "Wstrzymaj",
+                "rewild": "Pozwól zdziczeć",
+                "keep": "Zachowaj oczyszczone",
+                "advanced": "{name} przesuwa się do {hex}.",
+                "alreadyResolved": "{name} rozstrzygnięto już w tej turze.",
+                "noRegion": "Mapa regionu Kingmaker jest niedostępna.",
+                "rewilded": "{hex} zdziczał.",
+                "rewildFailed": "Nie udało się zdziczyć {hex} — zobacz konsolę."
+            },
+            "mapDynamismSettings": "Dynamika mapy",
+            "threatMigrationEnabled": "Wędrujące zagrożenia",
+            "threatMigrationEnabledHelp": "Każdy koniec tury wędrujące zagrożenia proponują krok ku celowi — zatwierdzany przez MG, nigdy automatyczny.",
+            "threatMigrationSpeed": "Heksy na zatwierdzony krok",
+            "threatMigrationSpeedHelp": "Jak daleko przesuwa się zagrożenie po „Naprzód” (domyślnie 1).",
+            "rewildDelayTurns": "Dziczenie po (turach)",
+            "rewildDelayTurnsHelp": "Ile tur heks leży oczyszczony i niezajęty, zanim padnie oferta zdziczenia; 0 = nigdy."
         },
         "chatMessages": {
             "annexation": {
@@ -7621,7 +7641,9 @@
                 "sortEscalation": "Escalation",
                 "clear": "Clear",
                 "noMatches": "No threats match this filter."
-            }
+            },
+            "wanders": "Wędruje ku celowi",
+            "wandersHelp": "Proponuje jeden krok heksu na turę jako ofertę MG. Wymaga heksu celu."
         },
         "warThreatStatus": {
             "active": "Active",

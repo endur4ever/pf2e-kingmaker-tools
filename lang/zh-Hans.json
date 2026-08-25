@@ -2326,7 +2326,27 @@
             "meanwhileDigestEnabled": "回合结束时发布插曲卡片",
             "meanwhileDigestEnabledHelp": "每次回合结束发布一张公开朗读卡片“与此同时，在盗贼之地”。",
             "meanwhileDigestMaxBeats": "每张卡片最多节拍数",
-            "meanwhileDigestMaxBeatsHelp": "1–6；插曲有意保持简短（默认 4）。"
+            "meanwhileDigestMaxBeatsHelp": "1–6；插曲有意保持简短（默认 4）。",
+            "mapDynamism": {
+                "title": "地图变化",
+                "age": "{turns} 回合前清理",
+                "advance": "推进",
+                "hold": "按兵不动",
+                "rewild": "任其荒芜",
+                "keep": "保持清理",
+                "advanced": "{name}推进至{hex}。",
+                "alreadyResolved": "{name}本回合已处理。",
+                "noRegion": "Kingmaker 区域地图不可用。",
+                "rewilded": "{hex}已重归荒野。",
+                "rewildFailed": "无法使{hex}荒芜——请查看控制台。"
+            },
+            "mapDynamismSettings": "地图动态",
+            "threatMigrationEnabled": "游荡威胁",
+            "threatMigrationEnabledHelp": "每次回合结束，游荡威胁会提议向目标前进一步——由 GM 确认，绝不自动。",
+            "threatMigrationSpeed": "每次推进的六角格数",
+            "threatMigrationSpeedHelp": "点击“推进”时威胁移动的距离（默认 1）。",
+            "rewildDelayTurns": "荒芜等待（回合）",
+            "rewildDelayTurnsHelp": "六角格保持已清理且未占领多少回合后提出荒芜提议；0 = 从不。"
         },
         "chatMessages": {
             "annexation": {
@@ -7621,7 +7641,9 @@
                 "sortEscalation": "Escalation",
                 "clear": "Clear",
                 "noMatches": "No threats match this filter."
-            }
+            },
+            "wanders": "向目标游荡",
+            "wandersHelp": "每回合提议前进一格，作为 GM 确认的提议。需要目标六角格。"
         },
         "warThreatStatus": {
             "active": "Active",

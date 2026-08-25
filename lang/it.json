@@ -2326,7 +2326,27 @@
             "meanwhileDigestEnabled": "Pubblica la carta interludio a fine turno",
             "meanwhileDigestEnabledHelp": "Una carta pubblica da leggere ad alta voce «Nel frattempo, nelle Terre Rubate» per ogni fine turno.",
             "meanwhileDigestMaxBeats": "Momenti max per carta",
-            "meanwhileDigestMaxBeatsHelp": "1–6; l’interludio resta breve di proposito (predefinito 4)."
+            "meanwhileDigestMaxBeatsHelp": "1–6; l’interludio resta breve di proposito (predefinito 4).",
+            "mapDynamism": {
+                "title": "Cambiamenti della mappa",
+                "age": "ripulito {turns} turni fa",
+                "advance": "Avanza",
+                "hold": "Trattieni",
+                "rewild": "Lascia rinselvatichire",
+                "keep": "Mantieni ripulito",
+                "advanced": "{name} avanza verso {hex}.",
+                "alreadyResolved": "{name} è già stato risolto questo turno.",
+                "noRegion": "La mappa della regione Kingmaker non è disponibile.",
+                "rewilded": "{hex} è tornato selvaggio.",
+                "rewildFailed": "Impossibile rinselvatichire {hex} — vedi console."
+            },
+            "mapDynamismSettings": "Dinamica della mappa",
+            "threatMigrationEnabled": "Minacce erranti",
+            "threatMigrationEnabledHelp": "A ogni fine turno le minacce erranti propongono un passo verso il bersaglio — confermato dal GM, mai automatico.",
+            "threatMigrationSpeed": "Esagoni per passo accettato",
+            "threatMigrationSpeedHelp": "Quanto avanza una minaccia quando premi Avanza (predefinito 1).",
+            "rewildDelayTurns": "Rinselvatichisce dopo (turni)",
+            "rewildDelayTurnsHelp": "Turni che un esagono resta ripulito e non rivendicato prima di un’offerta; 0 = mai."
         },
         "chatMessages": {
             "annexation": {
@@ -7621,7 +7641,9 @@
                 "sortEscalation": "Escalation",
                 "clear": "Clear",
                 "noMatches": "No threats match this filter."
-            }
+            },
+            "wanders": "Erra verso il bersaglio",
+            "wandersHelp": "Propone un passo di esagono per turno come offerta confermata dal GM. Richiede un esagono bersaglio."
         },
         "warThreatStatus": {
             "active": "Active",

@@ -38,6 +38,7 @@ external interface WarThreatFormData {
     var targetHexLocation: String?
     var pauseOnExpiry: Boolean
     var visibleToPlayers: Boolean
+    var wanders: Boolean
 }
 
 @JsExport
@@ -57,6 +58,7 @@ class WarThreatDataModel(
             string("targetHexLocation", nullable = true)
             boolean("pauseOnExpiry")
             boolean("visibleToPlayers")
+            boolean("wanders")
         }
     }
 }
@@ -100,6 +102,7 @@ class AddWarThreat(
         targetHexLocation = existing?.targetHexLocation,
         pauseOnExpiry = existing?.pauseOnExpiry ?: false,
         visibleToPlayers = existing?.visibleToPlayers ?: true,
+        wanders = existing?.wanders ?: false,
     )
 
     override fun _preparePartContext(
@@ -137,6 +140,7 @@ class AddWarThreat(
                         TextInput(name = "targetHexLocation", label = t("armyPressure.target"), value = data.targetHexLocation ?: "", required = false, stacked = false),
                         CheckboxInput(name = "pauseOnExpiry", label = t("armyPressure.pauseOnExpiry"), value = data.pauseOnExpiry, help = t("armyPressure.pauseOnExpiryHelp"), stacked = false),
                         CheckboxInput(name = "visibleToPlayers", label = t("armyPressure.visibleToPlayers"), value = data.visibleToPlayers, help = t("armyPressure.visibleToPlayersHelp"), stacked = false),
+                        CheckboxInput(name = "wanders", label = t("armyPressure.wanders"), value = data.wanders, help = t("armyPressure.wandersHelp"), stacked = false),
                     )
                 )
             )
@@ -171,6 +175,11 @@ class AddWarThreat(
                     visibleToPlayers = data.visibleToPlayers,
                     offerConsumed = existing?.offerConsumed,
                 )
+                // mobility fields are not part of the form's rebuild: preserve an edited threat's
+                // position and per-turn guard, or a save would silently reset a wandering threat
+                threat.wanders = data.wanders
+                threat.currentHexLocation = existing?.currentHexLocation ?: threat.targetHexLocation
+                threat.migrationConsumedTurn = existing?.migrationConsumedTurn
                 close()
                 onSave(threat)
             }

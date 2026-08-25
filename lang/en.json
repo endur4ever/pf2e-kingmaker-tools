@@ -2448,7 +2448,27 @@
             "meanwhileDigestEnabled": "Post the End Turn interlude card",
             "meanwhileDigestEnabledHelp": "One public read-aloud \"Meanwhile in the Stolen Lands\" card per End Turn.",
             "meanwhileDigestMaxBeats": "Max beats per card",
-            "meanwhileDigestMaxBeatsHelp": "1–6; the interlude stays short by design (default 4)."
+            "meanwhileDigestMaxBeatsHelp": "1–6; the interlude stays short by design (default 4).",
+            "mapDynamism": {
+                "title": "Map Changes",
+                "age": "cleared {turns} turns ago",
+                "advance": "Advance",
+                "hold": "Hold",
+                "rewild": "Let it re-wild",
+                "keep": "Keep cleared",
+                "advanced": "{name} advances to {hex}.",
+                "alreadyResolved": "{name} was already resolved this turn.",
+                "noRegion": "The Kingmaker region map is not available.",
+                "rewilded": "{hex} has re-wilded.",
+                "rewildFailed": "Could not re-wild {hex} — see the console."
+            },
+            "mapDynamismSettings": "Map Dynamism",
+            "threatMigrationEnabled": "Wandering threats",
+            "threatMigrationEnabledHelp": "Each End Turn, wandering threats propose one step toward their target — GM-confirmed, never automatic.",
+            "threatMigrationSpeed": "Hexes per accepted step",
+            "threatMigrationSpeedHelp": "How far a threat moves when you click Advance (default 1).",
+            "rewildDelayTurns": "Re-wild after (turns)",
+            "rewildDelayTurnsHelp": "Turns a hex sits cleared-and-unclaimed before a re-wild offer; 0 = never."
         },
         "chatMessages": {
             "calendarBridgeMissing": "<strong>Kingmaker Tools:</strong> Seasons &amp; Stars is active, but the <em>Simple Calendar Compatibility Bridge</em> module is not. Calendar notes (expeditions, weather, end-of-turn and camp summaries) are being silently skipped. Install <a href=\"{url}\">the compatibility bridge</a> (package id <code>{packageId}</code>) to enable them. This notice appears only once.",
@@ -7743,7 +7763,9 @@
                 "sortEscalation": "Escalation",
                 "clear": "Clear",
                 "noMatches": "No threats match this filter."
-            }
+            },
+            "wanders": "Wanders toward its target",
+            "wandersHelp": "Proposes one hex step per turn as a GM-confirmed offer. Needs a target hex."
         },
         "warThreatStatus": {
             "active": "Active",

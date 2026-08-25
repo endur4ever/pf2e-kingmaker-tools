@@ -67,6 +67,9 @@ import at.posselt.pfrpg2e.actions.ActionDispatcher
 import at.posselt.pfrpg2e.kingdom.pings.savePingsReady
 import at.posselt.pfrpg2e.kingdom.sheet.KingdomSheet
 import at.posselt.pfrpg2e.kingdom.sheet.navigation.MainNavEntry
+import at.posselt.pfrpg2e.kingdom.mapdynamism.hexDisplayLabel
+import at.posselt.pfrpg2e.kingdom.mapdynamism.kingmakerNeighbors
+import at.posselt.pfrpg2e.kingdom.mapdynamism.nextThreatHex
 import at.posselt.pfrpg2e.camping.downtimeRollPrompt
 import at.posselt.pfrpg2e.kingdom.downtime.DowntimeKind
 import at.posselt.pfrpg2e.kingdom.pressure.confirmPressureFiring
@@ -388,6 +391,88 @@ private val buttons = listOf(
                 postChatMessage(t("chatMessages.warRuin.applied", recordOf("ruin" to t("chatMessages.warRuin.$choice"))))
             }
         }
+    },
+    ChatButton("km-offer-threat-advance") { game, actor, _, button ->
+        if (!game.user.isGM) return@ChatButton
+        val id = button.dataset["threatId"] ?: return@ChatButton
+        val kingdom = actor.getKingdom() ?: return@ChatButton
+        val threat = kingdom.warThreats?.find { it.id == id } ?: return@ChatButton
+        val target = threat.targetHexLocation ?: return@ChatButton
+        val currentTurn = kingdom.currentTurn ?: 0
+        if (threat.migrationConsumedTurn == currentTurn) {
+            ui.notifications.warn(t("kingdom.mapDynamism.alreadyResolved", recordOf("name" to threat.name)))
+            return@ChatButton
+        }
+        val neighbors = kingmakerNeighbors()
+        if (neighbors == null) {
+            ui.notifications.warn(t("kingdom.mapDynamism.noRegion"))
+            return@ChatButton
+        }
+        // speed = hexes per ACCEPTED step; the walk stops at the target regardless
+        var position = threat.currentHexLocation ?: target
+        val speed = (kingdom.settings.threatMigrationSpeed ?: 1).coerceAtLeast(1)
+        repeat(speed) {
+            position = nextThreatHex(position, target, neighbors) ?: return@repeat
+        }
+        threat.currentHexLocation = position
+        threat.migrationConsumedTurn = currentTurn
+        actor.setKingdom(kingdom)
+        ui.notifications.info(
+            t(
+                "kingdom.mapDynamism.advanced",
+                recordOf("name" to threat.name, "hex" to hexDisplayLabel(position)),
+            )
+        )
+        markMapChangeRowDone(button)
+    },
+    ChatButton("km-offer-threat-hold") { game, actor, _, button ->
+        if (!game.user.isGM) return@ChatButton
+        val id = button.dataset["threatId"] ?: return@ChatButton
+        val kingdom = actor.getKingdom() ?: return@ChatButton
+        val threat = kingdom.warThreats?.find { it.id == id } ?: return@ChatButton
+        // per-turn guard, NOT a permanent flag: a held threat re-offers next turn (plan SS5.1)
+        threat.migrationConsumedTurn = kingdom.currentTurn ?: 0
+        actor.setKingdom(kingdom)
+        markMapChangeRowDone(button)
+    },
+    ChatButton("km-offer-hex-rewild") { game, actor, _, button ->
+        if (!game.user.isGM) return@ChatButton
+        val hexKey = button.dataset["hexKey"] ?: return@ChatButton
+        val kingdom = actor.getKingdom() ?: return@ChatButton
+        // the ONLY shared-map write in the feature, and it happens here, on the GM's click --
+        // updateSource+save is the annexation-proven path (kingmaker.state has no .update())
+        val applied = runCatching {
+            val state = com.foundryvtt.kingmaker.kingmaker.state.asDynamic()
+            val hexFlags = js("{}")
+            hexFlags.cleared = false
+            val hexes = js("{}")
+            hexes[hexKey] = hexFlags
+            val changes = js("{}")
+            changes.hexes = hexes
+            state.updateSource(changes)
+            (state.save() as? kotlin.js.Promise<*>)?.await()
+            true
+        }.getOrElse {
+            console.error("re-wild write failed for hex $hexKey", it)
+            false
+        }
+        if (!applied) {
+            ui.notifications.error(t("kingdom.mapDynamism.rewildFailed", recordOf("hex" to hexDisplayLabel(hexKey))))
+            return@ChatButton
+        }
+        kingdom.rewildTrackers?.find { it.hexKey == hexKey }?.offerConsumed = true
+        actor.setKingdom(kingdom)
+        ui.notifications.info(t("kingdom.mapDynamism.rewilded", recordOf("hex" to hexDisplayLabel(hexKey))))
+        markMapChangeRowDone(button)
+    },
+    ChatButton("km-offer-hex-keep") { game, actor, _, button ->
+        if (!game.user.isGM) return@ChatButton
+        val hexKey = button.dataset["hexKey"] ?: return@ChatButton
+        val kingdom = actor.getKingdom() ?: return@ChatButton
+        // quiet for the rest of this cycle; a re-clear after leaving the set starts a fresh one
+        kingdom.rewildTrackers?.find { it.hexKey == hexKey }?.offerConsumed = true
+        actor.setKingdom(kingdom)
+        markMapChangeRowDone(button)
     },
     ChatButton("km-offer-downtime-complete") { game, actor, _, button ->
         if (!game.user.isGM) return@ChatButton
@@ -1340,5 +1425,12 @@ private fun markPressureCardDone(button: HTMLElement) {
     card.querySelectorAll(".km-pressure-row").asList().filterIsInstance<HTMLElement>()
         .forEach { it.classList.add("km-pressure-row-done") }
     card.querySelectorAll("button").asList().filterIsInstance<HTMLElement>()
+        .forEach { it.setAttribute("disabled", "disabled") }
+}
+
+private fun markMapChangeRowDone(button: HTMLElement) {
+    val row = button.closest(".km-map-change-row") as? HTMLElement ?: return
+    row.classList.add("km-map-change-done")
+    row.querySelectorAll("button").asList().filterIsInstance<HTMLElement>()
         .forEach { it.setAttribute("disabled", "disabled") }
 }

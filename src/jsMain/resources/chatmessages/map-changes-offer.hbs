@@ -1,0 +1,34 @@
+<div class="km-map-changes-card">
+    <h3><i class="fa-solid fa-map"></i> {{title}}</h3>
+    {{#if migrations.length}}
+        <ul class="km-map-changes-list">
+            {{#each migrations}}
+                <li class="km-map-change-row">
+                    <span class="km-map-change-text"><strong>{{this.name}}</strong>
+                        {{this.fromLabel}} &rarr; {{this.toLabel}}</span>
+                    <button type="button" class="km-offer-threat-advance"
+                            data-kingdom-actor-uuid="{{@root.actorUuid}}"
+                            data-threat-id="{{this.threatId}}">{{@root.advanceLabel}}</button>
+                    <button type="button" class="km-offer-threat-hold"
+                            data-kingdom-actor-uuid="{{@root.actorUuid}}"
+                            data-threat-id="{{this.threatId}}">{{@root.holdLabel}}</button>
+                </li>
+            {{/each}}
+        </ul>
+    {{/if}}
+    {{#if rewilds.length}}
+        <ul class="km-map-changes-list">
+            {{#each rewilds}}
+                <li class="km-map-change-row">
+                    <span class="km-map-change-text"><strong>{{this.hexLabel}}</strong> {{this.ageLabel}}</span>
+                    <button type="button" class="km-offer-hex-rewild"
+                            data-kingdom-actor-uuid="{{@root.actorUuid}}"
+                            data-hex-key="{{this.hexKey}}">{{@root.rewildLabel}}</button>
+                    <button type="button" class="km-offer-hex-keep"
+                            data-kingdom-actor-uuid="{{@root.actorUuid}}"
+                            data-hex-key="{{this.hexKey}}">{{@root.keepLabel}}</button>
+                </li>
+            {{/each}}
+        </ul>
+    {{/if}}
+</div>
