@@ -14,6 +14,8 @@ import at.posselt.pfrpg2e.kingdom.data.RawHexContent
 import at.posselt.pfrpg2e.kingdom.data.RawLootManifestEntry
 import at.posselt.pfrpg2e.kingdom.data.toModel
 import at.posselt.pfrpg2e.kingdom.loot.manifestTotals
+import at.posselt.pfrpg2e.kingdom.loot.postLootAwardOffer
+import com.foundryvtt.core.game
 import js.objects.recordOf
 import at.posselt.pfrpg2e.utils.buildPromise
 import at.posselt.pfrpg2e.utils.buildUuid
@@ -425,8 +427,20 @@ class HexContentManager(
                 val contentId = target.dataset["contentId"] ?: return
                 buildPromise {
                     updateVisibility(contentId, at.posselt.pfrpg2e.kingdom.map.DiscoveryEvent.CLEAR)
+                    // Clearing SURFACES the treasure offer; it never moves items (plan SS5.1).
+                    currentKingdom()?.hexContents?.find { it.id == contentId }
+                        ?.let { postLootAwardOffer(game, actor, it) }
                     onContentChanged()
                     render()
+                }
+            }
+
+            "award-loot" -> {
+                val contentId = target.dataset["contentId"] ?: return
+                buildPromise {
+                    // same offer without re-clearing, for a hex cleared before it was prepped
+                    currentKingdom()?.hexContents?.find { it.id == contentId }
+                        ?.let { postLootAwardOffer(game, actor, it) }
                 }
             }
             "cancel-edit" -> {

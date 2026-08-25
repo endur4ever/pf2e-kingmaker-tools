@@ -153,6 +153,7 @@
                                 </td>
                                 <td class="km-hex-links-cell">
                                     {{#if this.hasManifest}}<span class="km-hex-link-count km-hex-loot-count{{#if this.manifestAwarded}} km-hex-loot-count-awarded{{/if}}" title="{{this.lootSummary}}"><i class="fa-solid fa-coins"></i></span>{{/if}}
+                                    {{#if this.hasManifest}}{{#unless this.manifestAwarded}}<button type="button" class="km-hex-award-loot" data-action="award-loot" data-content-id="{{this.id}}" title="{{localizeKM 'kingdom.hexContent.loot.awardButton'}}"><i class="fa-solid fa-gem"></i></button>{{/unless}}{{/if}}
                                     {{#if this.hasLinks}}
                                         {{#if this.linkedQuestCount}}<span class="km-hex-link-count" title="{{localizeKM 'kingdom.hexContent.linkedQuests'}}"><i class="fa-solid fa-scroll"></i> {{this.linkedQuestCount}}</span>{{/if}}
                                         {{#if this.linkedDocCount}}<span class="km-hex-link-count" title="{{localizeKM 'kingdom.hexContent.linkedDocuments'}}"><i class="fa-solid fa-link"></i> {{this.linkedDocCount}}</span>{{/if}}

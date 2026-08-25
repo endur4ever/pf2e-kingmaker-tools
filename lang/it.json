@@ -1963,7 +1963,8 @@
                     "note": "Nota",
                     "remove": "Rimuovi oggetto",
                     "summary": "{count} oggetti · {gp} mo · {cursed} maledetti",
-                    "awardedBadge": "già assegnato"
+                    "awardedBadge": "già assegnato",
+                    "awardButton": "Assegna bottino"
                 }
             },
             "homebrewProfile": {
@@ -2358,7 +2359,20 @@
             "threatMigrationSpeed": "Esagoni per passo accettato",
             "threatMigrationSpeedHelp": "Quanto avanza una minaccia quando premi Avanza (predefinito 1).",
             "rewildDelayTurns": "Rinselvatichisce dopo (turni)",
-            "rewildDelayTurnsHelp": "Turni che un esagono resta ripulito e non rivendicato prima di un’offerta; 0 = mai."
+            "rewildDelayTurnsHelp": "Turni che un esagono resta ripulito e non rivendicato prima di un’offerta; 0 = mai.",
+            "treasureLedger": {
+                "title": "Registro del tesoro",
+                "turn": "Turno {turn}",
+                "gp": "{gp} mo",
+                "total": "{gp} mo in totale",
+                "turnColumn": "Turno",
+                "sourceColumn": "Fonte",
+                "itemsColumn": "Oggetti",
+                "gpColumn": "Valore",
+                "cursedTitle": "Contiene oggetti maledetti",
+                "empty": "Nessun tesoro assegnato.",
+                "atCap": "Le voci più vecchie vengono rimosse al limite."
+            }
         },
         "chatMessages": {
             "annexation": {
@@ -2580,6 +2594,18 @@
                 "noArmy": "That army actor no longer exists.",
                 "effectMissing": "Could not find the “{condition}” army condition in the PF2e Kingmaker compendium. Apply it by hand.",
                 "dismiss": "Dismiss"
+            },
+            "lootAward": {
+                "title": "Tesoro trovato",
+                "rowDetail": "x{qty} · {gp} mo cad.",
+                "award": "Assegna al gruppo",
+                "dismiss": "Gestito manualmente",
+                "awarded": "{count} oggetti assegnati ({gp} mo).",
+                "alreadyAwarded": "Il tesoro di {name} è già stato assegnato.",
+                "itemsMissing": "Non risolti: {names}. Nulla è stato assegnato per quelle righe.",
+                "cursedTitle": "Tesoro maledetto assegnato",
+                "cleanse": "Purifica oggetto",
+                "cleansePrepared": "Purificazione preparata (CD {dc})."
             }
         },
         "displayBars": {

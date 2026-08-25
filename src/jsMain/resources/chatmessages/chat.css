@@ -248,3 +248,57 @@
 .km-map-change-row.km-map-change-done {
     opacity: 0.5;
 }
+
+/* Loot award + cursed hint cards (loot-manifests phase 4) */
+.km-loot-award-card h3,
+.km-loot-cursed-card h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0 0 0.3rem 0;
+    border: none;
+}
+
+.km-loot-award-source {
+    margin: 0 0 0.35rem 0;
+    font-size: 0.9em;
+    opacity: 0.85;
+}
+
+.km-loot-award-list,
+.km-loot-cursed-list {
+    margin: 0 0 0.4rem 0;
+    padding-left: 1.1rem;
+}
+
+.km-loot-award-list li.km-loot-cursed::marker {
+    color: var(--color-level-error, #c53131);
+}
+
+.km-loot-detail {
+    font-size: 0.85em;
+    opacity: 0.75;
+}
+
+.km-loot-award-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.km-loot-award-buttons button,
+.km-loot-cursed-list button {
+    width: auto;
+    font-size: 0.85em;
+    padding: 0.15rem 0.5rem;
+}
+
+.km-loot-cursed-list li {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 0.25rem;
+}
+
+.km-loot-cursed-name {
+    flex: 1;
+}

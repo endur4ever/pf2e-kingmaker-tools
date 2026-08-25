@@ -1,0 +1,15 @@
+<div class="km-loot-cursed-card">
+    <h3><i class="fa-solid fa-skull-crossbones"></i> {{title}}</h3>
+    <ul class="km-loot-cursed-list">
+        {{#each rows}}
+            <li>
+                <span class="km-loot-cursed-name">{{this.name}}</span>
+                {{#if this.hasUuid}}
+                    <button type="button" class="km-offer-loot-cleanse"
+                            data-kingdom-actor-uuid="{{@root.actorUuid}}"
+                            data-item-uuid="{{this.uuid}}">{{@root.cleanseLabel}}</button>
+                {{/if}}
+            </li>
+        {{/each}}
+    </ul>
+</div>

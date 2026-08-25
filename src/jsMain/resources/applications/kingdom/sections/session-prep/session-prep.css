@@ -290,3 +290,51 @@
 .km-forecast-jump:hover {
     text-decoration: underline;
 }
+
+/* Treasure Ledger (loot-manifests phase 4) */
+.km-treasure-ledger h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    justify-content: space-between;
+}
+
+.km-treasure-total {
+    font-size: 0.8em;
+    opacity: 0.8;
+    font-weight: normal;
+}
+
+.km-treasure-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.km-treasure-table th {
+    text-align: left;
+    font-size: 0.85em;
+    opacity: 0.75;
+    padding: 0.2rem 0.4rem;
+    border-bottom: 1px solid rgba(153, 153, 153, 0.5);
+}
+
+.km-treasure-table td {
+    padding: 0.25rem 0.4rem;
+    vertical-align: top;
+}
+
+.km-treasure-items {
+    overflow-wrap: anywhere;
+}
+
+.km-treasure-cursed {
+    color: var(--color-level-error, #c53131);
+    margin-left: 0.3rem;
+}
+
+.km-treasure-cap {
+    font-size: 0.85em;
+    opacity: 0.7;
+    margin: 0.3rem 0 0 0;
+}

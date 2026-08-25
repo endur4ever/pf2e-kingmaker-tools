@@ -184,6 +184,7 @@ import at.posselt.pfrpg2e.kingdom.forecast.buildForecast
 import at.posselt.pfrpg2e.resting.DAY_SECONDS
 import at.posselt.pfrpg2e.kingdom.dialogs.DeadlinesDialog
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.buildDeadlinesContext
+import at.posselt.pfrpg2e.kingdom.sheet.contexts.buildTreasureLedgerContext
 import at.posselt.pfrpg2e.kingdom.pings.buildPlayerFeed
 import at.posselt.pfrpg2e.kingdom.pings.postPlayerPings
 import at.posselt.pfrpg2e.kingdom.pings.pingsCursor
@@ -3728,6 +3729,7 @@ class KingdomSheet(
             ),
             showDetailedMatrix = showDetailedMatrix,
             campaignClocks = kingdom.campaignClocks.toDashboardContext(isGM),
+            treasureLedger = buildTreasureLedgerContext(isGM, kingdom),
             deadlines = buildDeadlinesContext(
                 isGM = isGM,
                 kingdom = kingdom,

@@ -1963,7 +1963,8 @@
                     "note": "Заметка",
                     "remove": "Убрать предмет",
                     "summary": "{count} предм. · {gp} зм · {cursed} проклятых",
-                    "awardedBadge": "уже выдано"
+                    "awardedBadge": "уже выдано",
+                    "awardButton": "Выдать добычу"
                 }
             },
             "homebrewProfile": {
@@ -2358,7 +2359,20 @@
             "threatMigrationSpeed": "Гексов за принятый шаг",
             "threatMigrationSpeedHelp": "Насколько угроза продвигается по «Продвинуть» (по умолчанию 1).",
             "rewildDelayTurns": "Одичание через (ходов)",
-            "rewildDelayTurnsHelp": "Сколько ходов гекс лежит расчищенным и незанятым до предложения; 0 = никогда."
+            "rewildDelayTurnsHelp": "Сколько ходов гекс лежит расчищенным и незанятым до предложения; 0 = никогда.",
+            "treasureLedger": {
+                "title": "Книга сокровищ",
+                "turn": "Ход {turn}",
+                "gp": "{gp} зм",
+                "total": "всего {gp} зм",
+                "turnColumn": "Ход",
+                "sourceColumn": "Источник",
+                "itemsColumn": "Предметы",
+                "gpColumn": "Ценность",
+                "cursedTitle": "Содержит проклятые предметы",
+                "empty": "Сокровища ещё не выдавались.",
+                "atCap": "Старые записи удаляются по достижении предела."
+            }
         },
         "chatMessages": {
             "annexation": {
@@ -2580,6 +2594,18 @@
                 "noArmy": "That army actor no longer exists.",
                 "effectMissing": "Could not find the “{condition}” army condition in the PF2e Kingmaker compendium. Apply it by hand.",
                 "dismiss": "Dismiss"
+            },
+            "lootAward": {
+                "title": "Найдено сокровище",
+                "rowDetail": "x{qty} · {gp} зм за шт.",
+                "award": "Выдать группе",
+                "dismiss": "Решено вручную",
+                "awarded": "Выдано предметов: {count} ({gp} зм).",
+                "alreadyAwarded": "Сокровище «{name}» уже выдано.",
+                "itemsMissing": "Не удалось найти: {names}. По этим строкам ничего не выдано.",
+                "cursedTitle": "Выдано проклятое сокровище",
+                "cleanse": "Очистить предмет",
+                "cleansePrepared": "Очищение подготовлено (КС {dc})."
             }
         },
         "displayBars": {

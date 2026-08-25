@@ -1914,7 +1914,8 @@
                     "note": "Notiz",
                     "remove": "Gegenstand entfernen",
                     "summary": "{count} Gegenstände · {gp} GM · {cursed} verflucht",
-                    "awardedBadge": "bereits vergeben"
+                    "awardedBadge": "bereits vergeben",
+                    "awardButton": "Beute vergeben"
                 }
             },
             "homebrewProfile": {
@@ -2358,7 +2359,20 @@
             "threatMigrationSpeed": "Hexfelder pro Schritt",
             "threatMigrationSpeedHelp": "Wie weit eine Bedrohung bei „Vorrücken“ zieht (Standard 1).",
             "rewildDelayTurns": "Verwildern nach (Zügen)",
-            "rewildDelayTurnsHelp": "Züge, die ein Hex geräumt und unbeansprucht liegt, bevor Verwilderung angeboten wird; 0 = nie."
+            "rewildDelayTurnsHelp": "Züge, die ein Hex geräumt und unbeansprucht liegt, bevor Verwilderung angeboten wird; 0 = nie.",
+            "treasureLedger": {
+                "title": "Schatzbuch",
+                "turn": "Zug {turn}",
+                "gp": "{gp} GM",
+                "total": "{gp} GM gesamt",
+                "turnColumn": "Zug",
+                "sourceColumn": "Quelle",
+                "itemsColumn": "Gegenstände",
+                "gpColumn": "Wert",
+                "cursedTitle": "Enthält verfluchte Gegenstände",
+                "empty": "Noch kein Schatz vergeben.",
+                "atCap": "Ältere Einträge werden am Limit entfernt."
+            }
         },
         "chatMessages": {
             "addHuntAndGather": {
@@ -2580,6 +2594,18 @@
                 "noArmy": "That army actor no longer exists.",
                 "effectMissing": "Could not find the “{condition}” army condition in the PF2e Kingmaker compendium. Apply it by hand.",
                 "dismiss": "Dismiss"
+            },
+            "lootAward": {
+                "title": "Schatz gefunden",
+                "rowDetail": "x{qty} · je {gp} GM",
+                "award": "Der Gruppe zusprechen",
+                "dismiss": "Manuell erledigt",
+                "awarded": "{count} Gegenstände vergeben ({gp} GM).",
+                "alreadyAwarded": "Der Schatz von {name} wurde bereits vergeben.",
+                "itemsMissing": "Nicht auflösbar: {names}. Für diese Zeilen wurde nichts vergeben.",
+                "cursedTitle": "Verfluchter Schatz vergeben",
+                "cleanse": "Gegenstand reinigen",
+                "cleansePrepared": "Reinigung vorbereitet (SG {dc})."
             }
         },
         "displayBars": {

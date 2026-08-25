@@ -1963,7 +1963,8 @@
                     "note": "Nota",
                     "remove": "Remover item",
                     "summary": "{count} itens · {gp} po · {cursed} amaldiçoados",
-                    "awardedBadge": "já concedido"
+                    "awardedBadge": "já concedido",
+                    "awardButton": "Conceder tesouro"
                 }
             },
             "homebrewProfile": {
@@ -2358,7 +2359,20 @@
             "threatMigrationSpeed": "Hexes por passo aceito",
             "threatMigrationSpeedHelp": "Quanto a ameaça avança ao clicar Avançar (padrão 1).",
             "rewildDelayTurns": "Reverter após (turnos)",
-            "rewildDelayTurnsHelp": "Turnos que um hex fica limpo e não reivindicado antes da oferta; 0 = nunca."
+            "rewildDelayTurnsHelp": "Turnos que um hex fica limpo e não reivindicado antes da oferta; 0 = nunca.",
+            "treasureLedger": {
+                "title": "Registro de tesouro",
+                "turn": "Turno {turn}",
+                "gp": "{gp} po",
+                "total": "{gp} po no total",
+                "turnColumn": "Turno",
+                "sourceColumn": "Origem",
+                "itemsColumn": "Itens",
+                "gpColumn": "Valor",
+                "cursedTitle": "Inclui itens amaldiçoados",
+                "empty": "Nenhum tesouro concedido ainda.",
+                "atCap": "Entradas antigas são removidas no limite."
+            }
         },
         "chatMessages": {
             "annexation": {
@@ -2580,6 +2594,18 @@
                 "noArmy": "That army actor no longer exists.",
                 "effectMissing": "Could not find the “{condition}” army condition in the PF2e Kingmaker compendium. Apply it by hand.",
                 "dismiss": "Dismiss"
+            },
+            "lootAward": {
+                "title": "Tesouro encontrado",
+                "rowDetail": "x{qty} · {gp} po cada",
+                "award": "Conceder ao grupo",
+                "dismiss": "Resolvido manualmente",
+                "awarded": "{count} itens concedidos ({gp} po).",
+                "alreadyAwarded": "O tesouro de {name} já foi concedido.",
+                "itemsMissing": "Não resolvidos: {names}. Nada foi concedido para essas linhas.",
+                "cursedTitle": "Tesouro amaldiçoado concedido",
+                "cleanse": "Purificar item",
+                "cleansePrepared": "Purificação preparada (CD {dc})."
             }
         },
         "displayBars": {

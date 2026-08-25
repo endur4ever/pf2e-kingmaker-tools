@@ -67,6 +67,11 @@ import at.posselt.pfrpg2e.actions.ActionDispatcher
 import at.posselt.pfrpg2e.kingdom.pings.savePingsReady
 import at.posselt.pfrpg2e.kingdom.sheet.KingdomSheet
 import at.posselt.pfrpg2e.kingdom.sheet.navigation.MainNavEntry
+import at.posselt.pfrpg2e.kingdom.loot.awardLootManifest
+import at.posselt.pfrpg2e.kingdom.loot.dismissLootManifest
+import at.posselt.pfrpg2e.kingdom.CleanseItemSettlement
+import at.posselt.pfrpg2e.kingdom.dialogs.openCleanseItemDialog
+import com.foundryvtt.pf2e.item.PF2EItem
 import at.posselt.pfrpg2e.kingdom.mapdynamism.hexDisplayLabel
 import at.posselt.pfrpg2e.kingdom.mapdynamism.kingmakerNeighbors
 import at.posselt.pfrpg2e.kingdom.mapdynamism.nextThreatHex
@@ -390,6 +395,38 @@ private val buttons = listOf(
             } else {
                 postChatMessage(t("chatMessages.warRuin.applied", recordOf("ruin" to t("chatMessages.warRuin.$choice"))))
             }
+        }
+    },
+    ChatButton("km-offer-loot-award") { game, actor, _, button ->
+        if (!game.user.isGM) return@ChatButton
+        val id = button.dataset["contentId"] ?: return@ChatButton
+        if (awardLootManifest(game, actor, id)) markLootCardDone(button)
+    },
+    ChatButton("km-offer-loot-dismiss") { game, actor, _, button ->
+        if (!game.user.isGM) return@ChatButton
+        val id = button.dataset["contentId"] ?: return@ChatButton
+        if (dismissLootManifest(actor, id)) markLootCardDone(button)
+    },
+    ChatButton("km-offer-loot-cleanse") { game, actor, _, button ->
+        if (!game.user.isGM) return@ChatButton
+        val uuid = button.dataset["itemUuid"] ?: return@ChatButton
+        val kingdom = actor.getKingdom() ?: return@ChatButton
+        // hand the dialog the item directly -- the GM never re-finds what the module just gave them
+        val item = fromUuidOfTypes(uuid, PF2EItem::class)
+        openCleanseItemDialog(
+            kingdomLevel = kingdom.level,
+            settlements = kingdom.getAllSettlements(game).allSettlements.map { settlement ->
+                CleanseItemSettlement(
+                    id = settlement.id,
+                    name = settlement.name,
+                    structureNames = settlement.constructedStructures.map { it.name }.toSet(),
+                )
+            },
+            preselected = item,
+        ) { preparation ->
+            ui.notifications.info(
+                t("chatMessages.lootAward.cleansePrepared", recordOf("dc" to preparation.dc.toString()))
+            )
         }
     },
     ChatButton("km-offer-threat-advance") { game, actor, _, button ->
@@ -1432,5 +1469,11 @@ private fun markMapChangeRowDone(button: HTMLElement) {
     val row = button.closest(".km-map-change-row") as? HTMLElement ?: return
     row.classList.add("km-map-change-done")
     row.querySelectorAll("button").asList().filterIsInstance<HTMLElement>()
+        .forEach { it.setAttribute("disabled", "disabled") }
+}
+
+private fun markLootCardDone(button: HTMLElement) {
+    val card = button.closest(".km-loot-award-card") as? HTMLElement ?: return
+    card.querySelectorAll("button").asList().filterIsInstance<HTMLElement>()
         .forEach { it.setAttribute("disabled", "disabled") }
 }

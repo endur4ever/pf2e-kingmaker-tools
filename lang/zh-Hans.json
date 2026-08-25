@@ -1963,7 +1963,8 @@
                     "note": "备注",
                     "remove": "移除物品",
                     "summary": "{count} 件 · {gp} 金币 · {cursed} 件诅咒",
-                    "awardedBadge": "已发放"
+                    "awardedBadge": "已发放",
+                    "awardButton": "发放战利品"
                 }
             },
             "homebrewProfile": {
@@ -2358,7 +2359,20 @@
             "threatMigrationSpeed": "每次推进的六角格数",
             "threatMigrationSpeedHelp": "点击“推进”时威胁移动的距离（默认 1）。",
             "rewildDelayTurns": "荒芜等待（回合）",
-            "rewildDelayTurnsHelp": "六角格保持已清理且未占领多少回合后提出荒芜提议；0 = 从不。"
+            "rewildDelayTurnsHelp": "六角格保持已清理且未占领多少回合后提出荒芜提议；0 = 从不。",
+            "treasureLedger": {
+                "title": "宝藏账簿",
+                "turn": "第 {turn} 回合",
+                "gp": "{gp} 金币",
+                "total": "共 {gp} 金币",
+                "turnColumn": "回合",
+                "sourceColumn": "来源",
+                "itemsColumn": "物品",
+                "gpColumn": "价值",
+                "cursedTitle": "包含诅咒物品",
+                "empty": "尚未发放任何宝藏。",
+                "atCap": "达到上限后会移除较早的记录。"
+            }
         },
         "chatMessages": {
             "annexation": {
@@ -2580,6 +2594,18 @@
                 "noArmy": "That army actor no longer exists.",
                 "effectMissing": "Could not find the “{condition}” army condition in the PF2e Kingmaker compendium. Apply it by hand.",
                 "dismiss": "Dismiss"
+            },
+            "lootAward": {
+                "title": "发现宝藏",
+                "rowDetail": "x{qty} · 每件 {gp} 金币",
+                "award": "发放给队伍",
+                "dismiss": "已手动处理",
+                "awarded": "已发放 {count} 件物品（{gp} 金币）。",
+                "alreadyAwarded": "{name}的宝藏已经发放过了。",
+                "itemsMissing": "无法解析：{names}。这些条目未发放任何物品。",
+                "cursedTitle": "已发放诅咒宝藏",
+                "cleanse": "净化物品",
+                "cleansePrepared": "净化已准备（DC {dc}）。"
             }
         },
         "displayBars": {

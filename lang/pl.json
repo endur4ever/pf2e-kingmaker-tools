@@ -1963,7 +1963,8 @@
                     "note": "Notatka",
                     "remove": "Usuń przedmiot",
                     "summary": "{count} przedmiotów · {gp} sz · {cursed} przeklętych",
-                    "awardedBadge": "już przyznano"
+                    "awardedBadge": "już przyznano",
+                    "awardButton": "Przyznaj łup"
                 }
             },
             "homebrewProfile": {
@@ -2358,7 +2359,20 @@
             "threatMigrationSpeed": "Heksy na zatwierdzony krok",
             "threatMigrationSpeedHelp": "Jak daleko przesuwa się zagrożenie po „Naprzód” (domyślnie 1).",
             "rewildDelayTurns": "Dziczenie po (turach)",
-            "rewildDelayTurnsHelp": "Ile tur heks leży oczyszczony i niezajęty, zanim padnie oferta zdziczenia; 0 = nigdy."
+            "rewildDelayTurnsHelp": "Ile tur heks leży oczyszczony i niezajęty, zanim padnie oferta zdziczenia; 0 = nigdy.",
+            "treasureLedger": {
+                "title": "Księga skarbów",
+                "turn": "Tura {turn}",
+                "gp": "{gp} sz",
+                "total": "łącznie {gp} sz",
+                "turnColumn": "Tura",
+                "sourceColumn": "Źródło",
+                "itemsColumn": "Przedmioty",
+                "gpColumn": "Wartość",
+                "cursedTitle": "Zawiera przeklęte przedmioty",
+                "empty": "Nie przyznano jeszcze skarbu.",
+                "atCap": "Najstarsze wpisy są usuwane po osiągnięciu limitu."
+            }
         },
         "chatMessages": {
             "annexation": {
@@ -2580,6 +2594,18 @@
                 "noArmy": "That army actor no longer exists.",
                 "effectMissing": "Could not find the “{condition}” army condition in the PF2e Kingmaker compendium. Apply it by hand.",
                 "dismiss": "Dismiss"
+            },
+            "lootAward": {
+                "title": "Znaleziony skarb",
+                "rowDetail": "x{qty} · {gp} sz za szt.",
+                "award": "Przyznaj drużynie",
+                "dismiss": "Obsłużone ręcznie",
+                "awarded": "Przyznano {count} przedmiotów ({gp} sz).",
+                "alreadyAwarded": "Skarb z {name} już przyznano.",
+                "itemsMissing": "Nie odnaleziono: {names}. Za te pozycje nic nie przyznano.",
+                "cursedTitle": "Przyznano przeklęty skarb",
+                "cleanse": "Oczyść przedmiot",
+                "cleansePrepared": "Oczyszczenie przygotowane (ST {dc})."
             }
         },
         "displayBars": {

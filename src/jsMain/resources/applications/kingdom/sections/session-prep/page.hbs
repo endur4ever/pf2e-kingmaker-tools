@@ -21,6 +21,44 @@
             <p class="km-session-prep-empty-all"><i class="fa-solid fa-mug-hot"></i> {{localizeKM "kingdom.sessionPrep.emptyAll"}}</p>
         {{/unless}}
 
+        {{#if treasureLedger}}
+        {{!-- GM-only by DATA: treasureLedger is null for players (it names hexes they may not
+              have found). Read-only -- awards happen on the offer card, never here. --}}
+        <section class="km-session-prep-section km-treasure-ledger">
+            <h3><i class="fa-solid fa-gem"></i> {{localizeKM "kingdom.treasureLedger.title"}}
+                <span class="km-treasure-total">{{treasureLedger.totalLabel}}</span>
+            </h3>
+            {{#if treasureLedger.hasRows}}
+                <table class="km-treasure-table">
+                    <thead>
+                    <tr>
+                        <th>{{localizeKM "kingdom.treasureLedger.turnColumn"}}</th>
+                        <th>{{localizeKM "kingdom.treasureLedger.sourceColumn"}}</th>
+                        <th>{{localizeKM "kingdom.treasureLedger.itemsColumn"}}</th>
+                        <th>{{localizeKM "kingdom.treasureLedger.gpColumn"}}</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {{#each treasureLedger.rows}}
+                        <tr>
+                            <td>{{this.turnLabel}}</td>
+                            <td>{{this.source}}</td>
+                            <td class="km-treasure-items">{{this.items}}{{#if this.hasCursed}}
+                                <i class="fa-solid fa-skull-crossbones km-treasure-cursed" title="{{localizeKM 'kingdom.treasureLedger.cursedTitle'}}"></i>{{/if}}</td>
+                            <td>{{this.gpLabel}}</td>
+                        </tr>
+                    {{/each}}
+                    </tbody>
+                </table>
+                {{#if treasureLedger.atCap}}
+                    <p class="km-treasure-cap">{{localizeKM "kingdom.treasureLedger.atCap"}}</p>
+                {{/if}}
+            {{else}}
+                <p>{{localizeKM "kingdom.treasureLedger.empty"}}</p>
+            {{/if}}
+        </section>
+        {{/if}}
+
         {{#if sessionPrepContext.forecast}}
         {{!-- Next-session forecast. GM-only by DATA: the context is null for players, so this
               block never receives anything to leak -- the if is layout, not the gate. Risk rows

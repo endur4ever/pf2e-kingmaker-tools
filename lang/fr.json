@@ -1963,7 +1963,8 @@
                     "note": "Note",
                     "remove": "Retirer l’objet",
                     "summary": "{count} objets · {gp} po · {cursed} maudits",
-                    "awardedBadge": "déjà attribué"
+                    "awardedBadge": "déjà attribué",
+                    "awardButton": "Attribuer le butin"
                 }
             },
             "homebrewProfile": {
@@ -2358,7 +2359,20 @@
             "threatMigrationSpeed": "Hex par pas accepté",
             "threatMigrationSpeedHelp": "Distance parcourue quand vous cliquez Avancer (1 par défaut).",
             "rewildDelayTurns": "Ensauvagement après (tours)",
-            "rewildDelayTurnsHelp": "Tours qu’un hex reste défriché et non revendiqué avant une offre d’ensauvagement ; 0 = jamais."
+            "rewildDelayTurnsHelp": "Tours qu’un hex reste défriché et non revendiqué avant une offre d’ensauvagement ; 0 = jamais.",
+            "treasureLedger": {
+                "title": "Registre du trésor",
+                "turn": "Tour {turn}",
+                "gp": "{gp} po",
+                "total": "{gp} po au total",
+                "turnColumn": "Tour",
+                "sourceColumn": "Source",
+                "itemsColumn": "Objets",
+                "gpColumn": "Valeur",
+                "cursedTitle": "Contient des objets maudits",
+                "empty": "Aucun trésor attribué.",
+                "atCap": "Les entrées les plus anciennes sont élaguées."
+            }
         },
         "chatMessages": {
             "annexation": {
@@ -2580,6 +2594,18 @@
                 "noArmy": "That army actor no longer exists.",
                 "effectMissing": "Could not find the “{condition}” army condition in the PF2e Kingmaker compendium. Apply it by hand.",
                 "dismiss": "Dismiss"
+            },
+            "lootAward": {
+                "title": "Trésor découvert",
+                "rowDetail": "x{qty} · {gp} po pièce",
+                "award": "Attribuer au groupe",
+                "dismiss": "Géré manuellement",
+                "awarded": "{count} objets attribués ({gp} po).",
+                "alreadyAwarded": "Le trésor de {name} a déjà été attribué.",
+                "itemsMissing": "Non résolus : {names}. Rien n’a été accordé pour ces lignes.",
+                "cursedTitle": "Trésor maudit attribué",
+                "cleanse": "Purifier l’objet",
+                "cleansePrepared": "Purification préparée (DD {dc})."
             }
         },
         "displayBars": {

@@ -2151,7 +2151,8 @@
                     "note": "Note",
                     "remove": "Remove item",
                     "summary": "{count} items · {gp} gp · {cursed} cursed",
-                    "awardedBadge": "already awarded"
+                    "awardedBadge": "already awarded",
+                    "awardButton": "Award loot"
                 }
             },
             "homebrewProfile": {
@@ -2480,7 +2481,20 @@
             "threatMigrationSpeed": "Hexes per accepted step",
             "threatMigrationSpeedHelp": "How far a threat moves when you click Advance (default 1).",
             "rewildDelayTurns": "Re-wild after (turns)",
-            "rewildDelayTurnsHelp": "Turns a hex sits cleared-and-unclaimed before a re-wild offer; 0 = never."
+            "rewildDelayTurnsHelp": "Turns a hex sits cleared-and-unclaimed before a re-wild offer; 0 = never.",
+            "treasureLedger": {
+                "title": "Treasure Ledger",
+                "turn": "Turn {turn}",
+                "gp": "{gp} gp",
+                "total": "{gp} gp total",
+                "turnColumn": "Turn",
+                "sourceColumn": "Source",
+                "itemsColumn": "Items",
+                "gpColumn": "Value",
+                "cursedTitle": "Includes cursed items",
+                "empty": "No treasure awarded yet.",
+                "atCap": "Older entries are trimmed at the ledger cap."
+            }
         },
         "chatMessages": {
             "calendarBridgeMissing": "<strong>Kingmaker Tools:</strong> Seasons &amp; Stars is active, but the <em>Simple Calendar Compatibility Bridge</em> module is not. Calendar notes (expeditions, weather, end-of-turn and camp summaries) are being silently skipped. Install <a href=\"{url}\">the compatibility bridge</a> (package id <code>{packageId}</code>) to enable them. This notice appears only once.",
@@ -2702,6 +2716,18 @@
                 "noArmy": "That army actor no longer exists.",
                 "effectMissing": "Could not find the “{condition}” army condition in the PF2e Kingmaker compendium. Apply it by hand.",
                 "dismiss": "Dismiss"
+            },
+            "lootAward": {
+                "title": "Treasure found",
+                "rowDetail": "x{qty} · {gp} gp each",
+                "award": "Award to party",
+                "dismiss": "Handled manually",
+                "awarded": "{count} items awarded ({gp} gp).",
+                "alreadyAwarded": "{name}’s treasure was already awarded.",
+                "itemsMissing": "Could not resolve: {names}. Nothing was granted for those rows.",
+                "cursedTitle": "Cursed treasure awarded",
+                "cleanse": "Cleanse Item",
+                "cleansePrepared": "Cleanse Item prepared (DC {dc})."
             }
         },
         "displayBars": {

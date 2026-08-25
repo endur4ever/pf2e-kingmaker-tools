@@ -127,6 +127,9 @@ external interface KingdomSheetContext : ValidatedHandlebarsContext {
 
     /** Deadlines rows for the Campaign tab. GM-only by DATA -- null for players. */
     val deadlines: Array<DeadlineRowContext>?
+
+    /** GM-only treasure ledger for the Session Prep tab; null for players. */
+    val treasureLedger: TreasureLedgerContext?
     val showDetailedMatrix: Boolean
     val campaignClocks: CampaignClockContext
     val generatedQuestCount: Int
