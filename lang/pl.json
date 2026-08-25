@@ -763,7 +763,10 @@
                 "runUpkeep": "Run Upkeep",
                 "upkeepAlreadyDone": "All Upkeep checklist steps are already satisfied.",
                 "upkeepStepAlreadyDone": "This upkeep step is already done this tura — uncheck it in the Tura Wizard to re-run.",
-                "upkeepSummary": "Upkeep Phase Summary"
+                "upkeepSummary": "Upkeep Phase Summary",
+                "readiness": "Gotowi gracze: {ready} / {total}",
+                "waitingOn": "— czekamy na {names}",
+                "allReady": "— wszyscy gotowi"
             },
             "exportToJournal": "Export to Journal",
             "exportToWorldAnvil": "Export for World Anvil",
@@ -2158,7 +2161,18 @@
                 "bellTooltip": "Nowości królestwa",
                 "panelTitle": "Co nowego",
                 "empty": "Wszystko na bieżąco.",
-                "dismiss": "Odrzuć"
+                "dismiss": "Odrzuć",
+                "card": {
+                    "title": "Tura {turn} — co na ciebie czeka",
+                    "leaderCheck": "{role}: wymagany test czeka na ciebie",
+                    "slotsRemaining": "Radzie zostało {remaining} działań przywódczych w tej turze",
+                    "expeditionReturning": "{title} wraca za {days} dni",
+                    "expeditionAwaiting": "{title} wróciła — oczekuje rozstrzygnięcia",
+                    "view": "Pokaż",
+                    "ready": "Jestem gotowy",
+                    "readyDone": "Gotowy ✓",
+                    "readyRecorded": "Twoja gotowość została zapisana."
+                }
             }
         },
         "chatMessages": {

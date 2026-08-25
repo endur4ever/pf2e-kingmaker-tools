@@ -763,7 +763,10 @@
                 "runUpkeep": "Run Upkeep",
                 "upkeepAlreadyDone": "All Upkeep checklist steps are already satisfied.",
                 "upkeepStepAlreadyDone": "This upkeep step is already done this ход — uncheck it in the Ход Wizard to re-run.",
-                "upkeepSummary": "Upkeep Phase Summary"
+                "upkeepSummary": "Upkeep Phase Summary",
+                "readiness": "Игроки готовы: {ready} / {total}",
+                "waitingOn": "— ждём {names}",
+                "allReady": "— все готовы"
             },
             "exportToJournal": "Export to Journal",
             "exportToWorldAnvil": "Export for World Anvil",
@@ -2158,7 +2161,18 @@
                 "bellTooltip": "Новости королевства",
                 "panelTitle": "Что нового",
                 "empty": "Вы в курсе всех событий.",
-                "dismiss": "Скрыть"
+                "dismiss": "Скрыть",
+                "card": {
+                    "title": "Ход {turn} — что вас ждёт",
+                    "leaderCheck": "{role}: вас ждёт обязательная проверка",
+                    "slotsRemaining": "У совета осталось {remaining} лидерских действий в этом ходу",
+                    "expeditionReturning": "{title} вернётся через {days} дн.",
+                    "expeditionAwaiting": "{title} вернулась — ожидает решения",
+                    "view": "Открыть",
+                    "ready": "Я готов",
+                    "readyDone": "Готов ✓",
+                    "readyRecorded": "Ваша готовность записана."
+                }
             }
         },
         "chatMessages": {

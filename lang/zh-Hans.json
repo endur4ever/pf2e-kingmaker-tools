@@ -763,7 +763,10 @@
                 "runUpkeep": "Run Upkeep",
                 "upkeepAlreadyDone": "All Upkeep checklist steps are already satisfied.",
                 "upkeepStepAlreadyDone": "This upkeep step is already done this 回合 — uncheck it in the 回合 Wizard to re-run.",
-                "upkeepSummary": "Upkeep Phase Summary"
+                "upkeepSummary": "Upkeep Phase Summary",
+                "readiness": "玩家就绪：{ready} / {total}",
+                "waitingOn": "— 等待 {names}",
+                "allReady": "— 全员就绪"
             },
             "exportToJournal": "Export to Journal",
             "exportToWorldAnvil": "Export for World Anvil",
@@ -2158,7 +2161,18 @@
                 "bellTooltip": "王国动态",
                 "panelTitle": "最新动态",
                 "empty": "没有未读消息。",
-                "dismiss": "忽略"
+                "dismiss": "忽略",
+                "card": {
+                    "title": "第 {turn} 回合 — 需要你处理的事项",
+                    "leaderCheck": "{role}：有一项必需检定等待你完成",
+                    "slotsRemaining": "议会本回合还剩 {remaining} 次领导力活动",
+                    "expeditionReturning": "{title} 将在 {days} 天后返回",
+                    "expeditionAwaiting": "{title} 已返回 — 等待裁定",
+                    "view": "查看",
+                    "ready": "我已就绪",
+                    "readyDone": "已就绪 ✓",
+                    "readyRecorded": "你的就绪状态已记录。"
+                }
             }
         },
         "chatMessages": {

@@ -1,0 +1,18 @@
+<div class="km-player-pings-card">
+    <h3><i class="fa-solid fa-bell"></i> {{title}}</h3>
+    <ul class="km-player-pings-lines">
+        {{#each lines}}
+            <li>{{this.text}}
+                {{#if this.jumpValue}}
+                    <button type="button" class="km-ping-jump"
+                            data-kingdom-actor-uuid="{{@root.actorUuid}}"
+                            data-jump-value="{{this.jumpValue}}">{{this.jumpLabel}}</button>
+                {{/if}}
+            </li>
+        {{/each}}
+    </ul>
+    <button type="button" class="km-ping-ready"
+            data-kingdom-actor-uuid="{{actorUuid}}"
+            data-turn="{{turn}}"
+            {{#if alreadyReady}}disabled{{/if}}>{{readyLabel}}</button>
+</div>

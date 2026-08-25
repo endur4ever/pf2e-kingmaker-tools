@@ -80,3 +80,38 @@
     font-size: 0.9em;
     opacity: 0.85;
 }
+
+/* Player Pings whisper card (player-pings.hbs) */
+.km-player-pings-card h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0 0 0.35rem 0;
+}
+
+.km-player-pings-lines {
+    margin: 0 0 0.5rem 0;
+    padding-left: 1.1rem;
+}
+
+.km-player-pings-lines li {
+    margin-bottom: 0.25rem;
+}
+
+.km-player-pings-card .km-ping-jump {
+    width: auto;
+    display: inline-block;
+    font-size: 0.85em;
+    padding: 0 0.4rem;
+    margin-left: 0.3rem;
+    line-height: 1.4;
+}
+
+.km-player-pings-card .km-ping-ready {
+    width: 100%;
+    font-weight: bold;
+}
+
+.km-player-pings-card .km-ping-ready:disabled {
+    opacity: 0.6;
+}

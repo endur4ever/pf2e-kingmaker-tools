@@ -9,6 +9,10 @@ import at.posselt.pfrpg2e.kingdom.clearPerformedActivities
 import at.posselt.pfrpg2e.kingdom.restoreTurnWizardState
 import com.foundryvtt.pf2e.item.PF2EItem
 import at.posselt.pfrpg2e.kingdom.getPerformedActivities
+import at.posselt.pfrpg2e.kingdom.pings.TurnReadiness
+import at.posselt.pfrpg2e.kingdom.pings.pingsReadyForTurn
+import at.posselt.pfrpg2e.kingdom.pings.readinessStrip
+import at.posselt.pfrpg2e.kingdom.sheet.contexts.ReadinessStripContext
 import at.posselt.pfrpg2e.kingdom.getActivity
 import at.posselt.pfrpg2e.data.armies.BattleStatus
 import at.posselt.pfrpg2e.kingdom.formatTurnGazette
@@ -1359,7 +1363,32 @@ class TurnWizardApplication(
 
             val canCommit = !capsResult.hasAnyOverCap
 
+            // GM-only advisory strip (plan SS4.2): reads each player User's own readiness flag.
+            // Data-level gate -- players get null, so the template cannot leak it. runCatching
+            // because unit-test environments have no game.users registry.
+            val readiness: ReadinessStripContext? = runCatching {
+                if (!game.user.isGM) return@runCatching null
+                val players = game.users.filter { !it.isGM }
+                val playerIds = players.mapNotNull { it.id }
+                if (playerIds.isEmpty()) return@runCatching null
+                val records = players.mapNotNull { u ->
+                    val id = u.id ?: return@mapNotNull null
+                    u.pingsReadyForTurn()?.let { TurnReadiness(userId = id, turn = it, ready = true) }
+                }
+                val strip = readinessStrip(records, kingdom.currentTurn ?: 0, playerIds)
+                val waiting = players
+                    .filter { strip[it.id] != true }
+                    .joinToString(", ") { it.name }
+                ReadinessStripContext(
+                    ready = strip.values.count { it },
+                    total = playerIds.size,
+                    waitingNames = waiting,
+                    allReady = waiting.isEmpty(),
+                )
+            }.getOrNull()
+
             return TurnWizardContext(
+                readiness = readiness,
                 partId = partId,
                 isFormValid = isFormValid,
                 kingdomName = kingdom.name,

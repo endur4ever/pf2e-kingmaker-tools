@@ -125,7 +125,7 @@ fun main() {
             registerDailyTickHooks(game)
         }
 
-        bindChatButtons(game)
+        bindChatButtons(game, actionDispatcher)
         bindSetupHealthCheckButtons(game, actionDispatcher)
         registerMacroDropHooks(game)
 

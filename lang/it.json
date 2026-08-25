@@ -763,7 +763,10 @@
                 "runUpkeep": "Run Upkeep",
                 "upkeepAlreadyDone": "All Upkeep checklist steps are already satisfied.",
                 "upkeepStepAlreadyDone": "This upkeep step is already done this turnoo — uncheck it in the Turnoo Wizard to re-run.",
-                "upkeepSummary": "Upkeep Phase Summary"
+                "upkeepSummary": "Upkeep Phase Summary",
+                "readiness": "Giocatori pronti: {ready} / {total}",
+                "waitingOn": "— in attesa di {names}",
+                "allReady": "— tutti pronti"
             },
             "exportToJournal": "Export to Journal",
             "exportToWorldAnvil": "Export for World Anvil",
@@ -2158,7 +2161,18 @@
                 "bellTooltip": "Novità del regno",
                 "panelTitle": "Novità",
                 "empty": "Sei aggiornato.",
-                "dismiss": "Ignora"
+                "dismiss": "Ignora",
+                "card": {
+                    "title": "Turno {turn} — cosa ti serve",
+                    "leaderCheck": "{role}: una prova richiesta ti attende",
+                    "slotsRemaining": "Il consiglio ha ancora {remaining} attività di comando questo turno",
+                    "expeditionReturning": "{title} torna tra {days} giorni",
+                    "expeditionAwaiting": "{title} è tornata — in attesa di risoluzione",
+                    "view": "Vedi",
+                    "ready": "Sono pronto",
+                    "readyDone": "Pronto ✓",
+                    "readyRecorded": "La tua prontezza è stata registrata."
+                }
             }
         },
         "chatMessages": {

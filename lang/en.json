@@ -885,7 +885,10 @@
                 "commit": "Complete Turn",
                 "cancel": "Cancel",
                 "previewButton": "Preview Turn",
-                "journalSummary": "Turn summary written to journal"
+                "journalSummary": "Turn summary written to journal",
+                "readiness": "Players ready: {ready} / {total}",
+                "waitingOn": "— waiting on {names}",
+                "allReady": "— everyone is ready"
             },
             "fame": "Fame",
             "current": "Current",
@@ -2280,7 +2283,18 @@
                 "bellTooltip": "Kingdom updates",
                 "panelTitle": "What's New",
                 "empty": "You're all caught up.",
-                "dismiss": "Dismiss"
+                "dismiss": "Dismiss",
+                "card": {
+                    "title": "Turn {turn} — what needs you",
+                    "leaderCheck": "{role}: a required check is waiting on you",
+                    "slotsRemaining": "The council has {remaining} leadership activities left this turn",
+                    "expeditionReturning": "{title} returns in {days} days",
+                    "expeditionAwaiting": "{title} has returned — awaiting resolution",
+                    "view": "View",
+                    "ready": "I'm Ready",
+                    "readyDone": "Ready ✓",
+                    "readyRecorded": "Your readiness has been recorded."
+                }
             }
         },
         "chatMessages": {

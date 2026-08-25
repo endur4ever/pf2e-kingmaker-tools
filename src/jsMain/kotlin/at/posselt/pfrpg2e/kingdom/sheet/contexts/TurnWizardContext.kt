@@ -54,7 +54,19 @@ external interface TickChangeContext {
 
 @Suppress("unused")
 @JsPlainObject
+external interface ReadinessStripContext {
+    val ready: Int
+    val total: Int
+    /** Pre-joined "Bob, Carol"; empty when everyone is ready. */
+    val waitingNames: String
+    val allReady: Boolean
+}
+
+@Suppress("unused")
+@JsPlainObject
 external interface TurnWizardContext : ValidatedHandlebarsContext {
+    /** GM-only advisory strip (null for players / no player users). NEVER affects canCommit. */
+    val readiness: ReadinessStripContext?
     val kingdomName: String
     val checklist: Array<ChecklistItemContext>
     val kingdomState: KingdomStateContext

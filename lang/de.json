@@ -763,7 +763,10 @@
                 "cancel": "Cancel",
                 "previewButton": "Preview Turn",
                 "journalSummary": "Turn summary written to journal",
-                "upkeepStepAlreadyDone": "This upkeep step is already done this zug — uncheck it in the Zug Wizard to re-run."
+                "upkeepStepAlreadyDone": "This upkeep step is already done this zug — uncheck it in the Zug Wizard to re-run.",
+                "readiness": "Spieler bereit: {ready} / {total}",
+                "waitingOn": "— warten auf {names}",
+                "allReady": "— alle sind bereit"
             },
             "fame": "Ruhm",
             "current": "Aktuell",
@@ -2158,7 +2161,18 @@
                 "bellTooltip": "Königreichs-Neuigkeiten",
                 "panelTitle": "Neuigkeiten",
                 "empty": "Du bist auf dem neuesten Stand.",
-                "dismiss": "Ausblenden"
+                "dismiss": "Ausblenden",
+                "card": {
+                    "title": "Zug {turn} — was dich braucht",
+                    "leaderCheck": "{role}: Eine erforderliche Probe wartet auf dich",
+                    "slotsRemaining": "Der Rat hat diesen Zug noch {remaining} Führungsaktivitäten übrig",
+                    "expeditionReturning": "{title} kehrt in {days} Tagen zurück",
+                    "expeditionAwaiting": "{title} ist zurückgekehrt — wartet auf Auflösung",
+                    "view": "Anzeigen",
+                    "ready": "Ich bin bereit",
+                    "readyDone": "Bereit ✓",
+                    "readyRecorded": "Deine Bereitschaft wurde vermerkt."
+                }
             }
         },
         "chatMessages": {

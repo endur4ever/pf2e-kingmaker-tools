@@ -180,6 +180,7 @@ import at.posselt.pfrpg2e.kingdom.computeCaravanRoute
 import at.posselt.pfrpg2e.kingdom.currentSeasonalModifiers
 import at.posselt.pfrpg2e.kingdom.forecast.buildForecast
 import at.posselt.pfrpg2e.kingdom.pings.buildPlayerFeed
+import at.posselt.pfrpg2e.kingdom.pings.postPlayerPings
 import at.posselt.pfrpg2e.kingdom.pings.pingsCursor
 import at.posselt.pfrpg2e.kingdom.pings.savePingsCursor
 import at.posselt.pfrpg2e.kingdom.pings.unreadFeed
@@ -373,6 +374,8 @@ class KingdomSheet(
     private val game: Game,
     private val actor: KingdomActor,
     private val dispatcher: ActionDispatcher,
+    /** Open on this tab instead of the default (used by chat-card jump buttons). */
+    private val initialNavEntry: MainNavEntry? = null,
 ) : FormApp<KingdomSheetContext, KingdomSheetData>(
     title = "Manage Kingdom",
     template = "applications/kingdom/kingdom-sheet.hbs",
@@ -415,7 +418,8 @@ class KingdomSheet(
     private var initialKingdomLevel = getKingdom().level
     private var noCharter = getKingdom().charter.type == null
     private var currentCharacterSheetNavEntry: String = if (noCharter) "Creation" else "$initialKingdomLevel"
-    private var currentNavEntry: MainNavEntry = if (noCharter) MainNavEntry.KINGDOM else MainNavEntry.TURN
+    private var currentNavEntry: MainNavEntry =
+        initialNavEntry ?: if (noCharter) MainNavEntry.KINGDOM else MainNavEntry.TURN
 
     /** Transient per-open horizon for the Session Prep forecast (plan phase 4); resets on reopen. */
     private var forecastHorizonDays: Int = 7
@@ -2333,6 +2337,8 @@ class KingdomSheet(
                 TurnWizardApplication(actor).render(true)
                 // GM-only, GM-whispered recap of the previous turn; idempotent per turn.
                 postLastTurnRecap(game, actor)
+                // Per-player "what needs you" whisper cards; same seam, same idempotency pattern.
+                postPlayerPings(game, actor)
             }
 
             "settlement-size-info" -> buildPromise {

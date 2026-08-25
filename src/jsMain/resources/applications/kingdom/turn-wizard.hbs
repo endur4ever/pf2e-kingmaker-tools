@@ -13,6 +13,15 @@
       {{/if}}
   </header>
 
+  {{#if readiness}}
+  {{!-- GM-only by DATA: readiness is null for players. Advisory only -- never gates End Turn. --}}
+  <div class="km-tw-readiness" style="display: flex; align-items: center; gap: 6px; padding: 5px 9px; margin-bottom: 8px; border: 1px dashed rgba(153, 153, 153, 0.7); border-radius: 4px; opacity: 0.9;">
+      <i class="fa-solid fa-users"></i>
+      {{localizeKM "kingdom.turnWizard.readiness" ready=readiness.ready total=readiness.total}}
+      {{#if readiness.allReady}}{{localizeKM "kingdom.turnWizard.allReady"}}{{else}}{{localizeKM "kingdom.turnWizard.waitingOn" names=readiness.waitingNames}}{{/if}}
+  </div>
+  {{/if}}
+
   {{!-- Checklist Section --}}
   <fieldset class="km-turn-wizard-section">
     <legend>{{localizeKM "kingdom.turnWizard.checklistTitle"}}</legend>

@@ -118,6 +118,8 @@ fun buildPlayerFeed(kingdom: KingdomData): List<FeedItem> {
 external interface RawPingsCursor {
     var lastSeenAtMillis: Double?
     var dismissedIds: Array<String>?
+    /** The kingdom turn this user marked themselves Ready for (plan SS2.2); null = not ready. */
+    var readyForTurn: Int?
 }
 
 fun User.pingsCursor(): SeenCursor {
@@ -129,11 +131,30 @@ fun User.pingsCursor(): SeenCursor {
 }
 
 suspend fun User.savePingsCursor(cursor: SeenCursor) {
+    // The readiness field SHARES this flag: read-merge-write so saving the cursor can never
+    // silently drop a Ready click (and vice versa in [savePingsReady]).
+    val existing = getAppFlag<User, RawPingsCursor?>("playerPings")
     setAppFlag(
         "playerPings",
         RawPingsCursor(
             lastSeenAtMillis = cursor.lastSeenAtMillis,
             dismissedIds = cursor.dismissedIds.toTypedArray(),
+            readyForTurn = existing?.readyForTurn,
+        ),
+    )
+}
+
+fun User.pingsReadyForTurn(): Int? =
+    getAppFlag<User, RawPingsCursor?>("playerPings")?.readyForTurn
+
+suspend fun User.savePingsReady(turn: Int) {
+    val existing = getAppFlag<User, RawPingsCursor?>("playerPings")
+    setAppFlag(
+        "playerPings",
+        RawPingsCursor(
+            lastSeenAtMillis = existing?.lastSeenAtMillis,
+            dismissedIds = existing?.dismissedIds,
+            readyForTurn = turn,
         ),
     )
 }

@@ -763,7 +763,10 @@
                 "runUpkeep": "Run Upkeep",
                 "upkeepAlreadyDone": "All Upkeep checklist steps are already satisfied.",
                 "upkeepStepAlreadyDone": "This upkeep step is already done this tour — uncheck it in the Tour Wizard to re-run.",
-                "upkeepSummary": "Upkeep Phase Summary"
+                "upkeepSummary": "Upkeep Phase Summary",
+                "readiness": "Joueurs prêts : {ready} / {total}",
+                "waitingOn": "— en attente de {names}",
+                "allReady": "— tout le monde est prêt"
             },
             "exportToJournal": "Export to Journal",
             "exportToWorldAnvil": "Export for World Anvil",
@@ -2158,7 +2161,18 @@
                 "bellTooltip": "Actualités du royaume",
                 "panelTitle": "Quoi de neuf",
                 "empty": "Vous êtes à jour.",
-                "dismiss": "Ignorer"
+                "dismiss": "Ignorer",
+                "card": {
+                    "title": "Tour {turn} — ce qui vous attend",
+                    "leaderCheck": "{role} : un test requis vous attend",
+                    "slotsRemaining": "Le conseil dispose encore de {remaining} activités de commandement ce tour",
+                    "expeditionReturning": "{title} revient dans {days} jours",
+                    "expeditionAwaiting": "{title} est de retour — en attente de résolution",
+                    "view": "Voir",
+                    "ready": "Je suis prêt",
+                    "readyDone": "Prêt ✓",
+                    "readyRecorded": "Votre état prêt a été enregistré."
+                }
             }
         },
         "chatMessages": {

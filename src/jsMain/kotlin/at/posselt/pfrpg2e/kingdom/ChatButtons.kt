@@ -62,6 +62,10 @@ import at.posselt.pfrpg2e.kingdom.dialogs.postComplexDegreeOfSuccess
 import at.posselt.pfrpg2e.takeIfInstance
 import at.posselt.pfrpg2e.data.checks.DegreeOfSuccess
 import at.posselt.pfrpg2e.kingdom.PLAGUE_EVENT_ID
+import at.posselt.pfrpg2e.actions.ActionDispatcher
+import at.posselt.pfrpg2e.kingdom.pings.savePingsReady
+import at.posselt.pfrpg2e.kingdom.sheet.KingdomSheet
+import at.posselt.pfrpg2e.kingdom.sheet.navigation.MainNavEntry
 
 private data class ChatButton(
     val buttonClass: String,
@@ -378,6 +382,19 @@ private val buttons = listOf(
                 postChatMessage(t("chatMessages.warRuin.applied", recordOf("ruin" to t("chatMessages.warRuin.$choice"))))
             }
         }
+    },
+    ChatButton("km-ping-ready") { game, _, _, button ->
+        // Player self-service, NOT an offer: writes only the clicking user's own flag (plan SS5.1).
+        val turn = button.dataset["turn"]?.toIntOrNull() ?: return@ChatButton
+        game.user.savePingsReady(turn)
+        button.textContent = t("kingdom.pings.card.readyDone")
+        ui.notifications.info(t("kingdom.pings.card.readyRecorded"))
+    },
+    ChatButton("km-ping-jump") { game, actor, _, button ->
+        // Pure navigation (plan SS5.1): open the kingdom sheet on the line's tab.
+        val dispatcher = chatButtonDispatcher ?: return@ChatButton
+        val nav = button.dataset["jumpValue"]?.let { MainNavEntry.fromString(it) }
+        KingdomSheet(game, actor, dispatcher, initialNavEntry = nav).launch()
     },
     ChatButton("km-offer-irrigation-plague") { game, actor, event, button ->
         // Adds the Plague event after a failed Irrigation flat check. Resolved through getEvent so
@@ -1205,7 +1222,14 @@ private val buttons = listOf(
     // sheet DOM — a ChatButton (bound to the #chat sidebar) never receives its click.
 )
 
-fun bindChatButtons(game: Game) {
+/**
+ * Set by [bindChatButtons]; the km-ping-jump handler needs it to construct a KingdomSheet.
+ * ChatButton callbacks run on the CLICKING user's client, so this is that client's dispatcher.
+ */
+private var chatButtonDispatcher: ActionDispatcher? = null
+
+fun bindChatButtons(game: Game, dispatcher: ActionDispatcher? = null) {
+    chatButtonDispatcher = dispatcher
     TypedHooks.onRenderChatLog { application, _, data ->
         buttons.forEach { data ->
             bindChatClick(".${data.buttonClass}") { ev, target, parent ->
