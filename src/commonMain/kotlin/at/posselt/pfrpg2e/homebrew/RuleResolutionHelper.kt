@@ -38,6 +38,9 @@ object RuleResolutionHelper {
     fun getCultOfTheBloomEvents(profile: HomebrewRulesProfile?): Boolean =
         profile?.rules?.cultOfTheBloomEvents ?: false
 
+    fun isSeasonalEconomyEnabled(profile: HomebrewRulesProfile?): Boolean =
+        profile?.rules?.seasonalEconomyEnabled ?: false
+
     fun getTravelCostRiverNoBridgeAdditional(profile: HomebrewRulesProfile?): Int =
         profile?.rules?.travelCostRiverNoBridgeAdditional ?: 0
 

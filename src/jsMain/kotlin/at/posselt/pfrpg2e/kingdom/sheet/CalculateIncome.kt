@@ -4,6 +4,7 @@ import at.posselt.pfrpg2e.data.kingdom.RealmData
 import at.posselt.pfrpg2e.data.kingdom.settlements.Settlement
 import at.posselt.pfrpg2e.data.kingdom.settlements.SettlementSizeType
 import at.posselt.pfrpg2e.kingdom.KingdomData
+import at.posselt.pfrpg2e.kingdom.seasonaleconomy.SeasonalEconomyModifiers
 import at.posselt.pfrpg2e.kingdom.data.ChosenFeat
 import at.posselt.pfrpg2e.kingdom.modifiers.Modifier
 import at.posselt.pfrpg2e.kingdom.modifiers.ModifierSelector
@@ -52,11 +53,13 @@ suspend fun collectResources(
     expressionContext: ExpressionContext,
     modifiers: List<Modifier>,
     suppressChat: Boolean = false,
+    seasonal: SeasonalEconomyModifiers = SeasonalEconomyModifiers.none(),
 ): Income {
     val income = calculateIncome(
         realmData = realmData,
         resourceDice = resourceDice,
         increaseGainedLuxuries = increaseGainedLuxuries,
+        seasonal = seasonal,
     )
     val withModifiers = income.plusModifierCommodities(modifiers, expressionContext)
     val rolledRp = roll(income.resourcePointsFormula, flavor = t("kingdom.gainingResourcePoints"), toChat = !suppressChat)
@@ -144,6 +147,7 @@ fun calculateProjectedResources(
     settlements: List<Settlement>,
     expressionContext: ExpressionContext,
     modifiers: List<Modifier>,
+    seasonal: SeasonalEconomyModifiers = SeasonalEconomyModifiers.none(),
 ): ProjectedResources {
     val resourceDice = kingdomData.getResourceDiceAmount(
         chosenFeats,
@@ -161,6 +165,7 @@ fun calculateProjectedResources(
         realmData = realmData,
         resourceDice = resourceDice,
         increaseGainedLuxuries = increaseGainedLuxuries,
+        seasonal = seasonal,
     )
     val uncappedIncome = baseIncome.plusModifierCommodities(modifiers, expressionContext)
     val currentCommodities = kingdomData.commodities.now

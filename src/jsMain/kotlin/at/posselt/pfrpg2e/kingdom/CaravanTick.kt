@@ -147,12 +147,16 @@ fun caravanRaidDc(
     atWar: Boolean,
     claimedFraction: Double,
     fullyRoadedThroughClaimed: Boolean = false,
+    seasonalDcDelta: Int = 0,
 ): Int {
     var dc = baseDc
     if (atWar) dc += 4
     dc -= (partnerStanding ?: 0) / 2
     dc -= (claimedFraction.coerceIn(0.0, 1.0) * 4).roundToInt()
     if (fullyRoadedThroughClaimed) dc -= 1
+    // Seasonal delta lands AFTER the road discount and before the clamp, so winter and a built-out
+    // trade road compose rather than one masking the other (seasonal-economy plan §6, seam 3).
+    dc += seasonalDcDelta
     return dc.coerceIn(5, 40)
 }
 
@@ -164,13 +168,18 @@ fun caravanRaidDc(
  * An item delivery has no trade partner at the far end, only a destination settlement, so standing
  * and war never apply.
  */
-fun shipmentRaidDc(safety: CaravanRouteSafety, baseDc: Int = CARAVAN_BASE_RAID_DC): Int =
+fun shipmentRaidDc(
+    safety: CaravanRouteSafety,
+    baseDc: Int = CARAVAN_BASE_RAID_DC,
+    seasonalDcDelta: Int = 0,
+): Int =
     caravanRaidDc(
         baseDc = baseDc,
         partnerStanding = null,
         atWar = false,
         claimedFraction = safety.claimedFraction,
         fullyRoadedThroughClaimed = safety.fullyRoadedThroughClaimed,
+        seasonalDcDelta = seasonalDcDelta,
     )
 
 /** Bonus Resource Dice granted per Commodity sold, scaled by the partner's standing and treaty tier. */

@@ -12,6 +12,7 @@ import at.posselt.pfrpg2e.kingdom.computeCaravanRoute
 import at.posselt.pfrpg2e.kingdom.RouteHexSafety
 import at.posselt.pfrpg2e.kingdom.caravanRouteSafety
 import at.posselt.pfrpg2e.kingdom.caravanRaidDc
+import at.posselt.pfrpg2e.kingdom.currentSeasonalModifiers
 import at.posselt.pfrpg2e.kingdom.CARAVAN_BASE_RAID_DC
 import at.posselt.pfrpg2e.kingdom.getKingdomActors
 import at.posselt.pfrpg2e.kingdom.getKingdom
@@ -818,6 +819,7 @@ suspend fun syncCaravanRoutes(game: Game) {
             atWar = partner?.atWar == true,
             claimedFraction = safety.claimedFraction,
             fullyRoadedThroughClaimed = safety.fullyRoadedThroughClaimed,
+            seasonalDcDelta = game.currentSeasonalModifiers().caravanRaidDcDelta,
         )
 
         // Draw midpoint label

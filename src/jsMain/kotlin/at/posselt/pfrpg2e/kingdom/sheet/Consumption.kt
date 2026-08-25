@@ -6,6 +6,7 @@ import at.posselt.pfrpg2e.kingdom.KingdomActor
 import at.posselt.pfrpg2e.kingdom.modifiers.Modifier
 import at.posselt.pfrpg2e.kingdom.modifiers.expressions.ExpressionContext
 import at.posselt.pfrpg2e.kingdom.resources.calculateConsumption
+import at.posselt.pfrpg2e.kingdom.seasonaleconomy.SeasonalEconomyModifiers
 import at.posselt.pfrpg2e.utils.postChatMessage
 import at.posselt.pfrpg2e.utils.postChatTemplate
 import at.posselt.pfrpg2e.utils.t
@@ -22,6 +23,7 @@ suspend fun payConsumption(
     expressionContext: ExpressionContext,
     modifiers: List<Modifier>,
     suppressChat: Boolean = false,
+    seasonal: SeasonalEconomyModifiers = SeasonalEconomyModifiers.none(),
 ): Int {
     val consumption = calculateConsumption(
         settlements = settlements,
@@ -30,6 +32,7 @@ suspend fun payConsumption(
         now = now,
         expressionContext = expressionContext,
         modifiers = modifiers,
+        seasonal = seasonal,
     ).total
     return if (consumption > 0) {
         val consumedFood = availableFood - consumption

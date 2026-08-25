@@ -177,6 +177,7 @@ import at.posselt.pfrpg2e.kingdom.CleanseItemSettlement
 import at.posselt.pfrpg2e.kingdom.dialogs.openCleanseItemDialog
 import at.posselt.pfrpg2e.kingdom.rollCleanseItem
 import at.posselt.pfrpg2e.kingdom.computeCaravanRoute
+import at.posselt.pfrpg2e.kingdom.currentSeasonalModifiers
 import at.posselt.pfrpg2e.kingdom.map.routeHexSafety
 import at.posselt.pfrpg2e.kingdom.shipmentRaidDc
 import at.posselt.pfrpg2e.kingdom.caravanRouteSafety
@@ -2296,6 +2297,7 @@ class KingdomSheet(
                     val realm = game.getRealmData(actor, kingdom)
                     val settlements = kingdom.getAllSettlements(game)
                     val consumption = calculateConsumption(
+                        seasonal = game.currentSeasonalModifiers(),
                         settlements = settlements.allSettlements,
                         realmData = realm,
                         armyConsumption = kingdom.consumption.armies,
@@ -2997,6 +2999,7 @@ class KingdomSheet(
         val expressionContext = kingdom.createSimpleContext(settlements)
         val modifiers = kingdom.createModifiers(settlements)
         val consumption = calculateConsumption(
+            seasonal = game.currentSeasonalModifiers(),
             settlements = settlements.allSettlements,
             realmData = realm,
             armyConsumption = kingdom.consumption.armies,
@@ -3007,6 +3010,7 @@ class KingdomSheet(
         val automateResources = kingdom.settings.automateResources != AutomateResources.MANUAL.value
         val projected = if (automateResources) {
             calculateProjectedResources(
+                seasonal = game.currentSeasonalModifiers(),
                 kingdomData = kingdom,
                 realmData = realm,
                 chosenFeats = chosenFeats,
@@ -3437,6 +3441,7 @@ class KingdomSheet(
                         atWar = partner?.atWar == true,
                         claimedFraction = safety.claimedFraction,
                         fullyRoadedThroughClaimed = safety.fullyRoadedThroughClaimed,
+                        seasonalDcDelta = game.currentSeasonalModifiers().caravanRaidDcDelta,
                     )
                 }.getOrNull()
             },
@@ -3460,7 +3465,7 @@ class KingdomSheet(
                 // A shipment already stores the path it is walking, so this needs no pathfinding.
                 runCatching {
                     shipment.path.takeIf { it.isNotEmpty() }
-                        ?.let { shipmentRaidDc(caravanRouteSafety(it.map(::routeHexSafety))) }
+                        ?.let { shipmentRaidDc(caravanRouteSafety(it.map(::routeHexSafety)), seasonalDcDelta = game.currentSeasonalModifiers().caravanRaidDcDelta) }
                 }.getOrNull()
             },
             sizeInput = sizeInput.toContext(),
@@ -4050,6 +4055,7 @@ class KingdomSheet(
                 val modifiers = kingdom.createModifiers(settlements)
 
                 val projected = calculateProjectedResources(
+                    seasonal = game.currentSeasonalModifiers(),
                     kingdomData = kingdom,
                     realmData = realm,
                     chosenFeats = chosenFeats,

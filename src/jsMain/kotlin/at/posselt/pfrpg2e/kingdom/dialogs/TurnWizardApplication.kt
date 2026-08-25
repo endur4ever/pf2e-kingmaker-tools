@@ -48,6 +48,7 @@ import at.posselt.pfrpg2e.kingdom.data.RawCaravanShipment
 import at.posselt.pfrpg2e.kingdom.data.RawExpeditionChronicleEntry
 import at.posselt.pfrpg2e.kingdom.data.RawGroup
 import at.posselt.pfrpg2e.kingdom.computeCaravanRoute
+import at.posselt.pfrpg2e.kingdom.currentSeasonalModifiers
 import at.posselt.pfrpg2e.kingdom.postWarThreatArrivalOffer
 import at.posselt.pfrpg2e.kingdom.map.routeHexSafety
 import at.posselt.pfrpg2e.kingdom.CaravanRouteSafety
@@ -238,6 +239,7 @@ fun runKingdomTurnTick(kingdom: KingdomData, storage: CommodityStorage, currentT
  * Returns null when the caller is not a GM; no caller uses the [TickResult].
  */
 suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData): TickResult? {
+    val seasonal = game.currentSeasonalModifiers()
     if (!game.user.isGM) {
         ui.notifications.warn(t("kingdom.turn.endTurnGmOnly"))
         return null
@@ -376,6 +378,7 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
                         atWar = partner?.atWar == true,
                         claimedFraction = safety.claimedFraction,
                         fullyRoadedThroughClaimed = safety.fullyRoadedThroughClaimed,
+                        seasonalDcDelta = seasonal.caravanRaidDcDelta,
                     ),
                     raidRoll = kotlin.random.Random.nextInt(1, 21),
                     rdPerCommodity = caravanRdPerCommodity(partner?.standing, partner?.allianceLevel),
@@ -442,7 +445,7 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
                 }.getOrDefault(CaravanRouteSafety(claimedFraction = 0.0, fullyRoadedThroughClaimed = false))
                 ShipmentTickInput(
                     shipment = shipment,
-                    raidDc = shipmentRaidDc(safety),
+                    raidDc = shipmentRaidDc(safety, seasonalDcDelta = seasonal.caravanRaidDcDelta),
                     raidRoll = kotlin.random.Random.nextInt(1, 21),
                 )
             }
@@ -624,6 +627,7 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
         val modifiers = kingdom.createModifiers(settlements)
 
         val projected = calculateProjectedResources(
+            seasonal = game.currentSeasonalModifiers(),
             kingdomData = kingdom,
             realmData = realm,
             chosenFeats = chosenFeats,
@@ -1123,6 +1127,7 @@ class TurnWizardApplication(
             val expressionContext = kingdom.createSimpleContext(settlements)
             val modifiers = kingdom.createModifiers(settlements)
             calculateProjectedResources(
+                seasonal = game.currentSeasonalModifiers(),
                 kingdomData = kingdom,
                 realmData = realm,
                 chosenFeats = chosenFeats,

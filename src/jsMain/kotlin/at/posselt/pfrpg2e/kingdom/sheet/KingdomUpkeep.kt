@@ -3,6 +3,7 @@ package at.posselt.pfrpg2e.kingdom.sheet
 import com.foundryvtt.core.Game
 import at.posselt.pfrpg2e.kingdom.KingdomActor
 import at.posselt.pfrpg2e.kingdom.KingdomData
+import at.posselt.pfrpg2e.kingdom.currentSeasonalModifiers
 import at.posselt.pfrpg2e.kingdom.data.getChosenFeatures
 import at.posselt.pfrpg2e.kingdom.getExplodedFeatures
 import at.posselt.pfrpg2e.kingdom.data.getChosenFeats
@@ -79,6 +80,7 @@ suspend fun KingdomActor.upkeepCollectResources(game: Game, kingdom: KingdomData
     val chosenFeatures = kingdom.getChosenFeatures(allFeatures)
     val chosenFeats = kingdom.getChosenFeats(chosenFeatures)
     val resources = collectResources(
+        seasonal = game.currentSeasonalModifiers(),
         kingdomData = kingdom,
         realmData = realm,
         resourceDice = kingdom.getResourceDiceAmount(
@@ -117,6 +119,7 @@ suspend fun KingdomActor.upkeepPayConsumption(game: Game, kingdom: KingdomData, 
     val settlements = kingdom.getAllSettlements(game)
     val oldFood = kingdom.commodities.now.food
     val newFood = payConsumption(
+        seasonal = game.currentSeasonalModifiers(),
         kingdomActor = this,
         settlements = settlements.allSettlements,
         realmData = realm,

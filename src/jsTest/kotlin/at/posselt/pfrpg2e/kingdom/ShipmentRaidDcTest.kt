@@ -55,4 +55,24 @@ class ShipmentRaidDcTest {
     fun theDcNeverDropsBelowFive() {
         assertTrue(shipmentRaidDc(safety(1.0, roaded = true), baseDc = 6) >= 5)
     }
+
+    @Test
+    fun theSeasonalDeltaLandsAfterTheRoadDiscountAndInsideTheClamp() {
+        // Winter +2 on top of a fully-roaded route: the two compose rather than one masking the
+        // other (seasonal plan seam 3), and the result still respects the 5..40 clamp.
+        val s = safety(1.0, roaded = true)
+        assertEquals(shipmentRaidDc(s) + 2, shipmentRaidDc(s, seasonalDcDelta = 2))
+        assertEquals(40, shipmentRaidDc(s, baseDc = 39, seasonalDcDelta = 10), "clamped at 40")
+        assertEquals(
+            caravanRaidDc(CARAVAN_BASE_RAID_DC, null, false, 0.5, false, seasonalDcDelta = 2),
+            shipmentRaidDc(safety(0.5), seasonalDcDelta = 2),
+            "shipments inherit the delta through the shared function",
+        )
+    }
+
+    @Test
+    fun theSeasonalDeltaDefaultsToZeroEverywhere() {
+        val s = safety(0.5)
+        assertEquals(shipmentRaidDc(s), shipmentRaidDc(s, seasonalDcDelta = 0))
+    }
 }

@@ -23,6 +23,12 @@ data class HomebrewRules(
     val travelCostRiverNoBridgeAdditional: Int = 0,
     val pavedStreetsReduceTravelCost: Boolean = false,
     val settlementInfluenceRadius: Int = 0,
+    /**
+     * Gates the seasonal economy layer (docs/plans/2026-07-09-plan-seasonal-economy.md). RAW has
+     * no seasonal economy, so the default is off — and it stays off in [gregory] too until the
+     * §3.2 numbers are signed off; flipping it there would change a live game on profile refresh.
+     */
+    val seasonalEconomyEnabled: Boolean = false,
 ) {
     companion object {
         fun none() = HomebrewRules()
