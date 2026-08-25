@@ -29,6 +29,7 @@ import at.posselt.pfrpg2e.kingdom.data.RawAbilityBoostChoices
 import at.posselt.pfrpg2e.kingdom.data.RawAbilityScores
 import at.posselt.pfrpg2e.kingdom.data.RawArmyDeployment
 import at.posselt.pfrpg2e.kingdom.data.RawRewildTracker
+import at.posselt.pfrpg2e.kingdom.data.RawTreasureLedgerEntry
 import at.posselt.pfrpg2e.kingdom.data.RawCaravan
 import at.posselt.pfrpg2e.kingdom.data.RawCaravanShipment
 import at.posselt.pfrpg2e.kingdom.data.RawArmyBattle
@@ -363,6 +364,12 @@ external interface KingdomData {
 
     /** Bonus resource dice granted by the GM this turn (e.g. from events). Applied during collection, then reset. */
     var bonusResourceDice: Int
+
+    /** Append-only wealth chronicle (loot-manifests SS2.4): capped at TREASURE_LEDGER_CAP,
+     * campaign-scoped so it outlives the hexes it came from. */
+    var treasureLedger: Array<RawTreasureLedgerEntry>?
+    /** Fire-once state for the realized-loot pacing track (loot-manifests SS6, phase 2). */
+    var pacingLastRealizedLootImbalance: String?
 
     /** Re-wild side-table (map-dynamism SS2.2): WHEN each cleared-unclaimed hex entered that
      * state. The authoritative cleared/claimed booleans stay in kingmaker.state; this only times

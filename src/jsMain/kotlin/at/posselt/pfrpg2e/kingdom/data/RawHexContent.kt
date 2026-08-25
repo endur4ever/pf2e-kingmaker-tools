@@ -21,4 +21,11 @@ external interface RawHexContent {
     var linkedUuids: Array<String>?      // referenced Foundry documents (journals/actors/scenes/items)
     var linkedWarThreatId: String?       // referenced war threat
     var icon: String?
+
+    /** Treasure prepped for this hex (loot-manifests SS2.2). Null = no treasure. */
+    var lootManifest: Array<RawLootManifestEntry>?
+    /** True once awarded -- the double-grant idempotency guard (offerConsumed pattern). */
+    var manifestAwarded: Boolean?
+    /** Kingdom turn the award fired, for audit. */
+    var manifestAwardedTurn: Int?
 }
