@@ -2131,7 +2131,32 @@
                 }
             },
             "deadlines": {
-                "fired": "Termin: {name} następuje (wystąpienie {escalation})."
+                "fired": "Termin: {name} następuje (wystąpienie {escalation}).",
+                "digestTitle": "Zaplanowane naciski",
+                "digestToday": "Dziś",
+                "digestDaysAgo": "{days} dni temu",
+                "confirm": "Zatwierdź",
+                "dismiss": "Odrzuć",
+                "confirmAll": "Zatwierdź wszystkie",
+                "dismissAll": "Odrzuć wszystkie",
+                "payload": {
+                    "spawnEvent": "Wydarzenie królestwa",
+                    "spawnEncounter": "Spotkanie",
+                    "advanceClock": "Przesuń zegar",
+                    "postBeat": "Moment fabularny",
+                    "unknown": "Nieznany efekt"
+                },
+                "escalation": "eskalacja {count}",
+                "alreadyHandled": "{name} już obsłużono.",
+                "confirmedNote": "{name} zadziałało: {payload} (zatwierdzone przez MG).",
+                "beat": "{name}: {text}",
+                "clockAdvanced": "{label} przesunięty — pozostało {turns} tur.",
+                "clockMissing": "{name}: powiązany zegar już nie istnieje.",
+                "eventMissing": "{name}: powiązane wydarzenie królestwa już nie istnieje.",
+                "encounterPrompt": "{name}: rozegraj spotkanie \"{ref}\" (eskalacja {escalation} — rozważ podniesienie ST/surowości).",
+                "escalationHint": "Eskalacja {count}: rozważ podniesienie ST/surowości — nigdy nie stosowane automatycznie.",
+                "allConfirmed": "Zatwierdzono {count} zdarzeń.",
+                "allDismissed": "Odrzucono {count} zdarzeń."
             },
             "forecast": {
                 "companionArrives": "{name} przybywa",

@@ -2131,7 +2131,32 @@
                 }
             },
             "deadlines": {
-                "fired": "Prazo: {name} dispara (ocorrência {escalation})."
+                "fired": "Prazo: {name} dispara (ocorrência {escalation}).",
+                "digestTitle": "Pressões agendadas",
+                "digestToday": "Hoje",
+                "digestDaysAgo": "{days} dias atrás",
+                "confirm": "Confirmar",
+                "dismiss": "Dispensar",
+                "confirmAll": "Confirmar tudo",
+                "dismissAll": "Dispensar tudo",
+                "payload": {
+                    "spawnEvent": "Evento do reino",
+                    "spawnEncounter": "Encontro",
+                    "advanceClock": "Avançar relógio",
+                    "postBeat": "Momento narrativo",
+                    "unknown": "Efeito desconhecido"
+                },
+                "escalation": "escalada {count}",
+                "alreadyHandled": "{name} já foi tratado.",
+                "confirmedNote": "{name} disparou: {payload} (confirmado pelo Mestre).",
+                "beat": "{name}: {text}",
+                "clockAdvanced": "{label} avançou — restam {turns} turnos.",
+                "clockMissing": "{name}: o relógio vinculado não existe mais.",
+                "eventMissing": "{name}: o evento de reino vinculado não existe mais.",
+                "encounterPrompt": "{name}: conduza o encontro \"{ref}\" (escalada {escalation} — considere um passo de CD/severidade).",
+                "escalationHint": "Escalada {count}: considere um passo de CD/severidade — nunca aplicado automaticamente.",
+                "allConfirmed": "{count} disparos confirmados.",
+                "allDismissed": "{count} disparos dispensados."
             },
             "forecast": {
                 "companionArrives": "{name} chega",

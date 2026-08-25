@@ -2131,7 +2131,32 @@
                 }
             },
             "deadlines": {
-                "fired": "Frist: {name} tritt ein (Vorkommen {escalation})."
+                "fired": "Frist: {name} tritt ein (Vorkommen {escalation}).",
+                "digestTitle": "Geplante Ereignisse",
+                "digestToday": "Heute",
+                "digestDaysAgo": "vor {days} Tagen",
+                "confirm": "Bestätigen",
+                "dismiss": "Verwerfen",
+                "confirmAll": "Alle bestätigen",
+                "dismissAll": "Alle verwerfen",
+                "payload": {
+                    "spawnEvent": "Königreichsereignis",
+                    "spawnEncounter": "Begegnung",
+                    "advanceClock": "Uhr vorrücken",
+                    "postBeat": "Erzählmoment",
+                    "unknown": "Unbekannte Wirkung"
+                },
+                "escalation": "Eskalation {count}",
+                "alreadyHandled": "{name} wurde bereits behandelt.",
+                "confirmedNote": "{name} ausgelöst: {payload} (vom SL bestätigt).",
+                "beat": "{name}: {text}",
+                "clockAdvanced": "{label} vorgerückt — {turns} Züge verbleiben.",
+                "clockMissing": "{name}: Die verknüpfte Uhr existiert nicht mehr.",
+                "eventMissing": "{name}: Das verknüpfte Königreichsereignis existiert nicht mehr.",
+                "encounterPrompt": "{name}: Begegnung \"{ref}\" durchführen (Eskalation {escalation} — SG/Schweregrad-Stufe erwägen).",
+                "escalationHint": "Eskalation {count}: SG/Schweregrad-Stufe erwägen — nie automatisch angewendet.",
+                "allConfirmed": "{count} Auslösungen bestätigt.",
+                "allDismissed": "{count} Auslösungen verworfen."
             },
             "forecast": {
                 "companionArrives": "{name} trifft ein",

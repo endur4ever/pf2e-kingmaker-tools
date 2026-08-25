@@ -2131,7 +2131,32 @@
                 }
             },
             "deadlines": {
-                "fired": "Scadenza: {name} scatta (occorrenza {escalation})."
+                "fired": "Scadenza: {name} scatta (occorrenza {escalation}).",
+                "digestTitle": "Pressioni programmate",
+                "digestToday": "Oggi",
+                "digestDaysAgo": "{days} giorni fa",
+                "confirm": "Conferma",
+                "dismiss": "Ignora",
+                "confirmAll": "Conferma tutto",
+                "dismissAll": "Ignora tutto",
+                "payload": {
+                    "spawnEvent": "Evento del regno",
+                    "spawnEncounter": "Incontro",
+                    "advanceClock": "Avanza orologio",
+                    "postBeat": "Momento narrativo",
+                    "unknown": "Effetto sconosciuto"
+                },
+                "escalation": "escalation {count}",
+                "alreadyHandled": "{name} è già stato gestito.",
+                "confirmedNote": "{name} scattato: {payload} (confermato dal GM).",
+                "beat": "{name}: {text}",
+                "clockAdvanced": "{label} avanza — restano {turns} turni.",
+                "clockMissing": "{name}: l’orologio collegato non esiste più.",
+                "eventMissing": "{name}: l’evento del regno collegato non esiste più.",
+                "encounterPrompt": "{name}: esegui l’incontro \"{ref}\" (escalation {escalation} — valuta un aumento di CD/severità).",
+                "escalationHint": "Escalation {count}: valuta un aumento di CD/severità — mai applicato in automatico.",
+                "allConfirmed": "{count} attivazioni confermate.",
+                "allDismissed": "{count} attivazioni ignorate."
             },
             "forecast": {
                 "companionArrives": "{name} arriva",

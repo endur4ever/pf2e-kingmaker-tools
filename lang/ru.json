@@ -2131,7 +2131,32 @@
                 }
             },
             "deadlines": {
-                "fired": "Срок: {name} наступает (повторение {escalation})."
+                "fired": "Срок: {name} наступает (повторение {escalation}).",
+                "digestTitle": "Запланированные угрозы",
+                "digestToday": "Сегодня",
+                "digestDaysAgo": "{days} дн. назад",
+                "confirm": "Подтвердить",
+                "dismiss": "Отклонить",
+                "confirmAll": "Подтвердить все",
+                "dismissAll": "Отклонить все",
+                "payload": {
+                    "spawnEvent": "Событие королевства",
+                    "spawnEncounter": "Столкновение",
+                    "advanceClock": "Продвинуть часы",
+                    "postBeat": "Сюжетный момент",
+                    "unknown": "Неизвестный эффект"
+                },
+                "escalation": "эскалация {count}",
+                "alreadyHandled": "{name} уже обработано.",
+                "confirmedNote": "{name} сработало: {payload} (подтверждено ведущим).",
+                "beat": "{name}: {text}",
+                "clockAdvanced": "{label} продвинуты — осталось {turns} ходов.",
+                "clockMissing": "{name}: связанные часы больше не существуют.",
+                "eventMissing": "{name}: связанное событие королевства больше не существует.",
+                "encounterPrompt": "{name}: проведите столкновение «{ref}» (эскалация {escalation} — рассмотрите шаг КС/тяжести).",
+                "escalationHint": "Эскалация {count}: рассмотрите шаг КС/тяжести — никогда не применяется автоматически.",
+                "allConfirmed": "Подтверждено срабатываний: {count}.",
+                "allDismissed": "Отклонено срабатываний: {count}."
             },
             "forecast": {
                 "companionArrives": "{name} прибывает",

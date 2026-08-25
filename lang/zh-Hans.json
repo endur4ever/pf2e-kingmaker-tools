@@ -2131,7 +2131,32 @@
                 }
             },
             "deadlines": {
-                "fired": "期限：{name} 触发（第 {escalation} 次）。"
+                "fired": "期限：{name} 触发（第 {escalation} 次）。",
+                "digestTitle": "定时压力",
+                "digestToday": "今天",
+                "digestDaysAgo": "{days} 天前",
+                "confirm": "确认",
+                "dismiss": "忽略",
+                "confirmAll": "全部确认",
+                "dismissAll": "全部忽略",
+                "payload": {
+                    "spawnEvent": "王国事件",
+                    "spawnEncounter": "遭遇",
+                    "advanceClock": "推进时钟",
+                    "postBeat": "剧情节点",
+                    "unknown": "未知效果"
+                },
+                "escalation": "升级 {count}",
+                "alreadyHandled": "{name}已处理过。",
+                "confirmedNote": "{name}触发：{payload}（已由 GM 确认）。",
+                "beat": "{name}：{text}",
+                "clockAdvanced": "{label}已推进——剩余 {turns} 回合。",
+                "clockMissing": "{name}：关联的时钟已不存在。",
+                "eventMissing": "{name}：关联的王国事件已不存在。",
+                "encounterPrompt": "{name}：进行遭遇“{ref}”（升级 {escalation}——可考虑提高 DC/强度）。",
+                "escalationHint": "升级 {count}：可考虑提高 DC/强度——绝不会自动套用。",
+                "allConfirmed": "已确认 {count} 次触发。",
+                "allDismissed": "已忽略 {count} 次触发。"
             },
             "forecast": {
                 "companionArrives": "{name} 抵达",

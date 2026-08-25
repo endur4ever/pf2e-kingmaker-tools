@@ -7,6 +7,8 @@ import at.posselt.pfrpg2e.kingdom.data.WarThreatStatus
 import at.posselt.pfrpg2e.kingdom.data.toModel
 import at.posselt.pfrpg2e.kingdom.pressure.ScheduledPressure
 import at.posselt.pfrpg2e.kingdom.pressure.dueFirings
+import at.posselt.pfrpg2e.kingdom.pressure.buildPressureDigestContext
+import at.posselt.pfrpg2e.utils.postChatTemplate
 import at.posselt.pfrpg2e.kingdom.downtime.DowntimeProject
 import at.posselt.pfrpg2e.kingdom.downtime.DowntimeStatus
 import at.posselt.pfrpg2e.kingdom.downtime.prerequisiteMet
@@ -488,19 +490,19 @@ private suspend fun tickScheduledPressures(game: Game, worldTime: Int, daysPasse
 			raw.escalationCount = firing.escalation
 		}
 		actor.setKingdom(kingdom)
+		// One whispered digest per tick (plan SS7): rows are OFFERS -- payloads apply on the
+		// card's confirm buttons, never here.
 		if (gmUserIds.isNotEmpty()) {
-			for (firing in firings) {
-				postChatMessage(
-					t(
-						"kingdom.deadlines.fired",
-						recordOf(
-							"name" to firing.schedule.name,
-							"escalation" to firing.escalation.toString(),
-						),
-					),
-					whisper = gmUserIds,
-				)
-			}
+			postChatTemplate(
+				templatePath = "chatmessages/pressure-digest.hbs",
+				templateContext = buildPressureDigestContext(
+					firings = firings,
+					rawById = rawById,
+					actorUuid = actor.uuid,
+					currentDay = toDay,
+				),
+				whisper = gmUserIds,
+			)
 		}
 	}
 }

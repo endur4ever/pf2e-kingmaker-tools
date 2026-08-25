@@ -2253,7 +2253,32 @@
                 }
             },
             "deadlines": {
-                "fired": "Deadline: {name} fires (occurrence {escalation})."
+                "fired": "Deadline: {name} fires (occurrence {escalation}).",
+                "digestTitle": "Scheduled Pressures",
+                "digestToday": "Today",
+                "digestDaysAgo": "{days} days ago",
+                "confirm": "Confirm",
+                "dismiss": "Dismiss",
+                "confirmAll": "Confirm all",
+                "dismissAll": "Dismiss all",
+                "payload": {
+                    "spawnEvent": "Kingdom event",
+                    "spawnEncounter": "Encounter",
+                    "advanceClock": "Advance clock",
+                    "postBeat": "Story beat",
+                    "unknown": "Unknown payload"
+                },
+                "escalation": "escalation {count}",
+                "alreadyHandled": "{name} has already been handled.",
+                "confirmedNote": "{name} fired: {payload} (confirmed by the GM).",
+                "beat": "{name}: {text}",
+                "clockAdvanced": "{label} advanced — {turns} turns remain.",
+                "clockMissing": "{name}: the linked clock no longer exists.",
+                "eventMissing": "{name}: the linked kingdom event no longer exists.",
+                "encounterPrompt": "{name}: run encounter \"{ref}\" (escalation {escalation} — consider a DC/severity step).",
+                "escalationHint": "Escalation {count}: consider a DC/severity step — never applied automatically.",
+                "allConfirmed": "{count} firings confirmed.",
+                "allDismissed": "{count} firings dismissed."
             },
             "forecast": {
                 "companionArrives": "{name} arrives",

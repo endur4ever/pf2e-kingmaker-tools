@@ -2131,7 +2131,32 @@
                 }
             },
             "deadlines": {
-                "fired": "Échéance : {name} se déclenche (occurrence {escalation})."
+                "fired": "Échéance : {name} se déclenche (occurrence {escalation}).",
+                "digestTitle": "Pressions programmées",
+                "digestToday": "Aujourd’hui",
+                "digestDaysAgo": "il y a {days} jours",
+                "confirm": "Confirmer",
+                "dismiss": "Ignorer",
+                "confirmAll": "Tout confirmer",
+                "dismissAll": "Tout ignorer",
+                "payload": {
+                    "spawnEvent": "Événement du royaume",
+                    "spawnEncounter": "Rencontre",
+                    "advanceClock": "Avancer l’horloge",
+                    "postBeat": "Temps narratif",
+                    "unknown": "Effet inconnu"
+                },
+                "escalation": "escalade {count}",
+                "alreadyHandled": "{name} a déjà été traité.",
+                "confirmedNote": "{name} déclenché : {payload} (confirmé par le MJ).",
+                "beat": "{name} : {text}",
+                "clockAdvanced": "{label} avance — {turns} tours restants.",
+                "clockMissing": "{name} : l’horloge liée n’existe plus.",
+                "eventMissing": "{name} : l’événement de royaume lié n’existe plus.",
+                "encounterPrompt": "{name} : lancer la rencontre « {ref} » (escalade {escalation} — envisager un palier de DD/sévérité).",
+                "escalationHint": "Escalade {count} : envisager un palier de DD/sévérité — jamais appliqué automatiquement.",
+                "allConfirmed": "{count} déclenchements confirmés.",
+                "allDismissed": "{count} déclenchements ignorés."
             },
             "forecast": {
                 "companionArrives": "{name} arrive",

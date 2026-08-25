@@ -1,0 +1,33 @@
+<div class="km-pressure-digest">
+    <h3><i class="fa-solid fa-hourglass-half"></i> {{title}}</h3>
+    {{#each days}}
+        <div class="km-pressure-day">
+            <div class="km-pressure-day-label">{{this.dayLabel}}</div>
+            <ul class="km-pressure-rows">
+                {{#each this.rows}}
+                    <li class="km-pressure-row">
+                        <span class="km-pressure-row-text">
+                            <strong>{{this.name}}</strong> — {{this.payloadLabel}}{{#if this.escalationLabel}}
+                            <em>({{this.escalationLabel}})</em>{{/if}}
+                            {{#if this.preview}}<br><span class="km-pressure-preview">{{this.preview}}</span>{{/if}}
+                        </span>
+                        <button type="button" class="km-offer-pressure-fire"
+                                data-kingdom-actor-uuid="{{@root.actorUuid}}"
+                                data-schedule-id="{{this.scheduleId}}">{{@root.confirmLabel}}</button>
+                        <button type="button" class="km-offer-pressure-dismiss"
+                                data-kingdom-actor-uuid="{{@root.actorUuid}}"
+                                data-schedule-id="{{this.scheduleId}}">{{@root.dismissLabel}}</button>
+                    </li>
+                {{/each}}
+            </ul>
+        </div>
+    {{/each}}
+    {{#if showAllButtons}}
+        <footer class="km-pressure-all">
+            <button type="button" class="km-offer-pressure-fire-all"
+                    data-kingdom-actor-uuid="{{actorUuid}}">{{confirmAllLabel}}</button>
+            <button type="button" class="km-offer-pressure-dismiss-all"
+                    data-kingdom-actor-uuid="{{actorUuid}}">{{dismissAllLabel}}</button>
+        </footer>
+    {{/if}}
+</div>

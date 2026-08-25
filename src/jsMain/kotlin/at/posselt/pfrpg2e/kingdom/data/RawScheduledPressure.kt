@@ -37,6 +37,10 @@ external interface RawScheduledPressure {
     var payloadBeatText: String?
     /** Increments on each firing; escalating payloads read it. */
     var escalationCount: Int
+    /** The most recent firing day the GM has ACTED on (confirmed or dismissed) via the digest
+     * card. The double-apply guard: a firing is pending while lastFiredDay > lastHandledDay.
+     * Nullable so old rows need no migration -- null reads as "never handled". */
+    var lastHandledDay: Int?
     /** none | questCompleted | threatResolved */
     var resolveConditionKind: String?
     var resolveConditionRef: String?

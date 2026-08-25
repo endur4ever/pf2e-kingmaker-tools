@@ -57,6 +57,7 @@ import kotlinx.html.org.w3c.dom.events.Event
 import kotlinx.js.JsPlainObject
 import kotlinx.serialization.json.Json.Default.parseToJsonElement
 import org.w3c.dom.HTMLElement
+import org.w3c.dom.asList
 import org.w3c.dom.get
 import at.posselt.pfrpg2e.kingdom.dialogs.postComplexDegreeOfSuccess
 import at.posselt.pfrpg2e.takeIfInstance
@@ -66,6 +67,9 @@ import at.posselt.pfrpg2e.actions.ActionDispatcher
 import at.posselt.pfrpg2e.kingdom.pings.savePingsReady
 import at.posselt.pfrpg2e.kingdom.sheet.KingdomSheet
 import at.posselt.pfrpg2e.kingdom.sheet.navigation.MainNavEntry
+import at.posselt.pfrpg2e.kingdom.pressure.confirmPressureFiring
+import at.posselt.pfrpg2e.kingdom.pressure.dismissPressureFiring
+import at.posselt.pfrpg2e.kingdom.pressure.pendingPressureRows
 
 private data class ChatButton(
     val buttonClass: String,
@@ -382,6 +386,38 @@ private val buttons = listOf(
                 postChatMessage(t("chatMessages.warRuin.applied", recordOf("ruin" to t("chatMessages.warRuin.$choice"))))
             }
         }
+    },
+    ChatButton("km-offer-pressure-fire") { game, actor, _, button ->
+        // players are OWNERs of the party actor: the isGM check IS the authorization
+        if (!game.user.isGM) return@ChatButton
+        val id = button.dataset["scheduleId"] ?: return@ChatButton
+        if (confirmPressureFiring(game, actor, id)) markPressureRowDone(button)
+    },
+    ChatButton("km-offer-pressure-dismiss") { game, actor, _, button ->
+        if (!game.user.isGM) return@ChatButton
+        val id = button.dataset["scheduleId"] ?: return@ChatButton
+        if (dismissPressureFiring(actor, id)) markPressureRowDone(button)
+    },
+    ChatButton("km-offer-pressure-fire-all") { game, actor, _, button ->
+        if (!game.user.isGM) return@ChatButton
+        // driven from DATA (pending = fired > handled), never from card DOM
+        val pending = pendingPressureRows(actor.getKingdom()?.scheduledPressures)
+        var applied = 0
+        for (row in pending) {
+            if (confirmPressureFiring(game, actor, row.id)) applied++
+        }
+        ui.notifications.info(t("kingdom.deadlines.allConfirmed", recordOf("count" to applied.toString())))
+        markPressureCardDone(button)
+    },
+    ChatButton("km-offer-pressure-dismiss-all") { game, actor, _, button ->
+        if (!game.user.isGM) return@ChatButton
+        val pending = pendingPressureRows(actor.getKingdom()?.scheduledPressures)
+        var dismissed = 0
+        for (row in pending) {
+            if (dismissPressureFiring(actor, row.id)) dismissed++
+        }
+        ui.notifications.info(t("kingdom.deadlines.allDismissed", recordOf("count" to dismissed.toString())))
+        markPressureCardDone(button)
     },
     ChatButton("km-ping-ready") { game, _, _, button ->
         // Player self-service, NOT an offer: writes only the clicking user's own flag (plan SS5.1).
@@ -1252,4 +1288,19 @@ fun bindChatButtons(game: Game, dispatcher: ActionDispatcher? = null) {
             }
         }
     }
+}
+/** Cosmetic, per-client: fades the handled row. The real double-apply guard is lastHandledDay. */
+private fun markPressureRowDone(button: HTMLElement) {
+    val row = button.closest(".km-pressure-row") as? HTMLElement ?: return
+    row.classList.add("km-pressure-row-done")
+    row.querySelectorAll("button").asList().filterIsInstance<HTMLElement>()
+        .forEach { it.setAttribute("disabled", "disabled") }
+}
+
+private fun markPressureCardDone(button: HTMLElement) {
+    val card = button.closest(".km-pressure-digest") as? HTMLElement ?: return
+    card.querySelectorAll(".km-pressure-row").asList().filterIsInstance<HTMLElement>()
+        .forEach { it.classList.add("km-pressure-row-done") }
+    card.querySelectorAll("button").asList().filterIsInstance<HTMLElement>()
+        .forEach { it.setAttribute("disabled", "disabled") }
 }
