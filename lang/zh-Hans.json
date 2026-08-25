@@ -593,7 +593,35 @@
                 "formIncomplete": "请先选择角色、活动和名称。",
                 "daysTooShort": "项目至少需要一天。",
                 "settlementMissing": "请选择进行工作的聚落。",
-                "prereqMissing": "{settlement}没有适合这项工作的建筑——需要以下之一：{structures}。"
+                "prereqMissing": "{settlement}没有适合这项工作的建筑——需要以下之一：{structures}。",
+                "title": "闲暇项目",
+                "empty": "没有闲暇项目。",
+                "daysColumn": "天数",
+                "statusColumn": "状态",
+                "unknownPc": "—",
+                "daysProgress": "{remaining}/{total}",
+                "status": {
+                    "inProgress": "进行中",
+                    "completed": "已完成",
+                    "paused": "已暂停",
+                    "pausedPrereq": "已暂停——建筑失效",
+                    "unknown": "未知"
+                },
+                "offer": {
+                    "title": "项目完成：{title}",
+                    "body": "{kind}，共 {days} 天工作。",
+                    "confirm": "确认",
+                    "extend": "再延一天",
+                    "confirmed": "{title}已确认。{prompt}",
+                    "extended": "{title}继续工作——剩余一天。"
+                },
+                "rollPrompt": {
+                    "craft": "请该角色现在进行制作检定。",
+                    "retrain": "无需检定——在角色卡上完成重训。",
+                    "earnIncome": "请该角色现在进行赚取收入检定；发放金币。",
+                    "ritual": "现在进行该仪式自身的检定。",
+                    "unknown": "按该活动的规则裁定。"
+                }
             }
         },
         "settlementNav": {

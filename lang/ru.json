@@ -593,7 +593,35 @@
                 "formIncomplete": "Сначала выберите персонажа, занятие и название.",
                 "daysTooShort": "Проекту нужен хотя бы один день.",
                 "settlementMissing": "Выберите поселение, где идёт работа.",
-                "prereqMissing": "В {settlement} нет строения для этой работы — нужно одно из: {structures}."
+                "prereqMissing": "В {settlement} нет строения для этой работы — нужно одно из: {structures}.",
+                "title": "Проекты досуга",
+                "empty": "Проектов нет.",
+                "daysColumn": "Дни",
+                "statusColumn": "Состояние",
+                "unknownPc": "—",
+                "daysProgress": "{remaining}/{total}",
+                "status": {
+                    "inProgress": "В работе",
+                    "completed": "Завершён",
+                    "paused": "Приостановлен",
+                    "pausedPrereq": "Приостановлен — строение утрачено",
+                    "unknown": "Неизвестно"
+                },
+                "offer": {
+                    "title": "Проект завершён: {title}",
+                    "body": "{kind}, {days} дней работы.",
+                    "confirm": "Подтвердить",
+                    "extend": "Ещё один день",
+                    "confirmed": "{title} подтверждён. {prompt}",
+                    "extended": "{title} возвращается в работу — остался один день."
+                },
+                "rollPrompt": {
+                    "craft": "Персонаж делает проверку Ремесла сейчас.",
+                    "retrain": "Без броска — внесите переобучение в лист.",
+                    "earnIncome": "Персонаж делает проверку Заработка; примените зм.",
+                    "ritual": "Проведите проверки ритуала сейчас.",
+                    "unknown": "Разрешите по правилам занятия."
+                }
             }
         },
         "settlementNav": {

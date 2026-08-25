@@ -593,7 +593,35 @@
                 "formIncomplete": "Wähle zuerst Charakter, Tätigkeit und Namen.",
                 "daysTooShort": "Ein Projekt braucht mindestens einen Tag.",
                 "settlementMissing": "Wähle die Siedlung, in der gearbeitet wird.",
-                "prereqMissing": "{settlement} hat kein Gebäude für diese Arbeit — benötigt wird eines von: {structures}."
+                "prereqMissing": "{settlement} hat kein Gebäude für diese Arbeit — benötigt wird eines von: {structures}.",
+                "title": "Projekte in Ausfallzeit",
+                "empty": "Keine Projekte.",
+                "daysColumn": "Tage",
+                "statusColumn": "Status",
+                "unknownPc": "—",
+                "daysProgress": "{remaining}/{total}",
+                "status": {
+                    "inProgress": "In Arbeit",
+                    "completed": "Abgeschlossen",
+                    "paused": "Pausiert",
+                    "pausedPrereq": "Pausiert — Gebäude verloren",
+                    "unknown": "Unbekannt"
+                },
+                "offer": {
+                    "title": "Projekt fertig: {title}",
+                    "body": "{kind}, {days} Tage Arbeit.",
+                    "confirm": "Bestätigen",
+                    "extend": "Noch ein Tag",
+                    "confirmed": "{title} bestätigt. {prompt}",
+                    "extended": "{title} arbeitet weiter — ein Tag verbleibt."
+                },
+                "rollPrompt": {
+                    "craft": "Der SC legt jetzt die Handwerksprobe ab.",
+                    "retrain": "Keine Probe — Umschulung auf dem Bogen anwenden.",
+                    "earnIncome": "Der SC legt jetzt die Einkommensprobe ab; GM anwenden.",
+                    "ritual": "Jetzt die Proben des Rituals durchführen.",
+                    "unknown": "Nach den Regeln der Tätigkeit auflösen."
+                }
             }
         },
         "settlementNav": {

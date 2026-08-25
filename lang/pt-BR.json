@@ -593,7 +593,35 @@
                 "formIncomplete": "Escolha primeiro personagem, atividade e nome.",
                 "daysTooShort": "Um projeto precisa de pelo menos um dia.",
                 "settlementMissing": "Escolha o assentamento que abriga o trabalho.",
-                "prereqMissing": "{settlement} não tem estrutura para este trabalho — é preciso uma de: {structures}."
+                "prereqMissing": "{settlement} não tem estrutura para este trabalho — é preciso uma de: {structures}.",
+                "title": "Projetos de tempo livre",
+                "empty": "Nenhum projeto.",
+                "daysColumn": "Dias",
+                "statusColumn": "Estado",
+                "unknownPc": "—",
+                "daysProgress": "{remaining}/{total}",
+                "status": {
+                    "inProgress": "Em andamento",
+                    "completed": "Concluído",
+                    "paused": "Pausado",
+                    "pausedPrereq": "Pausado — estrutura perdida",
+                    "unknown": "Desconhecido"
+                },
+                "offer": {
+                    "title": "Projeto concluído: {title}",
+                    "body": "{kind}, {days} dias de trabalho.",
+                    "confirm": "Confirmar",
+                    "extend": "Mais um dia",
+                    "confirmed": "{title} confirmado. {prompt}",
+                    "extended": "{title} voltou ao trabalho — resta um dia."
+                },
+                "rollPrompt": {
+                    "craft": "O PJ faz agora o teste de Ofício.",
+                    "retrain": "Sem rolagem — aplique o retreinamento na ficha.",
+                    "earnIncome": "O PJ faz agora o teste de Ganhar Renda; aplique as po.",
+                    "ritual": "Conduza agora os testes do ritual.",
+                    "unknown": "Resolva pelas regras da atividade."
+                }
             }
         },
         "settlementNav": {

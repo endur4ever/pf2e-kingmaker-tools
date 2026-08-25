@@ -12,6 +12,8 @@ import at.posselt.pfrpg2e.kingdom.pressure.isPressureResolved
 import at.posselt.pfrpg2e.utils.postChatTemplate
 import at.posselt.pfrpg2e.kingdom.downtime.DowntimeProject
 import at.posselt.pfrpg2e.kingdom.downtime.DowntimeStatus
+import at.posselt.pfrpg2e.kingdom.downtime.DOWNTIME_HISTORY_CAP
+import at.posselt.pfrpg2e.camping.downtimeCompleteContext
 import at.posselt.pfrpg2e.kingdom.downtime.prerequisiteMet
 import at.posselt.pfrpg2e.kingdom.downtime.tickDowntimeProjects
 import at.posselt.pfrpg2e.resting.DAY_SECONDS
@@ -444,7 +446,41 @@ private suspend fun tickPcDowntimeProjects(game: Game, daysPassed: Int) {
 			raw.status = next.status.value
 			raw.pauseReason = next.pauseReason
 		}
+		// History cap: oldest COMPLETED rows only -- in-progress and paused work is never pruned
+		// (a dropped row silently cancels work a player is waiting on).
+		val completedCount = raws.count { it.status == DowntimeStatus.COMPLETED.value }
+		if (completedCount > DOWNTIME_HISTORY_CAP) {
+			var toDrop = completedCount - DOWNTIME_HISTORY_CAP
+			kingdom.downtimeProjects = raws.filter { raw ->
+				if (toDrop > 0 && raw.status == DowntimeStatus.COMPLETED.value) {
+					toDrop--
+					false
+				} else {
+					true
+				}
+			}.toTypedArray()
+		}
 		actor.setKingdom(kingdom)
+		// One GM-whispered offer per completion, on the tick that consumed the last day only --
+		// the pure core reports completion exactly once, so a later jump cannot re-offer.
+		if (outcome.completed.isNotEmpty()) {
+			val gmIds = game.users.filter { it.isGM }.mapNotNull { it.id }.toTypedArray()
+			if (gmIds.isNotEmpty()) {
+				val rawByIdAfter = (kingdom.downtimeProjects ?: emptyArray()).associateBy { it.id }
+				for (done in outcome.completed) {
+					val raw = rawByIdAfter[done.id]
+					postChatTemplate(
+						templatePath = "chatmessages/downtime-complete.hbs",
+						templateContext = downtimeCompleteContext(
+							actorUuid = actor.uuid,
+							project = done,
+							targetRef = raw?.targetRef,
+						),
+						whisper = gmIds,
+					)
+				}
+			}
+		}
 	}
 }
 

@@ -67,6 +67,8 @@ import at.posselt.pfrpg2e.actions.ActionDispatcher
 import at.posselt.pfrpg2e.kingdom.pings.savePingsReady
 import at.posselt.pfrpg2e.kingdom.sheet.KingdomSheet
 import at.posselt.pfrpg2e.kingdom.sheet.navigation.MainNavEntry
+import at.posselt.pfrpg2e.camping.downtimeRollPrompt
+import at.posselt.pfrpg2e.kingdom.downtime.DowntimeKind
 import at.posselt.pfrpg2e.kingdom.pressure.confirmPressureFiring
 import at.posselt.pfrpg2e.kingdom.pressure.dismissPressureFiring
 import at.posselt.pfrpg2e.kingdom.pressure.pendingPressureRows
@@ -386,6 +388,42 @@ private val buttons = listOf(
                 postChatMessage(t("chatMessages.warRuin.applied", recordOf("ruin" to t("chatMessages.warRuin.$choice"))))
             }
         }
+    },
+    ChatButton("km-offer-downtime-complete") { game, actor, _, button ->
+        if (!game.user.isGM) return@ChatButton
+        val id = button.dataset["projectId"] ?: return@ChatButton
+        val kingdom = actor.getKingdom() ?: return@ChatButton
+        val raw = kingdom.downtimeProjects?.find { it.id == id } ?: return@ChatButton
+        // the tick already marked it completed; confirm ACKNOWLEDGES and names the roll --
+        // adjudicating the craft/retrain itself is explicitly the GM's (plan SS5, SS9)
+        postChatMessage(
+            t(
+                "camping.downtime.offer.confirmed",
+                recordOf(
+                    "title" to raw.title,
+                    "prompt" to downtimeRollPrompt(DowntimeKind.fromValue(raw.kind)),
+                ),
+            ),
+            whisper = game.users.filter { it.isGM }.mapNotNull { it.id }.toTypedArray(),
+        )
+        (button.closest(".km-downtime-offer-buttons") as? HTMLElement)
+            ?.querySelectorAll("button")?.asList()?.filterIsInstance<HTMLElement>()
+            ?.forEach { it.setAttribute("disabled", "disabled") }
+    },
+    ChatButton("km-offer-downtime-extend") { game, actor, _, button ->
+        if (!game.user.isGM) return@ChatButton
+        val id = button.dataset["projectId"] ?: return@ChatButton
+        val kingdom = actor.getKingdom() ?: return@ChatButton
+        val raw = kingdom.downtimeProjects?.find { it.id == id } ?: return@ChatButton
+        // "runs longer": back to in-progress with one day left (plan SS8)
+        raw.status = "inProgress"
+        raw.daysRemaining = 1
+        raw.pauseReason = null
+        actor.setKingdom(kingdom)
+        ui.notifications.info(t("camping.downtime.offer.extended", recordOf("title" to raw.title)))
+        (button.closest(".km-downtime-offer-buttons") as? HTMLElement)
+            ?.querySelectorAll("button")?.asList()?.filterIsInstance<HTMLElement>()
+            ?.forEach { it.setAttribute("disabled", "disabled") }
     },
     ChatButton("km-offer-pressure-fire") { game, actor, _, button ->
         // players are OWNERs of the party actor: the isGM check IS the authorization

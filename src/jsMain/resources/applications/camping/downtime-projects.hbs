@@ -1,0 +1,37 @@
+<details class="km-downtime-projects">
+    <summary><i class="fa-solid fa-hammer"></i> {{localizeKM "camping.downtime.title"}}{{#if downtimeProjects.activeCount}}
+        <span class="km-downtime-count">({{downtimeProjects.activeCount}})</span>{{/if}}</summary>
+    <div class="km-downtime-content">
+        {{#if isGM}}
+            <button type="button" class="km-downtime-add" data-action="add-downtime-project">
+                <i class="fa-solid fa-plus"></i> {{localizeKM "camping.downtime.addProject"}}
+            </button>
+        {{/if}}
+        {{#if downtimeProjects.rows.length}}
+            <table class="km-downtime-table">
+                <thead>
+                <tr>
+                    <th>{{localizeKM "camping.downtime.pc"}}</th>
+                    <th>{{localizeKM "applications.name"}}</th>
+                    <th>{{localizeKM "camping.downtime.kindLabel"}}</th>
+                    <th>{{localizeKM "camping.downtime.daysColumn"}}</th>
+                    <th>{{localizeKM "camping.downtime.statusColumn"}}</th>
+                </tr>
+                </thead>
+                <tbody>
+                {{#each downtimeProjects.rows}}
+                    <tr class="km-downtime-row{{#if this.paused}} km-downtime-paused{{/if}}{{#if this.completed}} km-downtime-completed{{/if}}">
+                        <td>{{this.pcName}}</td>
+                        <td>{{this.title}}</td>
+                        <td>{{this.kindLabel}}</td>
+                        <td>{{this.daysLabel}}</td>
+                        <td>{{this.statusLabel}}</td>
+                    </tr>
+                {{/each}}
+                </tbody>
+            </table>
+        {{else}}
+            <p class="km-downtime-empty">{{localizeKM "camping.downtime.empty"}}</p>
+        {{/if}}
+    </div>
+</details>

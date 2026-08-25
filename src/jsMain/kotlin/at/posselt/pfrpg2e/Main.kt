@@ -158,6 +158,7 @@ fun main() {
                     "kingdom-character-sheet-levels" to "applications/kingdom/sections/character-sheet/levels.hbs",
                     "campingTile" to "applications/camping/camping-tile.hbs",
                     "recipeTile" to "applications/camping/recipe-tile.hbs",
+                    "downtimeProjects" to "applications/camping/downtime-projects.hbs",
                     "formElement" to "components/forms/form-element.hbs",
                     "tabs" to "components/tabs/tabs.hbs",
                     "foodCost" to "components/food-cost/food-cost.hbs",

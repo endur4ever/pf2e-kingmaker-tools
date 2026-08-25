@@ -715,7 +715,35 @@
                 "formIncomplete": "Pick a character, an activity, and a name first.",
                 "daysTooShort": "A project needs at least one day.",
                 "settlementMissing": "Pick the settlement hosting the work.",
-                "prereqMissing": "{settlement} has no structure for this work — it needs one of: {structures}."
+                "prereqMissing": "{settlement} has no structure for this work — it needs one of: {structures}.",
+                "title": "Downtime Projects",
+                "empty": "No downtime projects.",
+                "daysColumn": "Days",
+                "statusColumn": "Status",
+                "unknownPc": "—",
+                "daysProgress": "{remaining}/{total}",
+                "status": {
+                    "inProgress": "In progress",
+                    "completed": "Completed",
+                    "paused": "Paused",
+                    "pausedPrereq": "Paused — structure lost",
+                    "unknown": "Unknown"
+                },
+                "offer": {
+                    "title": "Downtime complete: {title}",
+                    "body": "{kind}, {days} days of work.",
+                    "confirm": "Confirm",
+                    "extend": "One more day",
+                    "confirmed": "{title} confirmed. {prompt}",
+                    "extended": "{title} returned to work with one day remaining."
+                },
+                "rollPrompt": {
+                    "craft": "Have the PC make the Crafting check now.",
+                    "retrain": "No roll — apply the retraining on the sheet.",
+                    "earnIncome": "Have the PC make the Earn Income check now; apply the gp.",
+                    "ritual": "Run the ritual’s own checks now.",
+                    "unknown": "Resolve per the activity’s rules."
+                }
             }
         },
         "settlementNav": {

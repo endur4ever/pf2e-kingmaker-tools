@@ -20,6 +20,8 @@ import at.posselt.pfrpg2e.app.forms.Select
 import at.posselt.pfrpg2e.app.forms.SelectOption
 import at.posselt.pfrpg2e.app.forms.toOption
 import at.posselt.pfrpg2e.calculateHexplorationActivities
+import at.posselt.pfrpg2e.kingdom.setKingdom
+import at.posselt.pfrpg2e.camping.dialogs.AddDowntimeProject
 import at.posselt.pfrpg2e.camping.dialogs.CampingSettingsApplication
 import at.posselt.pfrpg2e.camping.dialogs.CategoryWeightSettingsApplication
 import at.posselt.pfrpg2e.camping.dialogs.ConfirmWatchApplication
@@ -247,6 +249,8 @@ external interface TravelRouteUiContext {
 @Suppress("unused")
 @JsPlainObject
 external interface CampingSheetContext : ValidatedHandlebarsContext {
+    /** PC downtime projects (plan phase 4); rows for everyone, controls are GM surfaces. */
+    val downtimeProjects: DowntimeSectionContext?
     var actors: Array<CampingSheetActor>
     var prepareCamp: CampingSheetActivity?
     var activities: Array<CampingSheetActivity>
@@ -544,6 +548,28 @@ class CampingSheet(
 
             "advance-hexploration" -> buildPromise {
                 advanceHexplorationActivities(target)
+            }
+
+            "add-downtime-project" -> buildPromise {
+                if (!game.user.isGM) return@buildPromise
+                val kingdomActor = game.getKingdomActors().firstOrNull() ?: return@buildPromise
+                val kingdom = kingdomActor.getKingdom() ?: return@buildPromise
+                val pcs = actor.getCamping()?.getActorsInCamp()
+                    ?.filterIsInstance<PF2ECharacter>()
+                    ?.map { it.uuid to (it.name ?: "?") }
+                    ?: emptyList()
+                val settlements = kingdom.getAllSettlements(game).allSettlements
+                AddDowntimeProject(
+                    pcs = pcs,
+                    settlements = settlements,
+                    afterSubmit = { raw ->
+                        kingdomActor.getKingdom()?.let { current ->
+                            current.downtimeProjects = (current.downtimeProjects ?: emptyArray()) + raw
+                            kingdomActor.setKingdom(current)
+                        }
+                        render()
+                    },
+                ).launch()
             }
 
             "travel-route" -> buildPromise {
@@ -2035,6 +2061,9 @@ class CampingSheet(
             travelStartHexSelect = travelStartHexSelect,
             travelEndHexSelect = travelEndHexSelect,
             travelRoute = travelRouteContext,
+            downtimeProjects = buildDowntimeSectionContext(
+                game.getKingdomActors().firstOrNull()?.getKingdom()?.downtimeProjects,
+            ) { uuid -> game.actors.find { it.uuid == uuid }?.name },
             travelMoveToken = camping.travelMoveToken == true,
             travelPathError = travelPathError
         )

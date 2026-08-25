@@ -1405,3 +1405,89 @@ ul.km-camping-actors {
         margin-right: 6px;
     }
 }
+
+/* PC downtime projects (downtime-projects.hbs) */
+.km-downtime-projects {
+    margin-top: 8px;
+}
+
+.km-downtime-projects summary {
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.km-downtime-count {
+    opacity: 0.7;
+    font-weight: normal;
+}
+
+.km-downtime-content {
+    padding: 6px 4px;
+}
+
+.km-downtime-add {
+    width: auto;
+    font-size: 0.85em;
+    padding: 2px 8px;
+    margin-bottom: 6px;
+}
+
+.km-downtime-table {
+    /* zero INTRINSIC width so the open table can never widen the shrink-to-fit
+       activities wrapper (the layout hazard the plan calls out); it still renders
+       at 100% of whatever width the wrapper's other children resolved. */
+    width: 0;
+    min-width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.km-downtime-table th {
+    text-align: left;
+    font-size: 0.85em;
+    opacity: 0.75;
+    padding: 2px 4px;
+    border-bottom: 1px solid rgba(153, 153, 153, 0.5);
+}
+
+.km-downtime-table td {
+    padding: 3px 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.km-downtime-paused {
+    opacity: 0.6;
+}
+
+.km-downtime-completed td:first-child::before {
+    content: "\2713 ";
+    color: var(--color-level-success, #2c8a2c);
+}
+
+.km-downtime-empty {
+    opacity: 0.7;
+    margin: 0;
+}
+
+/* completion offer card */
+.km-downtime-complete-card h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0 0 0.3rem 0;
+    border: none;
+}
+
+.km-downtime-offer-buttons {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.4rem;
+}
+
+.km-downtime-offer-buttons button {
+    width: auto;
+    font-size: 0.85em;
+    padding: 0.15rem 0.5rem;
+}

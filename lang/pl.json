@@ -593,7 +593,35 @@
                 "formIncomplete": "Najpierw wybierz postać, zajęcie i nazwę.",
                 "daysTooShort": "Projekt wymaga co najmniej jednego dnia.",
                 "settlementMissing": "Wybierz osadę, w której trwa praca.",
-                "prereqMissing": "{settlement} nie ma budowli do tej pracy — potrzebna jedna z: {structures}."
+                "prereqMissing": "{settlement} nie ma budowli do tej pracy — potrzebna jedna z: {structures}.",
+                "title": "Projekty czasu wolnego",
+                "empty": "Brak projektów.",
+                "daysColumn": "Dni",
+                "statusColumn": "Stan",
+                "unknownPc": "—",
+                "daysProgress": "{remaining}/{total}",
+                "status": {
+                    "inProgress": "W toku",
+                    "completed": "Ukończony",
+                    "paused": "Wstrzymany",
+                    "pausedPrereq": "Wstrzymany — utracono budowlę",
+                    "unknown": "Nieznany"
+                },
+                "offer": {
+                    "title": "Projekt ukończony: {title}",
+                    "body": "{kind}, {days} dni pracy.",
+                    "confirm": "Zatwierdź",
+                    "extend": "Jeszcze jeden dzień",
+                    "confirmed": "{title} zatwierdzono. {prompt}",
+                    "extended": "{title} wraca do pracy — został jeden dzień."
+                },
+                "rollPrompt": {
+                    "craft": "Gracz wykonuje teraz test Rzemiosła.",
+                    "retrain": "Bez rzutu — nanieś przeszkolenie na kartę.",
+                    "earnIncome": "Gracz wykonuje teraz test Zarabiania; przyznaj sz.",
+                    "ritual": "Wykonaj teraz testy rytuału.",
+                    "unknown": "Rozstrzygnij według zasad zajęcia."
+                }
             }
         },
         "settlementNav": {

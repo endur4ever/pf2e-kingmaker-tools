@@ -593,7 +593,35 @@
                 "formIncomplete": "Prima scegli personaggio, attività e nome.",
                 "daysTooShort": "Un progetto richiede almeno un giorno.",
                 "settlementMissing": "Scegli l’insediamento che ospita il lavoro.",
-                "prereqMissing": "{settlement} non ha una struttura per questo lavoro — serve una tra: {structures}."
+                "prereqMissing": "{settlement} non ha una struttura per questo lavoro — serve una tra: {structures}.",
+                "title": "Progetti di attività secondaria",
+                "empty": "Nessun progetto.",
+                "daysColumn": "Giorni",
+                "statusColumn": "Stato",
+                "unknownPc": "—",
+                "daysProgress": "{remaining}/{total}",
+                "status": {
+                    "inProgress": "In corso",
+                    "completed": "Completato",
+                    "paused": "In pausa",
+                    "pausedPrereq": "In pausa — struttura perduta",
+                    "unknown": "Sconosciuto"
+                },
+                "offer": {
+                    "title": "Progetto completato: {title}",
+                    "body": "{kind}, {days} giorni di lavoro.",
+                    "confirm": "Conferma",
+                    "extend": "Un altro giorno",
+                    "confirmed": "{title} confermato. {prompt}",
+                    "extended": "{title} torna al lavoro — resta un giorno."
+                },
+                "rollPrompt": {
+                    "craft": "Il PG effettua ora la prova di Artigianato.",
+                    "retrain": "Nessun tiro — applica la riqualifica sulla scheda.",
+                    "earnIncome": "Il PG effettua ora la prova di Guadagnare; applica le mo.",
+                    "ritual": "Esegui ora le prove del rituale.",
+                    "unknown": "Risolvi secondo le regole dell’attività."
+                }
             }
         },
         "settlementNav": {

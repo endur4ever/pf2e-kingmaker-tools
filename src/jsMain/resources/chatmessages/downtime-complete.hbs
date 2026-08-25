@@ -1,0 +1,13 @@
+<div class="km-downtime-complete-card">
+    <h3><i class="fa-solid fa-hammer"></i> {{title}}</h3>
+    <p>{{body}}</p>
+    {{#if targetLink}}<p class="km-downtime-target">{{{targetLink}}}</p>{{/if}}
+    <div class="km-downtime-offer-buttons">
+        <button type="button" class="km-offer-downtime-complete"
+                data-kingdom-actor-uuid="{{actorUuid}}"
+                data-project-id="{{projectId}}">{{confirmLabel}}</button>
+        <button type="button" class="km-offer-downtime-extend"
+                data-kingdom-actor-uuid="{{actorUuid}}"
+                data-project-id="{{projectId}}">{{extendLabel}}</button>
+    </div>
+</div>

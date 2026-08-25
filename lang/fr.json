@@ -593,7 +593,35 @@
                 "formIncomplete": "Choisissez d’abord un personnage, une activité et un nom.",
                 "daysTooShort": "Un projet demande au moins un jour.",
                 "settlementMissing": "Choisissez la colonie qui accueille le travail.",
-                "prereqMissing": "{settlement} n’a aucun bâtiment pour ce travail — il faut l’un de : {structures}."
+                "prereqMissing": "{settlement} n’a aucun bâtiment pour ce travail — il faut l’un de : {structures}.",
+                "title": "Projets d’intermède",
+                "empty": "Aucun projet.",
+                "daysColumn": "Jours",
+                "statusColumn": "État",
+                "unknownPc": "—",
+                "daysProgress": "{remaining}/{total}",
+                "status": {
+                    "inProgress": "En cours",
+                    "completed": "Terminé",
+                    "paused": "En pause",
+                    "pausedPrereq": "En pause — bâtiment perdu",
+                    "unknown": "Inconnu"
+                },
+                "offer": {
+                    "title": "Projet terminé : {title}",
+                    "body": "{kind}, {days} jours de travail.",
+                    "confirm": "Confirmer",
+                    "extend": "Un jour de plus",
+                    "confirmed": "{title} confirmé. {prompt}",
+                    "extended": "{title} reprend le travail — un jour restant."
+                },
+                "rollPrompt": {
+                    "craft": "Le PJ fait maintenant son test d’Artisanat.",
+                    "retrain": "Pas de jet — appliquer la reconversion sur la fiche.",
+                    "earnIncome": "Le PJ fait maintenant son test de revenu ; appliquer les po.",
+                    "ritual": "Effectuer maintenant les tests du rituel.",
+                    "unknown": "Résoudre selon les règles de l’activité."
+                }
             }
         },
         "settlementNav": {
