@@ -2126,6 +2126,9 @@
           "raided": "Raided",
           "recalled": "Recalled"
         }
+      },
+      "deadlines": {
+        "fired": "期限：{name} 触发（第 {escalation} 次）。"
       }
     },
     "chatMessages": {

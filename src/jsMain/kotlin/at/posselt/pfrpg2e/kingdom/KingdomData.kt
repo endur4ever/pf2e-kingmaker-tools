@@ -10,6 +10,7 @@ import at.posselt.pfrpg2e.data.kingdom.KingdomSkillRanks
 import at.posselt.pfrpg2e.data.kingdom.RuinValues
 import at.posselt.pfrpg2e.kingdom.data.RawCompanionExpedition
 import at.posselt.pfrpg2e.kingdom.data.RawPcDowntimeProject
+import at.posselt.pfrpg2e.kingdom.data.RawScheduledPressure
 import at.posselt.pfrpg2e.kingdom.data.RawExpeditionChronicleEntry
 import at.posselt.pfrpg2e.data.kingdom.calculateScore
 import at.posselt.pfrpg2e.data.kingdom.leaders.Leader
@@ -359,6 +360,9 @@ external interface KingdomData {
 
     /** PC downtime projects ticked by the world clock. Null on kingdoms saved before Migration62. */
     var downtimeProjects: Array<RawPcDowntimeProject>?
+
+    /** Calendar-dated pressure schedules. Null on kingdoms saved before Migration63. */
+    var scheduledPressures: Array<RawScheduledPressure>?
 }
 
 fun RawLeaderKingdomSkills.hasSkill(leader: Leader, skill: KingdomSkill) =

@@ -2248,6 +2248,9 @@
           "raided": "Raided",
           "recalled": "Recalled"
         }
+      },
+      "deadlines": {
+        "fired": "Deadline: {name} fires (occurrence {escalation})."
       }
     },
     "chatMessages": {

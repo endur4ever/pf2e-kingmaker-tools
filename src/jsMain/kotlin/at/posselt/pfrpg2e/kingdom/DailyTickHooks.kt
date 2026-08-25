@@ -3,7 +3,10 @@ package at.posselt.pfrpg2e.kingdom
 import at.posselt.pfrpg2e.camping.getActiveCamping
 import at.posselt.pfrpg2e.kingdom.data.RawCharacter
 import at.posselt.pfrpg2e.kingdom.data.RawCompanionExpedition
+import at.posselt.pfrpg2e.kingdom.data.WarThreatStatus
 import at.posselt.pfrpg2e.kingdom.data.toModel
+import at.posselt.pfrpg2e.kingdom.pressure.ScheduledPressure
+import at.posselt.pfrpg2e.kingdom.pressure.dueFirings
 import at.posselt.pfrpg2e.kingdom.downtime.DowntimeProject
 import at.posselt.pfrpg2e.kingdom.downtime.DowntimeStatus
 import at.posselt.pfrpg2e.kingdom.downtime.prerequisiteMet
@@ -61,6 +64,7 @@ fun registerDailyTickHooks(game: Game) {
 					tickCompanionExpeditions(game, daysPassed)
 					tickPersonalQuests(game, daysPassed)
 					tickPcDowntimeProjects(game, daysPassed)
+					tickScheduledPressures(game, worldTime, daysPassed)
 				}
 		}
 	}
@@ -438,5 +442,65 @@ private suspend fun tickPcDowntimeProjects(game: Game, daysPassed: Int) {
 			raw.pauseReason = next.pauseReason
 		}
 		actor.setKingdom(kingdom)
+	}
+}
+
+/**
+ * Evaluates calendar-dated pressure schedules over the day window just crossed
+ * (`docs/plans/2026-07-09-plan-scheduled-pressure-engine.md` §4/§5, phase 2).
+ *
+ * The window is (fromDay, toDay] in world day numbers, so a week-long jump yields every weekly
+ * firing inside it. Resolution is POLLED against stored quest/threat state rather than hooked —
+ * no completion hook exists for either, and polling also catches a quest completed while the
+ * module was disabled. Phase 2 posts a plain GM-whispered line per firing; the digest card and
+ * its offer buttons are phase 3, so firing state (lastFiredDay, escalationCount) is stamped here
+ * and nothing else changes.
+ */
+private suspend fun tickScheduledPressures(game: Game, worldTime: Int, daysPassed: Int) {
+	val toDay = worldTime.floorDiv(DAY_SECONDS)
+	val fromDay = toDay - daysPassed
+	val gmUserIds = game.users.filter { it.isGM }.mapNotNull { it.id }.toTypedArray()
+	game.getKingdomActors().forEach { actor ->
+		val kingdom = actor.getKingdom() ?: return@forEach
+		val raws = kingdom.scheduledPressures ?: return@forEach
+		if (raws.isEmpty()) return@forEach
+		val rawById = raws.associateBy { it.id }
+		val models = raws.mapNotNull { it.toModel() }
+		if (models.isEmpty()) return@forEach
+
+		val isResolved: (ScheduledPressure) -> Boolean = resolved@{ schedule ->
+			val raw = rawById[schedule.id] ?: return@resolved false
+			val ref = raw.resolveConditionRef ?: return@resolved false
+			when (raw.resolveConditionKind) {
+				"questCompleted" -> kingdom.quests?.any { it.id == ref && it.status == "completed" } == true
+				"threatResolved" -> kingdom.warThreats?.any {
+					it.id == ref && (it.status != WarThreatStatus.ACTIVE.value || it.peaceSettled == true)
+				} == true
+				else -> false
+			}
+		}
+
+		val firings = dueFirings(models, fromDay, toDay, isResolved)
+		if (firings.isEmpty()) return@forEach
+		for (firing in firings) {
+			val raw = rawById[firing.schedule.id] ?: continue
+			raw.lastFiredDay = firing.day
+			raw.escalationCount = firing.escalation
+		}
+		actor.setKingdom(kingdom)
+		if (gmUserIds.isNotEmpty()) {
+			for (firing in firings) {
+				postChatMessage(
+					t(
+						"kingdom.deadlines.fired",
+						recordOf(
+							"name" to firing.schedule.name,
+							"escalation" to firing.escalation.toString(),
+						),
+					),
+					whisper = gmUserIds,
+				)
+			}
+		}
 	}
 }

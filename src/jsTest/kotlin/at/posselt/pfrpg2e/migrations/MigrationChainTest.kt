@@ -21,7 +21,7 @@ class MigrationChainTest {
 
     @Test
     fun registeredVersionsAreContiguous17To61() {
-        assertEquals((17..62).toList(), migrations.map { it.version })
+        assertEquals((17..63).toList(), migrations.map { it.version })
     }
 
     @Test

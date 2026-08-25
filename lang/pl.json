@@ -2126,6 +2126,9 @@
           "raided": "Raided",
           "recalled": "Recalled"
         }
+      },
+      "deadlines": {
+        "fired": "Termin: {name} następuje (wystąpienie {escalation})."
       }
     },
     "chatMessages": {
