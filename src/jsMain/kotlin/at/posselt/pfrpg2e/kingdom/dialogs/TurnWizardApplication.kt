@@ -9,6 +9,7 @@ import at.posselt.pfrpg2e.kingdom.clearPerformedActivities
 import at.posselt.pfrpg2e.kingdom.restoreTurnWizardState
 import com.foundryvtt.pf2e.item.PF2EItem
 import at.posselt.pfrpg2e.kingdom.getPerformedActivities
+import at.posselt.pfrpg2e.kingdom.digest.postEndTurnDigest
 import at.posselt.pfrpg2e.kingdom.pings.TurnReadiness
 import at.posselt.pfrpg2e.kingdom.pings.pingsReadyForTurn
 import at.posselt.pfrpg2e.kingdom.pings.readinessStrip
@@ -285,6 +286,9 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
     val settlements = kingdom.getAllSettlements(game)
     val storage = calculateStorage(realm = realm, settlements = settlements.allSettlements)
 
+    // Captured BEFORE the tick overwrites kingdom.warThreats: the digest reports escalations by
+    // diffing pre- vs post-tick levels, and after the assignment below both sides would be equal.
+    val preTickThreats = kingdom.warThreats?.toList() ?: emptyList()
     val tickResult = runKingdomTurnTick(kingdom, storage, currentTurn)
     kingdom.supernaturalSolutions = tickResult.supernaturalSolutions
     kingdom.creativeSolutions = tickResult.creativeSolutions
@@ -739,6 +743,21 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
         templateContext = endTurnContext,
     )
 
+    // One public read-aloud interlude summarising the turn's off-screen feeds (player-safe by
+    // construction; see DigestAdapter's KDoc for which feeds qualify and why). ADDITIVE for
+    // now: the per-feed caravan/shipment cards above still post; silencing them in favour of
+    // the digest is a rollout decision for Gregory, not something to bundle into this commit.
+    postEndTurnDigest(
+        game = game,
+        actor = actor,
+        caravanEvents = caravanEvents,
+        shipmentEvents = shipmentEvents,
+        expeditionChronicle = kingdom.expeditionChronicle,
+        preTickThreats = preTickThreats,
+        postTickThreats = kingdom.warThreats?.toList() ?: emptyList(),
+        turn = currentTurn,
+    )
+
     val changesText = tickResult.changes
         .map { it.toDisplayString() }
         .joinToString("\n") { "- $it" }
@@ -763,6 +782,10 @@ suspend fun undoEndTurn(game: Game, actor: KingdomActor): Boolean {
     val d = snap.asDynamic()
     if (d.kingdom == null || d.snapshotTurn == null) {
         actor.unsetAppFlag("lastTurnSnapshot")
+    // The digest dedup baseline now describes a turn that no longer happened; clearing it
+    // keeps the flag honest (the re-run re-posts its card -- the same documented
+    // limitation as every other chat message under undo).
+    actor.unsetAppFlag("lastDigestBeats")
         return false
     }
     val kingdom = actor.getKingdom() ?: return false

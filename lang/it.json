@@ -2173,6 +2173,32 @@
                     "readyDone": "Pronto ✓",
                     "readyRecorded": "La tua prontezza è stata registrata."
                 }
+            },
+            "meanwhile": {
+                "title": "Nel frattempo, nelle Terre Rubate",
+                "turn": "Turno {turn}",
+                "genericCargo": "merci",
+                "caravan": {
+                    "raided": "Una carovana diretta a {destination} è stata assalita — {lost} {commodity} perduti; i superstiti proseguono.",
+                    "deliveredRd": "La carovana per {destination} è arrivata, assicurando {rd} dadi risorsa bonus al tesoro.",
+                    "deliveredAmount": "La carovana per {destination} è arrivata, consegnando {amount} {commodity}.",
+                    "lost": "Una carovana diretta a {destination} è svanita lungo la strada."
+                },
+                "shipment": {
+                    "raided": "Un carico diretto a {destination} è stato razziato — {lost} {commodity} perduti.",
+                    "deliveredRd": "Un carico è arrivato a {destination}, aggiungendo {rd} dadi risorsa bonus.",
+                    "deliveredAmount": "Un carico di {amount} {commodity} è arrivato a {destination}.",
+                    "lost": "Un carico diretto a {destination} non è mai arrivato."
+                },
+                "expedition": {
+                    "criticalSuccess": "{companions} tornano trionfanti da {title}.",
+                    "success": "{companions} completano {title} con buoni risultati.",
+                    "failure": "{companions} tornano da {title} a mani vuote.",
+                    "criticalFailure": "{companions} tornano malconci da {title} — la spedizione è finita in disastro."
+                },
+                "warThreat": {
+                    "escalated": "La minaccia {name} si intensifica (livello {level}/{max}). La pressione sul regno cresce."
+                }
             }
         },
         "chatMessages": {

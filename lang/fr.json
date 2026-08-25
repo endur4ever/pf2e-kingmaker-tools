@@ -2173,6 +2173,32 @@
                     "readyDone": "Prêt ✓",
                     "readyRecorded": "Votre état prêt a été enregistré."
                 }
+            },
+            "meanwhile": {
+                "title": "Pendant ce temps, dans les Terres Volées",
+                "turn": "Tour {turn}",
+                "genericCargo": "marchandises",
+                "caravan": {
+                    "raided": "Une caravane en route vers {destination} a été attaquée — {lost} {commodity} perdus ; les survivants poursuivent.",
+                    "deliveredRd": "La caravane vers {destination} est arrivée, rapportant {rd} dés de ressources bonus au trésor.",
+                    "deliveredAmount": "La caravane vers {destination} est arrivée, livrant {amount} {commodity}.",
+                    "lost": "Une caravane en route vers {destination} a disparu en chemin."
+                },
+                "shipment": {
+                    "raided": "Une cargaison destinée à {destination} a été pillée — {lost} {commodity} perdus.",
+                    "deliveredRd": "Une cargaison est arrivée à {destination}, ajoutant {rd} dés de ressources bonus.",
+                    "deliveredAmount": "Une cargaison de {amount} {commodity} est arrivée à {destination}.",
+                    "lost": "Une cargaison destinée à {destination} n’est jamais arrivée."
+                },
+                "expedition": {
+                    "criticalSuccess": "{companions} reviennent triomphants de {title}.",
+                    "success": "{companions} achèvent {title} avec de bons résultats.",
+                    "failure": "{companions} reviennent de {title} les mains vides.",
+                    "criticalFailure": "{companions} reviennent brisés de {title} — l’expédition a tourné au désastre."
+                },
+                "warThreat": {
+                    "escalated": "La menace {name} s’intensifie (niveau {level}/{max}). La pression sur le royaume augmente."
+                }
             }
         },
         "chatMessages": {

@@ -2173,6 +2173,32 @@
                     "readyDone": "Pronto ✓",
                     "readyRecorded": "Sua prontidão foi registrada."
                 }
+            },
+            "meanwhile": {
+                "title": "Enquanto isso, nas Terras Roubadas",
+                "turn": "Turno {turn}",
+                "genericCargo": "mercadorias",
+                "caravan": {
+                    "raided": "Uma caravana a caminho de {destination} foi emboscada — {lost} {commodity} perdidos; os sobreviventes seguem em frente.",
+                    "deliveredRd": "A caravana para {destination} chegou, garantindo {rd} dados de recurso bônus ao tesouro.",
+                    "deliveredAmount": "A caravana para {destination} chegou, entregando {amount} {commodity}.",
+                    "lost": "Uma caravana a caminho de {destination} desapareceu na estrada."
+                },
+                "shipment": {
+                    "raided": "Um carregamento para {destination} foi saqueado — {lost} {commodity} perdidos.",
+                    "deliveredRd": "Um carregamento chegou a {destination}, adicionando {rd} dados de recurso bônus.",
+                    "deliveredAmount": "Um carregamento de {amount} {commodity} chegou a {destination}.",
+                    "lost": "Um carregamento para {destination} nunca chegou."
+                },
+                "expedition": {
+                    "criticalSuccess": "{companions} retornam triunfantes de {title}.",
+                    "success": "{companions} concluem {title} com bons resultados.",
+                    "failure": "{companions} retornam de {title} de mãos vazias.",
+                    "criticalFailure": "{companions} mal conseguem voltar de {title} — a expedição terminou em desastre."
+                },
+                "warThreat": {
+                    "escalated": "A ameaça {name} se intensifica (nível {level}/{max}). A pressão sobre o reino aumenta."
+                }
             }
         },
         "chatMessages": {

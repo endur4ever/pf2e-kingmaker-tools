@@ -2173,6 +2173,32 @@
                     "readyDone": "Готов ✓",
                     "readyRecorded": "Ваша готовность записана."
                 }
+            },
+            "meanwhile": {
+                "title": "Тем временем в Украденных Землях",
+                "turn": "Ход {turn}",
+                "genericCargo": "товары",
+                "caravan": {
+                    "raided": "Караван, шедший в {destination}, попал в засаду — потеряно {lost} {commodity}; уцелевшие продолжают путь.",
+                    "deliveredRd": "Караван в {destination} прибыл, принеся казне {rd} бонусных кубов ресурсов.",
+                    "deliveredAmount": "Караван в {destination} прибыл, доставив {amount} {commodity}.",
+                    "lost": "Караван, шедший в {destination}, пропал в дороге."
+                },
+                "shipment": {
+                    "raided": "Груз, шедший в {destination}, был разграблен — потеряно {lost} {commodity}.",
+                    "deliveredRd": "Груз прибыл в {destination}, добавив {rd} бонусных кубов ресурсов.",
+                    "deliveredAmount": "Груз {amount} {commodity} прибыл в {destination}.",
+                    "lost": "Груз, шедший в {destination}, так и не прибыл."
+                },
+                "expedition": {
+                    "criticalSuccess": "{companions} с триумфом возвращаются из {title}.",
+                    "success": "{companions} завершают {title} с достойным результатом.",
+                    "failure": "{companions} возвращаются из {title} с пустыми руками.",
+                    "criticalFailure": "{companions} едва возвращаются из {title} — экспедиция обернулась катастрофой."
+                },
+                "warThreat": {
+                    "escalated": "Угроза {name} нарастает (уровень {level}/{max}). Давление на королевство растёт."
+                }
             }
         },
         "chatMessages": {

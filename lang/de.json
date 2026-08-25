@@ -2173,6 +2173,32 @@
                     "readyDone": "Bereit ✓",
                     "readyRecorded": "Deine Bereitschaft wurde vermerkt."
                 }
+            },
+            "meanwhile": {
+                "title": "Unterdessen in den Gestohlenen Landen",
+                "turn": "Zug {turn}",
+                "genericCargo": "Waren",
+                "caravan": {
+                    "raided": "Eine Karawane nach {destination} wurde überfallen — {lost} {commodity} verloren; die Überlebenden ziehen weiter.",
+                    "deliveredRd": "Die Karawane nach {destination} ist angekommen und sichert der Schatzkammer {rd} Bonus-Ressourcenwürfel.",
+                    "deliveredAmount": "Die Karawane nach {destination} ist angekommen und liefert {amount} {commodity}.",
+                    "lost": "Eine Karawane nach {destination} ist unterwegs verschollen."
+                },
+                "shipment": {
+                    "raided": "Eine Lieferung nach {destination} wurde überfallen — {lost} {commodity} verloren.",
+                    "deliveredRd": "Eine Lieferung ist in {destination} eingetroffen und bringt {rd} Bonus-Ressourcenwürfel.",
+                    "deliveredAmount": "Eine Lieferung von {amount} {commodity} ist in {destination} eingetroffen.",
+                    "lost": "Eine Lieferung nach {destination} ist nie angekommen."
+                },
+                "expedition": {
+                    "criticalSuccess": "{companions} kehren im Triumph von {title} zurück.",
+                    "success": "{companions} schließen {title} mit soliden Ergebnissen ab.",
+                    "failure": "{companions} kehren mit leeren Händen von {title} zurück.",
+                    "criticalFailure": "{companions} schleppen sich von {title} zurück — die Expedition endete im Desaster."
+                },
+                "warThreat": {
+                    "escalated": "Die Bedrohung {name} eskaliert (Stufe {level}/{max}). Der Druck auf das Königreich steigt."
+                }
             }
         },
         "chatMessages": {

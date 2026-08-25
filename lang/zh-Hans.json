@@ -2173,6 +2173,32 @@
                     "readyDone": "已就绪 ✓",
                     "readyRecorded": "你的就绪状态已记录。"
                 }
+            },
+            "meanwhile": {
+                "title": "与此同时，在盗贼之地",
+                "turn": "第 {turn} 回合",
+                "genericCargo": "货物",
+                "caravan": {
+                    "raided": "一支前往{destination}的商队遭到伏击——损失了 {lost} 份{commodity}；幸存者继续前行。",
+                    "deliveredRd": "前往{destination}的商队已抵达，为国库带来 {rd} 枚奖励资源骰。",
+                    "deliveredAmount": "前往{destination}的商队已抵达，交付了 {amount} 份{commodity}。",
+                    "lost": "一支前往{destination}的商队在途中失踪。"
+                },
+                "shipment": {
+                    "raided": "一批运往{destination}的货物遭到劫掠——损失了 {lost} 份{commodity}。",
+                    "deliveredRd": "一批货物已运抵{destination}，增加 {rd} 枚奖励资源骰。",
+                    "deliveredAmount": "{amount} 份{commodity}已运抵{destination}。",
+                    "lost": "一批运往{destination}的货物始终未能送达。"
+                },
+                "expedition": {
+                    "criticalSuccess": "{companions}凯旋而归，完成了{title}。",
+                    "success": "{companions}顺利完成了{title}。",
+                    "failure": "{companions}从{title}空手而归。",
+                    "criticalFailure": "{companions}从{title}狼狈而归——远征以灾难告终。"
+                },
+                "warThreat": {
+                    "escalated": "{name}威胁升级（第 {level}/{max} 阶段）。王国承受的压力上升。"
+                }
             }
         },
         "chatMessages": {

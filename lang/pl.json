@@ -2173,6 +2173,32 @@
                     "readyDone": "Gotowy ✓",
                     "readyRecorded": "Twoja gotowość została zapisana."
                 }
+            },
+            "meanwhile": {
+                "title": "Tymczasem na Skradzionych Ziemiach",
+                "turn": "Tura {turn}",
+                "genericCargo": "towary",
+                "caravan": {
+                    "raided": "Karawana zmierzająca do {destination} została napadnięta — stracono {lost} {commodity}; ocalali ruszają dalej.",
+                    "deliveredRd": "Karawana do {destination} dotarła, zapewniając skarbcowi {rd} dodatkowych kości zasobów.",
+                    "deliveredAmount": "Karawana do {destination} dotarła, dostarczając {amount} {commodity}.",
+                    "lost": "Karawana zmierzająca do {destination} przepadła w drodze."
+                },
+                "shipment": {
+                    "raided": "Transport do {destination} został złupiony — stracono {lost} {commodity}.",
+                    "deliveredRd": "Transport dotarł do {destination}, dodając {rd} dodatkowych kości zasobów.",
+                    "deliveredAmount": "Transport {amount} {commodity} dotarł do {destination}.",
+                    "lost": "Transport do {destination} nigdy nie dotarł."
+                },
+                "expedition": {
+                    "criticalSuccess": "{companions} wracają w triumfie z {title}.",
+                    "success": "{companions} kończą {title} z dobrym wynikiem.",
+                    "failure": "{companions} wracają z {title} z pustymi rękami.",
+                    "criticalFailure": "{companions} ledwo wracają z {title} — wyprawa skończyła się katastrofą."
+                },
+                "warThreat": {
+                    "escalated": "Zagrożenie {name} narasta (poziom {level}/{max}). Presja na królestwo rośnie."
+                }
             }
         },
         "chatMessages": {

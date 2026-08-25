@@ -2295,6 +2295,32 @@
                     "readyDone": "Ready ✓",
                     "readyRecorded": "Your readiness has been recorded."
                 }
+            },
+            "meanwhile": {
+                "title": "Meanwhile in the Stolen Lands",
+                "turn": "Turn {turn}",
+                "genericCargo": "goods",
+                "caravan": {
+                    "raided": "A caravan bound for {destination} was waylaid — {lost} {commodity} lost; the survivors press on.",
+                    "deliveredRd": "The caravan to {destination} arrived, securing {rd} bonus Resource Dice for the treasury.",
+                    "deliveredAmount": "The caravan to {destination} arrived, delivering {amount} {commodity}.",
+                    "lost": "A caravan bound for {destination} has vanished on the road."
+                },
+                "shipment": {
+                    "raided": "A shipment bound for {destination} was raided — {lost} {commodity} lost.",
+                    "deliveredRd": "A shipment arrived at {destination}, adding {rd} bonus Resource Dice.",
+                    "deliveredAmount": "A shipment of {amount} {commodity} arrived at {destination}.",
+                    "lost": "A shipment bound for {destination} never arrived."
+                },
+                "expedition": {
+                    "criticalSuccess": "{companions} return triumphant from {title}.",
+                    "success": "{companions} complete {title} with solid results.",
+                    "failure": "{companions} return from {title} empty-handed.",
+                    "criticalFailure": "{companions} limp back from {title} — the expedition ended in disaster."
+                },
+                "warThreat": {
+                    "escalated": "The {name} threat escalates (stage {level}/{max}). Pressure on the kingdom rises."
+                }
             }
         },
         "chatMessages": {
