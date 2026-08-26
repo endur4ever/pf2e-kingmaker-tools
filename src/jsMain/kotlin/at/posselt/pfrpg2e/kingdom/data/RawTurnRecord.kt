@@ -31,4 +31,9 @@ external interface RawTurnRecord {
     var ruinCrime: Int?
     var ruinDecay: Int?
     var ruinStrife: Int?
+
+    /** Per-actor contribution tallies accrued during this turn (renown-spotlight SS2.3).
+     * Nullable: legacy records have none, so the Spotlight shows nothing for old turns rather
+     * than asserting that nobody contributed. */
+    var contributions: Array<RawTurnContribution>?
 }

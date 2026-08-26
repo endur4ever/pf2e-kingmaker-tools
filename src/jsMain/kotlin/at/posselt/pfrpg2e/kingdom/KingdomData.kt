@@ -30,6 +30,12 @@ import at.posselt.pfrpg2e.kingdom.data.RawAbilityScores
 import at.posselt.pfrpg2e.kingdom.data.RawArmyDeployment
 import at.posselt.pfrpg2e.kingdom.data.RawRewildTracker
 import at.posselt.pfrpg2e.kingdom.data.RawTreasureLedgerEntry
+import at.posselt.pfrpg2e.kingdom.data.RawCouncilVote
+import at.posselt.pfrpg2e.kingdom.data.RawPcRenown
+import at.posselt.pfrpg2e.kingdom.data.RawRenownDeed
+import at.posselt.pfrpg2e.kingdom.data.RawRivalCharterParty
+import at.posselt.pfrpg2e.kingdom.data.RawRivalRealm
+import at.posselt.pfrpg2e.kingdom.data.RawTurnContribution
 import at.posselt.pfrpg2e.kingdom.data.RawCaravan
 import at.posselt.pfrpg2e.kingdom.data.RawCaravanShipment
 import at.posselt.pfrpg2e.kingdom.data.RawArmyBattle
@@ -387,6 +393,29 @@ external interface KingdomData {
 
     /** Calendar-dated pressure schedules. Null on kingdoms saved before Migration63. */
     var scheduledPressures: Array<RawScheduledPressure>?
+
+    /** Advisory contested-call ledger (council-votes SS2.1). Null on kingdoms saved before
+     * Migration66; newest last, capped by appendCouncilVote. Top-level rather than nested in a
+     * turn record because votes open ad hoc mid-turn, before that turn's record exists. */
+    var councilVotes: Array<RawCouncilVote>?
+
+    /** Rival realm scoreboard rows (rival-realms SS2.2), soft-linked to groups by factionRef ->
+     * RawGroup.name. Null before Migration67; empty means no rivals tracked. */
+    var rivalRealms: Array<RawRivalRealm>?
+
+    /** Rival charter parties out on the hex map (rival-charter-party SS2.1). Null before
+     * Migration68. Soft-FK by name, with no cascade on rename or delete. */
+    var rivalCharterParties: Array<RawRivalCharterParty>?
+
+    /** Cumulative per-PC renown ledger (renown-spotlight SS2.3). Null before Migration69. */
+    var renown: Array<RawPcRenown>?
+
+    /** In-progress per-actor tallies for the OPEN turn, flushed into the turn record at End Turn. */
+    var currentTurnContributions: Array<RawTurnContribution>?
+
+    /** Per-deed log for the OPEN turn so a re-roll REPLACES its earlier deed rather than
+     * double-counting it. Reset at End Turn beside currentTurnContributions. */
+    var currentTurnDeeds: Array<RawRenownDeed>?
 }
 
 fun RawLeaderKingdomSkills.hasSkill(leader: Leader, skill: KingdomSkill) =

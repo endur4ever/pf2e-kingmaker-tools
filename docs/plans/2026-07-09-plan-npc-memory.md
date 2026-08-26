@@ -124,7 +124,7 @@ different NPC types, which the card exists to prevent.
 **Migration.** Nullable additive fields on an interface nested inside `RawSettlement`. Every nullable
 array on `KingdomData` is seeded by convention (`quests`/23, `companionExpeditions`/40,
 `caravans`/44, `warThreats`/46, `shipmentHistory`/61), so this seeds too — but it walks
-settlements → roster → npcs rather than a top-level field. **`Migration67`** *(placeholder; 66 is reserved by the seasonal-economy plan)*.
+settlements → roster → npcs rather than a top-level field. **`Migration71`** *(placeholder; 66 is reserved by the seasonal-economy plan)*. *(placeholder — 66-69 were taken by the council-votes, rival-realms, rival-charter-party and renown-spotlight slices; re-derive from `Migrations.kt` at implementation time)*
 > ⚠️ 62–65 have LANDED since this plan was written (downtime, scheduler, map-dynamism,
 > loot-manifests), so the `Migration65` this section originally named is no longer free. Re-derive
 > the next contiguous number from `Migrations.kt` at implementation time.

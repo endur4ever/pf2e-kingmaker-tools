@@ -135,16 +135,16 @@ data class SeasonalEconomyModifiers(
 }
 ```
 
-### 2.4 Migration — **Migration66**
+### 2.4 Migration — **Migration70** *(placeholder — 66-69 were taken by the council-votes, rival-realms, rival-charter-party and renown-spotlight slices; re-derive from `Migrations.kt` at implementation time)*
 
 The chain ends at `Migration65` (`migrations/Migrations.kt`) and `MigrationChainTest` asserts
 contiguity. 62–65 are claimed by the downtime-projects, scheduled-pressure, petition-inbox and
-npc-memory plans, so this takes **Migration66**. Whichever of the five is implemented first should
+npc-memory plans, so this takes **Migration70**. Whichever of the five is implemented first should
 re-check the chain rather than trust these reservations.
 
 ```kotlin
-// Migration66: initialize the seasonal-economy idempotency marker; bump schema version.
-class Migration66 : Migration(version = 66) {
+// Migration70: initialize the seasonal-economy idempotency marker; bump schema version.
+class Migration70 : Migration(version = 66) {
     override fun migrateKingdom(game: Game, kingdomActor: KingdomActor, kingdom: KingdomData) {
         if (kingdom.lastSeasonalFloodYear == undefined) {
             kingdom.lastSeasonalFloodYear = null   // never offered yet
@@ -468,7 +468,7 @@ Profile plumbing: `HomebrewRules.kt` (new field) + `RuleResolutionHelper.kt`
 | `floodOffer_firesOncePerSpring` | Two consecutive spring End Turns emit the flood card once; second is suppressed by `lastSeasonalFloodYear`. |
 | `floodOffer_stampsMarkerOnDismiss` | Dismiss also stamps the marker (no re-offer this spring). |
 | `gateOff_noBadgeNoOfferRawNumbers` | Profile off → no badge, no flood card, and income/consumption equal the RAW baseline. |
-| `migration66_initsMarkerNull` | Migration66 sets `lastSeasonalFloodYear = null` on a pre-existing kingdom and bumps schema version. |
+| `migration66_initsMarkerNull` | Migration70 sets `lastSeasonalFloodYear = null` on a pre-existing kingdom and bumps schema version. |
 
 ### 7.3 Manual Foundry verification checklist
 
@@ -495,7 +495,7 @@ Profile plumbing: `HomebrewRules.kt` (new field) + `RuleResolutionHelper.kt`
 | Phase | Title | Deliverable | Key files |
 |-------|-------|-------------|-----------|
 | **1** | **Pure core + profile gate** | `SeasonalEconomy.kt` (`SeasonalEconomyModifiers`, `seasonalModifiers`, `applyWorksiteMultiplier`), `HomebrewRules.seasonalEconomy` field + `gregory()` opt-in, `RuleResolutionHelper.isSeasonalEconomyEnabled`, full commonTest. **Inert** — nothing wired yet. | `kingdom/resources/SeasonalEconomy.kt`, `homebrew/HomebrewRules.kt`, `homebrew/RuleResolutionHelper.kt`, `SeasonalEconomyTest.kt` |
-| **2** | **Economy seam wiring + migration** | Thread `seasonal` into `calculateIncome`, `calculateConsumption`, `caravanRaidDc` and their callers (`sheet/CalculateIncome.kt`, `performEndTurn` caravan tick); resolve season once per turn via `getCurrentMonth`; river-freeze composes with `travelCostRiverNoBridgeAdditional`; `KingdomData.lastSeasonalFloodYear` + **Migration66**. | `Income.kt`, `Consumption.kt`, `CaravanTick.kt`, `sheet/CalculateIncome.kt`, `TurnTickingEngine.kt`, `KingdomData.kt`, `migrations/migrations/Migration66.kt` |
+| **2** | **Economy seam wiring + migration** | Thread `seasonal` into `calculateIncome`, `calculateConsumption`, `caravanRaidDc` and their callers (`sheet/CalculateIncome.kt`, `performEndTurn` caravan tick); resolve season once per turn via `getCurrentMonth`; river-freeze composes with `travelCostRiverNoBridgeAdditional`; `KingdomData.lastSeasonalFloodYear` + **Migration70**. | `Income.kt`, `Consumption.kt`, `CaravanTick.kt`, `sheet/CalculateIncome.kt`, `TurnTickingEngine.kt`, `KingdomData.kt`, `migrations/migrations/Migration70.kt` |
 | **3** | **Turn-tab badge UI** | `SeasonalEconomyBadgeContext`, badge partial + Turn-tab include, partial registration, `kingdom.seasonalEconomy.*` i18n (reusing `season.*`). | `sheet/contexts/SeasonalEconomyContext.kt`, `sections/turn/seasonal-badge.hbs`, `Main.kt` (partial registration), `KingdomSheet.kt`, `lang/en.json` |
 | **4** | **Spring-flood offer + QA** | `km-offer-seasonal-flood` handler (spawn-event + dismiss, idempotent via marker), flood offer chat template, spring End-Turn emission, `data/events/spring-flood` event asset, jsTest + manual checklist. | `ChatButtons.kt`, `chatmessages/seasonal-flood-offer.hbs`, `TurnTickingEngine.kt`/`TurnWizardApplication.kt` (emission), `data/events/…`, `SeasonalEconomyTest.kt` (jsTest) |
 
