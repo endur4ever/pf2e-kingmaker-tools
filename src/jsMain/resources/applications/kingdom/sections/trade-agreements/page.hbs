@@ -91,5 +91,49 @@
                 {{/if}}
             {{/each}}
         </section>
+        <section>
+            <h2>{{localizeKM "kingdom.rivalRealms.title"}}
+                {{#if isGM}}<span class="km-header-right-align"><button type="button" data-action="add-rival-realm"><i class="fa-solid fa-plus"></i></button></span>{{/if}}
+            </h2>
+            {{#if rivalRealms.hasRivals}}
+                <table>
+                    <thead>
+                    <tr>
+                        <td>{{localizeKM "kingdom.rivalRealms.rank"}}</td>
+                        <td>{{localizeKM "kingdom.rivalRealms.realm"}}</td>
+                        <td>{{localizeKM "kingdom.rivalRealms.power"}}</td>
+                        <td>{{localizeKM "kingdom.rivalRealms.size"}}</td>
+                        <td>{{localizeKM "kingdom.rivalRealms.fame"}}</td>
+                        <td>{{localizeKM "kingdom.rivalRealms.armies"}}</td>
+                        {{#if isGM}}
+                            <td>{{localizeKM "kingdom.rivalRealms.growth"}}</td>
+                            <td></td>
+                        {{/if}}
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {{#each rivalRealms.rows}}
+                        <tr class="{{#if isPlayer}}km-rival-player-row{{/if}}">
+                            <td>#{{rank}}</td>
+                            <td>{{label}}{{#unless linked}} <i class="fa-solid fa-link-slash" data-tooltip="{{localizeKM "kingdom.rivalRealms.unlinked"}}"></i>{{/unless}}</td>
+                            <td>{{score}}</td>
+                            <td>{{size}}</td>
+                            <td>{{fame}}</td>
+                            <td>{{armyCount}}</td>
+                            {{#if ../isGM}}
+                                <td>{{#unless isPlayer}}{{growthSummary}}{{/unless}}</td>
+                                <td>{{#unless isPlayer}}
+                                    <button type="button" data-action="edit-rival-realm" data-id="{{id}}"><i class="fa-solid fa-sliders"></i></button>
+                                    <button type="button" data-action="delete-rival-realm" data-id="{{id}}"><i class="fa-solid fa-trash"></i></button>
+                                {{/unless}}</td>
+                            {{/if}}
+                        </tr>
+                    {{/each}}
+                    </tbody>
+                </table>
+            {{else}}
+                <p>{{localizeKM "kingdom.rivalRealms.empty"}}</p>
+            {{/if}}
+        </section>
     </div>
 </div>

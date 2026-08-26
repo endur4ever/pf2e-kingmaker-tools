@@ -977,7 +977,8 @@
                 "companion": "Gefährten {name} löschen? Dies kann nicht rückgängig gemacht werden.",
                 "modifier": "Modifikator {name} löschen? Dies kann nicht rückgängig gemacht werden.",
                 "group": "Fraktion {name} löschen? Dies zerstört auch deren gesamte Beziehungs-Historie und kann nicht rückgängig gemacht werden.",
-                "event": "Fortlaufendes Ereignis {name} löschen? Dies kann nicht rückgängig gemacht werden."
+                "event": "Fortlaufendes Ereignis {name} löschen? Dies kann nicht rückgängig gemacht werden.",
+                "rivalRealm": "Rivalisierendes Reich {name} löschen?"
             },
             "warfare": {
                 "mired": "Steckengeblieben",
@@ -2376,16 +2377,64 @@
             },
             "rivalRealms": {
                 "headline": {
-                    "expand1": "{faction} beansprucht neues Gebiet (jetzt {value} Hexfelder)",
-                    "expand2": "{faction} schiebt seine Grenzen vor",
-                    "expand3": "{faction} weht über {amount} weiteren Hexfeldern",
-                    "fame1": "{faction} gewinnt an Ansehen",
-                    "fame2": "Von {faction}s Taten wird gesprochen",
-                    "army1": "{faction} hebt eine weitere Kompanie aus",
-                    "army2": "{faction} verstärkt seine Reihen auf {value}",
-                    "armyWar1": "{faction} rekrutiert frische Truppen für den Krieg",
-                    "armyWar2": "Kriegstrommeln: {faction} stellt {value} Kompanien"
-                }
+                    "expand1": "{rival} hat {n} Hexfelder nahe {place} beansprucht.",
+                    "expand2": "{rival} schob seine Grenze in Richtung {place} vor.",
+                    "expand3": "Siedler unter {rival}s Banner breiten sich über {place} aus.",
+                    "fame1": "{rival}s Ruhm verbreitet sich in den Flusskönigreichen.",
+                    "fame2": "Barden tragen Geschichten über {rival} an ferne Höfe.",
+                    "army1": "{rival} hat {n} frische Kompanien ausgehoben.",
+                    "army2": "{rival}s Kriegslager nahe {place} schwellen an.",
+                    "armyWar1": "{rival}s Aufgebote sammeln sich nahe {place} zum Krieg.",
+                    "armyWar2": "{rival} führt {n} frische Kompanien an die Front."
+                },
+                "title": "Rivalisierende Reiche",
+                "rank": "#",
+                "realm": "Reich",
+                "power": "Macht",
+                "size": "Größe",
+                "fame": "Ruhm",
+                "armies": "Armeen",
+                "growth": "Wachstum",
+                "empty": "Keine rivalisierenden Reiche erfasst. Füge eines hinzu, um die Nachbarn wachsen zu sehen.",
+                "unlinked": "Die Fraktion dieses Reichs existiert nicht mehr.",
+                "standingReason": "{rival}s Expansion belastete die Grenze",
+                "profile": {
+                    "dormant": "Ruhend",
+                    "slow-expansion": "Langsame Expansion",
+                    "brevoy-hinterlands": "Brevoy — Anspruch auf das Hinterland",
+                    "troll-horde": "Trollhorde",
+                    "pitax-wartime": "Pitax — Kriegsaushebung",
+                    "expansionist-endgame": "Expansionistisch"
+                },
+                "warOffer": {
+                    "title": "{rival} sammelt Truppen für den Krieg",
+                    "raise": "Kriegsbedrohung erhöhen",
+                    "dismiss": "Verwerfen"
+                },
+                "standingOffer": {
+                    "title": "{rival}s Expansion belastet die Grenze",
+                    "apply": "Ansehensänderung anwenden",
+                    "dismiss": "Verwerfen"
+                },
+                "dialog": {
+                    "add": "Rivalisierendes Reich hinzufügen",
+                    "edit": "Rivalisierendes Reich bearbeiten",
+                    "faction": "Fraktion",
+                    "growthProfile": "Wachstumsprofil",
+                    "growthMode": "Wachstumsquelle",
+                    "borderRegion": "Grenzregion",
+                    "warThreshold": "Kriegsschwelle (Armeen)",
+                    "warThresholdHelp": "Leer deaktiviert das Kriegsbedrohungs-Angebot.",
+                    "pauseGrowth": "Wachstum pausieren",
+                    "sizeGrowth": "Größenwachstum überschreiben",
+                    "fameGrowth": "Ruhmwachstum überschreiben",
+                    "armyGrowth": "Armeewachstum überschreiben",
+                    "overrideHelp": "Rate pro Zug, z. B. 0.5. Leer nutzt das Profil.",
+                    "modeFlat": "Konstantes Wachstum",
+                    "modeAgenda": "Agenda-gesteuert (übergeordnete Engine)",
+                    "badNumber": "Wachstumsraten und Kriegsschwelle müssen Zahlen sein, z. B. 0.5 — vor dem Speichern korrigieren."
+                },
+                "borderFallback": "das Grenzland"
             }
         },
         "chatMessages": {

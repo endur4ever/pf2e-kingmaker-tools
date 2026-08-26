@@ -1116,7 +1116,8 @@
                 "companion": "Delete companion {name}? This cannot be undone.",
                 "modifier": "Delete modifier {name}? This cannot be undone.",
                 "group": "Delete faction {name}? This also destroys its entire standing history and cannot be undone.",
-                "event": "Delete ongoing event {name}? This cannot be undone."
+                "event": "Delete ongoing event {name}? This cannot be undone.",
+                "rivalRealm": "Delete rival realm {name}?"
             },
             "warfare": {
                 "mired": "Mired",
@@ -2498,16 +2499,64 @@
             },
             "rivalRealms": {
                 "headline": {
-                    "expand1": "{faction} claims new territory (now {value} hexes)",
-                    "expand2": "{faction} pushes its borders outward",
-                    "expand3": "{faction}'s banners fly over {amount} more hexes",
-                    "fame1": "{faction} grows in renown",
-                    "fame2": "Word of {faction}'s deeds spreads",
-                    "army1": "{faction} musters another company",
-                    "army2": "{faction} swells its ranks to {value}",
-                    "armyWar1": "{faction} raises fresh troops for the war",
-                    "armyWar2": "War drums: {faction} fields {value} companies"
-                }
+                    "expand1": "{rival} claimed {n} hexes near {place}.",
+                    "expand2": "{rival} pushed its border toward {place}.",
+                    "expand3": "Settlers under {rival}'s banner spread across {place}.",
+                    "fame1": "{rival}'s renown spreads through the River Kingdoms.",
+                    "fame2": "Bards carry tales of {rival} to distant courts.",
+                    "army1": "{rival} raised {n} fresh companies.",
+                    "army2": "{rival}'s war-camps swell near {place}.",
+                    "armyWar1": "{rival}'s levies muster for war near {place}.",
+                    "armyWar2": "{rival} marches {n} fresh companies to the front."
+                },
+                "title": "Rival Realms",
+                "rank": "#",
+                "realm": "Realm",
+                "power": "Power",
+                "size": "Size",
+                "fame": "Fame",
+                "armies": "Armies",
+                "growth": "Growth",
+                "empty": "No rival realms tracked. Add one to watch the neighbors grow.",
+                "unlinked": "This realm's faction no longer exists.",
+                "standingReason": "{rival}'s expansion strained the border",
+                "profile": {
+                    "dormant": "Dormant",
+                    "slow-expansion": "Slow Expansion",
+                    "brevoy-hinterlands": "Brevoy — Hinterlands Claim",
+                    "troll-horde": "Troll Horde",
+                    "pitax-wartime": "Pitax — Wartime Levy",
+                    "expansionist-endgame": "Expansionist"
+                },
+                "warOffer": {
+                    "title": "{rival} masses for war",
+                    "raise": "Raise War Threat",
+                    "dismiss": "Dismiss"
+                },
+                "standingOffer": {
+                    "title": "{rival}'s expansion strains the border",
+                    "apply": "Apply Standing Shift",
+                    "dismiss": "Dismiss"
+                },
+                "dialog": {
+                    "add": "Add Rival Realm",
+                    "edit": "Edit Rival Realm",
+                    "faction": "Faction",
+                    "growthProfile": "Growth Profile",
+                    "growthMode": "Growth Source",
+                    "borderRegion": "Border Region",
+                    "warThreshold": "War Army Threshold",
+                    "warThresholdHelp": "Blank disables the war-threat offer.",
+                    "pauseGrowth": "Pause Growth",
+                    "sizeGrowth": "Size Growth Override",
+                    "fameGrowth": "Fame Growth Override",
+                    "armyGrowth": "Army Growth Override",
+                    "overrideHelp": "Per-turn rate, e.g. 0.5. Blank defers to the profile.",
+                    "modeFlat": "Flat Growth",
+                    "modeAgenda": "Agenda-Driven (parent engine)",
+                    "badNumber": "Growth rates and the war threshold must be numbers, e.g. 0.5 — fix them before saving."
+                },
+                "borderFallback": "the borderlands"
             }
         },
         "chatMessages": {

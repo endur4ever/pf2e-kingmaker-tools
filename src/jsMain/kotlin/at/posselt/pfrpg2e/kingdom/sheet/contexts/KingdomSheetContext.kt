@@ -69,6 +69,7 @@ external interface KingdomSheetContext : ValidatedHandlebarsContext {
     val bonusFeat: AddBonusFeatContext
     val bonusFeats: Array<BonusFeatContext>
     val groups: Array<GroupContext>
+    val rivalRealms: RivalRealmsContext
     val skillRanks: SkillRanksContext
     val abilityScores: Array<AbilityScoreContext>
     val milestones: Array<MilestoneContext>

@@ -2035,7 +2035,8 @@
                 "group": "Delete faction {name}? This also destroys its entire standing history and cannot be undone.",
                 "modifier": "Delete modifier {name}? This cannot be undone.",
                 "quest": "Delete quest {name}? This cannot be undone.",
-                "warThreat": "Delete war ameaça {name}? This cannot be undone."
+                "warThreat": "Delete war ameaça {name}? This cannot be undone.",
+                "rivalRealm": "Excluir o reino rival {name}?"
             },
             "current": "Current",
             "expeditionBatchResolved": "Resolved {count} expedição rewards.",
@@ -2376,16 +2377,64 @@
             },
             "rivalRealms": {
                 "headline": {
-                    "expand1": "{faction} reivindica novo território (agora {value} hexes)",
-                    "expand2": "{faction} avança suas fronteiras",
-                    "expand3": "Os estandartes de {faction} tremulam sobre mais {amount} hexes",
-                    "fame1": "{faction} cresce em renome",
-                    "fame2": "Espalham-se notícias dos feitos de {faction}",
-                    "army1": "{faction} recruta mais uma companhia",
-                    "army2": "{faction} amplia suas fileiras para {value}",
-                    "armyWar1": "{faction} recruta tropas frescas para a guerra",
-                    "armyWar2": "Tambores de guerra: {faction} alinha {value} companhias"
-                }
+                    "expand1": "{rival} reivindicou {n} hexágonos perto de {place}.",
+                    "expand2": "{rival} avançou sua fronteira em direção a {place}.",
+                    "expand3": "Colonos sob o estandarte de {rival} se espalham por {place}.",
+                    "fame1": "A fama de {rival} se espalha pelos Reinos Fluviais.",
+                    "fame2": "Bardos levam histórias de {rival} a cortes distantes.",
+                    "army1": "{rival} recrutou {n} novas companhias.",
+                    "army2": "Os acampamentos de guerra de {rival} crescem perto de {place}.",
+                    "armyWar1": "As levas de {rival} se reúnem para a guerra perto de {place}.",
+                    "armyWar2": "{rival} marcha {n} novas companhias para o front."
+                },
+                "title": "Reinos rivais",
+                "rank": "#",
+                "realm": "Reino",
+                "power": "Poder",
+                "size": "Tamanho",
+                "fame": "Fama",
+                "armies": "Exércitos",
+                "growth": "Crescimento",
+                "empty": "Nenhum reino rival registrado. Adicione um para ver os vizinhos crescerem.",
+                "unlinked": "A facção deste reino não existe mais.",
+                "standingReason": "A expansão de {rival} tensionou a fronteira",
+                "profile": {
+                    "dormant": "Adormecido",
+                    "slow-expansion": "Expansão lenta",
+                    "brevoy-hinterlands": "Brevoy — Reivindicação do interior",
+                    "troll-horde": "Horda de trolls",
+                    "pitax-wartime": "Pitax — Convocação de guerra",
+                    "expansionist-endgame": "Expansionista"
+                },
+                "warOffer": {
+                    "title": "{rival} concentra forças para a guerra",
+                    "raise": "Elevar ameaça de guerra",
+                    "dismiss": "Descartar"
+                },
+                "standingOffer": {
+                    "title": "A expansão de {rival} tensiona a fronteira",
+                    "apply": "Aplicar mudança de relações",
+                    "dismiss": "Descartar"
+                },
+                "dialog": {
+                    "add": "Adicionar reino rival",
+                    "edit": "Editar reino rival",
+                    "faction": "Facção",
+                    "growthProfile": "Perfil de crescimento",
+                    "growthMode": "Fonte de crescimento",
+                    "borderRegion": "Região de fronteira",
+                    "warThreshold": "Limiar de exércitos de guerra",
+                    "warThresholdHelp": "Em branco desativa a oferta de ameaça de guerra.",
+                    "pauseGrowth": "Pausar crescimento",
+                    "sizeGrowth": "Substituir crescimento de tamanho",
+                    "fameGrowth": "Substituir crescimento de fama",
+                    "armyGrowth": "Substituir crescimento de exércitos",
+                    "overrideHelp": "Taxa por turno, ex. 0.5. Em branco usa o perfil.",
+                    "modeFlat": "Crescimento fixo",
+                    "modeAgenda": "Guiado por agenda (motor pai)",
+                    "badNumber": "As taxas de crescimento e o limiar de guerra devem ser números, ex. 0.5 — corrija antes de salvar."
+                },
+                "borderFallback": "as terras fronteiriças"
             }
         },
         "chatMessages": {

@@ -2035,7 +2035,8 @@
                 "group": "Delete faction {name}? This also destroys its entire standing history and cannot be undone.",
                 "modifier": "Delete modifier {name}? This cannot be undone.",
                 "quest": "Delete quest {name}? This cannot be undone.",
-                "warThreat": "Delete war 威胁 {name}? This cannot be undone."
+                "warThreat": "Delete war 威胁 {name}? This cannot be undone.",
+                "rivalRealm": "删除敌对国度 {name}？"
             },
             "current": "Current",
             "expeditionBatchResolved": "Resolved {count} 远征 rewards.",
@@ -2376,16 +2377,64 @@
             },
             "rivalRealms": {
                 "headline": {
-                    "expand1": "{faction}占据了新的领土（现有 {value} 格）",
-                    "expand2": "{faction}向外扩张边界",
-                    "expand3": "{faction}的旗帜又插上了 {amount} 格",
-                    "fame1": "{faction}声望渐隆",
-                    "fame2": "{faction}的事迹广为流传",
-                    "army1": "{faction}又招募了一支部队",
-                    "army2": "{faction}将兵力扩充至 {value}",
-                    "armyWar1": "{faction}为战争征募新兵",
-                    "armyWar2": "战鼓声起：{faction}集结了 {value} 支部队"
-                }
+                    "expand1": "{rival}在{place}附近夺取了{n}格领土。",
+                    "expand2": "{rival}将边境向{place}推进。",
+                    "expand3": "{rival}麾下的开拓者遍布{place}。",
+                    "fame1": "{rival}的声名传遍河流王国。",
+                    "fame2": "吟游诗人将{rival}的传闻带往远方宫廷。",
+                    "army1": "{rival}征募了{n}支新连队。",
+                    "army2": "{rival}在{place}附近的战争营地日益壮大。",
+                    "armyWar1": "{rival}的征召兵正在{place}附近集结备战。",
+                    "armyWar2": "{rival}率{n}支新连队开赴前线。"
+                },
+                "title": "敌对国度",
+                "rank": "#",
+                "realm": "国度",
+                "power": "国力",
+                "size": "规模",
+                "fame": "声望",
+                "armies": "军队",
+                "growth": "增长",
+                "empty": "尚未追踪任何敌对国度。添加一个来观察邻国的扩张。",
+                "unlinked": "该国度关联的势力已不存在。",
+                "standingReason": "{rival}的扩张使边境局势紧张",
+                "profile": {
+                    "dormant": "蛰伏",
+                    "slow-expansion": "缓慢扩张",
+                    "brevoy-hinterlands": "布雷沃伊——腹地宣称",
+                    "troll-horde": "巨魔部落",
+                    "pitax-wartime": "皮塔克斯——战时征召",
+                    "expansionist-endgame": "扩张主义"
+                },
+                "warOffer": {
+                    "title": "{rival}正集结备战",
+                    "raise": "提升战争威胁",
+                    "dismiss": "忽略"
+                },
+                "standingOffer": {
+                    "title": "{rival}的扩张使边境局势紧张",
+                    "apply": "应用关系变化",
+                    "dismiss": "忽略"
+                },
+                "dialog": {
+                    "add": "添加敌对国度",
+                    "edit": "编辑敌对国度",
+                    "faction": "势力",
+                    "growthProfile": "增长配置",
+                    "growthMode": "增长来源",
+                    "borderRegion": "边境地区",
+                    "warThreshold": "战争军队阈值",
+                    "warThresholdHelp": "留空则停用战争威胁提议。",
+                    "pauseGrowth": "暂停增长",
+                    "sizeGrowth": "覆盖规模增长",
+                    "fameGrowth": "覆盖声望增长",
+                    "armyGrowth": "覆盖军队增长",
+                    "overrideHelp": "每回合速率，如 0.5。留空则使用配置。",
+                    "modeFlat": "固定增长",
+                    "modeAgenda": "议程驱动（父引擎）",
+                    "badNumber": "增长速率与战争阈值必须是数字（如 0.5），请修正后再保存。"
+                },
+                "borderFallback": "边境地带"
             }
         },
         "chatMessages": {

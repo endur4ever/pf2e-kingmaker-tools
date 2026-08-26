@@ -128,6 +128,20 @@ class RivalRealmEngineTest {
     }
 
     @Test
+    fun headlinesCarryTheBorderRegionSoTheProseCanSayWhere() {
+        // the plan's authored templates interpolate {place} ("claimed {n} hexes near {place}");
+        // a move without the realm's borderRegion would render the fallback everywhere and the
+        // GM's per-realm flavor field would be write-only
+        val fat = mapOf("all" to RivalGrowthProfile(sizePerTurn = 1.0, famePerTurn = 0.0, armyPerTurn = 0.0))
+        val r = realm(profile = "all")
+        r.borderRegion = "the Branthlend Mountains"
+        val move = growRivalRealm(r, fat, turn = 1, atWar = false).move!!
+        assertEquals("the Branthlend Mountains", move.place)
+        val bare = growRivalRealm(realm(profile = "all"), fat, turn = 1, atWar = false).move!!
+        assertNull(bare.place, "no border region set -> the localizer falls back, not the engine")
+    }
+
+    @Test
     fun aRealmWithNoFactionRefGrowsButNeverHeadlines() {
         val fat = mapOf("all" to RivalGrowthProfile(sizePerTurn = 1.0, famePerTurn = 0.0, armyPerTurn = 0.0))
         val out = growRivalRealm(realm(factionRef = null, profile = "all"), fat, turn = 1, atWar = false)

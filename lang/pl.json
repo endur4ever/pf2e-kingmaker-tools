@@ -2035,7 +2035,8 @@
                 "group": "Delete faction {name}? This also destroys its entire standing history and cannot be undone.",
                 "modifier": "Delete modifier {name}? This cannot be undone.",
                 "quest": "Delete quest {name}? This cannot be undone.",
-                "warThreat": "Delete war zagrożenie {name}? This cannot be undone."
+                "warThreat": "Delete war zagrożenie {name}? This cannot be undone.",
+                "rivalRealm": "Usunąć rywalizujące królestwo {name}?"
             },
             "current": "Current",
             "expeditionBatchResolved": "Resolved {count} wyprawa rewards.",
@@ -2376,16 +2377,64 @@
             },
             "rivalRealms": {
                 "headline": {
-                    "expand1": "{faction} zajmuje nowe terytorium (już {value} heksów)",
-                    "expand2": "{faction} przesuwa swoje granice",
-                    "expand3": "Sztandary {faction} powiewają nad {amount} heksami więcej",
-                    "fame1": "{faction} zyskuje na sławie",
-                    "fame2": "Rozchodzą się wieści o czynach {faction}",
-                    "army1": "{faction} zaciąga kolejną kompanię",
-                    "army2": "{faction} zwiększa szeregi do {value}",
-                    "armyWar1": "{faction} werbuje świeże wojsko na wojnę",
-                    "armyWar2": "Bębny wojenne: {faction} wystawia {value} kompanii"
-                }
+                    "expand1": "{rival} zajął {n} heksów w pobliżu {place}.",
+                    "expand2": "{rival} przesunął swoją granicę w stronę {place}.",
+                    "expand3": "Osadnicy pod sztandarem {rival} rozprzestrzeniają się po {place}.",
+                    "fame1": "Sława {rival} niesie się przez Rzeczne Królestwa.",
+                    "fame2": "Bardowie niosą opowieści o {rival} na odległe dwory.",
+                    "army1": "{rival} wystawił {n} świeżych kompanii.",
+                    "army2": "Obozy wojenne {rival} rosną w pobliżu {place}.",
+                    "armyWar1": "Zaciągi {rival} zbierają się na wojnę w pobliżu {place}.",
+                    "armyWar2": "{rival} prowadzi {n} świeżych kompanii na front."
+                },
+                "title": "Rywalizujące królestwa",
+                "rank": "#",
+                "realm": "Królestwo",
+                "power": "Potęga",
+                "size": "Rozmiar",
+                "fame": "Sława",
+                "armies": "Armie",
+                "growth": "Wzrost",
+                "empty": "Brak śledzonych rywalizujących królestw. Dodaj jedno, by patrzeć, jak rosną sąsiedzi.",
+                "unlinked": "Frakcja tego królestwa już nie istnieje.",
+                "standingReason": "Ekspansja {rival} nadwyrężyła granicę",
+                "profile": {
+                    "dormant": "Uśpione",
+                    "slow-expansion": "Powolna ekspansja",
+                    "brevoy-hinterlands": "Brevoy — Roszczenie do interioru",
+                    "troll-horde": "Horda trolli",
+                    "pitax-wartime": "Pitax — Pobór wojenny",
+                    "expansionist-endgame": "Ekspansjonistyczne"
+                },
+                "warOffer": {
+                    "title": "{rival} gromadzi siły do wojny",
+                    "raise": "Podnieś zagrożenie wojenne",
+                    "dismiss": "Odrzuć"
+                },
+                "standingOffer": {
+                    "title": "Ekspansja {rival} napina granicę",
+                    "apply": "Zastosuj zmianę stosunków",
+                    "dismiss": "Odrzuć"
+                },
+                "dialog": {
+                    "add": "Dodaj rywalizujące królestwo",
+                    "edit": "Edytuj rywalizujące królestwo",
+                    "faction": "Frakcja",
+                    "growthProfile": "Profil wzrostu",
+                    "growthMode": "Źródło wzrostu",
+                    "borderRegion": "Region graniczny",
+                    "warThreshold": "Próg armii wojennych",
+                    "warThresholdHelp": "Puste wyłącza ofertę zagrożenia wojennego.",
+                    "pauseGrowth": "Wstrzymaj wzrost",
+                    "sizeGrowth": "Nadpisz wzrost rozmiaru",
+                    "fameGrowth": "Nadpisz wzrost sławy",
+                    "armyGrowth": "Nadpisz wzrost armii",
+                    "overrideHelp": "Tempo na turę, np. 0.5. Puste korzysta z profilu.",
+                    "modeFlat": "Stały wzrost",
+                    "modeAgenda": "Sterowane agendą (silnik nadrzędny)",
+                    "badNumber": "Tempa wzrostu i próg wojenny muszą być liczbami, np. 0.5 — popraw przed zapisem."
+                },
+                "borderFallback": "pogranicze"
             }
         },
         "chatMessages": {

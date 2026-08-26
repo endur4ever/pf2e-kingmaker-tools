@@ -40,6 +40,8 @@ data class RivalMove(
     val pool: RivalHeadlinePool,
     val templateIndex: Int,
     val newValue: Int,
+    /** The realm's border region, carried so the headline can say WHERE ("near {place}"). */
+    val place: String? = null,
 )
 
 /** Profile resolution: an explicit per-realm rate overrides the preset, and an unknown preset id
@@ -102,6 +104,7 @@ fun growRivalRealm(
             pool = pool,
             templateIndex = headlineTemplateIndex(turn, factionRef, gained.first, pool.poolSize),
             newValue = gained.third,
+            place = realm.borderRegion,
         )
     } else {
         null
@@ -146,9 +149,10 @@ fun advanceAllRivals(
  */
 fun localizeRivalHeadline(move: RivalMove): String {
     val data = recordOf(
-        "faction" to move.factionRef,
-        "amount" to move.amount.toString(),
-        "value" to move.newValue.toString(),
+        "rival" to move.factionRef,
+        "n" to move.amount.toString(),
+        "place" to (move.place?.takeIf { it.isNotBlank() }
+            ?: t("kingdom.rivalRealms.borderFallback")),
     )
     return when (move.pool) {
         RivalHeadlinePool.EXPAND -> when (move.templateIndex) {

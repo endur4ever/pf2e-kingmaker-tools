@@ -2880,4 +2880,11 @@ fieldset.km-hex-editor-links {
 .km-kingdom-sheet .km-deadline-resolved td:first-child::after {
     content: " \2713";
     color: var(--color-level-success, #2c8a2c);
+
+}
+
+/* the players' own kingdom in the rival standings table -- the row the eye should land on */
+.km-kingdom-sheet .km-rival-player-row td {
+    font-weight: bold;
+    background-color: rgba(0 0 0 / 12%);
 }

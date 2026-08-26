@@ -1,6 +1,7 @@
 package at.posselt.pfrpg2e.app
 
 import at.posselt.pfrpg2e.utils.buildPromise
+import at.posselt.pfrpg2e.utils.escapeHtml
 import at.posselt.pfrpg2e.utils.t
 import at.posselt.pfrpg2e.utils.tpl
 import com.foundryvtt.core.*
@@ -36,8 +37,12 @@ suspend fun confirmDelete(
     name: String,
     extraContext: Map<String, String> = emptyMap()
 ): Boolean {
-    val vars = recordOf("name" to name)
-    extraContext.forEach { (k, v) -> vars[k] = v }
+    // the interpolated values are user-authored (group names, quest titles, faction refs) and the
+    // rendered message becomes DialogV2 content -- HTML, with i18next's own escaping disabled
+    // (escapeValue=false). Unescaped, any OWNER-writable name is a stored XSS that fires in the
+    // GM's session the moment they click a delete button.
+    val vars = recordOf("name" to escapeHtml(name))
+    extraContext.forEach { (k, v) -> vars[k] = escapeHtml(v) }
     return confirm(t(i18nKey, vars))
 }
 

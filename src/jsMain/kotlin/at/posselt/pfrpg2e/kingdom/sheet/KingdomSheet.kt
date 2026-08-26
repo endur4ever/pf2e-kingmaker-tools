@@ -157,6 +157,9 @@ import at.posselt.pfrpg2e.kingdom.getKingdom
 import at.posselt.pfrpg2e.kingdom.getMilestones
 import at.posselt.pfrpg2e.kingdom.getOngoingEvents
 import at.posselt.pfrpg2e.kingdom.getRealmData
+import at.posselt.pfrpg2e.kingdom.sheet.contexts.buildRivalRealmsContext
+import at.posselt.pfrpg2e.kingdom.rivalGrowthProfilesById
+import at.posselt.pfrpg2e.kingdom.dialogs.ModifyRivalRealm
 import at.posselt.pfrpg2e.kingdom.getUnclaimedWorksites
 import at.posselt.pfrpg2e.kingdom.computeCaravanEtaTurns
 import at.posselt.pfrpg2e.kingdom.caravanPurchaseCost
@@ -1470,6 +1473,72 @@ class KingdomSheet(
                 if (group != null) {
                     if (confirmDelete("kingdom.confirmDelete.group", group.name)) {
                         kingdom.groups = kingdom.groups.filterIndexed { idx, _ -> idx != index }.toTypedArray()
+                        actor.setKingdom(kingdom)
+                    }
+                }
+            }
+
+            "add-rival-realm" -> {
+                if (!game.user.isGM) return
+                ModifyRivalRealm(
+                    initial = null,
+                    factionNames = getKingdom().groups.map { it.name },
+                ) { realm ->
+                    buildPromise {
+                        val kingdom = getKingdom()
+                        kingdom.rivalRealms = (kingdom.rivalRealms ?: emptyArray()) + realm
+                        actor.setKingdom(kingdom)
+                    }
+                }.launch()
+            }
+
+            "edit-rival-realm" -> {
+                if (!game.user.isGM) return
+                val id = target.dataset["id"]
+                val existing = getKingdom().rivalRealms?.firstOrNull { it.id == id } ?: return
+                ModifyRivalRealm(
+                    initial = existing,
+                    factionNames = getKingdom().groups.map { it.name },
+                ) { realm ->
+                    buildPromise {
+                        val kingdom = getKingdom()
+                        // upsert by the pinned id, not by index: the standings table is sorted by
+                        // score, so a row's position and its storage index disagree. Append when
+                        // the id vanished mid-edit (a second GM deleted the row while this dialog
+                        // was open) -- a map alone would silently discard the whole edit
+                        val current = kingdom.rivalRealms ?: emptyArray()
+                        kingdom.rivalRealms = if (current.any { it.id == realm.id }) {
+                            current.map { if (it.id == realm.id) realm else it }.toTypedArray()
+                        } else {
+                            current + realm
+                        }
+                        actor.setKingdom(kingdom)
+                    }
+                }.launch()
+            }
+
+            "delete-rival-realm" -> buildPromise {
+                if (!game.user.isGM) return@buildPromise
+                val id = target.dataset["id"]
+                val kingdom = getKingdom()
+                if (id.isNullOrBlank()) {
+                    // a row that lost its id (hand-edited world, half-written update) renders a
+                    // delete button with data-id="" that can never match anything; treat that
+                    // click as "clean up the damaged rows" so recovery stays inside the UI
+                    if (confirmDelete("kingdom.confirmDelete.rivalRealm", "?")) {
+                        kingdom.rivalRealms = kingdom.rivalRealms
+                            ?.filter { !it.id.isNullOrBlank() }
+                            ?.toTypedArray()
+                        actor.setKingdom(kingdom)
+                    }
+                    return@buildPromise
+                }
+                val realm = kingdom.rivalRealms?.firstOrNull { it.id == id }
+                if (realm != null) {
+                    if (confirmDelete("kingdom.confirmDelete.rivalRealm", realm.factionRef ?: "?")) {
+                        kingdom.rivalRealms = kingdom.rivalRealms
+                            ?.filter { it.id != id }
+                            ?.toTypedArray()
                         actor.setKingdom(kingdom)
                     }
                 }
@@ -3585,6 +3654,15 @@ class KingdomSheet(
                 skillRanks = kingdomSkillRanks,
             ),
             groups = kingdom.groups.toContext(),
+            rivalRealms = buildRivalRealmsContext(
+                rivals = kingdom.rivalRealms,
+                groups = kingdom.groups,
+                profiles = runCatching { rivalGrowthProfilesById() }.getOrDefault(emptyMap()),
+                playerLabel = kingdom.name,
+                playerSize = realm.size,
+                playerFame = kingdom.fame.now,
+                isGM = isGM,
+            ),
             abilityScores = kingdom.abilityScores.toContext(abilityScores, automateStats),
             skillRanks = kingdom.skillRanks.toContext(),
             milestones = kingdom.milestones.toContext(

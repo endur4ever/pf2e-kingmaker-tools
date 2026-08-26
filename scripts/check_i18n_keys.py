@@ -389,6 +389,41 @@ def check_setup_wizard_keys():
     return 0
 
 
+RIVAL_PROFILE_DIR = "data/rival-growth-profiles"
+
+def check_rival_profile_keys():
+    """Check 8: every rival growth profile id must have a label in every locale.
+
+    Profile ids come from data/rival-growth-profiles/*.json and the dropdown labels them with
+    t("kingdom.rivalRealms.profile.$id") -- a composed key, invisible to check 2's literal-string
+    scan. A new profile file with no label would ship a dropdown entry titled with the raw key
+    while every other check stays green. Same shape and rationale as check_setup_wizard_keys.
+    """
+    paths = sorted(glob.glob(f"{RIVAL_PROFILE_DIR}/*.json"))
+    if not paths:
+        return 0
+    ids = []
+    for p in paths:
+        pid = json.load(open(p, encoding="utf-8")).get("id")
+        if not isinstance(pid, str) or not pid:
+            print(f"[i18n] RIVAL: {p} has no string id -- fix the profile file")
+            return 1
+        ids.append(pid)
+    problems = [(path, f"kingdom.rivalRealms.profile.{i}")
+                for path in sorted(glob.glob("lang/*.json"))
+                for i in ids
+                if not isinstance(
+                    lookup_value(json.load(open(path, encoding="utf-8")).get(NS, {}),
+                                 f"kingdom.rivalRealms.profile.{i}"), str)]
+    if problems:
+        print(f"[i18n] RIVAL: {len(problems)} missing rival profile label(s):")
+        for path, key in problems:
+            print(f"  {path}: {key}")
+        return 1
+    print(f"[i18n] RIVAL OK -- {len(ids)} growth profile(s) labelled in every locale.")
+    return 0
+
+
 def main():
     parser = argparse.ArgumentParser(description="i18n key guard for pf2e-kingmaker-tools")
     parser.add_argument("--parity", action="store_true", help="Run cross-language parity check only")
@@ -469,6 +504,7 @@ def main():
         failed += check_parity() or 0
         failed += check_gazette_resolver() or 0
         failed += check_setup_wizard_keys() or 0
+        failed += check_rival_profile_keys() or 0
         if failed:
             return 1
     

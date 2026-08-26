@@ -2035,7 +2035,8 @@
                 "group": "Delete faction {name}? This also destroys its entire standing history and cannot be undone.",
                 "modifier": "Delete modifier {name}? This cannot be undone.",
                 "quest": "Delete quest {name}? This cannot be undone.",
-                "warThreat": "Delete war угроза {name}? This cannot be undone."
+                "warThreat": "Delete war угроза {name}? This cannot be undone.",
+                "rivalRealm": "Удалить соперничающее королевство {name}?"
             },
             "current": "Current",
             "expeditionBatchResolved": "Resolved {count} экспедиция rewards.",
@@ -2376,16 +2377,64 @@
             },
             "rivalRealms": {
                 "headline": {
-                    "expand1": "{faction} захватывает новые земли (теперь {value} гексов)",
-                    "expand2": "{faction} раздвигает свои границы",
-                    "expand3": "Знамёна {faction} реют над ещё {amount} гексами",
-                    "fame1": "Слава {faction} растёт",
-                    "fame2": "О деяниях {faction} идёт молва",
-                    "army1": "{faction} набирает ещё одну роту",
-                    "army2": "{faction} доводит войска до {value}",
-                    "armyWar1": "{faction} набирает свежие войска для войны",
-                    "armyWar2": "Барабаны войны: {faction} выставляет {value} рот"
-                }
+                    "expand1": "{rival} захватил {n} гексов вблизи {place}.",
+                    "expand2": "{rival} продвинул свою границу к {place}.",
+                    "expand3": "Поселенцы под знаменем {rival} расселяются по {place}.",
+                    "fame1": "Слава {rival} разносится по Речным королевствам.",
+                    "fame2": "Барды разносят предания о {rival} по дальним дворам.",
+                    "army1": "{rival} набрал {n} свежих рот.",
+                    "army2": "Военные лагеря {rival} разрастаются вблизи {place}.",
+                    "armyWar1": "Ополчения {rival} собираются на войну вблизи {place}.",
+                    "armyWar2": "{rival} ведёт {n} свежих рот на фронт."
+                },
+                "title": "Соперничающие королевства",
+                "rank": "#",
+                "realm": "Королевство",
+                "power": "Мощь",
+                "size": "Размер",
+                "fame": "Слава",
+                "armies": "Армии",
+                "growth": "Рост",
+                "empty": "Соперничающие королевства не отслеживаются. Добавьте одно, чтобы наблюдать, как растут соседи.",
+                "unlinked": "Фракция этого королевства больше не существует.",
+                "standingReason": "Экспансия {rival} обострила обстановку на границе",
+                "profile": {
+                    "dormant": "Бездействует",
+                    "slow-expansion": "Медленная экспансия",
+                    "brevoy-hinterlands": "Бревой — притязания на глубинку",
+                    "troll-horde": "Орда троллей",
+                    "pitax-wartime": "Питакс — военный набор",
+                    "expansionist-endgame": "Экспансионист"
+                },
+                "warOffer": {
+                    "title": "{rival} собирает силы для войны",
+                    "raise": "Повысить военную угрозу",
+                    "dismiss": "Отклонить"
+                },
+                "standingOffer": {
+                    "title": "Экспансия {rival} обостряет обстановку на границе",
+                    "apply": "Применить сдвиг отношений",
+                    "dismiss": "Отклонить"
+                },
+                "dialog": {
+                    "add": "Добавить соперничающее королевство",
+                    "edit": "Изменить соперничающее королевство",
+                    "faction": "Фракция",
+                    "growthProfile": "Профиль роста",
+                    "growthMode": "Источник роста",
+                    "borderRegion": "Приграничный регион",
+                    "warThreshold": "Порог военных армий",
+                    "warThresholdHelp": "Пусто — предложение военной угрозы отключено.",
+                    "pauseGrowth": "Приостановить рост",
+                    "sizeGrowth": "Переопределить рост размера",
+                    "fameGrowth": "Переопределить рост славы",
+                    "armyGrowth": "Переопределить рост армий",
+                    "overrideHelp": "Темп за ход, напр. 0.5. Пусто — используется профиль.",
+                    "modeFlat": "Постоянный рост",
+                    "modeAgenda": "По повестке (родительский движок)",
+                    "badNumber": "Темпы роста и военный порог должны быть числами, напр. 0.5 — исправьте перед сохранением."
+                },
+                "borderFallback": "приграничье"
             }
         },
         "chatMessages": {
