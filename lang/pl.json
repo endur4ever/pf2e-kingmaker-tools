@@ -2065,7 +2065,8 @@
                 "shipmentRaided": "Shipment raided: {summary} (lost {cargoLost})",
                 "shipments": "Shipments: {list}",
                 "tribute": "Tribute: +{tributeRp} PZ collected from vassal states",
-                "battleDefeats": "Defeated in battle: {battles}"
+                "battleDefeats": "Defeated in battle: {battles}",
+                "rivalMove": "Rywalizujące królestwa: {list}"
             },
             "warfare": {
                 "damaged": "Damaged",
@@ -2372,6 +2373,19 @@
                 "cursedTitle": "Zawiera przeklęte przedmioty",
                 "empty": "Nie przyznano jeszcze skarbu.",
                 "atCap": "Najstarsze wpisy są usuwane po osiągnięciu limitu."
+            },
+            "rivalRealms": {
+                "headline": {
+                    "expand1": "{faction} zajmuje nowe terytorium (już {value} heksów)",
+                    "expand2": "{faction} przesuwa swoje granice",
+                    "expand3": "Sztandary {faction} powiewają nad {amount} heksami więcej",
+                    "fame1": "{faction} zyskuje na sławie",
+                    "fame2": "Rozchodzą się wieści o czynach {faction}",
+                    "army1": "{faction} zaciąga kolejną kompanię",
+                    "army2": "{faction} zwiększa szeregi do {value}",
+                    "armyWar1": "{faction} werbuje świeże wojsko na wojnę",
+                    "armyWar2": "Bębny wojenne: {faction} wystawia {value} kompanii"
+                }
             }
         },
         "chatMessages": {

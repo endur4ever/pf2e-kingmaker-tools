@@ -1233,7 +1233,8 @@
                 "expeditionCriticalFailure": "💀 {title} — {companionNames}{loot}{faction}",
                 "expeditionOther": "{outcomeLabel} {title} — {companionNames}{loot}{faction}",
                 "expeditions": "Expeditionen: {list}",
-                "battleDefeats": "Defeated in battle: {battles}"
+                "battleDefeats": "Defeated in battle: {battles}",
+                "rivalMove": "Rivalisierende Reiche: {list}"
             },
             "xpRules": "XP Rules",
             "xpRulesHelp": "Adds additional milestones, gain XP buttons and increases XP for claiming hexes and converting XP based on kingdom level",
@@ -2372,6 +2373,19 @@
                 "cursedTitle": "Enthält verfluchte Gegenstände",
                 "empty": "Noch kein Schatz vergeben.",
                 "atCap": "Ältere Einträge werden am Limit entfernt."
+            },
+            "rivalRealms": {
+                "headline": {
+                    "expand1": "{faction} beansprucht neues Gebiet (jetzt {value} Hexfelder)",
+                    "expand2": "{faction} schiebt seine Grenzen vor",
+                    "expand3": "{faction} weht über {amount} weiteren Hexfeldern",
+                    "fame1": "{faction} gewinnt an Ansehen",
+                    "fame2": "Von {faction}s Taten wird gesprochen",
+                    "army1": "{faction} hebt eine weitere Kompanie aus",
+                    "army2": "{faction} verstärkt seine Reihen auf {value}",
+                    "armyWar1": "{faction} rekrutiert frische Truppen für den Krieg",
+                    "armyWar2": "Kriegstrommeln: {faction} stellt {value} Kompanien"
+                }
             }
         },
         "chatMessages": {

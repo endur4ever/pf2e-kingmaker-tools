@@ -2065,7 +2065,8 @@
                 "shipmentRaided": "Shipment raided: {summary} (lost {cargoLost})",
                 "shipments": "Shipments: {list}",
                 "tribute": "Tribute: +{tributeRp} PR collected from vassal states",
-                "battleDefeats": "Defeated in battle: {battles}"
+                "battleDefeats": "Defeated in battle: {battles}",
+                "rivalMove": "Reinos rivais: {list}"
             },
             "warfare": {
                 "damaged": "Damaged",
@@ -2372,6 +2373,19 @@
                 "cursedTitle": "Inclui itens amaldiçoados",
                 "empty": "Nenhum tesouro concedido ainda.",
                 "atCap": "Entradas antigas são removidas no limite."
+            },
+            "rivalRealms": {
+                "headline": {
+                    "expand1": "{faction} reivindica novo território (agora {value} hexes)",
+                    "expand2": "{faction} avança suas fronteiras",
+                    "expand3": "Os estandartes de {faction} tremulam sobre mais {amount} hexes",
+                    "fame1": "{faction} cresce em renome",
+                    "fame2": "Espalham-se notícias dos feitos de {faction}",
+                    "army1": "{faction} recruta mais uma companhia",
+                    "army2": "{faction} amplia suas fileiras para {value}",
+                    "armyWar1": "{faction} recruta tropas frescas para a guerra",
+                    "armyWar2": "Tambores de guerra: {faction} alinha {value} companhias"
+                }
             }
         },
         "chatMessages": {

@@ -1,0 +1,6 @@
+{
+  "id": "slow-expansion",
+  "sizePerTurn": 0.33,
+  "famePerTurn": 0.2,
+  "armyPerTurn": 0.0
+}

@@ -8,6 +8,8 @@ import at.posselt.pfrpg2e.kingdom.KingdomData
 import at.posselt.pfrpg2e.kingdom.clearPerformedActivities
 import at.posselt.pfrpg2e.kingdom.restoreTurnWizardState
 import com.foundryvtt.pf2e.item.PF2EItem
+import at.posselt.pfrpg2e.kingdom.rivalGrowthProfilesById
+import at.posselt.pfrpg2e.kingdom.localizeRivalHeadline
 import at.posselt.pfrpg2e.kingdom.getPerformedActivities
 import at.posselt.pfrpg2e.kingdom.digest.postEndTurnDigest
 import at.posselt.pfrpg2e.kingdom.mapdynamism.postMapDynamismOffers
@@ -235,6 +237,11 @@ fun runKingdomTurnTick(kingdom: KingdomData, storage: CommodityStorage, currentT
         // predating the diplomacy subsystem; cast to nullable so the guard is a real
         // runtime check (matches the sibling arrays above) and tick() never sees undefined.
         groups = kingdom.groups.unsafeCast<Array<RawGroup>?>() ?: emptyArray(),
+        // Rival realms ride the SAME chokepoint as groups, so the End Turn commit, the wizard
+        // preview and the forecast adapter all see identical growth (the KDoc above forbids
+        // calling tick() directly for exactly this reason).
+        rivalRealms = kingdom.rivalRealms ?: emptyArray(),
+        rivalProfiles = runCatching { rivalGrowthProfilesById() }.getOrDefault(emptyMap()),
         factionStandingDriftPerTurn = kingdom.settings.factionStandingDriftPerTurn ?: 0,
     )
 
@@ -353,6 +360,7 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
     kingdom.bonusResourceDice = tickResult.bonusResourceDice
     kingdom.activeBattles = tickResult.activeBattles
     kingdom.groups = tickResult.groups
+    kingdom.rivalRealms = tickResult.rivalRealms
 
     // Post GM offer cards for quests that hit their deadline this turn
     if (tickResult.questDeadlineReached.isNotEmpty()) {
@@ -591,6 +599,9 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
     val battleDefeats = (kingdom.activeBattles ?: emptyArray())
         .filter { it.status == BattleStatus.DEFEAT.value }
         .map { it.name }
+    // Rival growth is visible on the map, so the same headlines go into BOTH the GM gazette and
+    // the player-safe one -- unlike campaign clocks, there is nothing secret to strip.
+    val rivalHeadlines = tickResult.rivalMoves.map { localizeRivalHeadline(it) }
     val turnNotes = formatTurnGazette(
         activities = activitySummaries,
         sizeChange = sizeChange,
@@ -602,6 +613,7 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
         expeditionChronicle = kingdom.expeditionChronicle?.toList() ?: emptyList(),
         battleDefeats = battleDefeats,
         turn = currentTurn,
+        rivalMoves = rivalHeadlines,
         localize = ::t,
     )
     // Player-safe gazette: identical EXCEPT the secret campaign-clock progress is dropped, so the
@@ -617,6 +629,7 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
         expeditionChronicle = kingdom.expeditionChronicle?.toList() ?: emptyList(),
         battleDefeats = battleDefeats,
         turn = currentTurn,
+        rivalMoves = rivalHeadlines,
         localize = ::t,
     )
 

@@ -22,6 +22,7 @@ import at.posselt.pfrpg2e.kingdom.data.RawArmyDeployment
 import at.posselt.pfrpg2e.kingdom.data.RawArmyBattle
 import at.posselt.pfrpg2e.kingdom.data.RawWarPressure
 import at.posselt.pfrpg2e.kingdom.data.RawWarThreat
+import at.posselt.pfrpg2e.kingdom.data.RawRivalRealm
 import at.posselt.pfrpg2e.kingdom.detectNewlyTriggeredThreats
 import at.posselt.pfrpg2e.kingdom.WarThreatSnapshot
 
@@ -121,6 +122,10 @@ data class TickResult(
 	val questDeadlineReached: List<String> = emptyList(),
 	/** Threats that were newly triggered (arrived) this tick, for GM offer cards. */
 	val newlyTriggeredThreats: Array<RawWarThreat> = emptyArray(),
+	/** Rival realms after this tick's growth (rival-realms SS3.7). */
+	val rivalRealms: Array<RawRivalRealm> = emptyArray(),
+	/** At most one headline-worthy change per realm, for the gazette. */
+	val rivalMoves: Array<RivalMove> = emptyArray(),
 )
 
 /**
@@ -195,6 +200,8 @@ object TurnTickingEngine {
 		activeBattles: Array<RawArmyBattle> = emptyArray(),
 		groups: Array<RawGroup> = emptyArray(),
 		factionStandingDriftPerTurn: Int = 0,
+		rivalRealms: Array<RawRivalRealm> = emptyArray(),
+		rivalProfiles: Map<String, at.posselt.pfrpg2e.data.kingdom.RivalGrowthProfile> = emptyMap(),
 	): TickResult {
 		val changes = mutableListOf<TickChange>()
 
@@ -455,6 +462,15 @@ object TurnTickingEngine {
 			groups
 		}
 
+		// Rival realms grow on the monthly tick beside faction drift (rival-realms SS3.7); pure
+		// delegation, so preview and commit produce identical rows.
+		val (grownRivals, rivalMoves) = advanceAllRivals(
+			realms = rivalRealms,
+			groups = driftedGroups,
+			profiles = rivalProfiles,
+			turn = currentTurn,
+		)
+
 		return TickResult(
 					supernaturalSolutions = 0,
 					creativeSolutions = 0,
@@ -478,6 +494,8 @@ object TurnTickingEngine {
 					bonusResourceDice = 0,
 					activeBattles = archivedBattles,
 					groups = driftedGroups,
+					rivalRealms = grownRivals,
+					rivalMoves = rivalMoves.toTypedArray(),
 					factionStandingDrift = factionStandingDriftPerTurn != 0,
 					warThreatOffers = warThreatOffers,
 					diplomacyQuestOffers = diplomacyQuestOffers,

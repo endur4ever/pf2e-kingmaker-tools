@@ -1457,7 +1457,8 @@
                 "expeditionCriticalFailure": "💀 {title} — {companionNames}{loot}{faction}",
                 "expeditionOther": "{outcomeLabel} {title} — {companionNames}{loot}{faction}",
                 "expeditions": "Expeditions: {list}",
-                "battleDefeats": "Defeated in battle: {battles}"
+                "battleDefeats": "Defeated in battle: {battles}",
+                "rivalMove": "Rival Realms: {list}"
             },
             "xpRules": "XP Rules",
             "xpRulesHelp": "Adds additional milestones, gain XP buttons and increases XP for claiming hexes and converting XP based on kingdom level",
@@ -2494,6 +2495,19 @@
                 "cursedTitle": "Includes cursed items",
                 "empty": "No treasure awarded yet.",
                 "atCap": "Older entries are trimmed at the ledger cap."
+            },
+            "rivalRealms": {
+                "headline": {
+                    "expand1": "{faction} claims new territory (now {value} hexes)",
+                    "expand2": "{faction} pushes its borders outward",
+                    "expand3": "{faction}'s banners fly over {amount} more hexes",
+                    "fame1": "{faction} grows in renown",
+                    "fame2": "Word of {faction}'s deeds spreads",
+                    "army1": "{faction} musters another company",
+                    "army2": "{faction} swells its ranks to {value}",
+                    "armyWar1": "{faction} raises fresh troops for the war",
+                    "armyWar2": "War drums: {faction} fields {value} companies"
+                }
             }
         },
         "chatMessages": {

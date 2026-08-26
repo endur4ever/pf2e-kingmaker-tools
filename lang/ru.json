@@ -2065,7 +2065,8 @@
                 "shipmentRaided": "Shipment raided: {summary} (lost {cargoLost})",
                 "shipments": "Shipments: {list}",
                 "tribute": "Tribute: +{tributeRp} РО collected from vassal states",
-                "battleDefeats": "Defeated in battle: {battles}"
+                "battleDefeats": "Defeated in battle: {battles}",
+                "rivalMove": "Соперничающие королевства: {list}"
             },
             "warfare": {
                 "damaged": "Damaged",
@@ -2372,6 +2373,19 @@
                 "cursedTitle": "Содержит проклятые предметы",
                 "empty": "Сокровища ещё не выдавались.",
                 "atCap": "Старые записи удаляются по достижении предела."
+            },
+            "rivalRealms": {
+                "headline": {
+                    "expand1": "{faction} захватывает новые земли (теперь {value} гексов)",
+                    "expand2": "{faction} раздвигает свои границы",
+                    "expand3": "Знамёна {faction} реют над ещё {amount} гексами",
+                    "fame1": "Слава {faction} растёт",
+                    "fame2": "О деяниях {faction} идёт молва",
+                    "army1": "{faction} набирает ещё одну роту",
+                    "army2": "{faction} доводит войска до {value}",
+                    "armyWar1": "{faction} набирает свежие войска для войны",
+                    "armyWar2": "Барабаны войны: {faction} выставляет {value} рот"
+                }
             }
         },
         "chatMessages": {

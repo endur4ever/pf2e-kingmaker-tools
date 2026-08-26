@@ -2065,7 +2065,8 @@
                 "shipmentRaided": "Shipment raided: {summary} (lost {cargoLost})",
                 "shipments": "Shipments: {list}",
                 "tribute": "Tribute: +{tributeRp} 资源点 collected from vassal states",
-                "battleDefeats": "Defeated in battle: {battles}"
+                "battleDefeats": "Defeated in battle: {battles}",
+                "rivalMove": "敌对王国：{list}"
             },
             "warfare": {
                 "damaged": "Damaged",
@@ -2372,6 +2373,19 @@
                 "cursedTitle": "包含诅咒物品",
                 "empty": "尚未发放任何宝藏。",
                 "atCap": "达到上限后会移除较早的记录。"
+            },
+            "rivalRealms": {
+                "headline": {
+                    "expand1": "{faction}占据了新的领土（现有 {value} 格）",
+                    "expand2": "{faction}向外扩张边界",
+                    "expand3": "{faction}的旗帜又插上了 {amount} 格",
+                    "fame1": "{faction}声望渐隆",
+                    "fame2": "{faction}的事迹广为流传",
+                    "army1": "{faction}又招募了一支部队",
+                    "army2": "{faction}将兵力扩充至 {value}",
+                    "armyWar1": "{faction}为战争征募新兵",
+                    "armyWar2": "战鼓声起：{faction}集结了 {value} 支部队"
+                }
             }
         },
         "chatMessages": {

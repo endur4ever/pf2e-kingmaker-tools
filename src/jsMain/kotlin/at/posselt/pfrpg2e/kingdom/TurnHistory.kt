@@ -88,6 +88,9 @@ fun formatTurnGazette(
     expeditionChronicle: List<RawExpeditionChronicleEntry> = emptyList(),
     battleDefeats: List<String> = emptyList(),
     turn: Int = 0,
+    /** Pre-localized rival headlines (rival-realms SS4.4); the caller localizes because the
+     *  headline template is picked from an enum pool, not from a single key. */
+    rivalMoves: List<String> = emptyList(),
     localize: (key: String, data: AnyObject) -> String = ::defaultLocalize,
 ): String? {
     val gazetteEvents = mutableListOf<String>()
@@ -96,6 +99,12 @@ fun formatTurnGazette(
         val data = js("{}")
         data.tributeRp = tributeRp
         gazetteEvents.add(localize("kingdom.turnGazette.tribute", data.unsafeCast<AnyObject>()))
+    }
+
+    if (rivalMoves.isNotEmpty()) {
+        val data = js("{}")
+        data.list = rivalMoves.joinToString("; ")
+        gazetteEvents.add(localize("kingdom.turnGazette.rivalMove", data.unsafeCast<AnyObject>()))
     }
 
     if (activities.isNotEmpty()) {
@@ -228,6 +237,7 @@ fun defaultLocalize(key: String, data: AnyObject): String {
         "kingdom.turnGazette.expeditionCriticalFailure" -> "💀 ${dyn.title} — ${dyn.companionNames}${dyn.loot}${dyn.faction}"
         "kingdom.turnGazette.expeditionOther" -> "${dyn.outcomeLabel} ${dyn.title} — ${dyn.companionNames}${dyn.loot}${dyn.faction}"
         "kingdom.turnGazette.expeditions" -> "Expeditions: ${dyn.list}"
+        "kingdom.turnGazette.rivalMove" -> "Rival Realms: ${dyn.list}"
         else -> key
     }
 }
