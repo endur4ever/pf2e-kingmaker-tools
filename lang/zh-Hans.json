@@ -2441,6 +2441,25 @@
                     "badNumber": "增长速率与战争阈值必须是数字（如 0.5），请修正后再保存。"
                 },
                 "borderFallback": "边境地带"
+            },
+            "councilVotes": {
+                "ballotTitle": "议会表决",
+                "abstain": "弃权",
+                "close": "结束表决",
+                "reopen": "重新开启表决",
+                "open": "发起表决",
+                "dialogQuestion": "议题",
+                "dialogOption": "选项 {n}",
+                "recapLine": "“{question}”——{winner}（{count}/{total}）",
+                "recapLinked": "→ 回合 {turns}",
+                "tieNote": "平票——议会未能作出决定。",
+                "resultTitle": "议会表决结果",
+                "emptyState": "尚无议会表决。发起一项，把问题摆上桌面。",
+                "linkPickerTitle": "关联后果回合",
+                "linkPickerRow": "回合 {turn}",
+                "hasNotVoted": "{name} 尚未投票",
+                "abstained": "{name} 已弃权",
+                "noGmOnline": "没有 GM 在线——目前无法记录你的投票。"
             }
         },
         "chatMessages": {

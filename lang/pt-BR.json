@@ -2441,6 +2441,25 @@
                     "badNumber": "As taxas de crescimento e o limiar de guerra devem ser números, ex. 0.5 — corrija antes de salvar."
                 },
                 "borderFallback": "as terras fronteiriças"
+            },
+            "councilVotes": {
+                "ballotTitle": "Voto do conselho",
+                "abstain": "Abster-se",
+                "close": "Encerrar votação",
+                "reopen": "Reabrir votação",
+                "open": "Abrir votação",
+                "dialogQuestion": "Pergunta",
+                "dialogOption": "Opção {n}",
+                "recapLine": "“{question}” — {winner} ({count} de {total})",
+                "recapLinked": "→ Turno {turns}",
+                "tieNote": "Empate — o conselho não conseguiu decidir.",
+                "resultTitle": "Resultado do voto do conselho",
+                "emptyState": "Nenhum voto do conselho ainda. Abra um para levar uma pergunta à mesa.",
+                "linkPickerTitle": "Vincular turnos de consequência",
+                "linkPickerRow": "Turno {turn}",
+                "hasNotVoted": "{name} não votou",
+                "abstained": "{name} se absteve",
+                "noGmOnline": "Nenhum Mestre online — seu voto não pode ser registrado agora."
             }
         },
         "chatMessages": {

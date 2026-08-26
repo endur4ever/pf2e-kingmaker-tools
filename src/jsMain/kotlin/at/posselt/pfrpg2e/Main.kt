@@ -9,6 +9,9 @@ import at.posselt.pfrpg2e.actions.handlers.GainProvisionsHandler
 import at.posselt.pfrpg2e.actions.handlers.LearnSpecialRecipeHandler
 import at.posselt.pfrpg2e.actions.handlers.OpenCampingSheetHandler
 import at.posselt.pfrpg2e.actions.handlers.OpenKingdomSheetHandler
+import at.posselt.pfrpg2e.actions.handlers.CastCouncilVoteHandler
+import at.posselt.pfrpg2e.actions.handlers.CloseCouncilVoteHandler
+import at.posselt.pfrpg2e.actions.handlers.ReopenCouncilVoteHandler
 import at.posselt.pfrpg2e.actions.handlers.SyncActivitiesHandler
 import at.posselt.pfrpg2e.actions.handlers.SyncBattleOutcomeHandler
 import at.posselt.pfrpg2e.actor.partyMembers
@@ -105,6 +108,9 @@ fun main() {
                 GainProvisionsHandler(),
             ApplyStarvationHandler(),
                 OpenKingdomSheetHandler(game = game),
+                CastCouncilVoteHandler(),
+                CloseCouncilVoteHandler(),
+                ReopenCouncilVoteHandler(),
             )
         ).apply {
             listen()

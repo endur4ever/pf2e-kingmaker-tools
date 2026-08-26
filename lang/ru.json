@@ -2441,6 +2441,25 @@
                     "badNumber": "Темпы роста и военный порог должны быть числами, напр. 0.5 — исправьте перед сохранением."
                 },
                 "borderFallback": "приграничье"
+            },
+            "councilVotes": {
+                "ballotTitle": "Голосование совета",
+                "abstain": "Воздержаться",
+                "close": "Закрыть голосование",
+                "reopen": "Открыть заново",
+                "open": "Открыть голосование",
+                "dialogQuestion": "Вопрос",
+                "dialogOption": "Вариант {n}",
+                "recapLine": "«{question}» — {winner} ({count} из {total})",
+                "recapLinked": "→ Ход {turns}",
+                "tieNote": "Ничья — совет не смог решить.",
+                "resultTitle": "Итог голосования совета",
+                "emptyState": "Голосований совета пока нет. Откройте одно, чтобы вынести вопрос на стол.",
+                "linkPickerTitle": "Связать ходы-последствия",
+                "linkPickerRow": "Ход {turn}",
+                "hasNotVoted": "{name} не проголосовал(а)",
+                "abstained": "{name} воздержался(лась)",
+                "noGmOnline": "Нет ведущего в сети — ваш голос сейчас не может быть записан."
             }
         },
         "chatMessages": {

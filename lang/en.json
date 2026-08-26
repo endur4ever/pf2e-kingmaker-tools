@@ -2563,6 +2563,25 @@
                     "badNumber": "Growth rates and the war threshold must be numbers, e.g. 0.5 — fix them before saving."
                 },
                 "borderFallback": "the borderlands"
+            },
+            "councilVotes": {
+                "ballotTitle": "Council Vote",
+                "abstain": "Abstain",
+                "close": "Close Vote",
+                "reopen": "Reopen Vote",
+                "open": "Open Vote",
+                "dialogQuestion": "Question",
+                "dialogOption": "Option {n}",
+                "recapLine": "“{question}” — {winner} ({count} of {total})",
+                "recapLinked": "→ Turn {turns}",
+                "tieNote": "Tied — the council could not decide.",
+                "resultTitle": "Council Vote Result",
+                "emptyState": "No council votes yet. Open one to put a question to the table.",
+                "linkPickerTitle": "Link consequence turns",
+                "linkPickerRow": "Turn {turn}",
+                "hasNotVoted": "{name} has not voted",
+                "abstained": "{name} abstained",
+                "noGmOnline": "No GM is online — your ballot cannot be recorded right now."
             }
         },
         "chatMessages": {

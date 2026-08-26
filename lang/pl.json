@@ -2441,6 +2441,25 @@
                     "badNumber": "Tempa wzrostu i próg wojenny muszą być liczbami, np. 0.5 — popraw przed zapisem."
                 },
                 "borderFallback": "pogranicze"
+            },
+            "councilVotes": {
+                "ballotTitle": "Głosowanie rady",
+                "abstain": "Wstrzymaj się",
+                "close": "Zamknij głosowanie",
+                "reopen": "Otwórz ponownie",
+                "open": "Otwórz głosowanie",
+                "dialogQuestion": "Pytanie",
+                "dialogOption": "Opcja {n}",
+                "recapLine": "„{question}” — {winner} ({count} z {total})",
+                "recapLinked": "→ Tura {turns}",
+                "tieNote": "Remis — rada nie podjęła decyzji.",
+                "resultTitle": "Wynik głosowania rady",
+                "emptyState": "Brak głosowań rady. Otwórz jedno, by zadać pytanie drużynie.",
+                "linkPickerTitle": "Powiąż tury następstw",
+                "linkPickerRow": "Tura {turn}",
+                "hasNotVoted": "{name} nie zagłosował(a)",
+                "abstained": "{name} wstrzymał(a) się",
+                "noGmOnline": "Brak MG online — twój głos nie może być teraz zapisany."
             }
         },
         "chatMessages": {

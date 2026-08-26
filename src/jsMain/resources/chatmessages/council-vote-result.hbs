@@ -1,0 +1,13 @@
+<div class="km-council-vote-result">
+    <h3>{{title}}</h3>
+    <p class="km-council-vote__question">{{question}}</p>
+    <ul>
+        {{#each rows}}
+            <li{{#if this.isWinner}} class="km-council-vote-winner"{{/if}}>
+                {{this.label}} — {{this.count}}{{#if this.isWinner}} <i class="fa-solid fa-check"></i>{{/if}}
+            </li>
+        {{/each}}
+    </ul>
+    {{#if isTie}}<p><em>{{tieNote}}</em></p>{{/if}}
+    <p>{{abstainLabel}}: {{abstentions}}</p>
+</div>

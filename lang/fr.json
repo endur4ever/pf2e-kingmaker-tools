@@ -2441,6 +2441,25 @@
                     "badNumber": "Les taux de croissance et le seuil de guerre doivent être des nombres, p. ex. 0.5 — corrigez avant d'enregistrer."
                 },
                 "borderFallback": "les marches frontalières"
+            },
+            "councilVotes": {
+                "ballotTitle": "Vote du conseil",
+                "abstain": "S'abstenir",
+                "close": "Clore le vote",
+                "reopen": "Rouvrir le vote",
+                "open": "Ouvrir un vote",
+                "dialogQuestion": "Question",
+                "dialogOption": "Option {n}",
+                "recapLine": "« {question} » — {winner} ({count} sur {total})",
+                "recapLinked": "→ Tour {turns}",
+                "tieNote": "Égalité — le conseil n'a pas pu trancher.",
+                "resultTitle": "Résultat du vote du conseil",
+                "emptyState": "Aucun vote du conseil. Ouvrez-en un pour poser une question à la table.",
+                "linkPickerTitle": "Lier les tours de conséquence",
+                "linkPickerRow": "Tour {turn}",
+                "hasNotVoted": "{name} n'a pas voté",
+                "abstained": "{name} s'est abstenu",
+                "noGmOnline": "Aucun MJ en ligne — votre vote ne peut pas être enregistré pour le moment."
             }
         },
         "chatMessages": {

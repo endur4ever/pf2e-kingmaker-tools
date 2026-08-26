@@ -11,6 +11,9 @@ import at.posselt.pfrpg2e.actions.handlers.LearnSpecialRecipeHandler
 import at.posselt.pfrpg2e.actions.handlers.OpenCampingSheetHandler
 import at.posselt.pfrpg2e.actions.handlers.OpenKingdomSheetHandler
 import at.posselt.pfrpg2e.actions.handlers.OriginatorPolicy
+import at.posselt.pfrpg2e.actions.handlers.CastCouncilVoteHandler
+import at.posselt.pfrpg2e.actions.handlers.CloseCouncilVoteHandler
+import at.posselt.pfrpg2e.actions.handlers.ReopenCouncilVoteHandler
 import at.posselt.pfrpg2e.actions.handlers.SyncActivitiesHandler
 import at.posselt.pfrpg2e.actions.handlers.SyncBattleOutcomeHandler
 import com.foundryvtt.core.AnyObject
@@ -120,6 +123,37 @@ class ActionDispatcherSecurityTest {
         assertEquals(OriginatorPolicy.GM_ONLY, DefaultPolicyHandler().originatorPolicy)
     }
 
+    private class SenderCapturingHandler : ActionHandler(
+        "captureSender",
+        ExecutionMode.GM_ONLY,
+        OriginatorPolicy.ANY,
+    ) {
+        var capturedSenderId: String? = "not-executed"
+        override suspend fun execute(action: ActionMessage, dispatcher: ActionDispatcher) {
+            capturedSenderId = action.senderId
+        }
+    }
+
+    @Test
+    fun testLocalFirstGmDispatchStampsSenderIdBeforeExecute() = runTest {
+        // The seam where the first GM's own council ballot silently vanished: dispatch() used to
+        // stamp senderId only on the socket-EMIT branches, so the local-execute path (first-GM
+        // client, receivedViaSocket = false) reached handlers with senderId undefined and any
+        // handler keying its write on it dropped the action without a trace.
+        val gmUser = js("({ id: 'gm-1', isGM: true, name: 'GM User' })")
+        val game = mockGame(
+            currentUserId = "gm-1",
+            currentIsGm = true,
+            activeGmId = "gm-1",
+            usersList = listOf(gmUser),
+        )
+        val handler = SenderCapturingHandler()
+        val dispatcher = ActionDispatcher(game, listOf(handler))
+        val action = js("({ action: 'captureSender', data: {} })").unsafeCast<ActionMessage>()
+        dispatcher.dispatch(action, receivedViaSocket = false)
+        assertEquals("gm-1", handler.capturedSenderId, "the local sender must be stamped, not undefined")
+    }
+
     @Test
     fun testEveryHandlerHasExpectedOriginatorPolicy() {
         // Constructing a handler only stores its constructor args; no game logic runs, so a
@@ -134,12 +168,19 @@ class ActionDispatcherSecurityTest {
             GainProvisionsHandler().action to OriginatorPolicy.ANY,
             LearnSpecialRecipeHandler().action to OriginatorPolicy.ANY,
             SyncActivitiesHandler(game).action to OriginatorPolicy.ANY,
+            // council ballots are player-cast by design; execute keys the ballot on the
+            // socket-authenticated senderId, never a payload field
+            CastCouncilVoteHandler().action to OriginatorPolicy.ANY,
             // GM-only: sheet-push broadcasts + kingdom/army mutation
             OpenCampingSheetHandler(game).action to OriginatorPolicy.GM_ONLY,
             OpenKingdomSheetHandler(game).action to OriginatorPolicy.GM_ONLY,
             SyncBattleOutcomeHandler(game).action to OriginatorPolicy.GM_ONLY,
             // starvation conditions are GM-confirmed; a player must never be able to apply one
             ApplyStarvationHandler().action to OriginatorPolicy.GM_ONLY,
+            // closing/reopening a vote is a GM act; they ride the dispatcher only so the write
+            // serialises with in-flight ballots on the first-GM client
+            CloseCouncilVoteHandler().action to OriginatorPolicy.GM_ONLY,
+            ReopenCouncilVoteHandler().action to OriginatorPolicy.GM_ONLY,
         )
         val actual: List<Pair<String, OriginatorPolicy>> = listOf(
             AddHuntAndGatherResultHandler(),
@@ -148,10 +189,13 @@ class ActionDispatcherSecurityTest {
             GainProvisionsHandler(),
             LearnSpecialRecipeHandler(),
             SyncActivitiesHandler(game),
+            CastCouncilVoteHandler(),
             OpenCampingSheetHandler(game),
             OpenKingdomSheetHandler(game),
             SyncBattleOutcomeHandler(game),
             ApplyStarvationHandler(),
+            CloseCouncilVoteHandler(),
+            ReopenCouncilVoteHandler(),
         ).map { it.action to it.originatorPolicy }
         assertEquals(expected, actual)
     }

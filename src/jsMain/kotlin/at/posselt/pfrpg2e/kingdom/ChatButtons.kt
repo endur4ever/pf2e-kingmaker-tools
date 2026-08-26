@@ -1,5 +1,9 @@
 package at.posselt.pfrpg2e.kingdom
 
+import at.posselt.pfrpg2e.actions.ActionMessage
+import at.posselt.pfrpg2e.actions.handlers.CastCouncilVoteData
+import at.posselt.pfrpg2e.actions.handlers.CouncilVoteLifecycleData
+import at.posselt.pfrpg2e.data.kingdom.ABSTAIN_OPTION
 import at.posselt.pfrpg2e.data.kingdom.RIVAL_STANDING_SHIFT_DELTA
 import at.posselt.pfrpg2e.data.kingdom.applyStandingDelta
 import at.posselt.pfrpg2e.kingdom.data.RawFactionStandingEntry
@@ -242,6 +246,79 @@ private val buttons = listOf(
                 }
             }
         }.launch()
+    },
+    ChatButton("km-council-vote-cast") { game, actor, _, button ->
+        // ANY user, deliberately no isGM bail: casting is the one player-facing write, and it
+        // rides the socket to the first-GM client -- the single writer that keeps three
+        // same-second ballots from read-modify-writing the whole flag in parallel. The handler
+        // keys the ballot on the socket senderId, so nothing identity-shaped is read here.
+        val dispatcher = chatButtonDispatcher ?: return@ChatButton
+        if (game.users.activeGM == null) {
+            // no executor exists: the emit would vanish without feedback, and a ballot a player
+            // believes they cast simply not existing is the worst version of that
+            ui.notifications.warn(t("kingdom.councilVotes.noGmOnline"))
+            return@ChatButton
+        }
+        val voteId = button.dataset["voteId"] ?: return@ChatButton
+        val optionIdx = button.dataset["optionIdx"]?.toIntOrNull() ?: return@ChatButton
+        dispatcher.dispatch(
+            ActionMessage(
+                action = "castCouncilVote",
+                data = CastCouncilVoteData(
+                    actorUuid = actor.uuid,
+                    voteId = voteId,
+                    optionIdx = optionIdx,
+                ).unsafeCast<AnyObject>(),
+            )
+        )
+    },
+    ChatButton("km-council-vote-abstain") { game, actor, _, button ->
+        // Explicit abstain is a recorded position, distinct from not having voted at all.
+        val dispatcher = chatButtonDispatcher ?: return@ChatButton
+        if (game.users.activeGM == null) {
+            ui.notifications.warn(t("kingdom.councilVotes.noGmOnline"))
+            return@ChatButton
+        }
+        val voteId = button.dataset["voteId"] ?: return@ChatButton
+        dispatcher.dispatch(
+            ActionMessage(
+                action = "castCouncilVote",
+                data = CastCouncilVoteData(
+                    actorUuid = actor.uuid,
+                    voteId = voteId,
+                    optionIdx = ABSTAIN_OPTION,
+                ).unsafeCast<AnyObject>(),
+            )
+        )
+    },
+    ChatButton("km-council-vote-close") { game, actor, _, button ->
+        // GM only, and the bail is the ONLY authorization: the controls card is whispered, but
+        // players own the party actor, so visibility is never the guard. The write itself rides
+        // the dispatcher to the FIRST-GM client -- a second GM closing while a ballot is
+        // mid-flight there would otherwise race the whole-flag write and either resurrect a
+        // pre-ballot copy or reopen the vote its "frozen" result card just published.
+        if (!game.user.isGM) return@ChatButton
+        val dispatcher = chatButtonDispatcher ?: return@ChatButton
+        val voteId = button.dataset["voteId"] ?: return@ChatButton
+        dispatcher.dispatch(
+            ActionMessage(
+                action = "closeCouncilVote",
+                data = CouncilVoteLifecycleData(actorUuid = actor.uuid, voteId = voteId)
+                    .unsafeCast<AnyObject>(),
+            )
+        )
+    },
+    ChatButton("km-council-vote-reopen") { game, actor, _, button ->
+        if (!game.user.isGM) return@ChatButton
+        val dispatcher = chatButtonDispatcher ?: return@ChatButton
+        val voteId = button.dataset["voteId"] ?: return@ChatButton
+        dispatcher.dispatch(
+            ActionMessage(
+                action = "reopenCouncilVote",
+                data = CouncilVoteLifecycleData(actorUuid = actor.uuid, voteId = voteId)
+                    .unsafeCast<AnyObject>(),
+            )
+        )
     },
     ChatButton("km-offer-rival-war-threat") { game, actor, _, button ->
         // GM-confirmed offer from a rival realm massing at war (rival-realms plan section 5.2).

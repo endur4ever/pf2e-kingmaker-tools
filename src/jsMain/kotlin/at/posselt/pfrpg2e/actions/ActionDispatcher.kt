@@ -35,7 +35,15 @@ class ActionDispatcher(
         if (debug) console.log("Dispatching action", action)
         val handler = handlers.find { it.canExecute(action) }
         if (handler != null) {
-            val senderId = if (receivedViaSocket) action.senderId else game.user._id
+            if (!receivedViaSocket) {
+                // Stamp the local sender BEFORE any branch, not just on the emit paths: the
+                // local-execute path (first-GM client) used to reach handlers with senderId
+                // undefined, so a handler that keys on it -- council ballots -- silently
+                // dropped the first GM's own action. The emit branches below re-stamp the same
+                // value, which is harmless.
+                action.asDynamic().senderId = game.user._id
+            }
+            val senderId = action.senderId
 
             // Note: Since this is client-side code running in a browser, a player
             // could modify their client-side memory or local javascript payload to forge

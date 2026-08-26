@@ -1,0 +1,15 @@
+<div class="km-council-vote" data-vote-id="{{voteId}}" data-kingdom-actor-uuid="{{actorUuid}}">
+    <h3>{{localizeKM "kingdom.councilVotes.ballotTitle"}}</h3>
+    <p class="km-council-vote__question">{{question}}</p>
+    <div class="km-council-vote__options">
+        {{#each options}}
+            <button type="button" class="km-council-vote-cast"
+                    data-vote-id="{{../voteId}}" data-option-idx="{{@index}}"
+                    data-kingdom-actor-uuid="{{../actorUuid}}">{{this}}</button>
+        {{/each}}
+        <button type="button" class="km-council-vote-abstain"
+                data-vote-id="{{voteId}}" data-kingdom-actor-uuid="{{actorUuid}}">
+            {{localizeKM "kingdom.councilVotes.abstain"}}
+        </button>
+    </div>
+</div>

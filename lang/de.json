@@ -2441,6 +2441,25 @@
                     "badNumber": "Wachstumsraten und Kriegsschwelle müssen Zahlen sein, z. B. 0.5 — vor dem Speichern korrigieren."
                 },
                 "borderFallback": "das Grenzland"
+            },
+            "councilVotes": {
+                "ballotTitle": "Ratsabstimmung",
+                "abstain": "Enthalten",
+                "close": "Abstimmung schließen",
+                "reopen": "Abstimmung wieder öffnen",
+                "open": "Abstimmung eröffnen",
+                "dialogQuestion": "Frage",
+                "dialogOption": "Option {n}",
+                "recapLine": "„{question}“ — {winner} ({count} von {total})",
+                "recapLinked": "→ Zug {turns}",
+                "tieNote": "Unentschieden — der Rat konnte sich nicht einigen.",
+                "resultTitle": "Ergebnis der Ratsabstimmung",
+                "emptyState": "Noch keine Ratsabstimmungen. Eröffne eine, um dem Rat eine Frage zu stellen.",
+                "linkPickerTitle": "Folgen-Züge verknüpfen",
+                "linkPickerRow": "Zug {turn}",
+                "hasNotVoted": "{name} hat nicht abgestimmt",
+                "abstained": "{name} hat sich enthalten",
+                "noGmOnline": "Kein SL online — deine Stimme kann gerade nicht erfasst werden."
             }
         },
         "chatMessages": {

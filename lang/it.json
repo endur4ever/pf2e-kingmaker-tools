@@ -2441,6 +2441,25 @@
                     "badNumber": "I tassi di crescita e la soglia di guerra devono essere numeri, es. 0.5 — correggili prima di salvare."
                 },
                 "borderFallback": "le terre di confine"
+            },
+            "councilVotes": {
+                "ballotTitle": "Voto del consiglio",
+                "abstain": "Astieniti",
+                "close": "Chiudi votazione",
+                "reopen": "Riapri votazione",
+                "open": "Apri votazione",
+                "dialogQuestion": "Domanda",
+                "dialogOption": "Opzione {n}",
+                "recapLine": "“{question}” — {winner} ({count} su {total})",
+                "recapLinked": "→ Turno {turns}",
+                "tieNote": "Pareggio — il consiglio non ha deciso.",
+                "resultTitle": "Esito del voto del consiglio",
+                "emptyState": "Nessun voto del consiglio. Aprine uno per porre una domanda al tavolo.",
+                "linkPickerTitle": "Collega i turni conseguenza",
+                "linkPickerRow": "Turno {turn}",
+                "hasNotVoted": "{name} non ha votato",
+                "abstained": "{name} si è astenuto",
+                "noGmOnline": "Nessun GM online — il tuo voto non può essere registrato ora."
             }
         },
         "chatMessages": {
