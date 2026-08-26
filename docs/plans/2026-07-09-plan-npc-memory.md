@@ -124,8 +124,10 @@ different NPC types, which the card exists to prevent.
 **Migration.** Nullable additive fields on an interface nested inside `RawSettlement`. Every nullable
 array on `KingdomData` is seeded by convention (`quests`/23, `companionExpeditions`/40,
 `caravans`/44, `warThreats`/46, `shipmentHistory`/61), so this seeds too — but it walks
-settlements → roster → npcs rather than a top-level field. **`Migration65`**; 62, 63 and 64 are
-claimed by the downtime, scheduler and petition plans respectively.
+settlements → roster → npcs rather than a top-level field. **`Migration67`** *(placeholder; 66 is reserved by the seasonal-economy plan)*.
+> ⚠️ 62–65 have LANDED since this plan was written (downtime, scheduler, map-dynamism,
+> loot-manifests), so the `Migration65` this section originally named is no longer free. Re-derive
+> the next contiguous number from `Migrations.kt` at implementation time.
 
 ### 3.2 Rule schema
 
@@ -290,7 +292,7 @@ with a different purpose.
 - Untracked NPCs produce nothing at all.
 - A rule naming an unknown `source` is skipped, and the other rules still evaluate.
 
-**jsTest** — Raw↔model round trip preserving all three nullable fields; `Migration65` walking
+**jsTest** — Raw↔model round trip preserving all three nullable fields; the migration walking
 settlements→roster→npcs and idempotent on a second run; rule JSON parsed against the schema;
 `NpcMemoryContext` null for a non-GM.
 

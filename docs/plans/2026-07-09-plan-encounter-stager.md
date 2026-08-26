@@ -140,16 +140,18 @@ pattern.
 - **Pending-encounter manifest (Phase 3): `Migration49`** — no-op backfill that leaves
   `encounterManifest` null for existing hexes. Registered for chain contiguity only.
 
-> The migration chain currently ends at **`Migration61`** (`migrations/Migrations.kt`,
+> The migration chain currently ends at **`Migration65`** (`migrations/Migrations.kt`,
 > `internal val migrations = listOf(...)`; `MigrationChainTest` asserts contiguity). This plan
 > proposes **`Migration49`** *(placeholder — not free; see caveat)*; **Gregory sequences the real number at implementation time** in
 > case other in-flight work claims 49 first.
 
-> ⚠️ **The number in this section is stale and must be re-derived at implementation.** The chain
-> ends at `Migration61`, not 48, and 62–67 are already proposed by the downtime-projects,
-> scheduled-pressure, petition-inbox, npc-memory, seasonal-economy and loot-manifests plans. Nine
-> unimplemented plans currently name `Migration49`, so it is not free for any of them. Take the
-> next contiguous number when this actually lands, and update `MigrationChainTest`.
+> ⚠️ **The number in this section is a placeholder and must be re-derived at implementation.**
+> The chain now ends at **`Migration65`**. Since these plans were written, four of the reserved
+> numbers have LANDED: 62 = downtime-projects, 63 = scheduled-pressure-engine,
+> 64 = map-dynamism, 65 = loot-manifests. `Migration49` was never free (it sits inside the
+> long-registered 17..61 range) and several unimplemented plans still name it. The next free
+> number is **66**. Take the next contiguous number when this actually lands, and extend
+> `MigrationChainTest`'s hardcoded range.
 
 
 ---

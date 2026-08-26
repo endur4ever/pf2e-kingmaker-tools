@@ -120,19 +120,21 @@ var rewildDelayTurns: Int?             // turns cleared-unclaimed before re-wild
 
 These mirror existing tick dials (`factionStandingDriftPerTurn`, `rpToXpConversionRate`, `autoGainFamePerTurn`) that live on `kingdom.settings`, are edited in `dialogs/KingdomSettings.kt`, and are read into `TurnTickingEngine.tick(...)` from `TurnWizardApplication.kt` (~lines 200-210).
 
-### 2.3 Migration49
+### 2.3 Migration — **implemented as `Migration64`**
 
-Migration chain currently ends at **`Migration61`** (`migrations/Migrations.kt`, `MigrationChainTest` asserts contiguity). Propose **`Migration49`** *(placeholder — not free; see caveat)* (Gregory sequences the real number). Following the `Migration47` template:
+**Implemented 2026-08-25 as `Migration64`** (`migrations/migrations/Migration64.kt`, registered in `Migrations.kt`; `MigrationChainTest` asserts 17..65). The sketch below is the plan as written — the shipped migration follows it, with the number resolved:
 
-> ⚠️ **The number in this section is stale and must be re-derived at implementation.** The chain
-> ends at `Migration61`, not 48, and 62–67 are already proposed by the downtime-projects,
-> scheduled-pressure, petition-inbox, npc-memory, seasonal-economy and loot-manifests plans. Nine
-> unimplemented plans currently name `Migration49`, so it is not free for any of them. Take the
-> next contiguous number when this actually lands, and update `MigrationChainTest`.
+> ⚠️ **The number in this section is a placeholder and must be re-derived at implementation.**
+> The chain now ends at **`Migration65`**. Since these plans were written, four of the reserved
+> numbers have LANDED: 62 = downtime-projects, 63 = scheduled-pressure-engine,
+> 64 = map-dynamism, 65 = loot-manifests. `Migration49` was never free (it sits inside the
+> long-registered 17..61 range) and several unimplemented plans still name it. The next free
+> number is **66**. Take the next contiguous number when this actually lands, and extend
+> `MigrationChainTest`'s hardcoded range.
 
 
 ```kotlin
-class Migration49 : Migration(49) {
+class Migration64 : Migration(64) {
     override suspend fun migrateKingdom(game: Game, kingdom: KingdomData) {
         // War threats: opt-in mobility, start each threat at its declared target.
         kingdom.warThreats = kingdom.warThreats?.map { threat ->
@@ -514,7 +516,7 @@ Migration and arrival are **orthogonal and both gated**: `tickWarThreats` still 
 | `tick_migrationDisabledYieldsNoMigrations` | `threatMigrationEnabled = false` → empty migrations, threats untouched. |
 | `tick_trackersReconciledButNoCandidatesWhenDelayZero` | Timers reconcile while `rewildDelayTurns = 0` emits no candidates. |
 | `rawRewildTracker_roundTrip` | `RawRewildTracker` ⇄ `RewildTrackerSnapshot` fidelity. |
-| `migration49_backfillsFields` | Migration49 sets `wanders=false`, `currentHexLocation=targetHexLocation`, empty `rewildTrackers`, default dials (extend `MigrationBackfillsTest.kt`). |
+| `migration64_backfillsFields` | Migration64 sets `wanders=false`, `currentHexLocation=targetHexLocation`, empty `rewildTrackers`, default dials (extend `MigrationBackfillsTest.kt`). |
 
 ### 7.3 Manual Foundry verification checklist
 
@@ -540,7 +542,7 @@ Build/verify per `AGENTS.md`: `python3 scripts/check_i18n_keys.py`, then `JAVA_H
 
 | Phase | Title | Deliverable | Key files |
 |-------|-------|-------------|-----------|
-| **1** | **Data model + Migration49** | `wanders`/`currentHexLocation`/`migrationConsumedTurn` on `RawWarThreat`; new `RawRewildTracker`; `KingdomData.rewildTrackers`; three `RawKingdomSettings` dials; `Migration49` + backfill test. | `data/RawWarThreat.kt`, `data/RawRewildTracker.kt`, `KingdomData.kt`, `migrations/migrations/Migration49.kt`, `migrations/Migrations.kt`, `MigrationBackfillsTest.kt` |
+| **1** | **Data model + Migration64** | `wanders`/`currentHexLocation`/`migrationConsumedTurn` on `RawWarThreat`; new `RawRewildTracker`; `KingdomData.rewildTrackers`; three `RawKingdomSettings` dials; `Migration64` + backfill test. | `data/RawWarThreat.kt`, `data/RawRewildTracker.kt`, `KingdomData.kt`, `migrations/migrations/Migration64.kt`, `migrations/Migrations.kt`, `MigrationBackfillsTest.kt` |
 | **2** | **Pure engine (commonMain)** | `MapDynamism.kt` (`nextThreatHex`, `planThreatMigrations`, `reconcileRewild` + data classes) with full `MapDynamismTest.kt`. No Foundry deps. | `commonMain/.../kingdom/MapDynamism.kt`, `commonTest/.../kingdom/MapDynamismTest.kt` |
 | **3** | **TurnTickingEngine integration** | New `tick()` params + `TickResult` fields; wire `planThreatMigrations`/`reconcileRewild` in; source dials + build adjacency/distance/hexstate closures in `performEndTurn`; persist `updatedRewildTrackers`. jsTest parity. | `TurnTickingEngine.kt`, `dialogs/TurnWizardApplication.kt`, `map/KingmakerHexGridProvider.kt` (distance BFS helper), `TurnTickingEngineTest.kt`, `MapDynamismEngineTest.kt` |
 | **4** | **Offer surfaces + map writes** | `map-changes-offer.hbs`; `km-offer-threat-migration` + `km-offer-hex-rewild` handlers (GM-gated, `updateSource+save` re-wild, marker re-sync); gazette lines; digest posting in `performEndTurn`; i18n keys. | `resources/chatmessages/map-changes-offer.hbs`, `ChatButtons.kt`, `map/HexContentSync.kt`/`HexGridSync.kt`, `TurnHistory.kt`, `lang/en.json` |

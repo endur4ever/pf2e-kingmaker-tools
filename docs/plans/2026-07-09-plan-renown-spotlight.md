@@ -185,16 +185,18 @@ only number the war/quest/caravan systems ever read. This separation is asserted
 
 ### 2.6 Migration
 
-**Migration49** *(placeholder — not free; see caveat)* (the chain currently ends at `Migration61`; `MigrationChainTest`
+**Migration49** *(placeholder — not free; see caveat)* (the chain currently ends at `Migration65`; `MigrationChainTest`
 `registeredVersionsAreContiguous17To48` guards contiguity, so the new class must be registered in
 `Migrations.kt` and the assertion bumped to `…17To49`). *Gregory sequences the real number at
 implementation time if other migrations land first.*
 
-> ⚠️ **The number in this section is stale and must be re-derived at implementation.** The chain
-> ends at `Migration61`, not 48, and 62–67 are already proposed by the downtime-projects,
-> scheduled-pressure, petition-inbox, npc-memory, seasonal-economy and loot-manifests plans. Nine
-> unimplemented plans currently name `Migration49`, so it is not free for any of them. Take the
-> next contiguous number when this actually lands, and update `MigrationChainTest`.
+> ⚠️ **The number in this section is a placeholder and must be re-derived at implementation.**
+> The chain now ends at **`Migration65`**. Since these plans were written, four of the reserved
+> numbers have LANDED: 62 = downtime-projects, 63 = scheduled-pressure-engine,
+> 64 = map-dynamism, 65 = loot-manifests. `Migration49` was never free (it sits inside the
+> long-registered 17..61 range) and several unimplemented plans still name it. The next free
+> number is **66**. Take the next contiguous number when this actually lands, and extend
+> `MigrationChainTest`'s hardcoded range.
 
 
 ```kotlin

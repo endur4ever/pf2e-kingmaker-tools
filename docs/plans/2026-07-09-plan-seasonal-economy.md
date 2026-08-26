@@ -137,7 +137,7 @@ data class SeasonalEconomyModifiers(
 
 ### 2.4 Migration — **Migration66**
 
-The chain ends at `Migration61` (`migrations/Migrations.kt`) and `MigrationChainTest` asserts
+The chain ends at `Migration65` (`migrations/Migrations.kt`) and `MigrationChainTest` asserts
 contiguity. 62–65 are claimed by the downtime-projects, scheduled-pressure, petition-inbox and
 npc-memory plans, so this takes **Migration66**. Whichever of the five is implemented first should
 re-check the chain rather than trust these reservations.

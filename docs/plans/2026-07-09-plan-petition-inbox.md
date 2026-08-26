@@ -54,9 +54,11 @@ that petition rather than throwing**, so one bad row cannot empty every inbox.
 An earlier draft said "no immediate migration required… since this is a new feature", then
 contradicted itself a line later. The convention here is unambiguous — every nullable array on
 `KingdomData` is seeded: `quests` (Migration23), `companionExpeditions` (40), `caravans` (44),
-`warThreats` (46), `shipmentHistory` (61). This takes **`Migration64`**; 62 is claimed by the
-downtime-projects plan and 63 by the scheduled-pressure plan, and all three must land in
-`Migrations.kt` and `MigrationChainTest`'s range.
+`warThreats` (46), `shipmentHistory` (61). This takes **`Migration68`** *(placeholder; 66 and 67 are reserved by the
+seasonal-economy and npc-memory plans)*.
+> ⚠️ The `Migration64` this section originally named has LANDED as map-dynamism, and 62/63/65 are
+> likewise taken (downtime, scheduler, loot-manifests). Re-derive the next contiguous number from
+> `Migrations.kt` at implementation time and extend `MigrationChainTest`'s range.
 
 **Cap.** `PETITION_HISTORY_CAP = 100` answered-or-expired petitions, oldest trimmed first, in the
 shape of `appendShipmentHistory`. **Open petitions are never pruned** — trimming an unanswered
@@ -312,7 +314,7 @@ petitions, count seen ids as unread — and confirm the mutation *compiled* befo
 trimming. Full commonTest suite. Nothing wired.
 
 **Phase 2 — catalog and data.** `schemas/petition.json`, the 40 starter templates, `RawPetition`,
-`kingdom.petitions`, `Migration64`, and the `check_i18n_keys.py` catalog check.
+`kingdom.petitions`, the migration, and the `check_i18n_keys.py` catalog check.
 
 **Phase 3 — generation and expiry.** End Turn generation with both caps and petitioner casting;
 expiry offers.

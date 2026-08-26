@@ -149,13 +149,15 @@ The link is a **soft foreign key**: `factionRef` is a `RawGroup.name`. If a GM r
 
 ### 2.3 Migration — `Migration49`
 
-The migration chain currently ends at **`Migration61`** (`src/jsMain/kotlin/at/posselt/pfrpg2e/migrations/Migrations.kt`; imports and the `migrations = listOf(...)` both terminate at `Migration48()`; `MigrationChainTest` asserts contiguity, `latestMigrationVersion = migrations.maxOfOrNull { it.version }!!`). Propose **`Migration49`** *(placeholder — not free; see caveat)*. **Gregory sequences the real number at implementation** — note the sibling *Rival Realms* plan also claims `49`; if both land, whichever ships second takes `50`.
+The migration chain currently ends at **`Migration65`** (`src/jsMain/kotlin/at/posselt/pfrpg2e/migrations/Migrations.kt`; imports and the `migrations = listOf(...)` both terminate at `Migration48()`; `MigrationChainTest` asserts contiguity, `latestMigrationVersion = migrations.maxOfOrNull { it.version }!!`). Propose **`Migration49`** *(placeholder — not free; see caveat)*. **Gregory sequences the real number at implementation** — note the sibling *Rival Realms* plan also claims `49`; if both land, whichever ships second takes `50`.
 
-> ⚠️ **The number in this section is stale and must be re-derived at implementation.** The chain
-> ends at `Migration61`, not 48, and 62–67 are already proposed by the downtime-projects,
-> scheduled-pressure, petition-inbox, npc-memory, seasonal-economy and loot-manifests plans. Nine
-> unimplemented plans currently name `Migration49`, so it is not free for any of them. Take the
-> next contiguous number when this actually lands, and update `MigrationChainTest`.
+> ⚠️ **The number in this section is a placeholder and must be re-derived at implementation.**
+> The chain now ends at **`Migration65`**. Since these plans were written, four of the reserved
+> numbers have LANDED: 62 = downtime-projects, 63 = scheduled-pressure-engine,
+> 64 = map-dynamism, 65 = loot-manifests. `Migration49` was never free (it sits inside the
+> long-registered 17..61 range) and several unimplemented plans still name it. The next free
+> number is **66**. Take the next contiguous number when this actually lands, and extend
+> `MigrationChainTest`'s hardcoded range.
 
 
 ```kotlin
