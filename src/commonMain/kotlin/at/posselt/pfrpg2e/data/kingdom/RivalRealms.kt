@@ -253,3 +253,35 @@ fun rankStandings(rows: List<RivalStandingRow>): List<RivalStandingRow> =
  */
 fun headlineTemplateIndex(turn: Int, factionRef: String, stat: RivalStat, poolSize: Int): Int =
     if (poolSize <= 0) 0 else ((turn * 31 + factionRef.hashCode() + stat.ordinal * 7) % poolSize + poolSize) % poolSize
+
+/**
+ * PROVISIONAL default for the standing-shift trigger: the one-turn size delta that reads as
+ * "aggressive expansion on a shared border". Plan section 9 question 3 leaves 2-vs-3 to Gregory;
+ * 2 ships because every preset tops out at 0.75 size/turn (delta 0 or 1), so anything >= 2 can
+ * only come from a GM-dialed override -- exactly the realm the border-tension offer is about.
+ * At 3 the offer would be unreachable even for most overrides, i.e. dead code.
+ */
+const val RIVAL_STANDING_SHIFT_SIZE_DELTA = 2
+
+/** PROVISIONAL standing nudge the shift offer applies: a meaningful dent on the -100..100 scale,
+ *  same order as the adjust-standing dialog's own "e.g. 10 or -15" help text. GM-confirmed, so a
+ *  table that wants a harsher penalty applies it through the dialog afterwards. */
+const val RIVAL_STANDING_SHIFT_DELTA = -10
+
+/**
+ * Should this turn's End Turn offer the GM a war threat for a rival?
+ *
+ * Fires only while the linked group is at war AND the army count sits at or past the GM's dialed
+ * threshold AND the army has grown since the last time the offer was answered. [lastOffered] is
+ * the bookkeeping the Dismiss/Raise buttons bump: without the third clause a dismissed offer would
+ * reappear every single turn at an unchanged army count, which is exactly the spam the plan's
+ * "won't re-fire until the army grows again" forbids. A null [threshold] means the GM disabled
+ * the offer for this realm.
+ */
+fun rivalWarOfferDue(atWar: Boolean, armyCount: Int, threshold: Int?, lastOffered: Int?): Boolean =
+    atWar && threshold != null && armyCount >= threshold &&
+            (lastOffered == null || armyCount > lastOffered)
+
+/** Should a one-turn size gain of [sizeDelta] offer the GM a border-tension standing shift? */
+fun rivalStandingShiftDue(sizeDelta: Int, threshold: Int = RIVAL_STANDING_SHIFT_SIZE_DELTA): Boolean =
+    sizeDelta >= threshold

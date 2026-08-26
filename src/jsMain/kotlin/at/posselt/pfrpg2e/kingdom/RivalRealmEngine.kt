@@ -3,9 +3,12 @@ package at.posselt.pfrpg2e.kingdom
 import at.posselt.pfrpg2e.data.kingdom.RivalGrowthProfile
 import at.posselt.pfrpg2e.data.kingdom.RivalHeadlinePool
 import at.posselt.pfrpg2e.data.kingdom.RivalStat
+import at.posselt.pfrpg2e.data.kingdom.RIVAL_STANDING_SHIFT_SIZE_DELTA
 import at.posselt.pfrpg2e.data.kingdom.growStat
 import at.posselt.pfrpg2e.data.kingdom.headlineTemplateIndex
 import at.posselt.pfrpg2e.data.kingdom.poolFor
+import at.posselt.pfrpg2e.data.kingdom.rivalStandingShiftDue
+import at.posselt.pfrpg2e.data.kingdom.rivalWarOfferDue
 import at.posselt.pfrpg2e.kingdom.data.RawGroup
 import at.posselt.pfrpg2e.kingdom.data.RawRivalRealm
 import at.posselt.pfrpg2e.utils.t
@@ -174,3 +177,60 @@ fun localizeRivalHeadline(move: RivalMove): String {
         }
     }
 }
+
+/** One row of the war-threat offer digest: a rival at war whose army crossed the GM's dial. */
+data class RivalWarOfferRow(
+    val realmId: String,
+    val factionRef: String,
+    val armyCount: Int,
+)
+
+/** One row of the standing-shift offer digest: a rival whose one-turn expansion reads as border
+ *  pressure on the linked faction. */
+data class RivalShiftOfferRow(
+    val factionRef: String,
+    val sizeDelta: Int,
+)
+
+/**
+ * Collects this turn's GM-confirmed rival offers from the post-growth state.
+ *
+ * War rows come from the realms themselves ([rivalWarOfferDue] over the same trim+lowercase group
+ * match the growth split uses); a realm without an id is skipped because the Dismiss button must
+ * bump bookkeeping on a row it can address. Shift rows come from the turn's [RivalMove]s: growth
+ * emits at most one move per realm with size outranking every other stat, so ANY realm whose size
+ * grew this turn has that growth as its move -- reading moves misses nothing.
+ */
+fun collectRivalOffers(
+    realms: Array<RawRivalRealm>,
+    groups: Array<RawGroup>,
+    moves: List<RivalMove>,
+    shiftThreshold: Int = RIVAL_STANDING_SHIFT_SIZE_DELTA,
+): Pair<List<RivalWarOfferRow>, List<RivalShiftOfferRow>> {
+    val warByName = groups.associateBy({ it.name.trim().lowercase() }, { it.atWar })
+    val warRows = realms.mapNotNull { realm ->
+        val id = realm.id ?: return@mapNotNull null
+        val faction = realm.factionRef ?: return@mapNotNull null
+        val atWar = warByName[faction.trim().lowercase()] ?: false
+        if (rivalWarOfferDue(
+                atWar = atWar,
+                armyCount = realm.armyCount ?: 0,
+                threshold = realm.warArmyThreshold,
+                lastOffered = realm.lastWarOfferArmyCount,
+            )
+        ) {
+            RivalWarOfferRow(realmId = id, factionRef = faction, armyCount = realm.armyCount ?: 0)
+        } else {
+            null
+        }
+    }
+    // shift rows only for factions that still resolve: the Apply button's one job is a write to
+    // the linked group, so an orphaned realm would post an offer guaranteed to dead-end in the
+    // "unlinked" warning, every turn it grows
+    val shiftRows = moves
+        .filter { it.stat == RivalStat.SIZE && rivalStandingShiftDue(it.amount, shiftThreshold) }
+        .filter { it.factionRef.trim().lowercase() in warByName }
+        .map { RivalShiftOfferRow(factionRef = it.factionRef, sizeDelta = it.amount) }
+    return warRows to shiftRows
+}
+

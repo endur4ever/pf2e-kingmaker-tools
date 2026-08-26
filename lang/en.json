@@ -2531,12 +2531,18 @@
                 "warOffer": {
                     "title": "{rival} masses for war",
                     "raise": "Raise War Threat",
-                    "dismiss": "Dismiss"
+                    "dismiss": "Dismiss",
+                    "digestTitle": "Rivals mass for war",
+                    "dismissed": "Quiet until that army grows again."
                 },
                 "standingOffer": {
                     "title": "{rival}'s expansion strains the border",
                     "apply": "Apply Standing Shift",
-                    "dismiss": "Dismiss"
+                    "dismiss": "Dismiss",
+                    "digestTitle": "Rival expansion strains the borders",
+                    "applied": "Standing shift applied.",
+                    "dismissed": "Dismissed — nothing applied.",
+                    "alreadyApplied": "Already applied for this turn."
                 },
                 "dialog": {
                     "add": "Add Rival Realm",

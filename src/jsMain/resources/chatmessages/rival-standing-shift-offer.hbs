@@ -1,0 +1,19 @@
+<div class="km-rival-offer-card">
+    <h3><i class="fa-solid fa-flag"></i> {{title}}</h3>
+    <ul>
+        {{#each rows}}
+            <li>
+                {{this.line}}
+                <div>
+                    <button type="button" class="km-offer-rival-standing-shift"
+                            data-kingdom-actor-uuid="{{../actorUuid}}"
+                            data-faction="{{this.faction}}"
+                            data-reason="{{this.reason}}"
+                            data-turn="{{../turn}}">{{../applyLabel}}</button>
+                    <button type="button" class="km-offer-rival-standing-dismiss"
+                            data-kingdom-actor-uuid="{{../actorUuid}}">{{../dismissLabel}}</button>
+                </div>
+            </li>
+        {{/each}}
+    </ul>
+</div>

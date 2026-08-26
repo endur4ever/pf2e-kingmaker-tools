@@ -2409,12 +2409,18 @@
                 "warOffer": {
                     "title": "{rival} ammassa truppe per la guerra",
                     "raise": "Aumenta minaccia di guerra",
-                    "dismiss": "Ignora"
+                    "dismiss": "Ignora",
+                    "digestTitle": "I rivali ammassano truppe per la guerra",
+                    "dismissed": "Silenzio finché quell'esercito non cresce di nuovo."
                 },
                 "standingOffer": {
                     "title": "L'espansione di {rival} tende il confine",
                     "apply": "Applica variazione di relazioni",
-                    "dismiss": "Ignora"
+                    "dismiss": "Ignora",
+                    "digestTitle": "L'espansione rivale tende i confini",
+                    "applied": "Variazione di relazioni applicata.",
+                    "dismissed": "Ignorato — nulla applicato.",
+                    "alreadyApplied": "Già applicato per questo turno."
                 },
                 "dialog": {
                     "add": "Aggiungi regno rivale",

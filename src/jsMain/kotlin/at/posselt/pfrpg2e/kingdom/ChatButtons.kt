@@ -1,5 +1,9 @@
 package at.posselt.pfrpg2e.kingdom
 
+import at.posselt.pfrpg2e.data.kingdom.RIVAL_STANDING_SHIFT_DELTA
+import at.posselt.pfrpg2e.data.kingdom.applyStandingDelta
+import at.posselt.pfrpg2e.kingdom.data.RawFactionStandingEntry
+import at.posselt.pfrpg2e.kingdom.data.RawRivalRealm
 import at.posselt.pfrpg2e.companion.LevelUpResult
 import at.posselt.pfrpg2e.companion.applyCompanionXp
 import at.posselt.pfrpg2e.data.armies.BattleArmyState
@@ -238,6 +242,113 @@ private val buttons = listOf(
                 }
             }
         }.launch()
+    },
+    ChatButton("km-offer-rival-war-threat") { game, actor, _, button ->
+        // GM-confirmed offer from a rival realm massing at war (rival-realms plan section 5.2).
+        // Reuses the war-threat creation body above: opens AddWarThreat prefilled, nothing exists
+        // until the GM saves. Party actors are owner-permissioned to players, so the isGM bail is
+        // the guard -- template visibility is not.
+        if (!game.user.isGM) return@ChatButton
+        val faction = button.dataset["faction"] ?: ""
+        val realmId = button.dataset["realmId"]
+        val offeredArmyCount = button.dataset["armyCount"]?.toIntOrNull()
+        AddWarThreat(
+            prefillName = t("chatMessages.endTurn.warThreatName", recordOf("group" to faction)),
+            prefillEnemyFaction = faction.ifBlank { null },
+            factions = actor.getKingdom()?.groups?.map { it.name } ?: emptyList(),
+        ) { threat ->
+            buildPromise {
+                actor.getKingdom()?.let { kingdom ->
+                    kingdom.warThreats = (kingdom.warThreats ?: emptyArray()) + threat
+                    kingdom.warPressure = recalculateWarPressure(
+                        kingdom.warThreats ?: emptyArray(),
+                        kingdom.armyDeployments ?: emptyArray(),
+                        kingdom.warPressure,
+                    )
+                    // acting on the offer answers it. maxOf, never a plain write: old digests
+                    // stay clickable in chat history forever, and a stale card's pinned count
+                    // would otherwise ROLL BACK the watermark and re-fire an already-answered
+                    // offer at an unchanged army count
+                    kingdom.rivalRealms = kingdom.rivalRealms?.map { realm ->
+                        if (realm.id != null && realm.id == realmId && offeredArmyCount != null) {
+                            RawRivalRealm.copy(
+                                realm,
+                                lastWarOfferArmyCount =
+                                    maxOf(realm.lastWarOfferArmyCount ?: 0, offeredArmyCount),
+                            )
+                        } else {
+                            realm
+                        }
+                    }?.toTypedArray()
+                    actor.setKingdom(kingdom)
+                }
+            }
+        }.launch()
+    },
+    ChatButton("km-offer-rival-war-dismiss") { game, actor, _, button ->
+        // Dismiss re-asserts the post-time watermark (posting already stamped it, so this is
+        // belt-and-braces for hand-edited worlds). maxOf so a stale card from an earlier turn
+        // can never roll the watermark back and resurrect an answered offer.
+        if (!game.user.isGM) return@ChatButton
+        val realmId = button.dataset["realmId"] ?: return@ChatButton
+        val offeredArmyCount = button.dataset["armyCount"]?.toIntOrNull() ?: return@ChatButton
+        actor.getKingdom()?.let { kingdom ->
+            kingdom.rivalRealms = kingdom.rivalRealms?.map { realm ->
+                if (realm.id != null && realm.id == realmId) {
+                    RawRivalRealm.copy(
+                        realm,
+                        lastWarOfferArmyCount =
+                            maxOf(realm.lastWarOfferArmyCount ?: 0, offeredArmyCount),
+                    )
+                } else {
+                    realm
+                }
+            }?.toTypedArray()
+            actor.setKingdom(kingdom)
+            ui.notifications.info(t("kingdom.rivalRealms.warOffer.dismissed"))
+        }
+    },
+    ChatButton("km-offer-rival-standing-shift") { game, actor, _, button ->
+        // Applies the border-tension standing nudge to the linked group. Idempotent on
+        // (turn, group, reason) where the reason is the string PINNED ON THE CARD at post time:
+        // resolving it at click time would key the dedup on the clicking client's locale, and a
+        // second GM running a different language would compute a different string, miss the log
+        // entry, and stack the penalty. Pinned, every client compares the same bytes -- and the
+        // log prose stays displayable (localizeKM renders unknown keys as themselves).
+        if (!game.user.isGM) return@ChatButton
+        val faction = button.dataset["faction"] ?: return@ChatButton
+        val offerTurn = button.dataset["turn"]?.toIntOrNull() ?: return@ChatButton
+        val reason = button.dataset["reason"]?.takeIf { it.isNotBlank() } ?: return@ChatButton
+        actor.getKingdom()?.let { kingdom ->
+            val group = kingdom.groups.firstOrNull {
+                it.name.trim().lowercase() == faction.trim().lowercase()
+            } ?: run {
+                ui.notifications.warn(t("kingdom.rivalRealms.unlinked"))
+                return@ChatButton
+            }
+            val alreadyApplied = group.standingLog
+                ?.any { it.turn == offerTurn && it.reason == reason } == true
+            if (alreadyApplied) {
+                // every idempotent apply button here reports its no-op; a silent return reads
+                // as a broken button
+                ui.notifications.warn(t("kingdom.rivalRealms.standingOffer.alreadyApplied"))
+                return@ChatButton
+            }
+            group.standing = applyStandingDelta(group.standing, RIVAL_STANDING_SHIFT_DELTA)
+            group.addStandingEntry(RawFactionStandingEntry(
+                turn = offerTurn,
+                delta = RIVAL_STANDING_SHIFT_DELTA,
+                reason = reason,
+            ))
+            actor.setKingdom(kingdom)
+            ui.notifications.info(t("kingdom.rivalRealms.standingOffer.applied"))
+        }
+    },
+    ChatButton("km-offer-rival-standing-dismiss") { game, _, _, _ ->
+        // The plan's Dismiss "posts nothing" -- but a button that visibly does nothing reads as
+        // broken, so acknowledge without touching any state.
+        if (!game.user.isGM) return@ChatButton
+        ui.notifications.info(t("kingdom.rivalRealms.standingOffer.dismissed"))
     },
     ChatButton("km-offer-war-threat-arrival") { game, actor, event, button ->
         // GM-confirmed offer for a war threat that has arrived (triggered this turn).

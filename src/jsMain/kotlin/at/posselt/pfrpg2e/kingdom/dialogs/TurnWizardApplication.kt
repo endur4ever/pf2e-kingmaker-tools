@@ -9,6 +9,9 @@ import at.posselt.pfrpg2e.kingdom.clearPerformedActivities
 import at.posselt.pfrpg2e.kingdom.restoreTurnWizardState
 import com.foundryvtt.pf2e.item.PF2EItem
 import at.posselt.pfrpg2e.kingdom.rivalGrowthProfilesById
+import at.posselt.pfrpg2e.kingdom.collectRivalOffers
+import at.posselt.pfrpg2e.kingdom.data.withWarOfferRecorded
+import at.posselt.pfrpg2e.kingdom.postRivalOfferDigests
 import at.posselt.pfrpg2e.kingdom.localizeRivalHeadline
 import at.posselt.pfrpg2e.kingdom.getPerformedActivities
 import at.posselt.pfrpg2e.kingdom.digest.postEndTurnDigest
@@ -362,6 +365,24 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
     kingdom.groups = tickResult.groups
     kingdom.rivalRealms = tickResult.rivalRealms
 
+    // GM-confirmed rival offers (plan section 5): collect from the post-growth state, then stamp
+    // the war-offer watermark BEFORE the persist. The stamp is what stops an UNANSWERED offer
+    // re-posting an identical digest every turn at an unchanged army count -- click-time
+    // bookkeeping alone cannot, because an unclicked card bumps nothing (this is the contract
+    // RawRivalRealm.lastWarOfferArmyCount documents: the count the offer FIRED at, not the count
+    // the GM answered at). The digests themselves are posted after the persist, below.
+    val (rivalWarRows, rivalShiftRows) = collectRivalOffers(
+        realms = tickResult.rivalRealms,
+        groups = tickResult.groups,
+        moves = tickResult.rivalMoves.toList(),
+    )
+    if (rivalWarRows.isNotEmpty()) {
+        val offeredIds = rivalWarRows.map { it.realmId }.toSet()
+        kingdom.rivalRealms = kingdom.rivalRealms?.map { realm ->
+            if (realm.id in offeredIds) realm.withWarOfferRecorded(realm.armyCount ?: 0) else realm
+        }?.toTypedArray()
+    }
+
     // Post GM offer cards for quests that hit their deadline this turn
     if (tickResult.questDeadlineReached.isNotEmpty()) {
         tickResult.questDeadlineReached.forEach { questId ->
@@ -686,6 +707,18 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
     }
 
     actor.setKingdom(kingdom)
+
+    // Rival offer digests go out only now, after the tick is persisted: the cards' buttons
+    // read-modify-write the actor flag from OTHER clients, and a click landing in the window
+    // between a mid-tick post and the persist above would either be clobbered by it or clobber
+    // the whole ticked turn with pre-tick state.
+    postRivalOfferDigests(
+        game = game,
+        actorUuid = actor.uuid,
+        currentTurn = currentTurn,
+        warRows = rivalWarRows,
+        shiftRows = rivalShiftRows,
+    )
 
     // Post clock tick events to chat
     if (tickResult.clockEvents.isNotEmpty()) {

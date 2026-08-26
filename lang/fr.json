@@ -2409,12 +2409,18 @@
                 "warOffer": {
                     "title": "{rival} masse ses troupes pour la guerre",
                     "raise": "Accroître la menace de guerre",
-                    "dismiss": "Ignorer"
+                    "dismiss": "Ignorer",
+                    "digestTitle": "Des rivaux massent leurs troupes",
+                    "dismissed": "Silence jusqu'à ce que cette armée grossisse à nouveau."
                 },
                 "standingOffer": {
                     "title": "L'expansion de {rival} tend la frontière",
                     "apply": "Appliquer le changement de relations",
-                    "dismiss": "Ignorer"
+                    "dismiss": "Ignorer",
+                    "digestTitle": "L'expansion rivale tend les frontières",
+                    "applied": "Changement de relations appliqué.",
+                    "dismissed": "Ignoré — rien n'a été appliqué.",
+                    "alreadyApplied": "Déjà appliqué pour ce tour."
                 },
                 "dialog": {
                     "add": "Ajouter un royaume rival",

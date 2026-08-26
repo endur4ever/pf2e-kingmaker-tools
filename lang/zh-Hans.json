@@ -2409,12 +2409,18 @@
                 "warOffer": {
                     "title": "{rival}正集结备战",
                     "raise": "提升战争威胁",
-                    "dismiss": "忽略"
+                    "dismiss": "忽略",
+                    "digestTitle": "敌对国度正集结备战",
+                    "dismissed": "在该军队再次壮大前保持静默。"
                 },
                 "standingOffer": {
                     "title": "{rival}的扩张使边境局势紧张",
                     "apply": "应用关系变化",
-                    "dismiss": "忽略"
+                    "dismiss": "忽略",
+                    "digestTitle": "敌对扩张使边境紧张",
+                    "applied": "已应用关系变化。",
+                    "dismissed": "已忽略——未应用任何变化。",
+                    "alreadyApplied": "本回合已应用。"
                 },
                 "dialog": {
                     "add": "添加敌对国度",

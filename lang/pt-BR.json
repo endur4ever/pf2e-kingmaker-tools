@@ -2409,12 +2409,18 @@
                 "warOffer": {
                     "title": "{rival} concentra forças para a guerra",
                     "raise": "Elevar ameaça de guerra",
-                    "dismiss": "Descartar"
+                    "dismiss": "Descartar",
+                    "digestTitle": "Rivais concentram forças para a guerra",
+                    "dismissed": "Silêncio até esse exército crescer de novo."
                 },
                 "standingOffer": {
                     "title": "A expansão de {rival} tensiona a fronteira",
                     "apply": "Aplicar mudança de relações",
-                    "dismiss": "Descartar"
+                    "dismiss": "Descartar",
+                    "digestTitle": "A expansão rival tensiona as fronteiras",
+                    "applied": "Mudança de relações aplicada.",
+                    "dismissed": "Descartado — nada aplicado.",
+                    "alreadyApplied": "Já aplicado neste turno."
                 },
                 "dialog": {
                     "add": "Adicionar reino rival",

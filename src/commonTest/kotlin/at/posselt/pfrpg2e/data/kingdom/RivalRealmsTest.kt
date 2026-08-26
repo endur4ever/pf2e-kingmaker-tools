@@ -2,6 +2,7 @@ package at.posselt.pfrpg2e.data.kingdom
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -441,5 +442,33 @@ class RivalRealmsTest {
         // Reordering these silently re-rolls every headline in every campaign, so the order is
         // pinned here rather than left as an accident of the enum body.
         assertEquals(listOf(RivalStat.SIZE, RivalStat.FAME, RivalStat.ARMY), RivalStat.entries.toList())
+    }
+}
+
+class RivalOfferPredicateTest {
+    @Test
+    fun warOfferNeedsWarAndAThresholdAndGrowthSinceTheLastAnswer() {
+        // peace never offers, whatever the numbers
+        assertFalse(rivalWarOfferDue(atWar = false, armyCount = 99, threshold = 1, lastOffered = null))
+        // a null threshold is the GM's off switch
+        assertFalse(rivalWarOfferDue(atWar = true, armyCount = 99, threshold = null, lastOffered = null))
+        // below the dial: quiet
+        assertFalse(rivalWarOfferDue(atWar = true, armyCount = 2, threshold = 3, lastOffered = null))
+        // at the dial, never answered: fire
+        assertTrue(rivalWarOfferDue(atWar = true, armyCount = 3, threshold = 3, lastOffered = null))
+        // answered at this count: quiet until the army actually grows
+        assertFalse(rivalWarOfferDue(atWar = true, armyCount = 3, threshold = 3, lastOffered = 3))
+        assertTrue(rivalWarOfferDue(atWar = true, armyCount = 4, threshold = 3, lastOffered = 3))
+    }
+
+    @Test
+    fun standingShiftFiresOnlyOnGenuinelyAggressiveExpansion() {
+        // every shipped preset tops out below 1 size/turn, so the default threshold of 2 is
+        // reachable only through a GM-dialed override -- the aggressive rival the offer is about
+        assertFalse(rivalStandingShiftDue(0))
+        assertFalse(rivalStandingShiftDue(1))
+        assertTrue(rivalStandingShiftDue(RIVAL_STANDING_SHIFT_SIZE_DELTA))
+        assertTrue(rivalStandingShiftDue(5))
+        assertFalse(rivalStandingShiftDue(2, threshold = 3))
     }
 }

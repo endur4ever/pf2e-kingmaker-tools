@@ -2409,12 +2409,18 @@
                 "warOffer": {
                     "title": "{rival} gromadzi siły do wojny",
                     "raise": "Podnieś zagrożenie wojenne",
-                    "dismiss": "Odrzuć"
+                    "dismiss": "Odrzuć",
+                    "digestTitle": "Rywale gromadzą siły do wojny",
+                    "dismissed": "Cisza, dopóki ta armia znów nie urośnie."
                 },
                 "standingOffer": {
                     "title": "Ekspansja {rival} napina granicę",
                     "apply": "Zastosuj zmianę stosunków",
-                    "dismiss": "Odrzuć"
+                    "dismiss": "Odrzuć",
+                    "digestTitle": "Ekspansja rywali napina granice",
+                    "applied": "Zmiana stosunków zastosowana.",
+                    "dismissed": "Odrzucono — niczego nie zastosowano.",
+                    "alreadyApplied": "Już zastosowano w tej turze."
                 },
                 "dialog": {
                     "add": "Dodaj rywalizujące królestwo",

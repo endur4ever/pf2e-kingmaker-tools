@@ -1,6 +1,7 @@
 package at.posselt.pfrpg2e.kingdom
 
 import at.posselt.pfrpg2e.data.kingdom.RivalGrowthProfile
+import at.posselt.pfrpg2e.data.kingdom.RivalHeadlinePool
 import at.posselt.pfrpg2e.data.kingdom.RivalStat
 import at.posselt.pfrpg2e.kingdom.data.RawGroup
 import at.posselt.pfrpg2e.kingdom.data.RawRivalRealm
@@ -20,6 +21,8 @@ class RivalRealmEngineTest {
         mode: String? = null,
         paused: Boolean? = null,
         sizeAccrual: Double? = null,
+        warThreshold: Int? = null,
+        lastWarOffer: Int? = null,
     ): RawRivalRealm {
         val obj = js("{}").unsafeCast<RawRivalRealm>()
         obj.id = id
@@ -31,6 +34,8 @@ class RivalRealmEngineTest {
         obj.growthMode = mode
         obj.pauseGrowth = paused
         obj.sizeAccrual = sizeAccrual
+        obj.warArmyThreshold = warThreshold
+        obj.lastWarOfferArmyCount = lastWarOffer
         return obj
     }
 
@@ -215,4 +220,63 @@ class RivalRealmEngineTest {
         assertTrue(shipped.getValue("expansionist-endgame").sizePerTurn > 0.0)
     }
 
+
+    @Test
+    fun warOffersComeOnlyFromAtWarLinkedRealmsPastTheirDial() {
+        val realms = arrayOf(
+            realm(id = "hot", factionRef = "Pitax", army = 4, warThreshold = 3),
+            realm(id = "cold", factionRef = "Mivon", army = 9, warThreshold = 3),      // not at war
+            realm(id = "under", factionRef = "Pitax", army = 2, warThreshold = 3),     // below dial
+            realm(id = "off", factionRef = "Pitax", army = 9),                          // dial disabled
+            realm(id = "done", factionRef = "Pitax", army = 4, warThreshold = 3, lastWarOffer = 4),
+        )
+        val (war, _) = collectRivalOffers(
+            realms = realms,
+            groups = arrayOf(group("  pitax ", atWar = true), group("Mivon", atWar = false)),
+            moves = emptyList(),
+        )
+        assertEquals(listOf("hot"), war.map { it.realmId }, "one realm crosses: at war, past the dial, unanswered")
+        assertEquals(4, war[0].armyCount)
+    }
+
+    @Test
+    fun aRealmWithoutAnIdNeverOffersWarBecauseDismissCouldNotAddressIt() {
+        val ghost = realm(id = "x", factionRef = "Pitax", army = 9, warThreshold = 1)
+        ghost.id = null
+        val (war, _) = collectRivalOffers(
+            realms = arrayOf(ghost),
+            groups = arrayOf(group("Pitax", atWar = true)),
+            moves = emptyList(),
+        )
+        assertEquals(0, war.size)
+    }
+
+    @Test
+    fun standingShiftsComeFromAggressiveSizeMovesOnly() {
+        fun move(stat: RivalStat, amount: Int) = RivalMove(
+            factionRef = "Pitax", stat = stat, amount = amount,
+            pool = RivalHeadlinePool.EXPAND, templateIndex = 0, newValue = 0,
+        )
+        val (_, shifts) = collectRivalOffers(
+            realms = emptyArray(),
+            groups = arrayOf(group("  pitax ", atWar = false)),
+            moves = listOf(
+                move(RivalStat.SIZE, 1),   // normal growth: no border tension
+                move(RivalStat.SIZE, 2),   // aggressive: offer
+                move(RivalStat.ARMY, 5),   // armies are the war offer's business, not this one's
+            ),
+        )
+        assertEquals(1, shifts.size)
+        assertEquals(2, shifts[0].sizeDelta)
+        assertEquals("Pitax", shifts[0].factionRef)
+
+        // an orphaned faction posts nothing: its Apply button could only dead-end in the
+        // "unlinked" warning, and it would re-offer every turn the realm grows
+        val (_, orphaned) = collectRivalOffers(
+            realms = emptyArray(),
+            groups = arrayOf(group("Mivon", atWar = false)),
+            moves = listOf(move(RivalStat.SIZE, 5)),
+        )
+        assertEquals(0, orphaned.size)
+    }
 }

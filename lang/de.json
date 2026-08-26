@@ -2409,12 +2409,18 @@
                 "warOffer": {
                     "title": "{rival} sammelt Truppen für den Krieg",
                     "raise": "Kriegsbedrohung erhöhen",
-                    "dismiss": "Verwerfen"
+                    "dismiss": "Verwerfen",
+                    "digestTitle": "Rivalen sammeln Truppen für den Krieg",
+                    "dismissed": "Ruhe, bis diese Armee wieder wächst."
                 },
                 "standingOffer": {
                     "title": "{rival}s Expansion belastet die Grenze",
                     "apply": "Ansehensänderung anwenden",
-                    "dismiss": "Verwerfen"
+                    "dismiss": "Verwerfen",
+                    "digestTitle": "Rivalische Expansion belastet die Grenzen",
+                    "applied": "Ansehensänderung angewendet.",
+                    "dismissed": "Verworfen — nichts angewendet.",
+                    "alreadyApplied": "Für diesen Zug bereits angewendet."
                 },
                 "dialog": {
                     "add": "Rivalisierendes Reich hinzufügen",

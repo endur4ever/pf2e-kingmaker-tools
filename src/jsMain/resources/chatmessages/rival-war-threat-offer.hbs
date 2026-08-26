@@ -1,0 +1,21 @@
+<div class="km-rival-offer-card">
+    <h3><i class="fa-solid fa-chess-rook"></i> {{title}}</h3>
+    <ul>
+        {{#each rows}}
+            <li>
+                {{this.line}}
+                <div>
+                    <button type="button" class="km-offer-rival-war-threat"
+                            data-kingdom-actor-uuid="{{../actorUuid}}"
+                            data-realm-id="{{this.realmId}}"
+                            data-faction="{{this.faction}}"
+                            data-army-count="{{this.armyCount}}">{{../raiseLabel}}</button>
+                    <button type="button" class="km-offer-rival-war-dismiss"
+                            data-kingdom-actor-uuid="{{../actorUuid}}"
+                            data-realm-id="{{this.realmId}}"
+                            data-army-count="{{this.armyCount}}">{{../dismissLabel}}</button>
+                </div>
+            </li>
+        {{/each}}
+    </ul>
+</div>
