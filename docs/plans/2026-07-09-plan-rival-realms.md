@@ -52,7 +52,9 @@ external interface RawRivalRealm {
     var id: String
 
     /** Soft foreign key to RawGroup.name — the faction this realm IS.
-     *  Same by-name link the caravan/war-threat systems already use (enemyFaction, partner). */
+     *  Same by-name link the caravan/war-threat systems already use: RawWarThreat.enemyFactionName
+     *  and RawCaravan.partnerName. (NOT RawWarThreat.enemyFaction — that one is free text kept
+     *  alongside the soft FK, not the link itself.) */
     var factionRef: String
 
     // --- Player-visible scoreboard stats -------------------------------------
@@ -72,7 +74,7 @@ external interface RawRivalRealm {
     var fameAccrual: Double?
     var armyAccrual: Double?
 
-    /** Chapter preset id from data/rival-growth-profiles.json (e.g. "pitax-wartime").
+    /** Chapter preset id from data/rival-growth-profiles/ (e.g. "pitax-wartime"; see 3.4).
      *  When set, resolves the three growthPerTurn values; per-stat dials above override it. */
     var growthProfile: String?
 
@@ -98,6 +100,16 @@ external interface RawRivalRealm {
 
 Field list (18): `id`, `factionRef`, `size`, `fame`, `armyCount`, `sizeGrowthPerTurn`, `fameGrowthPerTurn`, `armyGrowthPerTurn`, `sizeAccrual`, `fameAccrual`, `armyAccrual`, `growthProfile`, `growthMode`, `pauseGrowth`, `borderRegion`, `warArmyThreshold`, `lastWarOfferArmyCount`, `headlinePool`.
 
+*Optional polish (not required):* `growthMode` persists as a bare string and §3.6 compares it with
+a literal, which is what shipped code already does for closed persisted sets (`quest.status == "active"`,
+`caravan.kind == "sellToPartner"`; `RawCaravan.kind` has no enum at all). Newer commonMain subsystems
+prefer a paired enum instead (`Relations.fromString(group.relations) ?: Relations.NONE`,
+`sheet/contexts/GroupContext.kt:60`). If symmetry with those is wanted, add
+`enum class RivalGrowthMode(val value: String) { FLAT("flat"), AGENDA_DRIVEN("agenda-driven"); companion object { fun fromValue(v: String?) = entries.firstOrNull { it.value == v } } }`
+in commonMain and read `RivalGrowthMode.fromValue(realm.growthMode) ?: RivalGrowthMode.FLAT`. Either
+way an unknown persisted value falls through to flat growth — `flat` is the default and the
+agenda branch is gated on an exact match.
+
 ### 2.2 Persistence location — top-level `KingdomData.rivalRealms`, NOT nested on `RawGroup`
 
 **Decision:** a new top-level `KingdomData.rivalRealms: Array<RawRivalRealm>?`, each row carrying `factionRef → RawGroup.name`.
@@ -106,7 +118,7 @@ Field list (18): `id`, `factionRef`, `size`, `fame`, `armyCount`, `sizeGrowthPer
 
 - A kingdom has *many* groups (Sootscale, every Brevoy house, minor trade partners) but only **2–4** are rival *realms*. Nesting a realm block on every group bloats the far-more-frequently-touched trade-partner record.
 - `RawGroup` is read on hot paths (trade activities, caravan routing, negotiation DCs). Keeping it lean matters.
-- A top-level array mirrors how `campaignClocks`, `warThreats`, and `companionExpeditions` already live on `KingdomData` — soft-FK-by-name is the established pattern (`RawWarThreat.enemyFaction`, caravan partner by name). See `KingdomData.kt`.
+- A top-level array mirrors how `campaignClocks`, `warThreats`, and `companionExpeditions` already live on `KingdomData` — soft-FK-by-name is the established pattern (`RawWarThreat.enemyFactionName` at `RawWarThreat.kt:45`, `RawCaravan.partnerName` at `RawCaravan.kt:25` — note `RawWarThreat.enemyFaction` at `:15` is the *free-text* label kept beside the FK, not the link). See `KingdomData.kt`.
 
 ```kotlin
 // KingdomData.kt — ADD (nullable => null means "not yet migrated"; empty => no rivals)
@@ -117,7 +129,7 @@ var rivalRealms: Array<RawRivalRealm>?
 
 The link is a **soft foreign key**: `factionRef` is a `RawGroup.name`. If a GM renames/deletes the group, the realm row survives but shows an "unlinked faction" hint in the UI; `atWar` / standing lookups fall back to neutral. (No cascade — same forgiving contract as caravans.)
 
-### 2.3 Migration — `Migration49`
+### 2.3 Migration — `Migration49` *(placeholder — see caveat)*
 
 The migration chain currently ends at **`Migration65`** (`src/jsMain/kotlin/at/posselt/pfrpg2e/migrations/Migrations.kt`; `MigrationChainTest` asserts contiguity). Propose **`Migration49`** *(placeholder — not free; see caveat)*. **Gregory sequences the real number at implementation** in case other branches land migrations first.
 
@@ -131,6 +143,8 @@ The migration chain currently ends at **`Migration65`** (`src/jsMain/kotlin/at/p
 
 
 ```kotlin
+// PLACEHOLDER NUMBER — see the caveat above. Take the next contiguous number at landing
+// (Migration64/65 both shipped this way) and extend MigrationChainTest's hardcoded range.
 class Migration49 : Migration(49) {
     override suspend fun migrateKingdom(game: Game, kingdom: dynamic) {
         if (kingdom.rivalRealms == null) {
@@ -201,6 +215,17 @@ fun rankStandings(rows: List<RivalStandingRow>): List<RivalStandingRow>
  */
 fun headlineTemplateIndex(turn: Int, factionRef: String, stat: RivalStat, poolSize: Int): Int =
     if (poolSize <= 0) 0 else ((turn * 31 + factionRef.hashCode() + stat.ordinal * 7) % poolSize + poolSize) % poolSize
+
+/** Which template pool a headline draws from. [poolSize] is a compile-time constant so
+ *  [headlineTemplateIndex] never has to read lang/en.json to know how many templates exist. */
+enum class RivalHeadlinePool(val poolSize: Int) { EXPAND(3), FAME(2), ARMY(2), ARMY_WAR(2) }
+
+/** Pool selection: only ARMY has a wartime variant (§3.5 — SIZE cannot tick over at war). */
+fun poolFor(stat: RivalStat, atWar: Boolean): RivalHeadlinePool = when (stat) {
+    RivalStat.SIZE -> RivalHeadlinePool.EXPAND
+    RivalStat.FAME -> RivalHeadlinePool.FAME
+    RivalStat.ARMY -> if (atWar) RivalHeadlinePool.ARMY_WAR else RivalHeadlinePool.ARMY
+}
 ```
 
 ### 3.2 jsMain adapter — concrete signature
@@ -230,7 +255,7 @@ fun advanceAllRivals(
     rivals: Array<RawRivalRealm>,
     groupsByName: Map<String, RawGroup>,
     turn: Int,
-    profiles: Map<String, RivalGrowthProfile>,  // from data/rival-growth-profiles.json
+    profiles: Map<String, RivalGrowthProfile>,  // rivalGrowthProfilesById(), see 3.4
 ): Pair<Array<RawRivalRealm>, List<RivalMove>>
 ```
 
@@ -240,11 +265,42 @@ fun advanceAllRivals(
 data class RivalMove(
     val factionRef: String,
     val stat: RivalStat,
-    val headlineKey: String,     // i18n key chosen by headlineTemplateIndex
-    val headlineData: AnyObject, // { rival, n, place } for interpolation
+    val pool: RivalHeadlinePool,  // poolFor(stat, atWar)
+    val templateIndex: Int,       // headlineTemplateIndex(turn, factionRef, stat, pool.poolSize)
+    val headline: String,         // localizeRivalHeadline(pool, templateIndex, data) — already interpolated
     val warOffer: RivalWarOffer?, // non-null => a GM-confirmed war-threat offer to post
 )
 ```
+
+**Template index → i18n key: a literal `when`, not a composed key.** `check_i18n_keys.py`'s reference
+scan (`collect_refs`, `scripts/check_i18n_keys.py:124`) only sees literal `t("…")` / `localizeKM "…"` strings, so
+`t("kingdom.rivalRealms.headline.$pool$index")` would be invisible to it and would ship as a raw
+key with every guard green. `kingdom/pressure/PressureDigest.kt:67-77` already solves exactly this
+("Literal keys mapped in a when -- t(\"...$kind\") would be invisible to check_i18n_keys.py");
+rival headlines follow it:
+
+```kotlin
+// kingdom/RivalRealmEngine.kt (jsMain) — data carries { rival, n, place }
+fun localizeRivalHeadline(pool: RivalHeadlinePool, index: Int, data: AnyObject): String = when (pool) {
+    RivalHeadlinePool.EXPAND -> when (index) {
+        0 -> t("kingdom.rivalRealms.headline.expand1", data)
+        1 -> t("kingdom.rivalRealms.headline.expand2", data)
+        else -> t("kingdom.rivalRealms.headline.expand3", data)
+    }
+    RivalHeadlinePool.FAME -> if (index == 0) t("kingdom.rivalRealms.headline.fame1", data)
+        else t("kingdom.rivalRealms.headline.fame2", data)
+    RivalHeadlinePool.ARMY -> if (index == 0) t("kingdom.rivalRealms.headline.army1", data)
+        else t("kingdom.rivalRealms.headline.army2", data)
+    RivalHeadlinePool.ARMY_WAR -> if (index == 0) t("kingdom.rivalRealms.headline.armyWar1", data)
+        else t("kingdom.rivalRealms.headline.armyWar2", data)
+}
+```
+
+`RawRivalRealm.headlinePool` (§2.1) overrides `poolFor`'s choice by naming a `RivalHeadlinePool`
+entry; an unparseable value falls back to `poolFor`. In jsTest no i18next instance is initialised, so
+`t(key, data)` falls back to `"$key ($details)"` (`utils/Localization.kt:67-84`) — assertions use
+`headline.startsWith("kingdom.rivalRealms.headline.armyWar1")` (or assert `pool`/`templateIndex`
+directly), never string equality against the English text.
 
 ### 3.3 The growth model — deterministic, no hidden simulation
 
@@ -258,13 +314,61 @@ Stated plainly so nobody mistakes this for an economy:
 
 ### 3.4 Profile resolution (chapter presets)
 
-`data/rival-growth-profiles.json` maps a profile id → per-stat rates. Resolution order per realm:
+Profiles ship as **one JSON file per profile in the directory `data/rival-growth-profiles/`** — *not*
+a flat `data/rival-growth-profiles.json`. `data/` contains only subdirectories today, because the
+bundling task `combineJsonFiles` (`build.gradle.kts:29-32`) is registered **once** over
+`sourceDirectory = data/` and its action walks one level deep filtering for directories
+(`Files.walk(source, 1).filter { Files.isDirectory(it) }.filter { it != source }`,
+`buildSrc/src/main/kotlin/at/posselt/pfrpg2e/plugins/CombineJsonFiles.kt`), emitting
+`build/generated/data/<dirname>.json` per subdirectory. A top-level *file* is skipped outright and
+would never reach the bundle, so `@JsModule("./rival-growth-profiles.json")` would not resolve.
+
+Because the task is generic, **a new subdirectory needs no Gradle change and no new task** — it is
+picked up automatically and lands in commonMain resources via `resources.srcDirs(...,
+tasks.named("combineJsonFiles"))` (`build.gradle.kts:76-79`).
+
+The merged output is a JSON **array**, so each file is one self-describing object carrying its own
+`id` (an id→rates map in a single file would not survive the merge):
+
+```json
+// data/rival-growth-profiles/pitax-wartime.json
+{ "id": "pitax-wartime", "sizePerTurn": 0.33, "famePerTurn": 0.5, "armyPerTurn": 0.5 }
+```
+
+Loaded jsMain-side in the style of `KingdomMilestone.kt:17-18`:
+
+```kotlin
+// kingdom/RivalGrowthProfiles.kt (jsMain)
+@JsPlainObject
+external interface RawRivalGrowthProfile {
+    var id: String
+    var sizePerTurn: Double
+    var famePerTurn: Double
+    var armyPerTurn: Double
+}
+
+@JsModule("./rival-growth-profiles.json")
+private external val rivalGrowthProfiles: Array<RawRivalGrowthProfile>
+
+/** The "profile id -> rates" map 3.2 hands to advanceAllRivals, built by keying the array on id. */
+fun rivalGrowthProfilesById(): Map<String, RivalGrowthProfile> =
+    rivalGrowthProfiles.associate {
+        it.id to RivalGrowthProfile(it.sizePerTurn, it.famePerTurn, it.armyPerTurn)
+    }
+```
+
+Optionally add `src/commonMain/resources/schemas/rival-growth-profile.json` plus a
+`JsonSchemaValidator` task mirroring `validateMilestones` (`build.gradle.kts:205-209`) and list it in
+the `check` task's `dependsOn` block (`build.gradle.kts:120-135`), so a malformed profile fails the
+build instead of the world.
+
+Resolution order per realm:
 
 1. If a per-stat dial (`sizeGrowthPerTurn`, …) is non-null → use it (GM override wins).
 2. Else if `growthProfile` names a profile → use its rates.
 3. Else → all zero (dormant).
 
-Presets tuned from the `docs/house-rules.md` pressure curve:
+Presets tuned from the `docs/house-rules.md` pressure curve — one file each, named `<id>.json`:
 
 | Profile id | size/turn | fame/turn | army/turn | Fiction (house-rules citation) |
 |------------|-----------|-----------|-----------|--------------------------------|
@@ -280,7 +384,7 @@ Presets tuned from the `docs/house-rules.md` pressure curve:
 When the **linked `RawGroup.atWar == true`**:
 
 - **Size growth pauses** — a realm actively at war is fighting, not annexing quiet hexes. (`profile.sizePerTurn` treated as 0 for this turn.)
-- **Army growth continues (and profiles bias it high)** — they are mobilizing. Headlines switch to a wartime pool.
+- **Army growth continues (and profiles bias it high)** — they are mobilizing. **Army headlines use the `armyWar` pool** (§4.4) instead of the peacetime `army` pool. There is deliberately **no wartime *size* pool**: with `sizePerTurn` forced to 0 the size accrual never advances and `growStat` leaves the carried remainder untouched (§3.1), so a SIZE tickover is unreachable at war *by construction* — a wartime expansion headline could never fire.
 - When `armyCount` **crosses `warArmyThreshold`** (and `armyCount > lastWarOfferArmyCount`), `growRivalRealm` sets `warOfferArmyCount`; `performEndTurn` posts a **GM-confirmed `km-offer-rival-war-threat`** that prefills `AddWarThreat` (reusing the exact plumbing behind `km-offer-war-threat`). Nothing is created until the GM clicks. `lastWarOfferArmyCount` is bumped to prevent re-offering until the army grows further.
 
 This wires the scoreboard into the Army & War Pressure board **without** simulating rival battles.
@@ -313,7 +417,8 @@ data class TickResult(
 
 - Rival *scale* (`size`, `armyCount`) is a kingdom-scale quantity that must move in lockstep with the player's own `kingdom.size`/level, which change at **End Turn** — a rival growing daily while the player grows monthly would make the standings jitter meaninglessly.
 - `tick()` is the **preview-safe** surface; every other turn consequence (clocks, standing drift, caravans) already resolves there, so rival growth participates in the same preview/commit parity contract. `DailyTickHooks` is for daily-world-clock effects (weather, companion travel) and is explicitly untouched.
-- The engine already receives `groups` and returns `tickResult.groups` (see `performEndTurn` in `TurnWizardApplication.kt` lines ~214, 273); adding `rivalRealms` alongside is a one-parameter extension of an established flow.
+- The engine already receives `groups` and returns `tickResult.groups`: the tick input is assembled in `runKingdomTurnTick` (`TurnWizardApplication.kt:207-239`, e.g. `groups = kingdom.groups.unsafeCast<Array<RawGroup>?>() ?: emptyArray(),` at line 237) and the result is written back in `performEndTurn` (`kingdom.groups = tickResult.groups`, line 355). Adding `rivalRealms` alongside is a one-parameter extension of an established flow.
+- **Phase 3 adds `rivalRealms = kingdom.rivalRealms ?: emptyArray()` to the `TurnTickingEngine.tick(...)` argument list inside `runKingdomTurnTick`** — the single tick-input chokepoint shared by the End Turn commit (`TurnWizardApplication.kt:296`), the Turn Wizard preview (`:1175`) and `kingdom/forecast/ForecastAdapter.kt:148`. Its KDoc (`:202-206`) is explicit that both paths "MUST call this — never tick() directly", and `TurnWizardApplicationTest.kt:82` guards the contract, so wiring the new input anywhere else is a bug.
 
 `performEndTurn` persists `kingdom.rivalRealms = tickResult.rivalRealms`, feeds `tickResult.rivalMoves` headlines into the gazette, and posts any war/standing offers.
 
@@ -405,7 +510,7 @@ A small Foundry `FormApp`/dialog (pattern of `ModifyFactionStanding.kt` / `Modif
 
 - **Faction** (select from `kingdom.groups` names → sets `factionRef`)
 - **Size / Fame / Armies** (number inputs)
-- **Growth profile** (select from `rival-growth-profiles.json` ids) *or* per-stat growth overrides (three number inputs)
+- **Growth profile** (select over `rivalGrowthProfilesById().keys`, labelled `kingdom.rivalRealms.profile.<id>`) *or* per-stat growth overrides (three number inputs)
 - **Growth mode** (`flat` / `agenda-driven`)
 - **Border region** (text, for headline interpolation)
 - **War army threshold** (number, blank = disabled)
@@ -415,7 +520,11 @@ On save: upsert into `kingdom.rivalRealms`, `actor.setKingdom(kingdom)`. Wired v
 
 ### 4.4 i18n namespace
 
-All keys nested under `pf2e-kingmaker-tools` → `kingdom.rivalRealms.*` in `lang/en.json` (nested objects, never flat-dotted — see `scripts/check_i18n_keys.py`), wired through `initLocalization()`:
+All keys nested under `pf2e-kingmaker-tools` → `kingdom.rivalRealms.*` (nested objects, never flat-dotted — see `scripts/check_i18n_keys.py`), wired through `initLocalization()`. The namespace is added to **ALL EIGHT locale files** (`lang/en.json`, `de.json`, `fr.json`, `it.json`, `pl.json`, `pt-BR.json`, `ru.json`, `zh-Hans.json`) with **identical nested key sets and identical placeholder names** — `check_parity` (`scripts/check_i18n_keys.py:242`) enforces both, and CI runs the strict form `python3 scripts/check_i18n_keys.py --all` (`.github/workflows/test.yml:27`). An en-only addition is a red build.
+
+Placeholders are **single-brace ICU** (`{rival}`, never `{{rival}}`): `initLocalization()` initialises i18next with the ICU plugin (`utils/Localization.kt:142-144`), and every sibling `kingdom.turnGazette.*` value is single-braced (`"Caravans: {list}"`, `"Campaign Clocks: {clocks}"`).
+
+Values are **strings only — never JSON arrays.** There is not one array value anywhere in `lang/en.json` today, and `unfuckFoundryTranslations` (`utils/Localization.kt:114-123`) rebuilds every non-string node through `.toRecord()`, so an array pool would silently arrive at i18next as an object. The headline pools are therefore flattened into individually-named string keys (`headline.expand1`, `headline.expand2`, …):
 
 ```json
 "kingdom": {
@@ -425,28 +534,56 @@ All keys nested under `pf2e-kingmaker-tools` → `kingdom.rivalRealms.*` in `lan
     "fame": "Fame", "armies": "Armies", "growth": "Growth",
     "empty": "No rival realms tracked. Add one to watch the neighbors grow.",
     "unlinked": "This realm's faction no longer exists.",
+    "standingReason": "{rival}'s expansion strained the border",
     "profile": { "dormant": "Dormant", "slow-expansion": "Slow Expansion",
       "brevoy-hinterlands": "Brevoy — Hinterlands Claim", "troll-horde": "Troll Horde",
       "pitax-wartime": "Pitax — Wartime Levy", "expansionist-endgame": "Expansionist" },
     "headline": {
-      "expand": ["{{rival}} claimed {{n}} hexes near {{place}}.",
-                 "{{rival}} pushed its border toward {{place}}.",
-                 "Settlers under {{rival}}'s banner spread across {{place}}."],
-      "expandWar": ["{{rival}} seized contested ground near {{place}} under arms."],
-      "fame": ["{{rival}}'s renown spreads through the River Kingdoms.",
-               "Bards carry tales of {{rival}} to distant courts."],
-      "army": ["{{rival}} raised {{n}} fresh companies.",
-               "{{rival}}'s war-camps swell near {{place}}."]
+      "expand1": "{rival} claimed {n} hexes near {place}.",
+      "expand2": "{rival} pushed its border toward {place}.",
+      "expand3": "Settlers under {rival}'s banner spread across {place}.",
+      "fame1": "{rival}'s renown spreads through the River Kingdoms.",
+      "fame2": "Bards carry tales of {rival} to distant courts.",
+      "army1": "{rival} raised {n} fresh companies.",
+      "army2": "{rival}'s war-camps swell near {place}.",
+      "armyWar1": "{rival}'s levies muster for war near {place}.",
+      "armyWar2": "{rival} marches {n} fresh companies to the front."
     },
-    "warOffer": { "title": "{{rival}} masses for war", "raise": "Raise War Threat", "dismiss": "Dismiss" },
-    "standingOffer": { "title": "{{rival}}'s expansion strains the border", "apply": "Apply Standing Shift", "dismiss": "Dismiss" },
+    "warOffer": { "title": "{rival} masses for war", "raise": "Raise War Threat", "dismiss": "Dismiss" },
+    "standingOffer": { "title": "{rival}'s expansion strains the border", "apply": "Apply Standing Shift", "dismiss": "Dismiss" },
     "dialog": { "add": "Add Rival Realm", "edit": "Edit Rival Realm", "faction": "Faction",
       "growthProfile": "Growth Profile", "growthMode": "Growth Source", "borderRegion": "Border Region",
       "warThreshold": "War Army Threshold", "pauseGrowth": "Pause Growth" }
   },
-  "turnGazette": { "rivalMove": "{{list}}" }
+  "turnGazette": { "rivalMove": "Rival Realms: {list}" }
 }
 ```
+
+**Profile labels are the one composed key, and they get their own guard.** Profile ids come from
+`data/rival-growth-profiles/` (§3.4), so the label lookup is
+`t("kingdom.rivalRealms.profile.$id")` — invisible to `collect_refs`, and a new profile file with
+no label would ship a dropdown entry titled with the raw key while every check stays green. This is
+exactly the shape `check_setup_wizard_keys` (`scripts/check_i18n_keys.py:356-389`) was written for,
+so Phase 4 adds a sibling:
+
+```python
+# scripts/check_i18n_keys.py
+RIVAL_PROFILE_DIR = "data/rival-growth-profiles"
+
+def check_rival_profile_keys():
+    """Check 8: every rival growth profile id must have a label in every locale."""
+    ids = [json.load(open(p, encoding="utf-8"))["id"]
+           for p in sorted(glob.glob(f"{RIVAL_PROFILE_DIR}/*.json"))]
+    problems = [(path, f"kingdom.rivalRealms.profile.{i}")
+                for path in sorted(glob.glob("lang/*.json"))
+                for i in ids
+                if not isinstance(
+                    lookup_value(json.load(open(path, encoding="utf-8")).get(NS, {}),
+                                 f"kingdom.rivalRealms.profile.{i}"), str)]
+    ...
+```
+
+registered in `main()` alongside the other checks so `--all` runs it.
 
 ---
 
@@ -458,6 +595,15 @@ Rival moves are **mostly public gazette flavor** with **no button**. Only the tw
 
 Every stat that ticked over produces one headline line, appended to the End-Turn gazette (see §6). No interaction — pure fiction.
 
+**The gazette string exists twice, on purpose.** `formatTurnGazette` takes an injected localizer defaulting to `::defaultLocalize` (`TurnHistory.kt:91`), so its unit tests render through a hand-maintained `when` rather than i18next. Phase 3 must therefore add
+
+```kotlin
+// TurnHistory.kt — inside defaultLocalize (:208), above the `else -> key` at :231
+"kingdom.turnGazette.rivalMove" -> "Rival Realms: ${dyn.list}"
+```
+
+**verbatim-equivalent** to the `lang/en.json` value in §4.4. `check_gazette_resolver` (`scripts/check_i18n_keys.py:308-350`, run by CI via `--all`) normalises the Kotlin `${dyn.list}` to `{list}` and demands a byte-identical en.json string; without the `when` case `defaultLocalize` falls through to `else -> key`, §7.2's `gazetteIncludesRivalHeadlines` renders the raw key, and the divergence is invisible everywhere else.
+
 ### 5.2 Offer cards enumerated
 
 | Trigger | Offer id | Buttons | Handler behavior (ChatButtons.kt) |
@@ -465,7 +611,7 @@ Every stat that ticked over produces one headline line, appended to the End-Turn
 | Linked group `atWar` **and** `armyCount` crosses `warArmyThreshold` | `km-offer-rival-war-threat` | **[Raise War Threat]** · **[Dismiss]** | GM-gated. `[Raise War Threat]` opens `AddWarThreat` prefilled with `prefillEnemyFaction = factionRef` (reuses the exact body of the existing `km-offer-war-threat` handler — appends threat, `recalculateWarPressure`, `setKingdom`). `[Dismiss]` bumps `lastWarOfferArmyCount` so it won't re-fire until the army grows again. |
 | Rival `size` grew by ≥ configurable N this turn (aggressive expansion on a shared border) | `km-offer-rival-standing-shift` | **[Apply Standing Shift]** · **[Dismiss]** | GM-gated + idempotent. `[Apply Standing Shift]` routes a negative delta through `applyStandingDelta` on the linked `RawGroup`, appends a `RawFactionStandingEntry` (reason `kingdom.rivalRealms.standingReason`), `setKingdom`. Naturally participates in the diplomacy tracker's own threshold hooks. `[Dismiss]` posts nothing. |
 
-Both follow the established idempotent, GM-gated, `button.dataset["…"]`-driven shape (see `km-offer-war-threat`, `km-offer-war-threat-arrival` at `ChatButtons.kt:179` / `:201`). Both carry `data-kingdom-actor-uuid` for actor resolution.
+Both follow the established idempotent, GM-gated, `button.dataset["…"]`-driven shape (see `km-offer-war-threat`, `km-offer-war-threat-arrival` at `ChatButtons.kt:216` / `:242`). Both carry `data-kingdom-actor-uuid` for actor resolution.
 
 ### 5.3 Digest, not spam
 
@@ -480,7 +626,7 @@ Offers are collected during `performEndTurn` and posted as at most **one whisper
 | **Faction & Diplomacy Tracker** | `data/kingdom/FactionRelations.kt`, `kingdom/data/RawGroup.kt`, `sheet/contexts/GroupContext.kt` | `factionRef → RawGroup.name` is the link. `atWar` on the group gates the war/army growth split. `km-offer-rival-standing-shift` routes through `applyStandingDelta` + appends `RawFactionStandingEntry`. |
 | **Turn ticking** | `kingdom/TurnTickingEngine.kt` | New `rivalRealms` in/`rivalRealms`+`rivalMoves` out on `TickResult`; growth runs in `tick()` (monthly), deterministic. |
 | **End-turn flow** | `kingdom/dialogs/TurnWizardApplication.kt` (`performEndTurn`) | Persists `kingdom.rivalRealms = tickResult.rivalRealms`; feeds `rivalMoves` labels into `formatTurnGazette`; posts §5 offers. |
-| **Gazette / Turn History** | `kingdom/TurnHistory.kt` | `formatTurnGazette` gains `rivalMoves: List<String> = emptyList()` → public "Rival Realms" gazette lines. Passed to **both** the GM (`turnNotes`) and player (`playerNotes`) gazette calls — rival headlines are **public** (unlike secret campaign-clock progress, which is dropped for players). |
+| **Gazette / Turn History** | `kingdom/TurnHistory.kt` | `formatTurnGazette` (`:80-206`) gains `rivalMoves: List<String> = emptyList()` → public "Rival Realms" gazette lines. Passed to **both** the GM (`turnNotes`) and player (`playerNotes`) gazette calls — rival headlines are **public** (unlike secret campaign-clock progress, which is dropped for players). **Also add the mandatory second copy of the string to `defaultLocalize`** — see below. |
 | **Army & War Pressure** | `kingdom/data/RawWarThreat.kt`, `kingdom/dialogs/AddWarThreat.kt`, `recalculateWarPressure` | `km-offer-rival-war-threat` reuses `AddWarThreat`; `armyCount` is a scoreboard scalar that *offers* a threat, never spawns a token. |
 | **Campaign Clocks** | `campaign/CampaignClock.kt`, `CampaignClockContext.kt` | Independent, but complementary: a "Stag Lord deadline" clock and a `brevoy-hinterlands` rival profile are the two halves of the same house-rule ("deal with the Stag Lord or Brevoy claims the Hinterlands"). No code coupling. |
 | **Turn Analytics** | `kingdom/TurnAnalytics.kt`, `sheet/contexts/AnalyticsContext.kt` | **Optional overlay (deferred phase):** overlay the leading rival's `rivalPowerScore` (or size) as a second series on the existing size/level charts, so the player sees their curve vs the rival's. Requires snapshotting one rival value into `RawTurnRecord` (a new nullable field → its own migration) and an `extractSeries` key. Marked deferred; not required for v1. |
@@ -521,7 +667,7 @@ Offers are collected during `performEndTurn` and posted as at most **one whisper
 | Test | Assertion |
 |------|-----------|
 | `growRivalRealm_flatProfileIncrementsAndHeadlines` | `pitax-wartime` on a realm → army/size deltas match profile; `grewStats` drives correct headline keys. |
-| `growRivalRealm_atWarPausesSizeKeepsArmy` | `atWar=true` → `sizeDelta==0`, army still grows, wartime headline pool used. |
+| `growRivalRealm_atWarPausesSizeKeepsArmy` | `atWar=true` → `sizeDelta==0`, `grewStats` contains only `ARMY`, the army move's `pool` is `RivalHeadlinePool.ARMY_WAR` and `headline.startsWith("kingdom.rivalRealms.headline.armyWar1")` (with no i18next in jsTest, `t(key, data)` returns `"$key ($details)"` — see §3.2). |
 | `growRivalRealm_warOfferOnThresholdCross` | armyCount rising past `warArmyThreshold` (and past `lastWarOfferArmyCount`) → `warOfferArmyCount` non-null; below/equal → null. |
 | `growRivalRealm_pauseGrowthFreezes` | `pauseGrowth=true` → no deltas, no moves. |
 | `advanceAllRivals_deterministicPreviewCommitParity` | same input twice → byte-identical `rivalRealms` + `rivalMoves`. |
@@ -529,7 +675,7 @@ Offers are collected during `performEndTurn` and posted as at most **one whisper
 | `gazetteIncludesRivalHeadlines` | `formatTurnGazette(rivalMoves=…)` output contains the interpolated headline lines. |
 | `standingShiftOffer_onAggressiveExpansion` | size delta ≥ N → a `km-offer-rival-standing-shift` move; below N → none. |
 | `unlinkedFaction_growsButNoWarOffer` | `factionRef` with no matching group → grows, but `atWar` treated false so no war offer. |
-| `migration49_seedsEmptyArray` | KingdomData without `rivalRealms` → after Migration49 → `rivalRealms != null`, length 0. |
+| `migration49_seedsEmptyArray` *(placeholder number — see the §2.3 caveat; rename with the class)* | KingdomData without `rivalRealms` → after Migration49 → `rivalRealms != null`, length 0. |
 
 ### 7.3 Manual Foundry verification checklist
 
@@ -543,7 +689,7 @@ Offers are collected during `performEndTurn` and posted as at most **one whisper
 8. Toggle **Pause Growth** → End Turn → that realm's stats do not move.
 9. Log in as a **player** → standings table is visible and read-only; no growth dials, no Add/Edit/Delete buttons, no offer whispers.
 10. Rename the linked group → realm row shows the "unlinked faction" hint but still renders/grows.
-11. Reload the world → rivals, stats, accruals, and dials persist. Run `scripts/check_i18n_keys.py` → no raw keys in the UI.
+11. Reload the world → rivals, stats, accruals, and dials persist. Run `python3 scripts/check_i18n_keys.py --all` (the form CI runs — includes cross-language parity, the gazette-resolver check and the new profile-label guard) → no raw keys in the UI.
 
 ---
 
@@ -553,10 +699,10 @@ Each phase is one kanban worker card, ~1–2 days.
 
 | Phase | Title | Deliverable | Key files |
 |-------|-------|-------------|-----------|
-| **1** | **Data model + migration + profiles** | `RawRivalRealm` interface, `KingdomData.rivalRealms`, `Defaults` seed, `Migration49` (+ registry), `data/rival-growth-profiles.json`, profile loader. | `kingdom/data/RawRivalRealm.kt`, `KingdomData.kt`, `sheet/Defaults.kt`, `migrations/migrations/Migration49.kt`, `migrations/Migrations.kt`, `data/rival-growth-profiles.json` |
-| **2** | **Pure core (commonMain) + tests** | `RivalRealms.kt` (`growStat`, `rivalPowerScore`, `RivalStandingRow`, `rankStandings`, `headlineTemplateIndex`, `RivalGrowthProfile`, `RivalStat`), full `RivalRealmsTest`. | `commonMain/.../data/kingdom/RivalRealms.kt`, `commonTest/.../data/kingdom/RivalRealmsTest.kt` |
-| **3** | **jsMain engine + tick integration** | `RivalRealmEngine.kt` (`growRivalRealm`, `advanceAllRivals`, `RivalGrowthResult`, `RivalMove`), extend `TickResult`, wire into `TurnTickingEngine.tick()`, persist + gazette in `performEndTurn`, `formatTurnGazette` `rivalMoves` param. | `kingdom/RivalRealmEngine.kt`, `kingdom/TurnTickingEngine.kt`, `kingdom/dialogs/TurnWizardApplication.kt`, `kingdom/TurnHistory.kt`, `RivalRealmEngineTest.kt` (jsTest) |
-| **4** | **Standings UI + GM dialog + i18n** | Rival Realms section on trade-agreements board, `RivalRealmsContext`, computed player row + `rankStandings`, `ModifyRivalRealm` dialog, sheet action handlers, `lang/en.json` keys. | `sections/trade-agreements/page.hbs`, `sheet/contexts/RivalRealmsContext.kt`, `kingdom/dialogs/ModifyRivalRealm.kt`, `sheet/KingdomSheet.kt`, `lang/en.json` |
+| **1** | **Data model + migration + profiles** | `RawRivalRealm` interface, `KingdomData.rivalRealms`, `Defaults` seed, `Migration49` *(placeholder number — see the §2.3 caveat)* (+ registry), the six preset files in `data/rival-growth-profiles/`, `RawRivalGrowthProfile` + `rivalGrowthProfilesById()` loader (no `build.gradle.kts` change — `combineJsonFiles` picks the new directory up automatically). | `kingdom/data/RawRivalRealm.kt`, `KingdomData.kt`, `sheet/Defaults.kt`, `migrations/migrations/Migration49.kt` *(placeholder)*, `migrations/Migrations.kt`, `kingdom/RivalGrowthProfiles.kt`, `data/rival-growth-profiles/*.json` |
+| **2** | **Pure core (commonMain) + tests** | `RivalRealms.kt` (`growStat`, `rivalPowerScore`, `RivalStandingRow`, `rankStandings`, `headlineTemplateIndex`, `RivalHeadlinePool`, `poolFor`, `RivalGrowthProfile`, `RivalStat`), full `RivalRealmsTest`. | `commonMain/.../data/kingdom/RivalRealms.kt`, `commonTest/.../data/kingdom/RivalRealmsTest.kt` |
+| **3** | **jsMain engine + tick integration** | `RivalRealmEngine.kt` (`growRivalRealm`, `advanceAllRivals`, `localizeRivalHeadline`, `RivalGrowthResult`, `RivalMove`), extend `TickResult`, wire the new `rivalRealms` argument into `TurnTickingEngine.tick(...)` **inside `runKingdomTurnTick`** (`TurnWizardApplication.kt:207`) so commit/preview/forecast stay in parity, persist + gazette in `performEndTurn`, `formatTurnGazette` `rivalMoves` param, **and the matching `"kingdom.turnGazette.rivalMove" -> "Rival Realms: ${dyn.list}"` case in `defaultLocalize` (`TurnHistory.kt:208`, above `else -> key` at `:231`)** — `check_gazette_resolver` requires the two copies to match verbatim. | `kingdom/RivalRealmEngine.kt`, `kingdom/TurnTickingEngine.kt`, `kingdom/dialogs/TurnWizardApplication.kt` (`runKingdomTurnTick` + `performEndTurn`), `kingdom/TurnHistory.kt`, `RivalRealmEngineTest.kt` (jsTest) |
+| **4** | **Standings UI + GM dialog + i18n** | Rival Realms section on trade-agreements board, `RivalRealmsContext`, computed player row + `rankStandings`, `ModifyRivalRealm` dialog, sheet action handlers, the `kingdom.rivalRealms.*` namespace in **all eight** locale files (identical key sets + placeholder names), and the `check_rival_profile_keys` guard. | `sections/trade-agreements/page.hbs`, `sheet/contexts/RivalRealmsContext.kt`, `kingdom/dialogs/ModifyRivalRealm.kt`, `sheet/KingdomSheet.kt`, `lang/en.json`, `lang/de.json`, `lang/fr.json`, `lang/it.json`, `lang/pl.json`, `lang/pt-BR.json`, `lang/ru.json`, `lang/zh-Hans.json`, `scripts/check_i18n_keys.py` |
 | **5** | **Offer handlers + QA** | `km-offer-rival-war-threat` + `km-offer-rival-standing-shift` handlers (digest, idempotent, GM-gated), offer templates, jsTest for offers, manual checklist. | `kingdom/ChatButtons.kt`, `chatmessages/rival-*-offer.hbs`, `RivalRealmEngineTest.kt` (offer cases) |
 | **6 (deferred/optional)** | **Analytics rival overlay** | Snapshot leading-rival power into `RawTurnRecord` (+ its own migration), add `extractSeries` key, overlay series on the size/level charts. | `kingdom/data/RawTurnRecord.kt`, `kingdom/TurnHistory.kt` (`buildTurnRecord`), `kingdom/TurnAnalytics.kt`, `sections/analytics/*.hbs`, new migration |
 
