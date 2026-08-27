@@ -1,5 +1,6 @@
 package at.posselt.pfrpg2e.kingdom.sheet.contexts
 
+import at.posselt.pfrpg2e.kingdom.ClosedVoteLine
 import at.posselt.pfrpg2e.kingdom.SessionPrepEntry
 import at.posselt.pfrpg2e.kingdom.SessionPrepView
 import at.posselt.pfrpg2e.kingdom.TurnRecentEntry
@@ -20,6 +21,21 @@ external interface SessionPrepEntryContext {
     val turnsRemaining: Int?
     val hasTurns: Boolean
     val hasDetail: Boolean
+}
+
+@JsPlainObject
+external interface ClosedVoteLineContext {
+    val question: String
+    val winnerLabel: String?
+    val winnerCount: Int
+    val totalBallots: Int
+    val isTie: Boolean
+    /** False for a tie AND for a vote nobody answered -- both are failures to decide, and the
+     *  template must not print an empty winner slot for either. */
+    val hasWinner: Boolean
+    val hasLinks: Boolean
+    /** Pre-joined "12, 15": Handlebars cannot join, and the recap line interpolates one string. */
+    val linkedTurnsCsv: String
 }
 
 @JsPlainObject
@@ -44,6 +60,10 @@ external interface TurnRecentEntryContext {
     val ruinCrime: Int?
     val ruinDecay: Int?
     val ruinStrife: Int?
+    val closedVotes: Array<ClosedVoteLineContext>
+    val hasClosedVotes: Boolean
+    /** True for the one turn a vote's consequence chip jumped to; drives the flash highlight. */
+    val isHighlighted: Boolean
 }
 
 @JsPlainObject
@@ -76,7 +96,7 @@ private fun List<SessionPrepEntry>.toContexts(): Array<SessionPrepEntryContext> 
         )
     }.toTypedArray()
 
-private fun List<TurnRecentEntry>.toTurnContexts(): Array<TurnRecentEntryContext> =
+private fun List<TurnRecentEntry>.toTurnContexts(highlightTurn: Int?): Array<TurnRecentEntryContext> =
     map { entry ->
         TurnRecentEntryContext(
             turn = entry.turn,
@@ -99,12 +119,27 @@ private fun List<TurnRecentEntry>.toTurnContexts(): Array<TurnRecentEntryContext
             ruinCrime = entry.ruinCrime,
             ruinDecay = entry.ruinDecay,
             ruinStrife = entry.ruinStrife,
+            isHighlighted = highlightTurn != null && entry.turn == highlightTurn,
+            hasClosedVotes = entry.closedVotes.isNotEmpty(),
+            closedVotes = entry.closedVotes.map { line ->
+                ClosedVoteLineContext(
+                    question = line.question,
+                    winnerLabel = line.winnerLabel,
+                    winnerCount = line.winnerCount,
+                    totalBallots = line.totalBallots,
+                    isTie = line.isTie,
+                    hasWinner = line.winnerLabel != null,
+                    hasLinks = line.linkedTurns.isNotEmpty(),
+                    linkedTurnsCsv = line.linkedTurns.joinToString(", "),
+                )
+            }.toTypedArray(),
         )
     }.toTypedArray()
 
 fun buildSessionPrepContext(
     view: SessionPrepView,
     forecast: ForecastPanelContext? = null,
+    highlightTurn: Int? = null,
 ): SessionPrepContext =
     SessionPrepContext(
         forecast = forecast,
@@ -114,7 +149,7 @@ fun buildSessionPrepContext(
         hexHooks = view.hexHooks.toContexts(),
         companionMoments = view.companionMoments.toContexts(),
         companionExpeditions = view.companionExpeditions.toContexts(),
-        recentTurns = view.recentTurns.toTurnContexts(),
+        recentTurns = view.recentTurns.toTurnContexts(highlightTurn),
         pendingEncounters = view.pendingEncounters.toContexts(),
         isGM = view.isGM,
         hasAnything = view.hasAnything,

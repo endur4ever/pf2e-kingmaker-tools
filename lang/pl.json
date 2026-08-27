@@ -2471,7 +2471,9 @@
                 "needQuestionAndOptions": "Głosowanie wymaga pytania i co najmniej dwóch opcji.",
                 "noteTitle": "Notatka o wyniku",
                 "noteLabel": "Co zdecydowała rada",
-                "noteButton": "Notatka"
+                "noteButton": "Notatka",
+                "noLinkableTurns": "Brak późniejszych tur do powiązania — rozegraj najpierw turę.",
+                "linkOutOfWindow": "Tura {turn} jest starsza niż lista ostatnich tur."
             }
         },
         "chatMessages": {

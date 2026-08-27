@@ -2593,7 +2593,9 @@
                 "needQuestionAndOptions": "A vote needs a question and at least two options.",
                 "noteTitle": "Outcome note",
                 "noteLabel": "What the council decided",
-                "noteButton": "Note"
+                "noteButton": "Note",
+                "noLinkableTurns": "No later turns to link yet — play a turn first.",
+                "linkOutOfWindow": "Turn {turn} is older than the recent-turns list shows."
             }
         },
         "chatMessages": {

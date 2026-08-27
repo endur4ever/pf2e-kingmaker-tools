@@ -51,6 +51,7 @@ fun buildTurnRecord(
     ruinCrime: Int? = null,
     ruinDecay: Int? = null,
     ruinStrife: Int? = null,
+    closedVoteIds: Array<String>? = null,
 ): RawTurnRecord = RawTurnRecord(
     turn = turn,
     timestamp = timestamp,
@@ -63,6 +64,7 @@ fun buildTurnRecord(
     warPressure = warPressure,
     pressurePerTurn = pressurePerTurn,
     notes = notes,
+    closedVoteIds = closedVoteIds,
     playerNotes = playerNotes,
     level = level,
     size = size,

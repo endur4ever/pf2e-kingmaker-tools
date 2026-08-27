@@ -1,5 +1,9 @@
 package at.posselt.pfrpg2e.kingdom.sheet
 
+import at.posselt.pfrpg2e.kingdom.RECENT_TURNS_WINDOW
+import at.posselt.pfrpg2e.actions.handlers.SetCouncilVoteLinksData
+import at.posselt.pfrpg2e.kingdom.dialogs.linkableTurnsFor
+import at.posselt.pfrpg2e.kingdom.dialogs.LinkVoteConsequence
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.CouncilNoteContext
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.CouncilNoteData
 import at.posselt.pfrpg2e.app.prompt
@@ -443,6 +447,9 @@ class KingdomSheet(
     private var currentNavEntry: MainNavEntry =
         initialNavEntry ?: if (noCharter) MainNavEntry.KINGDOM else MainNavEntry.TURN
 
+    /** Turn a vote's consequence chip asked Session Prep to point at; null on any other nav. */
+    private var highlightTurn: Int? = null
+
     /** Transient per-open horizon for the Session Prep forecast (plan phase 4); resets on reopen. */
     private var forecastHorizonDays: Int = 7
 
@@ -653,6 +660,21 @@ class KingdomSheet(
                 event.preventDefault()
                 event.stopPropagation()
                 currentNavEntry = target.dataset["link"]?.let { MainNavEntry.fromString(it) } ?: MainNavEntry.TURN
+                // a vote's "-> Turn 14" chip jumps to Session Prep AND points at the turn it
+                // names; any other navigation clears it, so the highlight never sticks
+                highlightTurn = target.dataset["turn"]?.toIntOrNull()
+                // Recent Turns renders only the last 10, while links may point anywhere in the
+                // 100-turn history: say so instead of navigating to a page where nothing lights up
+                highlightTurn?.let { wanted ->
+                    val visible = (getKingdom().turnHistory ?: emptyArray())
+                        .takeLast(RECENT_TURNS_WINDOW)
+                        .any { it.turn == wanted }
+                    if (!visible) {
+                        ui.notifications.info(
+                            t("kingdom.councilVotes.linkOutOfWindow", recordOf("turn" to wanted.toString()))
+                        )
+                    }
+                }
                 render()
             }
 
@@ -1491,6 +1513,46 @@ class KingdomSheet(
                 }
             }
 
+            "link-vote-consequence" -> buildPromise {
+                if (!game.user.isGM) return@buildPromise
+                val voteId = target.dataset["voteId"] ?: return@buildPromise
+                val kingdom = getKingdom()
+                val vote = kingdom.councilVotes?.firstOrNull { it.id == voteId } ?: return@buildPromise
+                val turns = linkableTurnsFor(
+                    history = kingdom.turnHistory,
+                    closedTurn = vote.closedTurn,
+                    alreadyLinked = vote.linkedRecordRefs,
+                )
+                if (turns.isEmpty()) {
+                    ui.notifications.warn(t("kingdom.councilVotes.noLinkableTurns"))
+                    return@buildPromise
+                }
+                // Links the picker cannot offer -- their turn record was evicted by the history
+                // cap, or a reopen/reclose moved closedTurn past them -- are carried through
+                // untouched. The handler REPLACES the array, so anything not in the payload is
+                // destroyed, and silently deleting a link the GM was never shown is not an edit
+                // they made.
+                val offered = turns.map { it.turn }.toSet()
+                val unoffered = (vote.linkedRecordRefs ?: emptyArray()).filterNot { it in offered }
+                LinkVoteConsequence(
+                    question = vote.question ?: "",
+                    turns = turns,
+                ) { linkedTurns ->
+                    buildPromise {
+                        dispatcher.dispatch(
+                            ActionMessage(
+                                action = "setCouncilVoteLinks",
+                                data = SetCouncilVoteLinksData(
+                                    actorUuid = actor.uuid,
+                                    voteId = voteId,
+                                    turns = (linkedTurns + unoffered).toIntArray().toTypedArray(),
+                                ).unsafeCast<AnyObject>(),
+                            )
+                        )
+                    }
+                }.launch()
+            }
+
             "open-council-vote" -> {
                 // isGM in the template is layout; this bail is the authorization, because
                 // players are OWNERs of the party actor and can reach any branch regardless of
@@ -1999,6 +2061,7 @@ class KingdomSheet(
                                     companionExpeditions = kingdom.companionExpeditions,
                                     companions = kingdom.companions,
                                     warThreats = kingdom.warThreats,
+                    councilVotes = kingdom.councilVotes,
                                 )
                                 val folder = SessionPrepJournalExporter.export(game, view)
                                 ui.notifications.info(t("kingdom.sessionPrep.exportSuccess", recordOf("folder" to folder)))
@@ -2022,6 +2085,7 @@ class KingdomSheet(
                                     companionExpeditions = kingdom.companionExpeditions,
                                     companions = kingdom.companions,
                                     warThreats = kingdom.warThreats,
+                    councilVotes = kingdom.councilVotes,
                                 )
                     val html = SessionPrepNarrativeGenerator.generate(view)
                     if (html.isBlank()) {
@@ -3938,7 +4002,9 @@ class KingdomSheet(
                     companionExpeditions = kingdom.companionExpeditions,
                     companions = kingdom.companions,
                     warThreats = kingdom.warThreats,
-                )
+                    councilVotes = kingdom.councilVotes,
+                ),
+                highlightTurn = highlightTurn
             ),
             showDetailedMatrix = showDetailedMatrix,
             campaignClocks = kingdom.campaignClocks.toDashboardContext(isGM),

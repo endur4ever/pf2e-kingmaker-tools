@@ -2471,7 +2471,9 @@
                 "needQuestionAndOptions": "Un vote exige une question et au moins deux options.",
                 "noteTitle": "Note de résultat",
                 "noteLabel": "Ce que le conseil a décidé",
-                "noteButton": "Note"
+                "noteButton": "Note",
+                "noLinkableTurns": "Aucun tour ultérieur à lier — jouez d'abord un tour.",
+                "linkOutOfWindow": "Le tour {turn} est antérieur à la liste des tours récents."
             }
         },
         "chatMessages": {

@@ -2471,7 +2471,9 @@
                 "needQuestionAndOptions": "Eine Abstimmung braucht eine Frage und mindestens zwei Optionen.",
                 "noteTitle": "Ergebnisnotiz",
                 "noteLabel": "Was der Rat entschieden hat",
-                "noteButton": "Notiz"
+                "noteButton": "Notiz",
+                "noLinkableTurns": "Noch keine späteren Züge zum Verknüpfen — spiele zuerst einen Zug.",
+                "linkOutOfWindow": "Zug {turn} liegt vor dem angezeigten Zeitraum der letzten Züge."
             }
         },
         "chatMessages": {

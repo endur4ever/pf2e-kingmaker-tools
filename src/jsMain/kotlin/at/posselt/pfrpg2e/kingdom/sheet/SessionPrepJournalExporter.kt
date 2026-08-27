@@ -179,6 +179,25 @@ object SessionPrepJournalExporter {
                     sb.append("<br/><em>Clock events: ${t.clockEvents.joinToString(", ") { esc(it) }}</em>")
                 }
                 if (!t.notes.isNullOrBlank()) sb.append("<br/><em>${esc(t.notes)}</em>")
+                // Council decisions land inside the GM-gated Recent Turns loop, so the exported
+                // journal inherits GM-only visibility -- deliberately narrower than the sheet's
+                // player-visible recap, because the export is the GM's prep document.
+                for (vote in t.closedVotes) {
+                    sb.append("<br/><em>Vote: ${esc(vote.question)} — ")
+                    if (vote.isTie) {
+                        sb.append("tied, no decision")
+                    } else if (vote.winnerLabel == null) {
+                        // NOT a tie: nobody answered (or everyone abstained). The tally file goes
+                        // out of its way to keep these apart, so the export must too
+                        sb.append("no ballots cast")
+                    } else {
+                        sb.append("${esc(vote.winnerLabel)} (${vote.winnerCount} of ${vote.totalBallots})")
+                    }
+                    if (vote.linkedTurns.isNotEmpty()) {
+                        sb.append(" → turn ${vote.linkedTurns.joinToString(", ")}")
+                    }
+                    sb.append("</em>")
+                }
                 sb.append("</li>\n")
             }
             sb.append("</ul>\n")

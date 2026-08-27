@@ -14,6 +14,7 @@ import at.posselt.pfrpg2e.actions.handlers.CloseCouncilVoteHandler
 import at.posselt.pfrpg2e.actions.handlers.DeleteCouncilVoteHandler
 import at.posselt.pfrpg2e.actions.handlers.OpenCouncilVoteHandler
 import at.posselt.pfrpg2e.actions.handlers.ReopenCouncilVoteHandler
+import at.posselt.pfrpg2e.actions.handlers.SetCouncilVoteLinksHandler
 import at.posselt.pfrpg2e.actions.handlers.SetCouncilVoteNoteHandler
 import at.posselt.pfrpg2e.actions.handlers.SyncActivitiesHandler
 import at.posselt.pfrpg2e.actions.handlers.SyncBattleOutcomeHandler
@@ -117,6 +118,7 @@ fun main() {
                 OpenCouncilVoteHandler(game = game),
                 DeleteCouncilVoteHandler(),
                 SetCouncilVoteNoteHandler(),
+                SetCouncilVoteLinksHandler(),
             )
         ).apply {
             listen()

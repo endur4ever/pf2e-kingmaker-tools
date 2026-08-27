@@ -16,6 +16,7 @@ import at.posselt.pfrpg2e.actions.handlers.CloseCouncilVoteHandler
 import at.posselt.pfrpg2e.actions.handlers.DeleteCouncilVoteHandler
 import at.posselt.pfrpg2e.actions.handlers.OpenCouncilVoteHandler
 import at.posselt.pfrpg2e.actions.handlers.ReopenCouncilVoteHandler
+import at.posselt.pfrpg2e.actions.handlers.SetCouncilVoteLinksHandler
 import at.posselt.pfrpg2e.actions.handlers.SetCouncilVoteNoteHandler
 import at.posselt.pfrpg2e.actions.handlers.SyncActivitiesHandler
 import at.posselt.pfrpg2e.actions.handlers.SyncBattleOutcomeHandler
@@ -187,6 +188,7 @@ class ActionDispatcherSecurityTest {
             OpenCouncilVoteHandler(game).action to OriginatorPolicy.GM_ONLY,
             DeleteCouncilVoteHandler().action to OriginatorPolicy.GM_ONLY,
             SetCouncilVoteNoteHandler().action to OriginatorPolicy.GM_ONLY,
+            SetCouncilVoteLinksHandler().action to OriginatorPolicy.GM_ONLY,
         )
         val actual: List<Pair<String, OriginatorPolicy>> = listOf(
             AddHuntAndGatherResultHandler(),
@@ -205,6 +207,7 @@ class ActionDispatcherSecurityTest {
             OpenCouncilVoteHandler(game),
             DeleteCouncilVoteHandler(),
             SetCouncilVoteNoteHandler(),
+            SetCouncilVoteLinksHandler(),
         ).map { it.action to it.originatorPolicy }
         assertEquals(expected, actual)
     }

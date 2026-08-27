@@ -677,6 +677,14 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
             ruinStrife = kingdom.ruin.strife.value,
             notes = turnNotes,
             playerNotes = playerTurnNotes,
+            // votes the council closed THIS turn, derived rather than stamped at click time: a
+            // vote records the turn it closed on, so the record can always recompute the set --
+            // and a vote closed and reopened within the same turn correctly leaves nothing behind
+            closedVoteIds = (kingdom.councilVotes ?: emptyArray())
+                .filter { it.closedTurn == currentTurn }
+                .mapNotNull { it.id }
+                .toTypedArray()
+                .takeIf { it.isNotEmpty() },
         ),
     )
 

@@ -157,7 +157,7 @@
             {{#if sessionPrepContext.recentTurns.length}}
                 <ul class="km-session-prep-turn-list">
                     {{#each sessionPrepContext.recentTurns}}
-                        <li class="km-session-prep-turn-item">
+                        <li class="km-session-prep-turn-item{{#if this.isHighlighted}} km-session-prep-turn-item--highlight{{/if}}">
                             <span class="km-session-prep-turn-item__label">{{localizeKM "kingdom.sessionPrep.turnLabel"}} {{this.turn}}</span>
                             <span class="km-session-prep-turn-item__stats">
                                 <span class="km-session-prep-turn-stat"><i class="fa-solid fa-star"></i> {{this.fame}}</span>
@@ -181,6 +181,22 @@
                                 </span>
                             {{/if}}
                             {{#if this.hasNotes}}<span class="km-session-prep-turn-item__notes">{{this.notes}}</span>{{/if}}
+                            {{#if this.hasClosedVotes}}
+                                <span class="km-session-prep-turn-item__votes">
+                                    {{#each this.closedVotes}}
+                                        <span class="km-session-prep-vote">
+                                            {{#unless this.hasWinner}}
+                                                {{!-- a tie AND a vote nobody answered both land
+                                                      here: neither may print a blank winner --}}
+                                                <b>{{this.question}}</b> — {{localizeKM "kingdom.councilVotes.tieNote"}}
+                                            {{else}}
+                                                {{localizeKM "kingdom.councilVotes.recapLine" question=this.question winner=this.winnerLabel count=this.winnerCount total=this.totalBallots}}
+                                            {{/unless}}
+                                            {{#if this.hasLinks}}<em>{{localizeKM "kingdom.councilVotes.recapLinked" turns=this.linkedTurnsCsv}}</em>{{/if}}
+                                        </span>
+                                    {{/each}}
+                                </span>
+                            {{/if}}
                         </li>
                     {{/each}}
                 </ul>

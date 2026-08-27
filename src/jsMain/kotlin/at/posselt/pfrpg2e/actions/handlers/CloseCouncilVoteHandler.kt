@@ -33,6 +33,13 @@ external interface OpenCouncilVoteData {
 }
 
 @JsPlainObject
+external interface SetCouncilVoteLinksData {
+    val actorUuid: String
+    val voteId: String
+    val turns: Array<Int>
+}
+
+@JsPlainObject
 external interface SetCouncilVoteNoteData {
     val actorUuid: String
     val voteId: String
@@ -55,7 +62,12 @@ class CloseCouncilVoteHandler : ActionHandler("closeCouncilVote") {
             val kingdom = actor.getKingdom() ?: return
             val vote = kingdom.councilVotes?.firstOrNull { it.id == data.voteId } ?: return
             if (vote.closedTurn != null) return  // idempotent: a stale card cannot move the recorded turn
-            val closed = closeVote(vote, kingdom.currentTurn ?: 0, outcomeNote = null)
+            // +1, matching ExpeditionResolution's chronicle stamp and for the same reason:
+            // kingdom.currentTurn is the COMPLETED-turn count, so during play of turn N it reads
+            // N-1, while the End Turn record that will report this vote is labelled N. Stamping
+            // the raw value made `closedTurn == record.turn` unmatchable, which silently emptied
+            // every recap, every export line and every consequence link.
+            val closed = closeVote(vote, (kingdom.currentTurn ?: 0) + 1, outcomeNote = null)
             kingdom.councilVotes = kingdom.councilVotes
                 ?.map { if (it.id == data.voteId) closed else it }
                 ?.toTypedArray()
@@ -99,7 +111,7 @@ class OpenCouncilVoteHandler(private val game: Game) : ActionHandler("openCounci
                 question = data.question,
                 options = data.options,
                 votes = emptyMap<String, Int>().toRawBallots(),
-                openedTurn = kingdom.currentTurn ?: 0,
+                openedTurn = (kingdom.currentTurn ?: 0) + 1,  // record-label scale, as above
                 closedTurn = null,
                 outcomeNote = null,
                 linkedRecordRefs = emptyArray(),
@@ -144,6 +156,31 @@ class SetCouncilVoteNoteHandler : ActionHandler("setCouncilVoteNote") {
             kingdom.councilVotes = kingdom.councilVotes?.map { vote ->
                 if (vote.id == data.voteId) {
                     RawCouncilVote.copy(vote, outcomeNote = data.note.ifBlank { null })
+                } else {
+                    vote
+                }
+            }?.toTypedArray()
+            actor.setKingdom(kingdom)
+        }
+    }
+}
+
+/**
+ * Replaces a vote's consequence links with the picker's complete desired set.
+ *
+ * Set-semantics rather than an add/remove pair: the picker is checkboxes, so what it knows is the
+ * final state, and diffing here would mean re-deriving what the GM unchecked. Sorted so the chip
+ * row does not reorder itself between renders.
+ */
+class SetCouncilVoteLinksHandler : ActionHandler("setCouncilVoteLinks") {
+    override suspend fun execute(action: ActionMessage, dispatcher: ActionDispatcher) {
+        val data = action.data.unsafeCast<SetCouncilVoteLinksData>()
+        councilVoteMutex.withLock {
+            val actor = fromUuidTypeSafe<KingdomActor>(data.actorUuid) ?: return
+            val kingdom = actor.getKingdom() ?: return
+            kingdom.councilVotes = kingdom.councilVotes?.map { vote ->
+                if (vote.id == data.voteId) {
+                    RawCouncilVote.copy(vote, linkedRecordRefs = data.turns.distinct().sorted().toTypedArray())
                 } else {
                     vote
                 }

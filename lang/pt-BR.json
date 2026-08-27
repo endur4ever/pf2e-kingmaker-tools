@@ -2471,7 +2471,9 @@
                 "needQuestionAndOptions": "Uma votação precisa de uma pergunta e ao menos duas opções.",
                 "noteTitle": "Nota do resultado",
                 "noteLabel": "O que o conselho decidiu",
-                "noteButton": "Nota"
+                "noteButton": "Nota",
+                "noLinkableTurns": "Nenhum turno posterior para vincular — jogue um turno primeiro.",
+                "linkOutOfWindow": "O turno {turn} é mais antigo que a lista de turnos recentes."
             }
         },
         "chatMessages": {

@@ -36,4 +36,14 @@ external interface RawTurnRecord {
      * Nullable: legacy records have none, so the Spotlight shows nothing for old turns rather
      * than asserting that nobody contributed. */
     var contributions: Array<RawTurnContribution>?
+
+    /**
+     * Ids of the council votes CLOSED during this turn -- the back-reference that lets a turn's
+     * recap say which decisions the table made that month.
+     *
+     * Nullable and never backfilled: a legacy record genuinely closed no votes, and seeding an
+     * empty array would assert that the council met and decided nothing rather than that nobody
+     * was recording it. Same reasoning as [contributions] (see Migration69's KDoc).
+     */
+    var closedVoteIds: Array<String>?
 }

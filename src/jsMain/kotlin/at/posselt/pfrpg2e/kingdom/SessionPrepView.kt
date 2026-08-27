@@ -1,5 +1,7 @@
 package at.posselt.pfrpg2e.kingdom
 
+import at.posselt.pfrpg2e.kingdom.tallyVote
+import at.posselt.pfrpg2e.kingdom.data.RawCouncilVote
 import at.posselt.pfrpg2e.campaign.CampaignClock
 import at.posselt.pfrpg2e.companion.CompanionPersonalQuest
 import at.posselt.pfrpg2e.data.hex.HexContentVisibility
@@ -41,6 +43,21 @@ data class SessionPrepEntry(
     val completesQuest: Boolean = false,
 )
 
+/**
+ * One closed council vote as it reads in a turn's recap: "«question» -- Aye (3 of 4)".
+ *
+ * [winnerLabel] is null for a tie AND for a vote nobody answered, because both are failures to
+ * decide and the recap must not name a winner out of either.
+ */
+data class ClosedVoteLine(
+    val question: String,
+    val winnerLabel: String?,
+    val winnerCount: Int,
+    val totalBallots: Int,
+    val isTie: Boolean,
+    val linkedTurns: List<Int>,
+)
+
 data class TurnRecentEntry(
     val turn: Int,
     val timestamp: String,
@@ -58,6 +75,8 @@ data class TurnRecentEntry(
     val ruinCrime: Int? = null,
     val ruinDecay: Int? = null,
     val ruinStrife: Int? = null,
+    /** Council votes closed on this turn. Player-visible by design: shared memory is the point. */
+    val closedVotes: List<ClosedVoteLine> = emptyList(),
 )
 
 data class SessionPrepView(
@@ -218,6 +237,7 @@ fun buildSessionPrepView(
     companionExpeditions: Array<RawCompanionExpedition>? = null,
     companions: Array<RawCharacter>? = null,
     warThreats: Array<dynamic>? = null,
+    councilVotes: Array<RawCouncilVote>? = null,
 ): SessionPrepView = SessionPrepView(
     openQuests = buildOpenQuests(quests),
     // Campaign clocks + unresolved events are GM-facing prep; withheld from players.
@@ -227,15 +247,54 @@ fun buildSessionPrepView(
     companionMoments = buildCompanionMoments(companionQuests, isGM),
     companionExpeditions = buildCompanionExpeditions(companionExpeditions, companions, isGM),
     // Recent turns: GM sees full detail (clocks, warPressure); players see safe slice.
-    recentTurns = if (isGM) buildRecentTurns(turnHistory) else buildRecentTurnsPlayer(turnHistory),
+    recentTurns = if (isGM) buildRecentTurns(turnHistory, councilVotes) else buildRecentTurnsPlayer(turnHistory, councilVotes),
     // Pending encounters are GM-only.
     pendingEncounters = if (isGM) buildPendingEncounters(hexContents, warThreats) else emptyList(),
     isGM = isGM,
 )
 
-private fun buildRecentTurns(turnHistory: Array<RawTurnRecord>?): List<TurnRecentEntry> =
+/**
+ * Resolves a record's closedVoteIds into recap lines.
+ *
+ * Two kinds of id are SKIPPED rather than rendered blank: one whose vote the council-vote cap
+ * evicted, and one whose vote has since been REOPENED (its tally is live again, so it is no
+ * longer a record of a decision). Same discipline the linked-turn chips use for evicted records.
+ */
+private fun closedVoteLinesFor(
+    record: RawTurnRecord,
+    councilVotes: Array<RawCouncilVote>?,
+): List<ClosedVoteLine> {
+    val ids = record.closedVoteIds ?: return emptyList()
+    if (ids.isEmpty()) return emptyList()
+    val byId = (councilVotes ?: emptyArray()).associateBy { it.id }
+    return ids.mapNotNull { id ->
+        val vote = byId[id] ?: return@mapNotNull null
+        // a REOPENED vote drops out of the frozen record: its tally is live again, and a recap
+        // line whose numbers move while players cast is not a record of anything
+        if (vote.closedTurn == null) return@mapNotNull null
+        val tally = tallyVote(vote)
+        val winner = tally.decidedOption
+        ClosedVoteLine(
+            question = vote.question ?: "",
+            winnerLabel = winner?.let { vote.options?.getOrNull(it) },
+            winnerCount = tally.leadingCount,
+            totalBallots = tally.totalBallots,
+            isTie = tally.isTie,
+            linkedTurns = (vote.linkedRecordRefs ?: emptyArray()).toList(),
+        )
+    }
+}
+
+/** How many turns the Recent Turns list shows. Named because the consequence-chip jump has to
+ *  know whether the turn it points at is inside the window. */
+const val RECENT_TURNS_WINDOW = 10
+
+private fun buildRecentTurns(
+    turnHistory: Array<RawTurnRecord>?,
+    councilVotes: Array<RawCouncilVote>?,
+): List<TurnRecentEntry> =
     (turnHistory ?: emptyArray())
-        .takeLast(10)
+        .takeLast(RECENT_TURNS_WINDOW)
         .reversed()
         .map { record ->
             TurnRecentEntry(
@@ -255,13 +314,17 @@ private fun buildRecentTurns(turnHistory: Array<RawTurnRecord>?): List<TurnRecen
                 ruinCrime = record.ruinCrime,
                 ruinDecay = record.ruinDecay,
                 ruinStrife = record.ruinStrife,
+                closedVotes = closedVoteLinesFor(record, councilVotes),
             )
         }
 
 /** Player-safe recent turns: omits clockEvents (secret clock progress) and warPressure. */
-private fun buildRecentTurnsPlayer(turnHistory: Array<RawTurnRecord>?): List<TurnRecentEntry> =
+private fun buildRecentTurnsPlayer(
+    turnHistory: Array<RawTurnRecord>?,
+    councilVotes: Array<RawCouncilVote>?,
+): List<TurnRecentEntry> =
     (turnHistory ?: emptyArray())
-        .takeLast(10)
+        .takeLast(RECENT_TURNS_WINDOW)
         .reversed()
         .map { record ->
             TurnRecentEntry(
@@ -283,5 +346,6 @@ private fun buildRecentTurnsPlayer(turnHistory: Array<RawTurnRecord>?): List<Tur
                 ruinCrime = record.ruinCrime,
                 ruinDecay = record.ruinDecay,
                 ruinStrife = record.ruinStrife,
+                closedVotes = closedVoteLinesFor(record, councilVotes),
             )
         }

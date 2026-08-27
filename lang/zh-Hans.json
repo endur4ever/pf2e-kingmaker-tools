@@ -2471,7 +2471,9 @@
                 "needQuestionAndOptions": "表决需要一个议题和至少两个选项。",
                 "noteTitle": "结果备注",
                 "noteLabel": "议会的决定",
-                "noteButton": "备注"
+                "noteButton": "备注",
+                "noLinkableTurns": "尚无可关联的后续回合——先进行一个回合。",
+                "linkOutOfWindow": "回合 {turn} 早于「最近回合」列表所显示的范围。"
             }
         },
         "chatMessages": {

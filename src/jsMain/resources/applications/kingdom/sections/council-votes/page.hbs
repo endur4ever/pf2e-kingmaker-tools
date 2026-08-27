@@ -67,7 +67,7 @@
                 {{#if this.hasLinks}}
                     <p class="km-council-vote-links">
                         {{#each this.linkedTurns}}
-                            <button type="button" data-action="change-nav" data-link="sessionPrep">
+                            <button type="button" data-action="change-nav" data-link="sessionPrep" data-turn="{{this}}">
                                 {{localizeKM "kingdom.councilVotes.recapLinked" turns=this}}
                             </button>
                         {{/each}}
@@ -93,6 +93,12 @@
                                 {{localizeKM "kingdom.councilVotes.reopen"}}
                             </button>
                         {{/if}}
+                        {{#unless this.isOpen}}
+                            {{!-- consequences only make sense once the decision is made --}}
+                            <button type="button" data-action="link-vote-consequence" data-vote-id="{{this.id}}">
+                                {{localizeKM "kingdom.councilVotes.linkPickerTitle"}}
+                            </button>
+                        {{/unless}}
                         <button type="button" data-action="set-council-vote-note" data-vote-id="{{this.id}}">
                             {{localizeKM "kingdom.councilVotes.noteButton"}}
                         </button>

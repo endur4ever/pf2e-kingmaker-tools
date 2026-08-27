@@ -2471,7 +2471,9 @@
                 "needQuestionAndOptions": "Для голосования нужны вопрос и минимум два варианта.",
                 "noteTitle": "Заметка об итоге",
                 "noteLabel": "Что решил совет",
-                "noteButton": "Заметка"
+                "noteButton": "Заметка",
+                "noLinkableTurns": "Пока нет более поздних ходов для связи — сыграйте ход.",
+                "linkOutOfWindow": "Ход {turn} старше, чем показывает список последних ходов."
             }
         },
         "chatMessages": {
