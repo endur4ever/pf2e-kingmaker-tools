@@ -18,6 +18,10 @@
                     data-tooltip="{{localizeKM "kingdom.holdings.edit"}}"><i class="fa-solid fa-sliders"></i></button>
             <button type="button" data-action="cycle-holding-condition" data-holding-id="{{id}}"
                     data-tooltip="{{localizeKM "kingdom.holdings.forceCondition"}}"><i class="fa-solid fa-house-crack"></i></button>
+            {{#unless (eq conditionValue "sound")}}
+                <button type="button" data-action="holding-repair" data-holding-id="{{id}}"
+                        data-tooltip="{{localizeKM "kingdom.holdings.repairOffer.title"}}"><i class="fa-solid fa-trowel-bricks"></i></button>
+            {{/unless}}
             <button type="button" data-action="revoke-holding" data-holding-id="{{id}}"
                     data-tooltip="{{localizeKM "kingdom.holdings.revoke"}}"><i class="fa-solid fa-trash"></i></button>
         </div>

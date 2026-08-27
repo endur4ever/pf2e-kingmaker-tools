@@ -2611,6 +2611,25 @@
                     "tier": "Livello di reddito",
                     "needNameAndOwner": "Un possedimento richiede nome e proprietario.",
                     "tooMany": "Quel PG ne possiede già {max} — colore, non una simulazione economica."
+                },
+                "damageOffer": {
+                    "title": "Un possedimento è colpito",
+                    "line": "{holding} — {cause}",
+                    "apply": "Applica danni",
+                    "waive": "Rinuncia",
+                    "applied": "{holding} subisce: {cause}.",
+                    "waived": "Rinunciato — nessun danno.",
+                    "alreadyApplied": "Già applicato.",
+                    "warThreat": "Minaccia di guerra",
+                    "hexLost": "L'esagono è andato perduto",
+                    "sacked": "Il sacco di {settlement}"
+                },
+                "repairOffer": {
+                    "title": "Ripara un possedimento",
+                    "line": "{holding} può essere ripristinato di un grado per {cost} mo.",
+                    "repair": "Ripara ({cost} mo)",
+                    "repaired": "{holding} è ripristinato di un grado ({cost} mo dovute).",
+                    "alreadyRepaired": "Già riparato."
                 }
             }
         },

@@ -81,3 +81,18 @@ fun accrueHoldingIncome(
     }.toTypedArray()
     return HoldingAccrualResult(holdings = stamped, offers = offers)
 }
+
+/**
+ * Which holdings a blow at ([hexKey], [sceneId]) lands on. Null location matches NOTHING here --
+ * the "no location -> offer against everything" fallback for events is the CALLER's explicit
+ * choice, not a wildcard hiding in the matcher.
+ */
+fun holdingsAt(
+    holdings: Array<RawPersonalHolding>?,
+    hexKey: String?,
+    sceneId: String?,
+): List<RawPersonalHolding> =
+    (holdings ?: emptyArray()).filter { holding ->
+        (hexKey != null && holding.boundHexKey == hexKey) ||
+                (sceneId != null && holding.structureSceneId == sceneId)
+    }

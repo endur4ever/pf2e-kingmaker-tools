@@ -2611,6 +2611,25 @@
                     "tier": "Уровень дохода",
                     "needNameAndOwner": "Владению нужны название и владелец.",
                     "tooMany": "У этого персонажа уже {max} — антураж, не экономическая симуляция."
+                },
+                "damageOffer": {
+                    "title": "Владение пострадало",
+                    "line": "{holding} — {cause}",
+                    "apply": "Применить урон",
+                    "waive": "Простить",
+                    "applied": "{holding} страдает: {cause}.",
+                    "waived": "Прощено — без вреда.",
+                    "alreadyApplied": "Уже применено.",
+                    "warThreat": "Военная угроза",
+                    "hexLost": "Гекс был потерян",
+                    "sacked": "Разграбление {settlement}"
+                },
+                "repairOffer": {
+                    "title": "Починить владение",
+                    "line": "{holding} можно восстановить на шаг за {cost} зм.",
+                    "repair": "Починить ({cost} зм)",
+                    "repaired": "{holding} восстановлено на шаг (к оплате {cost} зм).",
+                    "alreadyRepaired": "Уже починено."
                 }
             }
         },

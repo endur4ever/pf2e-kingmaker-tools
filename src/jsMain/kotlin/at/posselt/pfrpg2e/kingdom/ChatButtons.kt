@@ -1,5 +1,12 @@
 package at.posselt.pfrpg2e.kingdom
 
+import at.posselt.pfrpg2e.kingdom.postHoldingDamageOffer
+import at.posselt.pfrpg2e.kingdom.holdingsAt
+import at.posselt.pfrpg2e.data.kingdom.HOLDING_DAMAGING_EVENT_IDS
+import at.posselt.pfrpg2e.kingdom.conditionEnum
+import at.posselt.pfrpg2e.kingdom.applyHoldingDamage
+import at.posselt.pfrpg2e.data.kingdom.repairedCondition
+import at.posselt.pfrpg2e.data.kingdom.DamageSeverity
 import at.posselt.pfrpg2e.kingdom.data.RawPersonalHolding
 import at.posselt.pfrpg2e.kingdom.data.RawPcRenown
 import at.posselt.pfrpg2e.actions.ActionMessage
@@ -175,10 +182,31 @@ private val buttons = listOf(
                 "Could not find event with index $eventIndex"
             }
             postChatMessage(t("kingdom.resolvedEvent", recordOf("name" to event.event.name)))
+            val resolvedSceneId = event.settlementSceneId
             kingdom.ongoingEvents = kingdom.ongoingEvents
                 .filterIndexed { index, _ -> index != eventIndex }
                 .toTypedArray()
             actor.setKingdom(kingdom)
+            // Damage hook #3: an id in HOLDING_DAMAGING_EVENT_IDS strikes the holdings at the
+            // event's settlement -- or, when the event carries no location, EVERY holding (the
+            // plan's explicit fallback; most entries in the map are location-less events, so a
+            // location test alone would silently skip them). The id set is the selector.
+            HOLDING_DAMAGING_EVENT_IDS[eventId]?.let { severity ->
+                val struck = if (resolvedSceneId != null) {
+                    holdingsAt(kingdom.personalHoldings, hexKey = null, sceneId = resolvedSceneId)
+                } else {
+                    (kingdom.personalHoldings ?: emptyArray()).toList()
+                }
+                for (holding in struck) {
+                    postHoldingDamageOffer(
+                        game = game,
+                        actorUuid = actor.uuid,
+                        holding = holding,
+                        severity = severity,
+                        cause = event.event.name,
+                    )
+                }
+            }
         }
     },
     ChatButton("km-set-structure-hp") { game, actor, event, button ->
@@ -283,6 +311,70 @@ private val buttons = listOf(
                         "holding" to holding.name,
                         "gold" to gold.toString(),
                     ),
+                )
+            )
+        }
+    },
+    ChatButton("km-offer-holding-damage") { game, actor, _, button ->
+        // Apply advances the ladder ONLY from the condition pinned at post time: a double-click
+        // or a stale card whose holding already moved is a visible no-op, never a second blow.
+        if (!game.user.isGM) return@ChatButton
+        val holdingId = button.dataset["holdingId"] ?: return@ChatButton
+        val fromCondition = button.dataset["fromCondition"] ?: return@ChatButton
+        val severity = button.dataset["severity"]
+            ?.let { runCatching { DamageSeverity.valueOf(it) }.getOrNull() }
+            ?: return@ChatButton
+        val cause = button.dataset["cause"] ?: ""
+        actor.getKingdom()?.let { kingdom ->
+            val holding = kingdom.personalHoldings?.firstOrNull { it.id == holdingId }
+                ?: return@ChatButton
+            if (holding.condition != fromCondition) {
+                ui.notifications.info(t("kingdom.holdings.damageOffer.alreadyApplied"))
+                return@ChatButton
+            }
+            kingdom.personalHoldings = kingdom.personalHoldings?.map {
+                if (it.id == holdingId) applyHoldingDamage(it, severity, cause) else it
+            }?.toTypedArray()
+            actor.setKingdom(kingdom)
+            postChatMessage(
+                t(
+                    "kingdom.holdings.damageOffer.applied",
+                    recordOf("holding" to holding.name, "cause" to cause),
+                )
+            )
+        }
+    },
+    ChatButton("km-waive-holding-damage") { game, _, _, _ ->
+        // the plan's Waive records NOTHING; the ack exists because a silent button reads broken
+        if (!game.user.isGM) return@ChatButton
+        ui.notifications.info(t("kingdom.holdings.damageOffer.waived"))
+    },
+    ChatButton("km-offer-holding-repair") { game, actor, _, button ->
+        // Repair is announced, not silently paid: the card names the cost, the click restores one
+        // step, and the public line records who owes what -- the same chat-award discipline as
+        // income (plan open question 2 leaves the payer open, so the table settles it).
+        if (!game.user.isGM) return@ChatButton
+        val holdingId = button.dataset["holdingId"] ?: return@ChatButton
+        val fromCondition = button.dataset["fromCondition"] ?: return@ChatButton
+        val cost = button.dataset["cost"]?.toIntOrNull() ?: return@ChatButton
+        actor.getKingdom()?.let { kingdom ->
+            val holding = kingdom.personalHoldings?.firstOrNull { it.id == holdingId }
+                ?: return@ChatButton
+            if (holding.condition != fromCondition) {
+                ui.notifications.info(t("kingdom.holdings.repairOffer.alreadyRepaired"))
+                return@ChatButton
+            }
+            val repaired = repairedCondition(holding.conditionEnum())
+            kingdom.personalHoldings = kingdom.personalHoldings?.map {
+                if (it.id == holdingId) {
+                    RawPersonalHolding.copy(it, condition = repaired.value)
+                } else it
+            }?.toTypedArray()
+            actor.setKingdom(kingdom)
+            postChatMessage(
+                t(
+                    "kingdom.holdings.repairOffer.repaired",
+                    recordOf("holding" to holding.name, "cost" to cost.toString()),
                 )
             )
         }
@@ -614,6 +706,10 @@ private val buttons = listOf(
                     }
                     settlement.destroyedStructureIds =
                         (settlement.destroyedStructureIds ?: emptyArray()) + tokenIds.toTypedArray()
+                    // Damage hook #2: a sacked settlement strikes every structure-bound holding
+                    // there -- the district burned around them. MAJOR; posted after this branch's
+                    // setKingdom below.
+                    val sackedHoldings = holdingsAt(kingdom.personalHoldings, hexKey = null, sceneId = sceneId)
                     kingdom.unrest += unrest
                     val settlementName = game.scenes.get(settlement.sceneId)?.name ?: threat.name
                     val updatedThreat = threat.copyWith(offerConsumed = true)
@@ -631,6 +727,18 @@ private val buttons = listOf(
                         }
                     }
                     actor.setKingdom(kingdom)
+                    for (holding in sackedHoldings) {
+                        postHoldingDamageOffer(
+                            game = game,
+                            actorUuid = actor.uuid,
+                            holding = holding,
+                            severity = DamageSeverity.MAJOR,
+                            cause = t(
+                                "kingdom.holdings.damageOffer.sacked",
+                                recordOf("settlement" to (settlementName ?: "")),
+                            ),
+                        )
+                    }
                     postChatMessage(
                         if (names.isEmpty()) {
                             t(

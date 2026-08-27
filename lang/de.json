@@ -2611,6 +2611,25 @@
                     "tier": "Einkommensstufe",
                     "needNameAndOwner": "Ein Besitz braucht Namen und Besitzer.",
                     "tooMany": "Dieser SC hält bereits {max} — Flair, keine Wirtschaftssimulation."
+                },
+                "damageOffer": {
+                    "title": "Ein Besitz wird getroffen",
+                    "line": "{holding} — {cause}",
+                    "apply": "Schaden anwenden",
+                    "waive": "Erlassen",
+                    "applied": "{holding} erleidet: {cause}.",
+                    "waived": "Erlassen — kein Schaden.",
+                    "alreadyApplied": "Bereits angewendet.",
+                    "warThreat": "Kriegsbedrohung",
+                    "hexLost": "Das Hexfeld ging verloren",
+                    "sacked": "Die Plünderung von {settlement}"
+                },
+                "repairOffer": {
+                    "title": "Besitz reparieren",
+                    "line": "{holding} kann für {cost} GM um eine Stufe wiederhergestellt werden.",
+                    "repair": "Reparieren ({cost} GM)",
+                    "repaired": "{holding} wird um eine Stufe wiederhergestellt ({cost} GM fällig).",
+                    "alreadyRepaired": "Bereits repariert."
                 }
             }
         },

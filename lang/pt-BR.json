@@ -2611,6 +2611,25 @@
                     "tier": "Nível de renda",
                     "needNameAndOwner": "Uma propriedade precisa de nome e dono.",
                     "tooMany": "Esse PJ já possui {max} — ambientação, não simulação econômica."
+                },
+                "damageOffer": {
+                    "title": "Uma propriedade é atingida",
+                    "line": "{holding} — {cause}",
+                    "apply": "Aplicar dano",
+                    "waive": "Perdoar",
+                    "applied": "{holding} sofre: {cause}.",
+                    "waived": "Perdoado — sem danos.",
+                    "alreadyApplied": "Já aplicado.",
+                    "warThreat": "Ameaça de guerra",
+                    "hexLost": "O hexágono foi perdido",
+                    "sacked": "O saque de {settlement}"
+                },
+                "repairOffer": {
+                    "title": "Reparar propriedade",
+                    "line": "{holding} pode ser restaurada um passo por {cost} po.",
+                    "repair": "Reparar ({cost} po)",
+                    "repaired": "{holding} é restaurada um passo ({cost} po devidas).",
+                    "alreadyRepaired": "Já reparada."
                 }
             }
         },

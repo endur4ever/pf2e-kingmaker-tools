@@ -1,5 +1,9 @@
 package at.posselt.pfrpg2e.kingdom.sheet
 
+import at.posselt.pfrpg2e.kingdom.postHoldingRepairOffer
+import at.posselt.pfrpg2e.kingdom.conditionEnum
+import at.posselt.pfrpg2e.kingdom.tierEnum
+import at.posselt.pfrpg2e.data.kingdom.repairCost
 import at.posselt.pfrpg2e.kingdom.data.RawPersonalHolding
 import at.posselt.pfrpg2e.kingdom.dialogs.HoldingOwnerOption
 import at.posselt.pfrpg2e.kingdom.dialogs.GrantHolding
@@ -1613,6 +1617,18 @@ class KingdomSheet(
                     } else holding
                 }?.toTypedArray()
                 actor.setKingdom(kingdom)
+            }
+
+            "holding-repair" -> buildPromise {
+                // posts the whispered repair offer; the CARD's button does the actual repair, so
+                // the cost and the from-condition are pinned once and the click is idempotent
+                if (!game.user.isGM) return@buildPromise
+                val holdingId = target.dataset["holdingId"] ?: return@buildPromise
+                val holding = getKingdom().personalHoldings?.firstOrNull { it.id == holdingId }
+                    ?: return@buildPromise
+                val cost = repairCost(holding.tierEnum(), holding.conditionEnum())
+                if (cost <= 0) return@buildPromise
+                postHoldingRepairOffer(game, actor.uuid, holding, cost)
             }
 
             "revoke-holding" -> buildPromise {

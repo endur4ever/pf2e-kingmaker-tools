@@ -50,3 +50,64 @@ suspend fun postHoldingIncomeOffer(
         whisper = gmUserIds,
     )
 }
+
+/**
+ * One whispered damage offer per struck holding. The FROM condition is pinned on the card, which
+ * is the whole idempotency story: Apply advances only when the holding still holds the pinned
+ * condition, so a double-click or a stale card is a visible no-op rather than a second blow.
+ */
+suspend fun postHoldingDamageOffer(
+    game: Game,
+    actorUuid: String,
+    holding: at.posselt.pfrpg2e.kingdom.data.RawPersonalHolding,
+    severity: at.posselt.pfrpg2e.data.kingdom.DamageSeverity,
+    cause: String,
+) {
+    val gmUserIds = game.users.filter { it.isGM }.mapNotNull { it.id }.toTypedArray()
+    if (gmUserIds.isEmpty()) return
+    val ctx = js("{}")
+    ctx.actorUuid = actorUuid
+    ctx.holdingId = holding.id
+    ctx.fromCondition = holding.condition
+    ctx.severity = severity.name
+    ctx.cause = cause
+    ctx.title = t("kingdom.holdings.damageOffer.title")
+    ctx.line = t(
+        "kingdom.holdings.damageOffer.line",
+        recordOf("holding" to holding.name, "cause" to cause),
+    )
+    ctx.applyLabel = t("kingdom.holdings.damageOffer.apply")
+    ctx.waiveLabel = t("kingdom.holdings.damageOffer.waive")
+    postChatTemplate(
+        templatePath = "chatmessages/holding-damage-offer.hbs",
+        templateContext = ctx,
+        whisper = gmUserIds,
+    )
+}
+
+/** The repair offer for one damaged/destroyed holding; cost pinned at post time. */
+suspend fun postHoldingRepairOffer(
+    game: Game,
+    actorUuid: String,
+    holding: at.posselt.pfrpg2e.kingdom.data.RawPersonalHolding,
+    cost: Int,
+) {
+    val gmUserIds = game.users.filter { it.isGM }.mapNotNull { it.id }.toTypedArray()
+    if (gmUserIds.isEmpty()) return
+    val ctx = js("{}")
+    ctx.actorUuid = actorUuid
+    ctx.holdingId = holding.id
+    ctx.fromCondition = holding.condition
+    ctx.cost = cost
+    ctx.title = t("kingdom.holdings.repairOffer.title")
+    ctx.line = t(
+        "kingdom.holdings.repairOffer.line",
+        recordOf("holding" to holding.name, "cost" to cost.toString()),
+    )
+    ctx.repairLabel = t("kingdom.holdings.repairOffer.repair", recordOf("cost" to cost.toString()))
+    postChatTemplate(
+        templatePath = "chatmessages/holding-repair-offer.hbs",
+        templateContext = ctx,
+        whisper = gmUserIds,
+    )
+}

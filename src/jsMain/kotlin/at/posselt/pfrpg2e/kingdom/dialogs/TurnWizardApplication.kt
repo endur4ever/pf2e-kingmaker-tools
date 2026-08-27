@@ -2,6 +2,10 @@ package at.posselt.pfrpg2e.kingdom.dialogs
 
 import kotlinx.coroutines.sync.withLock
 import com.foundryvtt.pf2e.actor.PF2ECharacter
+import at.posselt.pfrpg2e.kingdom.postHoldingDamageOffer
+import at.posselt.pfrpg2e.kingdom.holdingsAt
+import at.posselt.pfrpg2e.kingdom.data.RawPersonalHolding
+import at.posselt.pfrpg2e.data.kingdom.DamageSeverity
 import at.posselt.pfrpg2e.kingdom.postHoldingIncomeOffer
 import at.posselt.pfrpg2e.utils.fromUuidTypeSafe
 import at.posselt.pfrpg2e.kingdom.councilVoteMutex
@@ -789,6 +793,26 @@ private suspend fun performEndTurnLocked(game: Game, actor: KingdomActor): TickR
     // other clients, and a click in the pre-persist window is silently lost
     stampEpithetOffersMade(kingdom, currentTurn, epithetOffers)
 
+    // Damage hook #4: a hex-bound holding whose hex BECAME unclaimed this turn. Edge-detected via
+    // lastKnownClaimed -- without the previous value this could only see "is unclaimed" and would
+    // re-offer every turn. The stamp is part of the tick (inside the persist); the offers post
+    // after it with the rest. Read-only against kingmaker.state; never inside tick().
+    val unclaimedHoldings = mutableListOf<at.posselt.pfrpg2e.kingdom.data.RawPersonalHolding>()
+    kingdom.personalHoldings = kingdom.personalHoldings?.map { holding ->
+        val hexKey = holding.boundHexKey ?: return@map holding
+        val claimedNow = runCatching {
+            com.foundryvtt.kingmaker.kingmaker.state.hexes[hexKey]?.claimed == true
+        }.getOrDefault(true)
+        val wasClaimed = holding.lastKnownClaimed
+        if (wasClaimed == true && !claimedNow) {
+            val stamped = RawPersonalHolding.copy(holding, lastKnownClaimed = false)
+            unclaimedHoldings.add(stamped)
+            stamped
+        } else if (wasClaimed != claimedNow) {
+            RawPersonalHolding.copy(holding, lastKnownClaimed = claimedNow)
+        } else holding
+    }?.toTypedArray()
+
     // Rewild bookkeeping is part of the tick, so it belongs inside the persist below rather than
     // in the offer poster that runs after it (where its write would clobber card clicks).
     runCatching { reconcileRewild(kingdom, clearedUnclaimedHexes(), currentTurn) }
@@ -835,6 +859,35 @@ private suspend fun performEndTurnLocked(game: Game, actor: KingdomActor): TickR
 
     if (offerIrrigationPlague) postIrrigationPlagueOffer(game, actor)
     deadlineQuestsToOffer.forEach { quest -> postQuestDeadlineOffer(game, actor, quest) }
+
+    // Damage hook #1: a war threat that TRIGGERED this turn strikes the holdings at its target
+    // hex or settlement -- a triggered siege is MAJOR. Same post-after-persist rule as every card.
+    for (threat in tickResult.newlyTriggeredThreats) {
+        val struck = holdingsAt(
+            kingdom.personalHoldings,
+            hexKey = threat.targetHexLocation,
+            sceneId = threat.targetSettlementSceneId,
+        )
+        for (holding in struck) {
+            postHoldingDamageOffer(
+                game = game,
+                actorUuid = actor.uuid,
+                holding = holding,
+                severity = DamageSeverity.MAJOR,
+                cause = threat.name ?: t("kingdom.holdings.damageOffer.warThreat"),
+            )
+        }
+    }
+    // Damage hook #4's offers (the edge was detected and stamped before the persist)
+    for (holding in unclaimedHoldings) {
+        postHoldingDamageOffer(
+            game = game,
+            actorUuid = actor.uuid,
+            holding = holding,
+            severity = DamageSeverity.MINOR,
+            cause = t("kingdom.holdings.damageOffer.hexLost"),
+        )
+    }
 
     postHoldingIncomeOffer(
         game = game,

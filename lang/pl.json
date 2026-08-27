@@ -2611,6 +2611,25 @@
                     "tier": "Poziom dochodu",
                     "needNameAndOwner": "Włość wymaga nazwy i właściciela.",
                     "tooMany": "Ta postać ma już {max} — klimat, nie symulacja gospodarki."
+                },
+                "damageOffer": {
+                    "title": "Włość ucierpiała",
+                    "line": "{holding} — {cause}",
+                    "apply": "Zastosuj obrażenia",
+                    "waive": "Odstąp",
+                    "applied": "{holding} cierpi: {cause}.",
+                    "waived": "Odstąpiono — bez szkód.",
+                    "alreadyApplied": "Już zastosowano.",
+                    "warThreat": "Zagrożenie wojenne",
+                    "hexLost": "Heks został utracony",
+                    "sacked": "Splądrowanie {settlement}"
+                },
+                "repairOffer": {
+                    "title": "Napraw włość",
+                    "line": "{holding} można przywrócić o stopień za {cost} sz.",
+                    "repair": "Napraw ({cost} sz)",
+                    "repaired": "{holding} przywrócono o stopień ({cost} sz do zapłaty).",
+                    "alreadyRepaired": "Już naprawiono."
                 }
             }
         },

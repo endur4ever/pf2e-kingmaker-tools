@@ -2733,6 +2733,25 @@
                     "tier": "Income tier",
                     "needNameAndOwner": "A holding needs a name and an owner.",
                     "tooMany": "That PC already holds {max} — flavor, not an economy sim."
+                },
+                "damageOffer": {
+                    "title": "A holding is struck",
+                    "line": "{holding} — {cause}",
+                    "apply": "Apply Damage",
+                    "waive": "Waive",
+                    "applied": "{holding} suffers: {cause}.",
+                    "waived": "Waived — no harm done.",
+                    "alreadyApplied": "Already applied.",
+                    "warThreat": "War threat",
+                    "hexLost": "The hex was lost",
+                    "sacked": "The sack of {settlement}"
+                },
+                "repairOffer": {
+                    "title": "Repair a holding",
+                    "line": "{holding} can be restored one step for {cost} gp.",
+                    "repair": "Repair ({cost} gp)",
+                    "repaired": "{holding} is restored one step ({cost} gp owed).",
+                    "alreadyRepaired": "Already repaired."
                 }
             }
         },

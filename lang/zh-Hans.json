@@ -2611,6 +2611,25 @@
                     "tier": "收入等级",
                     "needNameAndOwner": "产业需要名称和所有者。",
                     "tooMany": "该角色已拥有 {max} 处——是风味，不是经济模拟。"
+                },
+                "damageOffer": {
+                    "title": "一处产业遭袭",
+                    "line": "{holding}——{cause}",
+                    "apply": "应用伤害",
+                    "waive": "豁免",
+                    "applied": "{holding}蒙受：{cause}。",
+                    "waived": "已豁免——安然无恙。",
+                    "alreadyApplied": "已应用。",
+                    "warThreat": "战争威胁",
+                    "hexLost": "六角格已失守",
+                    "sacked": "{settlement}遭洗劫"
+                },
+                "repairOffer": {
+                    "title": "修复产业",
+                    "line": "{holding}可花费 {cost} 金币恢复一级。",
+                    "repair": "修复（{cost} 金币）",
+                    "repaired": "{holding}恢复一级（欠付 {cost} 金币）。",
+                    "alreadyRepaired": "已修复。"
                 }
             }
         },

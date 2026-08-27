@@ -2611,6 +2611,25 @@
                     "tier": "Palier de revenu",
                     "needNameAndOwner": "Un domaine exige un nom et un propriétaire.",
                     "tooMany": "Ce PJ en détient déjà {max} — du décor, pas une simulation économique."
+                },
+                "damageOffer": {
+                    "title": "Un domaine est frappé",
+                    "line": "{holding} — {cause}",
+                    "apply": "Appliquer les dégâts",
+                    "waive": "Renoncer",
+                    "applied": "{holding} subit : {cause}.",
+                    "waived": "Renoncé — aucun mal.",
+                    "alreadyApplied": "Déjà appliqué.",
+                    "warThreat": "Menace de guerre",
+                    "hexLost": "L'hexagone a été perdu",
+                    "sacked": "Le sac de {settlement}"
+                },
+                "repairOffer": {
+                    "title": "Réparer un domaine",
+                    "line": "{holding} peut être restauré d'un cran pour {cost} po.",
+                    "repair": "Réparer ({cost} po)",
+                    "repaired": "{holding} est restauré d'un cran ({cost} po dues).",
+                    "alreadyRepaired": "Déjà réparé."
                 }
             }
         },
