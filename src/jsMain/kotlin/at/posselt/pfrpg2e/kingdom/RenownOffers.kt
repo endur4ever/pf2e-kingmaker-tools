@@ -57,6 +57,10 @@ fun pendingEpithetOffers(
  *  the GM is still deciding. Must run BEFORE End Turn's persist -- it is part of the tick. */
 fun stampEpithetOffersMade(kingdom: KingdomData, turn: Int, offers: List<PendingEpithetOffer>) {
     if (offers.isEmpty()) return
+    val offeredUuids = offers.map { it.actorUuid }.toSet()
+    kingdom.renown = (kingdom.renown ?: emptyArray()).map { row ->
+        if (row.actorUuid in offeredUuids) RawPcRenown.copy(row, lastOfferedTurn = turn) else row
+    }.toTypedArray()
 }
 
 /**

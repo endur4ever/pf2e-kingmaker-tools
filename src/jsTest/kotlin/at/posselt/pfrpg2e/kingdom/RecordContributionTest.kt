@@ -275,6 +275,25 @@ class RenownOfferTest {
     }
 
     @Test
+    fun stampingAnOfferIsWhatMakesTheGuardWork() {
+        // The guard test above sets lastOfferedTurn by hand, so it passed while the STAMPER was
+        // an empty stub and nothing in production ever wrote the field -- every un-granted
+        // epithet would have re-posted its card on every End Turn, forever. This asserts the
+        // write itself, then feeds the result back through the guard.
+        val kingdom = js("{}").unsafeCast<KingdomData>()
+        kingdom.renown = arrayOf(renownRow(populace = 55))
+        val offers = pendingEpithetOffers(kingdom.renown, rulerUuid = null, turn = 5)
+        assertEquals(1, offers.size)
+
+        stampEpithetOffersMade(kingdom, turn = 5, offers = offers)
+        assertEquals(5, kingdom.renown?.first()?.lastOfferedTurn, "the stamp must actually write")
+        assertTrue(pendingEpithetOffers(kingdom.renown, rulerUuid = null, turn = 5).isEmpty(),
+            "and the guard it feeds must then suppress the re-offer")
+        assertEquals(1, pendingEpithetOffers(kingdom.renown, rulerUuid = null, turn = 6).size,
+            "next turn it is offerable again, since the GM never answered")
+    }
+
+    @Test
     fun aRowWithoutAnActorIsSkippedRatherThanOfferedToNobody() {
         val row = renownRow(populace = 55)
         row.actorUuid = null

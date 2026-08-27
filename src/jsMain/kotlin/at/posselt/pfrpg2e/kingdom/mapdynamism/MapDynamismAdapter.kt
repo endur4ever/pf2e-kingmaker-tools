@@ -140,8 +140,12 @@ suspend fun postMapDynamismOffers(
     currentTurn: Int,
 ) {
     runCatching {
+        // No setKingdom here. This runs AFTER End Turn's persist and after the offer cards are
+        // live, so a second wholesale write of the in-hand kingdom would ship a snapshot that
+        // predates any click on them -- silently reverting a granted epithet, a rival war-offer
+        // bump, a council ballot, anything. reconcileRewild's mutation is persisted by
+        // performEndTurn instead, which calls it BEFORE its own write.
         val candidates = reconcileRewild(kingdom, clearedUnclaimedHexes(), currentTurn)
-        actor.setKingdom(kingdom)
         val neighbors = kingmakerNeighbors()
         val proposals = if (neighbors != null) {
             migrationProposals(kingdom, currentTurn, neighbors)

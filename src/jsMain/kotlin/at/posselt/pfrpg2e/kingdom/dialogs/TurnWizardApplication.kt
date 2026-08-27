@@ -1,5 +1,7 @@
 package at.posselt.pfrpg2e.kingdom.dialogs
 
+import at.posselt.pfrpg2e.kingdom.mapdynamism.clearedUnclaimedHexes
+import at.posselt.pfrpg2e.kingdom.mapdynamism.reconcileRewild
 import at.posselt.pfrpg2e.kingdom.stampEpithetOffersMade
 import at.posselt.pfrpg2e.kingdom.data.toTurnTallies
 import at.posselt.pfrpg2e.data.kingdom.spotlightOfTheTurn
@@ -309,6 +311,12 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
 
     // Captured BEFORE the tick overwrites kingdom.warThreats: the digest reports escalations by
     // diffing pre- vs post-tick levels, and after the assignment below both sides would be equal.
+    // Captured BEFORE the tick: it rewrites every finished battle's status to "archived", so a
+    // read afterwards can never match DEFEAT and the gazette line was permanently empty.
+    val preTickBattleDefeats = (kingdom.activeBattles ?: emptyArray())
+        .filter { it.status == BattleStatus.DEFEAT.value }
+        .map { it.name }
+
     val preTickThreats = kingdom.warThreats?.toList() ?: emptyList()
     val tickResult = runKingdomTurnTick(kingdom, storage, currentTurn)
     kingdom.supernaturalSolutions = tickResult.supernaturalSolutions
@@ -338,6 +346,8 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
     // number of spoiled hexes, and a failure invites a Plague event. Rolled at the turn boundary
     // because that is the module's one reliable per-turn chokepoint; RAW places it at the start of
     // the Event phase, which this immediately precedes.
+    // set here, posted after the persist below -- the offer's button writes the kingdom flag
+    var offerIrrigationPlague = false
     val spoiledHexes = kingdom.critFailedIrrigationHexes ?: 0
     if (spoiledHexes > 0) {
         val plagueDc = irrigationPlagueFlatCheckDc(spoiledHexes)
@@ -346,7 +356,7 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
             flavor = t("kingdom.irrigation.plagueCheck", recordOf("hexes" to spoiledHexes)),
         ).degreeOfSuccess.succeeded()
         if (!passed) {
-            postIrrigationPlagueOffer(game, actor)
+            offerIrrigationPlague = true
         }
     }
     // Liquidate Resources: the next turn rolls 4 fewer Resource Dice. Spending the penalty here
@@ -390,12 +400,22 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
         }?.toTypedArray()
     }
 
+    // Deadline + plague offers are COLLECTED here and posted after the persist below: their
+
+    // buttons write the kingdom flag from the clicking client, and a click landing before End
+
+    // Turn's own write is silently reverted by it (same class as the epithet cards).
+
+    val deadlineQuestsToOffer = mutableListOf<dynamic>()
+
+
+
     // Post GM offer cards for quests that hit their deadline this turn
     if (tickResult.questDeadlineReached.isNotEmpty()) {
         tickResult.questDeadlineReached.forEach { questId ->
             val quest = kingdom.campaignQuests.find { it.id == questId }
             if (quest != null) {
-                postQuestDeadlineOffer(game, actor, quest)
+                deadlineQuestsToOffer.add(quest)
             }
         }
     }
@@ -623,10 +643,7 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
     // Per-turn history record (gap analysis item 2): snapshot post-tick kingdom state.
     val clockEventNames = tickResult.clockEvents.map { it.label }.toTypedArray()
     val tributeRp = tickResult.changes.find { it.category == "resourcePoints" && it.field == "tribute" }?.newValue as? Int ?: 0
-    // Battles lost this turn, named in the gazette. Read before the tick archives them.
-    val battleDefeats = (kingdom.activeBattles ?: emptyArray())
-        .filter { it.status == BattleStatus.DEFEAT.value }
-        .map { it.name }
+    val battleDefeats = preTickBattleDefeats
     // Rival growth is visible on the map, so the same headlines go into BOTH the GM gazette and
     // the player-safe one -- unlike campaign clocks, there is nothing secret to strip.
     val rivalHeadlines = tickResult.rivalMoves.map { localizeRivalHeadline(it) }
@@ -719,6 +736,10 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
     // for the same reason the rival digests do -- their grant buttons write the kingdom flag from
     // other clients, and a click in the pre-persist window is silently lost
     stampEpithetOffersMade(kingdom, currentTurn, epithetOffers)
+
+    // Rewild bookkeeping is part of the tick, so it belongs inside the persist below rather than
+    // in the offer poster that runs after it (where its write would clobber card clicks).
+    runCatching { reconcileRewild(kingdom, clearedUnclaimedHexes(), currentTurn) }
     kingdom.currentTurnContributions = emptyArray()
     kingdom.currentTurnDeeds = emptyArray()
 
@@ -759,6 +780,9 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
         actorUuid = actor.uuid,
         offers = epithetOffers,
     )
+
+    if (offerIrrigationPlague) postIrrigationPlagueOffer(game, actor)
+    deadlineQuestsToOffer.forEach { quest -> postQuestDeadlineOffer(game, actor, quest) }
 
     postRivalOfferDigests(
         game = game,
@@ -903,10 +927,6 @@ suspend fun undoEndTurn(game: Game, actor: KingdomActor): Boolean {
     val d = snap.asDynamic()
     if (d.kingdom == null || d.snapshotTurn == null) {
         actor.unsetAppFlag("lastTurnSnapshot")
-    // The digest dedup baseline now describes a turn that no longer happened; clearing it
-    // keeps the flag honest (the re-run re-posts its card -- the same documented
-    // limitation as every other chat message under undo).
-    actor.unsetAppFlag("lastDigestBeats")
         return false
     }
     val kingdom = actor.getKingdom() ?: return false
@@ -919,6 +939,12 @@ suspend fun undoEndTurn(game: Game, actor: KingdomActor): Boolean {
         actor.deleteEmbeddedDocuments<PF2EItem>("Item", ids).await()
     }
     actor.unsetAppFlag("lastTurnSnapshot")
+    // The digest dedup baseline now describes a turn that no longer happened; clearing it keeps
+    // the flag honest (the re-run re-posts its card -- the same documented limitation as every
+    // other chat message under undo). This belongs HERE, on the path where an undo actually
+    // happened: sitting in the malformed-snapshot guard above, it fired only when NOTHING was
+    // undone -- destroying a valid baseline in that case and leaving a stale one in this one.
+    actor.unsetAppFlag("lastDigestBeats")
 
     val gmUserIds = game.users.filter { it.isGM }.mapNotNull { it.id }.toTypedArray()
     val ctx = js("{}")
