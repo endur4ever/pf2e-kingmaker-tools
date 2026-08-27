@@ -1,5 +1,6 @@
 package at.posselt.pfrpg2e.kingdom
 
+import at.posselt.pfrpg2e.camping.tickRumorLifecycles
 import at.posselt.pfrpg2e.camping.getActiveCamping
 import at.posselt.pfrpg2e.kingdom.data.RawCharacter
 import at.posselt.pfrpg2e.kingdom.data.RawCompanionExpedition
@@ -70,6 +71,7 @@ fun registerDailyTickHooks(game: Game) {
 					tickPersonalQuests(game, daysPassed)
 					tickPcDowntimeProjects(game, daysPassed)
 					tickScheduledPressures(game, worldTime, daysPassed)
+					tickRumorLifecycles(game, daysPassed)
 				}
 		}
 	}

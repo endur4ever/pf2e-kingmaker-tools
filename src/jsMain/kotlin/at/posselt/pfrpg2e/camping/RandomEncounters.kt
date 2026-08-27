@@ -1,5 +1,6 @@
 package at.posselt.pfrpg2e.camping
 
+import io.github.uuidjs.uuid.v4
 import at.posselt.pfrpg2e.app.confirm
 import at.posselt.pfrpg2e.camping.dialogs.RegionSetting
 import at.posselt.pfrpg2e.data.checks.DegreeOfSuccess
@@ -193,6 +194,15 @@ private suspend fun showEncounterPreview(
                     "isRumor" to (category == EncounterCategory.RUMOR),
                 ),
             )
+            // THE write that never existed: accepting a rumor used to post the card and throw
+            // the object away -- CampingData.rumors was declared and read-helpered but nothing
+            // ever filled it. Accepted rumors now enter the store with identity and a birthday,
+            // which is what the whole lifecycle ages
+            if (rumor != null) {
+                actor.updateRumors { existing ->
+                    existing + rumor.copy(id = v4(), bornDay = currentWorldDay(game))
+                }
+            }
             clearEncounterPreview(actor)
         } },
         onReroll = { buildPromise { rollCuratedEncounter(game, actor, offerRestore = false) } },

@@ -53,6 +53,27 @@ external interface RawRumor {
     var sourceRegion: String?
     var isConverted: Boolean
     var convertedQuestId: String?
+
+    /** Stable identity. Mandatory before any chat card can name a specific rumor; null only on
+     *  rows written by a build older than the lifecycle feature. */
+    var id: String?
+
+    /** World day number the rumor entered play. Null: adopt the day it is first seen ticking. */
+    var bornDay: Int?
+
+    /** fresh | stale | expired | converted | pinned. A STRING at this boundary; an unrecognised
+     *  value drops the ROW from evaluation rather than throwing, so one bad row cannot take down
+     *  the day's tick. */
+    var state: String?
+
+    /** true | distorted | false -- the GM's private assessment. Null = unassessed. */
+    var veracity: String?
+
+    /** Day an expiry beat was offered; a declined beat never re-offers. */
+    var beatOfferedDay: Int?
+
+    /** Machine-readable sibling of the prose [location]; enables the hex-hook conversion. */
+    var sourceHexKey: String?
 }
 
 // ── converters ──────────────────────────────────────────────────────────────
@@ -90,16 +111,30 @@ fun MerchantStock.toRaw(): RawMerchantStock = RawMerchantStock(
     uuid = uuid,
 )
 
-fun RawRumor.toModel(): Rumor = Rumor(
-    text = text,
-    isQuestHook = isQuestHook,
-    questTemplateId = questTemplateId,
-    questTemplateName = questTemplateName,
-    location = location,
-    sourceRegion = sourceRegion,
-    isConverted = isConverted,
-    convertedQuestId = convertedQuestId,
-)
+/**
+ * Null when [RawRumor.state] holds a string this build does not know: the row is dropped from
+ * evaluation INDIVIDUALLY rather than defaulted (a wrong state would mis-age it) or thrown on
+ * (one bad row must not take down the day's tick). A null state is a legacy row and reads FRESH.
+ */
+fun RawRumor.toModel(): Rumor? {
+    val parsedState = if (state == null) RumorState.FRESH else RumorState.fromValue(state) ?: return null
+    return Rumor(
+        text = text,
+        isQuestHook = isQuestHook,
+        questTemplateId = questTemplateId,
+        questTemplateName = questTemplateName,
+        location = location,
+        sourceRegion = sourceRegion,
+        isConverted = isConverted,
+        convertedQuestId = convertedQuestId,
+        id = id ?: "",
+        bornDay = bornDay,
+        state = parsedState,
+        veracity = RumorVeracity.fromValue(veracity),
+        beatOfferedDay = beatOfferedDay,
+        sourceHexKey = sourceHexKey,
+    )
+}
 
 fun Rumor.toRaw(): RawRumor = RawRumor(
     text = text,
@@ -110,6 +145,12 @@ fun Rumor.toRaw(): RawRumor = RawRumor(
     sourceRegion = sourceRegion,
     isConverted = isConverted,
     convertedQuestId = convertedQuestId,
+    id = id.takeIf { it.isNotBlank() },
+    bornDay = bornDay,
+    state = state.value,
+    veracity = veracity?.value,
+    beatOfferedDay = beatOfferedDay,
+    sourceHexKey = sourceHexKey,
 )
 
 // ── defensive accessors on CampingData ───────────────────────────────────────
@@ -117,7 +158,7 @@ fun Rumor.toRaw(): RawRumor = RawRumor(
 fun CampingData.categoryWeightsOrDefault(): CategoryWeights =
     categoryWeights?.toModel() ?: CategoryWeights()
 
-fun CampingData.rumorList(): List<Rumor> = rumors?.map { it.toModel() } ?: emptyList()
+fun CampingData.rumorList(): List<Rumor> = rumors?.mapNotNull { it.toModel() } ?: emptyList()
 
 fun CampingData.merchantStockList(): List<MerchantStock> =
     merchantStock?.map { it.toModel() } ?: emptyList()
