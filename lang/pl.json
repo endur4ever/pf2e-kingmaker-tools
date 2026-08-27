@@ -2514,7 +2514,14 @@
                     "peoplesChampion": "People's Champion",
                     "theKingmaker": "The Kingmaker",
                     "scourgeOfPitax": "Scourge of Pitax"
-                }
+                },
+                "title": "Renoma",
+                "empty": "Brak członków drużyny do pokazania.",
+                "adjust": "Dostosuj renomę",
+                "populace": "Renoma wśród ludu",
+                "populaceHelp": "0-100. Silnik ogranicza do tego zakresu.",
+                "tier": "Poziom dostępu do zakupów (0-2)",
+                "accessTier": "Dostęp do zakupów +{tier}"
             }
         },
         "chatMessages": {

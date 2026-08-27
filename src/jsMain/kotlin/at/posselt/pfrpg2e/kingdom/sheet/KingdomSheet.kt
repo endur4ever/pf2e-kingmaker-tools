@@ -1,5 +1,9 @@
 package at.posselt.pfrpg2e.kingdom.sheet
 
+import at.posselt.pfrpg2e.kingdom.data.RawPcRenown
+import at.posselt.pfrpg2e.kingdom.dialogs.ModifyPcRenown
+import at.posselt.pfrpg2e.kingdom.sheet.contexts.RenownCardPc
+import at.posselt.pfrpg2e.kingdom.sheet.contexts.buildRenownCardContext
 import at.posselt.pfrpg2e.kingdom.RECENT_TURNS_WINDOW
 import at.posselt.pfrpg2e.actions.handlers.SetCouncilVoteLinksData
 import at.posselt.pfrpg2e.kingdom.dialogs.linkableTurnsFor
@@ -1549,6 +1553,57 @@ class KingdomSheet(
                                 ).unsafeCast<AnyObject>(),
                             )
                         )
+                    }
+                }.launch()
+            }
+
+            "modify-pc-renown" -> buildPromise {
+                if (!game.user.isGM) return@buildPromise
+                val pcUuid = target.dataset["pcUuid"] ?: return@buildPromise
+                val kingdom = getKingdom()
+                val row = kingdom.renown?.firstOrNull { it.actorUuid == pcUuid }
+                ModifyPcRenown(
+                    pcName = row?.actorName
+                        ?: runCatching { actor.partyMembers().firstOrNull { it.uuid == pcUuid }?.name }
+                            .getOrNull()
+                        ?: t("kingdom.renown.unknownPc"),
+                    initialPopulace = row?.populace ?: 0,
+                    initialTier = row?.purchaseAccessTier ?: 0,
+                    heldEpithets = (row?.epithets ?: emptyArray()).toList(),
+                ) { populace, tier, epithets ->
+                    buildPromise {
+                        val k = getKingdom()
+                        val existing = k.renown?.firstOrNull { it.actorUuid == pcUuid }
+                        val updated = if (existing != null) {
+                            RawPcRenown.copy(
+                                existing,
+                                populace = populace,
+                                purchaseAccessTier = tier,
+                                epithets = epithets.toTypedArray(),
+                            )
+                        } else {
+                            // a GM adjusting a PC with no ledger yet MINTS one rather than
+                            // silently doing nothing
+                            RawPcRenown(
+                                actorUuid = pcUuid,
+                                actorName = runCatching {
+                                    actor.partyMembers().firstOrNull { it.uuid == pcUuid }?.name
+                                }.getOrNull(),
+                                populace = populace,
+                                factionRenown = emptyArray(),
+                                epithets = epithets.toTypedArray(),
+                                purchaseAccessTier = tier,
+                                lastOfferedTurn = null,
+                                lifetimeCrits = 0,
+                                lifetimeCritFails = 0,
+                            )
+                        }
+                        k.renown = if (existing != null) {
+                            k.renown?.map { if (it.actorUuid == pcUuid) updated else it }?.toTypedArray()
+                        } else {
+                            (k.renown ?: emptyArray()) + updated
+                        }
+                        actor.setKingdom(k)
                     }
                 }.launch()
             }
@@ -3947,6 +4002,32 @@ class KingdomSheet(
                 companions = kingdom.companions ?: emptyArray(),
                 chronicle = kingdom.expeditionChronicle ?: emptyArray(),
             ) { t(it) },
+            renownCardContext = buildRenownCardContext(
+                pcs = runCatching {
+                    val roleByUuid = kingdom.leaders.let { l ->
+                        listOf(
+                            Leader.RULER to l.ruler.uuid, Leader.COUNSELOR to l.counselor.uuid,
+                            Leader.EMISSARY to l.emissary.uuid, Leader.GENERAL to l.general.uuid,
+                            Leader.MAGISTER to l.magister.uuid, Leader.TREASURER to l.treasurer.uuid,
+                            Leader.VICEROY to l.viceroy.uuid, Leader.WARDEN to l.warden.uuid,
+                        ).mapNotNull { (role, uuid) -> uuid?.let { it to role } }.toMap()
+                    }
+                    actor.partyMembers().map { member ->
+                        RenownCardPc(
+                            actorUuid = member.uuid,
+                            name = member.name,
+                            roleLabel = roleByUuid[member.uuid]?.let { t(it) },
+                            // isOwner is relative to the LOCAL user, which is exactly the question
+                            // being asked here: may THIS viewer see their own numbers
+                            isOwn = member.isOwner,
+                        )
+                    }
+                }.getOrDefault(emptyList()),
+                renownRows = kingdom.renown,
+                isGM = isGM,
+                epithetLabel = { id -> t("kingdom.renown.epithet.$id") },
+                factionLabel = { name, value -> "$name ${if (value >= 0) "+" else ""}$value" },
+            ),
             partyInfluenceContext = buildPartyInfluenceContext(
                 companions = (kingdom.companions ?: emptyArray()).map {
                     CompanionRef(

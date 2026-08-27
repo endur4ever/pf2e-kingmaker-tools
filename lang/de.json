@@ -2514,7 +2514,14 @@
                     "peoplesChampion": "People's Champion",
                     "theKingmaker": "The Kingmaker",
                     "scourgeOfPitax": "Scourge of Pitax"
-                }
+                },
+                "title": "Ansehen",
+                "empty": "Noch keine Gruppenmitglieder anzuzeigen.",
+                "adjust": "Ansehen anpassen",
+                "populace": "Ansehen beim Volk",
+                "populaceHelp": "0-100. Die Engine begrenzt auf diesen Bereich.",
+                "tier": "Zugangsstufe für Einkäufe (0-2)",
+                "accessTier": "Einkaufszugang +{tier}"
             }
         },
         "chatMessages": {

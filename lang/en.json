@@ -2636,7 +2636,14 @@
                     "peoplesChampion": "People's Champion",
                     "theKingmaker": "The Kingmaker",
                     "scourgeOfPitax": "Scourge of Pitax"
-                }
+                },
+                "title": "Renown",
+                "empty": "No party members to show yet.",
+                "adjust": "Adjust Renown",
+                "populace": "Populace renown",
+                "populaceHelp": "0-100. The engine clamps to this range.",
+                "tier": "Purchase access tier (0-2)",
+                "accessTier": "Purchase access +{tier}"
             }
         },
         "chatMessages": {

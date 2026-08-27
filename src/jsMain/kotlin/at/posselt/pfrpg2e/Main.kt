@@ -163,6 +163,7 @@ fun main() {
                     "kingdom-pacing-alerts" to "applications/kingdom/sections/pacing-alerts/page.hbs",
                     "kingdom-session-prep" to "applications/kingdom/sections/session-prep/page.hbs",
                     "kingdom-council-votes" to "applications/kingdom/sections/council-votes/page.hbs",
+                    "kingdom-renown-card" to "applications/kingdom/sections/party/renown-card.hbs",
                     "kingdom-analytics" to "applications/kingdom/sections/analytics/page.hbs",
                     "kingdom-expeditions" to "applications/kingdom/sections/expeditions/page.hbs",
                     "kingdom-campaign" to "applications/kingdom/sections/clocks/page.hbs",

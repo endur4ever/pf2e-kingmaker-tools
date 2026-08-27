@@ -114,9 +114,14 @@ private fun Array<RawPcRenown>.replacingActor(actorUuid: String, row: RawPcRenow
 /**
  * Moves the one tally counter [kind] owns by [delta], flooring at zero.
  *
- * A crit counts as a check too: the Spotlight's "checks" column is how many checks the PC made,
- * and a crit is one of them. Floored because a revert against a tally that was never written (a
- * deed carried over from an older build) must not produce a negative count.
+ * The buckets are DISJOINT -- exactly one counter moves per deed -- because that is the contract
+ * the pure core is written against: `spotlightScore` weights crits and checks SEPARATELY and
+ * `spotlightActionCount` sums all five, so a crit that also bumped `checks` would score four
+ * points where the weights say three and count as two actions instead of one. TurnTally's own
+ * KDoc states this ("Reading them as nested would make a crit worth four points").
+ *
+ * Floored because a revert against a tally that was never written -- a deed row that outlived its
+ * tally across an interrupted End Turn reset -- must not produce a negative count.
  */
 private fun Array<RawTurnContribution>.adjustCounter(
     actorUuid: String,
@@ -128,16 +133,10 @@ private fun Array<RawTurnContribution>.adjustCounter(
     val tally = existing?.toModel() ?: TurnTally(actorUuid = actorUuid, actorName = actorName)
     fun floor(value: Int) = maxOf(value, 0)
     val updated = when (kind) {
-        ContributionKind.CHECK_CRIT -> tally.copy(
-            checks = floor(tally.checks + delta),
-            crits = floor(tally.crits + delta),
-        )
+        ContributionKind.CHECK_CRIT -> tally.copy(crits = floor(tally.crits + delta))
         ContributionKind.CHECK_SUCCESS, ContributionKind.CHECK_FAILURE ->
             tally.copy(checks = floor(tally.checks + delta))
-        ContributionKind.CHECK_CRIT_FAIL -> tally.copy(
-            checks = floor(tally.checks + delta),
-            critFails = floor(tally.critFails + delta),
-        )
+        ContributionKind.CHECK_CRIT_FAIL -> tally.copy(critFails = floor(tally.critFails + delta))
         ContributionKind.ACTIVITY -> tally.copy(activities = floor(tally.activities + delta))
         ContributionKind.EVENT_RESOLVED, ContributionKind.PETITION_ANSWERED ->
             tally.copy(events = floor(tally.events + delta))

@@ -123,6 +123,7 @@ external interface KingdomSheetContext : ValidatedHandlebarsContext {
     val pacingAlertContext: PacingAlertContext
     val sessionPrepContext: SessionPrepContext
     val councilVotesContext: CouncilVotesContext
+    val renownCardContext: RenownCardContext
 
     /** Unread feed bell for the CURRENT user; null only when the kingdom itself is missing. */
     val pingsContext: PingsPanelContext?

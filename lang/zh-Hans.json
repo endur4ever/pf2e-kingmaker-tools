@@ -2514,7 +2514,14 @@
                     "peoplesChampion": "People's Champion",
                     "theKingmaker": "The Kingmaker",
                     "scourgeOfPitax": "Scourge of Pitax"
-                }
+                },
+                "title": "声望",
+                "empty": "暂无可显示的队伍成员。",
+                "adjust": "调整声望",
+                "populace": "民间声望",
+                "populaceHelp": "0-100，引擎会限制在此范围内。",
+                "tier": "采购准入等级（0-2）",
+                "accessTier": "采购准入 +{tier}"
             }
         },
         "chatMessages": {

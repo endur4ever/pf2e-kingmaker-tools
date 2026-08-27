@@ -2514,7 +2514,14 @@
                     "peoplesChampion": "People's Champion",
                     "theKingmaker": "The Kingmaker",
                     "scourgeOfPitax": "Scourge of Pitax"
-                }
+                },
+                "title": "Известность",
+                "empty": "Пока нет участников группы для показа.",
+                "adjust": "Изменить известность",
+                "populace": "Известность в народе",
+                "populaceHelp": "0-100. Движок ограничивает этим диапазоном.",
+                "tier": "Уровень доступа к покупкам (0-2)",
+                "accessTier": "Доступ к покупкам +{tier}"
             }
         },
         "chatMessages": {

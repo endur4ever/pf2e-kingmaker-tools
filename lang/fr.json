@@ -2514,7 +2514,14 @@
                     "peoplesChampion": "People's Champion",
                     "theKingmaker": "The Kingmaker",
                     "scourgeOfPitax": "Scourge of Pitax"
-                }
+                },
+                "title": "Renommée",
+                "empty": "Aucun membre du groupe à afficher.",
+                "adjust": "Ajuster la renommée",
+                "populace": "Renommée populaire",
+                "populaceHelp": "0-100. Le moteur borne à cet intervalle.",
+                "tier": "Palier d'accès aux achats (0-2)",
+                "accessTier": "Accès aux achats +{tier}"
             }
         },
         "chatMessages": {

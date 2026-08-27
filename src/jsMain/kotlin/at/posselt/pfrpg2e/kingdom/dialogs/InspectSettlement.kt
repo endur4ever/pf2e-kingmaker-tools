@@ -1,5 +1,6 @@
 package at.posselt.pfrpg2e.kingdom.dialogs
 
+import at.posselt.pfrpg2e.data.kingdom.settlementPurchaseAccessLevels
 import at.posselt.pfrpg2e.app.FormApp
 import at.posselt.pfrpg2e.app.HandlebarsRenderContext
 import at.posselt.pfrpg2e.app.ValidatedHandlebarsContext
@@ -517,7 +518,16 @@ class InspectSettlement(
             baseItemLevel = parsed.itemPurchaseLevel,
             grants = questGrants,
         )
-        val basePurchaseLevel = grantedAccess.itemLevel
+        // Renown perk: the realm's shops stock better goods when someone the realm reveres walks
+        // in. SETTLEMENT-scoped, not per-shopper -- this dialog has no viewer, no user and no PC
+        // in scope, so "whose renown applies" has no answer here; the GM granted every tier by
+        // hand, so the max across the party is the legible reading ("our reputation opens doors").
+        // Unioned at the same seam the quest grants use, BEFORE calculateAvailableItems, so the
+        // nudge actually widens what can be bought rather than only changing a printed number.
+        val renownAccessLevels = settlementPurchaseAccessLevels(
+            (kingdom.renown ?: emptyArray()).map { it.purchaseAccessTier ?: 0 }
+        )
+        val basePurchaseLevel = grantedAccess.itemLevel + renownAccessLevels
         val availableItems = calculateAvailableItems(
             settlementLevel = basePurchaseLevel,
             preventItemLevelPenalty = parsed.preventItemLevelPenalty,

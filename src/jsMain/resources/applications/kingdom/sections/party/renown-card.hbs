@@ -1,0 +1,45 @@
+<section class="km-renown-cards">
+    <h2><i class="fa-solid fa-award"></i> {{localizeKM "kingdom.renown.title"}}</h2>
+    {{#unless renownCardContext.hasAny}}
+        <p class="km-renown-empty">{{localizeKM "kingdom.renown.empty"}}</p>
+    {{/unless}}
+    {{#each renownCardContext.pcs}}
+        <div class="km-renown-card">
+            <div class="km-renown-card__head">
+                <b>{{this.name}}</b>
+                {{#if this.roleLabel}}<span class="km-renown-role">{{this.roleLabel}}</span>{{/if}}
+                {{#if @root.renownCardContext.isGM}}
+                    {{!-- registered partial: the outer frame is @root, never ../ --}}
+                    <button type="button" data-action="modify-pc-renown" data-pc-uuid="{{this.actorUuid}}">
+                        {{localizeKM "kingdom.renown.adjust"}}
+                    </button>
+                {{/if}}
+            </div>
+            {{#if this.hasNumbers}}
+                {{!-- GM-only by DATA: populace/factions/tier are null for viewers who are neither
+                      the GM nor this PC's owner, so this block cannot leak a number. --}}
+                <div class="km-renown-bar">
+                    <span class="km-renown-bar__track">
+                        <span class="km-renown-bar__fill" style="width: {{this.populacePct}}%"></span>
+                    </span>
+                    <span class="km-renown-bar__value">{{this.populace}}</span>
+                </div>
+                {{#if this.purchaseAccessTier}}
+                    <p class="km-renown-perk">{{localizeKM "kingdom.renown.accessTier" tier=this.purchaseAccessTier}}</p>
+                {{/if}}
+                <div class="km-renown-factions">
+                    {{#each this.factionRenown}}
+                        <span class="km-renown-chip km-renown-chip--faction">{{this.label}}</span>
+                    {{/each}}
+                </div>
+            {{/if}}
+            {{#if this.hasEpithets}}
+                <div class="km-renown-epithets">
+                    {{#each this.epithets}}
+                        <span class="km-renown-chip km-renown-chip--epithet">{{this.label}}</span>
+                    {{/each}}
+                </div>
+            {{/if}}
+        </div>
+    {{/each}}
+</section>

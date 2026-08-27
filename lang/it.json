@@ -2514,7 +2514,14 @@
                     "peoplesChampion": "People's Champion",
                     "theKingmaker": "The Kingmaker",
                     "scourgeOfPitax": "Scourge of Pitax"
-                }
+                },
+                "title": "Fama",
+                "empty": "Nessun membro del gruppo da mostrare.",
+                "adjust": "Modifica fama",
+                "populace": "Fama popolare",
+                "populaceHelp": "0-100. Il motore limita a questo intervallo.",
+                "tier": "Livello di accesso agli acquisti (0-2)",
+                "accessTier": "Accesso agli acquisti +{tier}"
             }
         },
         "chatMessages": {

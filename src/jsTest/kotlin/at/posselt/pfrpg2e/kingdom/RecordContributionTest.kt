@@ -49,13 +49,24 @@ class RecordContributionTest {
     }
 
     @Test
-    fun aCritCountsAsBothACritAndACheck() {
+    fun theTallyBucketsAreDisjointSoACritIsNotAlsoAPlainCheck() {
+        // spotlightScore weights crits and checks SEPARATELY and spotlightActionCount sums all
+        // five buckets, so a crit that also bumped `checks` would score four points where the
+        // weights say three, and read as two actions instead of one
         val k = kingdom()
         record(k, "d1", kind = ContributionKind.CHECK_CRIT)
         val tally = tallyOf(k, "pc-1")
         assertEquals(1, tally?.crits)
-        assertEquals(1, tally?.checks, "a crit is still a check the PC made")
+        assertEquals(0, tally?.checks, "exactly one counter moves per deed")
+        assertEquals(1, at.posselt.pfrpg2e.data.kingdom.spotlightActionCount(tally!!),
+            "one deed, one action")
         assertEquals(3, populaceOf(k, "pc-1"))
+
+        record(k, "d2", kind = ContributionKind.CHECK_CRIT_FAIL)
+        val after = tallyOf(k, "pc-1")!!
+        assertEquals(1, after.critFails)
+        assertEquals(0, after.checks, "a fumble is its own bucket too")
+        assertEquals(2, at.posselt.pfrpg2e.data.kingdom.spotlightActionCount(after))
     }
 
     @Test
@@ -69,8 +80,8 @@ class RecordContributionTest {
         record(k, "d1", kind = ContributionKind.CHECK_CRIT)
         assertEquals(3, populaceOf(k, "pc-1"), "credited once, at the FINAL degree")
         val tally = tallyOf(k, "pc-1")
-        assertEquals(1, tally?.checks, "still one check, not two")
-        assertEquals(1, tally?.crits)
+        assertEquals(0, tally?.checks, "the failed original stopped counting as a check")
+        assertEquals(1, tally?.crits, "and the re-rolled crit counts once")
         assertEquals(1, k.currentTurnDeeds?.size, "one deed row, replaced in place")
     }
 
@@ -83,7 +94,7 @@ class RecordContributionTest {
         val tally = tallyOf(k, "pc-1")
         assertEquals(0, tally?.crits, "the crit that was re-rolled away stops counting")
         assertEquals(1, tally?.critFails)
-        assertEquals(1, tally?.checks)
+        assertEquals(0, tally?.checks, "buckets are disjoint")
     }
 
     @Test
@@ -176,6 +187,7 @@ class RecordContributionTest {
         val tally = tallyOf(k, "pc-1")
         assertEquals(1, tally?.checks, "the new credit lands")
         assertEquals(0, tally?.crits, "and the stale decrement floors at zero rather than going negative")
+        assertTrue((tally?.crits ?: -1) >= 0)
         assertTrue((tally?.crits ?: -1) >= 0)
         assertTrue((tally?.checks ?: -1) >= 0)
     }

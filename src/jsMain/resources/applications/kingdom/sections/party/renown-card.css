@@ -1,0 +1,88 @@
+.km-renown-cards {
+    margin-top: 1rem;
+}
+
+.km-renown-empty {
+    font-style: italic;
+    opacity: 0.75;
+}
+
+.km-renown-card {
+    border: 1px solid rgba(0, 0, 0, 0.25);
+    border-radius: 5px;
+    padding: 0.4rem 0.6rem;
+    margin-bottom: 0.5rem;
+    background: rgba(0, 0, 0, 0.04);
+}
+
+.km-renown-card__head {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.km-renown-card__head button {
+    flex: 0 0 auto;
+    width: auto;
+    margin-left: auto;
+}
+
+.km-renown-role {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    opacity: 0.75;
+}
+
+/* grid, not inline spans: a width on an empty inline element renders nothing at all */
+.km-renown-bar {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0.3rem 0;
+}
+
+.km-renown-bar__track {
+    display: block;
+    height: 0.9rem;
+    background: rgba(0, 0, 0, 0.12);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.km-renown-bar__fill {
+    display: block;
+    height: 100%;
+    background: var(--secondary-km, #789035);
+    transition: width 0.3s ease;
+}
+
+.km-renown-bar__value {
+    font-variant-numeric: tabular-nums;
+}
+
+.km-renown-perk {
+    font-size: 0.8rem;
+    margin: 0.2rem 0;
+}
+
+.km-renown-factions,
+.km-renown-epithets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    margin-top: 0.25rem;
+}
+
+.km-renown-chip {
+    font-size: 0.75rem;
+    border-radius: 10px;
+    padding: 0.05rem 0.5rem;
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.km-renown-chip--epithet {
+    background: var(--primary-km, #275125);
+    color: white;
+}
