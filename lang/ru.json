@@ -2069,7 +2069,8 @@
                 "shipments": "Shipments: {list}",
                 "tribute": "Tribute: +{tributeRp} РО collected from vassal states",
                 "battleDefeats": "Defeated in battle: {battles}",
-                "rivalMove": "Соперничающие королевства: {list}"
+                "rivalMove": "Соперничающие королевства: {list}",
+                "spotlight": "В центре внимания: {name}"
             },
             "warfare": {
                 "damaged": "Damaged",
@@ -2474,6 +2475,46 @@
                 "noteButton": "Заметка",
                 "noLinkableTurns": "Пока нет более поздних ходов для связи — сыграйте ход.",
                 "linkOutOfWindow": "Ход {turn} старше, чем показывает список последних ходов."
+            },
+            "renown": {
+                "unknownPc": "Кто-то",
+                "unknownFaction": "далёкий двор",
+                "epithetGranted": "{name} теперь известен как {epithet}.",
+                "perkGranted": "Уровень доступа предоставлен.",
+                "perkAlreadyGranted": "Этот уровень доступа уже есть.",
+                "offerDismissed": "Отклонено — ничего не предоставлено.",
+                "invitationTitle": "Приглашение от {faction}",
+                "spotlight": {
+                    "busiest": "{name} успевал везде в этом месяце ({count} действий).",
+                    "critStar": "{name} добился {count} блестящих успехов.",
+                    "blunderer": "У {name} был месяц, который лучше забыть ({count} провалов).",
+                    "diplomat": "{name} нёс слово королевства за его пределы ({count} раз).",
+                    "eventHero": "{name} встречал кризисы королевства лицом к лицу ({count} решено)."
+                },
+                "epithetOffer": {
+                    "title": "Имя, которое начинает использовать королевство",
+                    "line": "{name} заслужил прозвище {epithet}.",
+                    "grant": "Даровать прозвище",
+                    "dismiss": "Отклонить"
+                },
+                "perkOffer": {
+                    "access": "Даровать уровень доступа (+{levels})",
+                    "invitation": "Создать приглашение"
+                },
+                "epithet": {
+                    "bridgeBuilder": "The Bridge-Builder",
+                    "restovsHammer": "Restov's Hammer",
+                    "theUntiring": "The Untiring",
+                    "coinCounter": "Coin-Counter",
+                    "theIronhand": "The Ironhand",
+                    "feyFriend": "Fey-Friend",
+                    "theUnshaken": "The Unshaken",
+                    "wardenOfTheMarches": "Warden of the Marches",
+                    "theSilverTongue": "The Silver Tongue",
+                    "peoplesChampion": "People's Champion",
+                    "theKingmaker": "The Kingmaker",
+                    "scourgeOfPitax": "Scourge of Pitax"
+                }
             }
         },
         "chatMessages": {

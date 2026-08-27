@@ -1,6 +1,10 @@
 package at.posselt.pfrpg2e.kingdom
 
 
+import at.posselt.pfrpg2e.kingdom.data.RawTurnContribution
+import at.posselt.pfrpg2e.kingdom.data.toTurnTallies
+import at.posselt.pfrpg2e.data.kingdom.spotlightOfTheTurn
+import at.posselt.pfrpg2e.data.kingdom.SpotlightPick
 import at.posselt.pfrpg2e.kingdom.data.RawExpeditionChronicleEntry
 import at.posselt.pfrpg2e.kingdom.data.RawTurnRecord
 import com.foundryvtt.core.AnyObject
@@ -52,6 +56,7 @@ fun buildTurnRecord(
     ruinDecay: Int? = null,
     ruinStrife: Int? = null,
     closedVoteIds: Array<String>? = null,
+    contributions: Array<RawTurnContribution>? = null,
 ): RawTurnRecord = RawTurnRecord(
     turn = turn,
     timestamp = timestamp,
@@ -65,6 +70,7 @@ fun buildTurnRecord(
     pressurePerTurn = pressurePerTurn,
     notes = notes,
     closedVoteIds = closedVoteIds,
+    contributions = contributions,
     playerNotes = playerNotes,
     level = level,
     size = size,
@@ -93,6 +99,7 @@ fun formatTurnGazette(
     /** Pre-localized rival headlines (rival-realms SS4.4); the caller localizes because the
      *  headline template is picked from an enum pool, not from a single key. */
     rivalMoves: List<String> = emptyList(),
+    spotlight: String? = null,
     localize: (key: String, data: AnyObject) -> String = ::defaultLocalize,
 ): String? {
     val gazetteEvents = mutableListOf<String>()
@@ -107,6 +114,12 @@ fun formatTurnGazette(
         val data = js("{}")
         data.list = rivalMoves.joinToString("; ")
         gazetteEvents.add(localize("kingdom.turnGazette.rivalMove", data.unsafeCast<AnyObject>()))
+    }
+
+    if (!spotlight.isNullOrBlank()) {
+        val data = js("{}")
+        data.name = spotlight
+        gazetteEvents.add(localize("kingdom.turnGazette.spotlight", data.unsafeCast<AnyObject>()))
     }
 
     if (activities.isNotEmpty()) {
@@ -240,6 +253,7 @@ fun defaultLocalize(key: String, data: AnyObject): String {
         "kingdom.turnGazette.expeditionOther" -> "${dyn.outcomeLabel} ${dyn.title} — ${dyn.companionNames}${dyn.loot}${dyn.faction}"
         "kingdom.turnGazette.expeditions" -> "Expeditions: ${dyn.list}"
         "kingdom.turnGazette.rivalMove" -> "Rival Realms: ${dyn.list}"
+        "kingdom.turnGazette.spotlight" -> "Spotlight: ${dyn.name}"
         else -> key
     }
 }
@@ -262,6 +276,8 @@ data class LastTurnRecap(
     val warPressureNow: Int,
     val xpAwarded: Int?,
     val notes: String?,
+    /** The turn's Spotlight subject, or null when nobody acted. Pure flavour, never an offer. */
+    val spotlight: SpotlightPick? = null,
 )
 
 /**
@@ -286,6 +302,9 @@ fun computeLastTurnRecap(history: Array<RawTurnRecord>?): LastTurnRecap? {
         warPressureNow = warPressureNow ?: 0,
         xpAwarded = latest.xpAwarded,
         notes = latest.notes,
+        // derived inside the pure function so the Spotlight stays unit-testable rather than
+        // being composed in the chat poster
+        spotlight = spotlightOfTheTurn(latest.contributions.toTurnTallies()),
     )
 }
 

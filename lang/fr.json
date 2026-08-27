@@ -2069,7 +2069,8 @@
                 "shipments": "Shipments: {list}",
                 "tribute": "Tribute: +{tributeRp} PR collected from vassal states",
                 "battleDefeats": "Defeated in battle: {battles}",
-                "rivalMove": "Royaumes rivaux : {list}"
+                "rivalMove": "Royaumes rivaux : {list}",
+                "spotlight": "Coup de projecteur : {name}"
             },
             "warfare": {
                 "damaged": "Damaged",
@@ -2474,6 +2475,46 @@
                 "noteButton": "Note",
                 "noLinkableTurns": "Aucun tour ultérieur à lier — jouez d'abord un tour.",
                 "linkOutOfWindow": "Le tour {turn} est antérieur à la liste des tours récents."
+            },
+            "renown": {
+                "unknownPc": "Quelqu'un",
+                "unknownFaction": "une cour lointaine",
+                "epithetGranted": "{name} est désormais connu sous le nom de {epithet}.",
+                "perkGranted": "Palier d'accès accordé.",
+                "perkAlreadyGranted": "Ce palier d'accès est déjà acquis.",
+                "offerDismissed": "Ignoré — rien accordé.",
+                "invitationTitle": "Une invitation de {faction}",
+                "spotlight": {
+                    "busiest": "{name} était partout ce mois-ci ({count} actions).",
+                    "critStar": "{name} a réussi {count} coups d'éclat.",
+                    "blunderer": "{name} a connu un mois à oublier ({count} désastres).",
+                    "diplomat": "{name} a porté la parole du royaume au loin ({count} fois).",
+                    "eventHero": "{name} a affronté les crises du royaume ({count} résolues)."
+                },
+                "epithetOffer": {
+                    "title": "Un nom que le royaume commence à employer",
+                    "line": "{name} a mérité l'épithète {epithet}.",
+                    "grant": "Accorder l'épithète",
+                    "dismiss": "Ignorer"
+                },
+                "perkOffer": {
+                    "access": "Accorder le palier d'accès (+{levels})",
+                    "invitation": "Créer une invitation"
+                },
+                "epithet": {
+                    "bridgeBuilder": "The Bridge-Builder",
+                    "restovsHammer": "Restov's Hammer",
+                    "theUntiring": "The Untiring",
+                    "coinCounter": "Coin-Counter",
+                    "theIronhand": "The Ironhand",
+                    "feyFriend": "Fey-Friend",
+                    "theUnshaken": "The Unshaken",
+                    "wardenOfTheMarches": "Warden of the Marches",
+                    "theSilverTongue": "The Silver Tongue",
+                    "peoplesChampion": "People's Champion",
+                    "theKingmaker": "The Kingmaker",
+                    "scourgeOfPitax": "Scourge of Pitax"
+                }
             }
         },
         "chatMessages": {

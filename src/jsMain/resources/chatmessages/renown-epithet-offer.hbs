@@ -1,0 +1,26 @@
+<div class="km-renown-offer-card">
+    <h3><i class="fa-solid fa-award"></i> {{title}}</h3>
+    <p>{{line}}</p>
+    <div class="km-renown-offer-buttons">
+        <button type="button" class="km-offer-renown-epithet"
+                data-kingdom-actor-uuid="{{actorUuid}}"
+                data-pc-uuid="{{pcUuid}}"
+                data-epithet-id="{{epithetId}}">{{grantLabel}}</button>
+        {{#if perkKind}}
+            {{#if (eq perkKind "access")}}
+                <button type="button" class="km-offer-renown-perk-access"
+                        data-kingdom-actor-uuid="{{actorUuid}}"
+                        data-pc-uuid="{{pcUuid}}"
+                        data-epithet-id="{{epithetId}}"
+                        data-perk-tier="{{perkTier}}">{{perkLabel}}</button>
+            {{else}}
+                <button type="button" class="km-offer-renown-invitation"
+                        data-kingdom-actor-uuid="{{actorUuid}}"
+                        data-pc-uuid="{{pcUuid}}"
+                        data-faction="{{perkFaction}}">{{perkLabel}}</button>
+            {{/if}}
+        {{/if}}
+        <button type="button" class="km-offer-renown-dismiss"
+                data-kingdom-actor-uuid="{{actorUuid}}">{{dismissLabel}}</button>
+    </div>
+</div>

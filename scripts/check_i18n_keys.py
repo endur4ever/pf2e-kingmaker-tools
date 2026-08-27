@@ -424,6 +424,40 @@ def check_rival_profile_keys():
     return 0
 
 
+RENOWN_ENGINE_SRC = "src/commonMain/kotlin/at/posselt/pfrpg2e/data/kingdom/RenownEngine.kt"
+
+def check_epithet_keys():
+    """Check 9: every epithet in EPITHET_CATALOG must have a label in every locale.
+
+    The offer card and the granted-announcement both localize with
+    t("kingdom.renown.epithet.$id") -- composed at runtime from the catalog, so check 2's
+    literal-string scan cannot see it. Adding a thirteenth epithet without its label would
+    announce a PC as "kingdom.renown.epithet.theWhatever" in public chat while CI stayed green.
+    Same shape and rationale as check_rival_profile_keys and check_setup_wizard_keys.
+    """
+    if not os.path.exists(RENOWN_ENGINE_SRC):
+        return 0
+    src = open(RENOWN_ENGINE_SRC, encoding="utf-8").read()
+    catalog = src.split("val EPITHET_CATALOG", 1)[-1]
+    ids = re.findall(r'^\s*id = "([\w-]+)",', catalog, re.M)
+    if not ids:
+        print("[i18n] EPITHET: could not parse catalog ids -- check the guard, not the code")
+        return 1
+    problems = [(path, f"kingdom.renown.epithet.{i}")
+                for path in sorted(glob.glob("lang/*.json"))
+                for i in ids
+                if not isinstance(
+                    lookup_value(json.load(open(path, encoding="utf-8")).get(NS, {}),
+                                 f"kingdom.renown.epithet.{i}"), str)]
+    if problems:
+        print(f"[i18n] EPITHET: {len(problems)} missing epithet label(s):")
+        for path, key in problems:
+            print(f"  {path}: {key}")
+        return 1
+    print(f"[i18n] EPITHET OK -- {len(ids)} epithet(s) labelled in every locale.")
+    return 0
+
+
 def main():
     parser = argparse.ArgumentParser(description="i18n key guard for pf2e-kingmaker-tools")
     parser.add_argument("--parity", action="store_true", help="Run cross-language parity check only")
@@ -505,6 +539,7 @@ def main():
         failed += check_gazette_resolver() or 0
         failed += check_setup_wizard_keys() or 0
         failed += check_rival_profile_keys() or 0
+        failed += check_epithet_keys() or 0
         if failed:
             return 1
     

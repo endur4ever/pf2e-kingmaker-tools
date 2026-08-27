@@ -2069,7 +2069,8 @@
                 "shipments": "Shipments: {list}",
                 "tribute": "Tribute: +{tributeRp} 资源点 collected from vassal states",
                 "battleDefeats": "Defeated in battle: {battles}",
-                "rivalMove": "敌对王国：{list}"
+                "rivalMove": "敌对王国：{list}",
+                "spotlight": "聚光灯：{name}"
             },
             "warfare": {
                 "damaged": "Damaged",
@@ -2474,6 +2475,46 @@
                 "noteButton": "备注",
                 "noLinkableTurns": "尚无可关联的后续回合——先进行一个回合。",
                 "linkOutOfWindow": "回合 {turn} 早于「最近回合」列表所显示的范围。"
+            },
+            "renown": {
+                "unknownPc": "某人",
+                "unknownFaction": "远方的宫廷",
+                "epithetGranted": "{name}如今被称为{epithet}。",
+                "perkGranted": "已授予采购等级。",
+                "perkAlreadyGranted": "该采购等级已拥有。",
+                "offerDismissed": "已忽略——未授予任何东西。",
+                "invitationTitle": "来自{faction}的邀请",
+                "spotlight": {
+                    "busiest": "{name}这个月无处不在（{count} 次行动）。",
+                    "critStar": "{name}取得了 {count} 次辉煌成功。",
+                    "blunderer": "{name}度过了不堪回首的一个月（{count} 次惨败）。",
+                    "diplomat": "{name}将王国之言带往远方（{count} 次）。",
+                    "eventHero": "{name}正面迎击王国的危机（已解决 {count} 起）。"
+                },
+                "epithetOffer": {
+                    "title": "王国开始使用的称号",
+                    "line": "{name}赢得了称号{epithet}。",
+                    "grant": "授予称号",
+                    "dismiss": "忽略"
+                },
+                "perkOffer": {
+                    "access": "授予采购等级（+{levels}）",
+                    "invitation": "创建邀请"
+                },
+                "epithet": {
+                    "bridgeBuilder": "The Bridge-Builder",
+                    "restovsHammer": "Restov's Hammer",
+                    "theUntiring": "The Untiring",
+                    "coinCounter": "Coin-Counter",
+                    "theIronhand": "The Ironhand",
+                    "feyFriend": "Fey-Friend",
+                    "theUnshaken": "The Unshaken",
+                    "wardenOfTheMarches": "Warden of the Marches",
+                    "theSilverTongue": "The Silver Tongue",
+                    "peoplesChampion": "People's Champion",
+                    "theKingmaker": "The Kingmaker",
+                    "scourgeOfPitax": "Scourge of Pitax"
+                }
             }
         },
         "chatMessages": {

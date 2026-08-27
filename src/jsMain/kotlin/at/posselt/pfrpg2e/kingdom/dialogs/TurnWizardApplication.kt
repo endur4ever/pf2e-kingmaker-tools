@@ -1,5 +1,11 @@
 package at.posselt.pfrpg2e.kingdom.dialogs
 
+import at.posselt.pfrpg2e.kingdom.data.toTurnTallies
+import at.posselt.pfrpg2e.data.kingdom.spotlightOfTheTurn
+import at.posselt.pfrpg2e.kingdom.localizeSpotlight
+import at.posselt.pfrpg2e.kingdom.rulerActorUuid
+import at.posselt.pfrpg2e.kingdom.postEpithetOffers
+import at.posselt.pfrpg2e.kingdom.pendingEpithetOffers
 import at.posselt.pfrpg2e.Config
 import at.posselt.pfrpg2e.app.forms.SimpleApp
 import com.foundryvtt.core.abstract.DatabaseUpdateOperation
@@ -623,6 +629,12 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
     // Rival growth is visible on the map, so the same headlines go into BOTH the GM gazette and
     // the player-safe one -- unlike campaign clocks, there is nothing secret to strip.
     val rivalHeadlines = tickResult.rivalMoves.map { localizeRivalHeadline(it) }
+    // the Spotlight names a PC and counts their own public deeds, so it is player-safe by
+    // construction and goes into BOTH gazettes -- a line that only reached the GM's whisper
+    // would vanish from the campaign's written record
+    val spotlightLine = spotlightOfTheTurn(
+        (kingdom.currentTurnContributions ?: emptyArray()).toTurnTallies()
+    )?.let { localizeSpotlight(it) }
     val turnNotes = formatTurnGazette(
         activities = activitySummaries,
         sizeChange = sizeChange,
@@ -635,6 +647,7 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
         battleDefeats = battleDefeats,
         turn = currentTurn,
         rivalMoves = rivalHeadlines,
+        spotlight = spotlightLine,
         localize = ::t,
     )
     // Player-safe gazette: identical EXCEPT the secret campaign-clock progress is dropped, so the
@@ -651,6 +664,7 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
         battleDefeats = battleDefeats,
         turn = currentTurn,
         rivalMoves = rivalHeadlines,
+        spotlight = spotlightLine,
         localize = ::t,
     )
 
@@ -680,6 +694,10 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
             // votes the council closed THIS turn, derived rather than stamped at click time: a
             // vote records the turn it closed on, so the record can always recompute the set --
             // and a vote closed and reopened within the same turn correctly leaves nothing behind
+            // the turn's per-PC tallies are FROZEN onto the record here and the live arrays
+            // reset below, so next turn starts from zero and this turn's Spotlight stays readable
+            // forever
+            contributions = (kingdom.currentTurnContributions ?: emptyArray()).takeIf { it.isNotEmpty() },
             closedVoteIds = (kingdom.councilVotes ?: emptyArray())
                 .filter { it.closedTurn == currentTurn }
                 .mapNotNull { it.id }
@@ -687,6 +705,24 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
                 .takeIf { it.isNotEmpty() },
         ),
     )
+
+    // Renown: the epithet offers this turn earned, then the reset. Offers are composed BEFORE
+    // the reset because they read the cumulative ledger, not the turn tally, and the reset only
+    // clears the in-progress arrays.
+    val epithetOffers = pendingEpithetOffers(
+        renownRows = kingdom.renown,
+        rulerUuid = kingdom.rulerActorUuid(),
+        turn = currentTurn,
+    )
+    postEpithetOffers(
+        game = game,
+        actorUuid = actor.uuid,
+        kingdom = kingdom,
+        turn = currentTurn,
+        offers = epithetOffers,
+    )
+    kingdom.currentTurnContributions = emptyArray()
+    kingdom.currentTurnDeeds = emptyArray()
 
     val automateResources = kingdom.settings.automateResources != "manual"
     if (automateResources) {
@@ -920,6 +956,9 @@ suspend fun postLastTurnRecap(game: Game, actor: KingdomActor) {
     ctx.warPressureNow = recap.warPressureNow
     ctx.xpAwarded = recap.xpAwarded
     val noteLines = recap.notes?.split(" | ")?.map { it.trim() }?.filter { it.isNotBlank() } ?: emptyList()
+    // the turn's Spotlight, surfaced at TURN OPEN rather than End Turn: it is the "here is what
+    // your table did last month" beat, and it belongs with the rest of the recap
+    recap.spotlight?.let { ctx.spotlight = localizeSpotlight(it) }
     if (noteLines.isNotEmpty()) ctx.notesList = noteLines.toTypedArray()
     postChatTemplate(
         templatePath = "chatmessages/last-turn-recap.hbs",

@@ -1461,7 +1461,8 @@
                 "expeditionOther": "{outcomeLabel} {title} — {companionNames}{loot}{faction}",
                 "expeditions": "Expeditions: {list}",
                 "battleDefeats": "Defeated in battle: {battles}",
-                "rivalMove": "Rival Realms: {list}"
+                "rivalMove": "Rival Realms: {list}",
+                "spotlight": "Spotlight: {name}"
             },
             "xpRules": "XP Rules",
             "xpRulesHelp": "Adds additional milestones, gain XP buttons and increases XP for claiming hexes and converting XP based on kingdom level",
@@ -2596,6 +2597,46 @@
                 "noteButton": "Note",
                 "noLinkableTurns": "No later turns to link yet — play a turn first.",
                 "linkOutOfWindow": "Turn {turn} is older than the recent-turns list shows."
+            },
+            "renown": {
+                "unknownPc": "Someone",
+                "unknownFaction": "a distant court",
+                "epithetGranted": "{name} is now known as {epithet}.",
+                "perkGranted": "Access tier granted.",
+                "perkAlreadyGranted": "That access tier is already held.",
+                "offerDismissed": "Dismissed — nothing granted.",
+                "invitationTitle": "An invitation from {faction}",
+                "spotlight": {
+                    "busiest": "{name} was everywhere this month ({count} actions).",
+                    "critStar": "{name} pulled off {count} brilliant successes.",
+                    "blunderer": "{name} had a month to forget ({count} disasters).",
+                    "diplomat": "{name} carried the realm's word abroad ({count} times).",
+                    "eventHero": "{name} met the realm's crises head-on ({count} resolved)."
+                },
+                "epithetOffer": {
+                    "title": "A name the realm is starting to use",
+                    "line": "{name} has earned the epithet {epithet}.",
+                    "grant": "Grant Epithet",
+                    "dismiss": "Dismiss"
+                },
+                "perkOffer": {
+                    "access": "Grant Access Tier (+{levels})",
+                    "invitation": "Create Invitation"
+                },
+                "epithet": {
+                    "bridgeBuilder": "The Bridge-Builder",
+                    "restovsHammer": "Restov's Hammer",
+                    "theUntiring": "The Untiring",
+                    "coinCounter": "Coin-Counter",
+                    "theIronhand": "The Ironhand",
+                    "feyFriend": "Fey-Friend",
+                    "theUnshaken": "The Unshaken",
+                    "wardenOfTheMarches": "Warden of the Marches",
+                    "theSilverTongue": "The Silver Tongue",
+                    "peoplesChampion": "People's Champion",
+                    "theKingmaker": "The Kingmaker",
+                    "scourgeOfPitax": "Scourge of Pitax"
+                }
             }
         },
         "chatMessages": {

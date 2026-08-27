@@ -213,3 +213,59 @@ class RecordContributionTest {
         assertNull(k.renown?.first()?.factionRenown?.firstOrNull())
     }
 }
+
+class RenownOfferTest {
+    private fun renownRow(
+        uuid: String = "pc-1",
+        populace: Int = 0,
+        epithets: Array<String>? = null,
+        lastOffered: Int? = null,
+    ): at.posselt.pfrpg2e.kingdom.data.RawPcRenown {
+        val obj = js("{}").unsafeCast<at.posselt.pfrpg2e.kingdom.data.RawPcRenown>()
+        obj.actorUuid = uuid
+        obj.actorName = "Alice"
+        obj.populace = populace
+        obj.epithets = epithets
+        obj.lastOfferedTurn = lastOffered
+        return obj
+    }
+
+    @Test
+    fun anEarnedEpithetIsOfferedOnce() {
+        // populace >= 50 earns peoplesChampion per the authored catalog
+        val rows = arrayOf(renownRow(populace = 55))
+        val offers = pendingEpithetOffers(rows, rulerUuid = null, turn = 5)
+        assertEquals(1, offers.size)
+        assertEquals("peoplesChampion", offers.single().award.epithetId)
+    }
+
+    @Test
+    fun anEpithetAlreadyHeldIsNeverReOffered() {
+        val rows = arrayOf(renownRow(populace = 55, epithets = arrayOf("peoplesChampion")))
+        assertTrue(pendingEpithetOffers(rows, rulerUuid = null, turn = 5).isEmpty())
+    }
+
+    @Test
+    fun aPcAlreadyOfferedThisTurnIsSkipped() {
+        // the GM has a card sitting in chat undecided; a second End Turn must not stack another
+        val rows = arrayOf(renownRow(populace = 55, lastOffered = 5))
+        assertTrue(pendingEpithetOffers(rows, rulerUuid = null, turn = 5).isEmpty())
+        assertEquals(1, pendingEpithetOffers(rows, rulerUuid = null, turn = 6).size)
+    }
+
+    @Test
+    fun theRulerOnlyEpithetNeedsTheRulerRole() {
+        val rows = arrayOf(renownRow(populace = 80))
+        val asRuler = pendingEpithetOffers(rows, rulerUuid = "pc-1", turn = 1).map { it.award.epithetId }
+        val notRuler = pendingEpithetOffers(rows, rulerUuid = "someone-else", turn = 1).map { it.award.epithetId }
+        assertTrue("theKingmaker" in asRuler)
+        assertTrue("theKingmaker" !in notRuler, "the crown is the condition, not the renown alone")
+    }
+
+    @Test
+    fun aRowWithoutAnActorIsSkippedRatherThanOfferedToNobody() {
+        val row = renownRow(populace = 55)
+        row.actorUuid = null
+        assertTrue(pendingEpithetOffers(arrayOf(row), rulerUuid = null, turn = 1).isEmpty())
+    }
+}

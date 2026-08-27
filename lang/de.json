@@ -1237,7 +1237,8 @@
                 "expeditionOther": "{outcomeLabel} {title} — {companionNames}{loot}{faction}",
                 "expeditions": "Expeditionen: {list}",
                 "battleDefeats": "Defeated in battle: {battles}",
-                "rivalMove": "Rivalisierende Reiche: {list}"
+                "rivalMove": "Rivalisierende Reiche: {list}",
+                "spotlight": "Im Rampenlicht: {name}"
             },
             "xpRules": "XP Rules",
             "xpRulesHelp": "Adds additional milestones, gain XP buttons and increases XP for claiming hexes and converting XP based on kingdom level",
@@ -2474,6 +2475,46 @@
                 "noteButton": "Notiz",
                 "noLinkableTurns": "Noch keine späteren Züge zum Verknüpfen — spiele zuerst einen Zug.",
                 "linkOutOfWindow": "Zug {turn} liegt vor dem angezeigten Zeitraum der letzten Züge."
+            },
+            "renown": {
+                "unknownPc": "Jemand",
+                "unknownFaction": "ein ferner Hof",
+                "epithetGranted": "{name} ist nun bekannt als {epithet}.",
+                "perkGranted": "Zugangsstufe gewährt.",
+                "perkAlreadyGranted": "Diese Zugangsstufe besteht bereits.",
+                "offerDismissed": "Verworfen — nichts gewährt.",
+                "invitationTitle": "Eine Einladung von {faction}",
+                "spotlight": {
+                    "busiest": "{name} war diesen Monat überall ({count} Aktionen).",
+                    "critStar": "{name} gelangen {count} glänzende Erfolge.",
+                    "blunderer": "{name} hatte einen Monat zum Vergessen ({count} Desaster).",
+                    "diplomat": "{name} trug das Wort des Reichs nach außen ({count} Mal).",
+                    "eventHero": "{name} stellte sich den Krisen des Reichs ({count} gelöst)."
+                },
+                "epithetOffer": {
+                    "title": "Ein Name, den das Reich zu benutzen beginnt",
+                    "line": "{name} hat den Beinamen {epithet} verdient.",
+                    "grant": "Beinamen verleihen",
+                    "dismiss": "Verwerfen"
+                },
+                "perkOffer": {
+                    "access": "Zugangsstufe gewähren (+{levels})",
+                    "invitation": "Einladung erstellen"
+                },
+                "epithet": {
+                    "bridgeBuilder": "The Bridge-Builder",
+                    "restovsHammer": "Restov's Hammer",
+                    "theUntiring": "The Untiring",
+                    "coinCounter": "Coin-Counter",
+                    "theIronhand": "The Ironhand",
+                    "feyFriend": "Fey-Friend",
+                    "theUnshaken": "The Unshaken",
+                    "wardenOfTheMarches": "Warden of the Marches",
+                    "theSilverTongue": "The Silver Tongue",
+                    "peoplesChampion": "People's Champion",
+                    "theKingmaker": "The Kingmaker",
+                    "scourgeOfPitax": "Scourge of Pitax"
+                }
             }
         },
         "chatMessages": {

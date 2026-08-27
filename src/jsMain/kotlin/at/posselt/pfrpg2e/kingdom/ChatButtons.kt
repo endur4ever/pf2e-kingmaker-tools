@@ -1,5 +1,6 @@
 package at.posselt.pfrpg2e.kingdom
 
+import at.posselt.pfrpg2e.kingdom.data.RawPcRenown
 import at.posselt.pfrpg2e.actions.ActionMessage
 import at.posselt.pfrpg2e.actions.handlers.CastCouncilVoteData
 import at.posselt.pfrpg2e.actions.handlers.CouncilVoteLifecycleData
@@ -246,6 +247,74 @@ private val buttons = listOf(
                 }
             }
         }.launch()
+    },
+    ChatButton("km-offer-renown-epithet") { game, actor, _, button ->
+        // Grants a PC the epithet they earned. Pure honour -- no rules effect -- but still
+        // GM-confirmed, because it is the table's language about that character.
+        if (!game.user.isGM) return@ChatButton
+        val pcUuid = button.dataset["pcUuid"] ?: return@ChatButton
+        val epithetId = button.dataset["epithetId"] ?: return@ChatButton
+        actor.getKingdom()?.let { kingdom ->
+            val row = kingdom.renown?.firstOrNull { it.actorUuid == pcUuid } ?: return@ChatButton
+            val held = row.epithets ?: emptyArray()
+            if (epithetId in held) return@ChatButton  // idempotent: a second click grants nothing
+            kingdom.renown = kingdom.renown?.map {
+                if (it.actorUuid == pcUuid) RawPcRenown.copy(it, epithets = held + epithetId) else it
+            }?.toTypedArray()
+            actor.setKingdom(kingdom)
+            // public, deliberately: an epithet is what the realm CALLS them, so the table hears it
+            postChatMessage(
+                t(
+                    "kingdom.renown.epithetGranted",
+                    recordOf(
+                        "name" to (row.actorName ?: t("kingdom.renown.unknownPc")),
+                        "epithet" to t("kingdom.renown.epithet.$epithetId"),
+                    ),
+                )
+            )
+        }
+    },
+    ChatButton("km-offer-renown-perk-access") { game, actor, _, button ->
+        // The one mechanical perk: the realm's shops stock better goods. Settlement-scoped, not
+        // per-shopper -- InspectSettlement has no viewer, and the GM granted every tier by hand.
+        if (!game.user.isGM) return@ChatButton
+        val pcUuid = button.dataset["pcUuid"] ?: return@ChatButton
+        val tier = button.dataset["perkTier"]?.toIntOrNull() ?: return@ChatButton
+        actor.getKingdom()?.let { kingdom ->
+            val row = kingdom.renown?.firstOrNull { it.actorUuid == pcUuid } ?: return@ChatButton
+            // never DOWNGRADE an already-granted tier: a lower-tier epithet granted later must
+            // not take away access the PC already has
+            if ((row.purchaseAccessTier ?: 0) >= tier) {
+                ui.notifications.info(t("kingdom.renown.perkAlreadyGranted"))
+                return@ChatButton
+            }
+            kingdom.renown = kingdom.renown?.map {
+                if (it.actorUuid == pcUuid) RawPcRenown.copy(it, purchaseAccessTier = tier) else it
+            }?.toTypedArray()
+            actor.setKingdom(kingdom)
+            ui.notifications.info(t("kingdom.renown.perkGranted"))
+        }
+    },
+    ChatButton("km-offer-renown-invitation") { game, actor, _, button ->
+        // Opens the existing quest pipeline prefilled; nothing is created until the GM saves.
+        if (!game.user.isGM) return@ChatButton
+        val faction = button.dataset["faction"]?.takeIf { it.isNotBlank() }
+        AddQuest(
+            prefillTitle = t(
+                "kingdom.renown.invitationTitle",
+                recordOf("faction" to (faction ?: t("kingdom.renown.unknownFaction"))),
+            ),
+            prefillGiver = faction,
+        ) { quest ->
+            actor.getKingdom()?.let { kingdom ->
+                kingdom.quests = (kingdom.quests ?: emptyArray()) + quest
+                actor.setKingdom(kingdom)
+            }
+        }.launch()
+    },
+    ChatButton("km-offer-renown-dismiss") { game, _, _, _ ->
+        if (!game.user.isGM) return@ChatButton
+        ui.notifications.info(t("kingdom.renown.offerDismissed"))
     },
     ChatButton("km-council-vote-cast") { game, actor, _, button ->
         // ANY user, deliberately no isGM bail: casting is the one player-facing write, and it
