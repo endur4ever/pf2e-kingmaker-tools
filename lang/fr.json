@@ -713,7 +713,8 @@
             "armyPressure": "Army & Pressure",
             "pacing": "Pacing",
             "analytics": "Analytics",
-            "expeditions": "Expeditions"
+            "expeditions": "Expeditions",
+            "councilVotes": "Votes"
         },
         "addSettlementBlock": {
             "title": "Add Settlement Block",
@@ -2036,7 +2037,8 @@
                 "modifier": "Delete modifier {name}? This cannot be undone.",
                 "quest": "Delete quest {name}? This cannot be undone.",
                 "warThreat": "Delete war menace {name}? This cannot be undone.",
-                "rivalRealm": "Supprimer le royaume rival {name} ?"
+                "rivalRealm": "Supprimer le royaume rival {name} ?",
+                "councilVote": "Supprimer le vote « {name} » ?"
             },
             "current": "Current",
             "expeditionBatchResolved": "Resolved {count} expédition rewards.",
@@ -2459,7 +2461,17 @@
                 "linkPickerRow": "Tour {turn}",
                 "hasNotVoted": "{name} n'a pas voté",
                 "abstained": "{name} s'est abstenu",
-                "noGmOnline": "Aucun MJ en ligne — votre vote ne peut pas être enregistré pour le moment."
+                "noGmOnline": "Aucun MJ en ligne — votre vote ne peut pas être enregistré pour le moment.",
+                "badgeOpen": "Ouvert",
+                "badgeClosed": "Clos",
+                "openedOn": "Ouvert au tour {turn}",
+                "closedOn": "clos au tour {turn}",
+                "notVotedCount": "{count} n'ont pas voté",
+                "repost": "Republier le bulletin",
+                "needQuestionAndOptions": "Un vote exige une question et au moins deux options.",
+                "noteTitle": "Note de résultat",
+                "noteLabel": "Ce que le conseil a décidé",
+                "noteButton": "Note"
             }
         },
         "chatMessages": {

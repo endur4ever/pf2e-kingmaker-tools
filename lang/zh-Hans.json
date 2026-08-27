@@ -713,7 +713,8 @@
             "armyPressure": "Army & Pressure",
             "pacing": "Pacing",
             "analytics": "Analytics",
-            "expeditions": "Expeditions"
+            "expeditions": "Expeditions",
+            "councilVotes": "表决"
         },
         "addSettlementBlock": {
             "title": "Add Settlement Block",
@@ -2036,7 +2037,8 @@
                 "modifier": "Delete modifier {name}? This cannot be undone.",
                 "quest": "Delete quest {name}? This cannot be undone.",
                 "warThreat": "Delete war 威胁 {name}? This cannot be undone.",
-                "rivalRealm": "删除敌对国度 {name}？"
+                "rivalRealm": "删除敌对国度 {name}？",
+                "councilVote": "删除表决“{name}”？"
             },
             "current": "Current",
             "expeditionBatchResolved": "Resolved {count} 远征 rewards.",
@@ -2459,7 +2461,17 @@
                 "linkPickerRow": "回合 {turn}",
                 "hasNotVoted": "{name} 尚未投票",
                 "abstained": "{name} 已弃权",
-                "noGmOnline": "没有 GM 在线——目前无法记录你的投票。"
+                "noGmOnline": "没有 GM 在线——目前无法记录你的投票。",
+                "badgeOpen": "进行中",
+                "badgeClosed": "已结束",
+                "openedOn": "第 {turn} 回合发起",
+                "closedOn": "第 {turn} 回合结束",
+                "notVotedCount": "{count} 人尚未投票",
+                "repost": "重新发布选票",
+                "needQuestionAndOptions": "表决需要一个议题和至少两个选项。",
+                "noteTitle": "结果备注",
+                "noteLabel": "议会的决定",
+                "noteButton": "备注"
             }
         },
         "chatMessages": {

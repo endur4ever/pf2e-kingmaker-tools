@@ -713,7 +713,8 @@
             "armyPressure": "Army & Pressure",
             "pacing": "Pacing",
             "analytics": "Analytics",
-            "expeditions": "Expeditions"
+            "expeditions": "Expeditions",
+            "councilVotes": "Abstimmungen"
         },
         "addSettlementBlock": {
             "title": "Add Settlement Block",
@@ -978,7 +979,8 @@
                 "modifier": "Modifikator {name} löschen? Dies kann nicht rückgängig gemacht werden.",
                 "group": "Fraktion {name} löschen? Dies zerstört auch deren gesamte Beziehungs-Historie und kann nicht rückgängig gemacht werden.",
                 "event": "Fortlaufendes Ereignis {name} löschen? Dies kann nicht rückgängig gemacht werden.",
-                "rivalRealm": "Rivalisierendes Reich {name} löschen?"
+                "rivalRealm": "Rivalisierendes Reich {name} löschen?",
+                "councilVote": "Abstimmung „{name}“ löschen?"
             },
             "warfare": {
                 "mired": "Steckengeblieben",
@@ -2459,7 +2461,17 @@
                 "linkPickerRow": "Zug {turn}",
                 "hasNotVoted": "{name} hat nicht abgestimmt",
                 "abstained": "{name} hat sich enthalten",
-                "noGmOnline": "Kein SL online — deine Stimme kann gerade nicht erfasst werden."
+                "noGmOnline": "Kein SL online — deine Stimme kann gerade nicht erfasst werden.",
+                "badgeOpen": "Offen",
+                "badgeClosed": "Geschlossen",
+                "openedOn": "Eröffnet in Zug {turn}",
+                "closedOn": "geschlossen in Zug {turn}",
+                "notVotedCount": "{count} haben nicht abgestimmt",
+                "repost": "Stimmzettel erneut posten",
+                "needQuestionAndOptions": "Eine Abstimmung braucht eine Frage und mindestens zwei Optionen.",
+                "noteTitle": "Ergebnisnotiz",
+                "noteLabel": "Was der Rat entschieden hat",
+                "noteButton": "Notiz"
             }
         },
         "chatMessages": {

@@ -713,7 +713,8 @@
             "armyPressure": "Army & Pressure",
             "pacing": "Pacing",
             "analytics": "Analytics",
-            "expeditions": "Expeditions"
+            "expeditions": "Expeditions",
+            "councilVotes": "Votações"
         },
         "addSettlementBlock": {
             "title": "Add Settlement Block",
@@ -2036,7 +2037,8 @@
                 "modifier": "Delete modifier {name}? This cannot be undone.",
                 "quest": "Delete quest {name}? This cannot be undone.",
                 "warThreat": "Delete war ameaça {name}? This cannot be undone.",
-                "rivalRealm": "Excluir o reino rival {name}?"
+                "rivalRealm": "Excluir o reino rival {name}?",
+                "councilVote": "Excluir a votação “{name}”?"
             },
             "current": "Current",
             "expeditionBatchResolved": "Resolved {count} expedição rewards.",
@@ -2459,7 +2461,17 @@
                 "linkPickerRow": "Turno {turn}",
                 "hasNotVoted": "{name} não votou",
                 "abstained": "{name} se absteve",
-                "noGmOnline": "Nenhum Mestre online — seu voto não pode ser registrado agora."
+                "noGmOnline": "Nenhum Mestre online — seu voto não pode ser registrado agora.",
+                "badgeOpen": "Aberta",
+                "badgeClosed": "Encerrada",
+                "openedOn": "Aberta no turno {turn}",
+                "closedOn": "encerrada no turno {turn}",
+                "notVotedCount": "{count} não votaram",
+                "repost": "Repostar cédula",
+                "needQuestionAndOptions": "Uma votação precisa de uma pergunta e ao menos duas opções.",
+                "noteTitle": "Nota do resultado",
+                "noteLabel": "O que o conselho decidiu",
+                "noteButton": "Nota"
             }
         },
         "chatMessages": {

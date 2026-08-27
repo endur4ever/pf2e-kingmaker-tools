@@ -2,6 +2,12 @@ package at.posselt.pfrpg2e.actions.handlers
 
 import at.posselt.pfrpg2e.actions.ActionDispatcher
 import at.posselt.pfrpg2e.actions.ActionMessage
+import at.posselt.pfrpg2e.kingdom.data.RawCouncilVote
+import at.posselt.pfrpg2e.kingdom.data.appendCouncilVote
+import at.posselt.pfrpg2e.kingdom.data.toRawBallots
+import at.posselt.pfrpg2e.kingdom.postCouncilVoteBallot
+import com.foundryvtt.core.Game
+import io.github.uuidjs.uuid.v4
 import at.posselt.pfrpg2e.kingdom.KingdomActor
 import at.posselt.pfrpg2e.kingdom.closeVote
 import at.posselt.pfrpg2e.kingdom.councilVoteMutex
@@ -17,6 +23,20 @@ import kotlinx.js.JsPlainObject
 external interface CouncilVoteLifecycleData {
     val actorUuid: String
     val voteId: String
+}
+
+@JsPlainObject
+external interface OpenCouncilVoteData {
+    val actorUuid: String
+    val question: String
+    val options: Array<String>
+}
+
+@JsPlainObject
+external interface SetCouncilVoteNoteData {
+    val actorUuid: String
+    val voteId: String
+    val note: String
 }
 
 /**
@@ -57,6 +77,77 @@ class ReopenCouncilVoteHandler : ActionHandler("reopenCouncilVote") {
             kingdom.councilVotes = kingdom.councilVotes
                 ?.map { if (it.id == data.voteId) reopenVote(it) else it }
                 ?.toTypedArray()
+            actor.setKingdom(kingdom)
+        }
+    }
+}
+
+/**
+ * Opens a vote and posts its cards. Dispatched rather than written on the clicking GM's client so
+ * that EVERY council mutation lands on the same executor under [councilVoteMutex]: a sheet-side
+ * read-modify-write of the whole kingdom flag would otherwise race an in-flight ballot and drop
+ * it (the flag is written wholesale, so last write wins).
+ */
+class OpenCouncilVoteHandler(private val game: Game) : ActionHandler("openCouncilVote") {
+    override suspend fun execute(action: ActionMessage, dispatcher: ActionDispatcher) {
+        val data = action.data.unsafeCast<OpenCouncilVoteData>()
+        val vote = councilVoteMutex.withLock {
+            val actor = fromUuidTypeSafe<KingdomActor>(data.actorUuid) ?: return
+            val kingdom = actor.getKingdom() ?: return
+            val vote = RawCouncilVote(
+                id = v4(),
+                question = data.question,
+                options = data.options,
+                votes = emptyMap<String, Int>().toRawBallots(),
+                openedTurn = kingdom.currentTurn ?: 0,
+                closedTurn = null,
+                outcomeNote = null,
+                linkedRecordRefs = emptyArray(),
+                anonymous = false,
+            )
+            kingdom.councilVotes = appendCouncilVote(kingdom.councilVotes, vote)
+            actor.setKingdom(kingdom)
+            vote
+        }
+        // posted outside the lock: chat rendering does not touch the flag, and holding a lock
+        // across it would stall a concurrent ballot for no reason
+        postCouncilVoteBallot(game, data.actorUuid, vote)
+    }
+}
+
+/** Deletes a vote. Same executor + lock as every other council write. */
+class DeleteCouncilVoteHandler : ActionHandler("deleteCouncilVote") {
+    override suspend fun execute(action: ActionMessage, dispatcher: ActionDispatcher) {
+        val data = action.data.unsafeCast<CouncilVoteLifecycleData>()
+        councilVoteMutex.withLock {
+            val actor = fromUuidTypeSafe<KingdomActor>(data.actorUuid) ?: return
+            val kingdom = actor.getKingdom() ?: return
+            kingdom.councilVotes = kingdom.councilVotes
+                ?.filter { it.id != data.voteId }
+                ?.toTypedArray()
+            actor.setKingdom(kingdom)
+        }
+    }
+}
+
+/**
+ * Records the GM's outcome note -- the "the council tied, so I decided" line. Without a writer
+ * the note field, its player-gate in the context builder and its template block are all dead, so
+ * this is what makes the tie-break story real.
+ */
+class SetCouncilVoteNoteHandler : ActionHandler("setCouncilVoteNote") {
+    override suspend fun execute(action: ActionMessage, dispatcher: ActionDispatcher) {
+        val data = action.data.unsafeCast<SetCouncilVoteNoteData>()
+        councilVoteMutex.withLock {
+            val actor = fromUuidTypeSafe<KingdomActor>(data.actorUuid) ?: return
+            val kingdom = actor.getKingdom() ?: return
+            kingdom.councilVotes = kingdom.councilVotes?.map { vote ->
+                if (vote.id == data.voteId) {
+                    RawCouncilVote.copy(vote, outcomeNote = data.note.ifBlank { null })
+                } else {
+                    vote
+                }
+            }?.toTypedArray()
             actor.setKingdom(kingdom)
         }
     }

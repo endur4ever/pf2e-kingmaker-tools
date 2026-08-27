@@ -713,7 +713,8 @@
             "armyPressure": "Army & Pressure",
             "pacing": "Pacing",
             "analytics": "Analytics",
-            "expeditions": "Expeditions"
+            "expeditions": "Expeditions",
+            "councilVotes": "Голосования"
         },
         "addSettlementBlock": {
             "title": "Add Settlement Block",
@@ -2036,7 +2037,8 @@
                 "modifier": "Delete modifier {name}? This cannot be undone.",
                 "quest": "Delete quest {name}? This cannot be undone.",
                 "warThreat": "Delete war угроза {name}? This cannot be undone.",
-                "rivalRealm": "Удалить соперничающее королевство {name}?"
+                "rivalRealm": "Удалить соперничающее королевство {name}?",
+                "councilVote": "Удалить голосование «{name}»?"
             },
             "current": "Current",
             "expeditionBatchResolved": "Resolved {count} экспедиция rewards.",
@@ -2459,7 +2461,17 @@
                 "linkPickerRow": "Ход {turn}",
                 "hasNotVoted": "{name} не проголосовал(а)",
                 "abstained": "{name} воздержался(лась)",
-                "noGmOnline": "Нет ведущего в сети — ваш голос сейчас не может быть записан."
+                "noGmOnline": "Нет ведущего в сети — ваш голос сейчас не может быть записан.",
+                "badgeOpen": "Открыто",
+                "badgeClosed": "Закрыто",
+                "openedOn": "Открыто на ходу {turn}",
+                "closedOn": "закрыто на ходу {turn}",
+                "notVotedCount": "{count} не проголосовали",
+                "repost": "Опубликовать бюллетень снова",
+                "needQuestionAndOptions": "Для голосования нужны вопрос и минимум два варианта.",
+                "noteTitle": "Заметка об итоге",
+                "noteLabel": "Что решил совет",
+                "noteButton": "Заметка"
             }
         },
         "chatMessages": {

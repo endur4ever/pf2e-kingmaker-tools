@@ -713,7 +713,8 @@
             "armyPressure": "Army & Pressure",
             "pacing": "Pacing",
             "analytics": "Analytics",
-            "expeditions": "Expeditions"
+            "expeditions": "Expeditions",
+            "councilVotes": "Głosowania"
         },
         "addSettlementBlock": {
             "title": "Add Settlement Block",
@@ -2036,7 +2037,8 @@
                 "modifier": "Delete modifier {name}? This cannot be undone.",
                 "quest": "Delete quest {name}? This cannot be undone.",
                 "warThreat": "Delete war zagrożenie {name}? This cannot be undone.",
-                "rivalRealm": "Usunąć rywalizujące królestwo {name}?"
+                "rivalRealm": "Usunąć rywalizujące królestwo {name}?",
+                "councilVote": "Usunąć głosowanie „{name}”?"
             },
             "current": "Current",
             "expeditionBatchResolved": "Resolved {count} wyprawa rewards.",
@@ -2459,7 +2461,17 @@
                 "linkPickerRow": "Tura {turn}",
                 "hasNotVoted": "{name} nie zagłosował(a)",
                 "abstained": "{name} wstrzymał(a) się",
-                "noGmOnline": "Brak MG online — twój głos nie może być teraz zapisany."
+                "noGmOnline": "Brak MG online — twój głos nie może być teraz zapisany.",
+                "badgeOpen": "Otwarte",
+                "badgeClosed": "Zamknięte",
+                "openedOn": "Otwarte w turze {turn}",
+                "closedOn": "zamknięte w turze {turn}",
+                "notVotedCount": "{count} nie zagłosowało",
+                "repost": "Opublikuj kartę ponownie",
+                "needQuestionAndOptions": "Głosowanie wymaga pytania i co najmniej dwóch opcji.",
+                "noteTitle": "Notatka o wyniku",
+                "noteLabel": "Co zdecydowała rada",
+                "noteButton": "Notatka"
             }
         },
         "chatMessages": {

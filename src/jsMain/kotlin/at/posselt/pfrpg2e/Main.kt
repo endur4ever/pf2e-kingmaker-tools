@@ -11,7 +11,10 @@ import at.posselt.pfrpg2e.actions.handlers.OpenCampingSheetHandler
 import at.posselt.pfrpg2e.actions.handlers.OpenKingdomSheetHandler
 import at.posselt.pfrpg2e.actions.handlers.CastCouncilVoteHandler
 import at.posselt.pfrpg2e.actions.handlers.CloseCouncilVoteHandler
+import at.posselt.pfrpg2e.actions.handlers.DeleteCouncilVoteHandler
+import at.posselt.pfrpg2e.actions.handlers.OpenCouncilVoteHandler
 import at.posselt.pfrpg2e.actions.handlers.ReopenCouncilVoteHandler
+import at.posselt.pfrpg2e.actions.handlers.SetCouncilVoteNoteHandler
 import at.posselt.pfrpg2e.actions.handlers.SyncActivitiesHandler
 import at.posselt.pfrpg2e.actions.handlers.SyncBattleOutcomeHandler
 import at.posselt.pfrpg2e.actor.partyMembers
@@ -111,6 +114,9 @@ fun main() {
                 CastCouncilVoteHandler(),
                 CloseCouncilVoteHandler(),
                 ReopenCouncilVoteHandler(),
+                OpenCouncilVoteHandler(game = game),
+                DeleteCouncilVoteHandler(),
+                SetCouncilVoteNoteHandler(),
             )
         ).apply {
             listen()
@@ -154,6 +160,7 @@ fun main() {
                     "kingdom-resolve-battle" to "applications/kingdom/dialogs/resolve-battle.hbs",
                     "kingdom-pacing-alerts" to "applications/kingdom/sections/pacing-alerts/page.hbs",
                     "kingdom-session-prep" to "applications/kingdom/sections/session-prep/page.hbs",
+                    "kingdom-council-votes" to "applications/kingdom/sections/council-votes/page.hbs",
                     "kingdom-analytics" to "applications/kingdom/sections/analytics/page.hbs",
                     "kingdom-expeditions" to "applications/kingdom/sections/expeditions/page.hbs",
                     "kingdom-campaign" to "applications/kingdom/sections/clocks/page.hbs",

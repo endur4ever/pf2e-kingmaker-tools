@@ -1,0 +1,107 @@
+<div {{#if (ne currentNavEntry 'councilVotes')}}hidden{{/if}} class="km-kingdom-sheet-content">
+    <div class="km-kingdom-sheet-sub-content km-council-votes">
+        <header class="km-council-votes-header">
+            <h2><i class="fa-solid fa-gavel"></i> {{localizeKM "kingdom.councilVotes.ballotTitle"}}</h2>
+            {{#if councilVotesContext.isGM}}
+                <button type="button" data-action="open-council-vote">
+                    <i class="fa-solid fa-plus"></i> {{localizeKM "kingdom.councilVotes.open"}}
+                </button>
+            {{/if}}
+        </header>
+
+        {{#unless councilVotesContext.hasAny}}
+            <p class="km-council-votes-empty">{{localizeKM "kingdom.councilVotes.emptyState"}}</p>
+        {{/unless}}
+
+        {{#each councilVotesContext.votes}}
+            <section class="km-council-vote-row{{#unless this.isOpen}} km-council-vote-row--closed{{/unless}}">
+                <h3>
+                    {{this.question}}
+                    {{#if this.isOpen}}
+                        <span class="km-council-vote-badge km-council-vote-badge--open">{{localizeKM "kingdom.councilVotes.badgeOpen"}}</span>
+                    {{else}}
+                        <span class="km-council-vote-badge">{{localizeKM "kingdom.councilVotes.badgeClosed"}}</span>
+                    {{/if}}
+                </h3>
+                <p class="km-council-vote-turns">
+                    {{localizeKM "kingdom.councilVotes.openedOn" turn=this.openedTurn}}{{#unless this.isOpen}} · {{localizeKM "kingdom.councilVotes.closedOn" turn=this.closedTurn}}{{/unless}}
+                </p>
+
+                <ul class="km-council-vote-bars">
+                    {{#each this.options}}
+                        <li class="km-council-vote-bar{{#if this.isLeading}} km-council-vote-bar--leading{{/if}}">
+                            <span class="km-council-vote-bar__label">{{this.label}}</span>
+                            <span class="km-council-vote-bar__track">
+                                <span class="km-council-vote-bar__fill" style="width: {{this.pct}}%"></span>
+                            </span>
+                            <span class="km-council-vote-bar__count">{{this.count}}</span>
+                        </li>
+                    {{/each}}
+                </ul>
+
+                {{#if this.isTie}}<p class="km-council-vote-tie">{{localizeKM "kingdom.councilVotes.tieNote"}}</p>{{/if}}
+
+                {{#if this.hasBallots}}
+                    <ul class="km-council-vote-ballots">
+                        {{#each this.ballots}}
+                            <li>
+                                {{#if this.abstained}}
+                                    {{localizeKM "kingdom.councilVotes.abstained" name=this.voterName}}
+                                {{else}}
+                                    <b>{{this.voterName}}</b>: {{this.optionLabel}}
+                                {{/if}}
+                            </li>
+                        {{/each}}
+                    </ul>
+                {{/if}}
+                <p class="km-council-vote-absent">
+                    {{localizeKM "kingdom.councilVotes.notVotedCount" count=this.notVotedCount}}
+                </p>
+
+                {{#if this.outcomeNote}}
+                    {{!-- GM-only by DATA: outcomeNote is null for players in the context builder,
+                          so this block cannot leak a spoiler even though it carries no isGM. --}}
+                    <p class="km-council-vote-note"><em>{{this.outcomeNote}}</em></p>
+                {{/if}}
+
+                {{#if this.hasLinks}}
+                    <p class="km-council-vote-links">
+                        {{#each this.linkedTurns}}
+                            <button type="button" data-action="change-nav" data-link="sessionPrep">
+                                {{localizeKM "kingdom.councilVotes.recapLinked" turns=this}}
+                            </button>
+                        {{/each}}
+                    </p>
+                {{/if}}
+
+                {{#if @root.councilVotesContext.isGM}}
+                    {{!-- Registered partials have no parent frame: inside {{#each}} the outer
+                          context is @root, never ../ -- a ../ here resolves to nothing and the
+                          whole GM block ships dead (check_hbs_scope.py guards this). --}}
+                    <div class="km-council-vote-gm-controls">
+                        {{#if this.isOpen}}
+                            <button type="button" data-action="close-council-vote" data-vote-id="{{this.id}}">
+                                {{localizeKM "kingdom.councilVotes.close"}}
+                            </button>
+                            {{!-- reposting a CLOSED vote would publish a ballot whose buttons
+                                  silently discard every click, so it is open-only --}}
+                            <button type="button" data-action="repost-council-vote" data-vote-id="{{this.id}}">
+                                {{localizeKM "kingdom.councilVotes.repost"}}
+                            </button>
+                        {{else}}
+                            <button type="button" data-action="reopen-council-vote" data-vote-id="{{this.id}}">
+                                {{localizeKM "kingdom.councilVotes.reopen"}}
+                            </button>
+                        {{/if}}
+                        <button type="button" data-action="set-council-vote-note" data-vote-id="{{this.id}}">
+                            {{localizeKM "kingdom.councilVotes.noteButton"}}
+                        </button>
+                        <button type="button" data-action="delete-council-vote" data-vote-id="{{this.id}}">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                {{/if}}
+            </section>
+        {{/each}}
+    </div>
+</div>

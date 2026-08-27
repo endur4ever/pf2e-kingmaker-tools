@@ -835,7 +835,8 @@
             "armyPressure": "Army & Pressure",
             "pacing": "Pacing",
             "analytics": "Analytics",
-            "expeditions": "Expeditions"
+            "expeditions": "Expeditions",
+            "councilVotes": "Votes"
         },
         "addSettlementBlock": {
             "title": "Add Settlement Block",
@@ -1117,7 +1118,8 @@
                 "modifier": "Delete modifier {name}? This cannot be undone.",
                 "group": "Delete faction {name}? This also destroys its entire standing history and cannot be undone.",
                 "event": "Delete ongoing event {name}? This cannot be undone.",
-                "rivalRealm": "Delete rival realm {name}?"
+                "rivalRealm": "Delete rival realm {name}?",
+                "councilVote": "Delete vote “{name}”?"
             },
             "warfare": {
                 "mired": "Mired",
@@ -2581,7 +2583,17 @@
                 "linkPickerRow": "Turn {turn}",
                 "hasNotVoted": "{name} has not voted",
                 "abstained": "{name} abstained",
-                "noGmOnline": "No GM is online — your ballot cannot be recorded right now."
+                "noGmOnline": "No GM is online — your ballot cannot be recorded right now.",
+                "badgeOpen": "Open",
+                "badgeClosed": "Closed",
+                "openedOn": "Opened turn {turn}",
+                "closedOn": "closed turn {turn}",
+                "notVotedCount": "{count} have not voted",
+                "repost": "Repost ballot",
+                "needQuestionAndOptions": "A vote needs a question and at least two options.",
+                "noteTitle": "Outcome note",
+                "noteLabel": "What the council decided",
+                "noteButton": "Note"
             }
         },
         "chatMessages": {

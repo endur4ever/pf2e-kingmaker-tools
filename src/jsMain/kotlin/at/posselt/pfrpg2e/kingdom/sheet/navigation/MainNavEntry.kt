@@ -16,6 +16,7 @@ enum class MainNavEntry: Translatable, ValueEnum {
     PARTY,
     NOTES,
     SESSION_PREP,
+    COUNCIL_VOTES,
     CAMPAIGN,
     ARMY_PRESSURE,
     PACING,

@@ -1,0 +1,146 @@
+.km-council-votes-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.km-council-votes-empty {
+    font-style: italic;
+    opacity: 0.75;
+}
+
+.km-council-vote-row {
+    border: 1px solid rgba(0, 0, 0, 0.25);
+    border-radius: 5px;
+    padding: 0.5rem 0.75rem;
+    margin-bottom: 0.75rem;
+    background: rgba(0, 0, 0, 0.04);
+}
+
+.km-council-vote-row--closed {
+    opacity: 0.85;
+}
+
+.km-council-vote-badge {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-radius: 3px;
+    padding: 0.05rem 0.4rem;
+    margin-left: 0.4rem;
+    vertical-align: middle;
+    color: white;
+    background: #5a5a5a;
+}
+
+.km-council-vote-badge--open {
+    background: var(--primary-km, #275125);
+}
+
+.km-council-vote-turns {
+    font-size: 0.8rem;
+    opacity: 0.75;
+    margin: 0 0 0.4rem;
+}
+
+.km-council-vote-bars {
+    list-style: none;
+    margin: 0 0 0.4rem;
+    padding: 0;
+}
+
+/* grid, not inline spans: a width on an empty inline element does nothing at all, which is
+   exactly how a tally bar ships invisible */
+.km-council-vote-bar {
+    display: grid;
+    grid-template-columns: minmax(6rem, 12rem) 1fr auto;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.25rem;
+}
+
+.km-council-vote-bar__label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.km-council-vote-bar__track {
+    display: block;
+    height: 1.1rem;
+    background: rgba(0, 0, 0, 0.12);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.km-council-vote-bar__fill {
+    display: block;
+    height: 100%;
+    min-width: 2px;
+    background: #4a6a2f;
+    transition: width 0.3s ease;
+}
+
+.km-council-vote-bar--leading .km-council-vote-bar__fill {
+    background: var(--secondary-km, #789035);
+}
+
+.km-council-vote-bar--leading .km-council-vote-bar__label {
+    font-weight: bold;
+}
+
+.km-council-vote-bar__count {
+    font-variant-numeric: tabular-nums;
+    min-width: 1.5rem;
+    text-align: right;
+}
+
+.km-council-vote-tie {
+    color: var(--failure, #c52424);
+    font-weight: bold;
+    margin: 0.2rem 0;
+}
+
+.km-council-vote-ballots {
+    list-style: none;
+    margin: 0.3rem 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.75rem;
+    font-size: 0.85rem;
+}
+
+.km-council-vote-absent {
+    font-size: 0.8rem;
+    opacity: 0.7;
+    margin: 0.2rem 0;
+}
+
+.km-council-vote-note {
+    border-left: 3px solid var(--secondary-km, #789035);
+    padding-left: 0.5rem;
+    margin: 0.4rem 0;
+}
+
+.km-council-vote-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    margin: 0.3rem 0;
+}
+
+.km-council-vote-gm-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px dashed rgba(0, 0, 0, 0.2);
+}
+
+.km-council-vote-gm-controls button {
+    flex: 0 1 auto;
+    width: auto;
+}

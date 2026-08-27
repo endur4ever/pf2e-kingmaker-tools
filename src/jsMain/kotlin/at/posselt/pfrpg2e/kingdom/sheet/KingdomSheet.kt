@@ -1,5 +1,17 @@
 package at.posselt.pfrpg2e.kingdom.sheet
 
+import at.posselt.pfrpg2e.kingdom.sheet.contexts.CouncilNoteContext
+import at.posselt.pfrpg2e.kingdom.sheet.contexts.CouncilNoteData
+import at.posselt.pfrpg2e.app.prompt
+import at.posselt.pfrpg2e.actions.handlers.SetCouncilVoteNoteData
+import at.posselt.pfrpg2e.actions.handlers.OpenCouncilVoteData
+import at.posselt.pfrpg2e.kingdom.sheet.contexts.buildCouncilVotesContext
+import at.posselt.pfrpg2e.kingdom.dialogs.OpenCouncilVote
+import at.posselt.pfrpg2e.kingdom.data.RawCouncilVote
+import at.posselt.pfrpg2e.kingdom.data.toRawBallots
+import at.posselt.pfrpg2e.kingdom.data.appendCouncilVote
+import at.posselt.pfrpg2e.kingdom.postCouncilVoteBallot
+import at.posselt.pfrpg2e.actions.handlers.CouncilVoteLifecycleData
 import at.posselt.pfrpg2e.actions.ActionDispatcher
 import at.posselt.pfrpg2e.actions.ActionMessage
 import at.posselt.pfrpg2e.actions.handlers.OpenKingdomSheetAction
@@ -86,6 +98,7 @@ import at.posselt.pfrpg2e.kingdom.data.RawConsumption
 import at.posselt.pfrpg2e.utils.t
 import at.posselt.pfrpg2e.utils.typeSafeUpdate
 import at.posselt.pfrpg2e.utils.worldTimeSeconds
+import com.foundryvtt.core.AnyObject
 import com.foundryvtt.core.grid.GridOffset2D
 import at.posselt.pfrpg2e.kingdom.data.RawFactionStandingEntry
 import at.posselt.pfrpg2e.kingdom.data.RawGroup
@@ -1475,6 +1488,119 @@ class KingdomSheet(
                         kingdom.groups = kingdom.groups.filterIndexed { idx, _ -> idx != index }.toTypedArray()
                         actor.setKingdom(kingdom)
                     }
+                }
+            }
+
+            "open-council-vote" -> {
+                // isGM in the template is layout; this bail is the authorization, because
+                // players are OWNERs of the party actor and can reach any branch regardless of
+                // what the sheet chose to render
+                if (!game.user.isGM) return
+                OpenCouncilVote { question, options ->
+                    buildPromise {
+                        // dispatched, not written here: every council mutation has to land on
+                        // the same executor under councilVoteMutex, or a sheet-side whole-flag
+                        // write races an in-flight ballot and silently drops it
+                        dispatcher.dispatch(
+                            ActionMessage(
+                                action = "openCouncilVote",
+                                data = OpenCouncilVoteData(
+                                    actorUuid = actor.uuid,
+                                    question = question,
+                                    options = options.toTypedArray(),
+                                ).unsafeCast<AnyObject>(),
+                            )
+                        )
+                    }
+                }.launch()
+            }
+
+            "close-council-vote" -> buildPromise {
+                if (!game.user.isGM) return@buildPromise
+                val voteId = target.dataset["voteId"] ?: return@buildPromise
+                // routed through the dispatcher, not written here: closing must serialise with
+                // in-flight ballots on the first-GM client (same reason the chat button does)
+                dispatcher.dispatch(
+                    ActionMessage(
+                        action = "closeCouncilVote",
+                        data = CouncilVoteLifecycleData(actorUuid = actor.uuid, voteId = voteId)
+                            .unsafeCast<AnyObject>(),
+                    )
+                )
+            }
+
+            "reopen-council-vote" -> buildPromise {
+                if (!game.user.isGM) return@buildPromise
+                val voteId = target.dataset["voteId"] ?: return@buildPromise
+                dispatcher.dispatch(
+                    ActionMessage(
+                        action = "reopenCouncilVote",
+                        data = CouncilVoteLifecycleData(actorUuid = actor.uuid, voteId = voteId)
+                            .unsafeCast<AnyObject>(),
+                    )
+                )
+            }
+
+            "repost-council-vote" -> buildPromise {
+                // the ballot card scrolls out of a busy chat log; reposting is how a GM gets it
+                // back in front of the table without opening a second vote
+                if (!game.user.isGM) return@buildPromise
+                val voteId = target.dataset["voteId"] ?: return@buildPromise
+                val vote = getKingdom().councilVotes?.firstOrNull { it.id == voteId }
+                    ?: return@buildPromise
+                postCouncilVoteBallot(game, actor.uuid, vote)
+            }
+
+            "delete-council-vote" -> buildPromise {
+                if (!game.user.isGM) return@buildPromise
+                val voteId = target.dataset["voteId"] ?: return@buildPromise
+                val vote = getKingdom().councilVotes?.firstOrNull { it.id == voteId }
+                    ?: return@buildPromise
+                // confirm FIRST, then dispatch: the old shape snapshotted the whole kingdom,
+                // waited on a modal for an unbounded time, and wrote that stale snapshot back --
+                // erasing every ballot cast while the dialog sat open
+                if (confirmDelete("kingdom.confirmDelete.councilVote", vote.question ?: "?")) {
+                    dispatcher.dispatch(
+                        ActionMessage(
+                            action = "deleteCouncilVote",
+                            data = CouncilVoteLifecycleData(actorUuid = actor.uuid, voteId = voteId)
+                                .unsafeCast<AnyObject>(),
+                        )
+                    )
+                }
+            }
+
+            "set-council-vote-note" -> buildPromise {
+                // the GM's "the council tied, so I decided" line -- the writer that makes the
+                // note field, its player-gate and its template block real rather than decorative
+                if (!game.user.isGM) return@buildPromise
+                val voteId = target.dataset["voteId"] ?: return@buildPromise
+                val vote = getKingdom().councilVotes?.firstOrNull { it.id == voteId }
+                    ?: return@buildPromise
+                prompt<CouncilNoteData, Unit>(
+                    title = t("kingdom.councilVotes.noteTitle"),
+                    templatePath = "components/forms/form.hbs",
+                    templateContext = CouncilNoteContext(
+                        formRows = arrayOf(
+                            TextInput(
+                                label = t("kingdom.councilVotes.noteLabel"),
+                                name = "note",
+                                value = vote.outcomeNote ?: "",
+                                required = false,
+                            ).toContext()
+                        )
+                    ).unsafeCast<AnyObject>(),
+                ) { data ->
+                    dispatcher.dispatch(
+                        ActionMessage(
+                            action = "setCouncilVoteNote",
+                            data = SetCouncilVoteNoteData(
+                                actorUuid = actor.uuid,
+                                voteId = voteId,
+                                note = data.note,
+                            ).unsafeCast<AnyObject>(),
+                        )
+                    )
                 }
             }
 
@@ -3789,6 +3915,15 @@ class KingdomSheet(
             pingsContext = buildPingsPanelContext(
                 unreadFeed(buildPlayerFeed(kingdom), game.user.pingsCursor()),
                 open = pingsPanelOpen,
+            ),
+            councilVotesContext = buildCouncilVotesContext(
+                votes = kingdom.councilVotes,
+                isGM = isGM,
+                // eligible voters = the non-GM users at the table, the same head count the
+                // readiness strip uses; runCatching because unit-test environments have no
+                // game.users registry
+                eligibleVoters = runCatching { game.users.filter { !it.isGM }.size }.getOrDefault(0),
+                voterNameOf = { userId -> runCatching { game.users.get(userId)?.name }.getOrNull() },
             ),
             sessionPrepContext = buildSessionPrepContext(
                 forecast = buildForecastPanelContext(buildForecast(game, actor, horizonDays = forecastHorizonDays)),

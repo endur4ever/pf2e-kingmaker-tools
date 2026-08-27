@@ -713,7 +713,8 @@
             "armyPressure": "Army & Pressure",
             "pacing": "Pacing",
             "analytics": "Analytics",
-            "expeditions": "Expeditions"
+            "expeditions": "Expeditions",
+            "councilVotes": "Votazioni"
         },
         "addSettlementBlock": {
             "title": "Add Settlement Block",
@@ -2036,7 +2037,8 @@
                 "modifier": "Delete modifier {name}? This cannot be undone.",
                 "quest": "Delete quest {name}? This cannot be undone.",
                 "warThreat": "Delete war minaccia {name}? This cannot be undone.",
-                "rivalRealm": "Eliminare il regno rivale {name}?"
+                "rivalRealm": "Eliminare il regno rivale {name}?",
+                "councilVote": "Eliminare la votazione “{name}”?"
             },
             "current": "Current",
             "expeditionBatchResolved": "Resolved {count} spedizione rewards.",
@@ -2459,7 +2461,17 @@
                 "linkPickerRow": "Turno {turn}",
                 "hasNotVoted": "{name} non ha votato",
                 "abstained": "{name} si è astenuto",
-                "noGmOnline": "Nessun GM online — il tuo voto non può essere registrato ora."
+                "noGmOnline": "Nessun GM online — il tuo voto non può essere registrato ora.",
+                "badgeOpen": "Aperto",
+                "badgeClosed": "Chiuso",
+                "openedOn": "Aperto al turno {turn}",
+                "closedOn": "chiuso al turno {turn}",
+                "notVotedCount": "{count} non hanno votato",
+                "repost": "Ripubblica la scheda",
+                "needQuestionAndOptions": "Una votazione richiede una domanda e almeno due opzioni.",
+                "noteTitle": "Nota sull'esito",
+                "noteLabel": "Cosa ha deciso il consiglio",
+                "noteButton": "Nota"
             }
         },
         "chatMessages": {

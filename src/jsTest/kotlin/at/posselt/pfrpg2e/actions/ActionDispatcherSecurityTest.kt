@@ -13,7 +13,10 @@ import at.posselt.pfrpg2e.actions.handlers.OpenKingdomSheetHandler
 import at.posselt.pfrpg2e.actions.handlers.OriginatorPolicy
 import at.posselt.pfrpg2e.actions.handlers.CastCouncilVoteHandler
 import at.posselt.pfrpg2e.actions.handlers.CloseCouncilVoteHandler
+import at.posselt.pfrpg2e.actions.handlers.DeleteCouncilVoteHandler
+import at.posselt.pfrpg2e.actions.handlers.OpenCouncilVoteHandler
 import at.posselt.pfrpg2e.actions.handlers.ReopenCouncilVoteHandler
+import at.posselt.pfrpg2e.actions.handlers.SetCouncilVoteNoteHandler
 import at.posselt.pfrpg2e.actions.handlers.SyncActivitiesHandler
 import at.posselt.pfrpg2e.actions.handlers.SyncBattleOutcomeHandler
 import com.foundryvtt.core.AnyObject
@@ -181,6 +184,9 @@ class ActionDispatcherSecurityTest {
             // serialises with in-flight ballots on the first-GM client
             CloseCouncilVoteHandler().action to OriginatorPolicy.GM_ONLY,
             ReopenCouncilVoteHandler().action to OriginatorPolicy.GM_ONLY,
+            OpenCouncilVoteHandler(game).action to OriginatorPolicy.GM_ONLY,
+            DeleteCouncilVoteHandler().action to OriginatorPolicy.GM_ONLY,
+            SetCouncilVoteNoteHandler().action to OriginatorPolicy.GM_ONLY,
         )
         val actual: List<Pair<String, OriginatorPolicy>> = listOf(
             AddHuntAndGatherResultHandler(),
@@ -196,6 +202,9 @@ class ActionDispatcherSecurityTest {
             ApplyStarvationHandler(),
             CloseCouncilVoteHandler(),
             ReopenCouncilVoteHandler(),
+            OpenCouncilVoteHandler(game),
+            DeleteCouncilVoteHandler(),
+            SetCouncilVoteNoteHandler(),
         ).map { it.action to it.originatorPolicy }
         assertEquals(expected, actual)
     }
