@@ -2653,7 +2653,9 @@ class KingdomSheet(
                     if (!confirm(t("kingdom.turn.confirmEndTurn", recordOf("turn" to nextTurn)))) {
                         return@buildPromise
                     }
-                    performEndTurn(game, actor, kingdom)
+                    // the fresh read happens INSIDE performEndTurn, under the council mutex --
+                    // this kingdom copy was read before the confirm dialog and may be stale
+                    performEndTurn(game, actor)
                 }
             }
 

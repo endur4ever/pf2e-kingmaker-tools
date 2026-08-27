@@ -1,5 +1,7 @@
 package at.posselt.pfrpg2e.kingdom.dialogs
 
+import kotlinx.coroutines.sync.withLock
+import at.posselt.pfrpg2e.kingdom.councilVoteMutex
 import at.posselt.pfrpg2e.kingdom.mapdynamism.clearedUnclaimedHexes
 import at.posselt.pfrpg2e.kingdom.mapdynamism.reconcileRewild
 import at.posselt.pfrpg2e.kingdom.stampEpithetOffersMade
@@ -266,12 +268,32 @@ fun runKingdomTurnTick(kingdom: KingdomData, storage: CommodityStorage, currentT
  *
  * Returns null when the caller is not a GM; no caller uses the [TickResult].
  */
-suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData): TickResult? {
-    val seasonal = game.currentSeasonalModifiers()
+/**
+ * Ends the kingdom turn. The entire tick -- read, mutate, persist, and the offer cards -- runs
+ * under [councilVoteMutex], the same lock every council handler takes, because the tick is one
+ * long read-modify-write of the whole kingdom flag held across MANY suspension points (chat
+ * round-trips, rolls, inventory writes). Without the lock, a ballot cast or a vote closed while
+ * the turn was ticking was persisted by its handler and then silently overwritten by the tick's
+ * own wholesale write. With it, mid-tick council writes queue and apply to the POST-tick kingdom.
+ *
+ * The kingdom is read HERE, inside the lock, not passed in: the sheet's caller used to read it,
+ * hold a confirm dialog open for an unbounded time, and then hand the stale copy over.
+ *
+ * No deadlock: nothing this function awaits takes the mutex itself -- the offer handlers do, but
+ * they run on click, and a click during the tick simply queues until the lock is released.
+ */
+suspend fun performEndTurn(game: Game, actor: KingdomActor): TickResult? {
+    // GM gate BEFORE the lock: a refused call must neither queue behind a ballot nor read a thing
     if (!game.user.isGM) {
         ui.notifications.warn(t("kingdom.turn.endTurnGmOnly"))
         return null
     }
+    return councilVoteMutex.withLock { performEndTurnLocked(game, actor) }
+}
+
+private suspend fun performEndTurnLocked(game: Game, actor: KingdomActor): TickResult? {
+    val kingdom = actor.getKingdom() ?: return null
+    val seasonal = game.currentSeasonalModifiers()
     // Capture snapshot BEFORE any mutations — enables "undo-end-turn" (exact revert). Must cover
     // EVERYTHING End Turn mutates, not just the kingdom flag: the turn-wizard-state flag (performed
     // activity counts, cleared below) and the ids of shipment items added to the party inventory
@@ -921,7 +943,12 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
  * double-deliver. Does NOT un-post chat messages or un-log the calendar (documented limitation).
  * Returns true if an undo happened. Callers must GM-gate.
  */
-suspend fun undoEndTurn(game: Game, actor: KingdomActor): Boolean {
+/** Undo is the tick's mirror -- a wholesale restore of the snapshot -- so it takes the same lock
+ *  for the same reason: a ballot landing mid-undo must queue rather than be reverted. */
+suspend fun undoEndTurn(game: Game, actor: KingdomActor): Boolean =
+    councilVoteMutex.withLock { undoEndTurnLocked(game, actor) }
+
+private suspend fun undoEndTurnLocked(game: Game, actor: KingdomActor): Boolean {
     val snap = actor.getAppFlag<KingdomActor, Any?>("lastTurnSnapshot")?.unsafeCast<EndTurnSnapshot>() ?: return false
     // The erased external-interface cast can't detect a malformed flag; validate shape (undefined == null in JS).
     val d = snap.asDynamic()
@@ -1321,8 +1348,8 @@ class TurnWizardApplication(
     }
 
     private suspend fun commitTurn() {
-        val kingdom = kingdomActor.getKingdom() ?: return
-        performEndTurn(game, kingdomActor, kingdom)
+        kingdomActor.getKingdom() ?: return
+        performEndTurn(game, kingdomActor)
         kingdomActor.unsetAppFlag("turn-wizard-state")
         close().await()
     }
