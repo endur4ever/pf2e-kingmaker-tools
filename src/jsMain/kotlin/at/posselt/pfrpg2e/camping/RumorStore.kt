@@ -13,14 +13,21 @@ import com.foundryvtt.core.game
  * can only be two calls to this funnel.
  *
  * GM-gated at the top rather than at each caller: players interact with rumors only through
- * GM-confirmed offers, so a non-GM reaching this at all is a caller bug, and refusing here keeps
- * the store single-writer even then.
+ * GM-confirmed offers, so a non-GM reaching this at all is a caller bug. Single-writer holds PER
+ * CLIENT -- two GM clients editing across the same day-boundary tick can still last-write-wins,
+ * the same residual the kingdom flag carries; the funnel narrows the race, it cannot end it.
  */
 suspend fun CampingActor.updateRumors(block: (List<Rumor>) -> List<Rumor>) {
     if (!game.user.isGM) return
     val camping = getCamping() ?: return
-    val next = capRumors(block(camping.rumorList()))
-    camping.rumors = next.map { it.toRaw() }.toTypedArray()
+    val raws = camping.rumors ?: emptyArray()
+    // rows this build cannot parse (an unknown state from a newer build, a hand-edited flag) are
+    // CARRIED THROUGH the write untouched, not silently deleted: dropping them from evaluation is
+    // the contract, dropping them from STORAGE would make one round trip through an older build
+    // destructive -- the same rule the downtime tick documents for its own unknown rows
+    val unparseable = raws.filter { it.toModel() == null }
+    val next = capRumors(block(raws.mapNotNull { it.toModel() }))
+    camping.rumors = (next.map { it.toRaw() } + unparseable).toTypedArray()
     setCamping(camping)
 }
 

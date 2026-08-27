@@ -477,13 +477,15 @@ private fun calculateModifierIncrease(
  * existing "From: ..." badge on the quests board, and its id is tracked in
  * [KingdomData.rumorGeneratedQuestIds].
  */
-suspend fun convertRumorToQuest(game: Game, rumor: Rumor) {
+/** Returns the minted quest id, or null when conversion could not happen -- callers must NOT
+ *  mark the rumor CONVERTED on null, or the lead dies with no quest to show for it. */
+suspend fun convertRumorToQuest(game: Game, rumor: Rumor): String? {
     val kingdomActor = game.getKingdomActors().firstOrNull()
     if (kingdomActor == null) {
         ui.notifications.error(t("camping.encounterNoKingdom"))
-        return
+        return null
     }
-    val kingdom = kingdomActor.getKingdom() ?: return
+    val kingdom = kingdomActor.getKingdom() ?: return null
     val now = kotlin.js.Date().toISOString()
     val questId = "rumor-${kotlin.js.Date().getTime().toLong()}"
     val quest = CampaignQuest(
@@ -511,4 +513,5 @@ suspend fun convertRumorToQuest(game: Game, rumor: Rumor) {
     kingdom.rumorGeneratedQuestIds = (kingdom.rumorGeneratedQuestIds ?: emptyArray()) + questId
     kingdomActor.setKingdom(kingdom)
     ui.notifications.info(t("camping.encounterRumorConverted"))
+    return questId
 }

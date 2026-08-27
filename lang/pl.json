@@ -663,7 +663,8 @@
                         "moved": "Ślad w okolicy {region} ostygł; cokolwiek to było, ruszyło dalej.",
                         "grew": "Podróżni z okolic {region} mówią teraz o czymś znacznie większym, niż głoszono."
                     }
-                }
+                },
+                "rowGone": "Tej plotki nie ma już na tablicy."
             }
         },
         "settlementNav": {

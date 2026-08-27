@@ -785,7 +785,8 @@
                         "moved": "The trail has gone cold near {region}; whatever it was has moved on.",
                         "grew": "Travelers near {region} now speak of something far larger than first told."
                     }
-                }
+                },
+                "rowGone": "That rumor is no longer on the board."
             }
         },
         "settlementNav": {

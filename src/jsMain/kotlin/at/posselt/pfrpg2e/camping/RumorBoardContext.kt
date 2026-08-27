@@ -22,6 +22,9 @@ external interface RumorRowContext {
     val veracityValue: String?
     val veracityLabel: String?
     val ageDays: Int?
+    /** True when [ageDays] is present -- Handlebars treats 0 as falsy, and "0d old" is a real
+     *  thing to show the GM on the day a rumor lands. */
+    val hasAge: Boolean
     val canConvert: Boolean
 }
 
@@ -71,8 +74,9 @@ fun buildRumorBoardContext(
             veracityValue = rumor.veracity?.value.takeIf { isGM },
             veracityLabel = rumorVeracityLabel(rumor.veracity).takeIf { isGM },
             ageDays = rumor.bornDay?.let { currentDay - it }?.coerceAtLeast(0).takeIf { isGM },
+            hasAge = isGM && rumor.bornDay != null,
             canConvert = isGM && rumor.id.isNotBlank() &&
-                    rumor.state != RumorState.CONVERTED,
+                    rumor.state != RumorState.CONVERTED && !rumor.isConverted,
         )
     }
     return RumorBoardContext(

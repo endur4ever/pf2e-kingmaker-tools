@@ -496,6 +496,18 @@ class CampingSheet(
         appHook.onUpdateItem { _, _, _, _ -> render() }
     }
 
+    private suspend fun applyRumorVeracity(rumorId: String, value: String?) {
+        if (!game.user.isGM) return
+        actor.updateRumors { rumors ->
+            rumors.map { rumor ->
+                if (rumor.id == rumorId) {
+                    rumor.copy(veracity = RumorVeracity.fromValue(value?.takeIf { it.isNotBlank() }))
+                } else rumor
+            }
+        }
+        render()
+    }
+
     override fun _onClickAction(event: PointerEvent, target: HTMLElement) {
         when (target.dataset["action"]) {
             "toggle-rumor-pin" -> buildPromise {
@@ -507,6 +519,9 @@ class CampingSheet(
                 actor.updateRumors { rumors ->
                     rumors.map { rumor ->
                         if (rumor.id != rumorId) rumor
+                        // CONVERTED is terminal: pinning it would let unpin reset the state to
+                        // FRESH, resurrecting a lead that already became a quest
+                        else if (rumor.state == RumorState.CONVERTED) rumor
                         else if (rumor.state == RumorState.PINNED) {
                             // unpinning resumes aging FROM NOW: bornDay resets so the weeks spent
                             // pinned do not land all at once and expire it on the next tick
@@ -520,17 +535,8 @@ class CampingSheet(
             }
 
             "set-rumor-veracity" -> buildPromise {
-                if (!game.user.isGM) return@buildPromise
                 val rumorId = target.dataset["rumorId"] ?: return@buildPromise
-                val value = target.takeIfInstance<org.w3c.dom.HTMLSelectElement>()?.value
-                actor.updateRumors { rumors ->
-                    rumors.map { rumor ->
-                        if (rumor.id == rumorId) {
-                            rumor.copy(veracity = RumorVeracity.fromValue(value?.takeIf { it.isNotBlank() }))
-                        } else rumor
-                    }
-                }
-                render()
+                applyRumorVeracity(rumorId, target.takeIfInstance<org.w3c.dom.HTMLSelectElement>()?.value)
             }
 
             "convert-rumor" -> buildPromise {
@@ -538,15 +544,20 @@ class CampingSheet(
                 val rumorId = target.dataset["rumorId"] ?: return@buildPromise
                 val rumor = actor.getCamping()?.rumorList()?.firstOrNull { it.id == rumorId }
                     ?: return@buildPromise
-                // the existing rumor->quest pipeline mints the quest; the store then marks the
-                // rumor CONVERTED, which stops its aging permanently
-                convertRumorToQuest(game, rumor)
-                actor.updateRumors { rumors ->
-                    rumors.map {
-                        if (it.id == rumorId) it.copy(state = RumorState.CONVERTED, isConverted = true) else it
+                // the existing rumor->quest pipeline mints the quest; CONVERTED is stamped only
+                // when a quest actually exists -- convertRumorToQuest bails null in a world with
+                // no kingdom actor, and marking anyway would kill the lead with nothing to show
+                val questId = convertRumorToQuest(game, rumor)
+                if (questId != null) {
+                    actor.updateRumors { rumors ->
+                        rumors.map {
+                            if (it.id == rumorId) {
+                                it.copy(state = RumorState.CONVERTED, isConverted = true, convertedQuestId = questId)
+                            } else it
+                        }
                     }
+                    render()
                 }
-                render()
             }
 
             "delete-rumor" -> buildPromise {
@@ -2202,8 +2213,15 @@ class CampingSheet(
             .filterIsInstance<HTMLElement>()
             .forEach { el: HTMLElement ->
                 el.addEventListener("change", {
-                    el.dataset["action"] = "set-rumor-veracity"
-                    _onClickAction(PointerEvent("click"), el)
+                    // direct call, no dataset mutation: writing data-action onto the select
+                    // would enroll it in ApplicationV2's click delegation too, and the click
+                    // browsers fire right after an option is chosen would dispatch the write a
+                    // second time
+                    val rumorId = el.dataset["rumorId"]
+                    val value = el.takeIfInstance<HTMLSelectElement>()?.value
+                    if (rumorId != null) {
+                        buildPromise { applyRumorVeracity(rumorId, value) }
+                    }
                 })
             }
         htmlElement.querySelector("#km-camping-rest")

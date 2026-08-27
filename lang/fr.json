@@ -663,7 +663,8 @@
                         "moved": "La piste s'est refroidie près de {region} ; la créature est partie ailleurs.",
                         "grew": "Les voyageurs près de {region} parlent désormais d'une chose bien plus grande qu'annoncé."
                     }
-                }
+                },
+                "rowGone": "Cette rumeur n'est plus au tableau."
             }
         },
         "settlementNav": {

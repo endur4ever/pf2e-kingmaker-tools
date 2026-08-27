@@ -302,3 +302,27 @@
 .km-loot-cursed-name {
     flex: 1;
 }
+
+/* rumor offer cards */
+.km-rumor-offer-card h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.km-rumor-beat-preview {
+    font-style: italic;
+    border-left: 3px solid rgba(0, 0, 0, 0.3);
+    padding-left: 0.5rem;
+}
+
+.km-rumor-offer-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+}
+
+.km-rumor-offer-buttons button {
+    flex: 1 1 auto;
+    width: auto;
+}

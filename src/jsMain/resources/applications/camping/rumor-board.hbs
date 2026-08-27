@@ -10,7 +10,7 @@
                     {{this.text}}
                     {{#if this.sourceRegion}}<span class="km-rumor-region">{{this.sourceRegion}}</span>{{/if}}
                 </td>
-                <td class="km-rumor-state">{{this.stateLabel}}{{#if this.ageDays}} <span class="km-rumor-age">({{localizeKM "camping.rumors.ageDays" days=this.ageDays}})</span>{{/if}}</td>
+                <td class="km-rumor-state">{{this.stateLabel}}{{#if this.hasAge}} <span class="km-rumor-age">({{localizeKM "camping.rumors.ageDays" days=this.ageDays}})</span>{{/if}}</td>
                 {{#if @root.rumorBoard.isGM}}
                     <td class="km-rumor-controls">
                         {{#if this.id}}
@@ -20,10 +20,10 @@
                                 <option value="distorted" {{#if (eq this.veracityValue "distorted")}}selected{{/if}}>{{localizeKM "camping.rumors.veracity.distorted"}}</option>
                                 <option value="false" {{#if (eq this.veracityValue "false")}}selected{{/if}}>{{localizeKM "camping.rumors.veracity.false"}}</option>
                             </select>
-                            <button type="button" data-action="toggle-rumor-pin" data-rumor-id="{{this.id}}"
+                            {{#unless this.isConverted}}<button type="button" data-action="toggle-rumor-pin" data-rumor-id="{{this.id}}"
                                     data-tooltip="{{localizeKM "camping.rumors.pinTooltip"}}">
                                 <i class="fa-solid fa-thumbtack"></i>
-                            </button>
+                            </button>{{/unless}}
                             {{#if this.canConvert}}
                                 <button type="button" data-action="convert-rumor" data-rumor-id="{{this.id}}"
                                         data-tooltip="{{localizeKM "camping.rumors.convertTooltip"}}">

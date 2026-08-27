@@ -32,6 +32,7 @@ suspend fun postRumorExpiryOffers(
     if (gmUserIds.isEmpty()) return
     val tables = runCatching { rumorMutationTablesByCategory() }.getOrDefault(emptyMap())
 
+    val posted = mutableListOf<String>()
     for (rumor in expired) {
         // category is not persisted on the rumor; the curator's rumors are all category "rumor"
         // hooks, so the beat table is keyed by what the rumor is ABOUT -- monster is the shipped
@@ -43,6 +44,8 @@ suspend fun postRumorExpiryOffers(
         val ctx = js("{}")
         ctx.campingActorUuid = campingActor.uuid
         ctx.rumorId = rumor.id
+        // region pinned on the card so the beat can post even if the row is capped away later
+        ctx.regionPin = rumor.sourceRegion ?: ""
         ctx.title = t("camping.rumors.expiredOffer.title")
         ctx.text = rumor.text
         ctx.region = rumor.sourceRegion
@@ -52,11 +55,14 @@ suspend fun postRumorExpiryOffers(
             ctx.beatLabel = t("camping.rumors.expiredOffer.postBeat")
         }
         ctx.quietLabel = t("camping.rumors.expiredOffer.letItFade")
-        postChatTemplate(
-            templatePath = "chatmessages/rumor-expired-offer.hbs",
-            templateContext = ctx,
-            whisper = gmUserIds,
-        )
+        val ok = runCatching {
+            postChatTemplate(
+                templatePath = "chatmessages/rumor-expired-offer.hbs",
+                templateContext = ctx,
+                whisper = gmUserIds,
+            )
+        }.isSuccess
+        if (ok) posted.add(rumor.id)
 
         // the rescue card, only for leads worth rescuing: a quest-hook rumor about to die gets
         // one last chance to become a quest or a hex hook. The plan lists the card but not its
@@ -82,8 +88,12 @@ suspend fun postRumorExpiryOffers(
         }
     }
 
-    val offeredIds = expired.map { it.id }.toSet()
-    campingActor.updateRumors { rumors ->
-        rumors.map { if (it.id in offeredIds) it.copy(beatOfferedDay = currentDay) else it }
+    // stamp only what actually posted: a chat rejection mid-loop must not leave earlier cards
+    // unstamped (they would re-post tomorrow) nor stamp cards that never went out
+    if (posted.isNotEmpty()) {
+        val offeredIds = posted.toSet()
+        campingActor.updateRumors { rumors ->
+            rumors.map { if (it.id in offeredIds) it.copy(beatOfferedDay = currentDay) else it }
+        }
     }
 }

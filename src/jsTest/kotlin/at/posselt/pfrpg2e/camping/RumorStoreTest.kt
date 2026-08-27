@@ -58,4 +58,14 @@ class RumorStoreTest {
         assertEquals("", model.id)
         assertNull(model.toRaw().id, "blank must not be persisted as a fake identity")
     }
+
+    @Test
+    fun conversionRecordsTheQuestItBecame() {
+        // convertedQuestId was declared, round-tripped, and never written by any path; the
+        // convert callers now store it, so a CONVERTED row can name its quest
+        val model = raw().toModel()!!.copy(
+            state = RumorState.CONVERTED, isConverted = true, convertedQuestId = "quest-9",
+        )
+        assertEquals("quest-9", model.toRaw().convertedQuestId)
+    }
 }

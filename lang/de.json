@@ -663,7 +663,8 @@
                         "moved": "Die Spur nahe {region} ist kalt geworden; was immer es war, ist weitergezogen.",
                         "grew": "Reisende nahe {region} sprechen nun von etwas weit Größerem als zuerst erzählt."
                     }
-                }
+                },
+                "rowGone": "Dieses Gerücht steht nicht mehr auf der Tafel."
             }
         },
         "settlementNav": {

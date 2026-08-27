@@ -113,6 +113,20 @@ class RumorLifecycleTest {
     }
 
     @Test
+    fun theCapDropsAnsweredExpiredBeforeAJustExpiredUnofferedOne() {
+        // the tick a rumor expires INTO an over-cap store: its offer has not posted yet, and
+        // trimming it first would silently skip the one consequence the feature promises
+        val rumors = listOf(
+            rumor(id = "answered", state = RumorState.EXPIRED, offered = 3),
+            rumor(id = "just-expired", state = RumorState.EXPIRED),
+            rumor(id = "live"),
+        )
+        val capped = capRumors(rumors, cap = 2)
+        assertEquals(listOf("just-expired", "live"), capped.map { it.id },
+            "the answered one had nothing left to say; the unoffered one still owes the GM a card")
+    }
+
+    @Test
     fun theCapPrefersDroppingExpiredOverConverted() {
         // a converted rumor still points at a quest the table is playing
         val rumors = listOf(

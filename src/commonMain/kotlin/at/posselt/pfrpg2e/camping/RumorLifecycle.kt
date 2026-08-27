@@ -88,12 +88,20 @@ fun capRumors(rumors: List<Rumor>, cap: Int = RUMOR_CAP): List<Rumor> {
     if (rumors.size <= cap) return rumors
     var excess = rumors.size - cap
     val dropIds = mutableSetOf<Int>()
-    // two passes, expired before converted: a converted rumor still points at a quest the table
-    // is playing, so it outlives an expired dead end
-    for (state in listOf(RumorState.EXPIRED, RumorState.CONVERTED)) {
+    // three passes: ANSWERED expired first (their beat was offered; nothing left to say), then
+    // unoffered expired, then converted (still points at a quest the table is playing). The
+    // offered-first split matters on the tick a rumor expires INTO an over-cap store: trimming
+    // the just-expired row before its offer posts would silently skip the one consequence the
+    // whole feature promises the GM signs off on
+    val passes: List<(Rumor) -> Boolean> = listOf(
+        { it.state == RumorState.EXPIRED && it.beatOfferedDay != null },
+        { it.state == RumorState.EXPIRED },
+        { it.state == RumorState.CONVERTED },
+    )
+    for (pass in passes) {
         if (excess <= 0) break
         rumors.forEachIndexed { index, rumor ->
-            if (excess > 0 && rumor.state == state && index !in dropIds) {
+            if (excess > 0 && pass(rumor) && index !in dropIds) {
                 dropIds.add(index)
                 excess--
             }

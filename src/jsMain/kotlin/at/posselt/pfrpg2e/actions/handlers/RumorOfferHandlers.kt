@@ -1,5 +1,6 @@
 package at.posselt.pfrpg2e.actions.handlers
 
+import com.foundryvtt.core.ui
 import at.posselt.pfrpg2e.actions.ActionDispatcher
 import at.posselt.pfrpg2e.actions.ActionMessage
 import at.posselt.pfrpg2e.camping.CampingActor
@@ -28,6 +29,8 @@ external interface RumorOfferData {
     val rumorId: String
     val beatKey: String?
     val hexKey: String?
+    /** Region pinned at post time, so the beat can post even after the row was capped away. */
+    val regionPin: String?
 }
 
 /**
@@ -39,11 +42,11 @@ class PostRumorBeatHandler(private val game: Game) : ActionHandler("postRumorBea
     override suspend fun execute(action: ActionMessage, dispatcher: ActionDispatcher) {
         val data = action.data.unsafeCast<RumorOfferData>()
         val beatKey = data.beatKey ?: return
-        val actor = fromUuidTypeSafe<CampingActor>(data.campingActorUuid) ?: return
-        val rumor = actor.getCamping()?.rumorList()?.firstOrNull { it.id == data.rumorId } ?: return
-        postChatMessage(
-            t(beatKey, recordOf("region" to (rumor.sourceRegion ?: t("camping.rumors.somewhere")))),
-        )
+        // everything the beat needs was pinned on the card at post time, deliberately: the cap
+        // trims EXPIRED rows first, so the row can be gone by the time the GM clicks -- and the
+        // beat must still post, because the card is the GM's preview of exactly this prose
+        val region = data.regionPin?.takeIf { it.isNotBlank() } ?: t("camping.rumors.somewhere")
+        postChatMessage(t(beatKey, recordOf("region" to region)))
     }
 }
 
@@ -52,12 +55,19 @@ class ConvertRumorQuestHandler(private val game: Game) : ActionHandler("convertR
     override suspend fun execute(action: ActionMessage, dispatcher: ActionDispatcher) {
         val data = action.data.unsafeCast<RumorOfferData>()
         val actor = fromUuidTypeSafe<CampingActor>(data.campingActorUuid) ?: return
-        val rumor = actor.getCamping()?.rumorList()?.firstOrNull { it.id == data.rumorId } ?: return
-        if (rumor.state == RumorState.CONVERTED) return  // idempotent: a stale card converts once
-        convertRumorToQuest(game, rumor)
+        val rumor = actor.getCamping()?.rumorList()?.firstOrNull { it.id == data.rumorId } ?: run {
+            ui.notifications.warn(t("camping.rumors.rowGone"))
+            return
+        }
+        // isConverted too, not just state: a pin/unpin cycle could reset the state while the
+        // boolean survives, and a second quest for the same lead must never mint
+        if (rumor.state == RumorState.CONVERTED || rumor.isConverted) return
+        val questId = convertRumorToQuest(game, rumor) ?: return
         actor.updateRumors { rumors ->
             rumors.map {
-                if (it.id == data.rumorId) it.copy(state = RumorState.CONVERTED, isConverted = true) else it
+                if (it.id == data.rumorId) {
+                    it.copy(state = RumorState.CONVERTED, isConverted = true, convertedQuestId = questId)
+                } else it
             }
         }
     }
@@ -74,9 +84,15 @@ class ConvertRumorHexHandler(private val game: Game) : ActionHandler("convertRum
         val data = action.data.unsafeCast<RumorOfferData>()
         val hexKey = data.hexKey ?: return
         val actor = fromUuidTypeSafe<CampingActor>(data.campingActorUuid) ?: return
-        val rumor = actor.getCamping()?.rumorList()?.firstOrNull { it.id == data.rumorId } ?: return
-        if (rumor.state == RumorState.CONVERTED) return
-        val kingdomActor = game.getKingdomActors().firstOrNull() ?: return
+        val rumor = actor.getCamping()?.rumorList()?.firstOrNull { it.id == data.rumorId } ?: run {
+            ui.notifications.warn(t("camping.rumors.rowGone"))
+            return
+        }
+        if (rumor.state == RumorState.CONVERTED || rumor.isConverted) return
+        val kingdomActor = game.getKingdomActors().firstOrNull() ?: run {
+            ui.notifications.warn(t("camping.encounterNoKingdom"))
+            return
+        }
         val kingdom = kingdomActor.getKingdom() ?: return
         kingdom.hexContents = (kingdom.hexContents ?: emptyArray()) + RawHexContent(
             id = "rumor-hook-${v4()}",

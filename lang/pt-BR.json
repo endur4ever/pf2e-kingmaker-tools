@@ -663,7 +663,8 @@
                         "moved": "O rastro esfriou perto de {region}; o que quer que fosse, seguiu adiante.",
                         "grew": "Viajantes perto de {region} agora falam de algo bem maior do que se contava."
                     }
-                }
+                },
+                "rowGone": "Esse rumor não está mais no quadro."
             }
         },
         "settlementNav": {

@@ -76,6 +76,7 @@ fun bindCampingChatEventListeners(game: Game, dispatcher: ActionDispatcher) {
                                 rumorId = rumorId,
                                 beatKey = el.dataset["beatKey"],
                                 hexKey = el.dataset["hexKey"],
+                                regionPin = el.dataset["regionPin"],
                             ).unsafeCast<AnyObject>(),
                         )
                     )
