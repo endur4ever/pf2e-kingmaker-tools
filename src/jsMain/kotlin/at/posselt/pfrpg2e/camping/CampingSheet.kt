@@ -1,5 +1,6 @@
 package at.posselt.pfrpg2e.camping
 
+import at.posselt.pfrpg2e.app.confirmDelete
 import at.posselt.pfrpg2e.actions.ActionDispatcher
 import at.posselt.pfrpg2e.actions.ActionMessage
 import at.posselt.pfrpg2e.actions.handlers.ClearMealEffectsMessage
@@ -84,10 +85,12 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.datetime.LocalTime
 import kotlinx.js.JsPlainObject
+import org.w3c.dom.asList
 import org.w3c.dom.HTMLButtonElement
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.HTMLSelectElement
 import org.w3c.dom.get
+import org.w3c.dom.set
 import org.w3c.dom.pointerevents.PointerEvent
 import kotlin.js.Promise
 import kotlin.math.max
@@ -251,6 +254,8 @@ external interface TravelRouteUiContext {
 external interface CampingSheetContext : ValidatedHandlebarsContext {
     /** PC downtime projects (plan phase 4); rows for everyone, controls are GM surfaces. */
     val downtimeProjects: DowntimeSectionContext?
+    /** The rumor board; rows for everyone, veracity/age/controls GM-only at the data level. */
+    val rumorBoard: RumorBoardContext?
     var actors: Array<CampingSheetActor>
     var prepareCamp: CampingSheetActivity?
     var activities: Array<CampingSheetActivity>
@@ -493,6 +498,68 @@ class CampingSheet(
 
     override fun _onClickAction(event: PointerEvent, target: HTMLElement) {
         when (target.dataset["action"]) {
+            "toggle-rumor-pin" -> buildPromise {
+                // players own the camping actor the same way they own the party actor: the
+                // template's isGM is layout, this bail is the authorization (updateRumors is
+                // ALSO GM-gated, so this is belt and braces)
+                if (!game.user.isGM) return@buildPromise
+                val rumorId = target.dataset["rumorId"] ?: return@buildPromise
+                actor.updateRumors { rumors ->
+                    rumors.map { rumor ->
+                        if (rumor.id != rumorId) rumor
+                        else if (rumor.state == RumorState.PINNED) {
+                            // unpinning resumes aging FROM NOW: bornDay resets so the weeks spent
+                            // pinned do not land all at once and expire it on the next tick
+                            rumor.copy(state = RumorState.FRESH, bornDay = currentWorldDay(game))
+                        } else {
+                            rumor.copy(state = RumorState.PINNED)
+                        }
+                    }
+                }
+                render()
+            }
+
+            "set-rumor-veracity" -> buildPromise {
+                if (!game.user.isGM) return@buildPromise
+                val rumorId = target.dataset["rumorId"] ?: return@buildPromise
+                val value = target.takeIfInstance<org.w3c.dom.HTMLSelectElement>()?.value
+                actor.updateRumors { rumors ->
+                    rumors.map { rumor ->
+                        if (rumor.id == rumorId) {
+                            rumor.copy(veracity = RumorVeracity.fromValue(value?.takeIf { it.isNotBlank() }))
+                        } else rumor
+                    }
+                }
+                render()
+            }
+
+            "convert-rumor" -> buildPromise {
+                if (!game.user.isGM) return@buildPromise
+                val rumorId = target.dataset["rumorId"] ?: return@buildPromise
+                val rumor = actor.getCamping()?.rumorList()?.firstOrNull { it.id == rumorId }
+                    ?: return@buildPromise
+                // the existing rumor->quest pipeline mints the quest; the store then marks the
+                // rumor CONVERTED, which stops its aging permanently
+                convertRumorToQuest(game, rumor)
+                actor.updateRumors { rumors ->
+                    rumors.map {
+                        if (it.id == rumorId) it.copy(state = RumorState.CONVERTED, isConverted = true) else it
+                    }
+                }
+                render()
+            }
+
+            "delete-rumor" -> buildPromise {
+                if (!game.user.isGM) return@buildPromise
+                val rumorId = target.dataset["rumorId"] ?: return@buildPromise
+                val rumor = actor.getCamping()?.rumorList()?.firstOrNull { it.id == rumorId }
+                    ?: return@buildPromise
+                if (confirmDelete("camping.rumors.confirmDelete", rumor.text.take(60))) {
+                    actor.updateRumors { rumors -> rumors.filter { it.id != rumorId } }
+                    render()
+                }
+            }
+
             "configure-regions" -> RegionConfig(actor).launch()
             "configure-recipes" -> ManageRecipesApplication(game, actor).launch()
             "configure-activities" -> ManageActivitiesApplication(game, actor).launch()
@@ -2064,6 +2131,11 @@ class CampingSheet(
             downtimeProjects = buildDowntimeSectionContext(
                 game.getKingdomActors().firstOrNull()?.getKingdom()?.downtimeProjects,
             ) { uuid -> game.actors.find { it.uuid == uuid }?.name },
+            rumorBoard = buildRumorBoardContext(
+                rumors = camping.rumorList(),
+                currentDay = currentWorldDay(game),
+                isGM = game.user.isGM,
+            ),
             travelMoveToken = camping.travelMoveToken == true,
             travelPathError = travelPathError
         )
@@ -2124,6 +2196,16 @@ class CampingSheet(
 
     override fun _attachPartListeners(partId: String, htmlElement: HTMLElement, options: ApplicationRenderOptions) {
         super._attachPartListeners(partId, htmlElement, options)
+        // selects fire "change", not the click pipeline; route them into the same handler
+        htmlElement.querySelectorAll("[data-action-change='set-rumor-veracity']")
+            .asList()
+            .filterIsInstance<HTMLElement>()
+            .forEach { el: HTMLElement ->
+                el.addEventListener("change", {
+                    el.dataset["action"] = "set-rumor-veracity"
+                    _onClickAction(PointerEvent("click"), el)
+                })
+            }
         htmlElement.querySelector("#km-camping-rest")
             ?.takeIfInstance<HTMLButtonElement>()
             ?.ondragstart = {

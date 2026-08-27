@@ -622,6 +622,27 @@
                     "ritual": "Effectuer maintenant les tests du rituel.",
                     "unknown": "Résoudre selon les règles de l’activité."
                 }
+            },
+            "rumors": {
+                "title": "Tableau des rumeurs",
+                "ageDays": "{days} j",
+                "pinnedTooltip": "Épinglée — cette rumeur ne se périme pas",
+                "pinTooltip": "Épingler / détacher",
+                "convertTooltip": "Convertir en quête",
+                "confirmDelete": "Supprimer la rumeur « {name} » ?",
+                "state": {
+                    "fresh": "Fraîche",
+                    "stale": "Défraîchie",
+                    "expired": "Périmée",
+                    "converted": "Convertie",
+                    "pinned": "Épinglée"
+                },
+                "veracity": {
+                    "true": "Vraie",
+                    "distorted": "Déformée",
+                    "false": "Fausse",
+                    "unassessed": "Non évaluée"
+                }
             }
         },
         "settlementNav": {

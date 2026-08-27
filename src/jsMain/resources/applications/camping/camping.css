@@ -1491,3 +1491,68 @@ ul.km-camping-actors {
     font-size: 0.85em;
     padding: 0.15rem 0.5rem;
 }
+
+/* rumor board -- lives inside the shrink-to-fit activities wrapper, whose widest child sets every
+   sibling's width; width:0 + min-width:100% is the documented antidote (this repo hit it twice) */
+.km-rumor-board {
+    margin: 0.5rem 0;
+    background: rgba(0, 0, 0, 0.35);
+    border-radius: 5px;
+    padding: 0.3rem 0.5rem;
+    color: white;
+}
+
+.km-rumor-board > summary {
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.km-rumor-table {
+    width: 0;
+    min-width: 100%;
+    border-collapse: collapse;
+    margin-top: 0.3rem;
+}
+
+.km-rumor-row td {
+    padding: 0.15rem 0.35rem;
+    vertical-align: middle;
+}
+
+.km-rumor-row--stale {
+    opacity: 0.65;
+}
+
+.km-rumor-row--expired {
+    opacity: 0.4;
+    text-decoration: line-through;
+}
+
+.km-rumor-region {
+    font-size: 0.75rem;
+    opacity: 0.7;
+    margin-left: 0.4rem;
+}
+
+.km-rumor-state {
+    white-space: nowrap;
+    font-size: 0.85rem;
+}
+
+.km-rumor-age {
+    opacity: 0.7;
+}
+
+.km-rumor-controls {
+    white-space: nowrap;
+}
+
+.km-rumor-controls button {
+    width: auto;
+    display: inline-block;
+}
+
+.km-rumor-veracity {
+    width: auto;
+    max-width: 8rem;
+}

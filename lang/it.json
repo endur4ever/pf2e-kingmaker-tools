@@ -622,6 +622,27 @@
                     "ritual": "Esegui ora le prove del rituale.",
                     "unknown": "Risolvi secondo le regole dell’attività."
                 }
+            },
+            "rumors": {
+                "title": "Bacheca delle voci",
+                "ageDays": "{days} g",
+                "pinnedTooltip": "Fissata — questa voce non scade",
+                "pinTooltip": "Fissa / sblocca",
+                "convertTooltip": "Converti in missione",
+                "confirmDelete": "Eliminare la voce “{name}”?",
+                "state": {
+                    "fresh": "Fresca",
+                    "stale": "Vecchia",
+                    "expired": "Scaduta",
+                    "converted": "Convertita",
+                    "pinned": "Fissata"
+                },
+                "veracity": {
+                    "true": "Vera",
+                    "distorted": "Distorta",
+                    "false": "Falsa",
+                    "unassessed": "Non valutata"
+                }
             }
         },
         "settlementNav": {

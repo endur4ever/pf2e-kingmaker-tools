@@ -622,6 +622,27 @@
                     "ritual": "Проведите проверки ритуала сейчас.",
                     "unknown": "Разрешите по правилам занятия."
                 }
+            },
+            "rumors": {
+                "title": "Доска слухов",
+                "ageDays": "{days} дн.",
+                "pinnedTooltip": "Закреплён — этот слух не устаревает",
+                "pinTooltip": "Закрепить / открепить",
+                "convertTooltip": "Превратить в задание",
+                "confirmDelete": "Удалить слух «{name}»?",
+                "state": {
+                    "fresh": "Свежий",
+                    "stale": "Устаревший",
+                    "expired": "Истёкший",
+                    "converted": "Преобразован",
+                    "pinned": "Закреплён"
+                },
+                "veracity": {
+                    "true": "Правдивый",
+                    "distorted": "Искажённый",
+                    "false": "Ложный",
+                    "unassessed": "Не оценён"
+                }
             }
         },
         "settlementNav": {

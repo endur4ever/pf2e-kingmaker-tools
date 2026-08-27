@@ -1,0 +1,44 @@
+{{#if rumorBoard.hasAny}}
+<details class="km-rumor-board" open>
+    <summary><i class="fa-solid fa-ear-listen"></i> {{localizeKM "camping.rumors.title"}}</summary>
+    <table class="km-rumor-table">
+        <tbody>
+        {{#each rumorBoard.rows}}
+            <tr class="km-rumor-row{{#if this.isStale}} km-rumor-row--stale{{/if}}{{#if this.isExpired}} km-rumor-row--expired{{/if}}">
+                <td class="km-rumor-text">
+                    {{#if this.isPinned}}<i class="fa-solid fa-thumbtack" data-tooltip="{{localizeKM "camping.rumors.pinnedTooltip"}}"></i> {{/if}}
+                    {{this.text}}
+                    {{#if this.sourceRegion}}<span class="km-rumor-region">{{this.sourceRegion}}</span>{{/if}}
+                </td>
+                <td class="km-rumor-state">{{this.stateLabel}}{{#if this.ageDays}} <span class="km-rumor-age">({{localizeKM "camping.rumors.ageDays" days=this.ageDays}})</span>{{/if}}</td>
+                {{#if @root.rumorBoard.isGM}}
+                    <td class="km-rumor-controls">
+                        {{#if this.id}}
+                            <select data-action-change="set-rumor-veracity" data-rumor-id="{{this.id}}" class="km-rumor-veracity">
+                                <option value="" {{#unless this.veracityValue}}selected{{/unless}}>{{localizeKM "camping.rumors.veracity.unassessed"}}</option>
+                                <option value="true" {{#if (eq this.veracityValue "true")}}selected{{/if}}>{{localizeKM "camping.rumors.veracity.true"}}</option>
+                                <option value="distorted" {{#if (eq this.veracityValue "distorted")}}selected{{/if}}>{{localizeKM "camping.rumors.veracity.distorted"}}</option>
+                                <option value="false" {{#if (eq this.veracityValue "false")}}selected{{/if}}>{{localizeKM "camping.rumors.veracity.false"}}</option>
+                            </select>
+                            <button type="button" data-action="toggle-rumor-pin" data-rumor-id="{{this.id}}"
+                                    data-tooltip="{{localizeKM "camping.rumors.pinTooltip"}}">
+                                <i class="fa-solid fa-thumbtack"></i>
+                            </button>
+                            {{#if this.canConvert}}
+                                <button type="button" data-action="convert-rumor" data-rumor-id="{{this.id}}"
+                                        data-tooltip="{{localizeKM "camping.rumors.convertTooltip"}}">
+                                    <i class="fa-solid fa-scroll"></i>
+                                </button>
+                            {{/if}}
+                            <button type="button" data-action="delete-rumor" data-rumor-id="{{this.id}}">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        {{/if}}
+                    </td>
+                {{/if}}
+            </tr>
+        {{/each}}
+        </tbody>
+    </table>
+</details>
+{{/if}}

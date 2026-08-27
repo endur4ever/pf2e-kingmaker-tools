@@ -744,6 +744,27 @@
                     "ritual": "Run the ritual’s own checks now.",
                     "unknown": "Resolve per the activity’s rules."
                 }
+            },
+            "rumors": {
+                "title": "Rumor Board",
+                "ageDays": "{days}d old",
+                "pinnedTooltip": "Pinned — this rumor does not lapse",
+                "pinTooltip": "Pin / unpin",
+                "convertTooltip": "Convert to quest",
+                "confirmDelete": "Delete rumor “{name}”?",
+                "state": {
+                    "fresh": "Fresh",
+                    "stale": "Stale",
+                    "expired": "Expired",
+                    "converted": "Converted",
+                    "pinned": "Pinned"
+                },
+                "veracity": {
+                    "true": "True",
+                    "distorted": "Distorted",
+                    "false": "False",
+                    "unassessed": "Unassessed"
+                }
             }
         },
         "settlementNav": {

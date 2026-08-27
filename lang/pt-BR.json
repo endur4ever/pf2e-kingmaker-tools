@@ -622,6 +622,27 @@
                     "ritual": "Conduza agora os testes do ritual.",
                     "unknown": "Resolva pelas regras da atividade."
                 }
+            },
+            "rumors": {
+                "title": "Quadro de rumores",
+                "ageDays": "{days} d",
+                "pinnedTooltip": "Fixado — este rumor não expira",
+                "pinTooltip": "Fixar / soltar",
+                "convertTooltip": "Converter em missão",
+                "confirmDelete": "Excluir o rumor “{name}”?",
+                "state": {
+                    "fresh": "Recente",
+                    "stale": "Velho",
+                    "expired": "Expirado",
+                    "converted": "Convertido",
+                    "pinned": "Fixado"
+                },
+                "veracity": {
+                    "true": "Verdadeiro",
+                    "distorted": "Distorcido",
+                    "false": "Falso",
+                    "unassessed": "Não avaliado"
+                }
             }
         },
         "settlementNav": {

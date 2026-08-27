@@ -622,6 +622,27 @@
                     "ritual": "Jetzt die Proben des Rituals durchführen.",
                     "unknown": "Nach den Regeln der Tätigkeit auflösen."
                 }
+            },
+            "rumors": {
+                "title": "Gerüchtetafel",
+                "ageDays": "{days} T. alt",
+                "pinnedTooltip": "Angeheftet — dieses Gerücht verfällt nicht",
+                "pinTooltip": "Anheften / lösen",
+                "convertTooltip": "In Quest umwandeln",
+                "confirmDelete": "Gerücht „{name}“ löschen?",
+                "state": {
+                    "fresh": "Frisch",
+                    "stale": "Abgestanden",
+                    "expired": "Verfallen",
+                    "converted": "Umgewandelt",
+                    "pinned": "Angeheftet"
+                },
+                "veracity": {
+                    "true": "Wahr",
+                    "distorted": "Verzerrt",
+                    "false": "Falsch",
+                    "unassessed": "Unbewertet"
+                }
             }
         },
         "settlementNav": {

@@ -622,6 +622,27 @@
                     "ritual": "现在进行该仪式自身的检定。",
                     "unknown": "按该活动的规则裁定。"
                 }
+            },
+            "rumors": {
+                "title": "传闻板",
+                "ageDays": "{days} 天前",
+                "pinnedTooltip": "已钉住——该传闻不会过期",
+                "pinTooltip": "钉住 / 取消钉住",
+                "convertTooltip": "转化为任务",
+                "confirmDelete": "删除传闻“{name}”？",
+                "state": {
+                    "fresh": "新鲜",
+                    "stale": "陈旧",
+                    "expired": "过期",
+                    "converted": "已转化",
+                    "pinned": "已钉住"
+                },
+                "veracity": {
+                    "true": "真实",
+                    "distorted": "失真",
+                    "false": "虚假",
+                    "unassessed": "未评估"
+                }
             }
         },
         "settlementNav": {

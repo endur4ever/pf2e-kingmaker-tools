@@ -175,6 +175,7 @@ fun main() {
                     "campingTile" to "applications/camping/camping-tile.hbs",
                     "recipeTile" to "applications/camping/recipe-tile.hbs",
                     "downtimeProjects" to "applications/camping/downtime-projects.hbs",
+                    "rumorBoard" to "applications/camping/rumor-board.hbs",
                     "formElement" to "components/forms/form-element.hbs",
                     "tabs" to "components/tabs/tabs.hbs",
                     "foodCost" to "components/food-cost/food-cost.hbs",

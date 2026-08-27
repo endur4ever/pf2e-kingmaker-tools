@@ -622,6 +622,27 @@
                     "ritual": "Wykonaj teraz testy rytuału.",
                     "unknown": "Rozstrzygnij według zasad zajęcia."
                 }
+            },
+            "rumors": {
+                "title": "Tablica plotek",
+                "ageDays": "{days} dni",
+                "pinnedTooltip": "Przypięta — ta plotka nie wygasa",
+                "pinTooltip": "Przypnij / odepnij",
+                "convertTooltip": "Zamień w zadanie",
+                "confirmDelete": "Usunąć plotkę „{name}”?",
+                "state": {
+                    "fresh": "Świeża",
+                    "stale": "Nieświeża",
+                    "expired": "Wygasła",
+                    "converted": "Zamieniona",
+                    "pinned": "Przypięta"
+                },
+                "veracity": {
+                    "true": "Prawdziwa",
+                    "distorted": "Zniekształcona",
+                    "false": "Fałszywa",
+                    "unassessed": "Nieoceniona"
+                }
             }
         },
         "settlementNav": {
