@@ -1,5 +1,6 @@
 package at.posselt.pfrpg2e.kingdom
 
+import at.posselt.pfrpg2e.data.kingdom.leaders.Leader
 import at.posselt.pfrpg2e.data.checks.DegreeOfSuccess
 import at.posselt.pfrpg2e.data.checks.RollMode
 import at.posselt.pfrpg2e.data.kingdom.KingdomSkill
@@ -53,6 +54,13 @@ external interface RollMetaContext {
     val notes: String?
     val eventIndex: Int
     val freeAndFairPills: Array<String>
+    /** Renown attribution, carried through the chat card so a RE-ROLL can replace the deed it
+     *  originally credited instead of double-crediting or silently crediting nobody. */
+    val renownDeedId: String?
+    val renownActorUuid: String?
+    val renownActorName: String?
+    val renownRole: String?
+    val renownFactionName: String?
 }
 
 private fun parseRollMeta(rollElement: HTMLElement): RollMetaContext {
@@ -77,6 +85,11 @@ private fun parseRollMeta(rollElement: HTMLElement): RollMetaContext {
         skill = meta?.dataset["skill"] ?: "",
         pills = pills,
         additionalChatMessages = meta?.dataset["additionalChatMessages"],
+        renownDeedId = meta?.dataset["renownDeedId"]?.takeIf { it.isNotBlank() },
+        renownActorUuid = meta?.dataset["renownActorUuid"]?.takeIf { it.isNotBlank() },
+        renownActorName = meta?.dataset["renownActorName"]?.takeIf { it.isNotBlank() },
+        renownRole = meta?.dataset["renownRole"]?.takeIf { it.isNotBlank() },
+        renownFactionName = meta?.dataset["renownFactionName"]?.takeIf { it.isNotBlank() },
         upgrades = meta?.dataset["upgrades"],
         downgrades = meta?.dataset["downgrades"],
         creativeSolutionPills = creativePills,
@@ -115,6 +128,11 @@ suspend fun generateRollMeta(
     eventId: String?,
     eventStageIndex: Int,
     eventIndex: Int,
+    renownDeedId: String? = null,
+    renownActorUuid: String? = null,
+    renownActorName: String? = null,
+    renownRole: String? = null,
+    renownFactionName: String? = null,
 ): String {
     val upgradeData = upgrades
         .map { UpOrDowngrade(degree = it.upgrade.value, times = it.times) }
@@ -153,6 +171,11 @@ suspend fun generateRollMeta(
             eventId = eventId,
             eventStageIndex = eventStageIndex,
             eventIndex = eventIndex,
+            renownDeedId = renownDeedId,
+            renownActorUuid = renownActorUuid,
+            renownActorName = renownActorName,
+            renownRole = renownRole,
+            renownFactionName = renownFactionName,
             modifierWithoutFreeAndFair = modifierWithoutFreeAndFair,
         ),
     )
@@ -209,6 +232,14 @@ suspend fun reRoll(chatMessage: HTMLElement, mode: ReRollMode) {
             }
         }.toSet(),
         degreeMessages = degreeMessages,
+        // the identity the ORIGINAL roll minted, so this re-roll replaces that deed rather than
+        // crediting a second one (or, without it, crediting nobody and leaving the failed
+        // original standing in the ledger)
+        leaderActorUuid = meta.renownActorUuid,
+        leaderActorName = meta.renownActorName,
+        leaderRole = meta.renownRole?.let { Leader.fromString(it) },
+        factionName = meta.renownFactionName,
+        deedId = meta.renownDeedId,
         useFameInfamy = mode == ReRollMode.FAME_OR_INFAMY,
         assurance = false,
         notes = notes,

@@ -1,0 +1,160 @@
+package at.posselt.pfrpg2e.kingdom
+
+import at.posselt.pfrpg2e.data.kingdom.Contribution
+import at.posselt.pfrpg2e.data.kingdom.ContributionKind
+import at.posselt.pfrpg2e.data.kingdom.DeedCategory
+import at.posselt.pfrpg2e.data.kingdom.PcRenown
+import at.posselt.pfrpg2e.data.kingdom.TurnTally
+import at.posselt.pfrpg2e.data.kingdom.accrueRenown
+import at.posselt.pfrpg2e.data.kingdom.leaders.Leader
+import at.posselt.pfrpg2e.data.kingdom.revertRenown
+import at.posselt.pfrpg2e.kingdom.data.RawPcRenown
+import at.posselt.pfrpg2e.kingdom.data.RawRenownDeed
+import at.posselt.pfrpg2e.kingdom.data.RawTurnContribution
+import at.posselt.pfrpg2e.kingdom.data.appliedFaction
+import at.posselt.pfrpg2e.kingdom.data.appliedPopulace
+import at.posselt.pfrpg2e.kingdom.data.toModel
+import at.posselt.pfrpg2e.kingdom.data.toRaw
+
+/**
+ * THE attribution seam: credits one deed to one PC, in the kingdom's in-progress tally and in
+ * their cumulative renown.
+ *
+ * Idempotent PER DEED, not per call. A second call carrying a [deedId] already in
+ * `kingdom.currentTurnDeeds` REPLACES that deed: the prior credit is reverted with the deltas
+ * that ACTUALLY landed, its tally counter is decremented, and the new result is applied. That is
+ * the re-roll path -- a re-rolled check must end up credited once, at its final degree, not twice
+ * and not at the degree it first rolled.
+ *
+ * Never emits offers. Epithet and perk offers are batched at End Turn, so a PC crossing a
+ * threshold mid-turn does not interrupt the table with a chat card.
+ *
+ * The caller owns persistence: this mutates [kingdom] in place and the caller batches its own
+ * `setKingdom` with whatever else that flow is writing.
+ */
+fun recordContribution(
+    kingdom: KingdomData,
+    deedId: String,
+    actorUuid: String,
+    actorName: String?,
+    kind: ContributionKind,
+    leader: Leader,
+    category: DeedCategory = DeedCategory.OTHER,
+    factionName: String? = null,
+) {
+    if (actorUuid.isBlank() || deedId.isBlank()) return
+
+    val priorDeed = (kingdom.currentTurnDeeds ?: emptyArray()).firstOrNull { it.deedId == deedId }
+    // the prior row's OWN actor, not the incoming one: a re-roll cannot move credit between PCs,
+    // and reverting against the wrong ledger would mint renown out of nothing
+    val revertUuid = priorDeed?.actorUuid?.takeIf { it.isNotBlank() }
+
+    var renownRows = kingdom.renown ?: emptyArray()
+    var tallyRows = kingdom.currentTurnContributions ?: emptyArray()
+
+    if (priorDeed != null && revertUuid != null) {
+        val priorContribution = priorDeed.toModel()
+        val priorLedger = renownRows.firstOrNull { it.actorUuid == revertUuid }
+        if (priorContribution != null && priorLedger != null) {
+            priorLedger.toModel()?.let { model ->
+                val reverted = revertRenown(
+                    current = model,
+                    deed = priorContribution,
+                    populaceApplied = priorDeed.appliedPopulace,
+                    factionApplied = priorDeed.appliedFaction,
+                )
+                renownRows = renownRows.replacingActor(
+                    revertUuid,
+                    reverted.toRaw(
+                        actorName = priorLedger.actorName,
+                        lastOfferedTurn = priorLedger.lastOfferedTurn,
+                    ),
+                )
+            }
+            tallyRows = tallyRows.adjustCounter(revertUuid, priorContribution.kind, delta = -1, actorName = null)
+        }
+        kingdom.currentTurnDeeds = (kingdom.currentTurnDeeds ?: emptyArray())
+            .filter { it.deedId != deedId }
+            .toTypedArray()
+    }
+
+    val existing = renownRows.firstOrNull { it.actorUuid == actorUuid }
+    val currentModel = existing?.toModel() ?: PcRenown(actorUuid = actorUuid)
+    val result = accrueRenown(
+        current = currentModel,
+        deed = Contribution(kind = kind, leader = leader, category = category, factionName = factionName),
+    )
+    kingdom.renown = renownRows.replacingActor(
+        actorUuid,
+        result.renown.toRaw(
+            // an incoming name refreshes a renamed PC, but never erases a stored one with null
+            actorName = actorName ?: existing?.actorName,
+            lastOfferedTurn = existing?.lastOfferedTurn,
+        ),
+    )
+    kingdom.currentTurnContributions = tallyRows.adjustCounter(actorUuid, kind, delta = 1, actorName = actorName)
+    kingdom.currentTurnDeeds = (kingdom.currentTurnDeeds ?: emptyArray()) +
+            Contribution(kind = kind, leader = leader, category = category, factionName = factionName)
+                .toRaw(
+                    deedId = deedId,
+                    actorUuid = actorUuid,
+                    populaceApplied = result.populaceApplied,
+                    factionApplied = result.factionApplied,
+                )
+}
+
+/** Replaces one actor's ledger row, appending when absent. */
+private fun Array<RawPcRenown>.replacingActor(actorUuid: String, row: RawPcRenown): Array<RawPcRenown> =
+    if (any { it.actorUuid == actorUuid }) {
+        map { if (it.actorUuid == actorUuid) row else it }.toTypedArray()
+    } else {
+        this + row
+    }
+
+/**
+ * Moves the one tally counter [kind] owns by [delta], flooring at zero.
+ *
+ * A crit counts as a check too: the Spotlight's "checks" column is how many checks the PC made,
+ * and a crit is one of them. Floored because a revert against a tally that was never written (a
+ * deed carried over from an older build) must not produce a negative count.
+ */
+private fun Array<RawTurnContribution>.adjustCounter(
+    actorUuid: String,
+    kind: ContributionKind,
+    delta: Int,
+    actorName: String?,
+): Array<RawTurnContribution> {
+    val existing = firstOrNull { it.actorUuid == actorUuid }
+    val tally = existing?.toModel() ?: TurnTally(actorUuid = actorUuid, actorName = actorName)
+    fun floor(value: Int) = maxOf(value, 0)
+    val updated = when (kind) {
+        ContributionKind.CHECK_CRIT -> tally.copy(
+            checks = floor(tally.checks + delta),
+            crits = floor(tally.crits + delta),
+        )
+        ContributionKind.CHECK_SUCCESS, ContributionKind.CHECK_FAILURE ->
+            tally.copy(checks = floor(tally.checks + delta))
+        ContributionKind.CHECK_CRIT_FAIL -> tally.copy(
+            checks = floor(tally.checks + delta),
+            critFails = floor(tally.critFails + delta),
+        )
+        ContributionKind.ACTIVITY -> tally.copy(activities = floor(tally.activities + delta))
+        ContributionKind.EVENT_RESOLVED, ContributionKind.PETITION_ANSWERED ->
+            tally.copy(events = floor(tally.events + delta))
+    }
+    val row = updated.copy(actorName = actorName ?: tally.actorName).toRaw()
+    return if (existing != null) {
+        map { if (it.actorUuid == actorUuid) row else it }.toTypedArray()
+    } else {
+        this + row
+    }
+}
+
+/** Maps a rolled degree onto the kind the ledger credits. */
+fun contributionKindFor(degree: at.posselt.pfrpg2e.data.checks.DegreeOfSuccess): ContributionKind =
+    when (degree) {
+        at.posselt.pfrpg2e.data.checks.DegreeOfSuccess.CRITICAL_SUCCESS -> ContributionKind.CHECK_CRIT
+        at.posselt.pfrpg2e.data.checks.DegreeOfSuccess.SUCCESS -> ContributionKind.CHECK_SUCCESS
+        at.posselt.pfrpg2e.data.checks.DegreeOfSuccess.FAILURE -> ContributionKind.CHECK_FAILURE
+        at.posselt.pfrpg2e.data.checks.DegreeOfSuccess.CRITICAL_FAILURE -> ContributionKind.CHECK_CRIT_FAIL
+    }

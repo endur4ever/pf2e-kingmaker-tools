@@ -1,5 +1,11 @@
 package at.posselt.pfrpg2e.kingdom.dialogs
 
+import io.github.uuidjs.uuid.v4
+import at.posselt.pfrpg2e.kingdom.recordContribution
+import at.posselt.pfrpg2e.kingdom.contributionKindFor
+import at.posselt.pfrpg2e.data.kingdom.leaders.Leader
+import at.posselt.pfrpg2e.data.kingdom.deedCategoryFor
+import at.posselt.pfrpg2e.data.kingdom.ContributionKind
 import at.posselt.pfrpg2e.data.checks.DegreeOfSuccess
 import at.posselt.pfrpg2e.data.checks.RollMode
 import at.posselt.pfrpg2e.data.events.KingdomEvent
@@ -120,6 +126,16 @@ suspend fun rollCheck(
     eventIndex: Int,
     isFreeAndFair: Boolean,
     modifierWithoutFreeAndFair: Int,
+    /** Renown attribution (plan section 3.2). All three are null when the acting PC is unknown --
+     *  no leader selected, a vacant role, or an NPC official -- and the seam then records nothing
+     *  rather than crediting whoever happens to sit in the Ruler slot. */
+    leaderActorUuid: String? = null,
+    leaderActorName: String? = null,
+    leaderRole: Leader? = null,
+    factionName: String? = null,
+    /** Minted on a first roll; a RE-roll carries the original id so the deed is replaced, not
+     *  credited twice. */
+    deedId: String? = null,
 ): DegreeOfSuccess {
     val result = d20Check(
         dc = dc,
@@ -162,6 +178,9 @@ suspend fun rollCheck(
         }
     }
 
+    // minted BEFORE the chat card is rendered, so the card can carry it and a re-roll can name
+    // the deed it must replace
+    val renownDeedId = deedId ?: v4()
     val degreeResult = determineDegree(result.degreeOfSuccess, upgrades, downgrades)
     val originalDegree = degreeResult.originalDegree
     val changed = degreeResult.changedDegree
@@ -271,6 +290,11 @@ suspend fun rollCheck(
         freeAndFairPills = freeAndFairPills,
         modifierWithoutFreeAndFair = modifierWithoutFreeAndFair,
         isFreeAndFair = isFreeAndFair,
+        renownDeedId = renownDeedId,
+        renownActorUuid = leaderActorUuid,
+        renownActorName = leaderActorName,
+        renownRole = leaderRole?.value,
+        renownFactionName = factionName,
     )
     result.toChat(rollMeta, isHtml = true)
     if (activity == null && event == null) {
@@ -296,6 +320,51 @@ suspend fun rollCheck(
         )
         postComplexDegreeOfSuccess(context, changed)
     }
+    // Renown attribution: credit the acting PC for this deed at its FINAL degree. Batched with
+    // its own setKingdom below rather than emitting anything -- epithet offers wait for End Turn.
+    if (leaderActorUuid != null && leaderRole != null) {
+        kingdomActor.getKingdom()?.let { k ->
+            val id = renownDeedId
+            recordContribution(
+                kingdom = k,
+                deedId = id,
+                actorUuid = leaderActorUuid,
+                actorName = leaderActorName,
+                kind = contributionKindFor(changed),
+                leader = leaderRole,
+                category = deedCategoryFor(skill),
+                factionName = factionName,
+            )
+            // an activity or a resolved event is a SECOND deed on the same roll, sharing the id
+            // with a suffix so a re-roll replaces both halves cleanly
+            if (activity != null) {
+                recordContribution(
+                    kingdom = k,
+                    deedId = "$id:activity",
+                    actorUuid = leaderActorUuid,
+                    actorName = leaderActorName,
+                    kind = ContributionKind.ACTIVITY,
+                    leader = leaderRole,
+                    category = deedCategoryFor(skill),
+                    factionName = factionName,
+                )
+            }
+            if (event != null) {
+                recordContribution(
+                    kingdom = k,
+                    deedId = "$id:event",
+                    actorUuid = leaderActorUuid,
+                    actorName = leaderActorName,
+                    kind = ContributionKind.EVENT_RESOLVED,
+                    leader = leaderRole,
+                    category = deedCategoryFor(skill),
+                    factionName = factionName,
+                )
+            }
+            kingdomActor.setKingdom(k)
+        }
+    }
+
     // Persist per-activity timeout / escalating-DC usage state (RAW lockouts + climbing DC).
     // Runs after any degree adjustment so the lockout reflects the final result. Locks self-expire
     // against kingdom.currentTurn; the dcBump climb is settled at end-turn in TurnTickingEngine.

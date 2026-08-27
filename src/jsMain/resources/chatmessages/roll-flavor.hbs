@@ -13,6 +13,11 @@
      data-event-stage-index="{{eventStageIndex}}"
      data-event-index="{{eventIndex}}"
      data-dc="{{dc}}"
+     {{#if renownDeedId}}data-renown-deed-id="{{renownDeedId}}"{{/if}}
+     {{#if renownActorUuid}}data-renown-actor-uuid="{{renownActorUuid}}"{{/if}}
+     {{#if renownActorName}}data-renown-actor-name="{{renownActorName}}"{{/if}}
+     {{#if renownRole}}data-renown-role="{{renownRole}}"{{/if}}
+     {{#if renownFactionName}}data-renown-faction-name="{{renownFactionName}}"{{/if}}
      {{#if notes}}data-notes="{{notes}}"{{/if}}
      {{#if upgrades}}data-upgrades="{{upgrades}}"{{/if}}
      {{#if downgrades}}data-downgrades="{{downgrades}}"{{/if}}

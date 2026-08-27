@@ -1,5 +1,7 @@
 package at.posselt.pfrpg2e.kingdom.dialogs
 
+import at.posselt.pfrpg2e.kingdom.parseLeaderActors
+import at.posselt.pfrpg2e.data.kingdom.leaders.LeaderType
 import at.posselt.pfrpg2e.app.FormApp
 import at.posselt.pfrpg2e.app.HandlebarsRenderContext
 import at.posselt.pfrpg2e.app.ValidatedHandlebarsContext
@@ -287,6 +289,9 @@ private data class CheckDialogParams(
     val eventIndex: Int = 0,
     val rollOptions: Set<String> = emptySet(),
     val defaultToBestSkill: Boolean = false,
+    /** The group a negotiation targets, for per-faction renown. Null for every check that is not
+     *  aimed at a faction -- the picker only runs for NEGOTIATION-style DCs. */
+    val factionName: String? = null,
 )
 
 typealias AfterRoll = suspend (degree: DegreeOfSuccess) -> Unit
@@ -478,8 +483,22 @@ private class KingdomCheckDialog(
         notes: Set<Note>,
         modifierWithoutFreeAndFair: Int,
     ) {
+        // Renown attribution, the record-or-skip rule (plan section 3.2): credit only a real PC
+        // in a real role. selectedLeader is null when the world's active-leader setting is unset,
+        // and the dialog falls back to RULER for the CHECK -- but crediting the Ruler for every
+        // unselected check would poison the whole ledger, so attribution uses the UNRESOLVED
+        // selection and records nothing when it is absent. A vacant role or an NPC official is
+        // likewise skipped: renown is player colour.
+        val creditLeader = selectedLeader
+        val creditActor = creditLeader
+            ?.let { runCatching { kingdomActor.getKingdom()?.parseLeaderActors()?.resolve(it) }.getOrNull() }
+            ?.takeIf { it.type == LeaderType.PC }
         rollCheck(
             afterRoll = afterRoll,
+            leaderActorUuid = creditActor?.uuid,
+            leaderActorName = creditActor?.name,
+            leaderRole = creditLeader?.takeIf { creditActor != null },
+            factionName = params.factionName,
             rollMode = RollMode.fromString(data.rollMode),
             activity = activity,
             skill = KingdomSkill.fromString(data.skill)!!,
@@ -923,6 +942,7 @@ suspend fun kingdomCheckDialog(
                 activity = activity,
                 armyConditions = game.getSelectedArmyConditions(),
                 rollOptions = if (group?.atWar == true) setOf("group-at-war") else emptySet(),
+                factionName = group?.name,
                 event = event,
                 defaultToBestSkill = check.activity.defaultToBestSkill == true,
             )
