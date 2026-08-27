@@ -2081,7 +2081,8 @@
                 "quest": "Delete quest {name}? This cannot be undone.",
                 "warThreat": "Delete war zagrożenie {name}? This cannot be undone.",
                 "rivalRealm": "Usunąć rywalizujące królestwo {name}?",
-                "councilVote": "Usunąć głosowanie „{name}”?"
+                "councilVote": "Usunąć głosowanie „{name}”?",
+                "holding": "Odebrać {name}?"
             },
             "current": "Current",
             "expeditionBatchResolved": "Resolved {count} wyprawa rewards.",
@@ -2573,6 +2574,43 @@
                     "award": "Przyznaj",
                     "alreadyAwarded": "Już przyznano w tej turze.",
                     "awarded": "{owner} pobiera {gold} sz z {holding}."
+                },
+                "title": "Osobiste włości",
+                "grant": "Nadaj włość",
+                "edit": "Edytuj",
+                "empty": "Nie nadano jeszcze żadnych włości.",
+                "revoke": "Odbierz",
+                "forceCondition": "Zmień stan",
+                "noPcs": "Brak członków drużyny do nadania.",
+                "incomePerTurn": "{gold} sz, {luxuries} luksusy, {favors} przysługi / tura",
+                "kind": {
+                    "manor": "Dwór",
+                    "lodge": "Chata myśliwska",
+                    "tavernStake": "Udział w karczmie",
+                    "farmstead": "Zagroda",
+                    "workshop": "Warsztat",
+                    "other": "Włość"
+                },
+                "condition": {
+                    "sound": "Nienaruszona",
+                    "damaged": "Uszkodzona",
+                    "destroyed": "Zniszczona"
+                },
+                "tier": {
+                    "modest": "Skromna",
+                    "comfortable": "Wygodna",
+                    "lavish": "Wystawna"
+                },
+                "dialog": {
+                    "owner": "Właściciel",
+                    "title": "Tytuł (opcjonalnie)",
+                    "name": "Nazwa włości",
+                    "kind": "Rodzaj",
+                    "location": "Miejsce",
+                    "locationHelp": "Klucz heksu lub krótka nazwa miejsca; opcjonalnie.",
+                    "tier": "Poziom dochodu",
+                    "needNameAndOwner": "Włość wymaga nazwy i właściciela.",
+                    "tooMany": "Ta postać ma już {max} — klimat, nie symulacja gospodarki."
                 }
             }
         },

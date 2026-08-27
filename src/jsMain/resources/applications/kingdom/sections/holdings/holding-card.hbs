@@ -1,0 +1,25 @@
+<div class="km-holding-card km-holding-card--{{conditionValue}}">
+    {{!-- the card's own context carries isGM/isOwner, so no parent lookup: a registered partial
+          has no frame above its context, and a parent-climbing ref would be silently falsy --}}
+    <div class="km-holding-card__head">
+        <b>{{#if title}}{{title}} — {{/if}}{{name}}</b>
+        <span class="km-holding-kind">{{kindLabel}}</span>
+        <span class="km-holding-condition km-holding-condition--{{conditionValue}}">{{conditionLabel}}</span>
+    </div>
+    <div class="km-holding-card__body">
+        <span class="km-holding-owner">{{ownerLabel}}</span>
+        {{#if locationLabel}}<span class="km-holding-location">{{locationLabel}}</span>{{/if}}
+        <span class="km-holding-income">{{incomeLabel}}</span>
+    </div>
+    {{#if lastEventLabel}}<p class="km-holding-event">{{lastEventLabel}}</p>{{/if}}
+    {{#if isGM}}
+        <div class="km-holding-controls">
+            <button type="button" data-action="edit-holding" data-holding-id="{{id}}"
+                    data-tooltip="{{localizeKM "kingdom.holdings.edit"}}"><i class="fa-solid fa-sliders"></i></button>
+            <button type="button" data-action="cycle-holding-condition" data-holding-id="{{id}}"
+                    data-tooltip="{{localizeKM "kingdom.holdings.forceCondition"}}"><i class="fa-solid fa-house-crack"></i></button>
+            <button type="button" data-action="revoke-holding" data-holding-id="{{id}}"
+                    data-tooltip="{{localizeKM "kingdom.holdings.revoke"}}"><i class="fa-solid fa-trash"></i></button>
+        </div>
+    {{/if}}
+</div>

@@ -124,6 +124,7 @@ external interface KingdomSheetContext : ValidatedHandlebarsContext {
     val sessionPrepContext: SessionPrepContext
     val councilVotesContext: CouncilVotesContext
     val renownCardContext: RenownCardContext
+    val personalHoldingsContext: PersonalHoldingsSectionContext
 
     /** Unread feed bell for the CURRENT user; null only when the kingdom itself is missing. */
     val pingsContext: PingsPanelContext?

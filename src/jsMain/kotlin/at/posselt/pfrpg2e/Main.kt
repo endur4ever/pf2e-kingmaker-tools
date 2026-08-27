@@ -170,6 +170,8 @@ fun main() {
                     "kingdom-session-prep" to "applications/kingdom/sections/session-prep/page.hbs",
                     "kingdom-council-votes" to "applications/kingdom/sections/council-votes/page.hbs",
                     "kingdom-renown-card" to "applications/kingdom/sections/party/renown-card.hbs",
+                    "kingdom-holdings" to "applications/kingdom/sections/holdings/page.hbs",
+                    "kingdom-holding-card" to "applications/kingdom/sections/holdings/holding-card.hbs",
                     "kingdom-analytics" to "applications/kingdom/sections/analytics/page.hbs",
                     "kingdom-expeditions" to "applications/kingdom/sections/expeditions/page.hbs",
                     "kingdom-campaign" to "applications/kingdom/sections/clocks/page.hbs",

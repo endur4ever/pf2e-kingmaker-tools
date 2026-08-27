@@ -1,0 +1,80 @@
+.km-holdings {
+    margin-top: 1rem;
+}
+
+.km-holdings h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.km-holdings h2 button {
+    width: auto;
+    margin-left: auto;
+}
+
+.km-holdings-empty {
+    font-style: italic;
+    opacity: 0.75;
+}
+
+.km-holding-card {
+    border: 1px solid rgba(0, 0, 0, 0.25);
+    border-radius: 5px;
+    padding: 0.4rem 0.6rem;
+    margin-bottom: 0.5rem;
+    background: rgba(0, 0, 0, 0.04);
+}
+
+.km-holding-card--destroyed {
+    opacity: 0.6;
+}
+
+.km-holding-card__head,
+.km-holding-card__body {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.km-holding-kind {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    opacity: 0.7;
+}
+
+.km-holding-condition {
+    font-size: 0.75rem;
+    border-radius: 3px;
+    padding: 0.05rem 0.4rem;
+    color: white;
+    background: #5a5a5a;
+    margin-left: auto;
+}
+
+.km-holding-condition--sound { background: var(--primary-km, #275125); }
+.km-holding-condition--damaged { background: #8a6a1f; }
+.km-holding-condition--destroyed { background: var(--failure, #c52424); }
+
+.km-holding-income {
+    font-variant-numeric: tabular-nums;
+}
+
+.km-holding-event {
+    font-size: 0.8rem;
+    font-style: italic;
+    opacity: 0.75;
+    margin: 0.2rem 0 0;
+}
+
+.km-holding-controls {
+    display: flex;
+    gap: 0.3rem;
+    margin-top: 0.3rem;
+}
+
+.km-holding-controls button {
+    width: auto;
+}

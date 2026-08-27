@@ -2081,7 +2081,8 @@
                 "quest": "Delete quest {name}? This cannot be undone.",
                 "warThreat": "Delete war угроза {name}? This cannot be undone.",
                 "rivalRealm": "Удалить соперничающее королевство {name}?",
-                "councilVote": "Удалить голосование «{name}»?"
+                "councilVote": "Удалить голосование «{name}»?",
+                "holding": "Отозвать {name}?"
             },
             "current": "Current",
             "expeditionBatchResolved": "Resolved {count} экспедиция rewards.",
@@ -2573,6 +2574,43 @@
                     "award": "Выдать",
                     "alreadyAwarded": "В этом ходу уже выдано.",
                     "awarded": "{owner} получает {gold} зм от {holding}."
+                },
+                "title": "Личные владения",
+                "grant": "Даровать владение",
+                "edit": "Изменить",
+                "empty": "Владения ещё не дарованы.",
+                "revoke": "Отозвать",
+                "forceCondition": "Сменить состояние",
+                "noPcs": "Нет членов группы для дарования.",
+                "incomePerTurn": "{gold} зм, {luxuries} роскошь, {favors} услуги / ход",
+                "kind": {
+                    "manor": "Поместье",
+                    "lodge": "Охотничий домик",
+                    "tavernStake": "Доля в таверне",
+                    "farmstead": "Хутор",
+                    "workshop": "Мастерская",
+                    "other": "Владение"
+                },
+                "condition": {
+                    "sound": "Целое",
+                    "damaged": "Повреждено",
+                    "destroyed": "Разрушено"
+                },
+                "tier": {
+                    "modest": "Скромное",
+                    "comfortable": "Достойное",
+                    "lavish": "Роскошное"
+                },
+                "dialog": {
+                    "owner": "Владелец",
+                    "title": "Титул (необязательно)",
+                    "name": "Название владения",
+                    "kind": "Тип",
+                    "location": "Место",
+                    "locationHelp": "Ключ гекса или краткое название места; необязательно.",
+                    "tier": "Уровень дохода",
+                    "needNameAndOwner": "Владению нужны название и владелец.",
+                    "tooMany": "У этого персонажа уже {max} — антураж, не экономическая симуляция."
                 }
             }
         },

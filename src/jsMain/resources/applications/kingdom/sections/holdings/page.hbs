@@ -1,0 +1,16 @@
+<section class="km-holdings">
+    <h2>
+        <i class="fa-solid fa-house-flag"></i> {{localizeKM "kingdom.holdings.title"}}
+        {{#if personalHoldingsContext.canGrant}}
+            <button type="button" data-action="grant-holding">
+                <i class="fa-solid fa-plus"></i> {{localizeKM "kingdom.holdings.grant"}}
+            </button>
+        {{/if}}
+    </h2>
+    {{#unless personalHoldingsContext.hasAny}}
+        <p class="km-holdings-empty">{{localizeKM "kingdom.holdings.empty"}}</p>
+    {{/unless}}
+    {{#each personalHoldingsContext.holdings}}
+        {{> kingdom-holding-card this}}
+    {{/each}}
+</section>

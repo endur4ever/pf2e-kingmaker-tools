@@ -1162,7 +1162,8 @@
                 "group": "Delete faction {name}? This also destroys its entire standing history and cannot be undone.",
                 "event": "Delete ongoing event {name}? This cannot be undone.",
                 "rivalRealm": "Delete rival realm {name}?",
-                "councilVote": "Delete vote “{name}”?"
+                "councilVote": "Delete vote “{name}”?",
+                "holding": "Revoke {name}?"
             },
             "warfare": {
                 "mired": "Mired",
@@ -2695,6 +2696,43 @@
                     "award": "Award",
                     "alreadyAwarded": "Already awarded this turn.",
                     "awarded": "{owner} collects {gold} gp from {holding}."
+                },
+                "title": "Personal Holdings",
+                "grant": "Grant Holding",
+                "edit": "Edit",
+                "empty": "No holdings granted yet.",
+                "revoke": "Revoke",
+                "forceCondition": "Cycle condition",
+                "noPcs": "No party members to grant to.",
+                "incomePerTurn": "{gold} gp, {luxuries} lux, {favors} favors / turn",
+                "kind": {
+                    "manor": "Manor",
+                    "lodge": "Lodge",
+                    "tavernStake": "Tavern Stake",
+                    "farmstead": "Farmstead",
+                    "workshop": "Workshop",
+                    "other": "Holding"
+                },
+                "condition": {
+                    "sound": "Sound",
+                    "damaged": "Damaged",
+                    "destroyed": "Destroyed"
+                },
+                "tier": {
+                    "modest": "Modest",
+                    "comfortable": "Comfortable",
+                    "lavish": "Lavish"
+                },
+                "dialog": {
+                    "owner": "Owner",
+                    "title": "Title (optional)",
+                    "name": "Holding name",
+                    "kind": "Kind",
+                    "location": "Location",
+                    "locationHelp": "Hex key or a short place name; optional.",
+                    "tier": "Income tier",
+                    "needNameAndOwner": "A holding needs a name and an owner.",
+                    "tooMany": "That PC already holds {max} — flavor, not an economy sim."
                 }
             }
         },

@@ -1023,7 +1023,8 @@
                 "group": "Fraktion {name} löschen? Dies zerstört auch deren gesamte Beziehungs-Historie und kann nicht rückgängig gemacht werden.",
                 "event": "Fortlaufendes Ereignis {name} löschen? Dies kann nicht rückgängig gemacht werden.",
                 "rivalRealm": "Rivalisierendes Reich {name} löschen?",
-                "councilVote": "Abstimmung „{name}“ löschen?"
+                "councilVote": "Abstimmung „{name}“ löschen?",
+                "holding": "{name} entziehen?"
             },
             "warfare": {
                 "mired": "Steckengeblieben",
@@ -2573,6 +2574,43 @@
                     "award": "Zuweisen",
                     "alreadyAwarded": "In diesem Zug bereits zugewiesen.",
                     "awarded": "{owner} erhält {gold} GM aus {holding}."
+                },
+                "title": "Persönliche Besitztümer",
+                "grant": "Besitz verleihen",
+                "edit": "Bearbeiten",
+                "empty": "Noch keine Besitztümer verliehen.",
+                "revoke": "Entziehen",
+                "forceCondition": "Zustand wechseln",
+                "noPcs": "Keine Gruppenmitglieder zum Verleihen.",
+                "incomePerTurn": "{gold} GM, {luxuries} Lux, {favors} Gefallen / Zug",
+                "kind": {
+                    "manor": "Gutshof",
+                    "lodge": "Jagdhütte",
+                    "tavernStake": "Tavernenanteil",
+                    "farmstead": "Bauernhof",
+                    "workshop": "Werkstatt",
+                    "other": "Besitz"
+                },
+                "condition": {
+                    "sound": "Intakt",
+                    "damaged": "Beschädigt",
+                    "destroyed": "Zerstört"
+                },
+                "tier": {
+                    "modest": "Bescheiden",
+                    "comfortable": "Komfortabel",
+                    "lavish": "Prunkvoll"
+                },
+                "dialog": {
+                    "owner": "Besitzer",
+                    "title": "Titel (optional)",
+                    "name": "Name des Besitzes",
+                    "kind": "Art",
+                    "location": "Ort",
+                    "locationHelp": "Hex-Schlüssel oder kurzer Ortsname; optional.",
+                    "tier": "Einkommensstufe",
+                    "needNameAndOwner": "Ein Besitz braucht Namen und Besitzer.",
+                    "tooMany": "Dieser SC hält bereits {max} — Flair, keine Wirtschaftssimulation."
                 }
             }
         },

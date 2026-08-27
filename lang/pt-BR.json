@@ -2081,7 +2081,8 @@
                 "quest": "Delete quest {name}? This cannot be undone.",
                 "warThreat": "Delete war ameaça {name}? This cannot be undone.",
                 "rivalRealm": "Excluir o reino rival {name}?",
-                "councilVote": "Excluir a votação “{name}”?"
+                "councilVote": "Excluir a votação “{name}”?",
+                "holding": "Revogar {name}?"
             },
             "current": "Current",
             "expeditionBatchResolved": "Resolved {count} expedição rewards.",
@@ -2573,6 +2574,43 @@
                     "award": "Conceder",
                     "alreadyAwarded": "Já concedido neste turno.",
                     "awarded": "{owner} recebe {gold} po de {holding}."
+                },
+                "title": "Propriedades pessoais",
+                "grant": "Conceder propriedade",
+                "edit": "Editar",
+                "empty": "Nenhuma propriedade concedida.",
+                "revoke": "Revogar",
+                "forceCondition": "Alternar estado",
+                "noPcs": "Nenhum membro do grupo para conceder.",
+                "incomePerTurn": "{gold} po, {luxuries} luxo, {favors} favores / turno",
+                "kind": {
+                    "manor": "Solar",
+                    "lodge": "Cabana",
+                    "tavernStake": "Cota de taverna",
+                    "farmstead": "Fazenda",
+                    "workshop": "Oficina",
+                    "other": "Propriedade"
+                },
+                "condition": {
+                    "sound": "Íntegra",
+                    "damaged": "Danificada",
+                    "destroyed": "Destruída"
+                },
+                "tier": {
+                    "modest": "Modesta",
+                    "comfortable": "Confortável",
+                    "lavish": "Luxuosa"
+                },
+                "dialog": {
+                    "owner": "Dono",
+                    "title": "Título (opcional)",
+                    "name": "Nome da propriedade",
+                    "kind": "Tipo",
+                    "location": "Local",
+                    "locationHelp": "Chave do hexágono ou nome curto do lugar; opcional.",
+                    "tier": "Nível de renda",
+                    "needNameAndOwner": "Uma propriedade precisa de nome e dono.",
+                    "tooMany": "Esse PJ já possui {max} — ambientação, não simulação econômica."
                 }
             }
         },

@@ -1,5 +1,9 @@
 package at.posselt.pfrpg2e.kingdom.sheet
 
+import at.posselt.pfrpg2e.kingdom.data.RawPersonalHolding
+import at.posselt.pfrpg2e.kingdom.dialogs.HoldingOwnerOption
+import at.posselt.pfrpg2e.kingdom.dialogs.GrantHolding
+import at.posselt.pfrpg2e.kingdom.sheet.contexts.buildPersonalHoldingsContext
 import at.posselt.pfrpg2e.kingdom.data.RawPcRenown
 import at.posselt.pfrpg2e.kingdom.dialogs.ModifyPcRenown
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.RenownCardPc
@@ -1555,6 +1559,74 @@ class KingdomSheet(
                         )
                     }
                 }.launch()
+            }
+
+            "grant-holding", "edit-holding" -> buildPromise {
+                if (!game.user.isGM) return@buildPromise
+                val kingdom = getKingdom()
+                val holdingId = target.dataset["holdingId"]
+                val initial = holdingId?.let { id -> kingdom.personalHoldings?.firstOrNull { it.id == id } }
+                val owners = runCatching {
+                    actor.partyMembers().map { member ->
+                        HoldingOwnerOption(
+                            actorUuid = member.uuid,
+                            userId = null,
+                            label = member.name,
+                        )
+                    }
+                }.getOrDefault(emptyList())
+                if (owners.isEmpty() && initial == null) {
+                    ui.notifications.warn(t("kingdom.holdings.noPcs"))
+                    return@buildPromise
+                }
+                GrantHolding(
+                    initial = initial,
+                    owners = owners,
+                    existingHoldings = (kingdom.personalHoldings ?: emptyArray()).toList(),
+                ) { holding ->
+                    buildPromise {
+                        val k = getKingdom()
+                        val current = k.personalHoldings ?: emptyArray()
+                        k.personalHoldings = if (current.any { it.id == holding.id }) {
+                            current.map { if (it.id == holding.id) holding else it }.toTypedArray()
+                        } else {
+                            current + RawPersonalHolding.copy(holding, grantedTurn = k.currentTurn ?: 0)
+                        }
+                        actor.setKingdom(k)
+                    }
+                }.launch()
+            }
+
+            "cycle-holding-condition" -> buildPromise {
+                // the GM's narrative override: sound -> damaged -> destroyed -> sound
+                if (!game.user.isGM) return@buildPromise
+                val holdingId = target.dataset["holdingId"] ?: return@buildPromise
+                val kingdom = getKingdom()
+                kingdom.personalHoldings = kingdom.personalHoldings?.map { holding ->
+                    if (holding.id == holdingId) {
+                        val next = when (holding.condition) {
+                            "sound" -> "damaged"
+                            "damaged" -> "destroyed"
+                            else -> "sound"
+                        }
+                        RawPersonalHolding.copy(holding, condition = next)
+                    } else holding
+                }?.toTypedArray()
+                actor.setKingdom(kingdom)
+            }
+
+            "revoke-holding" -> buildPromise {
+                if (!game.user.isGM) return@buildPromise
+                val holdingId = target.dataset["holdingId"] ?: return@buildPromise
+                val kingdom = getKingdom()
+                val holding = kingdom.personalHoldings?.firstOrNull { it.id == holdingId }
+                    ?: return@buildPromise
+                if (confirmDelete("kingdom.confirmDelete.holding", holding.name)) {
+                    kingdom.personalHoldings = kingdom.personalHoldings
+                        ?.filter { it.id != holdingId }
+                        ?.toTypedArray()
+                    actor.setKingdom(kingdom)
+                }
             }
 
             "modify-pc-renown" -> buildPromise {
@@ -4004,6 +4076,15 @@ class KingdomSheet(
                 companions = kingdom.companions ?: emptyArray(),
                 chronicle = kingdom.expeditionChronicle ?: emptyArray(),
             ) { t(it) },
+            personalHoldingsContext = buildPersonalHoldingsContext(
+                holdings = kingdom.personalHoldings,
+                isGM = isGM,
+                ownedActorUuids = runCatching {
+                    actor.partyMembers().filter { it.isOwner }.map { it.uuid }.toSet()
+                }.getOrDefault(emptySet()),
+                ownerLevels = emptyMap(),  // card projection uses kingdom level; the tick resolves real levels
+                kingdomLevel = kingdom.level,
+            ),
             renownCardContext = buildRenownCardContext(
                 pcs = runCatching {
                     val roleByUuid = kingdom.leaders.let { l ->

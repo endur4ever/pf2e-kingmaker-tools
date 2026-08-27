@@ -2081,7 +2081,8 @@
                 "quest": "Delete quest {name}? This cannot be undone.",
                 "warThreat": "Delete war 威胁 {name}? This cannot be undone.",
                 "rivalRealm": "删除敌对国度 {name}？",
-                "councilVote": "删除表决“{name}”？"
+                "councilVote": "删除表决“{name}”？",
+                "holding": "收回{name}？"
             },
             "current": "Current",
             "expeditionBatchResolved": "Resolved {count} 远征 rewards.",
@@ -2573,6 +2574,43 @@
                     "award": "发放",
                     "alreadyAwarded": "本回合已发放。",
                     "awarded": "{owner}从{holding}获得 {gold} 金币。"
+                },
+                "title": "个人产业",
+                "grant": "授予产业",
+                "edit": "编辑",
+                "empty": "尚未授予任何产业。",
+                "revoke": "收回",
+                "forceCondition": "切换状态",
+                "noPcs": "没有可授予的队伍成员。",
+                "incomePerTurn": "每回合 {gold} 金币、{luxuries} 奢侈品、{favors} 人情",
+                "kind": {
+                    "manor": "庄园",
+                    "lodge": "猎庄",
+                    "tavernStake": "酒馆股份",
+                    "farmstead": "农庄",
+                    "workshop": "工坊",
+                    "other": "产业"
+                },
+                "condition": {
+                    "sound": "完好",
+                    "damaged": "受损",
+                    "destroyed": "被毁"
+                },
+                "tier": {
+                    "modest": "简朴",
+                    "comfortable": "舒适",
+                    "lavish": "奢华"
+                },
+                "dialog": {
+                    "owner": "所有者",
+                    "title": "头衔（可选）",
+                    "name": "产业名称",
+                    "kind": "类型",
+                    "location": "位置",
+                    "locationHelp": "六角格键或简短地名；可选。",
+                    "tier": "收入等级",
+                    "needNameAndOwner": "产业需要名称和所有者。",
+                    "tooMany": "该角色已拥有 {max} 处——是风味，不是经济模拟。"
                 }
             }
         },

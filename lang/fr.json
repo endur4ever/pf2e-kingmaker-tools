@@ -2081,7 +2081,8 @@
                 "quest": "Delete quest {name}? This cannot be undone.",
                 "warThreat": "Delete war menace {name}? This cannot be undone.",
                 "rivalRealm": "Supprimer le royaume rival {name} ?",
-                "councilVote": "Supprimer le vote « {name} » ?"
+                "councilVote": "Supprimer le vote « {name} » ?",
+                "holding": "Révoquer {name} ?"
             },
             "current": "Current",
             "expeditionBatchResolved": "Resolved {count} expédition rewards.",
@@ -2573,6 +2574,43 @@
                     "award": "Attribuer",
                     "alreadyAwarded": "Déjà attribué ce tour-ci.",
                     "awarded": "{owner} perçoit {gold} po de {holding}."
+                },
+                "title": "Domaines personnels",
+                "grant": "Accorder un domaine",
+                "edit": "Modifier",
+                "empty": "Aucun domaine accordé.",
+                "revoke": "Révoquer",
+                "forceCondition": "Changer l'état",
+                "noPcs": "Aucun membre du groupe à qui accorder.",
+                "incomePerTurn": "{gold} po, {luxuries} luxe, {favors} faveurs / tour",
+                "kind": {
+                    "manor": "Manoir",
+                    "lodge": "Pavillon",
+                    "tavernStake": "Part de taverne",
+                    "farmstead": "Ferme",
+                    "workshop": "Atelier",
+                    "other": "Domaine"
+                },
+                "condition": {
+                    "sound": "Intact",
+                    "damaged": "Endommagé",
+                    "destroyed": "Détruit"
+                },
+                "tier": {
+                    "modest": "Modeste",
+                    "comfortable": "Confortable",
+                    "lavish": "Somptueux"
+                },
+                "dialog": {
+                    "owner": "Propriétaire",
+                    "title": "Titre (facultatif)",
+                    "name": "Nom du domaine",
+                    "kind": "Type",
+                    "location": "Lieu",
+                    "locationHelp": "Clé d'hexagone ou nom de lieu court ; facultatif.",
+                    "tier": "Palier de revenu",
+                    "needNameAndOwner": "Un domaine exige un nom et un propriétaire.",
+                    "tooMany": "Ce PJ en détient déjà {max} — du décor, pas une simulation économique."
                 }
             }
         },

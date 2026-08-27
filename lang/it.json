@@ -2081,7 +2081,8 @@
                 "quest": "Delete quest {name}? This cannot be undone.",
                 "warThreat": "Delete war minaccia {name}? This cannot be undone.",
                 "rivalRealm": "Eliminare il regno rivale {name}?",
-                "councilVote": "Eliminare la votazione “{name}”?"
+                "councilVote": "Eliminare la votazione “{name}”?",
+                "holding": "Revocare {name}?"
             },
             "current": "Current",
             "expeditionBatchResolved": "Resolved {count} spedizione rewards.",
@@ -2573,6 +2574,43 @@
                     "award": "Assegna",
                     "alreadyAwarded": "Già assegnato questo turno.",
                     "awarded": "{owner} riscuote {gold} mo da {holding}."
+                },
+                "title": "Possedimenti personali",
+                "grant": "Concedi possedimento",
+                "edit": "Modifica",
+                "empty": "Nessun possedimento concesso.",
+                "revoke": "Revoca",
+                "forceCondition": "Cambia stato",
+                "noPcs": "Nessun membro del gruppo a cui concedere.",
+                "incomePerTurn": "{gold} mo, {luxuries} lusso, {favors} favori / turno",
+                "kind": {
+                    "manor": "Maniero",
+                    "lodge": "Casino di caccia",
+                    "tavernStake": "Quota di taverna",
+                    "farmstead": "Fattoria",
+                    "workshop": "Bottega",
+                    "other": "Possedimento"
+                },
+                "condition": {
+                    "sound": "Integro",
+                    "damaged": "Danneggiato",
+                    "destroyed": "Distrutto"
+                },
+                "tier": {
+                    "modest": "Modesto",
+                    "comfortable": "Confortevole",
+                    "lavish": "Sfarzoso"
+                },
+                "dialog": {
+                    "owner": "Proprietario",
+                    "title": "Titolo (facoltativo)",
+                    "name": "Nome del possedimento",
+                    "kind": "Tipo",
+                    "location": "Luogo",
+                    "locationHelp": "Chiave dell'esagono o breve nome del luogo; facoltativo.",
+                    "tier": "Livello di reddito",
+                    "needNameAndOwner": "Un possedimento richiede nome e proprietario.",
+                    "tooMany": "Quel PG ne possiede già {max} — colore, non una simulazione economica."
                 }
             }
         },
