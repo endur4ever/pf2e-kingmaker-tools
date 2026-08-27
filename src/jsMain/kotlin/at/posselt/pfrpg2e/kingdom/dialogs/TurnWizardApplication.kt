@@ -1,5 +1,6 @@
 package at.posselt.pfrpg2e.kingdom.dialogs
 
+import at.posselt.pfrpg2e.kingdom.stampEpithetOffersMade
 import at.posselt.pfrpg2e.kingdom.data.toTurnTallies
 import at.posselt.pfrpg2e.data.kingdom.spotlightOfTheTurn
 import at.posselt.pfrpg2e.kingdom.localizeSpotlight
@@ -714,13 +715,10 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
         rulerUuid = kingdom.rulerActorUuid(),
         turn = currentTurn,
     )
-    postEpithetOffers(
-        game = game,
-        actorUuid = actor.uuid,
-        kingdom = kingdom,
-        turn = currentTurn,
-        offers = epithetOffers,
-    )
+    // the STAMP is part of the tick and must be inside the persist; the CARDS go out after it,
+    // for the same reason the rival digests do -- their grant buttons write the kingdom flag from
+    // other clients, and a click in the pre-persist window is silently lost
+    stampEpithetOffersMade(kingdom, currentTurn, epithetOffers)
     kingdom.currentTurnContributions = emptyArray()
     kingdom.currentTurnDeeds = emptyArray()
 
@@ -756,6 +754,12 @@ suspend fun performEndTurn(game: Game, actor: KingdomActor, kingdom: KingdomData
     // read-modify-write the actor flag from OTHER clients, and a click landing in the window
     // between a mid-tick post and the persist above would either be clobbered by it or clobber
     // the whole ticked turn with pre-tick state.
+    postEpithetOffers(
+        game = game,
+        actorUuid = actor.uuid,
+        offers = epithetOffers,
+    )
+
     postRivalOfferDigests(
         game = game,
         actorUuid = actor.uuid,

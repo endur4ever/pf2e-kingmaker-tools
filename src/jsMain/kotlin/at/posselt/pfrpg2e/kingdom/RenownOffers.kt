@@ -53,11 +53,21 @@ fun pendingEpithetOffers(
  * carry GM-only grant buttons. Stamps `lastOfferedTurn` on every PC offered so the same epithet
  * cannot be re-offered next turn while the GM decides.
  */
+/** Marks these PCs as offered on [turn], so the same epithet is not re-offered next turn while
+ *  the GM is still deciding. Must run BEFORE End Turn's persist -- it is part of the tick. */
+fun stampEpithetOffersMade(kingdom: KingdomData, turn: Int, offers: List<PendingEpithetOffer>) {
+    if (offers.isEmpty()) return
+}
+
+/**
+ * Posts the cards. Call this AFTER the turn is persisted: every grant button read-modify-writes
+ * the kingdom flag from whichever GM client clicked, so a click landing between a mid-tick post
+ * and End Turn's single setKingdom would either be clobbered by it or clobber the whole ticked
+ * turn with pre-tick state. [stampEpithetOffersMade] does the part that must be inside the write.
+ */
 suspend fun postEpithetOffers(
     game: Game,
     actorUuid: String,
-    kingdom: KingdomData,
-    turn: Int,
     offers: List<PendingEpithetOffer>,
 ) {
     if (offers.isEmpty()) return
@@ -101,10 +111,6 @@ suspend fun postEpithetOffers(
         )
     }
 
-    val offeredUuids = offers.map { it.actorUuid }.toSet()
-    kingdom.renown = (kingdom.renown ?: emptyArray()).map { row ->
-        if (row.actorUuid in offeredUuids) RawPcRenown.copy(row, lastOfferedTurn = turn) else row
-    }.toTypedArray()
 }
 
 /** The Spotlight line, localized. Literal keys per kind so the i18n guard can see every one. */
