@@ -1,5 +1,6 @@
 package at.posselt.pfrpg2e.kingdom.forecast
 
+import at.posselt.pfrpg2e.kingdom.dialogs.resolveHoldingOwnerLevels
 import at.posselt.pfrpg2e.campaign.ClockEventType
 import at.posselt.pfrpg2e.kingdom.CARAVAN_BASE_RAID_DC
 import at.posselt.pfrpg2e.kingdom.KingdomActor
@@ -145,7 +146,7 @@ suspend fun buildForecast(game: Game, actor: KingdomActor, horizonDays: Int): Fo
         val realm = game.getRealmData(actor, kingdom)
         val settlements = kingdom.getAllSettlements(game)
         val storage = calculateStorage(realm, settlements.allSettlements)
-        endTurnBeats(runKingdomTurnTick(kingdom, storage, (kingdom.currentTurn ?: 0) + 1))
+        endTurnBeats(runKingdomTurnTick(kingdom, storage, (kingdom.currentTurn ?: 0) + 1, resolveHoldingOwnerLevels(kingdom)))
     }.getOrDefault(EndTurnBeats())
 
     return forecast(

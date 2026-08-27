@@ -1,5 +1,6 @@
 package at.posselt.pfrpg2e.kingdom
 
+import at.posselt.pfrpg2e.kingdom.data.RawPersonalHolding
 import at.posselt.pfrpg2e.kingdom.data.RawPcRenown
 import at.posselt.pfrpg2e.actions.ActionMessage
 import at.posselt.pfrpg2e.actions.handlers.CastCouncilVoteData
@@ -247,6 +248,44 @@ private val buttons = listOf(
                 }
             }
         }.launch()
+    },
+    ChatButton("km-offer-holding-income") { game, actor, _, button ->
+        // Award is what makes income REAL: the tick only stamps lastIncomeTurn, and this handler
+        // is the sole writer of lifetimeIncomeGold -- the ledger records gold actually handed
+        // over, and the GM may dismiss the card. Chat-award only (plan open question 1's
+        // recommended default): the gold is announced, not silently pushed into an inventory.
+        if (!game.user.isGM) return@ChatButton
+        val holdingId = button.dataset["holdingId"] ?: return@ChatButton
+        val gold = button.dataset["gold"]?.toIntOrNull() ?: return@ChatButton
+        val turn = button.dataset["turn"]?.toIntOrNull() ?: return@ChatButton
+        actor.getKingdom()?.let { kingdom ->
+            val holding = kingdom.personalHoldings?.firstOrNull { it.id == holdingId }
+                ?: return@ChatButton
+            if (holding.incomeAwardedTurn == turn) {
+                ui.notifications.info(t("kingdom.holdings.incomeOffer.alreadyAwarded"))
+                return@ChatButton
+            }
+            kingdom.personalHoldings = kingdom.personalHoldings?.map {
+                if (it.id == holdingId) {
+                    RawPersonalHolding.copy(
+                        it,
+                        incomeAwardedTurn = turn,
+                        lifetimeIncomeGold = (it.lifetimeIncomeGold ?: 0) + gold,
+                    )
+                } else it
+            }?.toTypedArray()
+            actor.setKingdom(kingdom)
+            postChatMessage(
+                t(
+                    "kingdom.holdings.incomeOffer.awarded",
+                    recordOf(
+                        "owner" to (holding.ownerLabel ?: holding.name),
+                        "holding" to holding.name,
+                        "gold" to gold.toString(),
+                    ),
+                )
+            )
+        }
     },
     ChatButton("km-offer-renown-epithet") { game, actor, _, button ->
         // Grants a PC the epithet they earned. Pure honour -- no rules effect -- but still

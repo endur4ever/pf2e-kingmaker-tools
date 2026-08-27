@@ -2565,6 +2565,15 @@
                 "populaceHelp": "0-100. O motor limita a esse intervalo.",
                 "tier": "Nível de acesso a compras (0-2)",
                 "accessTier": "Acesso a compras +{tier}"
+            },
+            "holdings": {
+                "incomeOffer": {
+                    "title": "Propriedades pessoais — renda do mês",
+                    "line": "{owner}, {holding}: {gold} po, {luxuries} luxos, {favors} favores",
+                    "award": "Conceder",
+                    "alreadyAwarded": "Já concedido neste turno.",
+                    "awarded": "{owner} recebe {gold} po de {holding}."
+                }
             }
         },
         "chatMessages": {

@@ -1,5 +1,7 @@
 package at.posselt.pfrpg2e.kingdom
 
+import at.posselt.pfrpg2e.kingdom.data.RawPersonalHolding
+import at.posselt.pfrpg2e.data.kingdom.HoldingIncomeLine
 import at.posselt.pfrpg2e.campaign.CampaignClock
 import at.posselt.pfrpg2e.campaign.CampaignClockManager
 import at.posselt.pfrpg2e.campaign.ClockTickEvent
@@ -124,6 +126,9 @@ data class TickResult(
 	val newlyTriggeredThreats: Array<RawWarThreat> = emptyArray(),
 	/** Rival realms after this tick's growth (rival-realms SS3.7). */
 	val rivalRealms: Array<RawRivalRealm> = emptyArray(),
+	/** lastIncomeTurn advanced -- NOT lifetimeIncomeGold, which only the award handler bumps. */
+	val updatedPersonalHoldings: Array<RawPersonalHolding> = emptyArray(),
+	val holdingIncomeOffers: Array<HoldingIncomeLine> = emptyArray(),
 	/** At most one headline-worthy change per realm, for the gazette. */
 	val rivalMoves: Array<RivalMove> = emptyArray(),
 )
@@ -201,6 +206,8 @@ object TurnTickingEngine {
 		groups: Array<RawGroup> = emptyArray(),
 		factionStandingDriftPerTurn: Int = 0,
 		rivalRealms: Array<RawRivalRealm> = emptyArray(),
+		personalHoldings: Array<RawPersonalHolding> = emptyArray(),
+		holdingOwnerLevels: Map<String, Int> = emptyMap(),
 		rivalProfiles: Map<String, at.posselt.pfrpg2e.data.kingdom.RivalGrowthProfile> = emptyMap(),
 	): TickResult {
 		val changes = mutableListOf<TickChange>()
@@ -464,6 +471,12 @@ object TurnTickingEngine {
 
 		// Rival realms grow on the monthly tick beside faction drift (rival-realms SS3.7); pure
 		// delegation, so preview and commit produce identical rows.
+		val holdingAccrual = accrueHoldingIncome(
+			holdings = personalHoldings,
+			ownerLevels = holdingOwnerLevels,
+			kingdomLevel = kingdomLevel,
+			currentTurn = currentTurn,
+		)
 		val (grownRivals, rivalMoves) = advanceAllRivals(
 			realms = rivalRealms,
 			groups = driftedGroups,
@@ -495,6 +508,8 @@ object TurnTickingEngine {
 					activeBattles = archivedBattles,
 					groups = driftedGroups,
 					rivalRealms = grownRivals,
+					updatedPersonalHoldings = holdingAccrual.holdings,
+					holdingIncomeOffers = holdingAccrual.offers.toTypedArray(),
 					rivalMoves = rivalMoves.toTypedArray(),
 					factionStandingDrift = factionStandingDriftPerTurn != 0,
 					warThreatOffers = warThreatOffers,

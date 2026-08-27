@@ -1,0 +1,15 @@
+<div class="km-holding-offer-card">
+    <h3><i class="fa-solid fa-coins"></i> {{title}}</h3>
+    <ul>
+        {{#each rows}}
+            <li>
+                {{this.line}}
+                <button type="button" class="km-offer-holding-income"
+                        data-kingdom-actor-uuid="{{../actorUuid}}"
+                        data-holding-id="{{this.holdingId}}"
+                        data-gold="{{this.gold}}"
+                        data-turn="{{../turn}}">{{../awardLabel}}</button>
+            </li>
+        {{/each}}
+    </ul>
+</div>

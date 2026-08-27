@@ -2565,6 +2565,15 @@
                 "populaceHelp": "0-100. Die Engine begrenzt auf diesen Bereich.",
                 "tier": "Zugangsstufe für Einkäufe (0-2)",
                 "accessTier": "Einkaufszugang +{tier}"
+            },
+            "holdings": {
+                "incomeOffer": {
+                    "title": "Persönliche Besitztümer — Einkünfte des Monats",
+                    "line": "{owner}, {holding}: {gold} GM, {luxuries} Luxusgüter, {favors} Gefallen",
+                    "award": "Zuweisen",
+                    "alreadyAwarded": "In diesem Zug bereits zugewiesen.",
+                    "awarded": "{owner} erhält {gold} GM aus {holding}."
+                }
             }
         },
         "chatMessages": {

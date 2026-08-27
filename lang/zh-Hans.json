@@ -2565,6 +2565,15 @@
                 "populaceHelp": "0-100，引擎会限制在此范围内。",
                 "tier": "采购准入等级（0-2）",
                 "accessTier": "采购准入 +{tier}"
+            },
+            "holdings": {
+                "incomeOffer": {
+                    "title": "个人产业——本月收入",
+                    "line": "{owner}的{holding}：{gold} 金币、{luxuries} 奢侈品、{favors} 人情",
+                    "award": "发放",
+                    "alreadyAwarded": "本回合已发放。",
+                    "awarded": "{owner}从{holding}获得 {gold} 金币。"
+                }
             }
         },
         "chatMessages": {

@@ -2565,6 +2565,15 @@
                 "populaceHelp": "0-100. Il motore limita a questo intervallo.",
                 "tier": "Livello di accesso agli acquisti (0-2)",
                 "accessTier": "Accesso agli acquisti +{tier}"
+            },
+            "holdings": {
+                "incomeOffer": {
+                    "title": "Possedimenti personali — entrate del mese",
+                    "line": "{owner}, {holding}: {gold} mo, {luxuries} beni di lusso, {favors} favori",
+                    "award": "Assegna",
+                    "alreadyAwarded": "Già assegnato questo turno.",
+                    "awarded": "{owner} riscuote {gold} mo da {holding}."
+                }
             }
         },
         "chatMessages": {

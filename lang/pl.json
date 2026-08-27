@@ -2565,6 +2565,15 @@
                 "populaceHelp": "0-100. Silnik ogranicza do tego zakresu.",
                 "tier": "Poziom dostępu do zakupów (0-2)",
                 "accessTier": "Dostęp do zakupów +{tier}"
+            },
+            "holdings": {
+                "incomeOffer": {
+                    "title": "Osobiste włości — dochód miesiąca",
+                    "line": "{owner}, {holding}: {gold} sz, {luxuries} luksusy, {favors} przysługi",
+                    "award": "Przyznaj",
+                    "alreadyAwarded": "Już przyznano w tej turze.",
+                    "awarded": "{owner} pobiera {gold} sz z {holding}."
+                }
             }
         },
         "chatMessages": {

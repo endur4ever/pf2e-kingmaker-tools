@@ -1,6 +1,9 @@
 package at.posselt.pfrpg2e.kingdom.dialogs
 
 import kotlinx.coroutines.sync.withLock
+import com.foundryvtt.pf2e.actor.PF2ECharacter
+import at.posselt.pfrpg2e.kingdom.postHoldingIncomeOffer
+import at.posselt.pfrpg2e.utils.fromUuidTypeSafe
 import at.posselt.pfrpg2e.kingdom.councilVoteMutex
 import at.posselt.pfrpg2e.kingdom.mapdynamism.clearedUnclaimedHexes
 import at.posselt.pfrpg2e.kingdom.mapdynamism.reconcileRewild
@@ -220,7 +223,31 @@ private fun ProjectedResources.storageCapPreviewChanges(): List<TickChange> = li
  * MUST call this — never tick() directly — so the preview cannot drift from what
  * committing actually applies. [currentTurn] is the turn being ticked into (previous + 1).
  */
-fun runKingdomTurnTick(kingdom: KingdomData, storage: CommodityStorage, currentTurn: Int): TickResult =
+/**
+ * actorUuid -> level for every holding owner, resolved through the suspend uuid lookup. Failures
+ * simply omit the entry -- the engine falls back to kingdom level for that holding.
+ */
+suspend fun resolveHoldingOwnerLevels(kingdom: KingdomData): Map<String, Int> {
+    val uuids = (kingdom.personalHoldings ?: emptyArray()).mapNotNull { it.actorUuid }.distinct()
+    if (uuids.isEmpty()) return emptyMap()
+    val levels = mutableMapOf<String, Int>()
+    for (uuid in uuids) {
+        runCatching { fromUuidTypeSafe<PF2ECharacter>(uuid)?.system?.details?.level?.value }
+            .getOrNull()
+            ?.let { levels[uuid] = it }
+    }
+    return levels
+}
+
+fun runKingdomTurnTick(
+    kingdom: KingdomData,
+    storage: CommodityStorage,
+    currentTurn: Int,
+    /** actorUuid -> level, resolved impurely BY EACH CALLER before this pure function: the
+     *  resolution needs a suspend uuid lookup, and a missing entry falls back to kingdom level
+     *  inside the engine, so preview and commit still agree when an actor fails to resolve. */
+    holdingOwnerLevels: Map<String, Int> = emptyMap(),
+): TickResult =
     TurnTickingEngine.tick(
         fame = kingdom.fame,
         resourcePoints = kingdom.resourcePoints,
@@ -255,6 +282,8 @@ fun runKingdomTurnTick(kingdom: KingdomData, storage: CommodityStorage, currentT
         // preview and the forecast adapter all see identical growth (the KDoc above forbids
         // calling tick() directly for exactly this reason).
         rivalRealms = kingdom.rivalRealms ?: emptyArray(),
+        personalHoldings = kingdom.personalHoldings ?: emptyArray(),
+        holdingOwnerLevels = holdingOwnerLevels,
         rivalProfiles = runCatching { rivalGrowthProfilesById() }.getOrDefault(emptyMap()),
         factionStandingDriftPerTurn = kingdom.settings.factionStandingDriftPerTurn ?: 0,
     )
@@ -340,7 +369,7 @@ private suspend fun performEndTurnLocked(game: Game, actor: KingdomActor): TickR
         .map { it.name }
 
     val preTickThreats = kingdom.warThreats?.toList() ?: emptyList()
-    val tickResult = runKingdomTurnTick(kingdom, storage, currentTurn)
+    val tickResult = runKingdomTurnTick(kingdom, storage, currentTurn, resolveHoldingOwnerLevels(kingdom))
     kingdom.supernaturalSolutions = tickResult.supernaturalSolutions
     kingdom.creativeSolutions = tickResult.creativeSolutions
     kingdom.fame = tickResult.fame
@@ -403,6 +432,7 @@ private suspend fun performEndTurnLocked(game: Game, actor: KingdomActor): TickR
     kingdom.activeBattles = tickResult.activeBattles
     kingdom.groups = tickResult.groups
     kingdom.rivalRealms = tickResult.rivalRealms
+    kingdom.personalHoldings = tickResult.updatedPersonalHoldings.takeIf { it.isNotEmpty() } ?: kingdom.personalHoldings
 
     // GM-confirmed rival offers (plan section 5): collect from the post-growth state, then stamp
     // the war-offer watermark BEFORE the persist. The stamp is what stops an UNANSWERED offer
@@ -805,6 +835,13 @@ private suspend fun performEndTurnLocked(game: Game, actor: KingdomActor): TickR
 
     if (offerIrrigationPlague) postIrrigationPlagueOffer(game, actor)
     deadlineQuestsToOffer.forEach { quest -> postQuestDeadlineOffer(game, actor, quest) }
+
+    postHoldingIncomeOffer(
+        game = game,
+        actorUuid = actor.uuid,
+        currentTurn = currentTurn,
+        lines = tickResult.holdingIncomeOffers.toList(),
+    )
 
     postRivalOfferDigests(
         game = game,
@@ -1322,7 +1359,7 @@ class TurnWizardApplication(
         val settlements = kingdom.getAllSettlements(game)
         val storage = calculateStorage(realm, settlements.allSettlements)
         // Simulate the same upcoming turn End Turn will tick into, without persisting the increment.
-        val tickResult = runKingdomTurnTick(kingdom, storage, (kingdom.currentTurn ?: 0) + 1)
+        val tickResult = runKingdomTurnTick(kingdom, storage, (kingdom.currentTurn ?: 0) + 1, resolveHoldingOwnerLevels(kingdom))
 
         val storageCapChanges = if (kingdom.settings.automateResources != "manual") {
             val allFeatures = kingdom.getExplodedFeatures()

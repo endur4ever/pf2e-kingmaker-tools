@@ -2687,6 +2687,15 @@
                 "populaceHelp": "0-100. The engine clamps to this range.",
                 "tier": "Purchase access tier (0-2)",
                 "accessTier": "Purchase access +{tier}"
+            },
+            "holdings": {
+                "incomeOffer": {
+                    "title": "Personal holdings — the month's income",
+                    "line": "{owner}, {holding}: {gold} gp, {luxuries} luxuries, {favors} favors",
+                    "award": "Award",
+                    "alreadyAwarded": "Already awarded this turn.",
+                    "awarded": "{owner} collects {gold} gp from {holding}."
+                }
             }
         },
         "chatMessages": {

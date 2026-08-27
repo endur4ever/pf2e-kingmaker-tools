@@ -2565,6 +2565,15 @@
                 "populaceHelp": "0-100. Le moteur borne à cet intervalle.",
                 "tier": "Palier d'accès aux achats (0-2)",
                 "accessTier": "Accès aux achats +{tier}"
+            },
+            "holdings": {
+                "incomeOffer": {
+                    "title": "Domaines personnels — revenus du mois",
+                    "line": "{owner}, {holding} : {gold} po, {luxuries} produits de luxe, {favors} faveurs",
+                    "award": "Attribuer",
+                    "alreadyAwarded": "Déjà attribué ce tour-ci.",
+                    "awarded": "{owner} perçoit {gold} po de {holding}."
+                }
             }
         },
         "chatMessages": {

@@ -2565,6 +2565,15 @@
                 "populaceHelp": "0-100. Движок ограничивает этим диапазоном.",
                 "tier": "Уровень доступа к покупкам (0-2)",
                 "accessTier": "Доступ к покупкам +{tier}"
+            },
+            "holdings": {
+                "incomeOffer": {
+                    "title": "Личные владения — доход за месяц",
+                    "line": "{owner}, {holding}: {gold} зм, {luxuries} предметы роскоши, {favors} услуги",
+                    "award": "Выдать",
+                    "alreadyAwarded": "В этом ходу уже выдано.",
+                    "awarded": "{owner} получает {gold} зм от {holding}."
+                }
             }
         },
         "chatMessages": {
