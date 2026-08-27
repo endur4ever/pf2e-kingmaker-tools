@@ -21,7 +21,7 @@ class MigrationChainTest {
 
     @Test
     fun registeredVersionsAreContiguous17To69() {
-        assertEquals((17..69).toList(), migrations.map { it.version })
+        assertEquals((17..70).toList(), migrations.map { it.version })
     }
 
     @Test
@@ -64,6 +64,7 @@ class MigrationChainTest {
         assertDefined("renown", kingdom.renown)                                // M69
         assertDefined("currentTurnContributions", kingdom.currentTurnContributions) // M69
         assertDefined("currentTurnDeeds", kingdom.currentTurnDeeds)            // M69
+        assertDefined("personalHoldings", kingdom.personalHoldings)           // M70
 
         // Scalar defaults from the late (formerly-unregistered) feat-tracking migration.
         assertEquals(11, kingdom.pullTogetherCurrentDC.unsafeCast<Int>())      // M45
@@ -85,6 +86,7 @@ class MigrationChainTest {
         kingdom.rivalRealms = arrayOf(unsafeJso<dynamic> { id = "realm-1" })
         kingdom.rivalCharterParties = arrayOf(unsafeJso<dynamic> { id = "band-1" })
         kingdom.renown = arrayOf(unsafeJso<dynamic> { actorUuid = "Actor.a" })
+        kingdom.personalHoldings = arrayOf(unsafeJso<dynamic> { id = "holding-1" })
         // Re-running the whole chain must not clobber the now-populated data.
         migrations.forEach { it.migrateKingdom(game, kingdom) }
         assertEquals(11, kingdom.pullTogetherCurrentDC.unsafeCast<Int>())
@@ -93,5 +95,6 @@ class MigrationChainTest {
         assertEquals(1, kingdom.rivalRealms.length.unsafeCast<Int>(), "M67 must seed, never assign")
         assertEquals(1, kingdom.rivalCharterParties.length.unsafeCast<Int>(), "M68 must seed, never assign")
         assertEquals(1, kingdom.renown.length.unsafeCast<Int>(), "M69 must seed, never assign")
+        assertEquals(1, kingdom.personalHoldings.length.unsafeCast<Int>(), "M70 must seed, never assign")
     }
 }

@@ -34,6 +34,7 @@ import at.posselt.pfrpg2e.kingdom.data.RawCouncilVote
 import at.posselt.pfrpg2e.kingdom.data.RawPcRenown
 import at.posselt.pfrpg2e.kingdom.data.RawRenownDeed
 import at.posselt.pfrpg2e.kingdom.data.RawRivalCharterParty
+import at.posselt.pfrpg2e.kingdom.data.RawPersonalHolding
 import at.posselt.pfrpg2e.kingdom.data.RawRivalRealm
 import at.posselt.pfrpg2e.kingdom.data.RawTurnContribution
 import at.posselt.pfrpg2e.kingdom.data.RawCaravan
@@ -402,6 +403,9 @@ external interface KingdomData {
     /** Rival realm scoreboard rows (rival-realms SS2.2), soft-linked to groups by factionRef ->
      * RawGroup.name. Null before Migration67; empty means no rivals tracked. */
     var rivalRealms: Array<RawRivalRealm>?
+
+    /** Per-PC fiefs, estates and businesses; GM-granted titles with income (plan: personal-holdings). */
+    var personalHoldings: Array<RawPersonalHolding>?
 
     /** Rival charter parties out on the hex map (rival-charter-party SS2.1). Null before
      * Migration68. Soft-FK by name, with no cascade on rename or delete. */
