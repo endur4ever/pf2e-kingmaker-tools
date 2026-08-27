@@ -642,6 +642,27 @@
                     "distorted": "Déformée",
                     "false": "Fausse",
                     "unassessed": "Non évaluée"
+                },
+                "somewhere": "les marches frontalières",
+                "expiredOffer": {
+                    "title": "Une rumeur s'est éteinte",
+                    "postBeat": "Publier le rebondissement",
+                    "letItFade": "Laisser s'éteindre",
+                    "faded": "La rumeur s'éteint sans bruit."
+                },
+                "convertOffer": {
+                    "title": "Une piste va se refroidir",
+                    "quest": "Convertir en quête",
+                    "hex": "Marquer l'hexagone",
+                    "dismiss": "Laisser filer",
+                    "dismissed": "La piste se refroidit."
+                },
+                "mutation": {
+                    "monster": {
+                        "silenced": "Les apparitions près de {region} ont cessé — quelque chose là-bas y a mis fin.",
+                        "moved": "La piste s'est refroidie près de {region} ; la créature est partie ailleurs.",
+                        "grew": "Les voyageurs près de {region} parlent désormais d'une chose bien plus grande qu'annoncé."
+                    }
                 }
             }
         },

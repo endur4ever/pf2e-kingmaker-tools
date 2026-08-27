@@ -764,6 +764,27 @@
                     "distorted": "Distorted",
                     "false": "False",
                     "unassessed": "Unassessed"
+                },
+                "somewhere": "the borderlands",
+                "expiredOffer": {
+                    "title": "A rumor has run its course",
+                    "postBeat": "Post the beat",
+                    "letItFade": "Let it fade",
+                    "faded": "The rumor fades unremarked."
+                },
+                "convertOffer": {
+                    "title": "A lead is about to go cold",
+                    "quest": "Convert to quest",
+                    "hex": "Mark the hex",
+                    "dismiss": "Let it go",
+                    "dismissed": "The lead goes cold."
+                },
+                "mutation": {
+                    "monster": {
+                        "silenced": "The sightings near {region} have stopped — something out there ended them.",
+                        "moved": "The trail has gone cold near {region}; whatever it was has moved on.",
+                        "grew": "Travelers near {region} now speak of something far larger than first told."
+                    }
                 }
             }
         },

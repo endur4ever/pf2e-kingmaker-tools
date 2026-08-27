@@ -39,5 +39,9 @@ suspend fun tickRumorLifecycles(game: Game, daysPassed: Int) {
         val hasRumors = actor.getCamping()?.rumors?.isNotEmpty() == true
         if (!hasRumors) continue
         actor.updateRumors { rumors -> tickRumors(rumors, currentDay = today, days = daysPassed).rumors }
+        // offers AFTER the aging write, from the post-tick store: candidates are EXPIRED rows
+        // whose beat was never offered, and posting stamps them so tomorrow's tick stays quiet
+        val due = beatCandidates(actor.getCamping()?.rumorList() ?: emptyList(), today)
+        postRumorExpiryOffers(game, actor, due, today)
     }
 }

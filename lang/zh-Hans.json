@@ -642,6 +642,27 @@
                     "distorted": "失真",
                     "false": "虚假",
                     "unassessed": "未评估"
+                },
+                "somewhere": "边境地带",
+                "expiredOffer": {
+                    "title": "一则传闻已然过时",
+                    "postBeat": "发布后续",
+                    "letItFade": "任其消散",
+                    "faded": "传闻悄然消散。"
+                },
+                "convertOffer": {
+                    "title": "一条线索即将冷却",
+                    "quest": "转化为任务",
+                    "hex": "标记六角格",
+                    "dismiss": "放手",
+                    "dismissed": "线索冷却了。"
+                },
+                "mutation": {
+                    "monster": {
+                        "silenced": "{region}附近的目击消失了——那里有什么东西终结了它们。",
+                        "moved": "{region}附近的踪迹已冷；无论那是什么，它已经离开。",
+                        "grew": "{region}附近的旅人如今谈论的，是比最初传闻大得多的东西。"
+                    }
                 }
             }
         },

@@ -642,6 +642,27 @@
                     "distorted": "Distorcido",
                     "false": "Falso",
                     "unassessed": "Não avaliado"
+                },
+                "somewhere": "as terras fronteiriças",
+                "expiredOffer": {
+                    "title": "Um rumor se esgotou",
+                    "postBeat": "Publicar a virada",
+                    "letItFade": "Deixar sumir",
+                    "faded": "O rumor some sem alarde."
+                },
+                "convertOffer": {
+                    "title": "Uma pista está prestes a esfriar",
+                    "quest": "Converter em missão",
+                    "hex": "Marcar o hexágono",
+                    "dismiss": "Deixar para lá",
+                    "dismissed": "A pista esfria."
+                },
+                "mutation": {
+                    "monster": {
+                        "silenced": "Os avistamentos perto de {region} cessaram — algo lá fora deu fim a eles.",
+                        "moved": "O rastro esfriou perto de {region}; o que quer que fosse, seguiu adiante.",
+                        "grew": "Viajantes perto de {region} agora falam de algo bem maior do que se contava."
+                    }
                 }
             }
         },

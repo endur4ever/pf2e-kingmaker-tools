@@ -1,0 +1,18 @@
+<div class="km-rumor-offer-card">
+    <h3><i class="fa-solid fa-scroll"></i> {{title}}</h3>
+    <p><em>{{text}}</em></p>
+    <div class="km-rumor-offer-buttons">
+        <button type="button" class="km-offer-rumor-quest"
+                data-camping-actor-uuid="{{campingActorUuid}}"
+                data-rumor-id="{{rumorId}}">{{questLabel}}</button>
+        {{#if hexKey}}
+            <button type="button" class="km-offer-rumor-hex"
+                    data-camping-actor-uuid="{{campingActorUuid}}"
+                    data-rumor-id="{{rumorId}}"
+                    data-hex-key="{{hexKey}}">{{hexLabel}}</button>
+        {{/if}}
+        <button type="button" class="km-offer-rumor-dismiss"
+                data-camping-actor-uuid="{{campingActorUuid}}"
+                data-rumor-id="{{rumorId}}">{{dismissLabel}}</button>
+    </div>
+</div>

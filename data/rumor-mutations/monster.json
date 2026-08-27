@@ -1,0 +1,8 @@
+{
+  "category": "monster",
+  "beats": [
+    "camping.rumors.mutation.monster.silenced",
+    "camping.rumors.mutation.monster.moved",
+    "camping.rumors.mutation.monster.grew"
+  ]
+}

@@ -16,6 +16,9 @@ import at.posselt.pfrpg2e.actions.handlers.CloseCouncilVoteHandler
 import at.posselt.pfrpg2e.actions.handlers.DeleteCouncilVoteHandler
 import at.posselt.pfrpg2e.actions.handlers.OpenCouncilVoteHandler
 import at.posselt.pfrpg2e.actions.handlers.ReopenCouncilVoteHandler
+import at.posselt.pfrpg2e.actions.handlers.ConvertRumorHexHandler
+import at.posselt.pfrpg2e.actions.handlers.ConvertRumorQuestHandler
+import at.posselt.pfrpg2e.actions.handlers.PostRumorBeatHandler
 import at.posselt.pfrpg2e.actions.handlers.SetCouncilVoteLinksHandler
 import at.posselt.pfrpg2e.actions.handlers.SetCouncilVoteNoteHandler
 import at.posselt.pfrpg2e.actions.handlers.SyncActivitiesHandler
@@ -189,6 +192,10 @@ class ActionDispatcherSecurityTest {
             DeleteCouncilVoteHandler().action to OriginatorPolicy.GM_ONLY,
             SetCouncilVoteNoteHandler().action to OriginatorPolicy.GM_ONLY,
             SetCouncilVoteLinksHandler().action to OriginatorPolicy.GM_ONLY,
+            // rumor offers are GM-confirmed cards; a player must not originate a conversion
+            PostRumorBeatHandler(game).action to OriginatorPolicy.GM_ONLY,
+            ConvertRumorQuestHandler(game).action to OriginatorPolicy.GM_ONLY,
+            ConvertRumorHexHandler(game).action to OriginatorPolicy.GM_ONLY,
         )
         val actual: List<Pair<String, OriginatorPolicy>> = listOf(
             AddHuntAndGatherResultHandler(),
@@ -208,6 +215,9 @@ class ActionDispatcherSecurityTest {
             DeleteCouncilVoteHandler(),
             SetCouncilVoteNoteHandler(),
             SetCouncilVoteLinksHandler(),
+            PostRumorBeatHandler(game),
+            ConvertRumorQuestHandler(game),
+            ConvertRumorHexHandler(game),
         ).map { it.action to it.originatorPolicy }
         assertEquals(expected, actual)
     }

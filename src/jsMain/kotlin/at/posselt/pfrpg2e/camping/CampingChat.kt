@@ -1,5 +1,7 @@
 package at.posselt.pfrpg2e.camping
 
+import com.foundryvtt.core.ui
+import at.posselt.pfrpg2e.actions.handlers.RumorOfferData
 import at.posselt.pfrpg2e.actions.ActionDispatcher
 import at.posselt.pfrpg2e.actions.ActionMessage
 import at.posselt.pfrpg2e.actions.handlers.ApplyMealEffects
@@ -52,6 +54,44 @@ fun bindCampingChatEventListeners(game: Game, dispatcher: ActionDispatcher) {
             }
         }
     }
+    // rumor offer buttons (plan section 6.1): camping-side, dispatched through the
+    // deny-by-default ActionDispatcher -- GM_ONLY originator by default, and the cards are
+    // GM-whispered anyway. Identity is pinned on the card; the handlers act on what the GM read.
+    for (spec in listOf(
+        ".km-offer-rumor-beat" to "postRumorBeat",
+        ".km-offer-rumor-quest" to "convertRumorQuest",
+        ".km-offer-rumor-hex" to "convertRumorHex",
+    )) {
+        val (selector, actionName) = spec
+        bindChatClick(selector) { _, el, _ ->
+            val campingActorUuid = el.dataset["campingActorUuid"]
+            val rumorId = el.dataset["rumorId"]
+            if (campingActorUuid != null && rumorId != null) {
+                buildPromise {
+                    dispatcher.dispatch(
+                        ActionMessage(
+                            action = actionName,
+                            data = RumorOfferData(
+                                campingActorUuid = campingActorUuid,
+                                rumorId = rumorId,
+                                beatKey = el.dataset["beatKey"],
+                                hexKey = el.dataset["hexKey"],
+                            ).unsafeCast<AnyObject>(),
+                        )
+                    )
+                }
+            }
+        }
+    }
+    bindChatClick(".km-offer-rumor-quiet") { _, el, _ ->
+        // posting already stamped beatOfferedDay, so Quiet is a pure acknowledgement -- a silent
+        // button reads as broken, nothing more is needed
+        ui.notifications.info(t("camping.rumors.expiredOffer.faded"))
+    }
+    bindChatClick(".km-offer-rumor-dismiss") { _, el, _ ->
+        ui.notifications.info(t("camping.rumors.convertOffer.dismissed"))
+    }
+
     bindChatClick(".km-pass-time") { _, el, _ ->
         el.dataset["seconds"]?.toInt()?.let {
             buildPromise {

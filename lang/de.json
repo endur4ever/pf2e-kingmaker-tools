@@ -642,6 +642,27 @@
                     "distorted": "Verzerrt",
                     "false": "Falsch",
                     "unassessed": "Unbewertet"
+                },
+                "somewhere": "das Grenzland",
+                "expiredOffer": {
+                    "title": "Ein Gerücht hat sich totgelaufen",
+                    "postBeat": "Beat veröffentlichen",
+                    "letItFade": "Verklingen lassen",
+                    "faded": "Das Gerücht verklingt unbemerkt."
+                },
+                "convertOffer": {
+                    "title": "Eine Spur wird gleich kalt",
+                    "quest": "In Quest umwandeln",
+                    "hex": "Hex markieren",
+                    "dismiss": "Loslassen",
+                    "dismissed": "Die Spur wird kalt."
+                },
+                "mutation": {
+                    "monster": {
+                        "silenced": "Die Sichtungen nahe {region} haben aufgehört — irgendetwas dort draußen hat sie beendet.",
+                        "moved": "Die Spur nahe {region} ist kalt geworden; was immer es war, ist weitergezogen.",
+                        "grew": "Reisende nahe {region} sprechen nun von etwas weit Größerem als zuerst erzählt."
+                    }
                 }
             }
         },

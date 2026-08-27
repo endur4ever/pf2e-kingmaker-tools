@@ -1,0 +1,16 @@
+<div class="km-rumor-offer-card">
+    <h3><i class="fa-solid fa-hourglass-end"></i> {{title}}</h3>
+    <p><em>{{text}}</em>{{#if region}} — {{region}}{{/if}}</p>
+    {{#if beatKey}}<p class="km-rumor-beat-preview">{{beatPreview}}</p>{{/if}}
+    <div class="km-rumor-offer-buttons">
+        {{#if beatKey}}
+            <button type="button" class="km-offer-rumor-beat"
+                    data-camping-actor-uuid="{{campingActorUuid}}"
+                    data-rumor-id="{{rumorId}}"
+                    data-beat-key="{{beatKey}}">{{beatLabel}}</button>
+        {{/if}}
+        <button type="button" class="km-offer-rumor-quiet"
+                data-camping-actor-uuid="{{campingActorUuid}}"
+                data-rumor-id="{{rumorId}}">{{quietLabel}}</button>
+    </div>
+</div>

@@ -14,6 +14,9 @@ import at.posselt.pfrpg2e.actions.handlers.CloseCouncilVoteHandler
 import at.posselt.pfrpg2e.actions.handlers.DeleteCouncilVoteHandler
 import at.posselt.pfrpg2e.actions.handlers.OpenCouncilVoteHandler
 import at.posselt.pfrpg2e.actions.handlers.ReopenCouncilVoteHandler
+import at.posselt.pfrpg2e.actions.handlers.ConvertRumorHexHandler
+import at.posselt.pfrpg2e.actions.handlers.ConvertRumorQuestHandler
+import at.posselt.pfrpg2e.actions.handlers.PostRumorBeatHandler
 import at.posselt.pfrpg2e.actions.handlers.SetCouncilVoteLinksHandler
 import at.posselt.pfrpg2e.actions.handlers.SetCouncilVoteNoteHandler
 import at.posselt.pfrpg2e.actions.handlers.SyncActivitiesHandler
@@ -119,6 +122,9 @@ fun main() {
                 DeleteCouncilVoteHandler(),
                 SetCouncilVoteNoteHandler(),
                 SetCouncilVoteLinksHandler(),
+                PostRumorBeatHandler(game = game),
+                ConvertRumorQuestHandler(game = game),
+                ConvertRumorHexHandler(game = game),
             )
         ).apply {
             listen()

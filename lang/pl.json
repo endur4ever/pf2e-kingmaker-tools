@@ -642,6 +642,27 @@
                     "distorted": "Zniekształcona",
                     "false": "Fałszywa",
                     "unassessed": "Nieoceniona"
+                },
+                "somewhere": "pogranicze",
+                "expiredOffer": {
+                    "title": "Plotka się wyczerpała",
+                    "postBeat": "Opublikuj zwrot",
+                    "letItFade": "Pozwól jej wygasnąć",
+                    "faded": "Plotka gaśnie niezauważona."
+                },
+                "convertOffer": {
+                    "title": "Trop zaraz ostygnie",
+                    "quest": "Zamień w zadanie",
+                    "hex": "Oznacz heks",
+                    "dismiss": "Odpuść",
+                    "dismissed": "Trop stygnie."
+                },
+                "mutation": {
+                    "monster": {
+                        "silenced": "Doniesienia z okolic {region} ustały — coś tam położyło im kres.",
+                        "moved": "Ślad w okolicy {region} ostygł; cokolwiek to było, ruszyło dalej.",
+                        "grew": "Podróżni z okolic {region} mówią teraz o czymś znacznie większym, niż głoszono."
+                    }
                 }
             }
         },

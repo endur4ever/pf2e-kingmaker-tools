@@ -642,6 +642,27 @@
                     "distorted": "Distorta",
                     "false": "Falsa",
                     "unassessed": "Non valutata"
+                },
+                "somewhere": "le terre di confine",
+                "expiredOffer": {
+                    "title": "Una voce si è spenta",
+                    "postBeat": "Pubblica il colpo di scena",
+                    "letItFade": "Lasciala svanire",
+                    "faded": "La voce svanisce senza clamore."
+                },
+                "convertOffer": {
+                    "title": "Una pista sta per raffreddarsi",
+                    "quest": "Converti in missione",
+                    "hex": "Segna l'esagono",
+                    "dismiss": "Lasciala andare",
+                    "dismissed": "La pista si raffredda."
+                },
+                "mutation": {
+                    "monster": {
+                        "silenced": "Gli avvistamenti vicino a {region} sono cessati — qualcosa là fuori li ha fatti finire.",
+                        "moved": "Le tracce vicino a {region} si sono raffreddate; qualunque cosa fosse, se n'è andata.",
+                        "grew": "I viaggiatori vicino a {region} parlano ora di qualcosa di ben più grande del previsto."
+                    }
                 }
             }
         },
