@@ -244,6 +244,12 @@ object Pfrpg2eKingdomCampingWeatherSettings {
     fun getLatestMigrationBackup(): String =
         game.settings.getString("latestMigrationBackup")
 
+    suspend fun setSubsystemStore(value: String) =
+        game.settings.setString("subsystemStore", value)
+
+    fun getSubsystemStore(): String =
+        game.settings.getString("subsystemStore")
+
     suspend fun setPreviousMigrationBackup(value: String) =
         game.settings.setString("previousMigrationBackup", value)
 
@@ -464,6 +470,9 @@ object Pfrpg2eKingdomCampingWeatherSettings {
             "previousMigrationBackup" to "{}",
             // JSON-serialized HomebrewProfileRegistry (managed via the Homebrew Profile Manager)
             "homebrewProfileRegistry" to "{}",
+            // JSON-serialized RawSubsystemStore: Influence encounters + Research projects.
+            // World-scoped so the trackers work in a campaign with no kingdom actor at all.
+            "subsystemStore" to "{}",
         )
     }
 
