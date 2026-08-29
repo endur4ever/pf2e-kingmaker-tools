@@ -145,3 +145,37 @@
     flex-wrap: wrap;
     gap: 0.3rem;
 }
+
+/* faction agenda cards (Diplomacy section) reuse the subsystem bar; these are their own rows */
+.km-agenda-cards {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+    gap: 0.5rem;
+}
+
+.km-agenda-card {
+    border: 1px solid rgba(0, 0, 0, 0.25);
+    border-radius: 5px;
+    padding: 0.35rem 0.6rem;
+    background: rgba(0, 0, 0, 0.04);
+}
+
+.km-agenda-card--idle {
+    opacity: 0.7;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.km-agenda-card--idle button {
+    width: auto;
+}
+
+.km-agenda-archetype {
+    font-size: 0.8rem;
+    opacity: 0.75;
+    margin-left: 0.4rem;
+}

@@ -2661,6 +2661,42 @@
                     "courtAlly": "Courtisé par une faction alliée",
                     "courtPcs": "Émissaires envoyés au royaume",
                     "other": "Manœuvre d'agenda de faction"
+                },
+                "title": "Agendas de faction",
+                "edit": "Modifier l'agenda",
+                "clear": "Effacer l'agenda",
+                "assign": "Assigner un agenda",
+                "clearConfirm": "Effacer l'agenda de cette faction ? Elle restera inactive jusqu'à un nouvel agenda.",
+                "editTitle": "Agenda — {name}",
+                "goalLabel": "Objectif",
+                "goalTitleLabel": "Titre d'objectif personnalisé",
+                "goalTitleHelp": "Vide : le nom standard est utilisé.",
+                "segmentsLabel": "Segments d'horloge",
+                "progressLabel": "Progression",
+                "archetypeLabel": "Archétype",
+                "archetype": {
+                    "aggressive": "Agressif",
+                    "mercantile": "Mercantile",
+                    "fey": "Féerique",
+                    "political": "Politique",
+                    "monster": "Monstrueux"
+                },
+                "goal": {
+                    "conquerNeighbor": "Conquérir un voisin",
+                    "buildArmy": "Bâtir une armée",
+                    "raidTradeRoutes": "Piller les routes commerciales",
+                    "secureTradeRoute": "Sécuriser une route commerciale",
+                    "monopolyResource": "Monopoliser une ressource",
+                    "allyMajorPower": "S'allier à une grande puissance",
+                    "claimGrove": "Revendiquer le bosquet",
+                    "bindMortal": "Lier un mortel",
+                    "veilTerritory": "Voiler le territoire",
+                    "marriageAlliance": "Alliance matrimoniale",
+                    "treatyNetwork": "Réseau de traités",
+                    "courtFavor": "Faveur de la cour",
+                    "expandLair": "Agrandir le repaire",
+                    "gatherHorde": "Rassembler la horde",
+                    "sackSettlement": "Mettre à sac une colonie"
                 }
             }
         },

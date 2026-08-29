@@ -9,6 +9,8 @@ import at.posselt.pfrpg2e.data.kingdom.Relations
 import at.posselt.pfrpg2e.data.kingdom.attitudeFor
 import at.posselt.pfrpg2e.kingdom.data.RawFactionStandingEntry
 import at.posselt.pfrpg2e.kingdom.data.RawGroup
+import at.posselt.pfrpg2e.kingdom.localizeAgendaArchetype
+import at.posselt.pfrpg2e.kingdom.localizeAgendaGoal
 import at.posselt.pfrpg2e.utils.t
 import kotlinx.js.JsPlainObject
 
@@ -21,13 +23,28 @@ external interface GroupContext {
     val preventPledgeOfFealty: FormElementContext
     val relations: FormElementContext
     val hexKey: FormElementContext
+    /** The group's display name as a plain string; [name] is a form input context. */
+    val plainName: String
     val attitude: String
     val standing: Int
     val allianceLevel: String?
     val standingLog: Array<RawFactionStandingEntry>?
+    val agenda: AgendaCardContext?
 }
 
-fun Array<RawGroup>.toContext() =
+@Suppress("unused")
+@JsPlainObject
+external interface AgendaCardContext {
+    val goalLabel: String
+    val progress: Int
+    val segments: Int
+    val progressPct: Int
+    /** GM-only detail; null for players. */
+    val archetypeLabel: String?
+    val cooldownSummary: String?
+}
+
+fun Array<RawGroup>.toContext(isGM: Boolean = false) =
     mapIndexed { index, group ->
         GroupContext(
             name = TextInput(
@@ -66,7 +83,23 @@ fun Array<RawGroup>.toContext() =
                 value = group.hexKey ?: "",
                 required = false,
             ).toContext(),
+            plainName = group.name,
             attitude = t(attitudeFor(group.standing).i18nKey),
+            agenda = group.agenda?.let { agenda ->
+                AgendaCardContext(
+                    goalLabel = localizeAgendaGoal(agenda.goalId, agenda.goalTitle),
+                    progress = agenda.progress,
+                    segments = agenda.segments,
+                    progressPct = if (agenda.segments > 0) {
+                        (agenda.progress * 100 / agenda.segments).coerceIn(0, 100)
+                    } else 0,
+                    archetypeLabel = localizeAgendaArchetype(agenda.archetype).takeIf { isGM },
+                    cooldownSummary = agenda.moveCooldowns?.let { cds ->
+                        js.objects.Object.keys(cds.unsafeCast<Any>())
+                            .joinToString(", ") { key -> "$key: ${cds[key]}" }
+                    }?.takeIf { isGM && it.isNotBlank() },
+                )
+            },
             standing = group.standing ?: DEFAULT_FACTION_STANDING,
             allianceLevel = group.allianceLevel,
             standingLog = group.standingLog,

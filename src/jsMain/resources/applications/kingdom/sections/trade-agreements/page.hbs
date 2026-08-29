@@ -64,6 +64,35 @@
             </table>
         </section>
         <section>
+            <h2>{{localizeKM "kingdom.factionAgenda.title"}}</h2>
+            <ul class="km-agenda-cards">
+                {{#each groups}}
+                    {{#if this.agenda}}
+                        <li class="km-agenda-card">
+                            <b>{{this.plainName}}</b> — {{this.agenda.goalLabel}}
+                            <span class="km-sub-points">{{this.agenda.progress}}/{{this.agenda.segments}}</span>
+                            {{#if this.agenda.archetypeLabel}}<span class="km-agenda-archetype">{{this.agenda.archetypeLabel}}</span>{{/if}}
+                            <div class="km-sub-bar"><span class="km-sub-bar__fill" style="width: {{this.agenda.progressPct}}%"></span></div>
+                            {{#if this.agenda.cooldownSummary}}<p class="km-sub-note">{{this.agenda.cooldownSummary}}</p>{{/if}}
+                            {{#if ../isGM}}
+                                <span class="km-sub-controls">
+                                    <button type="button" data-action="edit-faction-agenda" data-index="{{@index}}" data-tooltip="{{localizeKM "kingdom.factionAgenda.edit"}}"><i class="fa-solid fa-sliders"></i></button>
+                                    <button type="button" data-action="clear-faction-agenda" data-index="{{@index}}" data-tooltip="{{localizeKM "kingdom.factionAgenda.clear"}}"><i class="fa-solid fa-broom"></i></button>
+                                </span>
+                            {{/if}}
+                        </li>
+                    {{else}}
+                        {{#if ../isGM}}
+                            <li class="km-agenda-card km-agenda-card--idle">
+                                <b>{{this.plainName}}</b>
+                                <button type="button" data-action="edit-faction-agenda" data-index="{{@index}}"><i class="fa-solid fa-plus"></i> {{localizeKM "kingdom.factionAgenda.assign"}}</button>
+                            </li>
+                        {{/if}}
+                    {{/if}}
+                {{/each}}
+            </ul>
+        </section>
+        <section>
             <h2>{{localizeKM "kingdom.standingLog"}}</h2>
             {{#each groups}}
                 {{#if standingLog.length}}

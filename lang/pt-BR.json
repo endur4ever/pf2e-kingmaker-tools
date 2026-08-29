@@ -2661,6 +2661,42 @@
                     "courtAlly": "Cortejada por uma facção aliada",
                     "courtPcs": "Emissários enviados ao reino",
                     "other": "Manobra de agenda de facção"
+                },
+                "title": "Agendas de facção",
+                "edit": "Editar agenda",
+                "clear": "Limpar agenda",
+                "assign": "Atribuir agenda",
+                "clearConfirm": "Limpar a agenda desta facção? Ela ficará ociosa até receber uma nova.",
+                "editTitle": "Agenda — {name}",
+                "goalLabel": "Objetivo",
+                "goalTitleLabel": "Título de objetivo personalizado",
+                "goalTitleHelp": "Vazio usa o nome padrão.",
+                "segmentsLabel": "Segmentos do relógio",
+                "progressLabel": "Progresso",
+                "archetypeLabel": "Arquétipo",
+                "archetype": {
+                    "aggressive": "Agressivo",
+                    "mercantile": "Mercantil",
+                    "fey": "Feérico",
+                    "political": "Político",
+                    "monster": "Monstruoso"
+                },
+                "goal": {
+                    "conquerNeighbor": "Conquistar um vizinho",
+                    "buildArmy": "Formar um exército",
+                    "raidTradeRoutes": "Saquear rotas comerciais",
+                    "secureTradeRoute": "Proteger uma rota comercial",
+                    "monopolyResource": "Monopolizar um recurso",
+                    "allyMajorPower": "Aliar-se a uma grande potência",
+                    "claimGrove": "Reivindicar o bosque",
+                    "bindMortal": "Vincular um mortal",
+                    "veilTerritory": "Velar o território",
+                    "marriageAlliance": "Aliança matrimonial",
+                    "treatyNetwork": "Rede de tratados",
+                    "courtFavor": "Favor da corte",
+                    "expandLair": "Expandir o covil",
+                    "gatherHorde": "Reunir a horda",
+                    "sackSettlement": "Saquear um assentamento"
                 }
             }
         },

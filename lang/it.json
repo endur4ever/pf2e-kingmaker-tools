@@ -2661,6 +2661,42 @@
                     "courtAlly": "Corteggiata da una fazione alleata",
                     "courtPcs": "Emissari inviati al regno",
                     "other": "Mossa di agenda di fazione"
+                },
+                "title": "Agende delle fazioni",
+                "edit": "Modifica agenda",
+                "clear": "Cancella agenda",
+                "assign": "Assegna agenda",
+                "clearConfirm": "Cancellare l'agenda di questa fazione? Resterà inattiva finché non ne riceve una nuova.",
+                "editTitle": "Agenda — {name}",
+                "goalLabel": "Obiettivo",
+                "goalTitleLabel": "Titolo obiettivo personalizzato",
+                "goalTitleHelp": "Vuoto: usa il nome standard.",
+                "segmentsLabel": "Segmenti dell'orologio",
+                "progressLabel": "Progresso",
+                "archetypeLabel": "Archetipo",
+                "archetype": {
+                    "aggressive": "Aggressivo",
+                    "mercantile": "Mercantile",
+                    "fey": "Fatato",
+                    "political": "Politico",
+                    "monster": "Mostruoso"
+                },
+                "goal": {
+                    "conquerNeighbor": "Conquistare un vicino",
+                    "buildArmy": "Costruire un esercito",
+                    "raidTradeRoutes": "Razziare le rotte commerciali",
+                    "secureTradeRoute": "Proteggere una rotta commerciale",
+                    "monopolyResource": "Monopolizzare una risorsa",
+                    "allyMajorPower": "Allearsi con una grande potenza",
+                    "claimGrove": "Rivendicare il bosco",
+                    "bindMortal": "Vincolare un mortale",
+                    "veilTerritory": "Velare il territorio",
+                    "marriageAlliance": "Alleanza matrimoniale",
+                    "treatyNetwork": "Rete di trattati",
+                    "courtFavor": "Favore di corte",
+                    "expandLair": "Espandere il covo",
+                    "gatherHorde": "Radunare l'orda",
+                    "sackSettlement": "Saccheggiare un insediamento"
                 }
             }
         },

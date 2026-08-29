@@ -2661,6 +2661,42 @@
                     "courtAlly": "Względy sojuszniczej frakcji",
                     "courtPcs": "Posłowie wysłani do królestwa",
                     "other": "Ruch agendy frakcji"
+                },
+                "title": "Agendy frakcji",
+                "edit": "Edytuj agendę",
+                "clear": "Wyczyść agendę",
+                "assign": "Przypisz agendę",
+                "clearConfirm": "Wyczyścić agendę tej frakcji? Pozostanie bezczynna do przypisania nowej.",
+                "editTitle": "Agenda — {name}",
+                "goalLabel": "Cel",
+                "goalTitleLabel": "Własny tytuł celu",
+                "goalTitleHelp": "Puste: użyta zostanie standardowa nazwa.",
+                "segmentsLabel": "Segmenty zegara",
+                "progressLabel": "Postęp",
+                "archetypeLabel": "Archetyp",
+                "archetype": {
+                    "aggressive": "Agresywny",
+                    "mercantile": "Kupiecki",
+                    "fey": "Wróżkowy",
+                    "political": "Polityczny",
+                    "monster": "Potworny"
+                },
+                "goal": {
+                    "conquerNeighbor": "Podbić sąsiada",
+                    "buildArmy": "Zbudować armię",
+                    "raidTradeRoutes": "Najeżdżać szlaki handlowe",
+                    "secureTradeRoute": "Zabezpieczyć szlak handlowy",
+                    "monopolyResource": "Zmonopolizować surowiec",
+                    "allyMajorPower": "Sojusz z mocarstwem",
+                    "claimGrove": "Zająć gaj",
+                    "bindMortal": "Związać śmiertelnika",
+                    "veilTerritory": "Zasłonić terytorium",
+                    "marriageAlliance": "Sojusz małżeński",
+                    "treatyNetwork": "Sieć traktatów",
+                    "courtFavor": "Względy dworu",
+                    "expandLair": "Rozbudować leże",
+                    "gatherHorde": "Zebrać hordę",
+                    "sackSettlement": "Splądrować osadę"
                 }
             }
         },

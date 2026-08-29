@@ -1,8 +1,10 @@
 package at.posselt.pfrpg2e.kingdom.sheet
 
+import at.posselt.pfrpg2e.kingdom.data.RawFactionAgenda
 import at.posselt.pfrpg2e.kingdom.data.RawResearchProject
 import at.posselt.pfrpg2e.kingdom.getSubsystemStore
 import at.posselt.pfrpg2e.kingdom.updateSubsystemStore
+import at.posselt.pfrpg2e.kingdom.dialogs.ModifyFactionAgenda
 import at.posselt.pfrpg2e.kingdom.dialogs.openSubsystemTrackers
 import at.posselt.pfrpg2e.kingdom.postHoldingRepairOffer
 import at.posselt.pfrpg2e.kingdom.conditionEnum
@@ -1949,6 +1951,41 @@ class KingdomSheet(
                         postChatMessage(content, speaker = actor, isHtml = true)
                     }
                 }
+            }
+
+            "edit-faction-agenda" -> {
+                if (!game.user.isGM) return
+                val index = target.dataset["index"]?.toInt() ?: 0
+                val group = getKingdom().groups.getOrNull(index) ?: return
+                ModifyFactionAgenda(factionName = group.name, initial = group.agenda) { goalId, goalTitle, segments, progress, archetype ->
+                    buildPromise {
+                        val kingdom = getKingdom()
+                        val g = kingdom.groups.getOrNull(index) ?: return@buildPromise
+                        // engine-owned bookkeeping survives the edit: only the GM-shaped
+                        // fields come from the dialog
+                        g.agenda = RawFactionAgenda(
+                            goalId = goalId,
+                            goalTitle = goalTitle,
+                            progress = progress,
+                            segments = segments,
+                            archetype = archetype,
+                            moveCooldowns = g.agenda?.moveCooldowns ?: js.objects.recordOf(),
+                            lastAdvancedTurn = g.agenda?.lastAdvancedTurn,
+                            targetFaction = g.agenda?.targetFaction,
+                        )
+                        actor.setKingdom(kingdom)
+                    }
+                }.launch()
+            }
+
+            "clear-faction-agenda" -> buildPromise {
+                if (!game.user.isGM) return@buildPromise
+                val index = target.dataset["index"]?.toInt() ?: 0
+                if (!at.posselt.pfrpg2e.app.confirm(t("kingdom.factionAgenda.clearConfirm"))) return@buildPromise
+                val kingdom = getKingdom()
+                val g = kingdom.groups.getOrNull(index) ?: return@buildPromise
+                g.agenda = null
+                actor.setKingdom(kingdom)
             }
 
             "adjust-standing" -> {
@@ -4032,7 +4069,7 @@ class KingdomSheet(
                 abilityScores = abilityScores,
                 skillRanks = kingdomSkillRanks,
             ),
-            groups = kingdom.groups.toContext(),
+            groups = kingdom.groups.toContext(isGM = game.user.isGM),
             rivalRealms = buildRivalRealmsContext(
                 rivals = kingdom.rivalRealms,
                 groups = kingdom.groups,

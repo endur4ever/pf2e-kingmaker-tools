@@ -124,6 +124,38 @@ fun advanceFactionAgendasOnGroups(
     return FactionAgendaTickOutcome(groups = updated, moves = result.moves)
 }
 
+/** Goal label: the GM's free-text override wins; otherwise a literal-key when over the pools. */
+fun localizeAgendaGoal(goalId: String, goalTitle: String): String {
+    if (goalTitle.isNotBlank()) return goalTitle
+    return when (goalId) {
+        "conquer-neighbor" -> t("kingdom.factionAgenda.goal.conquerNeighbor")
+        "build-army" -> t("kingdom.factionAgenda.goal.buildArmy")
+        "raid-trade-routes" -> t("kingdom.factionAgenda.goal.raidTradeRoutes")
+        "secure-trade-route" -> t("kingdom.factionAgenda.goal.secureTradeRoute")
+        "monopoly-resource" -> t("kingdom.factionAgenda.goal.monopolyResource")
+        "ally-major-power" -> t("kingdom.factionAgenda.goal.allyMajorPower")
+        "claim-grove" -> t("kingdom.factionAgenda.goal.claimGrove")
+        "bind-mortal" -> t("kingdom.factionAgenda.goal.bindMortal")
+        "veil-territory" -> t("kingdom.factionAgenda.goal.veilTerritory")
+        "marriage-alliance" -> t("kingdom.factionAgenda.goal.marriageAlliance")
+        "treaty-network" -> t("kingdom.factionAgenda.goal.treatyNetwork")
+        "court-favor" -> t("kingdom.factionAgenda.goal.courtFavor")
+        "expand-lair" -> t("kingdom.factionAgenda.goal.expandLair")
+        "gather-horde" -> t("kingdom.factionAgenda.goal.gatherHorde")
+        "sack-settlement" -> t("kingdom.factionAgenda.goal.sackSettlement")
+        else -> goalId
+    }
+}
+
+fun localizeAgendaArchetype(archetype: String): String = when (archetype) {
+    "aggressive" -> t("kingdom.factionAgenda.archetype.aggressive")
+    "mercantile" -> t("kingdom.factionAgenda.archetype.mercantile")
+    "fey" -> t("kingdom.factionAgenda.archetype.fey")
+    "political" -> t("kingdom.factionAgenda.archetype.political")
+    "monster" -> t("kingdom.factionAgenda.archetype.monster")
+    else -> archetype
+}
+
 /** Literal keys only -- composed "gazette.$id" keys would be invisible to the i18n scan. */
 fun localizeAgendaMoveLine(move: AgendaFactionMove): String {
     val data = recordOf<String, Any?>("faction" to move.factionName)

@@ -2661,6 +2661,42 @@
                     "courtAlly": "Внимание союзной фракции",
                     "courtPcs": "Послы, отправленные в королевство",
                     "other": "Ход повестки фракции"
+                },
+                "title": "Повестки фракций",
+                "edit": "Изменить повестку",
+                "clear": "Очистить повестку",
+                "assign": "Назначить повестку",
+                "clearConfirm": "Очистить повестку этой фракции? Она будет бездействовать, пока не получит новую.",
+                "editTitle": "Повестка — {name}",
+                "goalLabel": "Цель",
+                "goalTitleLabel": "Своё название цели",
+                "goalTitleHelp": "Пусто — используется стандартное название.",
+                "segmentsLabel": "Сегменты часов",
+                "progressLabel": "Прогресс",
+                "archetypeLabel": "Архетип",
+                "archetype": {
+                    "aggressive": "Агрессивный",
+                    "mercantile": "Торговый",
+                    "fey": "Фейский",
+                    "political": "Политический",
+                    "monster": "Чудовищный"
+                },
+                "goal": {
+                    "conquerNeighbor": "Завоевать соседа",
+                    "buildArmy": "Собрать армию",
+                    "raidTradeRoutes": "Грабить торговые пути",
+                    "secureTradeRoute": "Защитить торговый путь",
+                    "monopolyResource": "Монополизировать ресурс",
+                    "allyMajorPower": "Союз с великой державой",
+                    "claimGrove": "Забрать рощу",
+                    "bindMortal": "Связать смертного",
+                    "veilTerritory": "Скрыть территорию",
+                    "marriageAlliance": "Брачный союз",
+                    "treatyNetwork": "Сеть договоров",
+                    "courtFavor": "Милость двора",
+                    "expandLair": "Расширить логово",
+                    "gatherHorde": "Собрать орду",
+                    "sackSettlement": "Разграбить поселение"
                 }
             }
         },

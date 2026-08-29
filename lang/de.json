@@ -2661,6 +2661,42 @@
                     "courtAlly": "Von einer verbündeten Fraktion umworben",
                     "courtPcs": "Gesandte ins Königreich geschickt",
                     "other": "Fraktions-Agenda-Zug"
+                },
+                "title": "Fraktions-Agenden",
+                "edit": "Agenda bearbeiten",
+                "clear": "Agenda löschen",
+                "assign": "Agenda zuweisen",
+                "clearConfirm": "Agenda dieser Fraktion löschen? Die Fraktion bleibt untätig, bis eine neue zugewiesen wird.",
+                "editTitle": "Agenda — {name}",
+                "goalLabel": "Ziel",
+                "goalTitleLabel": "Eigener Zieltitel",
+                "goalTitleHelp": "Leer verwendet den Standardnamen.",
+                "segmentsLabel": "Uhr-Segmente",
+                "progressLabel": "Fortschritt",
+                "archetypeLabel": "Archetyp",
+                "archetype": {
+                    "aggressive": "Aggressiv",
+                    "mercantile": "Merkantil",
+                    "fey": "Feenhaft",
+                    "political": "Politisch",
+                    "monster": "Monströs"
+                },
+                "goal": {
+                    "conquerNeighbor": "Nachbarn erobern",
+                    "buildArmy": "Armee aufbauen",
+                    "raidTradeRoutes": "Handelsrouten überfallen",
+                    "secureTradeRoute": "Handelsroute sichern",
+                    "monopolyResource": "Ressource monopolisieren",
+                    "allyMajorPower": "Bündnis mit einer Großmacht",
+                    "claimGrove": "Den Hain beanspruchen",
+                    "bindMortal": "Einen Sterblichen binden",
+                    "veilTerritory": "Das Gebiet verschleiern",
+                    "marriageAlliance": "Heiratsallianz",
+                    "treatyNetwork": "Vertragsnetz",
+                    "courtFavor": "Gunst am Hofe",
+                    "expandLair": "Das Lager erweitern",
+                    "gatherHorde": "Die Horde sammeln",
+                    "sackSettlement": "Eine Siedlung plündern"
                 }
             }
         },

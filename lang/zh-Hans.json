@@ -2661,6 +2661,42 @@
                     "courtAlly": "受盟友势力拉拢",
                     "courtPcs": "向王国派出使节",
                     "other": "势力议程行动"
+                },
+                "title": "势力议程",
+                "edit": "编辑议程",
+                "clear": "清除议程",
+                "assign": "分配议程",
+                "clearConfirm": "清除该势力的议程？在分配新议程前它将保持闲置。",
+                "editTitle": "议程 — {name}",
+                "goalLabel": "目标",
+                "goalTitleLabel": "自定义目标名称",
+                "goalTitleHelp": "留空则使用标准名称。",
+                "segmentsLabel": "时钟刻度",
+                "progressLabel": "进度",
+                "archetypeLabel": "原型",
+                "archetype": {
+                    "aggressive": "侵略型",
+                    "mercantile": "商业型",
+                    "fey": "妖精型",
+                    "political": "政治型",
+                    "monster": "怪物型"
+                },
+                "goal": {
+                    "conquerNeighbor": "征服邻邦",
+                    "buildArmy": "建立军队",
+                    "raidTradeRoutes": "劫掠商路",
+                    "secureTradeRoute": "保护商路",
+                    "monopolyResource": "垄断资源",
+                    "allyMajorPower": "与大国结盟",
+                    "claimGrove": "夺取树林",
+                    "bindMortal": "束缚凡人",
+                    "veilTerritory": "遮蔽领地",
+                    "marriageAlliance": "联姻结盟",
+                    "treatyNetwork": "条约网络",
+                    "courtFavor": "宫廷恩宠",
+                    "expandLair": "扩建巢穴",
+                    "gatherHorde": "集结部落",
+                    "sackSettlement": "洗劫聚落"
                 }
             }
         },

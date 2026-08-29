@@ -2783,6 +2783,42 @@
                     "courtAlly": "Courted by an allied faction",
                     "courtPcs": "Sent envoys to the kingdom",
                     "other": "Faction agenda move"
+                },
+                "title": "Faction Agendas",
+                "edit": "Edit agenda",
+                "clear": "Clear agenda",
+                "assign": "Assign agenda",
+                "clearConfirm": "Clear this faction's agenda? The faction goes idle until a new one is assigned.",
+                "editTitle": "Agenda — {name}",
+                "goalLabel": "Goal",
+                "goalTitleLabel": "Custom goal title",
+                "goalTitleHelp": "Blank uses the standard goal name.",
+                "segmentsLabel": "Clock segments",
+                "progressLabel": "Progress",
+                "archetypeLabel": "Archetype",
+                "archetype": {
+                    "aggressive": "Aggressive",
+                    "mercantile": "Mercantile",
+                    "fey": "Fey",
+                    "political": "Political",
+                    "monster": "Monster"
+                },
+                "goal": {
+                    "conquerNeighbor": "Conquer Neighbor",
+                    "buildArmy": "Build Army",
+                    "raidTradeRoutes": "Raid Trade Routes",
+                    "secureTradeRoute": "Secure Trade Route",
+                    "monopolyResource": "Monopolize a Resource",
+                    "allyMajorPower": "Ally with a Major Power",
+                    "claimGrove": "Claim the Grove",
+                    "bindMortal": "Bind a Mortal",
+                    "veilTerritory": "Veil the Territory",
+                    "marriageAlliance": "Marriage Alliance",
+                    "treatyNetwork": "Treaty Network",
+                    "courtFavor": "Court Favor",
+                    "expandLair": "Expand the Lair",
+                    "gatherHorde": "Gather the Horde",
+                    "sackSettlement": "Sack a Settlement"
                 }
             }
         },
