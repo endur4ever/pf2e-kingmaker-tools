@@ -5,7 +5,8 @@ import at.posselt.pfrpg2e.data.kingdom.extractRegionData
 import at.posselt.pfrpg2e.kingdom.deeds.DeedCatalogEntry
 import at.posselt.pfrpg2e.kingdom.deeds.DeedHistoryPoint
 import at.posselt.pfrpg2e.kingdom.data.RawGroup
-import at.posselt.pfrpg2e.data.kingdom.settlements.settlementSizeTypeForLevel
+import at.posselt.pfrpg2e.data.kingdom.Relations
+import at.posselt.pfrpg2e.data.kingdom.settlements.SettlementSizeType
 import at.posselt.pfrpg2e.kingdom.deeds.DeedInputs
 import at.posselt.pfrpg2e.kingdom.deeds.undetectedDeeds
 import at.posselt.pfrpg2e.data.kingdom.getRoadHexKeys
@@ -28,7 +29,17 @@ import js.objects.Object
  * through the same seams the travel-cost path uses; the connectivity and claim logic itself is the
  * pure, unit-tested [roadConnectedToCapital] / [regionFullyClaimed].
  */
-fun detectFiredDeeds(kingdom: KingdomData, currentTurn: Int): List<String> {
+fun detectFiredDeeds(
+    kingdom: KingdomData,
+    currentTurn: Int,
+    /** Realm size from getRealmData: kingdom.size is the MANUAL-mode field and stays 1 otherwise. */
+    realmSize: Int,
+    /** Parsed settlement size bands. RawSettlement.level is written once as 1 and never updated;
+     *  the live size is derived from occupied blocks, so only the caller can supply this. */
+    settlementSizes: List<SettlementSizeType>,
+    /** Victories counted BEFORE the tick, which rewrites every finished battle to "archived". */
+    armiesWon: Int,
+): List<String> {
     // Level-triggered detectors re-fire forever on standing state, so an offer is suppressed once
     // ANSWERED either way -- awarded (completed) or refused (offerDismissed) -- never merely once
     // posted. Suppressing on "completed" alone re-posts the identical card to a GM who declined.
@@ -36,8 +47,11 @@ fun detectFiredDeeds(kingdom: KingdomData, currentTurn: Int): List<String> {
         .filter { milestoneOfferAnswered(it.completed, it.offerDismissed) }
         .map { it.id }
         .toSet()
+    // A milestone the GM switched off is not part of this campaign, so it must not be offered.
+    // Absent choices count as ON: a kingdom predating a catalog entry has no row for it yet.
+    val disabledIds = kingdom.milestones.filter { !it.enabled }.map { it.id }.toSet()
     val catalog = kingdom.getMilestones()
-        .filter { it.detectionId != null }
+        .filter { it.detectionId != null && it.id !in disabledIds }
         .map { DeedCatalogEntry(id = it.id, detectionId = it.detectionId) }
     if (catalog.isEmpty() || catalog.all { it.id in answeredIds }) return emptyList()
 
@@ -56,9 +70,11 @@ fun detectFiredDeeds(kingdom: KingdomData, currentTurn: Int): List<String> {
             val neighbors: (String) -> Set<String> = { provider.getAdjacentHexKeys(it).toSet() }
             val settlementHexes = Object.values(regionData.settlementHexKeys).unsafeCast<Array<String>>()
             // all-settlements-roaded needs the COUNT, so this can no longer short-circuit at the
-            // first hit the way the road-to-capital-only version did
+            // first hit the way the road-to-capital-only version did. The capital counts as
+            // connected to itself -- excluding it made "every settlement is linked" compare a
+            // capital-less numerator against a capital-ful total, so it could never be equal.
             settlementHexes.count { hex ->
-                hex != capital && roadConnectedToCapital(hex, capital, roadSet, neighbors)
+                hex == capital || roadConnectedToCapital(hex, capital, roadSet, neighbors)
             }
         }
     } else 0
@@ -78,17 +94,13 @@ fun detectFiredDeeds(kingdom: KingdomData, currentTurn: Int): List<String> {
                 (it.ruinDecay ?: 0) + (it.ruinStrife ?: 0),
         )
     }
-    val settlementSizes = kingdom.settlements
-        .unsafeCast<Array<at.posselt.pfrpg2e.kingdom.structures.RawSettlement>?>()
-        ?.map { settlementSizeTypeForLevel(it.level) } ?: emptyList()
-
     return undetectedDeeds(
         catalog = catalog,
         answeredIds = answeredIds,
         inputs = DeedInputs(
             turn = currentTurn,
             level = kingdom.level,
-            size = kingdom.size,
+            size = realmSize,
             unrest = kingdom.unrest,
             fame = kingdom.fame.now,
             fameMax = kingdom.settings.maximumFamePoints,
@@ -97,13 +109,12 @@ fun detectFiredDeeds(kingdom: KingdomData, currentTurn: Int): List<String> {
             regionsFullyClaimed = regionsFullyClaimed,
             settlementsRoadedToCapital = settlementsRoadedToCapital,
             settlementSizes = settlementSizes,
-            // battles are archived in place (status flips, the row stays), so a finished
-            // victory keeps counting for the rest of the campaign -- which is what "won their
-            // first battle" means
-            armiesWon = (kingdom.activeBattles ?: emptyArray()).count { it.status == "victory" },
+            armiesWon = armiesWon,
             consecutiveSafeCaravanTurns = consecutiveSafeCaravanTurns(kingdom, currentTurn),
+            // the persisted value is the enum's camelCase form ("tradeAgreement"); the
+            // kebab-case spelling in RawGroup's comment is prose, not data
             tradeAgreements = (kingdom.groups.unsafeCast<Array<RawGroup>?>() ?: emptyArray())
-                .count { it.relations == "trade-agreement" },
+                .count { it.relations == Relations.TRADE_AGREEMENT.value },
             history = history,
         ),
     )

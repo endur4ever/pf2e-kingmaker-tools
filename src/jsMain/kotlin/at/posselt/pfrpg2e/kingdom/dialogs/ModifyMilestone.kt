@@ -130,6 +130,9 @@ class ModifyMilestone(
             completed = current.completed,
             enabledOnFirstRun = current.enabledOnFirstRun,
             isCultMilestone = current.isCultMilestone,
+            // a homebrew override of a shipped deed must keep its detector wiring; the form
+            // does not render this field, so rebuilding without it silently unwires the deed
+            detectionId = current.detectionId,
         )
         undefined
     }

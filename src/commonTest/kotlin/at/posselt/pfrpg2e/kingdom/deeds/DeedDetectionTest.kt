@@ -183,4 +183,19 @@ class DeedDetectionTest {
         // and nothing extra: a detector with no catalog row is code nothing can reach
         assertEquals(starter.toSet(), deedDetectors.keys)
     }
+
+    @Test
+    fun everySettlementRoadedCountsTheCapitalItself() {
+        // the capital is trivially connected to itself; a numerator that excludes it can never
+        // equal a total that includes it, which made this deed unreachable
+        val three = List(3) { SettlementSizeType.VILLAGE }
+        assertTrue(fires("all-settlements-roaded", DeedInputs(
+            settlementSizes = three,
+            settlementsRoadedToCapital = 3,
+        )))
+        assertFalse(fires("all-settlements-roaded", DeedInputs(
+            settlementSizes = three,
+            settlementsRoadedToCapital = 2,
+        )))
+    }
 }

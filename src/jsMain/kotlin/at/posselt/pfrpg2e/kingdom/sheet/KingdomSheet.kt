@@ -4252,7 +4252,7 @@ class KingdomSheet(
                 eligibleVoters = runCatching { game.users.filter { !it.isGM }.size }.getOrDefault(0),
                 voterNameOf = { userId -> runCatching { game.users.get(userId)?.name }.getOrNull() },
             ),
-            chronicle = buildChronicleRows(kingdom),
+            chronicle = buildChronicleRows(kingdom, isGM = isGM),
             sessionPrepContext = buildSessionPrepContext(
                 forecast = buildForecastPanelContext(buildForecast(game, actor, horizonDays = forecastHorizonDays)),
                 view = buildSessionPrepView(

@@ -25,15 +25,18 @@ external interface DeedChronicleRowContext {
 }
 
 /**
- * Completed milestones, newest first. Rows with no [awardedOnTurn] -- milestones ticked by hand
+ * Completed milestones, newest first, cult beats withheld from players. Rows with no [awardedOnTurn] -- milestones ticked by hand
  * before the Chronicle existed -- sort last and render an em dash rather than inventing a turn.
  */
-fun buildChronicleRows(kingdom: KingdomData): Array<DeedChronicleRowContext> {
+fun buildChronicleRows(kingdom: KingdomData, isGM: Boolean): Array<DeedChronicleRowContext> {
     val catalog = kingdom.getMilestones().associateBy { it.id }
     return kingdom.milestones
         .filter { it.completed }
         .mapNotNull { choice ->
             val milestone = catalog[choice.id] ?: return@mapNotNull null
+            // cult milestones are GM-only everywhere else (see MilestoneContext); a read-only
+            // Chronicle that lists them would leak the campaign's cult beats to the table
+            if (milestone.isCultMilestone && !isGM) return@mapNotNull null
             DeedChronicleRowContext(
                 turn = choice.awardedOnTurn,
                 turnLabel = choice.awardedOnTurn

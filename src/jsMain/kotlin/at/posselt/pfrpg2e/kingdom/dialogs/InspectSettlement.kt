@@ -235,6 +235,9 @@ class InspectSettlement(
         terrain = settlement.terrain,
         hexKey = settlement.hexKey,
         populationRoster = settlement.populationRoster ?: RawPopulationRoster(),
+        // siege state the dialog never renders: rebuilding without it un-razes every structure
+        // a siege destroyed the moment the GM opens and saves this dialog
+        destroyedStructureIds = settlement.destroyedStructureIds,
     )
 
     init {

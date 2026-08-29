@@ -383,6 +383,11 @@ private suspend fun performEndTurnLocked(game: Game, actor: KingdomActor): TickR
         .filter { it.status == BattleStatus.DEFEAT.value }
         .map { it.name }
 
+    // Same trap, mirrored: the tick rewrites every finished battle to "archived", so a victory
+    // read after it can never match and the first-battle-won deed could never fire.
+    val preTickBattleVictories = (kingdom.activeBattles ?: emptyArray())
+        .count { it.status == BattleStatus.VICTORY.value }
+
     val preTickThreats = kingdom.warThreats?.toList() ?: emptyList()
     val tickResult = runKingdomTurnTick(kingdom, storage, currentTurn, resolveHoldingOwnerLevels(kingdom))
     kingdom.supernaturalSolutions = tickResult.supernaturalSolutions
@@ -993,7 +998,18 @@ private suspend fun performEndTurnLocked(game: Game, actor: KingdomActor): TickR
     // Auto-detected deeds (deeds-chronicle plan): read-only detection over standing state, one
     // whispered digest, never an auto-award. Detection runs AFTER the persist so it sees the turn
     // this End Turn just wrote -- history-based deeds would otherwise miss their own last turn.
-    postDeedsDigest(game, actor, kingdom, detectFiredDeeds(kingdom, currentTurn))
+    postDeedsDigest(
+        game, actor, kingdom,
+        detectFiredDeeds(
+            kingdom = kingdom,
+            currentTurn = currentTurn,
+            // realm.size is the authoritative size; kingdom.size only tracks it in manual mode
+            realmSize = realm.size,
+            // parsed, not RawSettlement.level: that field is written once as 1 and never updated
+            settlementSizes = kingdom.getAllSettlements(game).allSettlements.map { it.size.type },
+            armiesWon = preTickBattleVictories,
+        ),
+    )
 
     // Post any pacing advisories that fired this turn to chat
     firedPacingAlerts.forEach { alert -> postPacingAlertChat(alert) }
