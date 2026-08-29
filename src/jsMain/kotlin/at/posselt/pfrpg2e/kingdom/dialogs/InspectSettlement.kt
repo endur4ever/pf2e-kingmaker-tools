@@ -289,7 +289,12 @@ class InspectSettlement(
                 if (parsed != null) {
                     val grown = parsed.growPopulation()
                     if (grown.npcs.size > (current.populationRoster?.npcs?.size ?: 0)) {
-                        val updatedRoster = grown.toRaw()
+                        // the model round trip has no memory fields, so carry them across or
+                        // the top-up erases every tracked resident's ledger
+                        val updatedRoster = at.posselt.pfrpg2e.kingdom.mergeNpcMemoryFields(
+                            grown.toRaw(),
+                            current.populationRoster,
+                        )
                         current.populationRoster = updatedRoster
                         onRosterChange(updatedRoster)
                         render()
