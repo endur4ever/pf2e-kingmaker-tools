@@ -125,6 +125,7 @@ import com.foundryvtt.core.grid.GridOffset2D
 import at.posselt.pfrpg2e.kingdom.data.RawFactionStandingEntry
 import at.posselt.pfrpg2e.kingdom.data.RawGroup
 import at.posselt.pfrpg2e.kingdom.mergeSubmittedGroups
+import at.posselt.pfrpg2e.kingdom.mergeSubmittedMilestones
 import at.posselt.pfrpg2e.kingdom.data.endTurn
 import at.posselt.pfrpg2e.kingdom.data.getChosenCharter
 import at.posselt.pfrpg2e.kingdom.data.getChosenFeats
@@ -4660,7 +4661,9 @@ class KingdomSheet(
             ).toSet()
             kingdom.skillRanks = value.skillRanks
             kingdom.abilityScores = value.abilityScores
-            kingdom.milestones = value.milestones
+            // the sheet renders id/completed/enabled only, so a wholesale assign drops
+            // offerDismissed (re-resurrecting every refused offer) and awardedOnTurn
+            kingdom.milestones = mergeSubmittedMilestones(value.milestones, kingdom.milestones)
             kingdom.notes = value.notes
             kingdom.initialProficiencies = value.initialProficiencies
 
