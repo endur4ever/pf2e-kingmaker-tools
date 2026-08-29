@@ -1,0 +1,10 @@
+{
+  "id": "court-pcs",
+  "label": "kingdom.factionAgenda.move.courtPCs",
+  "weight": 1,
+  "cooldownTurns": 0,
+  "validTargets": "pcs",
+  "effect": "standing-delta",
+  "effectMagnitude": 5,
+  "requires": null
+}

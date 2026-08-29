@@ -1,0 +1,10 @@
+{
+  "id": "sabotage-rival",
+  "label": "kingdom.factionAgenda.move.sabotageRival",
+  "weight": 1,
+  "cooldownTurns": 3,
+  "validTargets": "rival",
+  "effect": "standing-delta",
+  "effectMagnitude": -10,
+  "requires": "not-at-war"
+}

@@ -1,0 +1,5 @@
+{
+  "id": "monster",
+  "weights": { "expand": 35, "sabotage-rival": 20, "court-ally": 10, "court-pcs": 10, "raise-army": 25 },
+  "goals": ["expand-lair", "gather-horde", "sack-settlement"]
+}

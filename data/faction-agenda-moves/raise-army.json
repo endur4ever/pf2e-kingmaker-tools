@@ -1,0 +1,10 @@
+{
+  "id": "raise-army",
+  "label": "kingdom.factionAgenda.move.raiseArmy",
+  "weight": 1,
+  "cooldownTurns": 4,
+  "validTargets": "self",
+  "effect": "war-threat",
+  "effectMagnitude": 0,
+  "requires": "has-hex"
+}

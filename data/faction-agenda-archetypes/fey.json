@@ -1,0 +1,5 @@
+{
+  "id": "fey",
+  "weights": { "expand": 15, "sabotage-rival": 20, "court-ally": 25, "court-pcs": 25, "raise-army": 15 },
+  "goals": ["claim-grove", "bind-mortal", "veil-territory"]
+}

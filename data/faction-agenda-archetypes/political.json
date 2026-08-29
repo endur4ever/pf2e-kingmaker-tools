@@ -1,0 +1,5 @@
+{
+  "id": "political",
+  "weights": { "expand": 15, "sabotage-rival": 20, "court-ally": 35, "court-pcs": 25, "raise-army": 5 },
+  "goals": ["marriage-alliance", "treaty-network", "court-favor"]
+}

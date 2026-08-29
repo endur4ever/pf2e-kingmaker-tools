@@ -1,6 +1,7 @@
 package at.posselt.pfrpg2e.migrations
 
 import at.posselt.pfrpg2e.camping.CampingData
+import at.posselt.pfrpg2e.migrations.migrations.Migration72
 import at.posselt.pfrpg2e.migrations.migrations.Migration25
 import at.posselt.pfrpg2e.migrations.migrations.Migration28
 import at.posselt.pfrpg2e.migrations.migrations.Migration29
@@ -399,5 +400,50 @@ class MigrationBackfillsTest {
         val c = camping { it.travelJournal = js("[{worldDate:'d1',kind:'rest'}]") }
         Migration60().migrateCamping(game, c)
         assertEquals(1, size(c.travelJournal))
+    }
+
+    // ── Migration72: faction agendas on kingdom groups ────────────────────────────────────────
+    @Test
+    fun migration72BackfillsAgendasDeterministically() = runTest {
+        val k = kingdom {
+            it.groups = arrayOf(
+                unsafeJso<dynamic> { name = "Pitax" },
+                unsafeJso<dynamic> { name = "Mivon" },
+            )
+        }
+        Migration72().migrateKingdom(game, k.unsafeCast<at.posselt.pfrpg2e.kingdom.KingdomData>())
+        val groups = k.groups.unsafeCast<Array<dynamic>>()
+        val agenda = groups[0].agenda
+        assertEquals(0, agenda.progress.unsafeCast<Int>())
+        assertEquals(6, agenda.segments.unsafeCast<Int>())
+        val archetype = agenda.archetype.unsafeCast<String>()
+        assertEquals(at.posselt.pfrpg2e.data.kingdom.pickArchetypeForFaction("Pitax"), archetype)
+        // the goal comes from THAT archetype's pool
+        val pool = at.posselt.pfrpg2e.kingdom.factionAgendaArchetypesById()[archetype]!!.goals.toList()
+        assertEquals(true, agenda.goalId.unsafeCast<String>() in pool)
+        assertEquals("", agenda.goalTitle.unsafeCast<String>())
+    }
+
+    @Test
+    fun migration72PreservesExistingAgendas() = runTest {
+        val k = kingdom {
+            it.groups = arrayOf(
+                unsafeJso<dynamic> {
+                    name = "Pitax"
+                    agenda = unsafeJso<dynamic> { goalId = "gm-custom"; progress = 4 }
+                },
+            )
+        }
+        Migration72().migrateKingdom(game, k.unsafeCast<at.posselt.pfrpg2e.kingdom.KingdomData>())
+        val agenda = k.groups.unsafeCast<Array<dynamic>>()[0].agenda
+        assertEquals("gm-custom", agenda.goalId.unsafeCast<String>())
+        assertEquals(4, agenda.progress.unsafeCast<Int>())
+    }
+
+    @Test
+    fun migration72SkipsKingdomsWithoutGroups() = runTest {
+        val k = kingdom()
+        Migration72().migrateKingdom(game, k.unsafeCast<at.posselt.pfrpg2e.kingdom.KingdomData>())
+        assertEquals(null, k.groups)
     }
 }

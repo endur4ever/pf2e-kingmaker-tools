@@ -20,4 +20,7 @@ external interface RawGroup {
 
     // Realm-map hex this faction's trade hub sits on, for caravan routing (null => no location set).
     var hexKey: String?
+
+    // Faction agenda engine (nullable for back-compat): null = idle, no agenda yet.
+    var agenda: RawFactionAgenda?
 }

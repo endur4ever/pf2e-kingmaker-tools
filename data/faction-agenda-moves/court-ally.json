@@ -1,0 +1,10 @@
+{
+  "id": "court-ally",
+  "label": "kingdom.factionAgenda.move.courtAlly",
+  "weight": 1,
+  "cooldownTurns": 2,
+  "validTargets": "ally",
+  "effect": "standing-delta",
+  "effectMagnitude": 8,
+  "requires": null
+}

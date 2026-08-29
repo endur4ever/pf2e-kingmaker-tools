@@ -1,0 +1,10 @@
+{
+  "id": "expand",
+  "label": "kingdom.factionAgenda.move.expand",
+  "weight": 1,
+  "cooldownTurns": 2,
+  "validTargets": "self",
+  "effect": "clock",
+  "effectMagnitude": 1,
+  "requires": null
+}

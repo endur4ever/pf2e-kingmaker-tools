@@ -1,0 +1,5 @@
+{
+  "id": "aggressive",
+  "weights": { "expand": 30, "sabotage-rival": 25, "raise-army": 20, "court-ally": 15, "court-pcs": 10 },
+  "goals": ["conquer-neighbor", "build-army", "raid-trade-routes"]
+}

@@ -1,0 +1,5 @@
+{
+  "id": "mercantile",
+  "weights": { "expand": 20, "sabotage-rival": 15, "court-ally": 30, "court-pcs": 25, "raise-army": 10 },
+  "goals": ["secure-trade-route", "monopoly-resource", "ally-major-power"]
+}
