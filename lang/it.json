@@ -2750,6 +2750,29 @@
                 },
                 "milestoneEarned": {
                     "entry": "Il regno ha raggiunto una pietra miliare."
+                },
+                "track": "Traccia i ricordi",
+                "capRefused": "Il tracciamento dei ricordi è pieno ({list}). Rimuovi prima qualcuno.",
+                "attitudeLabel": "Atteggiamento",
+                "logTitle": "Registro dei ricordi",
+                "band": {
+                    "hostile": "Ostile",
+                    "unfriendly": "Scostante",
+                    "indifferent": "Indifferente",
+                    "friendly": "Amichevole",
+                    "helpful": "Disponibile"
+                },
+                "offer": {
+                    "title": "Un'opinione è cambiata",
+                    "gmActions": "Azioni del GM",
+                    "body": "{name} ({occupation}, {settlement}) ora è {band} ({score}).",
+                    "spawnEncounter": "Tira un incontro",
+                    "createQuest": "Crea missione",
+                    "writeNote": "Scrivi nota",
+                    "noteLine": "{name} ({settlement}) è diventato {band}.",
+                    "noted": "Annotato nelle note del GM.",
+                    "alreadyNoted": "Questo cambiamento è già nelle note del GM.",
+                    "noCampingActor": "Nessuna scheda accampamento con cui tirare un incontro."
                 }
             }
         },

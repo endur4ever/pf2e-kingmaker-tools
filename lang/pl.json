@@ -2750,6 +2750,29 @@
                 },
                 "milestoneEarned": {
                     "entry": "Królestwo osiągnęło kamień milowy."
+                },
+                "track": "Śledź pamięć",
+                "capRefused": "Śledzenie pamięci jest pełne ({list}). Najpierw kogoś usuń.",
+                "attitudeLabel": "Nastawienie",
+                "logTitle": "Dziennik wspomnień",
+                "band": {
+                    "hostile": "Wrogi",
+                    "unfriendly": "Nieprzyjazny",
+                    "indifferent": "Obojętny",
+                    "friendly": "Przyjazny",
+                    "helpful": "Pomocny"
+                },
+                "offer": {
+                    "title": "Czyjaś opinia się zmieniła",
+                    "gmActions": "Akcje MG",
+                    "body": "{name} ({occupation}, {settlement}) jest teraz {band} ({score}).",
+                    "spawnEncounter": "Rzuć na spotkanie",
+                    "createQuest": "Utwórz zadanie",
+                    "writeNote": "Zapisz notatkę",
+                    "noteLine": "{name} ({settlement}) stał się {band}.",
+                    "noted": "Zapisano w notatkach MG.",
+                    "alreadyNoted": "Ta zmiana jest już w notatkach MG.",
+                    "noCampingActor": "Brak karty obozu do rzutu na spotkanie."
                 }
             }
         },

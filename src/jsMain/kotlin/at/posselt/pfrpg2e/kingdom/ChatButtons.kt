@@ -99,6 +99,8 @@ import at.posselt.pfrpg2e.kingdom.mapdynamism.hexDisplayLabel
 import at.posselt.pfrpg2e.kingdom.mapdynamism.kingmakerNeighbors
 import at.posselt.pfrpg2e.kingdom.mapdynamism.nextThreatHex
 import at.posselt.pfrpg2e.camping.downtimeRollPrompt
+import at.posselt.pfrpg2e.camping.rollRandomEncounter
+import at.posselt.pfrpg2e.camping.getCampingActors
 import at.posselt.pfrpg2e.kingdom.downtime.DowntimeKind
 import at.posselt.pfrpg2e.kingdom.pressure.confirmPressureFiring
 import at.posselt.pfrpg2e.kingdom.pressure.dismissPressureFiring
@@ -255,6 +257,53 @@ private val buttons = listOf(
                     actor.setKingdom(kingdom)
                 }
             }
+        }
+    },
+    ChatButton("km-offer-npc-encounter") { game, actor, event, button ->
+        // NPC attitude crossing (npc-memory plan section 7): rolls a random encounter through
+        // the existing camping pipeline; the card stays for the other options.
+        if (!game.user.isGM) return@ChatButton
+        val campingActor = game.getCampingActors().firstOrNull()
+        if (campingActor == null) {
+            ui.notifications.warn(t("kingdom.npcMemory.offer.noCampingActor"))
+            return@ChatButton
+        }
+        rollRandomEncounter(game, campingActor, false)
+    },
+    ChatButton("km-offer-npc-quest") { game, actor, event, button ->
+        if (!game.user.isGM) return@ChatButton
+        val npcName = button.dataset["npcName"] ?: ""
+        AddQuest(
+            prefillTitle = "",
+            prefillGiver = npcName,
+            settlements = actor.getKingdom()
+                ?.let { k -> k.getAllSettlements(game).allSettlements.map { it.id to it.name } }
+                ?: emptyList(),
+        ) { quest ->
+            actor.getKingdom()?.let { kingdom ->
+                kingdom.quests = (kingdom.quests ?: emptyArray()) + quest
+                actor.setKingdom(kingdom)
+            }
+        }.launch()
+    },
+    ChatButton("km-offer-npc-note") { game, actor, event, button ->
+        // writes one line into the GM notes; idempotent per card via a verbatim-line check
+        if (!game.user.isGM) return@ChatButton
+        val npcName = button.dataset["npcName"] ?: return@ChatButton
+        val band = button.dataset["band"] ?: ""
+        val settlement = button.dataset["settlement"] ?: ""
+        actor.getKingdom()?.let { kingdom ->
+            val line = t(
+                "kingdom.npcMemory.offer.noteLine",
+                recordOf("name" to npcName, "band" to band, "settlement" to settlement),
+            )
+            if (kingdom.notes.gm.contains(line)) {
+                ui.notifications.info(t("kingdom.npcMemory.offer.alreadyNoted"))
+                return@let
+            }
+            kingdom.notes.gm = if (kingdom.notes.gm.isBlank()) line else kingdom.notes.gm + "\n" + line
+            actor.setKingdom(kingdom)
+            ui.notifications.info(t("kingdom.npcMemory.offer.noted"))
         }
     },
     ChatButton("km-offer-faction-standing-shift") { game, actor, event, button ->

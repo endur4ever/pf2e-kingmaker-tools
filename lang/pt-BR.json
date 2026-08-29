@@ -2750,6 +2750,29 @@
                 },
                 "milestoneEarned": {
                     "entry": "O reino conquistou um marco."
+                },
+                "track": "Rastrear memória",
+                "capRefused": "O rastreamento de memória está cheio ({list}). Remova alguém primeiro.",
+                "attitudeLabel": "Atitude",
+                "logTitle": "Registro de memórias",
+                "band": {
+                    "hostile": "Hostil",
+                    "unfriendly": "Hostil leve",
+                    "indifferent": "Indiferente",
+                    "friendly": "Amistoso",
+                    "helpful": "Prestativo"
+                },
+                "offer": {
+                    "title": "Uma opinião mudou",
+                    "gmActions": "Ações do Mestre",
+                    "body": "{name} ({occupation}, {settlement}) agora está {band} ({score}).",
+                    "spawnEncounter": "Rolar encontro",
+                    "createQuest": "Criar missão",
+                    "writeNote": "Escrever nota",
+                    "noteLine": "{name} ({settlement}) ficou {band}.",
+                    "noted": "Anotado nas notas do Mestre.",
+                    "alreadyNoted": "Essa mudança já está nas notas do Mestre.",
+                    "noCampingActor": "Nenhuma ficha de acampamento para rolar um encontro."
                 }
             }
         },

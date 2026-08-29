@@ -331,6 +331,10 @@ class InspectSettlement(
                         PopulationEditDialog(
                             occupations = npcOccupations.toTypedArray(),
                             existing = existing,
+                            otherTrackedCount = at.posselt.pfrpg2e.kingdom.countTrackedNpcs(kingdom) -
+                                (if (existing.memoryTracked == true) 1 else 0),
+                            trackedNames = at.posselt.pfrpg2e.kingdom.trackedNpcNames(kingdom),
+                            isGM = game.user.isGM,
                             onSave = { updated ->
                                 val existingNpcs = (roster.npcs?.toMutableList() ?: mutableListOf())
                                 existingNpcs[index] = updated

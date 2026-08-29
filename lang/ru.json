@@ -2750,6 +2750,29 @@
                 },
                 "milestoneEarned": {
                     "entry": "Королевство достигло вехи."
+                },
+                "track": "Отслеживать память",
+                "capRefused": "Отслеживание памяти заполнено ({list}). Сначала уберите кого-нибудь.",
+                "attitudeLabel": "Отношение",
+                "logTitle": "Журнал воспоминаний",
+                "band": {
+                    "hostile": "Враждебный",
+                    "unfriendly": "Недружелюбный",
+                    "indifferent": "Безразличный",
+                    "friendly": "Дружелюбный",
+                    "helpful": "Отзывчивый"
+                },
+                "offer": {
+                    "title": "Чьё-то мнение изменилось",
+                    "gmActions": "Действия ведущего",
+                    "body": "{name} ({occupation}, {settlement}) теперь {band} ({score}).",
+                    "spawnEncounter": "Бросить на встречу",
+                    "createQuest": "Создать задание",
+                    "writeNote": "Записать заметку",
+                    "noteLine": "{name} ({settlement}) стал {band}.",
+                    "noted": "Записано в заметки ведущего.",
+                    "alreadyNoted": "Это изменение уже есть в заметках ведущего.",
+                    "noCampingActor": "Нет листа лагеря для броска на встречу."
                 }
             }
         },

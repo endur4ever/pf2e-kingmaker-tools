@@ -2750,6 +2750,29 @@
                 },
                 "milestoneEarned": {
                     "entry": "王国达成了一座里程碑。"
+                },
+                "track": "追踪记忆",
+                "capRefused": "记忆追踪已满（{list}）。请先取消追踪某人。",
+                "attitudeLabel": "态度",
+                "logTitle": "记忆日志",
+                "band": {
+                    "hostile": "敌对",
+                    "unfriendly": "不友善",
+                    "indifferent": "冷淡",
+                    "friendly": "友善",
+                    "helpful": "乐于助人"
+                },
+                "offer": {
+                    "title": "有人的看法改变了",
+                    "gmActions": "GM 操作",
+                    "body": "{name}（{occupation}，{settlement}）现在的态度是 {band}（{score}）。",
+                    "spawnEncounter": "掷遭遇",
+                    "createQuest": "创建任务",
+                    "writeNote": "写下笔记",
+                    "noteLine": "{name}（{settlement}）变得 {band}。",
+                    "noted": "已记入 GM 笔记。",
+                    "alreadyNoted": "这一变化已在 GM 笔记中。",
+                    "noCampingActor": "没有可用于掷遭遇的营地卡。"
                 }
             }
         },

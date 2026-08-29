@@ -32,6 +32,9 @@ import com.foundryvtt.pf2e.item.PF2EItem
 import at.posselt.pfrpg2e.kingdom.rivalGrowthProfilesById
 import at.posselt.pfrpg2e.kingdom.collectRivalOffers
 import at.posselt.pfrpg2e.kingdom.data.withWarOfferRecorded
+import at.posselt.pfrpg2e.kingdom.evaluateNpcMemoriesForTurn
+import at.posselt.pfrpg2e.kingdom.npcMemoryRules
+import at.posselt.pfrpg2e.kingdom.postNpcAttitudeShiftOffers
 import at.posselt.pfrpg2e.kingdom.postFactionMoveDigest
 import at.posselt.pfrpg2e.kingdom.postRivalOfferDigests
 import at.posselt.pfrpg2e.kingdom.localizeRivalHeadline
@@ -791,6 +794,15 @@ private suspend fun performEndTurnLocked(game: Game, actor: KingdomActor): TickR
         ),
     )
 
+    // NPC memories read the record that was just appended plus its predecessor, and write
+    // straight onto the roster rows -- all inside the same single persist below.
+    val npcMemoryOutcome = evaluateNpcMemoriesForTurn(
+        kingdom = kingdom,
+        currentTurn = currentTurn,
+        rules = npcMemoryRules(),
+        fameMax = kingdom.settings.maximumFamePoints,
+    )
+
     // Renown: the epithet offers this turn earned, then the reset. Offers are composed BEFORE
     // the reset because they read the cumulative ledger, not the turn tally, and the reset only
     // clears the in-progress arrays.
@@ -920,6 +932,12 @@ private suspend fun performEndTurnLocked(game: Game, actor: KingdomActor): TickR
         actorUuid = actor.uuid,
         currentTurn = currentTurn,
         moves = tickResult.factionAgendaMoves,
+    )
+
+    postNpcAttitudeShiftOffers(
+        game = game,
+        actorUuid = actor.uuid,
+        crossings = npcMemoryOutcome.crossings,
     )
 
     // Post clock tick events to chat

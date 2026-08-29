@@ -2872,6 +2872,29 @@
                 },
                 "milestoneEarned": {
                     "entry": "The kingdom earned a milestone."
+                },
+                "track": "Track memory",
+                "capRefused": "Memory tracking is full ({list}). Untrack someone first.",
+                "attitudeLabel": "Attitude",
+                "logTitle": "Memory log",
+                "band": {
+                    "hostile": "Hostile",
+                    "unfriendly": "Unfriendly",
+                    "indifferent": "Indifferent",
+                    "friendly": "Friendly",
+                    "helpful": "Helpful"
+                },
+                "offer": {
+                    "title": "An Opinion Has Shifted",
+                    "gmActions": "GM Actions",
+                    "body": "{name} ({occupation}, {settlement}) is now {band} ({score}).",
+                    "spawnEncounter": "Roll Encounter",
+                    "createQuest": "Create Quest",
+                    "writeNote": "Write Note",
+                    "noteLine": "{name} ({settlement}) turned {band}.",
+                    "noted": "Noted in the GM notes.",
+                    "alreadyNoted": "This shift is already in the GM notes.",
+                    "noCampingActor": "No camping sheet found to roll an encounter with."
                 }
             }
         },

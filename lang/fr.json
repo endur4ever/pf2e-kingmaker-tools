@@ -2750,6 +2750,29 @@
                 },
                 "milestoneEarned": {
                     "entry": "Le royaume a franchi un jalon."
+                },
+                "track": "Suivre la mémoire",
+                "capRefused": "Le suivi de mémoire est complet ({list}). Retirez d'abord quelqu'un.",
+                "attitudeLabel": "Attitude",
+                "logTitle": "Journal des souvenirs",
+                "band": {
+                    "hostile": "Hostile",
+                    "unfriendly": "Inamical",
+                    "indifferent": "Indifférent",
+                    "friendly": "Amical",
+                    "helpful": "Serviable"
+                },
+                "offer": {
+                    "title": "Une opinion a changé",
+                    "gmActions": "Actions du MJ",
+                    "body": "{name} ({occupation}, {settlement}) est désormais {band} ({score}).",
+                    "spawnEncounter": "Lancer une rencontre",
+                    "createQuest": "Créer une quête",
+                    "writeNote": "Écrire une note",
+                    "noteLine": "{name} ({settlement}) est devenu {band}.",
+                    "noted": "Consigné dans les notes du MJ.",
+                    "alreadyNoted": "Ce changement figure déjà dans les notes du MJ.",
+                    "noCampingActor": "Aucune feuille de campement pour lancer une rencontre."
                 }
             }
         },

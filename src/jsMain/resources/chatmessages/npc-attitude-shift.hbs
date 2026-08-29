@@ -1,0 +1,23 @@
+<h2>{{localizeKM "kingdom.npcMemory.offer.title"}}</h2>
+<div class="km-npc-attitude-shift">
+    <p>{{localizeKM "kingdom.npcMemory.offer.body" name=npcName occupation=occupation settlement=settlementName band=bandLabel score=score}}</p>
+    {{#if memories.length}}
+        <ul class="km-sub-log">
+            {{#each memories}}<li>{{this}}</li>{{/each}}
+        </ul>
+    {{/if}}
+</div>
+<hr>
+<h3>{{localizeKM "kingdom.npcMemory.offer.gmActions"}}</h3>
+<div class="km-subsystem-offer__buttons">
+    <button type="button" class="km-offer-npc-encounter" data-kingdom-actor-uuid="{{actorUuid}}">
+        {{localizeKM "kingdom.npcMemory.offer.spawnEncounter"}}
+    </button>
+    <button type="button" class="km-offer-npc-quest" data-kingdom-actor-uuid="{{actorUuid}}" data-npc-name="{{npcName}}">
+        {{localizeKM "kingdom.npcMemory.offer.createQuest"}}
+    </button>
+    <button type="button" class="km-offer-npc-note" data-kingdom-actor-uuid="{{actorUuid}}"
+            data-npc-name="{{npcName}}" data-band="{{bandLabel}}" data-settlement="{{settlementName}}">
+        {{localizeKM "kingdom.npcMemory.offer.writeNote"}}
+    </button>
+</div>

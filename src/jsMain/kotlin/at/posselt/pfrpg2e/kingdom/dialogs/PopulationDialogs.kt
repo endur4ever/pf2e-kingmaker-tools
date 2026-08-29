@@ -1,5 +1,7 @@
 package at.posselt.pfrpg2e.kingdom.dialogs
 
+import js.objects.recordOf
+import com.foundryvtt.core.ui
 import at.posselt.pfrpg2e.app.HandlebarsRenderContext
 import at.posselt.pfrpg2e.app.forms.SimpleApp
 import at.posselt.pfrpg2e.kingdom.structures.RawNpcEntry
@@ -84,6 +86,10 @@ class PopulationAddDialog(
  */
 @JsPlainObject
 external interface PopulationEditContext : HandlebarsRenderContext {
+    val isGM: Boolean
+    val memoryTracked: Boolean
+    val attitudeLabel: String?
+    val memoryEntries: Array<String>?
     val npcName: String
     val occupation: String
     val notes: String
@@ -93,6 +99,10 @@ external interface PopulationEditContext : HandlebarsRenderContext {
 class PopulationEditDialog(
     private val occupations: Array<String>,
     private val existing: RawNpcEntry,
+    /** Kingdom-wide tracked count EXCLUDING this NPC, for the MAX_TRACKED_NPCS cap. */
+    private val otherTrackedCount: Int = 0,
+    private val trackedNames: List<String> = emptyList(),
+    private val isGM: Boolean = false,
     private val onSave: suspend (RawNpcEntry) -> Unit,
     private val onDelete: suspend () -> Unit,
 ) : SimpleApp<PopulationEditContext>(
@@ -114,12 +124,34 @@ class PopulationEditDialog(
                     ?.let { it as? org.w3c.dom.HTMLTextAreaElement }
                     ?.value ?: (existing.notes ?: "")
 
+                val trackedBox = element.querySelector("input[name='npcMemoryTracked']")
+                    ?.let { it as? org.w3c.dom.HTMLInputElement }
+                val wantsTracking = trackedBox?.checked ?: (existing.memoryTracked == true)
+                val tracked = if (wantsTracking && existing.memoryTracked != true &&
+                    !at.posselt.pfrpg2e.kingdom.npcmemory.canTrackAnother(otherTrackedCount)
+                ) {
+                    // the cap refuses the eleventh and NAMES the current cast (plan section 6)
+                    ui.notifications.warn(
+                        t(
+                            "kingdom.npcMemory.capRefused",
+                            recordOf("list" to trackedNames.joinToString(", ")),
+                        )
+                    )
+                    false
+                } else {
+                    wantsTracking
+                }
                 val updated = RawNpcEntry(
                     id = existing.id,
                     name = name,
                     occupation = occupation,
                 ).also {
                     it.notes = notes.ifBlank { null }
+                    // engine-owned state the form never renders: dropping these here would be
+                    // the sheet-save agenda wipe all over again, one dialog later
+                    it.memoryTracked = tracked
+                    it.memoryLog = existing.memoryLog
+                    it.attitudeScore = existing.attitudeScore
                 }
                 onSave(updated)
                 close()
@@ -146,6 +178,18 @@ class PopulationEditDialog(
             occupation = existing.occupation,
             notes = existing.notes ?: "",
             occupations = occupations,
+            // memory panel is GM-only DATA, not merely hidden markup: players own the party actor
+            isGM = isGM,
+            memoryTracked = existing.memoryTracked == true,
+            attitudeLabel = if (isGM) {
+                val score = existing.attitudeScore ?: 0
+                "${at.posselt.pfrpg2e.kingdom.localizeAttitudeBand(at.posselt.pfrpg2e.kingdom.npcmemory.attitudeBand(score))} ($score)"
+            } else null,
+            memoryEntries = if (isGM) {
+                (existing.memoryLog ?: emptyArray()).sortedByDescending { it.turn }.map {
+                    "${it.turn}: ${at.posselt.pfrpg2e.kingdom.localizeMemoryEntry(it.ruleId)} (${if (it.delta >= 0) "+" else ""}${it.delta})"
+                }.toTypedArray()
+            } else null,
         )
     }
 }

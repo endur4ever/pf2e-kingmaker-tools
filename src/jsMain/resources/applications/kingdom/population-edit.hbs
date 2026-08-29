@@ -18,6 +18,26 @@
         <textarea name="npcNotes" rows="3" placeholder="{{localizeKM 'kingdom.population.notesPlaceholder'}}">{{notes}}</textarea>
     </div>
 
+    {{#if isGM}}
+        <div class="km-form-group">
+            <label>
+                <input type="checkbox" name="npcMemoryTracked" {{#if memoryTracked}}checked{{/if}} />
+                {{localizeKM "kingdom.npcMemory.track"}}
+            </label>
+        </div>
+        {{#if attitudeLabel}}
+            <p><b>{{localizeKM "kingdom.npcMemory.attitudeLabel"}}:</b> {{attitudeLabel}}</p>
+        {{/if}}
+        {{#if memoryEntries.length}}
+            <details>
+                <summary>{{localizeKM "kingdom.npcMemory.logTitle"}}</summary>
+                <ul class="km-sub-log">
+                    {{#each memoryEntries}}<li>{{this}}</li>{{/each}}
+                </ul>
+            </details>
+        {{/if}}
+    {{/if}}
+
     <hr>
 
     <div class="km-population-dialog-actions">

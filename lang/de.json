@@ -2750,6 +2750,29 @@
                 },
                 "milestoneEarned": {
                     "entry": "Das Königreich erreichte einen Meilenstein."
+                },
+                "track": "Erinnerungen verfolgen",
+                "capRefused": "Die Erinnerungs-Verfolgung ist voll ({list}). Zuerst jemanden entfernen.",
+                "attitudeLabel": "Haltung",
+                "logTitle": "Erinnerungsprotokoll",
+                "band": {
+                    "hostile": "Feindselig",
+                    "unfriendly": "Ablehnend",
+                    "indifferent": "Gleichgültig",
+                    "friendly": "Freundlich",
+                    "helpful": "Hilfsbereit"
+                },
+                "offer": {
+                    "title": "Eine Meinung hat sich gewandelt",
+                    "gmActions": "SL-Aktionen",
+                    "body": "{name} ({occupation}, {settlement}) ist jetzt {band} ({score}).",
+                    "spawnEncounter": "Begegnung würfeln",
+                    "createQuest": "Quest erstellen",
+                    "writeNote": "Notiz schreiben",
+                    "noteLine": "{name} ({settlement}) wurde {band}.",
+                    "noted": "In den SL-Notizen vermerkt.",
+                    "alreadyNoted": "Dieser Wandel steht bereits in den SL-Notizen.",
+                    "noCampingActor": "Kein Lager-Bogen gefunden, um eine Begegnung zu würfeln."
                 }
             }
         },
