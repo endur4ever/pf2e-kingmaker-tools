@@ -4,6 +4,12 @@ import kotlinx.js.JsPlainObject
 
 @JsPlainObject
 external interface MilestoneChoice {
+    /**
+     * The kingdom turn this milestone was awarded on; null for milestones ticked by hand before
+     * the Chronicle existed, which render without a turn rather than claiming a wrong one.
+     */
+    var awardedOnTurn: Int?
+
     var id: String
     var completed: Boolean
     var enabled: Boolean

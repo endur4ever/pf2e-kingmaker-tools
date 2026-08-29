@@ -1,0 +1,8 @@
+{
+  "id": "ruin-free-realm",
+  "name": "milestones.ruin-free-realm.name",
+  "xp": 40,
+  "enabledOnFirstRun": false,
+  "isCultMilestone": false,
+  "detectionId": "ruin-free"
+}

@@ -1,0 +1,8 @@
+{
+  "id": "ten-quiet-turns",
+  "name": "milestones.ten-quiet-turns.name",
+  "xp": 40,
+  "enabledOnFirstRun": false,
+  "isCultMilestone": false,
+  "detectionId": "ten-quiet-turns"
+}

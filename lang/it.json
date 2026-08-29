@@ -2115,7 +2115,8 @@
                 "battleDefeats": "Defeated in battle: {battles}",
                 "rivalMove": "Regni rivali: {list}",
                 "spotlight": "Sotto i riflettori: {name}",
-                "factionMoves": "Mosse delle fazioni: {list}"
+                "factionMoves": "Mosse delle fazioni: {list}",
+                "deed": "Impresa: {name}"
             },
             "warfare": {
                 "damaged": "Damaged",
@@ -2774,6 +2775,11 @@
                     "alreadyNoted": "Questo cambiamento è già nelle note del GM.",
                     "noCampingActor": "Nessuna scheda accampamento con cui tirare un incontro."
                 }
+            },
+            "chronicle": {
+                "title": "Cronaca",
+                "empty": "Nessuna pietra miliare registrata.",
+                "turnLabel": "Turno {turn}"
             }
         },
         "chatMessages": {
@@ -2942,7 +2948,11 @@
                 "offerBody": "The kingdom has reached a milestone: {name} (+{xp} XP). Award it?",
                 "offerTitle": "Milestone reached!",
                 "awarded": "Milestone awarded: {name} (+{xp} XP).",
-                "dismissed": "Milestone offer dismissed: {name}."
+                "dismissed": "Milestone offer dismissed: {name}.",
+                "deedsTitle": "Imprese rilevate",
+                "deedsBody": "Questi traguardi sono validi da questo turno. Concedi o ignora ciascuno.",
+                "dismissAll": "Ignora tutto",
+                "dismissedAll": "Ignorate {count} offerte di impresa."
             },
             "travelRoute": {
                 "title": "Travel",
@@ -4356,6 +4366,39 @@
             },
             "connect-settlement-to-capital-via-roads": {
                 "name": "Connect a settlement to your capital via roads"
+            },
+            "all-settlements-roaded": {
+                "name": "Ogni insediamento è collegato alla capitale"
+            },
+            "two-regions-claimed": {
+                "name": "Una seconda regione è interamente rivendicata"
+            },
+            "kingdom-level-10": {
+                "name": "Il regno raggiunge il livello 10"
+            },
+            "kingdom-level-20": {
+                "name": "Il regno raggiunge il livello 20"
+            },
+            "fame-at-maximum": {
+                "name": "La fama raggiunge il suo limite"
+            },
+            "ruin-free-realm": {
+                "name": "Nessuna rovina, dopo averne avute"
+            },
+            "unrest-zero-after-crisis": {
+                "name": "Il malcontento torna a zero dopo aver toccato 10 o più"
+            },
+            "ten-quiet-turns": {
+                "name": "Dieci turni consecutivi senza aumenti del malcontento"
+            },
+            "safe-trade-route": {
+                "name": "Una rotta commerciale resiste cinque turni di fila"
+            },
+            "three-trade-agreements": {
+                "name": "Tre accordi commerciali attivi contemporaneamente"
+            },
+            "survived-fifty-turns": {
+                "name": "Cinquanta turni di regno"
             }
         },
         "charters": {

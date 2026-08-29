@@ -1,0 +1,29 @@
+<h2>{{localizeKM "chatMessages.milestone.deedsTitle"}}</h2>
+<p>{{localizeKM "chatMessages.milestone.deedsBody"}}</p>
+<ul class="km-deeds-digest">
+    {{#each deeds}}
+        <li class="km-deed-row">
+            <span>{{this.milestoneName}} ({{this.milestoneXp}} XP)</span>
+            <button type="button"
+                    class="km-offer-milestone"
+                    data-kingdom-actor-uuid="{{@root.actorUuid}}"
+                    data-milestone-id="{{this.milestoneId}}"
+                    data-action="award">
+                {{localizeKM "chatMessages.milestone.award"}}
+            </button>
+            <button type="button"
+                    class="km-offer-milestone"
+                    data-kingdom-actor-uuid="{{@root.actorUuid}}"
+                    data-milestone-id="{{this.milestoneId}}"
+                    data-action="dismiss">
+                {{localizeKM "chatMessages.milestone.dismiss"}}
+            </button>
+        </li>
+    {{/each}}
+</ul>
+<button type="button"
+        class="km-offer-milestone-dismiss-all"
+        data-kingdom-actor-uuid="{{actorUuid}}"
+        data-all-ids="{{allIds}}">
+    {{localizeKM "chatMessages.milestone.dismissAll"}}
+</button>

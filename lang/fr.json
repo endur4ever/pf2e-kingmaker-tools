@@ -2115,7 +2115,8 @@
                 "battleDefeats": "Defeated in battle: {battles}",
                 "rivalMove": "Royaumes rivaux : {list}",
                 "spotlight": "Coup de projecteur : {name}",
-                "factionMoves": "Manœuvres de faction : {list}"
+                "factionMoves": "Manœuvres de faction : {list}",
+                "deed": "Exploit : {name}"
             },
             "warfare": {
                 "damaged": "Damaged",
@@ -2774,6 +2775,11 @@
                     "alreadyNoted": "Ce changement figure déjà dans les notes du MJ.",
                     "noCampingActor": "Aucune feuille de campement pour lancer une rencontre."
                 }
+            },
+            "chronicle": {
+                "title": "Chronique",
+                "empty": "Aucun jalon enregistré pour l'instant.",
+                "turnLabel": "Tour {turn}"
             }
         },
         "chatMessages": {
@@ -2942,7 +2948,11 @@
                 "offerBody": "The kingdom has reached a milestone: {name} (+{xp} XP). Award it?",
                 "offerTitle": "Milestone reached!",
                 "awarded": "Milestone awarded: {name} (+{xp} XP).",
-                "dismissed": "Milestone offer dismissed: {name}."
+                "dismissed": "Milestone offer dismissed: {name}.",
+                "deedsTitle": "Exploits détectés",
+                "deedsBody": "Ces accomplissements sont vrais à ce tour. Accordez ou rejetez chacun.",
+                "dismissAll": "Tout rejeter",
+                "dismissedAll": "{count} offre(s) d'exploit rejetée(s)."
             },
             "travelRoute": {
                 "title": "Travel",
@@ -4356,6 +4366,39 @@
             },
             "connect-settlement-to-capital-via-roads": {
                 "name": "Connect a settlement to your capital via roads"
+            },
+            "all-settlements-roaded": {
+                "name": "Chaque colonie est reliée à la capitale"
+            },
+            "two-regions-claimed": {
+                "name": "Une deuxième région est entièrement revendiquée"
+            },
+            "kingdom-level-10": {
+                "name": "Le royaume atteint le niveau 10"
+            },
+            "kingdom-level-20": {
+                "name": "Le royaume atteint le niveau 20"
+            },
+            "fame-at-maximum": {
+                "name": "La renommée atteint son maximum"
+            },
+            "ruin-free-realm": {
+                "name": "Plus aucune ruine, après en avoir connu"
+            },
+            "unrest-zero-after-crisis": {
+                "name": "L'agitation retombe à zéro après avoir atteint 10 ou plus"
+            },
+            "ten-quiet-turns": {
+                "name": "Dix tours consécutifs sans hausse de l'agitation"
+            },
+            "safe-trade-route": {
+                "name": "Une route commerciale survit cinq tours d'affilée"
+            },
+            "three-trade-agreements": {
+                "name": "Trois accords commerciaux tiennent en même temps"
+            },
+            "survived-fifty-turns": {
+                "name": "Cinquante tours de règne"
             }
         },
         "charters": {

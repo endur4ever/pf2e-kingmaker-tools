@@ -2115,7 +2115,8 @@
                 "battleDefeats": "Defeated in battle: {battles}",
                 "rivalMove": "敌对王国：{list}",
                 "spotlight": "聚光灯：{name}",
-                "factionMoves": "势力动向：{list}"
+                "factionMoves": "势力动向：{list}",
+                "deed": "功绩：{name}"
             },
             "warfare": {
                 "damaged": "Damaged",
@@ -2774,6 +2775,11 @@
                     "alreadyNoted": "这一变化已在 GM 笔记中。",
                     "noCampingActor": "没有可用于掷遭遇的营地卡。"
                 }
+            },
+            "chronicle": {
+                "title": "编年史",
+                "empty": "尚未记录任何里程碑。",
+                "turnLabel": "第 {turn} 回合"
             }
         },
         "chatMessages": {
@@ -2942,7 +2948,11 @@
                 "offerBody": "The kingdom has reached a milestone: {name} (+{xp} XP). Award it?",
                 "offerTitle": "Milestone reached!",
                 "awarded": "Milestone awarded: {name} (+{xp} XP).",
-                "dismissed": "Milestone offer dismissed: {name}."
+                "dismissed": "Milestone offer dismissed: {name}.",
+                "deedsTitle": "检测到功绩",
+                "deedsBody": "这些成就在本回合成立。请逐项授予或忽略。",
+                "dismissAll": "全部忽略",
+                "dismissedAll": "已忽略 {count} 项功绩提议。"
             },
             "travelRoute": {
                 "title": "Travel",
@@ -4356,6 +4366,39 @@
             },
             "connect-settlement-to-capital-via-roads": {
                 "name": "Connect a settlement to your capital via roads"
+            },
+            "all-settlements-roaded": {
+                "name": "所有聚落均与首都相连"
+            },
+            "two-regions-claimed": {
+                "name": "第二个地区被完全占领"
+            },
+            "kingdom-level-10": {
+                "name": "王国达到 10 级"
+            },
+            "kingdom-level-20": {
+                "name": "王国达到 20 级"
+            },
+            "fame-at-maximum": {
+                "name": "声望达到上限"
+            },
+            "ruin-free-realm": {
+                "name": "曾有废墟，如今一处不剩"
+            },
+            "unrest-zero-after-crisis": {
+                "name": "动荡在达到 10 以上后归零"
+            },
+            "ten-quiet-turns": {
+                "name": "连续十回合动荡未上升"
+            },
+            "safe-trade-route": {
+                "name": "一条商路连续五回合平安无事"
+            },
+            "three-trade-agreements": {
+                "name": "同时维持三项贸易协定"
+            },
+            "survived-fifty-turns": {
+                "name": "统治五十回合"
             }
         },
         "charters": {

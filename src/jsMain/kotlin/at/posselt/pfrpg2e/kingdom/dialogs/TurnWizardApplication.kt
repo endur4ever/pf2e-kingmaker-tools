@@ -118,7 +118,8 @@ import at.posselt.pfrpg2e.kingdom.data.ChosenFeature
 import at.posselt.pfrpg2e.kingdom.data.RawPacingAlert
 import at.posselt.pfrpg2e.kingdom.data.RawTurnRecord
 import at.posselt.pfrpg2e.kingdom.appendTurnRecord
-import at.posselt.pfrpg2e.kingdom.detectAndOfferMilestones
+import at.posselt.pfrpg2e.kingdom.detectFiredDeeds
+import at.posselt.pfrpg2e.kingdom.postDeedsDigest
 import at.posselt.pfrpg2e.kingdom.computeLastTurnRecap
 import at.posselt.pfrpg2e.kingdom.buildTurnRecord
 import at.posselt.pfrpg2e.data.kingdom.structures.CommodityStorage
@@ -989,10 +990,10 @@ private suspend fun performEndTurnLocked(game: Game, actor: KingdomActor): TickR
         }
     }
 
-    // Auto-detect the two house-rule milestones (road-to-capital, region fully claimed) from live
-    // hex state and post a GM-confirmed award offer for any newly-earned one. Read-only detection;
-    // never auto-awards.
-    detectAndOfferMilestones(game, actor, kingdom)
+    // Auto-detected deeds (deeds-chronicle plan): read-only detection over standing state, one
+    // whispered digest, never an auto-award. Detection runs AFTER the persist so it sees the turn
+    // this End Turn just wrote -- history-based deeds would otherwise miss their own last turn.
+    postDeedsDigest(game, actor, kingdom, detectFiredDeeds(kingdom, currentTurn))
 
     // Post any pacing advisories that fired this turn to chat
     firedPacingAlerts.forEach { alert -> postPacingAlertChat(alert) }

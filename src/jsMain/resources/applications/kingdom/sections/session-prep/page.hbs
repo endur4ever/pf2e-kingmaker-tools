@@ -273,5 +273,21 @@
             {{/if}}
         </section>
         {{/if}}
+        <section class="km-session-prep-section km-chronicle">
+            <h3>{{localizeKM "kingdom.chronicle.title"}}</h3>
+            {{#if chronicle.length}}
+                <ul class="km-chronicle-list">
+                    {{#each chronicle}}
+                        <li class="km-chronicle-row{{#if this.isDeed}} km-chronicle-row--deed{{/if}}">
+                            <span class="km-chronicle-turn">{{this.turnLabel}}</span>
+                            <span class="km-chronicle-name">{{this.name}}</span>
+                            <span class="km-chronicle-xp">{{this.xp}} XP</span>
+                        </li>
+                    {{/each}}
+                </ul>
+            {{else}}
+                <p class="km-session-prep-empty">{{localizeKM "kingdom.chronicle.empty"}}</p>
+            {{/if}}
+        </section>
     </div>
 </div>

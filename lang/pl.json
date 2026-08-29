@@ -2115,7 +2115,8 @@
                 "battleDefeats": "Defeated in battle: {battles}",
                 "rivalMove": "Rywalizujące królestwa: {list}",
                 "spotlight": "W centrum uwagi: {name}",
-                "factionMoves": "Ruchy frakcji: {list}"
+                "factionMoves": "Ruchy frakcji: {list}",
+                "deed": "Czyn: {name}"
             },
             "warfare": {
                 "damaged": "Damaged",
@@ -2774,6 +2775,11 @@
                     "alreadyNoted": "Ta zmiana jest już w notatkach MG.",
                     "noCampingActor": "Brak karty obozu do rzutu na spotkanie."
                 }
+            },
+            "chronicle": {
+                "title": "Kronika",
+                "empty": "Nie zapisano jeszcze żadnych kamieni milowych.",
+                "turnLabel": "Tura {turn}"
             }
         },
         "chatMessages": {
@@ -2942,7 +2948,11 @@
                 "offerBody": "The kingdom has reached a milestone: {name} (+{xp} XP). Award it?",
                 "offerTitle": "Milestone reached!",
                 "awarded": "Milestone awarded: {name} (+{xp} XP).",
-                "dismissed": "Milestone offer dismissed: {name}."
+                "dismissed": "Milestone offer dismissed: {name}.",
+                "deedsTitle": "Wykryto czyny",
+                "deedsBody": "Te osiągnięcia są prawdziwe w tej turze. Przyznaj lub odrzuć każde.",
+                "dismissAll": "Odrzuć wszystko",
+                "dismissedAll": "Odrzucono {count} ofert(y) czynów."
             },
             "travelRoute": {
                 "title": "Travel",
@@ -4356,6 +4366,39 @@
             },
             "connect-settlement-to-capital-via-roads": {
                 "name": "Connect a settlement to your capital via roads"
+            },
+            "all-settlements-roaded": {
+                "name": "Każda osada połączona ze stolicą"
+            },
+            "two-regions-claimed": {
+                "name": "Druga kraina w całości zajęta"
+            },
+            "kingdom-level-10": {
+                "name": "Królestwo osiąga poziom 10"
+            },
+            "kingdom-level-20": {
+                "name": "Królestwo osiąga poziom 20"
+            },
+            "fame-at-maximum": {
+                "name": "Sława osiąga swój limit"
+            },
+            "ruin-free-realm": {
+                "name": "Żadnej ruiny, choć kiedyś była"
+            },
+            "unrest-zero-after-crisis": {
+                "name": "Niepokoje wracają do zera po osiągnięciu 10 lub więcej"
+            },
+            "ten-quiet-turns": {
+                "name": "Dziesięć tur z rzędu bez wzrostu niepokojów"
+            },
+            "safe-trade-route": {
+                "name": "Szlak handlowy przetrwał pięć tur z rzędu"
+            },
+            "three-trade-agreements": {
+                "name": "Trzy umowy handlowe obowiązują naraz"
+            },
+            "survived-fifty-turns": {
+                "name": "Pięćdziesiąt tur panowania"
             }
         },
         "charters": {

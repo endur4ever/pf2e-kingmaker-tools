@@ -3,5 +3,6 @@
   "name": "milestones.expand-a-city-into-your-first-metropolis.name",
   "xp": 120,
   "enabledOnFirstRun": true,
-  "isCultMilestone": false
+  "isCultMilestone": false,
+  "detectionId": "first-metropolis"
 }

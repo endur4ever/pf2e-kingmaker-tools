@@ -1507,7 +1507,8 @@
                 "battleDefeats": "Defeated in battle: {battles}",
                 "rivalMove": "Rival Realms: {list}",
                 "spotlight": "Spotlight: {name}",
-                "factionMoves": "Faction Moves: {list}"
+                "factionMoves": "Faction Moves: {list}",
+                "deed": "Deed: {name}"
             },
             "xpRules": "XP Rules",
             "xpRulesHelp": "Adds additional milestones, gain XP buttons and increases XP for claiming hexes and converting XP based on kingdom level",
@@ -2896,6 +2897,11 @@
                     "alreadyNoted": "This shift is already in the GM notes.",
                     "noCampingActor": "No camping sheet found to roll an encounter with."
                 }
+            },
+            "chronicle": {
+                "title": "Chronicle",
+                "empty": "No milestones recorded yet.",
+                "turnLabel": "Turn {turn}"
             }
         },
         "chatMessages": {
@@ -3064,7 +3070,11 @@
                 "offerBody": "The kingdom has reached a milestone: {name} (+{xp} XP). Award it?",
                 "offerTitle": "Milestone reached!",
                 "awarded": "Milestone awarded: {name} (+{xp} XP).",
-                "dismissed": "Milestone offer dismissed: {name}."
+                "dismissed": "Milestone offer dismissed: {name}.",
+                "deedsTitle": "Deeds Detected",
+                "deedsBody": "These achievements are true as of this turn. Award or dismiss each.",
+                "dismissAll": "Dismiss all",
+                "dismissedAll": "Dismissed {count} deed offer(s)."
             },
             "travelRoute": {
                 "title": "Travel",
@@ -4478,6 +4488,39 @@
             },
             "connect-settlement-to-capital-via-roads": {
                 "name": "Connect a settlement to your capital via roads"
+            },
+            "all-settlements-roaded": {
+                "name": "Every settlement is linked to the capital"
+            },
+            "two-regions-claimed": {
+                "name": "A second region is wholly claimed"
+            },
+            "kingdom-level-10": {
+                "name": "The kingdom reaches level 10"
+            },
+            "kingdom-level-20": {
+                "name": "The kingdom reaches level 20"
+            },
+            "fame-at-maximum": {
+                "name": "Fame reaches its cap"
+            },
+            "ruin-free-realm": {
+                "name": "No ruin of any kind, having once had some"
+            },
+            "unrest-zero-after-crisis": {
+                "name": "Unrest returns to zero after reaching 10 or more"
+            },
+            "ten-quiet-turns": {
+                "name": "Ten consecutive turns without unrest rising"
+            },
+            "safe-trade-route": {
+                "name": "A caravan route survives five straight turns"
+            },
+            "three-trade-agreements": {
+                "name": "Three trade agreements stand at once"
+            },
+            "survived-fifty-turns": {
+                "name": "Fifty turns of rule"
             }
         },
         "charters": {

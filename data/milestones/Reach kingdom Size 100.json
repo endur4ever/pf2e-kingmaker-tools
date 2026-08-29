@@ -3,5 +3,6 @@
   "name": "milestones.reach-kingdom-size-100.name",
   "xp": 120,
   "enabledOnFirstRun": true,
-  "isCultMilestone": false
+  "isCultMilestone": false,
+  "detectionId": "size-100"
 }

@@ -3,5 +3,6 @@
   "name": "milestones.win-your-first-war-encounter.name",
   "xp": 60,
   "enabledOnFirstRun": false,
-  "isCultMilestone": false
+  "isCultMilestone": false,
+  "detectionId": "first-battle-won"
 }

@@ -3,5 +3,6 @@
   "name": "milestones.connect-settlement-to-capital-via-roads.name",
   "xp": 50,
   "enabledOnFirstRun": false,
-  "isCultMilestone": false
+  "isCultMilestone": false,
+  "detectionId": "road-to-capital"
 }

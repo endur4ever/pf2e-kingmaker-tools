@@ -2115,7 +2115,8 @@
                 "battleDefeats": "Defeated in battle: {battles}",
                 "rivalMove": "Соперничающие королевства: {list}",
                 "spotlight": "В центре внимания: {name}",
-                "factionMoves": "Ходы фракций: {list}"
+                "factionMoves": "Ходы фракций: {list}",
+                "deed": "Деяние: {name}"
             },
             "warfare": {
                 "damaged": "Damaged",
@@ -2774,6 +2775,11 @@
                     "alreadyNoted": "Это изменение уже есть в заметках ведущего.",
                     "noCampingActor": "Нет листа лагеря для броска на встречу."
                 }
+            },
+            "chronicle": {
+                "title": "Хроника",
+                "empty": "Вехи ещё не записаны.",
+                "turnLabel": "Ход {turn}"
             }
         },
         "chatMessages": {
@@ -2942,7 +2948,11 @@
                 "offerBody": "The kingdom has reached a milestone: {name} (+{xp} XP). Award it?",
                 "offerTitle": "Milestone reached!",
                 "awarded": "Milestone awarded: {name} (+{xp} XP).",
-                "dismissed": "Milestone offer dismissed: {name}."
+                "dismissed": "Milestone offer dismissed: {name}.",
+                "deedsTitle": "Обнаружены деяния",
+                "deedsBody": "Эти достижения верны на этот ход. Даруйте или отклоните каждое.",
+                "dismissAll": "Отклонить все",
+                "dismissedAll": "Отклонено предложений деяний: {count}."
             },
             "travelRoute": {
                 "title": "Travel",
@@ -4356,6 +4366,39 @@
             },
             "connect-settlement-to-capital-via-roads": {
                 "name": "Connect a settlement to your capital via roads"
+            },
+            "all-settlements-roaded": {
+                "name": "Каждое поселение связано со столицей"
+            },
+            "two-regions-claimed": {
+                "name": "Второй регион занят целиком"
+            },
+            "kingdom-level-10": {
+                "name": "Королевство достигает 10 уровня"
+            },
+            "kingdom-level-20": {
+                "name": "Королевство достигает 20 уровня"
+            },
+            "fame-at-maximum": {
+                "name": "Слава достигает предела"
+            },
+            "ruin-free-realm": {
+                "name": "Ни следа разрухи — после того, как она была"
+            },
+            "unrest-zero-after-crisis": {
+                "name": "Беспорядки падают до нуля после 10 и выше"
+            },
+            "ten-quiet-turns": {
+                "name": "Десять ходов подряд без роста беспорядков"
+            },
+            "safe-trade-route": {
+                "name": "Торговый путь выдерживает пять ходов подряд"
+            },
+            "three-trade-agreements": {
+                "name": "Три торговых соглашения действуют одновременно"
+            },
+            "survived-fifty-turns": {
+                "name": "Пятьдесят ходов правления"
             }
         },
         "charters": {

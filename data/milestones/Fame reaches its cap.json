@@ -1,0 +1,8 @@
+{
+  "id": "fame-at-maximum",
+  "name": "milestones.fame-at-maximum.name",
+  "xp": 20,
+  "enabledOnFirstRun": false,
+  "isCultMilestone": false,
+  "detectionId": "fame-max"
+}

@@ -2888,3 +2888,37 @@ fieldset.km-hex-editor-links {
     font-weight: bold;
     background-color: rgba(0 0 0 / 12%);
 }
+
+/* Deeds Chronicle (session prep) */
+.km-chronicle-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.km-chronicle-row {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    padding: 0.15rem 0;
+    border-bottom: 1px dotted rgba(0, 0, 0, 0.15);
+}
+
+.km-chronicle-row--deed .km-chronicle-name {
+    font-style: italic;
+}
+
+.km-chronicle-turn {
+    font-variant-numeric: tabular-nums;
+    opacity: 0.7;
+    min-width: 4.5rem;
+}
+
+.km-chronicle-name {
+    flex: 1;
+}
+
+.km-chronicle-xp {
+    font-variant-numeric: tabular-nums;
+    font-weight: bold;
+}

@@ -3,5 +3,6 @@
   "name": "milestones.establish-your-first-village.name",
   "xp": 40,
   "enabledOnFirstRun": true,
-  "isCultMilestone": false
+  "isCultMilestone": false,
+  "detectionId": "first-settlement"
 }

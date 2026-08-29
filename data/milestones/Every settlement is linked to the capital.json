@@ -1,0 +1,8 @@
+{
+  "id": "all-settlements-roaded",
+  "name": "milestones.all-settlements-roaded.name",
+  "xp": 40,
+  "enabledOnFirstRun": false,
+  "isCultMilestone": false,
+  "detectionId": "all-settlements-roaded"
+}

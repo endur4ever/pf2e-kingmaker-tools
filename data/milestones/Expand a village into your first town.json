@@ -3,5 +3,6 @@
   "name": "milestones.expand-a-village-into-your-first-town.name",
   "xp": 60,
   "enabledOnFirstRun": true,
-  "isCultMilestone": false
+  "isCultMilestone": false,
+  "detectionId": "first-town"
 }

@@ -292,6 +292,7 @@ import at.posselt.pfrpg2e.kingdom.sheet.contexts.buildArmyPressureContext
 import at.posselt.pfrpg2e.kingdom.buildArmyPressureView
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.buildPacingAlertContext
 import at.posselt.pfrpg2e.kingdom.buildPacingAlertView
+import at.posselt.pfrpg2e.kingdom.sheet.contexts.buildChronicleRows
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.buildSessionPrepContext
 import at.posselt.pfrpg2e.kingdom.SessionPrepView
 import at.posselt.pfrpg2e.kingdom.buildSessionPrepView
@@ -4250,6 +4251,7 @@ class KingdomSheet(
                 eligibleVoters = runCatching { game.users.filter { !it.isGM }.size }.getOrDefault(0),
                 voterNameOf = { userId -> runCatching { game.users.get(userId)?.name }.getOrNull() },
             ),
+            chronicle = buildChronicleRows(kingdom),
             sessionPrepContext = buildSessionPrepContext(
                 forecast = buildForecastPanelContext(buildForecast(game, actor, horizonDays = forecastHorizonDays)),
                 view = buildSessionPrepView(

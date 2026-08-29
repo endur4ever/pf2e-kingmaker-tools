@@ -1,0 +1,8 @@
+{
+  "id": "survived-fifty-turns",
+  "name": "milestones.survived-fifty-turns.name",
+  "xp": 80,
+  "enabledOnFirstRun": false,
+  "isCultMilestone": false,
+  "detectionId": "survived-fifty-turns"
+}

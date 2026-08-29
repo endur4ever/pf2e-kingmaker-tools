@@ -104,3 +104,14 @@ fun findSettlementMaxItemBonusLevel(kingdomLevel: Int) =
     } else {
         3
     }
+
+/**
+ * The size band a settlement of [level] falls in, from [settlementSizeData]'s own level ranges --
+ * so the bands live in one place instead of being re-spelled by every caller that needs them.
+ * A level below the first band reads as VILLAGE; the top band has no upper bound.
+ */
+fun settlementSizeTypeForLevel(level: Int): SettlementSizeType =
+    settlementSizeData
+        .firstOrNull { level >= it.levelFrom && (it.levelTo == null || level <= it.levelTo) }
+        ?.type
+        ?: SettlementSizeType.VILLAGE

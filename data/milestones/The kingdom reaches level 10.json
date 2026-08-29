@@ -1,0 +1,8 @@
+{
+  "id": "kingdom-level-10",
+  "name": "milestones.kingdom-level-10.name",
+  "xp": 40,
+  "enabledOnFirstRun": false,
+  "isCultMilestone": false,
+  "detectionId": "level-10"
+}

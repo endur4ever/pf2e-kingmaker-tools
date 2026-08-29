@@ -2115,7 +2115,8 @@
                 "battleDefeats": "Defeated in battle: {battles}",
                 "rivalMove": "Reinos rivais: {list}",
                 "spotlight": "Destaque: {name}",
-                "factionMoves": "Manobras de facção: {list}"
+                "factionMoves": "Manobras de facção: {list}",
+                "deed": "Feito: {name}"
             },
             "warfare": {
                 "damaged": "Damaged",
@@ -2774,6 +2775,11 @@
                     "alreadyNoted": "Essa mudança já está nas notas do Mestre.",
                     "noCampingActor": "Nenhuma ficha de acampamento para rolar um encontro."
                 }
+            },
+            "chronicle": {
+                "title": "Crônica",
+                "empty": "Nenhum marco registrado ainda.",
+                "turnLabel": "Turno {turn}"
             }
         },
         "chatMessages": {
@@ -2942,7 +2948,11 @@
                 "offerBody": "The kingdom has reached a milestone: {name} (+{xp} XP). Award it?",
                 "offerTitle": "Milestone reached!",
                 "awarded": "Milestone awarded: {name} (+{xp} XP).",
-                "dismissed": "Milestone offer dismissed: {name}."
+                "dismissed": "Milestone offer dismissed: {name}.",
+                "deedsTitle": "Feitos detectados",
+                "deedsBody": "Estas conquistas são válidas neste turno. Conceda ou descarte cada uma.",
+                "dismissAll": "Descartar tudo",
+                "dismissedAll": "{count} oferta(s) de feito descartada(s)."
             },
             "travelRoute": {
                 "title": "Travel",
@@ -4356,6 +4366,39 @@
             },
             "connect-settlement-to-capital-via-roads": {
                 "name": "Connect a settlement to your capital via roads"
+            },
+            "all-settlements-roaded": {
+                "name": "Todo assentamento ligado à capital"
+            },
+            "two-regions-claimed": {
+                "name": "Uma segunda região totalmente reivindicada"
+            },
+            "kingdom-level-10": {
+                "name": "O reino alcança o nível 10"
+            },
+            "kingdom-level-20": {
+                "name": "O reino alcança o nível 20"
+            },
+            "fame-at-maximum": {
+                "name": "A fama atinge seu limite"
+            },
+            "ruin-free-realm": {
+                "name": "Nenhuma ruína, tendo já tido alguma"
+            },
+            "unrest-zero-after-crisis": {
+                "name": "A inquietação volta a zero após chegar a 10 ou mais"
+            },
+            "ten-quiet-turns": {
+                "name": "Dez turnos seguidos sem aumento da inquietação"
+            },
+            "safe-trade-route": {
+                "name": "Uma rota comercial sobrevive cinco turnos seguidos"
+            },
+            "three-trade-agreements": {
+                "name": "Três acordos comerciais vigentes ao mesmo tempo"
+            },
+            "survived-fifty-turns": {
+                "name": "Cinquenta turnos de governo"
             }
         },
         "charters": {

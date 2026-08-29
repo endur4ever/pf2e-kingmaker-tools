@@ -1901,14 +1901,39 @@ private val buttons = listOf(
             )
         }
         val previous = deepClone(kingdom)
+        // the turn the deed was earned on: the record this End Turn just wrote, so the Chronicle
+        // can date it. Hand-ticked milestones keep a null turn rather than claiming a wrong one.
+        val awardTurn = kingdom.turnHistory?.lastOrNull()?.turn ?: kingdom.currentTurn
         kingdom.milestones = kingdom.milestones.map {
-            if (it.id == milestoneId) MilestoneChoice.copy(it, completed = true, enabled = true) else it
+            if (it.id == milestoneId) {
+                MilestoneChoice.copy(it, completed = true, enabled = true, awardedOnTurn = awardTurn)
+            } else it
         }.toTypedArray()
+        // the players' celebration beat: only AWARDED deeds reach the gazette, so a GM who
+        // declines one does not announce it to the table anyway (plan 7)
+        appendDeedGazetteLine(kingdom, milestone.name)
         beforeKingdomUpdate(previous, kingdom)
         actor.setKingdom(kingdom)
         postChatMessage(
             t("chatMessages.milestone.awarded", recordOf("name" to milestone.name, "xp" to milestone.xp)),
         )
+    },
+    ChatButton("km-offer-milestone-dismiss-all") { game, actor, _, button ->
+        // Adopting the module mid-campaign fires a dozen true deeds at once; without this the GM
+        // faces a dozen individual dismissals to silence them (plan 7).
+        if (!game.user.isGM) return@ChatButton
+        val ids = button.dataset["allIds"]?.split(",")?.filter { it.isNotBlank() } ?: return@ChatButton
+        val kingdom = actor.getKingdom() ?: return@ChatButton
+        val existing = kingdom.milestones.associateBy { it.id }
+        val missing = ids.filter { it !in existing }
+            .map { MilestoneChoice(id = it, completed = false, enabled = true, offerDismissed = true) }
+        kingdom.milestones = (kingdom.milestones.map {
+            // an ALREADY AWARDED deed is left alone: dismiss-all silences offers, it never
+            // un-awards XP the GM already granted
+            if (it.id in ids && !it.completed) MilestoneChoice.copy(it, offerDismissed = true) else it
+        } + missing).toTypedArray()
+        actor.setKingdom(kingdom)
+        postChatMessage(t("chatMessages.milestone.dismissedAll", recordOf("count" to ids.size)))
     },
     // Jump-to-settlement on the pacing-alert CHAT card. It MUST be a ChatButton (bound to #chat by
     // CSS class) — the sheet-panel copy uses data-action/_onClickAction, but that only fires inside
@@ -2133,4 +2158,21 @@ private fun markLootCardDone(button: HTMLElement) {
     val card = button.closest(".km-loot-award-card") as? HTMLElement ?: return
     card.querySelectorAll("button").asList().filterIsInstance<HTMLElement>()
         .forEach { it.setAttribute("disabled", "disabled") }
+}
+
+/**
+ * Appends one deed line to the most recent turn record's notes, GM and player copies alike.
+ *
+ * The deed is public news -- a village founded, a region claimed -- so unlike campaign clocks
+ * there is nothing to strip from the player gazette. Idempotent on the verbatim line, because a
+ * GM may award a deed, undo, and award it again.
+ */
+private fun appendDeedGazetteLine(kingdom: KingdomData, milestoneName: String) {
+    val history = kingdom.turnHistory ?: return
+    val record = history.lastOrNull() ?: return
+    val line = t("kingdom.turnGazette.deed", recordOf("name" to milestoneName))
+    fun append(existing: String?): String =
+        if (existing.isNullOrBlank()) line else if (existing.contains(line)) existing else "$existing\n$line"
+    record.notes = append(record.notes)
+    record.playerNotes = append(record.playerNotes)
 }

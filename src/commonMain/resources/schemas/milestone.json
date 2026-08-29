@@ -29,6 +29,13 @@
         },
         "isCultMilestone": {
           "type": "boolean"
+        },
+        "detectionId": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Wires this milestone to a deed detector in deedDetectors; absent = GM-awarded only"
         }
       }
     }

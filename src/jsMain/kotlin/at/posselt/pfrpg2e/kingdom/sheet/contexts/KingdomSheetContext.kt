@@ -122,6 +122,8 @@ external interface KingdomSheetContext : ValidatedHandlebarsContext {
     val armyPressureContext: ArmyPressureContext
     val pacingAlertContext: PacingAlertContext
     val sessionPrepContext: SessionPrepContext
+    /** Completed milestones, newest first; read-only and player-visible. */
+    val chronicle: Array<DeedChronicleRowContext>
     val councilVotesContext: CouncilVotesContext
     val renownCardContext: RenownCardContext
     val personalHoldingsContext: PersonalHoldingsSectionContext

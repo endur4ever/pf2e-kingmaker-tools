@@ -1,0 +1,8 @@
+{
+  "id": "two-regions-claimed",
+  "name": "milestones.two-regions-claimed.name",
+  "xp": 40,
+  "enabledOnFirstRun": false,
+  "isCultMilestone": false,
+  "detectionId": "two-regions-claimed"
+}

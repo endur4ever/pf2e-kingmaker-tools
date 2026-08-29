@@ -1283,7 +1283,8 @@
                 "battleDefeats": "Defeated in battle: {battles}",
                 "rivalMove": "Rivalisierende Reiche: {list}",
                 "spotlight": "Im Rampenlicht: {name}",
-                "factionMoves": "Fraktionszüge: {list}"
+                "factionMoves": "Fraktionszüge: {list}",
+                "deed": "Tat: {name}"
             },
             "xpRules": "XP Rules",
             "xpRulesHelp": "Adds additional milestones, gain XP buttons and increases XP for claiming hexes and converting XP based on kingdom level",
@@ -2774,6 +2775,11 @@
                     "alreadyNoted": "Dieser Wandel steht bereits in den SL-Notizen.",
                     "noCampingActor": "Kein Lager-Bogen gefunden, um eine Begegnung zu würfeln."
                 }
+            },
+            "chronicle": {
+                "title": "Chronik",
+                "empty": "Noch keine Meilensteine verzeichnet.",
+                "turnLabel": "Zug {turn}"
             }
         },
         "chatMessages": {
@@ -2942,7 +2948,11 @@
                 "offerBody": "The kingdom has reached a milestone: {name} (+{xp} XP). Award it?",
                 "offerTitle": "Milestone reached!",
                 "awarded": "Milestone awarded: {name} (+{xp} XP).",
-                "dismissed": "Milestone offer dismissed: {name}."
+                "dismissed": "Milestone offer dismissed: {name}.",
+                "deedsTitle": "Taten erkannt",
+                "deedsBody": "Diese Errungenschaften treffen ab diesem Zug zu. Jede gewähren oder verwerfen.",
+                "dismissAll": "Alle verwerfen",
+                "dismissedAll": "{count} Taten-Angebot(e) verworfen."
             },
             "travelRoute": {
                 "title": "Travel",
@@ -4356,6 +4366,39 @@
             },
             "connect-settlement-to-capital-via-roads": {
                 "name": "Connect a settlement to your capital via roads"
+            },
+            "all-settlements-roaded": {
+                "name": "Jede Siedlung ist mit der Hauptstadt verbunden"
+            },
+            "two-regions-claimed": {
+                "name": "Eine zweite Region ist vollständig beansprucht"
+            },
+            "kingdom-level-10": {
+                "name": "Das Königreich erreicht Stufe 10"
+            },
+            "kingdom-level-20": {
+                "name": "Das Königreich erreicht Stufe 20"
+            },
+            "fame-at-maximum": {
+                "name": "Der Ruhm erreicht seine Obergrenze"
+            },
+            "ruin-free-realm": {
+                "name": "Kein Ruin mehr, nachdem es einst welchen gab"
+            },
+            "unrest-zero-after-crisis": {
+                "name": "Die Unruhe fällt nach 10 oder mehr auf null"
+            },
+            "ten-quiet-turns": {
+                "name": "Zehn Züge in Folge ohne steigende Unruhe"
+            },
+            "safe-trade-route": {
+                "name": "Eine Handelsroute übersteht fünf Züge in Folge"
+            },
+            "three-trade-agreements": {
+                "name": "Drei Handelsabkommen bestehen gleichzeitig"
+            },
+            "survived-fifty-turns": {
+                "name": "Fünfzig Züge der Herrschaft"
             }
         },
         "charters": {

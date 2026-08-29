@@ -3,5 +3,6 @@
   "name": "milestones.claim-all-hexes-in-a-region.name",
   "xp": 200,
   "enabledOnFirstRun": false,
-  "isCultMilestone": false
+  "isCultMilestone": false,
+  "detectionId": "region-fully-claimed"
 }
