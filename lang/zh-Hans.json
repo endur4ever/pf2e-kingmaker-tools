@@ -2114,7 +2114,8 @@
                 "tribute": "Tribute: +{tributeRp} 资源点 collected from vassal states",
                 "battleDefeats": "Defeated in battle: {battles}",
                 "rivalMove": "敌对王国：{list}",
-                "spotlight": "聚光灯：{name}"
+                "spotlight": "聚光灯：{name}",
+                "factionMoves": "势力动向：{list}"
             },
             "warfare": {
                 "damaged": "Damaged",
@@ -2630,6 +2631,36 @@
                     "repair": "修复（{cost} 金币）",
                     "repaired": "{holding}恢复一级（欠付 {cost} 金币）。",
                     "alreadyRepaired": "已修复。"
+                }
+            },
+            "factionAgenda": {
+                "digestTitle": "势力动向",
+                "goalCompleted": "目标达成——新的议程开始",
+                "confirmShift": "应用立场变化",
+                "dismiss": "忽略",
+                "spawnThreat": "生成战争威胁",
+                "createQuest": "创建任务",
+                "alreadyApplied": "此立场变化已被应用。",
+                "targetGone": "势力“{name}”已不存在；该提议已过期。",
+                "gazette": {
+                    "expand": "{faction} 扩张了影响力（{progress}/{segments}）。",
+                    "sabotage": "{faction} 破坏了 {target}。",
+                    "courtAlly": "{faction} 拉拢 {target}。",
+                    "raiseArmy": "{faction} 集结了一支军队。",
+                    "courtPCs": "{faction} 向玩家角色派出使节。"
+                },
+                "move": {
+                    "expand": "扩张领土",
+                    "sabotageRival": "破坏对手",
+                    "courtAlly": "拉拢盟友",
+                    "raiseArmy": "集结军队",
+                    "courtPCs": "拉拢玩家角色"
+                },
+                "shiftReason": {
+                    "sabotageRival": "遭敌对势力破坏",
+                    "courtAlly": "受盟友势力拉拢",
+                    "courtPcs": "向王国派出使节",
+                    "other": "势力议程行动"
                 }
             }
         },

@@ -1,0 +1,42 @@
+<h2>{{localizeKM "kingdom.factionAgenda.digestTitle"}}</h2>
+<ul class="km-faction-moves">
+    {{#each moves}}
+        <li class="km-faction-move-row">
+            <p>{{this.line}}{{#if this.goalCompleted}} <i class="fa-solid fa-flag-checkered" data-tooltip="{{localizeKM "kingdom.factionAgenda.goalCompleted"}}"></i>{{/if}}</p>
+            {{#if this.shiftTarget}}
+                <button type="button"
+                        class="km-offer-faction-standing-shift"
+                        data-kingdom-actor-uuid="{{../actorUuid}}"
+                        data-target="{{this.shiftTarget}}"
+                        data-delta="{{this.shiftDelta}}"
+                        data-turn="{{../turn}}"
+                        data-reason="{{this.shiftReason}}"
+                        data-action="confirm">
+                    {{localizeKM "kingdom.factionAgenda.confirmShift"}} ({{this.shiftDelta}})
+                </button>
+                <button type="button"
+                        class="km-offer-faction-standing-shift"
+                        data-kingdom-actor-uuid="{{../actorUuid}}"
+                        data-action="dismiss">
+                    {{localizeKM "kingdom.factionAgenda.dismiss"}}
+                </button>
+            {{/if}}
+            {{#if this.warThreatFaction}}
+                <button type="button"
+                        class="km-offer-war-threat"
+                        data-kingdom-actor-uuid="{{../actorUuid}}"
+                        data-faction="{{this.warThreatFaction}}">
+                    {{localizeKM "kingdom.factionAgenda.spawnThreat"}}
+                </button>
+            {{/if}}
+            {{#if this.questFaction}}
+                <button type="button"
+                        class="km-offer-diplomacy-quest"
+                        data-kingdom-actor-uuid="{{../actorUuid}}"
+                        data-faction="{{this.questFaction}}">
+                    {{localizeKM "kingdom.factionAgenda.createQuest"}}
+                </button>
+            {{/if}}
+        </li>
+    {{/each}}
+</ul>

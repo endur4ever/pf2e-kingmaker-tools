@@ -128,6 +128,9 @@ data class AgendaFactionMove(
     val targetFaction: String?,
     val effect: AgendaMoveEffect,
     val goalCompleted: Boolean,
+    /** Clock reading after this move, for the gazette line; null on non-clock moves. */
+    val progressAfter: Int? = null,
+    val segments: Int? = null,
 )
 
 data class AgendaTickResult(
@@ -292,6 +295,8 @@ fun advanceAllAgendas(
             targetFaction = target?.name,
             effect = effect,
             goalCompleted = completed,
+            progressAfter = if (effect is AgendaMoveEffect.ClockSegments) progressed else null,
+            segments = if (effect is AgendaMoveEffect.ClockSegments) ticked.segments else null,
         )
         faction.copy(agenda = nextAgenda)
     }

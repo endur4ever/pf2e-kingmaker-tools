@@ -1506,7 +1506,8 @@
                 "expeditions": "Expeditions: {list}",
                 "battleDefeats": "Defeated in battle: {battles}",
                 "rivalMove": "Rival Realms: {list}",
-                "spotlight": "Spotlight: {name}"
+                "spotlight": "Spotlight: {name}",
+                "factionMoves": "Faction Moves: {list}"
             },
             "xpRules": "XP Rules",
             "xpRulesHelp": "Adds additional milestones, gain XP buttons and increases XP for claiming hexes and converting XP based on kingdom level",
@@ -2752,6 +2753,36 @@
                     "repair": "Repair ({cost} gp)",
                     "repaired": "{holding} is restored one step ({cost} gp owed).",
                     "alreadyRepaired": "Already repaired."
+                }
+            },
+            "factionAgenda": {
+                "digestTitle": "Faction Moves",
+                "goalCompleted": "Goal completed — a new agenda begins",
+                "confirmShift": "Apply standing shift",
+                "dismiss": "Dismiss",
+                "spawnThreat": "Spawn War Threat",
+                "createQuest": "Create Quest",
+                "alreadyApplied": "This standing shift was already applied.",
+                "targetGone": "Faction “{name}” no longer exists; the offer is stale.",
+                "gazette": {
+                    "expand": "{faction} expands their influence ({progress}/{segments}).",
+                    "sabotage": "{faction} sabotages {target}.",
+                    "courtAlly": "{faction} courts {target}.",
+                    "raiseArmy": "{faction} raises an army.",
+                    "courtPCs": "{faction} sends envoys to the PCs."
+                },
+                "move": {
+                    "expand": "Expand Territory",
+                    "sabotageRival": "Sabotage Rival",
+                    "courtAlly": "Court Ally",
+                    "raiseArmy": "Raise Army",
+                    "courtPCs": "Court the PCs"
+                },
+                "shiftReason": {
+                    "sabotageRival": "Sabotaged by a rival faction",
+                    "courtAlly": "Courted by an allied faction",
+                    "courtPcs": "Sent envoys to the kingdom",
+                    "other": "Faction agenda move"
                 }
             }
         },

@@ -2114,7 +2114,8 @@
                 "tribute": "Tribute: +{tributeRp} PR collected from vassal states",
                 "battleDefeats": "Defeated in battle: {battles}",
                 "rivalMove": "Reinos rivais: {list}",
-                "spotlight": "Destaque: {name}"
+                "spotlight": "Destaque: {name}",
+                "factionMoves": "Manobras de facção: {list}"
             },
             "warfare": {
                 "damaged": "Damaged",
@@ -2630,6 +2631,36 @@
                     "repair": "Reparar ({cost} po)",
                     "repaired": "{holding} é restaurada um passo ({cost} po devidas).",
                     "alreadyRepaired": "Já reparada."
+                }
+            },
+            "factionAgenda": {
+                "digestTitle": "Manobras de facção",
+                "goalCompleted": "Objetivo concluído — uma nova agenda começa",
+                "confirmShift": "Aplicar mudança de reputação",
+                "dismiss": "Descartar",
+                "spawnThreat": "Gerar ameaça de guerra",
+                "createQuest": "Criar missão",
+                "alreadyApplied": "Esta mudança de reputação já foi aplicada.",
+                "targetGone": "A facção “{name}” não existe mais; a oferta está obsoleta.",
+                "gazette": {
+                    "expand": "{faction} expande sua influência ({progress}/{segments}).",
+                    "sabotage": "{faction} sabota {target}.",
+                    "courtAlly": "{faction} corteja {target}.",
+                    "raiseArmy": "{faction} levanta um exército.",
+                    "courtPCs": "{faction} envia emissários aos PJs."
+                },
+                "move": {
+                    "expand": "Expandir território",
+                    "sabotageRival": "Sabotar rival",
+                    "courtAlly": "Cortejar aliado",
+                    "raiseArmy": "Levantar exército",
+                    "courtPCs": "Cortejar os PJs"
+                },
+                "shiftReason": {
+                    "sabotageRival": "Sabotada por uma facção rival",
+                    "courtAlly": "Cortejada por uma facção aliada",
+                    "courtPcs": "Emissários enviados ao reino",
+                    "other": "Manobra de agenda de facção"
                 }
             }
         },

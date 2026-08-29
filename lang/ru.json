@@ -2114,7 +2114,8 @@
                 "tribute": "Tribute: +{tributeRp} РО collected from vassal states",
                 "battleDefeats": "Defeated in battle: {battles}",
                 "rivalMove": "Соперничающие королевства: {list}",
-                "spotlight": "В центре внимания: {name}"
+                "spotlight": "В центре внимания: {name}",
+                "factionMoves": "Ходы фракций: {list}"
             },
             "warfare": {
                 "damaged": "Damaged",
@@ -2630,6 +2631,36 @@
                     "repair": "Починить ({cost} зм)",
                     "repaired": "{holding} восстановлено на шаг (к оплате {cost} зм).",
                     "alreadyRepaired": "Уже починено."
+                }
+            },
+            "factionAgenda": {
+                "digestTitle": "Ходы фракций",
+                "goalCompleted": "Цель достигнута — начинается новая повестка",
+                "confirmShift": "Применить сдвиг отношения",
+                "dismiss": "Отклонить",
+                "spawnThreat": "Создать военную угрозу",
+                "createQuest": "Создать задание",
+                "alreadyApplied": "Этот сдвиг отношения уже применён.",
+                "targetGone": "Фракция «{name}» больше не существует; предложение устарело.",
+                "gazette": {
+                    "expand": "{faction} расширяет своё влияние ({progress}/{segments}).",
+                    "sabotage": "{faction} саботирует {target}.",
+                    "courtAlly": "{faction} обхаживает {target}.",
+                    "raiseArmy": "{faction} собирает армию.",
+                    "courtPCs": "{faction} шлёт послов к персонажам."
+                },
+                "move": {
+                    "expand": "Расширить территорию",
+                    "sabotageRival": "Саботировать соперника",
+                    "courtAlly": "Обхаживать союзника",
+                    "raiseArmy": "Собрать армию",
+                    "courtPCs": "Обхаживать персонажей"
+                },
+                "shiftReason": {
+                    "sabotageRival": "Саботаж фракции-соперника",
+                    "courtAlly": "Внимание союзной фракции",
+                    "courtPcs": "Послы, отправленные в королевство",
+                    "other": "Ход повестки фракции"
                 }
             }
         },

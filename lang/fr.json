@@ -2114,7 +2114,8 @@
                 "tribute": "Tribute: +{tributeRp} PR collected from vassal states",
                 "battleDefeats": "Defeated in battle: {battles}",
                 "rivalMove": "Royaumes rivaux : {list}",
-                "spotlight": "Coup de projecteur : {name}"
+                "spotlight": "Coup de projecteur : {name}",
+                "factionMoves": "Manœuvres de faction : {list}"
             },
             "warfare": {
                 "damaged": "Damaged",
@@ -2630,6 +2631,36 @@
                     "repair": "Réparer ({cost} po)",
                     "repaired": "{holding} est restauré d'un cran ({cost} po dues).",
                     "alreadyRepaired": "Déjà réparé."
+                }
+            },
+            "factionAgenda": {
+                "digestTitle": "Manœuvres de faction",
+                "goalCompleted": "Objectif atteint — un nouvel agenda commence",
+                "confirmShift": "Appliquer le changement de réputation",
+                "dismiss": "Rejeter",
+                "spawnThreat": "Créer une menace de guerre",
+                "createQuest": "Créer une quête",
+                "alreadyApplied": "Ce changement de réputation a déjà été appliqué.",
+                "targetGone": "La faction « {name} » n'existe plus ; l'offre est obsolète.",
+                "gazette": {
+                    "expand": "{faction} étend son influence ({progress}/{segments}).",
+                    "sabotage": "{faction} sabote {target}.",
+                    "courtAlly": "{faction} courtise {target}.",
+                    "raiseArmy": "{faction} lève une armée.",
+                    "courtPCs": "{faction} envoie des émissaires aux PJ."
+                },
+                "move": {
+                    "expand": "Étendre le territoire",
+                    "sabotageRival": "Saboter un rival",
+                    "courtAlly": "Courtiser un allié",
+                    "raiseArmy": "Lever une armée",
+                    "courtPCs": "Courtiser les PJ"
+                },
+                "shiftReason": {
+                    "sabotageRival": "Saboté par une faction rivale",
+                    "courtAlly": "Courtisé par une faction alliée",
+                    "courtPcs": "Émissaires envoyés au royaume",
+                    "other": "Manœuvre d'agenda de faction"
                 }
             }
         },

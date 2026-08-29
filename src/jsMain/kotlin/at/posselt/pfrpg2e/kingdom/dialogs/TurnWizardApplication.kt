@@ -2,6 +2,9 @@ package at.posselt.pfrpg2e.kingdom.dialogs
 
 import kotlinx.coroutines.sync.withLock
 import com.foundryvtt.pf2e.actor.PF2ECharacter
+import at.posselt.pfrpg2e.kingdom.factionAgendaMoveSpecs
+import at.posselt.pfrpg2e.kingdom.factionAgendaArchetypeSpecs
+import at.posselt.pfrpg2e.kingdom.localizeAgendaMoveLine
 import at.posselt.pfrpg2e.kingdom.postHoldingDamageOffer
 import at.posselt.pfrpg2e.kingdom.holdingsAt
 import at.posselt.pfrpg2e.kingdom.data.RawPersonalHolding
@@ -29,6 +32,7 @@ import com.foundryvtt.pf2e.item.PF2EItem
 import at.posselt.pfrpg2e.kingdom.rivalGrowthProfilesById
 import at.posselt.pfrpg2e.kingdom.collectRivalOffers
 import at.posselt.pfrpg2e.kingdom.data.withWarOfferRecorded
+import at.posselt.pfrpg2e.kingdom.postFactionMoveDigest
 import at.posselt.pfrpg2e.kingdom.postRivalOfferDigests
 import at.posselt.pfrpg2e.kingdom.localizeRivalHeadline
 import at.posselt.pfrpg2e.kingdom.getPerformedActivities
@@ -282,6 +286,9 @@ fun runKingdomTurnTick(
         // predating the diplomacy subsystem; cast to nullable so the guard is a real
         // runtime check (matches the sibling arrays above) and tick() never sees undefined.
         groups = kingdom.groups.unsafeCast<Array<RawGroup>?>() ?: emptyArray(),
+        kingdomName = kingdom.name,
+        agendaMoves = factionAgendaMoveSpecs(),
+        agendaArchetypes = factionAgendaArchetypeSpecs(),
         // Rival realms ride the SAME chokepoint as groups, so the End Turn commit, the wizard
         // preview and the forecast adapter all see identical growth (the KDoc above forbids
         // calling tick() directly for exactly this reason).
@@ -703,6 +710,8 @@ private suspend fun performEndTurnLocked(game: Game, actor: KingdomActor): TickR
     // Rival growth is visible on the map, so the same headlines go into BOTH the GM gazette and
     // the player-safe one -- unlike campaign clocks, there is nothing secret to strip.
     val rivalHeadlines = tickResult.rivalMoves.map { localizeRivalHeadline(it) }
+    // Faction agenda lines are public by the same argument: the move is visible in the world.
+    val factionMoveLines = tickResult.factionAgendaMoves.map { localizeAgendaMoveLine(it) }
     // the Spotlight names a PC and counts their own public deeds, so it is player-safe by
     // construction and goes into BOTH gazettes -- a line that only reached the GM's whisper
     // would vanish from the campaign's written record
@@ -721,6 +730,7 @@ private suspend fun performEndTurnLocked(game: Game, actor: KingdomActor): TickR
         battleDefeats = battleDefeats,
         turn = currentTurn,
         rivalMoves = rivalHeadlines,
+        factionMoves = factionMoveLines,
         spotlight = spotlightLine,
         localize = ::t,
     )
@@ -738,6 +748,7 @@ private suspend fun performEndTurnLocked(game: Game, actor: KingdomActor): TickR
         battleDefeats = battleDefeats,
         turn = currentTurn,
         rivalMoves = rivalHeadlines,
+        factionMoves = factionMoveLines,
         spotlight = spotlightLine,
         localize = ::t,
     )
@@ -902,6 +913,13 @@ private suspend fun performEndTurnLocked(game: Game, actor: KingdomActor): TickR
         currentTurn = currentTurn,
         warRows = rivalWarRows,
         shiftRows = rivalShiftRows,
+    )
+
+    postFactionMoveDigest(
+        game = game,
+        actorUuid = actor.uuid,
+        currentTurn = currentTurn,
+        moves = tickResult.factionAgendaMoves,
     )
 
     // Post clock tick events to chat

@@ -2114,7 +2114,8 @@
                 "tribute": "Tribute: +{tributeRp} PZ collected from vassal states",
                 "battleDefeats": "Defeated in battle: {battles}",
                 "rivalMove": "Rywalizujące królestwa: {list}",
-                "spotlight": "W centrum uwagi: {name}"
+                "spotlight": "W centrum uwagi: {name}",
+                "factionMoves": "Ruchy frakcji: {list}"
             },
             "warfare": {
                 "damaged": "Damaged",
@@ -2630,6 +2631,36 @@
                     "repair": "Napraw ({cost} sz)",
                     "repaired": "{holding} przywrócono o stopień ({cost} sz do zapłaty).",
                     "alreadyRepaired": "Już naprawiono."
+                }
+            },
+            "factionAgenda": {
+                "digestTitle": "Ruchy frakcji",
+                "goalCompleted": "Cel osiągnięty — zaczyna się nowa agenda",
+                "confirmShift": "Zastosuj zmianę reputacji",
+                "dismiss": "Odrzuć",
+                "spawnThreat": "Utwórz zagrożenie wojenne",
+                "createQuest": "Utwórz zadanie",
+                "alreadyApplied": "Ta zmiana reputacji została już zastosowana.",
+                "targetGone": "Frakcja „{name}” już nie istnieje; oferta jest nieaktualna.",
+                "gazette": {
+                    "expand": "{faction} rozszerza swoje wpływy ({progress}/{segments}).",
+                    "sabotage": "{faction} sabotuje {target}.",
+                    "courtAlly": "{faction} zabiega o {target}.",
+                    "raiseArmy": "{faction} formuje armię.",
+                    "courtPCs": "{faction} wysyła posłów do BG."
+                },
+                "move": {
+                    "expand": "Rozszerz terytorium",
+                    "sabotageRival": "Sabotuj rywala",
+                    "courtAlly": "Zabiegaj o sojusznika",
+                    "raiseArmy": "Sformuj armię",
+                    "courtPCs": "Zabiegaj o BG"
+                },
+                "shiftReason": {
+                    "sabotageRival": "Sabotaż rywalizującej frakcji",
+                    "courtAlly": "Względy sojuszniczej frakcji",
+                    "courtPcs": "Posłowie wysłani do królestwa",
+                    "other": "Ruch agendy frakcji"
                 }
             }
         },

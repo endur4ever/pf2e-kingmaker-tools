@@ -2114,7 +2114,8 @@
                 "tribute": "Tribute: +{tributeRp} PR collected from vassal states",
                 "battleDefeats": "Defeated in battle: {battles}",
                 "rivalMove": "Regni rivali: {list}",
-                "spotlight": "Sotto i riflettori: {name}"
+                "spotlight": "Sotto i riflettori: {name}",
+                "factionMoves": "Mosse delle fazioni: {list}"
             },
             "warfare": {
                 "damaged": "Damaged",
@@ -2630,6 +2631,36 @@
                     "repair": "Ripara ({cost} mo)",
                     "repaired": "{holding} è ripristinato di un grado ({cost} mo dovute).",
                     "alreadyRepaired": "Già riparato."
+                }
+            },
+            "factionAgenda": {
+                "digestTitle": "Mosse delle fazioni",
+                "goalCompleted": "Obiettivo raggiunto — inizia una nuova agenda",
+                "confirmShift": "Applica variazione di reputazione",
+                "dismiss": "Ignora",
+                "spawnThreat": "Genera minaccia di guerra",
+                "createQuest": "Crea missione",
+                "alreadyApplied": "Questa variazione di reputazione è già stata applicata.",
+                "targetGone": "La fazione “{name}” non esiste più; l'offerta è obsoleta.",
+                "gazette": {
+                    "expand": "{faction} espande la propria influenza ({progress}/{segments}).",
+                    "sabotage": "{faction} sabota {target}.",
+                    "courtAlly": "{faction} corteggia {target}.",
+                    "raiseArmy": "{faction} arruola un esercito.",
+                    "courtPCs": "{faction} invia emissari ai PG."
+                },
+                "move": {
+                    "expand": "Espandere il territorio",
+                    "sabotageRival": "Sabotare un rivale",
+                    "courtAlly": "Corteggiare un alleato",
+                    "raiseArmy": "Arruolare un esercito",
+                    "courtPCs": "Corteggiare i PG"
+                },
+                "shiftReason": {
+                    "sabotageRival": "Sabotata da una fazione rivale",
+                    "courtAlly": "Corteggiata da una fazione alleata",
+                    "courtPcs": "Emissari inviati al regno",
+                    "other": "Mossa di agenda di fazione"
                 }
             }
         },

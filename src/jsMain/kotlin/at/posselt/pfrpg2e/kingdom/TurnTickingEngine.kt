@@ -1,5 +1,8 @@
 package at.posselt.pfrpg2e.kingdom
 
+import at.posselt.pfrpg2e.data.kingdom.AgendaArchetypeSpec
+import at.posselt.pfrpg2e.data.kingdom.AgendaFactionMove
+import at.posselt.pfrpg2e.data.kingdom.AgendaMoveSpec
 import at.posselt.pfrpg2e.kingdom.data.RawPersonalHolding
 import at.posselt.pfrpg2e.data.kingdom.HoldingIncomeLine
 import at.posselt.pfrpg2e.campaign.CampaignClock
@@ -131,6 +134,8 @@ data class TickResult(
 	val holdingIncomeOffers: Array<HoldingIncomeLine> = emptyArray(),
 	/** At most one headline-worthy change per realm, for the gazette. */
 	val rivalMoves: Array<RivalMove> = emptyArray(),
+	/** Faction agenda moves this turn -- intents only; every external effect is a GM offer. */
+	val factionAgendaMoves: List<AgendaFactionMove> = emptyList(),
 )
 
 /**
@@ -209,6 +214,10 @@ object TurnTickingEngine {
 		personalHoldings: Array<RawPersonalHolding> = emptyArray(),
 		holdingOwnerLevels: Map<String, Int> = emptyMap(),
 		rivalProfiles: Map<String, at.posselt.pfrpg2e.data.kingdom.RivalGrowthProfile> = emptyMap(),
+		/** Seed identity for the agenda RNG; the plan uses the kingdom NAME (KingdomData has no id). */
+		kingdomName: String = "",
+		agendaMoves: Map<String, AgendaMoveSpec> = emptyMap(),
+		agendaArchetypes: Map<String, AgendaArchetypeSpec> = emptyMap(),
 	): TickResult {
 		val changes = mutableListOf<TickChange>()
 
@@ -484,6 +493,21 @@ object TurnTickingEngine {
 			turn = currentTurn,
 		)
 
+		// Faction agendas advance beside rival growth: same chokepoint, so preview and commit see
+		// identical moves. Empty catalogs keep the feature inert (and every pre-agenda test green).
+		val agendaOutcome = if (agendaMoves.isNotEmpty() && agendaArchetypes.isNotEmpty() && driftedGroups.isNotEmpty()) {
+			advanceFactionAgendasOnGroups(
+				groups = driftedGroups,
+				kingdomName = kingdomName,
+				currentTurn = currentTurn,
+				moves = agendaMoves,
+				archetypes = agendaArchetypes,
+				warThreats = tickedThreats,
+			)
+		} else {
+			null
+		}
+
 		return TickResult(
 					supernaturalSolutions = 0,
 					creativeSolutions = 0,
@@ -506,11 +530,12 @@ object TurnTickingEngine {
 					xpAwarded = xpAwarded,
 					bonusResourceDice = 0,
 					activeBattles = archivedBattles,
-					groups = driftedGroups,
+					groups = agendaOutcome?.groups ?: driftedGroups,
 					rivalRealms = grownRivals,
 					updatedPersonalHoldings = holdingAccrual.holdings,
 					holdingIncomeOffers = holdingAccrual.offers.toTypedArray(),
 					rivalMoves = rivalMoves.toTypedArray(),
+					factionAgendaMoves = agendaOutcome?.moves ?: emptyList(),
 					factionStandingDrift = factionStandingDriftPerTurn != 0,
 					warThreatOffers = warThreatOffers,
 					diplomacyQuestOffers = diplomacyQuestOffers,

@@ -99,6 +99,8 @@ fun formatTurnGazette(
     /** Pre-localized rival headlines (rival-realms SS4.4); the caller localizes because the
      *  headline template is picked from an enum pool, not from a single key. */
     rivalMoves: List<String> = emptyList(),
+    /** Pre-localized faction agenda move lines; public per plan 7.1 (what happened, never why). */
+    factionMoves: List<String> = emptyList(),
     spotlight: String? = null,
     localize: (key: String, data: AnyObject) -> String = ::defaultLocalize,
 ): String? {
@@ -114,6 +116,12 @@ fun formatTurnGazette(
         val data = js("{}")
         data.list = rivalMoves.joinToString("; ")
         gazetteEvents.add(localize("kingdom.turnGazette.rivalMove", data.unsafeCast<AnyObject>()))
+    }
+
+    if (factionMoves.isNotEmpty()) {
+        val data = js("{}")
+        data.list = factionMoves.joinToString("; ")
+        gazetteEvents.add(localize("kingdom.turnGazette.factionMoves", data.unsafeCast<AnyObject>()))
     }
 
     if (!spotlight.isNullOrBlank()) {
@@ -253,6 +261,7 @@ fun defaultLocalize(key: String, data: AnyObject): String {
         "kingdom.turnGazette.expeditionOther" -> "${dyn.outcomeLabel} ${dyn.title} — ${dyn.companionNames}${dyn.loot}${dyn.faction}"
         "kingdom.turnGazette.expeditions" -> "Expeditions: ${dyn.list}"
         "kingdom.turnGazette.rivalMove" -> "Rival Realms: ${dyn.list}"
+        "kingdom.turnGazette.factionMoves" -> "Faction Moves: ${dyn.list}"
         "kingdom.turnGazette.spotlight" -> "Spotlight: ${dyn.name}"
         else -> key
     }

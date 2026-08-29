@@ -1282,7 +1282,8 @@
                 "expeditions": "Expeditionen: {list}",
                 "battleDefeats": "Defeated in battle: {battles}",
                 "rivalMove": "Rivalisierende Reiche: {list}",
-                "spotlight": "Im Rampenlicht: {name}"
+                "spotlight": "Im Rampenlicht: {name}",
+                "factionMoves": "Fraktionszüge: {list}"
             },
             "xpRules": "XP Rules",
             "xpRulesHelp": "Adds additional milestones, gain XP buttons and increases XP for claiming hexes and converting XP based on kingdom level",
@@ -2630,6 +2631,36 @@
                     "repair": "Reparieren ({cost} GM)",
                     "repaired": "{holding} wird um eine Stufe wiederhergestellt ({cost} GM fällig).",
                     "alreadyRepaired": "Bereits repariert."
+                }
+            },
+            "factionAgenda": {
+                "digestTitle": "Fraktionszüge",
+                "goalCompleted": "Ziel erreicht — eine neue Agenda beginnt",
+                "confirmShift": "Ansehensänderung anwenden",
+                "dismiss": "Verwerfen",
+                "spawnThreat": "Kriegsdrohung erzeugen",
+                "createQuest": "Quest erstellen",
+                "alreadyApplied": "Diese Ansehensänderung wurde bereits angewendet.",
+                "targetGone": "Fraktion „{name}“ existiert nicht mehr; das Angebot ist veraltet.",
+                "gazette": {
+                    "expand": "{faction} weitet seinen Einfluss aus ({progress}/{segments}).",
+                    "sabotage": "{faction} sabotiert {target}.",
+                    "courtAlly": "{faction} umwirbt {target}.",
+                    "raiseArmy": "{faction} hebt eine Armee aus.",
+                    "courtPCs": "{faction} entsendet Gesandte zu den SC."
+                },
+                "move": {
+                    "expand": "Gebiet ausweiten",
+                    "sabotageRival": "Rivalen sabotieren",
+                    "courtAlly": "Verbündeten umwerben",
+                    "raiseArmy": "Armee ausheben",
+                    "courtPCs": "Die SC umwerben"
+                },
+                "shiftReason": {
+                    "sabotageRival": "Von einer rivalisierenden Fraktion sabotiert",
+                    "courtAlly": "Von einer verbündeten Fraktion umworben",
+                    "courtPcs": "Gesandte ins Königreich geschickt",
+                    "other": "Fraktions-Agenda-Zug"
                 }
             }
         },

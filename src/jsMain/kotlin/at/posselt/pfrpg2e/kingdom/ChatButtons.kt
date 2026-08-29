@@ -16,6 +16,7 @@ import at.posselt.pfrpg2e.data.kingdom.ABSTAIN_OPTION
 import at.posselt.pfrpg2e.data.kingdom.RIVAL_STANDING_SHIFT_DELTA
 import at.posselt.pfrpg2e.data.kingdom.applyStandingDelta
 import at.posselt.pfrpg2e.kingdom.data.RawFactionStandingEntry
+import at.posselt.pfrpg2e.kingdom.data.RawGroup
 import at.posselt.pfrpg2e.kingdom.data.RawRivalRealm
 import at.posselt.pfrpg2e.companion.LevelUpResult
 import at.posselt.pfrpg2e.companion.applyCompanionXp
@@ -254,6 +255,49 @@ private val buttons = listOf(
                     actor.setKingdom(kingdom)
                 }
             }
+        }
+    },
+    ChatButton("km-offer-faction-standing-shift") { game, actor, event, button ->
+        // GM-confirmed faction-agenda standing shift (faction-agenda plan 6.1): the tick only
+        // EMITS the intent; this click is the sole writer. Idempotency is the standing log
+        // itself -- an identical (turn, delta, reason) entry means the shift already landed.
+        if (!game.user.isGM) return@ChatButton
+        if (button.dataset["action"] == "dismiss") {
+            markFactionMoveRowDone(button)
+            return@ChatButton
+        }
+        val target = button.dataset["target"] ?: return@ChatButton
+        val delta = button.dataset["delta"]?.toIntOrNull() ?: return@ChatButton
+        val turn = button.dataset["turn"]?.toIntOrNull() ?: return@ChatButton
+        val reason = button.dataset["reason"] ?: return@ChatButton
+        actor.getKingdom()?.let { kingdom ->
+            val groups = kingdom.groups ?: return@let
+            val index = groups.indexOfFirst { it.name == target }
+            if (index < 0) {
+                // the GM renamed or deleted the faction after the card posted: stale, not wrong
+                ui.notifications.warn(t("kingdom.factionAgenda.targetGone", recordOf("name" to target)))
+                return@let
+            }
+            val group = groups[index]
+            val already = group.standingLog
+                ?.any { it.turn == turn && it.delta == delta && it.reason == reason } == true
+            if (already) {
+                ui.notifications.info(t("kingdom.factionAgenda.alreadyApplied"))
+                markFactionMoveRowDone(button)
+                return@let
+            }
+            val after = applyStandingDelta(group.standing, delta)
+            groups[index] = RawGroup.copy(
+                group,
+                standing = after,
+                standingLog = appendStandingEntry(
+                    group.standingLog,
+                    RawFactionStandingEntry(turn = turn, delta = delta, reason = reason),
+                ),
+            )
+            kingdom.groups = groups
+            actor.setKingdom(kingdom)
+            markFactionMoveRowDone(button)
         }
     },
     ChatButton("km-offer-war-threat") { game, actor, event, button ->
@@ -2002,6 +2046,14 @@ fun bindChatButtons(game: Game, dispatcher: ActionDispatcher? = null) {
         }
     }
 }
+/** Cosmetic, per-client: fades one faction-move row; the real guard is the standing log. */
+private fun markFactionMoveRowDone(button: HTMLElement) {
+    val row = button.closest(".km-faction-move-row") as? HTMLElement ?: return
+    row.classList.add("km-pressure-row-done")
+    row.querySelectorAll("button").asList().filterIsInstance<HTMLElement>()
+        .forEach { it.setAttribute("disabled", "disabled") }
+}
+
 /** Cosmetic, per-client: fades the handled row. The real double-apply guard is lastHandledDay. */
 private fun markPressureRowDone(button: HTMLElement) {
     val row = button.closest(".km-pressure-row") as? HTMLElement ?: return
