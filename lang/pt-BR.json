@@ -8183,6 +8183,59 @@
                 "noPartyActor": "Ainda não existe um ator de grupo; crie um primeiro.",
                 "noScenes": "Este mundo não tem cenas para escolher."
             }
+        },
+        "subsystems": {
+            "trackersTitle": "Rastreadores de influência e pesquisa",
+            "openTrackers": "Influência e pesquisa",
+            "points": "Pontos",
+            "rp": "PP",
+            "acted": "Já agiu nesta rodada",
+            "newRound": "Nova rodada",
+            "participants": "Participantes",
+            "discoveries": "Descobertas",
+            "thresholds": "Limiares",
+            "resistances": "Resistências",
+            "weaknesses": "Fraquezas",
+            "toggleVisible": "Alternar visibilidade para jogadores",
+            "confirmDelete": "Excluir este rastreador? Esta ação não pode ser desfeita.",
+            "influence": {
+                "title": "Encontros de influência",
+                "empty": "Nenhum encontro de influência ainda.",
+                "add": "Adicionar encontro de influência",
+                "edit": "Editar encontro de influência"
+            },
+            "research": {
+                "title": "Projetos de pesquisa",
+                "empty": "Nenhum projeto de pesquisa ainda.",
+                "add": "Adicionar projeto de pesquisa",
+                "edit": "Editar projeto de pesquisa"
+            },
+            "outcome": {
+                "critSuccess": "Sucesso crítico",
+                "success": "Sucesso",
+                "failure": "Falha",
+                "critFailure": "Falha crítica"
+            },
+            "dialog": {
+                "name": "Nome",
+                "npc": "NPC",
+                "description": "Descrição",
+                "discoveries": "Testes de descoberta",
+                "influenceSkills": "Perícias de influência",
+                "thresholds": "Limiares",
+                "resistances": "Resistências",
+                "weaknesses": "Fraquezas",
+                "library": "Biblioteca",
+                "maxPoints": "Pontos máximos",
+                "checks": "Testes de pesquisa",
+                "checkLineHelp": "Um por linha: perícia | CD",
+                "thresholdLineHelp": "Um por linha: pontos | efeito",
+                "traitLineHelp": "Um por linha: rótulo | modificador (ex.: bajulação | -1)",
+                "badLines": "Algumas linhas não puderam ser lidas; verifique o formato."
+            },
+            "toggleResolved": "Marcar como resolvido / reabrir",
+            "resolvedGuard": "Este rastreador está resolvido; reabra-o para registrar testes.",
+            "corruptStore": "A configuração do armazém de subsistemas contém JSON ilegível; gravação recusada. Corrija ou limpe a configuração de mundo 'subsystemStore'."
         }
     }
 }

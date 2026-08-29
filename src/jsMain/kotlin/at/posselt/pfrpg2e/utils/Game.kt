@@ -10,6 +10,7 @@ import kotlin.js.Promise
 @Suppress("unused")
 @JsPlainObject
 external interface ToolsMacros {
+    val openSubsystemTrackers: () -> Unit
     val toggleWeatherMacro: () -> Unit
     val toggleShelteredMacro: () -> Unit
     val setCurrentWeatherMacro: () -> Unit

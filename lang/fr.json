@@ -8183,6 +8183,59 @@
                 "noPartyActor": "Aucun acteur de groupe n'existe encore ; créez-en un d'abord.",
                 "noScenes": "Ce monde n'a aucune scène à choisir."
             }
+        },
+        "subsystems": {
+            "trackersTitle": "Suivis d'influence et de recherche",
+            "openTrackers": "Influence et recherche",
+            "points": "Points",
+            "rp": "PR",
+            "acted": "A déjà agi ce tour",
+            "newRound": "Nouvelle manche",
+            "participants": "Participants",
+            "discoveries": "Découvertes",
+            "thresholds": "Seuils",
+            "resistances": "Résistances",
+            "weaknesses": "Faiblesses",
+            "toggleVisible": "Basculer la visibilité pour les joueurs",
+            "confirmDelete": "Supprimer ce suivi ? Cette action est irréversible.",
+            "influence": {
+                "title": "Rencontres d'influence",
+                "empty": "Aucune rencontre d'influence pour le moment.",
+                "add": "Ajouter une rencontre d'influence",
+                "edit": "Modifier la rencontre d'influence"
+            },
+            "research": {
+                "title": "Projets de recherche",
+                "empty": "Aucun projet de recherche pour le moment.",
+                "add": "Ajouter un projet de recherche",
+                "edit": "Modifier le projet de recherche"
+            },
+            "outcome": {
+                "critSuccess": "Succès critique",
+                "success": "Succès",
+                "failure": "Échec",
+                "critFailure": "Échec critique"
+            },
+            "dialog": {
+                "name": "Nom",
+                "npc": "PNJ",
+                "description": "Description",
+                "discoveries": "Tests de découverte",
+                "influenceSkills": "Compétences d'influence",
+                "thresholds": "Seuils",
+                "resistances": "Résistances",
+                "weaknesses": "Faiblesses",
+                "library": "Bibliothèque",
+                "maxPoints": "Points maximum",
+                "checks": "Tests de recherche",
+                "checkLineHelp": "Un par ligne : compétence | DD",
+                "thresholdLineHelp": "Un par ligne : points | effet",
+                "traitLineHelp": "Un par ligne : libellé | modificateur (p. ex. flatterie | -1)",
+                "badLines": "Certaines lignes n'ont pas pu être lues ; vérifiez leur format."
+            },
+            "toggleResolved": "Marquer comme résolu / rouvrir",
+            "resolvedGuard": "Ce suivi est résolu ; rouvrez-le pour enregistrer des tests.",
+            "corruptStore": "Le paramètre du magasin de sous-systèmes contient du JSON illisible ; écriture refusée. Réparez ou videz le paramètre de monde « subsystemStore »."
         }
     }
 }

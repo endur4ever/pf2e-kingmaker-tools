@@ -1,0 +1,179 @@
+<div class="km-subsystem-trackers">
+    <section class="km-sub-pane">
+        <h2>
+            <i class="fa-solid fa-comments"></i> {{localizeKM "subsystems.influence.title"}}
+            {{#if isGM}}
+                <button type="button" data-action="add-influence"><i class="fa-solid fa-plus"></i></button>
+            {{/if}}
+        </h2>
+        {{#unless hasEncounters}}<p class="km-sub-empty">{{localizeKM "subsystems.influence.empty"}}</p>{{/unless}}
+        {{#each encounters}}
+            <details class="km-sub-card{{#if this.isResolved}} km-sub-card--resolved{{/if}}" open>
+                <summary>
+                    <b>{{this.name}}</b> — {{this.npcName}}
+                    <span class="km-sub-points">{{this.points}} {{localizeKM "subsystems.points"}}</span>
+                    {{#if this.isGM}}
+                        <span class="km-sub-controls">
+                            <button type="button" data-action="toggle-visible" data-id="{{this.id}}" data-tooltip="{{localizeKM "subsystems.toggleVisible"}}"><i class="fa-solid {{#if this.visibleToPlayers}}fa-eye{{else}}fa-eye-slash{{/if}}"></i></button>
+                            <button type="button" data-action="toggle-resolved" data-id="{{this.id}}" data-tooltip="{{localizeKM "subsystems.toggleResolved"}}"><i class="fa-solid fa-flag-checkered"></i></button>
+                            <button type="button" data-action="edit-influence" data-id="{{this.id}}"><i class="fa-solid fa-sliders"></i></button>
+                            <button type="button" data-action="delete-influence" data-id="{{this.id}}"><i class="fa-solid fa-trash"></i></button>
+                        </span>
+                    {{/if}}
+                </summary>
+                {{#if this.description}}<p class="km-sub-desc">{{this.description}}</p>{{/if}}
+                {{#if this.resistanceSummary}}<p class="km-sub-traits"><b>{{localizeKM "subsystems.resistances"}}:</b> {{this.resistanceSummary}}</p>{{/if}}
+                {{#if this.weaknessSummary}}<p class="km-sub-traits"><b>{{localizeKM "subsystems.weaknesses"}}:</b> {{this.weaknessSummary}}</p>{{/if}}
+
+                {{#if this.discoveries.length}}
+                    <h4>{{localizeKM "subsystems.discoveries"}}</h4>
+                    <ul class="km-sub-rows">
+                        {{#each this.discoveries}}
+                            <li>{{this.skill}} (DC {{this.dc}}){{#if this.note}} <span class="km-sub-note">{{this.note}}</span>{{/if}}
+                                {{#if ../isGM}}
+                                    <button type="button" data-action="toggle-reveal" data-id="{{../id}}" data-kind="discovery" data-index="{{this.index}}"
+                                            class="{{#if this.revealed}}km-sub-revealed{{/if}}"><i class="fa-solid fa-eye"></i></button>
+                                {{/if}}
+                            </li>
+                        {{/each}}
+                    </ul>
+                {{/if}}
+                {{#if this.influenceSkills.length}}
+                    <h4>{{localizeKM "subsystems.dialog.influenceSkills"}}</h4>
+                    <ul class="km-sub-rows">
+                        {{#each this.influenceSkills}}
+                            <li>{{this.skill}} (DC {{this.dc}}){{#if this.note}} <span class="km-sub-note">{{this.note}}</span>{{/if}}
+                                {{#if ../isGM}}
+                                    <button type="button" data-action="toggle-reveal" data-id="{{../id}}" data-kind="skill" data-index="{{this.index}}"
+                                            class="{{#if this.revealed}}km-sub-revealed{{/if}}"><i class="fa-solid fa-eye"></i></button>
+                                {{/if}}
+                            </li>
+                        {{/each}}
+                    </ul>
+                {{/if}}
+                {{#if this.thresholds.length}}
+                    <h4>{{localizeKM "subsystems.thresholds"}}</h4>
+                    <ul class="km-sub-rows">
+                        {{#each this.thresholds}}
+                            <li class="{{#if this.reached}}km-sub-reached{{/if}}">
+                                {{this.points}}{{#if this.effect}} — {{this.effect}}{{/if}}
+                                {{#if ../isGM}}
+                                    <button type="button" data-action="toggle-reveal" data-id="{{../id}}" data-kind="threshold" data-index="{{this.index}}"
+                                            class="{{#if this.revealed}}km-sub-revealed{{/if}}"><i class="fa-solid fa-eye"></i></button>
+                                {{/if}}
+                            </li>
+                        {{/each}}
+                    </ul>
+                {{/if}}
+                {{#if this.participants.length}}
+                    <h4>{{localizeKM "subsystems.participants"}}
+                        {{#if this.isGM}}<button type="button" data-action="new-round" data-id="{{this.id}}">{{localizeKM "subsystems.newRound"}}</button>{{/if}}
+                    </h4>
+                    <ul class="km-sub-rows">
+                        {{#each this.participants}}
+                            <li class="{{#if this.acted}}km-sub-acted{{/if}}">{{this.name}}: {{this.points}}{{#if this.acted}} <i class="fa-solid fa-check" data-tooltip="{{localizeKM "subsystems.acted"}}"></i>{{/if}}</li>
+                        {{/each}}
+                    </ul>
+                {{/if}}
+
+                {{#if this.influenceSkills.length}}{{#if this.isGM}}
+                    <div class="km-sub-record">
+                        <select data-role="skill">
+                            {{#each this.influenceSkills}}<option value="{{this.skill}}">{{this.skill}} (DC {{this.dc}})</option>{{/each}}
+                        </select>
+                        <select data-role="pc">
+                            <option value="">—</option>
+                            {{#each @root.partyOptions}}<option value="{{this.uuid}}">{{this.name}}</option>{{/each}}
+                        </select>
+                        <button type="button" data-action="record-check" data-id="{{this.id}}" data-outcome="criticalSuccess">{{localizeKM "subsystems.outcome.critSuccess"}}</button>
+                        <button type="button" data-action="record-check" data-id="{{this.id}}" data-outcome="success">{{localizeKM "subsystems.outcome.success"}}</button>
+                        <button type="button" data-action="record-check" data-id="{{this.id}}" data-outcome="failure">{{localizeKM "subsystems.outcome.failure"}}</button>
+                        <button type="button" data-action="record-check" data-id="{{this.id}}" data-outcome="criticalFailure">{{localizeKM "subsystems.outcome.critFailure"}}</button>
+                    </div>
+                {{/if}}{{/if}}
+                {{#if this.recentLog.length}}
+                    <ul class="km-sub-log">
+                        {{#each this.recentLog}}<li>{{this.skill}} — {{this.outcome}} ({{this.delta}})</li>{{/each}}
+                    </ul>
+                {{/if}}
+            </details>
+        {{/each}}
+    </section>
+
+    <section class="km-sub-pane">
+        <h2>
+            <i class="fa-solid fa-book-open"></i> {{localizeKM "subsystems.research.title"}}
+            {{#if isGM}}
+                <button type="button" data-action="add-research"><i class="fa-solid fa-plus"></i></button>
+            {{/if}}
+        </h2>
+        {{#unless hasProjects}}<p class="km-sub-empty">{{localizeKM "subsystems.research.empty"}}</p>{{/unless}}
+        {{#each projects}}
+            <details class="km-sub-card{{#if this.isResolved}} km-sub-card--resolved{{/if}}" open>
+                <summary>
+                    <b>{{this.name}}</b>{{#if this.libraryName}} — {{this.libraryName}}{{/if}}
+                    <span class="km-sub-points">{{this.points}}{{#if this.maxPoints}}/{{this.maxPoints}}{{/if}} {{localizeKM "subsystems.rp"}}</span>
+                    {{#if this.isGM}}
+                        <span class="km-sub-controls">
+                            <button type="button" data-action="toggle-visible" data-id="{{this.id}}" data-tooltip="{{localizeKM "subsystems.toggleVisible"}}"><i class="fa-solid {{#if this.visibleToPlayers}}fa-eye{{else}}fa-eye-slash{{/if}}"></i></button>
+                            <button type="button" data-action="toggle-resolved" data-id="{{this.id}}" data-tooltip="{{localizeKM "subsystems.toggleResolved"}}"><i class="fa-solid fa-flag-checkered"></i></button>
+                            <button type="button" data-action="edit-research" data-id="{{this.id}}"><i class="fa-solid fa-sliders"></i></button>
+                            <button type="button" data-action="delete-research" data-id="{{this.id}}"><i class="fa-solid fa-trash"></i></button>
+                        </span>
+                    {{/if}}
+                </summary>
+                {{#if this.maxPoints}}
+                    <div class="km-sub-bar"><span class="km-sub-bar__fill" style="width: {{this.progressPct}}%"></span></div>
+                {{/if}}
+                {{#if this.description}}<p class="km-sub-desc">{{this.description}}</p>{{/if}}
+                {{#if this.thresholds.length}}
+                    <h4>{{localizeKM "subsystems.thresholds"}}</h4>
+                    <ul class="km-sub-rows">
+                        {{#each this.thresholds}}
+                            <li class="{{#if this.reached}}km-sub-reached{{/if}}">
+                                {{this.points}}{{#if this.effect}} — {{this.effect}}{{/if}}
+                                {{#if ../isGM}}
+                                    <button type="button" data-action="toggle-reveal" data-id="{{../id}}" data-kind="threshold" data-index="{{this.index}}"
+                                            class="{{#if this.revealed}}km-sub-revealed{{/if}}"><i class="fa-solid fa-eye"></i></button>
+                                {{/if}}
+                            </li>
+                        {{/each}}
+                    </ul>
+                {{/if}}
+                {{#if this.checks.length}}
+                    <h4>{{localizeKM "subsystems.dialog.checks"}}</h4>
+                    <ul class="km-sub-rows">
+                        {{#each this.checks}}
+                            <li>{{this.skill}} (DC {{this.dc}}){{#if this.note}} <span class="km-sub-note">{{this.note}}</span>{{/if}}
+                                {{#if ../isGM}}
+                                    <button type="button" data-action="toggle-reveal" data-id="{{../id}}" data-kind="check" data-index="{{this.index}}"
+                                            class="{{#if this.revealed}}km-sub-revealed{{/if}}"><i class="fa-solid fa-eye"></i></button>
+                                {{/if}}
+                            </li>
+                        {{/each}}
+                    </ul>
+                {{/if}}
+                {{#if this.checks.length}}{{#if this.isGM}}
+                    <div class="km-sub-record">
+                        <select data-role="skill">
+                            {{#each this.checks}}<option value="{{this.skill}}">{{this.skill}} (DC {{this.dc}})</option>{{/each}}
+                        </select>
+                        <select data-role="pc">
+                            <option value="">—</option>
+                            {{#each @root.partyOptions}}<option value="{{this.uuid}}">{{this.name}}</option>{{/each}}
+                        </select>
+                        <button type="button" data-action="record-check" data-id="{{this.id}}" data-outcome="criticalSuccess">{{localizeKM "subsystems.outcome.critSuccess"}}</button>
+                        <button type="button" data-action="record-check" data-id="{{this.id}}" data-outcome="success">{{localizeKM "subsystems.outcome.success"}}</button>
+                        <button type="button" data-action="record-check" data-id="{{this.id}}" data-outcome="failure">{{localizeKM "subsystems.outcome.failure"}}</button>
+                        <button type="button" data-action="record-check" data-id="{{this.id}}" data-outcome="criticalFailure">{{localizeKM "subsystems.outcome.critFailure"}}</button>
+                    </div>
+                {{/if}}{{/if}}
+                {{#if this.recentLog.length}}
+                    <ul class="km-sub-log">
+                        {{#each this.recentLog}}<li>{{this.skill}} — {{this.outcome}} ({{this.delta}})</li>{{/each}}
+                    </ul>
+                {{/if}}
+            </details>
+        {{/each}}
+    </section>
+</div>

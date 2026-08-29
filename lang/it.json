@@ -8183,6 +8183,59 @@
                 "noPartyActor": "Non esiste ancora un attore gruppo; creane uno prima.",
                 "noScenes": "Questo mondo non ha scene tra cui scegliere."
             }
+        },
+        "subsystems": {
+            "trackersTitle": "Tracciatori di influenza e ricerca",
+            "openTrackers": "Influenza e ricerca",
+            "points": "Punti",
+            "rp": "PR",
+            "acted": "Ha già agito questo round",
+            "newRound": "Nuovo round",
+            "participants": "Partecipanti",
+            "discoveries": "Scoperte",
+            "thresholds": "Soglie",
+            "resistances": "Resistenze",
+            "weaknesses": "Debolezze",
+            "toggleVisible": "Attiva/disattiva la visibilità per i giocatori",
+            "confirmDelete": "Eliminare questo tracciatore? L'operazione è irreversibile.",
+            "influence": {
+                "title": "Incontri di influenza",
+                "empty": "Nessun incontro di influenza al momento.",
+                "add": "Aggiungi incontro di influenza",
+                "edit": "Modifica incontro di influenza"
+            },
+            "research": {
+                "title": "Progetti di ricerca",
+                "empty": "Nessun progetto di ricerca al momento.",
+                "add": "Aggiungi progetto di ricerca",
+                "edit": "Modifica progetto di ricerca"
+            },
+            "outcome": {
+                "critSuccess": "Successo critico",
+                "success": "Successo",
+                "failure": "Fallimento",
+                "critFailure": "Fallimento critico"
+            },
+            "dialog": {
+                "name": "Nome",
+                "npc": "PNG",
+                "description": "Descrizione",
+                "discoveries": "Prove di scoperta",
+                "influenceSkills": "Abilità di influenza",
+                "thresholds": "Soglie",
+                "resistances": "Resistenze",
+                "weaknesses": "Debolezze",
+                "library": "Biblioteca",
+                "maxPoints": "Punti massimi",
+                "checks": "Prove di ricerca",
+                "checkLineHelp": "Una per riga: abilità | CD",
+                "thresholdLineHelp": "Una per riga: punti | effetto",
+                "traitLineHelp": "Una per riga: etichetta | modificatore (es. adulazione | -1)",
+                "badLines": "Alcune righe non sono state riconosciute; controlla il formato."
+            },
+            "toggleResolved": "Segna come risolto / riapri",
+            "resolvedGuard": "Questo tracciatore è risolto; riaprilo per registrare le prove.",
+            "corruptStore": "L'impostazione del magazzino dei sottosistemi contiene JSON illeggibile; scrittura rifiutata. Correggi o svuota l'impostazione di mondo 'subsystemStore'."
         }
     }
 }

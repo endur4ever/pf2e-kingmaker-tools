@@ -8183,6 +8183,59 @@
                 "noPartyActor": "Es existiert noch kein Gruppen-Akteur; erstelle zuerst einen.",
                 "noScenes": "Diese Welt hat keine Szenen zur Auswahl."
             }
+        },
+        "subsystems": {
+            "trackersTitle": "Einfluss- & Forschungs-Tracker",
+            "openTrackers": "Einfluss & Forschung",
+            "points": "Punkte",
+            "rp": "FP",
+            "acted": "Hat diese Runde bereits gehandelt",
+            "newRound": "Neue Runde",
+            "participants": "Teilnehmer",
+            "discoveries": "Entdeckungen",
+            "thresholds": "Schwellenwerte",
+            "resistances": "Widerstände",
+            "weaknesses": "Schwächen",
+            "toggleVisible": "Sichtbarkeit für Spieler umschalten",
+            "confirmDelete": "Diesen Tracker löschen? Dies kann nicht rückgängig gemacht werden.",
+            "influence": {
+                "title": "Einfluss-Begegnungen",
+                "empty": "Noch keine Einfluss-Begegnungen.",
+                "add": "Einfluss-Begegnung hinzufügen",
+                "edit": "Einfluss-Begegnung bearbeiten"
+            },
+            "research": {
+                "title": "Forschungsprojekte",
+                "empty": "Noch keine Forschungsprojekte.",
+                "add": "Forschungsprojekt hinzufügen",
+                "edit": "Forschungsprojekt bearbeiten"
+            },
+            "outcome": {
+                "critSuccess": "Kritischer Erfolg",
+                "success": "Erfolg",
+                "failure": "Fehlschlag",
+                "critFailure": "Kritischer Fehlschlag"
+            },
+            "dialog": {
+                "name": "Name",
+                "npc": "NSC",
+                "description": "Beschreibung",
+                "discoveries": "Entdeckungswürfe",
+                "influenceSkills": "Einfluss-Fertigkeiten",
+                "thresholds": "Schwellenwerte",
+                "resistances": "Widerstände",
+                "weaknesses": "Schwächen",
+                "library": "Bibliothek",
+                "maxPoints": "Maximale Punkte",
+                "checks": "Forschungswürfe",
+                "checkLineHelp": "Eine pro Zeile: Fertigkeit | SG",
+                "thresholdLineHelp": "Einer pro Zeile: Punkte | Effekt",
+                "traitLineHelp": "Eine pro Zeile: Bezeichnung | Modifikator (z. B. Schmeichelei | -1)",
+                "badLines": "Einige Zeilen konnten nicht gelesen werden; bitte Zeilenformate prüfen."
+            },
+            "toggleResolved": "Als abgeschlossen markieren / wieder öffnen",
+            "resolvedGuard": "Dieser Tracker ist abgeschlossen; zum Erfassen von Würfen erst wieder öffnen.",
+            "corruptStore": "Die Subsystem-Speicher-Einstellung enthält unlesbares JSON; das Überschreiben wird verweigert. Welteinstellung 'subsystemStore' reparieren oder leeren."
         }
     }
 }

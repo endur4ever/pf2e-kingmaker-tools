@@ -15,6 +15,7 @@
 @import "./applications/kingdom/sections/council-votes/council-votes.css";
 @import "./applications/kingdom/sections/party/renown-card.css";
 @import "./applications/kingdom/sections/holdings/holdings.css";
+@import "./applications/subsystems/subsystems.css";
 @import "./applications/kingdom/companion-relationship.css";
 @import "./applications/kingdom/sections/expeditions/expeditions.css";
 @import "./applications/kingdom/clocks.css";

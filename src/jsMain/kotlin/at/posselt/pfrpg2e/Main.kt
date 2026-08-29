@@ -1,5 +1,6 @@
 package at.posselt.pfrpg2e
 
+import at.posselt.pfrpg2e.kingdom.dialogs.openSubsystemTrackers
 import at.posselt.pfrpg2e.actions.ActionDispatcher
 import at.posselt.pfrpg2e.actions.handlers.AddHuntAndGatherResultHandler
 import at.posselt.pfrpg2e.actions.handlers.ApplyMealEffectsHandler
@@ -200,6 +201,7 @@ fun main() {
                 updateCampingRegion = ::updateCampingRegion
             ),
             macros = ToolsMacros(
+                openSubsystemTrackers = { openSubsystemTrackers(game) },
                 toggleWeatherMacro = { buildPromise { toggleWeatherMacro(game) } },
                 toggleShelteredMacro = { buildPromise { toggleShelteredMacro(game) } },
                 setCurrentWeatherMacro = { buildPromise { setWeatherMacro(game) } },

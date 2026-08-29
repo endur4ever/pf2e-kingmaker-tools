@@ -314,6 +314,9 @@
         </section>
         <section class="km-kingdom-sheet-section">
             <h2 id="{{actorUuid}}-km-turn-event">{{localizeKM "kingdom.event"}}</h2>
+            <p class="km-turn-buttons">
+                <button type="button" data-action="open-subsystem-trackers"><i class="fa-solid fa-diagram-project"></i> {{localizeKM "subsystems.openTrackers"}}</button>
+            </p>
             {{#if isGM}}
                 <p {{#unless cultOfTheBloomEvents}}hidden{{/unless}}>{{localizeKM "kingdom.cultHelp"}}</p>
                 <p class="km-turn-buttons" {{#unless cultOfTheBloomEvents}}hidden{{/unless}}>

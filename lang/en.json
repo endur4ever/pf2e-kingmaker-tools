@@ -8183,6 +8183,59 @@
                 "noPartyActor": "No party actor exists yet; create one first.",
                 "noScenes": "This world has no scenes to pick from."
             }
+        },
+        "subsystems": {
+            "trackersTitle": "Influence & Research Trackers",
+            "openTrackers": "Influence & Research",
+            "points": "Points",
+            "rp": "RP",
+            "acted": "Already acted this round",
+            "newRound": "New Round",
+            "participants": "Participants",
+            "discoveries": "Discoveries",
+            "thresholds": "Thresholds",
+            "resistances": "Resistances",
+            "weaknesses": "Weaknesses",
+            "toggleVisible": "Toggle player visibility",
+            "confirmDelete": "Delete this tracker? This cannot be undone.",
+            "influence": {
+                "title": "Influence Encounters",
+                "empty": "No influence encounters yet.",
+                "add": "Add Influence Encounter",
+                "edit": "Edit Influence Encounter"
+            },
+            "research": {
+                "title": "Research Projects",
+                "empty": "No research projects yet.",
+                "add": "Add Research Project",
+                "edit": "Edit Research Project"
+            },
+            "outcome": {
+                "critSuccess": "Critical Success",
+                "success": "Success",
+                "failure": "Failure",
+                "critFailure": "Critical Failure"
+            },
+            "dialog": {
+                "name": "Name",
+                "npc": "NPC",
+                "description": "Description",
+                "discoveries": "Discovery Checks",
+                "influenceSkills": "Influence Skills",
+                "thresholds": "Thresholds",
+                "resistances": "Resistances",
+                "weaknesses": "Weaknesses",
+                "library": "Library",
+                "maxPoints": "Maximum Points",
+                "checks": "Research Checks",
+                "checkLineHelp": "One per line: skill | DC",
+                "thresholdLineHelp": "One per line: points | effect",
+                "traitLineHelp": "One per line: label | modifier (e.g. flattery | -1)",
+                "badLines": "Some lines could not be parsed; check the line formats."
+            },
+            "toggleResolved": "Mark resolved / reopen",
+            "resolvedGuard": "This tracker is resolved; reopen it to record checks.",
+            "corruptStore": "The subsystem store setting holds unreadable JSON; refusing to overwrite it. Fix or clear the world setting 'subsystemStore'."
         }
     }
 }

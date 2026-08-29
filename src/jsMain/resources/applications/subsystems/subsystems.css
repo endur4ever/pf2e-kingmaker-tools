@@ -1,0 +1,135 @@
+.km-subsystem-trackers {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 0.5rem;
+}
+
+.km-sub-pane h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.km-sub-pane h2 button {
+    width: auto;
+    margin-left: auto;
+}
+
+.km-sub-empty {
+    font-style: italic;
+    opacity: 0.75;
+}
+
+.km-sub-card {
+    border: 1px solid rgba(0, 0, 0, 0.25);
+    border-radius: 5px;
+    padding: 0.35rem 0.6rem;
+    margin-bottom: 0.5rem;
+    background: rgba(0, 0, 0, 0.04);
+}
+
+.km-sub-card--resolved {
+    opacity: 0.6;
+}
+
+.km-sub-card > summary {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.km-sub-points {
+    font-variant-numeric: tabular-nums;
+    font-weight: bold;
+}
+
+.km-sub-controls {
+    margin-left: auto;
+    display: flex;
+    gap: 0.25rem;
+}
+
+.km-sub-controls button,
+.km-sub-rows button {
+    width: auto;
+}
+
+.km-sub-rows {
+    list-style: none;
+    margin: 0.2rem 0;
+    padding: 0;
+}
+
+.km-sub-rows li {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.1rem 0;
+}
+
+.km-sub-reached {
+    font-weight: bold;
+}
+
+.km-sub-acted {
+    opacity: 0.6;
+}
+
+.km-sub-revealed {
+    color: var(--secondary-km, #789035);
+}
+
+/* block-level bar, never inline spans: an inline width renders nothing */
+.km-sub-bar {
+    display: block;
+    height: 0.8rem;
+    background: rgba(0, 0, 0, 0.12);
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 0.3rem 0;
+}
+
+.km-sub-bar__fill {
+    display: block;
+    height: 100%;
+    background: var(--secondary-km, #789035);
+    transition: width 0.3s ease;
+}
+
+.km-sub-record {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    align-items: center;
+    margin-top: 0.4rem;
+    padding-top: 0.4rem;
+    border-top: 1px dashed rgba(0, 0, 0, 0.2);
+}
+
+.km-sub-record select,
+.km-sub-record button {
+    width: auto;
+}
+
+.km-sub-log {
+    list-style: none;
+    margin: 0.3rem 0 0;
+    padding: 0;
+    font-size: 0.8rem;
+    opacity: 0.75;
+}
+
+.km-sub-desc,
+.km-sub-traits {
+    margin: 0.25rem 0;
+    font-size: 0.9rem;
+}
+
+.km-sub-note {
+    font-size: 0.8rem;
+    font-style: italic;
+    opacity: 0.7;
+}

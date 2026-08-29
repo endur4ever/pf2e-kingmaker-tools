@@ -8183,6 +8183,59 @@
                 "noPartyActor": "尚无队伍角色；请先创建一个。",
                 "noScenes": "此世界没有可选场景。"
             }
+        },
+        "subsystems": {
+            "trackersTitle": "影响与研究追踪器",
+            "openTrackers": "影响与研究",
+            "points": "点",
+            "rp": "研究点",
+            "acted": "本轮已行动",
+            "newRound": "新一轮",
+            "participants": "参与者",
+            "discoveries": "发现",
+            "thresholds": "阈值",
+            "resistances": "抗性",
+            "weaknesses": "弱点",
+            "toggleVisible": "切换玩家可见性",
+            "confirmDelete": "删除此追踪器？此操作无法撤销。",
+            "influence": {
+                "title": "影响遭遇",
+                "empty": "暂无影响遭遇。",
+                "add": "添加影响遭遇",
+                "edit": "编辑影响遭遇"
+            },
+            "research": {
+                "title": "研究项目",
+                "empty": "暂无研究项目。",
+                "add": "添加研究项目",
+                "edit": "编辑研究项目"
+            },
+            "outcome": {
+                "critSuccess": "大成功",
+                "success": "成功",
+                "failure": "失败",
+                "critFailure": "大失败"
+            },
+            "dialog": {
+                "name": "名称",
+                "npc": "NPC",
+                "description": "描述",
+                "discoveries": "发现检定",
+                "influenceSkills": "影响技能",
+                "thresholds": "阈值",
+                "resistances": "抗性",
+                "weaknesses": "弱点",
+                "library": "图书馆",
+                "maxPoints": "最大点数",
+                "checks": "研究检定",
+                "checkLineHelp": "每行一条：技能 | DC",
+                "thresholdLineHelp": "每行一条：点数 | 效果",
+                "traitLineHelp": "每行一条：标签 | 调整值（例如 奉承 | -1）",
+                "badLines": "部分行无法解析；请检查行格式。"
+            },
+            "toggleResolved": "标记为已解决 / 重新打开",
+            "resolvedGuard": "此追踪器已解决；请重新打开后再记录检定。",
+            "corruptStore": "子系统存储设置包含无法读取的 JSON；已拒绝覆盖。请修复或清空世界设置 'subsystemStore'。"
         }
     }
 }

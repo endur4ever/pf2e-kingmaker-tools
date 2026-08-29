@@ -8183,6 +8183,59 @@
                 "noPartyActor": "Nie ma jeszcze aktora drużyny; najpierw go utwórz.",
                 "noScenes": "Ten świat nie ma scen do wyboru."
             }
+        },
+        "subsystems": {
+            "trackersTitle": "Śledzenie wpływu i badań",
+            "openTrackers": "Wpływ i badania",
+            "points": "Punkty",
+            "rp": "PB",
+            "acted": "Działał już w tej rundzie",
+            "newRound": "Nowa runda",
+            "participants": "Uczestnicy",
+            "discoveries": "Odkrycia",
+            "thresholds": "Progi",
+            "resistances": "Odporności",
+            "weaknesses": "Słabości",
+            "toggleVisible": "Przełącz widoczność dla graczy",
+            "confirmDelete": "Usunąć ten tracker? Tej operacji nie można cofnąć.",
+            "influence": {
+                "title": "Spotkania wpływu",
+                "empty": "Brak spotkań wpływu.",
+                "add": "Dodaj spotkanie wpływu",
+                "edit": "Edytuj spotkanie wpływu"
+            },
+            "research": {
+                "title": "Projekty badawcze",
+                "empty": "Brak projektów badawczych.",
+                "add": "Dodaj projekt badawczy",
+                "edit": "Edytuj projekt badawczy"
+            },
+            "outcome": {
+                "critSuccess": "Krytyczny sukces",
+                "success": "Sukces",
+                "failure": "Porażka",
+                "critFailure": "Krytyczna porażka"
+            },
+            "dialog": {
+                "name": "Nazwa",
+                "npc": "BN",
+                "description": "Opis",
+                "discoveries": "Testy odkryć",
+                "influenceSkills": "Umiejętności wpływu",
+                "thresholds": "Progi",
+                "resistances": "Odporności",
+                "weaknesses": "Słabości",
+                "library": "Biblioteka",
+                "maxPoints": "Maksymalne punkty",
+                "checks": "Testy badań",
+                "checkLineHelp": "Jeden na linię: umiejętność | ST",
+                "thresholdLineHelp": "Jeden na linię: punkty | efekt",
+                "traitLineHelp": "Jeden na linię: etykieta | modyfikator (np. pochlebstwo | -1)",
+                "badLines": "Niektórych linii nie udało się odczytać; sprawdź format."
+            },
+            "toggleResolved": "Oznacz jako rozstrzygnięty / otwórz ponownie",
+            "resolvedGuard": "Ten tracker jest rozstrzygnięty; otwórz go ponownie, aby rejestrować testy.",
+            "corruptStore": "Ustawienie magazynu podsystemów zawiera nieczytelny JSON; odmowa nadpisania. Napraw lub wyczyść ustawienie świata 'subsystemStore'."
         }
     }
 }

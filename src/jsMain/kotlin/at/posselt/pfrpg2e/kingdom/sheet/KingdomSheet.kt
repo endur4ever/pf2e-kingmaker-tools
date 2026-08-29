@@ -1,5 +1,6 @@
 package at.posselt.pfrpg2e.kingdom.sheet
 
+import at.posselt.pfrpg2e.kingdom.dialogs.openSubsystemTrackers
 import at.posselt.pfrpg2e.kingdom.postHoldingRepairOffer
 import at.posselt.pfrpg2e.kingdom.conditionEnum
 import at.posselt.pfrpg2e.kingdom.tierEnum
@@ -1563,6 +1564,12 @@ class KingdomSheet(
                         )
                     }
                 }.launch()
+            }
+
+            "open-subsystem-trackers" -> {
+                // a convenience door only: the tracker is standalone and stores nothing on the
+                // kingdom actor, so Kingdom-less campaigns reach it via the module API instead
+                openSubsystemTrackers(game)
             }
 
             "grant-holding", "edit-holding" -> buildPromise {
