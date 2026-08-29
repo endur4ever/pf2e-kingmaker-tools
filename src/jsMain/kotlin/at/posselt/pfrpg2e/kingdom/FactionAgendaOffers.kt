@@ -34,6 +34,9 @@ suspend fun postFactionMoveDigest(
         val row = recordOf<String, Any?>(
             "line" to localizeAgendaMoveLine(move),
             "goalCompleted" to move.goalCompleted,
+            // dedup identity for the confirm handler: two factions courting the SAME ally at the
+            // same delta in one turn are two legitimate shifts, not one double-click
+            "actingFaction" to move.factionName,
         )
         when (val effect = move.effect) {
             is AgendaMoveEffect.ClockSegments -> {}

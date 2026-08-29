@@ -221,14 +221,27 @@ fun advanceAllAgendas(
     pendingWarThreatFactions: Set<String> = emptySet(),
 ): AgendaTickResult {
     val emitted = mutableListOf<AgendaFactionMove>()
-    val updated = factions.sortedBy { it.name }.map { faction ->
-        val agenda = faction.agenda ?: return@map faction
-        if (agenda.lastAdvancedTurn == currentTurn) return@map faction
-        val archetype = archetypes[agenda.archetype] ?: return@map faction
+    // victims flagged THIS tick join the suppression set, so two same-turn crossings on one
+    // faction can never mint two war-threat offers
+    val flaggedThisTick = mutableSetOf<String>()
+    // index is the identity through the sort: duplicate NAMES must not collapse rows
+    val updatedByIndex = mutableMapOf<Int, FactionSnapshot>()
+    factions.withIndex().sortedBy { it.value.name }.forEach { (index, faction) ->
+        val agenda = faction.agenda
+        if (agenda == null || agenda.lastAdvancedTurn == currentTurn) {
+            updatedByIndex[index] = faction
+            return@forEach
+        }
+        val archetype = archetypes[agenda.archetype]
+        if (archetype == null) {
+            updatedByIndex[index] = faction
+            return@forEach
+        }
         val ticked = agenda.copy(moveCooldowns = cooldownsTicked(agenda.moveCooldowns))
         val spec = pickAgendaMove(faction, ticked, factions, moves, archetype, rng)
         if (spec == null) {
-            return@map faction.copy(agenda = ticked.copy(lastAdvancedTurn = currentTurn))
+            updatedByIndex[index] = faction.copy(agenda = ticked.copy(lastAdvancedTurn = currentTurn))
+            return@forEach
         }
         val rival = if (spec.validTargets == "rival") pickRival(faction, factions) else null
         val ally = if (spec.validTargets == "ally") pickAlly(faction, factions) else null
@@ -244,13 +257,20 @@ fun advanceAllAgendas(
                     )
                 }
                 else -> {
-                    val victim = target ?: return@map faction.copy(agenda = ticked.copy(lastAdvancedTurn = currentTurn))
+                    val victim = target
+                    if (victim == null) {
+                        updatedByIndex[index] = faction.copy(agenda = ticked.copy(lastAdvancedTurn = currentTurn))
+                        return@forEach
+                    }
                     val after = applyStandingDelta(victim.standing, spec.effectMagnitude)
+                    val offerWar = victim.name !in pendingWarThreatFactions &&
+                        victim.name !in flaggedThisTick &&
+                        shouldOfferWarThreat(victim.standing, after)
+                    if (offerWar) flaggedThisTick += victim.name
                     AgendaMoveEffect.StandingDelta(
                         targetFaction = victim.name,
                         delta = spec.effectMagnitude,
-                        offerWarThreat = victim.name !in pendingWarThreatFactions &&
-                            shouldOfferWarThreat(victim.standing, after),
+                        offerWarThreat = offerWar,
                         offerDiplomacyQuest = shouldOfferDiplomacyQuest(victim.standing, after),
                     )
                 }
@@ -298,12 +318,11 @@ fun advanceAllAgendas(
             progressAfter = if (effect is AgendaMoveEffect.ClockSegments) progressed else null,
             segments = if (effect is AgendaMoveEffect.ClockSegments) ticked.segments else null,
         )
-        faction.copy(agenda = nextAgenda)
+        updatedByIndex[index] = faction.copy(agenda = nextAgenda)
     }
-    // return factions in their ORIGINAL order so the caller's group array stays aligned
-    val byName = updated.associateBy { it.name }
+    // original order by INDEX: name keys would collapse duplicate-named groups
     return AgendaTickResult(
-        factions = factions.map { byName[it.name] ?: it },
+        factions = factions.mapIndexed { index, faction -> updatedByIndex[index] ?: faction },
         moves = emitted,
     )
 }

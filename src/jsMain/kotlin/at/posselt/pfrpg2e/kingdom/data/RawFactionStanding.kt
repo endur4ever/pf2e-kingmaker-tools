@@ -8,6 +8,8 @@ import kotlinx.js.JsPlainObject
  */
 @JsPlainObject
 external interface RawFactionStandingEntry {
+    /** The acting faction behind an agenda shift; part of the confirm-dedup identity. */
+    var source: String?
     var turn: Int
     var delta: Int
     var reason: String

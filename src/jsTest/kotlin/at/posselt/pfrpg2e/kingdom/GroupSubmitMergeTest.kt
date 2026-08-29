@@ -1,5 +1,6 @@
 package at.posselt.pfrpg2e.kingdom
 
+import at.posselt.pfrpg2e.kingdom.data.RawFactionAgenda
 import at.posselt.pfrpg2e.kingdom.data.RawFactionStandingEntry
 import at.posselt.pfrpg2e.kingdom.data.RawGroup
 import kotlin.test.Test
@@ -106,5 +107,20 @@ class GroupSubmitMergeTest {
 
         assertEquals(-60, merged[0].standing)
         assertEquals(30, merged[1].standing)
+    }
+
+    @Test
+    fun mergeCarriesTheAgendaTheFormNeverRenders() {
+        val agenda = RawFactionAgenda(
+            goalId = "conquer-neighbor", goalTitle = "", progress = 3, segments = 6,
+            archetype = "aggressive", moveCooldowns = js.objects.recordOf(),
+            lastAdvancedTurn = 4, targetFaction = null,
+        )
+        val existing = arrayOf(group("Pitax").also { it.agenda = agenda })
+        // the sheet DataModel strips agenda from submitted rows, exactly like standing
+        val submitted = arrayOf(group("Pitax"))
+        val merged = mergeSubmittedGroups(submitted, existing)
+        assertEquals(3, merged[0].agenda?.progress)
+        assertEquals(4, merged[0].agenda?.lastAdvancedTurn)
     }
 }

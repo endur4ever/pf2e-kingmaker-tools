@@ -105,7 +105,9 @@ fun advanceFactionAgendasOnGroups(
     warThreats: Array<RawWarThreat>,
 ): FactionAgendaTickOutcome {
     val pending = warThreats
-        .filter { it.offerConsumed != true }
+        // only a LIVE unanswered threat suppresses; a resolved threat with an unclicked card
+        // would otherwise silence that faction's crossings forever
+        .filter { it.status == "active" && it.offerConsumed != true }
         .mapNotNull { it.enemyFactionName }
         .toSet()
     val result = advanceAllAgendas(
@@ -116,9 +118,10 @@ fun advanceFactionAgendasOnGroups(
         rng = TurnRng(factionAgendaTurnSeed(kingdomName, currentTurn)),
         pendingWarThreatFactions = pending,
     )
-    val stateByName = result.factions.associateBy { it.name }
-    val updated = groups.map { group ->
-        val nextAgenda = stateByName[group.name]?.agenda
+    // the engine returns factions in ORIGINAL order, so index is the safe join key --
+    // duplicate group names must not collapse rows here either
+    val updated = groups.mapIndexed { index, group ->
+        val nextAgenda = result.factions.getOrNull(index)?.agenda
         if (nextAgenda == null) group else RawGroup.copy(group, agenda = nextAgenda.toRaw())
     }.toTypedArray()
     return FactionAgendaTickOutcome(groups = updated, moves = result.moves)

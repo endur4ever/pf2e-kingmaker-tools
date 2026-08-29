@@ -270,6 +270,7 @@ private val buttons = listOf(
         val delta = button.dataset["delta"]?.toIntOrNull() ?: return@ChatButton
         val turn = button.dataset["turn"]?.toIntOrNull() ?: return@ChatButton
         val reason = button.dataset["reason"] ?: return@ChatButton
+        val source = button.dataset["source"]
         actor.getKingdom()?.let { kingdom ->
             val groups = kingdom.groups ?: return@let
             val index = groups.indexOfFirst { it.name == target }
@@ -280,7 +281,7 @@ private val buttons = listOf(
             }
             val group = groups[index]
             val already = group.standingLog
-                ?.any { it.turn == turn && it.delta == delta && it.reason == reason } == true
+                ?.any { it.turn == turn && it.delta == delta && it.reason == reason && it.source == source } == true
             if (already) {
                 ui.notifications.info(t("kingdom.factionAgenda.alreadyApplied"))
                 markFactionMoveRowDone(button)
@@ -292,7 +293,7 @@ private val buttons = listOf(
                 standing = after,
                 standingLog = appendStandingEntry(
                     group.standingLog,
-                    RawFactionStandingEntry(turn = turn, delta = delta, reason = reason),
+                    RawFactionStandingEntry(turn = turn, delta = delta, reason = reason, source = source),
                 ),
             )
             kingdom.groups = groups
@@ -1464,6 +1465,8 @@ private val buttons = listOf(
     ChatButton("km-offer-diplomacy-quest") { game, actor, event, button ->
         // GM-confirmed offer from a faction-standing threshold crossing (#1 → #2).
         // Opens the AddQuest dialog prefilled with the faction as giver.
+        // Party actors are owner-permissioned to players, so the isGM check is the real guard.
+        if (!game.user.isGM) return@ChatButton
         val faction = button.dataset["faction"] ?: ""
         AddQuest(
             prefillTitle = t("chatMessages.endTurn.diplomacyQuestTitle", recordOf("group" to faction)),

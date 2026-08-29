@@ -33,6 +33,9 @@ fun mergeSubmittedGroups(
             standing = previous?.standing,
             standingLog = previous?.standingLog,
             allianceLevel = previous?.allianceLevel,
+            // the agenda is engine-owned state the form never renders: dropping it here was
+            // the standing-history wipe all over again, one field later
+            agenda = previous?.agenda,
         )
     }.toTypedArray()
 }

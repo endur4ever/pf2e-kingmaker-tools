@@ -227,4 +227,34 @@ class FactionAgendaEngineTest {
         assertNull(result.factions[1].agenda)
         assertTrue(result.moves.none { it.factionName == "Varnhold" })
     }
+
+    @Test
+    fun duplicateGroupNamesKeepTheirOwnAgendaRows() {
+        val expandOnly = AgendaArchetypeSpec("aggressive", mapOf("expand" to 1), aggressive.goals)
+        val arch = mapOf("aggressive" to expandOnly)
+        val twins = listOf(
+            faction("Group Name", hasHex = false, agenda = agenda(progress = 1)),
+            faction("Group Name", hasHex = false, agenda = agenda(progress = 4)),
+        )
+        val result = advanceAllAgendas(twins, 2, catalog, arch, TurnRng(6))
+        // both advance independently and neither row is cloned onto the other
+        assertEquals(listOf(2, 5), result.factions.map { it.agenda!!.progress })
+        assertEquals(2, result.moves.size)
+    }
+
+    @Test
+    fun oneVictimNeverMintsTwoWarThreatOffersInOneTick() {
+        val sabotageOnly = AgendaArchetypeSpec("aggressive", mapOf("sabotage-rival" to 1), aggressive.goals)
+        val arch = mapOf("aggressive" to sabotageOnly)
+        // both actors sabotage the same global-lowest victim; the crossing flags exactly once
+        val all = listOf(
+            faction("Pitax"),
+            faction("Restov"),
+            faction("Mivon", standing = -45, agenda = null),
+        )
+        val result = advanceAllAgendas(all, 1, catalog, arch, TurnRng(4))
+        assertEquals(2, result.moves.size)
+        val flags = result.moves.map { (it.effect as AgendaMoveEffect.StandingDelta).offerWarThreat }
+        assertEquals(1, flags.count { it }, "exactly one war-threat flag, got $flags")
+    }
 }
