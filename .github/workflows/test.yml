@@ -35,5 +35,8 @@ jobs:
       - name: Check Handlebars scope
         run: python3 scripts/check_hbs_scope.py
 
+      - name: Check sheet submit merges
+        run: python3 scripts/check_submit_merges.py
+
       - name: Run build
         run: ./gradlew build
