@@ -1,0 +1,44 @@
+<h2>{{localizeKM "subsystems.offer.researchTitle"}}</h2>
+<div class="km-subsystem-offer">
+    <p>{{localizeKM "subsystems.offer.body" name=entryName points=points}}</p>
+    <p class="km-subsystem-offer__effect">{{effect}}</p>
+</div>
+<hr>
+<h3>{{localizeKM "subsystems.offer.gmActions"}}</h3>
+<div class="km-subsystem-offer__buttons">
+    <button type="button"
+            class="km-offer-research-threshold"
+            data-store="{{storeKind}}"
+            data-entry-id="{{entryId}}"
+            data-entry-name="{{entryName}}"
+            data-threshold-index="{{thresholdIndex}}"
+            data-threshold-points="{{points}}"
+            data-effect="{{effect}}"
+            data-action="grant">
+        {{localizeKM "subsystems.offer.grant"}}
+    </button>
+    {{#if canConvertToQuest}}
+        <button type="button"
+                class="km-offer-research-threshold"
+                data-store="{{storeKind}}"
+                data-entry-id="{{entryId}}"
+                data-entry-name="{{entryName}}"
+                data-threshold-index="{{thresholdIndex}}"
+            data-threshold-points="{{points}}"
+                data-effect="{{effect}}"
+                data-action="convert">
+            {{localizeKM "subsystems.offer.convert"}}
+        </button>
+    {{/if}}
+    <button type="button"
+            class="km-offer-research-threshold"
+            data-store="{{storeKind}}"
+            data-entry-id="{{entryId}}"
+            data-entry-name="{{entryName}}"
+            data-threshold-index="{{thresholdIndex}}"
+            data-threshold-points="{{points}}"
+            data-effect="{{effect}}"
+            data-action="dismiss">
+        {{localizeKM "subsystems.offer.dismiss"}}
+    </button>
+</div>

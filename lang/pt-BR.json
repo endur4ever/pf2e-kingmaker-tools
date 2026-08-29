@@ -2650,11 +2650,11 @@
                 "resetSolutions": "Setting available Supernatural and Creative Solutions to 0",
                 "moveValues": "Adding values from the next columns to the now columns, respecting their resource limits",
                 "factionStanding": "Faction Standing Changes",
-                "factionStandingChange": "{{group}}: {{oldAttitude}} → {{newAttitude}} ({{delta}})",
+                "factionStandingChange": "{group}: {oldAttitude} → {newAttitude} ({delta})",
                 "raiseWarThreat": "Raise War Threat",
                 "offerDiplomacyQuest": "Offer Diplomacy Quest",
-                "warThreatName": "{{group}} Aggression",
-                "diplomacyQuestTitle": "Diplomatic Accord with {{group}}",
+                "warThreatName": "{group} Aggression",
+                "diplomacyQuestTitle": "Diplomatic Accord with {group}",
                 "endTurnUndone": "Turnoo {turn} end reverted; reino state restored.",
                 "endTurnUndoneTooltip": "Reverts reino state (PR, fame, commodities, agitação, quests, ameaças, clocks) to before End Turnoo. Does NOT remove chat mensagems or calendar notes.",
                 "undoEndTurn": "Undo Last End Turnoo",
@@ -7963,18 +7963,18 @@
             "defenderStatus": "Defender Status",
             "resolveRound": "Resolve Round",
             "battleLog": "Battle Log",
-            "chatTitle": "{{battleName}} — Round {{round}}",
+            "chatTitle": "{battleName} — Round {round}",
             "victory": "Victory! The kingdom's armies have defeated the threat.",
             "defeat": "Defeat… the kingdom's armies have been destroyed.",
             "conditionPinnedNoStrike": "{name} is pinned and cannot strike!",
             "conditionWearyPenalty": "{name} is weary and takes a –1 penalty to attack rolls and AC.",
             "levelUpOffer": {
-                "description": "{{name}} has earned {{xp}} XP (threshold: {{threshold}}). Level up to {{level}}?",
+                "description": "{name} has earned {xp} XP (threshold: {threshold}). Level up to {level}?",
                 "dismiss": "Dispensar",
-                "dismissed": "{{name}} level-up oferta dispensared.",
+                "dismissed": "{name} level-up oferta dispensared.",
                 "levelUp": "Level Up",
-                "leveledUp": "{{name}} leveled up to level {{level}}!",
-                "title": "{{name}} Ready to Level Up!"
+                "leveledUp": "{name} leveled up to level {level}!",
+                "title": "{name} Ready to Level Up!"
             },
             "moraleCheckFail": "{name} fails the morale check (roll {roll} + {bonus} = {total} vs DC {dc}) and becomes routed!",
             "moraleCheckPass": "{name} passes the morale check (roll {roll} + {bonus} = {total} vs DC {dc}) and recovers.",
@@ -8235,7 +8235,27 @@
             },
             "toggleResolved": "Marcar como resolvido / reabrir",
             "resolvedGuard": "Este rastreador está resolvido; reabra-o para registrar testes.",
-            "corruptStore": "A configuração do armazém de subsistemas contém JSON ilegível; gravação recusada. Corrija ou limpe a configuração de mundo 'subsystemStore'."
+            "corruptStore": "A configuração do armazém de subsistemas contém JSON ilegível; gravação recusada. Corrija ou limpe a configuração de mundo 'subsystemStore'.",
+            "runAsResearch": "Executar como projeto de pesquisa",
+            "eventAlreadyLinked": "Este evento já tem um projeto de pesquisa ativo.",
+            "offer": {
+                "influenceTitle": "Limiar de influência atingido",
+                "researchTitle": "Avanço na pesquisa",
+                "body": "{name} atingiu {points} pontos.",
+                "gmActions": "Ações do Mestre",
+                "grant": "Conceder",
+                "convert": "Converter em missão",
+                "dismiss": "Descartar",
+                "granted": "{name} ({points} pontos): {effect}",
+                "alreadyAnswered": "Esta oferta de limiar já foi respondida.",
+                "pickKingdom": "Qual reino recebe a missão?"
+            },
+            "import": {
+                "title": "Importar JSON",
+                "help": "Cole o formato JSON documentado; as entradas são acrescentadas, nunca substituídas. Uma entrada malformada bloqueia toda a importação.",
+                "invalid": "Nada importado: o JSON estava ilegível ou uma entrada malformada.",
+                "done": "Importados {encounters} encontro(s) de influência e {projects} projeto(s) de pesquisa."
+            }
         }
     }
 }

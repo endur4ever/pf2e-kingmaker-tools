@@ -20,6 +20,8 @@ import at.posselt.pfrpg2e.kingdom.data.RawSubsystemParticipant
 import at.posselt.pfrpg2e.kingdom.data.RawSubsystemThreshold
 import at.posselt.pfrpg2e.kingdom.getKingdomActors
 import at.posselt.pfrpg2e.kingdom.getSubsystemStore
+import at.posselt.pfrpg2e.kingdom.postSubsystemThresholdOffers
+import at.posselt.pfrpg2e.kingdom.thresholdsToOffer
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.SubsystemTrackersContext
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.buildSubsystemTrackersContext
 import at.posselt.pfrpg2e.kingdom.updateSubsystemStore
@@ -100,6 +102,12 @@ class SubsystemTrackers(
                         render()
                     }
                 }.launch()
+            }
+
+            "import-json" -> buildPromise {
+                if (!game.user.isGM) return@buildPromise
+                importSubsystemJson(game)
+                render()
             }
 
             "edit-influence" -> {
@@ -260,6 +268,10 @@ class SubsystemTrackers(
      * per-check trait picking is the dashboard's future, not its v1.
      */
     private suspend fun recordCheck(id: String, skill: String, pcUuid: String?, outcome: SubsystemOutcome) {
+        // offers captured inside the write, posted only after it lands (post-cards-after-persist)
+        var offerKind = ""
+        var offerName = ""
+        var offers: List<at.posselt.pfrpg2e.kingdom.ThresholdOffer> = emptyList()
         game.updateSubsystemStore { store ->
             store.influenceEncounters = store.influenceEncounters?.map { enc ->
                 if (enc.id != id || enc.status == "resolved") return@map enc
@@ -269,6 +281,9 @@ class SubsystemTrackers(
                     enc.weaknesses,
                 )
                 val application = applyCheck(enc.influencePoints, outcome, PointRule(), matched)
+                offerKind = "influence"
+                offerName = enc.name
+                offers = thresholdsToOffer(enc.influencePoints, application.newTotal, enc.thresholds)
                 val pcName = pcUuid?.let { uuid ->
                     runCatching { game.actors.find { it.uuid == uuid }?.name }.getOrNull()
                 }
@@ -310,6 +325,9 @@ class SubsystemTrackers(
                     applyCheck(proj.researchPoints, outcome, PointRule(), emptyList()),
                     proj.maxResearchPoints,
                 )
+                offerKind = "research"
+                offerName = proj.name
+                offers = thresholdsToOffer(proj.researchPoints, application.newTotal, proj.thresholds)
                 RawResearchProject.copy(
                     proj,
                     researchPoints = application.newTotal,
@@ -325,6 +343,7 @@ class SubsystemTrackers(
             }?.toTypedArray()
             store
         }
+        postSubsystemThresholdOffers(game, offerKind, id, offerName, offers)
     }
 
     private suspend fun toggleReveal(id: String, kind: String, index: Int) {

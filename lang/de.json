@@ -2644,11 +2644,11 @@
                 "resetSolutions": "Setting available Supernatural and Creative Solutions to 0",
                 "moveValues": "Adding values from the next columns to the now columns, respecting their resource limits",
                 "factionStanding": "Faction Standing Changes",
-                "factionStandingChange": "{{group}}: {{oldAttitude}} → {{newAttitude}} ({{delta}})",
+                "factionStandingChange": "{group}: {oldAttitude} → {newAttitude} ({delta})",
                 "raiseWarThreat": "Raise War Threat",
                 "offerDiplomacyQuest": "Offer Diplomacy Quest",
-                "warThreatName": "{{group}} Aggression",
-                "diplomacyQuestTitle": "Diplomatic Accord with {{group}}",
+                "warThreatName": "{group} Aggression",
+                "diplomacyQuestTitle": "Diplomatic Accord with {group}",
                 "endTurnUndone": "Zug {turn} end reverted; königreich state restored.",
                 "endTurnUndoneTooltip": "Reverts königreich state (RP, fame, commodities, unruhe, quests, bedrohungs, clocks) to before End Zug. Does NOT remove chat nachrichts or calendar notes.",
                 "undoEndTurn": "Undo Last End Zug",
@@ -7963,7 +7963,7 @@
             "defenderStatus": "Defender Status",
             "resolveRound": "Resolve Round",
             "battleLog": "Battle Log",
-            "chatTitle": "{{battleName}} — Round {{round}}",
+            "chatTitle": "{battleName} — Round {round}",
             "victory": "Sieg! Die Armeen des Königreichs haben die Bedrohung besiegt.",
             "defeat": "Niederlage… Die Armeen des Königreichs wurden zerstört.",
             "recovers": "{name} erholt sich von {condition}.",
@@ -7972,12 +7972,12 @@
             "recoversPinnedSuccess": "{name} kann sich wieder bewegen (Wurf {roll} >= 10).",
             "recoversPinnedFail": "{name} bleibt festgesetzt (Wurf {roll} < 10).",
             "levelUpOffer": {
-                "title": "{{name}} ist bereit für einen Stufenaufstieg!",
-                "description": "{{name}} hat {{xp}} EP verdient (Schwelle: {{threshold}}). Auf Stufe {{level}} aufsteigen?",
+                "title": "{name} ist bereit für einen Stufenaufstieg!",
+                "description": "{name} hat {xp} EP verdient (Schwelle: {threshold}). Auf Stufe {level} aufsteigen?",
                 "levelUp": "Stufenaufstieg",
                 "dismiss": "Verwerfen",
-                "leveledUp": "{{name}} ist auf Stufe {{level}} aufgestiegen!",
-                "dismissed": "Stufenaufstieg-Angebot für {{name}} verworfen."
+                "leveledUp": "{name} ist auf Stufe {level} aufgestiegen!",
+                "dismissed": "Stufenaufstieg-Angebot für {name} verworfen."
             },
             "conditionPinnedNoStrike": "{name} is pinned and cannot strike!",
             "conditionWearyPenalty": "{name} is weary and takes a –1 penalty to attack rolls and AC.",
@@ -8235,7 +8235,27 @@
             },
             "toggleResolved": "Als abgeschlossen markieren / wieder öffnen",
             "resolvedGuard": "Dieser Tracker ist abgeschlossen; zum Erfassen von Würfen erst wieder öffnen.",
-            "corruptStore": "Die Subsystem-Speicher-Einstellung enthält unlesbares JSON; das Überschreiben wird verweigert. Welteinstellung 'subsystemStore' reparieren oder leeren."
+            "corruptStore": "Die Subsystem-Speicher-Einstellung enthält unlesbares JSON; das Überschreiben wird verweigert. Welteinstellung 'subsystemStore' reparieren oder leeren.",
+            "runAsResearch": "Als Forschungsprojekt führen",
+            "eventAlreadyLinked": "Dieses Ereignis hat bereits ein aktives Forschungsprojekt.",
+            "offer": {
+                "influenceTitle": "Einfluss-Schwelle erreicht",
+                "researchTitle": "Forschungsdurchbruch",
+                "body": "{name} hat {points} Punkte erreicht.",
+                "gmActions": "SL-Aktionen",
+                "grant": "Gewähren",
+                "convert": "In Quest umwandeln",
+                "dismiss": "Verwerfen",
+                "granted": "{name} ({points} Punkte): {effect}",
+                "alreadyAnswered": "Dieses Schwellen-Angebot wurde bereits beantwortet.",
+                "pickKingdom": "Welches Königreich erhält die Quest?"
+            },
+            "import": {
+                "title": "JSON importieren",
+                "help": "Das dokumentierte JSON-Format einfügen; Einträge werden angehängt, nie ersetzt. Ein fehlerhafter Eintrag blockiert den gesamten Import.",
+                "invalid": "Nichts importiert: Das JSON war unlesbar oder ein Eintrag fehlerhaft.",
+                "done": "{encounters} Einfluss-Begegnung(en) und {projects} Forschungsprojekt(e) importiert."
+            }
         }
     }
 }

@@ -133,3 +133,15 @@
     font-style: italic;
     opacity: 0.7;
 }
+
+/* the offer cards live in chat, but style.css is module-global so these apply there too */
+.km-subsystem-offer__effect {
+    font-style: italic;
+    margin: 0.25rem 0;
+}
+
+.km-subsystem-offer__buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+}

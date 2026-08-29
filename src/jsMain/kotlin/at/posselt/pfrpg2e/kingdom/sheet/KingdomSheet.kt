@@ -1,5 +1,8 @@
 package at.posselt.pfrpg2e.kingdom.sheet
 
+import at.posselt.pfrpg2e.kingdom.data.RawResearchProject
+import at.posselt.pfrpg2e.kingdom.getSubsystemStore
+import at.posselt.pfrpg2e.kingdom.updateSubsystemStore
 import at.posselt.pfrpg2e.kingdom.dialogs.openSubsystemTrackers
 import at.posselt.pfrpg2e.kingdom.postHoldingRepairOffer
 import at.posselt.pfrpg2e.kingdom.conditionEnum
@@ -2476,6 +2479,40 @@ class KingdomSheet(
                         .toTypedArray()
                     actor.setKingdom(kingdom)
                 }
+            }
+
+            "run-as-research" -> buildPromise {
+                // seeds a research project from the ongoing event (plan 6.3); name/description
+                // come from the RESOLVED OngoingEvent, which is already localized -- the raw
+                // catalog holds i18n keys, not text
+                if (!game.user.isGM) return@buildPromise
+                val index = target.dataset["index"]?.toIntOrNull() ?: return@buildPromise
+                val kingdom = getKingdom()
+                val ongoing = kingdom.getOngoingEvents().getOrNull(index) ?: return@buildPromise
+                val already = game.getSubsystemStore().researchProjects
+                    ?.any { it.sourceEventId == ongoing.event.id && it.status == "active" } == true
+                if (already) {
+                    ui.notifications.info(t("subsystems.eventAlreadyLinked"))
+                } else {
+                    game.updateSubsystemStore { store ->
+                        store.researchProjects = (store.researchProjects ?: emptyArray()) + RawResearchProject(
+                            id = v4(),
+                            name = ongoing.event.name,
+                            description = ongoing.event.description,
+                            researchPoints = 0,
+                            status = "active",
+                            checks = emptyArray(),
+                            thresholds = emptyArray(),
+                            checkLog = emptyArray(),
+                            sourceEventId = ongoing.event.id,
+                            visibleToPlayers = false,
+                            createdAt = kotlin.js.Date.now(),
+                            updatedAt = kotlin.js.Date.now(),
+                        )
+                        store
+                    }
+                }
+                openSubsystemTrackers(game)
             }
 
             "handle-event" -> buildPromise {

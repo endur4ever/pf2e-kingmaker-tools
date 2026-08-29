@@ -2774,11 +2774,11 @@
                 "resetSolutions": "Setting available Supernatural and Creative Solutions to 0",
                 "moveValues": "Adding values from the next columns to the now columns, respecting their resource limits",
                 "factionStanding": "Faction Standing Changes",
-                "factionStandingChange": "{{group}}: {{oldAttitude}} → {{newAttitude}} ({{delta}})",
+                "factionStandingChange": "{group}: {oldAttitude} → {newAttitude} ({delta})",
                 "raiseWarThreat": "Raise War Threat",
                 "offerDiplomacyQuest": "Offer Diplomacy Quest",
-                "warThreatName": "{{group}} Aggression",
-                "diplomacyQuestTitle": "Diplomatic Accord with {{group}}",
+                "warThreatName": "{group} Aggression",
+                "diplomacyQuestTitle": "Diplomatic Accord with {group}",
                 "undoEndTurn": "Undo Last End Turn",
                 "undoStale": "This undo is out of date — another End Turn has happened since. Only the most recent End Turn can be undone.",
                 "undoNothing": "Nothing to undo — no End Turn snapshot is available.",
@@ -8085,7 +8085,7 @@
             "defenderStatus": "Defender Status",
             "resolveRound": "Resolve Round",
             "battleLog": "Battle Log",
-            "chatTitle": "{{battleName}} — Round {{round}}",
+            "chatTitle": "{battleName} — Round {round}",
             "victory": "Victory! The kingdom's armies have defeated the threat.",
             "defeat": "Defeat… the kingdom's armies have been destroyed.",
             "recovers": "{name} recovers from {condition}.",
@@ -8099,12 +8099,12 @@
             "conditionPinnedNoStrike": "{name} is pinned and cannot strike!",
             "conditionMiredNoAdvance": "{name} is mired and cannot advance.",
             "levelUpOffer": {
-                "title": "{{name}} Ready to Level Up!",
-                "description": "{{name}} has earned {{xp}} XP (threshold: {{threshold}}). Level up to {{level}}?",
+                "title": "{name} Ready to Level Up!",
+                "description": "{name} has earned {xp} XP (threshold: {threshold}). Level up to {level}?",
                 "levelUp": "Level Up",
                 "dismiss": "Dismiss",
-                "leveledUp": "{{name}} leveled up to level {{level}}!",
-                "dismissed": "{{name}} level-up offer dismissed."
+                "leveledUp": "{name} leveled up to level {level}!",
+                "dismissed": "{name} level-up offer dismissed."
             },
             "garrisonDefenseNote": "+{bonus} AC (Garrison)"
         },
@@ -8235,7 +8235,27 @@
             },
             "toggleResolved": "Mark resolved / reopen",
             "resolvedGuard": "This tracker is resolved; reopen it to record checks.",
-            "corruptStore": "The subsystem store setting holds unreadable JSON; refusing to overwrite it. Fix or clear the world setting 'subsystemStore'."
+            "corruptStore": "The subsystem store setting holds unreadable JSON; refusing to overwrite it. Fix or clear the world setting 'subsystemStore'.",
+            "runAsResearch": "Run as Research project",
+            "eventAlreadyLinked": "This event already has an active research project.",
+            "offer": {
+                "influenceTitle": "Influence Threshold Reached",
+                "researchTitle": "Research Breakthrough",
+                "body": "{name} has reached {points} points.",
+                "gmActions": "GM Actions",
+                "grant": "Grant",
+                "convert": "Convert to Quest",
+                "dismiss": "Dismiss",
+                "granted": "{name} ({points} points): {effect}",
+                "alreadyAnswered": "This threshold offer was already answered.",
+                "pickKingdom": "Which kingdom receives the quest?"
+            },
+            "import": {
+                "title": "Import JSON",
+                "help": "Paste the documented JSON format; entries are appended, never replacing. One malformed entry blocks the whole import.",
+                "invalid": "Nothing imported: the JSON was unreadable or an entry was malformed.",
+                "done": "Imported {encounters} influence encounter(s) and {projects} research project(s)."
+            }
         }
     }
 }

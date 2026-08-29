@@ -4,6 +4,7 @@
             <i class="fa-solid fa-comments"></i> {{localizeKM "subsystems.influence.title"}}
             {{#if isGM}}
                 <button type="button" data-action="add-influence"><i class="fa-solid fa-plus"></i></button>
+                <button type="button" data-action="import-json" data-tooltip="{{localizeKM "subsystems.import.title"}}"><i class="fa-solid fa-file-import"></i></button>
             {{/if}}
         </h2>
         {{#unless hasEncounters}}<p class="km-sub-empty">{{localizeKM "subsystems.influence.empty"}}</p>{{/unless}}

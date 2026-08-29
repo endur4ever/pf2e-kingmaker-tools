@@ -69,6 +69,11 @@ import com.foundryvtt.core.ui
 import com.foundryvtt.core.utils.deepClone
 import io.github.uuidjs.uuid.v4
 import js.array.tupleOf
+import at.posselt.pfrpg2e.app.awaitablePrompt
+import at.posselt.pfrpg2e.app.forms.Select
+import at.posselt.pfrpg2e.app.forms.SelectOption
+import at.posselt.pfrpg2e.app.forms.formContext
+import at.posselt.pfrpg2e.kingdom.data.RawSubsystemThreshold
 import js.objects.recordOf
 import kotlinx.html.org.w3c.dom.events.Event
 import kotlinx.js.JsPlainObject
@@ -1823,6 +1828,138 @@ private val buttons = listOf(
 )
 
 /**
+ * Actor-independent chat buttons (plan section 5.3): the subsystem store is world-scoped, so
+ * these cards have no [data-kingdom-actor-uuid] for findKingdomActor to read -- putting them in
+ * [buttons] would mean they silently never fire in a Kingdom-less campaign.
+ */
+private data class WorldChatButton(
+    val buttonClass: String,
+    val callback: suspend (game: Game, event: Event, button: HTMLElement) -> Unit,
+)
+
+private val worldButtons = listOf(
+    WorldChatButton("km-offer-influence-threshold") { game, _, button ->
+        handleSubsystemThresholdOffer(game, button)
+    },
+    WorldChatButton("km-offer-research-threshold") { game, _, button ->
+        handleSubsystemThresholdOffer(game, button)
+    },
+)
+
+/** More than one kingdom in the world: the GM says which one receives the quest. */
+private suspend fun pickKingdomActor(actors: List<KingdomActor>): KingdomActor? =
+    awaitablePrompt<PickKingdomActorData, KingdomActor?>(
+        title = t("subsystems.offer.pickKingdom"),
+        templatePath = "components/forms/form.hbs",
+        templateContext = recordOf(
+            "formRows" to formContext(
+                Select(
+                    name = "index",
+                    label = t("subsystems.offer.pickKingdom"),
+                    value = "0",
+                    options = actors.mapIndexed { index, actor ->
+                        SelectOption(value = index.toString(), label = actor.name)
+                    },
+                )
+            )
+        ),
+    ) { data, _ -> actors.getOrNull(data.index.toIntOrNull() ?: -1) }
+
+private external interface PickKingdomActorData {
+    val index: String
+}
+
+/**
+ * Grant / Convert to Quest / Dismiss on a threshold offer card. Grant posts the PINNED effect
+ * text publicly (locale- and edit-safe) and consumes the offer; Dismiss consumes silently;
+ * Convert opens AddQuest against a GM-chosen kingdom and deliberately does NOT consume -- the
+ * plan only specifies consumption for Grant and Dismiss.
+ */
+private suspend fun handleSubsystemThresholdOffer(game: Game, button: HTMLElement) {
+    if (!game.user.isGM) return
+    val storeKind = button.dataset["store"] ?: return
+    val entryId = button.dataset["entryId"] ?: return
+    val index = button.dataset["thresholdIndex"]?.toIntOrNull() ?: return
+    val points = button.dataset["thresholdPoints"]?.toIntOrNull() ?: return
+    val effect = button.dataset["effect"] ?: ""
+    val entryName = button.dataset["entryName"] ?: ""
+    when (button.dataset["action"]) {
+        "grant", "dismiss" -> {
+            val store = game.getSubsystemStore()
+            val rows = if (storeKind == "influence") {
+                store.influenceEncounters?.firstOrNull { it.id == entryId }?.thresholds
+            } else {
+                store.researchProjects?.firstOrNull { it.id == entryId }?.thresholds
+            }
+            // identity is the row index the card was minted for; the points cross-check makes a
+            // card stale (not misdirected) when the GM re-authors thresholds under it
+            val row = rows?.getOrNull(index)
+            val open = row != null && row.points == points && row.offerConsumed != true
+            if (!open) {
+                // answered from another card or another GM: a consumed threshold is a no-op
+                ui.notifications.info(t("subsystems.offer.alreadyAnswered"))
+                return
+            }
+            consumeSubsystemThreshold(game, storeKind, entryId, index, points)
+            if (button.dataset["action"] == "grant") {
+                postChatMessage(
+                    t(
+                        "subsystems.offer.granted",
+                        recordOf("name" to entryName, "points" to points, "effect" to effect),
+                    )
+                )
+            }
+        }
+
+        "convert" -> {
+            val actors = game.getKingdomActors()
+            val actor = when {
+                actors.isEmpty() -> {
+                    ui.notifications.warn(t("kingdom.chatButtonNoKingdom"))
+                    return
+                }
+                actors.size == 1 -> actors.first()
+                else -> pickKingdomActor(actors) ?: return
+            }
+            AddQuest(
+                prefillTitle = effect,
+                prefillGiver = entryName,
+                settlements = actor.getKingdom()
+                    ?.let { k -> k.getAllSettlements(game).allSettlements.map { it.id to it.name } }
+                    ?: emptyList(),
+            ) { quest ->
+                actor.getKingdom()?.let { kingdom ->
+                    kingdom.quests = (kingdom.quests ?: emptyArray()) + quest
+                    actor.setKingdom(kingdom)
+                }
+            }.launch()
+        }
+    }
+}
+
+/** Consumes exactly the row the card was minted for; a points mismatch means a stale card. */
+private suspend fun consumeSubsystemThreshold(game: Game, storeKind: String, entryId: String, index: Int, points: Int) {
+    fun consume(rows: Array<RawSubsystemThreshold>?): Array<RawSubsystemThreshold>? =
+        rows?.mapIndexed { i, row ->
+            if (i == index && row.points == points && row.offerConsumed != true) {
+                RawSubsystemThreshold.copy(row, offerConsumed = true)
+            } else row
+        }?.toTypedArray()
+    game.updateSubsystemStore { store ->
+        if (storeKind == "influence") {
+            store.influenceEncounters = store.influenceEncounters?.map {
+                if (it.id == entryId) at.posselt.pfrpg2e.kingdom.data.RawInfluenceEncounter.copy(it, thresholds = consume(it.thresholds)) else it
+            }?.toTypedArray()
+        } else {
+            store.researchProjects = store.researchProjects?.map {
+                if (it.id == entryId) at.posselt.pfrpg2e.kingdom.data.RawResearchProject.copy(it, thresholds = consume(it.thresholds)) else it
+            }?.toTypedArray()
+        }
+        store
+    }
+}
+
+/**
  * Set by [bindChatButtons]; the km-ping-jump handler needs it to construct a KingdomSheet.
  * ChatButton callbacks run on the CLICKING user's client, so this is that client's dispatcher.
  */
@@ -1845,6 +1982,18 @@ fun bindChatButtons(game: Game, dispatcher: ActionDispatcher? = null) {
                 }.catch { e ->
                     // buildPromise's result was discarded, so a throw inside any offer handler was
                     // an unhandled rejection visible only in the console — another dead button.
+                    console.error("kingdom chat button '${data.buttonClass}' failed", e)
+                    ui.notifications.error(t("kingdom.chatButtonFailed"))
+                    null
+                }
+            }
+        }
+        worldButtons.forEach { data ->
+            // deliberately NO findKingdomActor gate: these cards are world-scoped (plan 5.3)
+            bindChatClick(".${data.buttonClass}") { ev, target, _ ->
+                buildPromise {
+                    data.callback(game, ev, target)
+                }.catch { e ->
                     console.error("kingdom chat button '${data.buttonClass}' failed", e)
                     ui.notifications.error(t("kingdom.chatButtonFailed"))
                     null

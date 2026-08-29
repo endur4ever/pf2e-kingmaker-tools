@@ -2650,11 +2650,11 @@
                 "resetSolutions": "Setting available Supernatural and Creative Solutions to 0",
                 "moveValues": "Adding values from the next columns to the now columns, respecting their resource limits",
                 "factionStanding": "Faction Standing Changes",
-                "factionStandingChange": "{{group}}: {{oldAttitude}} → {{newAttitude}} ({{delta}})",
+                "factionStandingChange": "{group}: {oldAttitude} → {newAttitude} ({delta})",
                 "raiseWarThreat": "Raise War Threat",
                 "offerDiplomacyQuest": "Offer Diplomacy Quest",
-                "warThreatName": "{{group}} Aggression",
-                "diplomacyQuestTitle": "Diplomatic Accord with {{group}}",
+                "warThreatName": "{group} Aggression",
+                "diplomacyQuestTitle": "Diplomatic Accord with {group}",
                 "endTurnUndone": "Tour {turn} end reverted; royaume state restored.",
                 "endTurnUndoneTooltip": "Reverts royaume state (PR, fame, commodities, troubles, quests, menaces, clocks) to before End Tour. Does NOT remove chat messages or calendar notes.",
                 "undoEndTurn": "Undo Last End Tour",
@@ -7963,18 +7963,18 @@
             "defenderStatus": "Defender Status",
             "resolveRound": "Resolve Round",
             "battleLog": "Battle Log",
-            "chatTitle": "{{battleName}} — Round {{round}}",
+            "chatTitle": "{battleName} — Round {round}",
             "victory": "Victory! The kingdom's armies have defeated the threat.",
             "defeat": "Defeat… the kingdom's armies have been destroyed.",
             "conditionPinnedNoStrike": "{name} is pinned and cannot strike!",
             "conditionWearyPenalty": "{name} is weary and takes a –1 penalty to attack rolls and AC.",
             "levelUpOffer": {
-                "description": "{{name}} has earned {{xp}} XP (threshold: {{threshold}}). Level up to {{level}}?",
+                "description": "{name} has earned {xp} XP (threshold: {threshold}). Level up to {level}?",
                 "dismiss": "Ignorer",
-                "dismissed": "{{name}} level-up offre ignorered.",
+                "dismissed": "{name} level-up offre ignorered.",
                 "levelUp": "Level Up",
-                "leveledUp": "{{name}} leveled up to level {{level}}!",
-                "title": "{{name}} Ready to Level Up!"
+                "leveledUp": "{name} leveled up to level {level}!",
+                "title": "{name} Ready to Level Up!"
             },
             "moraleCheckFail": "{name} fails the morale check (roll {roll} + {bonus} = {total} vs DC {dc}) and becomes routed!",
             "moraleCheckPass": "{name} passes the morale check (roll {roll} + {bonus} = {total} vs DC {dc}) and recovers.",
@@ -8235,7 +8235,27 @@
             },
             "toggleResolved": "Marquer comme résolu / rouvrir",
             "resolvedGuard": "Ce suivi est résolu ; rouvrez-le pour enregistrer des tests.",
-            "corruptStore": "Le paramètre du magasin de sous-systèmes contient du JSON illisible ; écriture refusée. Réparez ou videz le paramètre de monde « subsystemStore »."
+            "corruptStore": "Le paramètre du magasin de sous-systèmes contient du JSON illisible ; écriture refusée. Réparez ou videz le paramètre de monde « subsystemStore ».",
+            "runAsResearch": "Lancer comme projet de recherche",
+            "eventAlreadyLinked": "Cet événement a déjà un projet de recherche actif.",
+            "offer": {
+                "influenceTitle": "Seuil d'influence atteint",
+                "researchTitle": "Percée de recherche",
+                "body": "{name} a atteint {points} points.",
+                "gmActions": "Actions du MJ",
+                "grant": "Accorder",
+                "convert": "Convertir en quête",
+                "dismiss": "Rejeter",
+                "granted": "{name} ({points} points) : {effect}",
+                "alreadyAnswered": "Cette offre de seuil a déjà reçu une réponse.",
+                "pickKingdom": "Quel royaume reçoit la quête ?"
+            },
+            "import": {
+                "title": "Importer du JSON",
+                "help": "Collez le format JSON documenté ; les entrées sont ajoutées, jamais remplacées. Une entrée mal formée bloque tout l'import.",
+                "invalid": "Rien n'a été importé : JSON illisible ou entrée mal formée.",
+                "done": "{encounters} rencontre(s) d'influence et {projects} projet(s) de recherche importés."
+            }
         }
     }
 }

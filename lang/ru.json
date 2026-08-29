@@ -2650,11 +2650,11 @@
                 "resetSolutions": "Setting available Supernatural and Creative Solutions to 0",
                 "moveValues": "Adding values from the next columns to the now columns, respecting their resource limits",
                 "factionStanding": "Faction Standing Changes",
-                "factionStandingChange": "{{group}}: {{oldAttitude}} → {{newAttitude}} ({{delta}})",
+                "factionStandingChange": "{group}: {oldAttitude} → {newAttitude} ({delta})",
                 "raiseWarThreat": "Raise War Threat",
                 "offerDiplomacyQuest": "Offer Diplomacy Quest",
-                "warThreatName": "{{group}} Aggression",
-                "diplomacyQuestTitle": "Diplomatic Accord with {{group}}",
+                "warThreatName": "{group} Aggression",
+                "diplomacyQuestTitle": "Diplomatic Accord with {group}",
                 "endTurnUndone": "Ход {turn} end reverted; королевство state restored.",
                 "endTurnUndoneTooltip": "Reverts королевство state (РО, fame, commodities, беспорядки, quests, угрозаs, clocks) to before End Ход. Does NOT remove chat сообщениеs or calendar notes.",
                 "undoEndTurn": "Undo Last End Ход",
@@ -7963,18 +7963,18 @@
             "defenderStatus": "Defender Status",
             "resolveRound": "Resolve Round",
             "battleLog": "Battle Log",
-            "chatTitle": "{{battleName}} — Round {{round}}",
+            "chatTitle": "{battleName} — Round {round}",
             "victory": "Victory! The kingdom's armies have defeated the threat.",
             "defeat": "Defeat… the kingdom's armies have been destroyed.",
             "conditionPinnedNoStrike": "{name} is pinned and cannot strike!",
             "conditionWearyPenalty": "{name} is weary and takes a –1 penalty to attack rolls and AC.",
             "levelUpOffer": {
-                "description": "{{name}} has earned {{xp}} XP (threshold: {{threshold}}). Level up to {{level}}?",
+                "description": "{name} has earned {xp} XP (threshold: {threshold}). Level up to {level}?",
                 "dismiss": "Отклонить",
-                "dismissed": "{{name}} level-up предложение отклонитьed.",
+                "dismissed": "{name} level-up предложение отклонитьed.",
                 "levelUp": "Level Up",
-                "leveledUp": "{{name}} leveled up to level {{level}}!",
-                "title": "{{name}} Ready to Level Up!"
+                "leveledUp": "{name} leveled up to level {level}!",
+                "title": "{name} Ready to Level Up!"
             },
             "moraleCheckFail": "{name} fails the morale check (roll {roll} + {bonus} = {total} vs DC {dc}) and becomes routed!",
             "moraleCheckPass": "{name} passes the morale check (roll {roll} + {bonus} = {total} vs DC {dc}) and recovers.",
@@ -8235,7 +8235,27 @@
             },
             "toggleResolved": "Отметить завершённым / открыть заново",
             "resolvedGuard": "Этот трекер завершён; откройте его заново, чтобы записывать проверки.",
-            "corruptStore": "Настройка хранилища подсистем содержит нечитаемый JSON; запись отклонена. Исправьте или очистите мировую настройку 'subsystemStore'."
+            "corruptStore": "Настройка хранилища подсистем содержит нечитаемый JSON; запись отклонена. Исправьте или очистите мировую настройку 'subsystemStore'.",
+            "runAsResearch": "Запустить как исследовательский проект",
+            "eventAlreadyLinked": "У этого события уже есть активный исследовательский проект.",
+            "offer": {
+                "influenceTitle": "Достигнут порог влияния",
+                "researchTitle": "Прорыв в исследовании",
+                "body": "{name}: достигнуто {points} очков.",
+                "gmActions": "Действия ведущего",
+                "grant": "Даровать",
+                "convert": "Преобразовать в задание",
+                "dismiss": "Отклонить",
+                "granted": "{name} ({points} очков): {effect}",
+                "alreadyAnswered": "На это пороговое предложение уже ответили.",
+                "pickKingdom": "Какое королевство получит задание?"
+            },
+            "import": {
+                "title": "Импорт JSON",
+                "help": "Вставьте документированный формат JSON; записи добавляются, никогда не заменяются. Одна повреждённая запись блокирует весь импорт.",
+                "invalid": "Ничего не импортировано: JSON нечитаем или запись повреждена.",
+                "done": "Импортировано встреч влияния: {encounters}, исследовательских проектов: {projects}."
+            }
         }
     }
 }

@@ -2650,11 +2650,11 @@
                 "resetSolutions": "Setting available Supernatural and Creative Solutions to 0",
                 "moveValues": "Adding values from the next columns to the now columns, respecting their resource limits",
                 "factionStanding": "Faction Standing Changes",
-                "factionStandingChange": "{{group}}: {{oldAttitude}} → {{newAttitude}} ({{delta}})",
+                "factionStandingChange": "{group}: {oldAttitude} → {newAttitude} ({delta})",
                 "raiseWarThreat": "Raise War Threat",
                 "offerDiplomacyQuest": "Offer Diplomacy Quest",
-                "warThreatName": "{{group}} Aggression",
-                "diplomacyQuestTitle": "Diplomatic Accord with {{group}}",
+                "warThreatName": "{group} Aggression",
+                "diplomacyQuestTitle": "Diplomatic Accord with {group}",
                 "endTurnUndone": "回合 {turn} end reverted; 王国 state restored.",
                 "endTurnUndoneTooltip": "Reverts 王国 state (资源点, fame, commodities, 动荡, quests, 威胁s, clocks) to before End 回合. Does NOT remove chat 消息s or calendar notes.",
                 "undoEndTurn": "Undo Last End 回合",
@@ -7963,18 +7963,18 @@
             "defenderStatus": "Defender Status",
             "resolveRound": "Resolve Round",
             "battleLog": "Battle Log",
-            "chatTitle": "{{battleName}} — Round {{round}}",
+            "chatTitle": "{battleName} — Round {round}",
             "victory": "Victory! The kingdom's armies have defeated the threat.",
             "defeat": "Defeat… the kingdom's armies have been destroyed.",
             "conditionPinnedNoStrike": "{name} is pinned and cannot strike!",
             "conditionWearyPenalty": "{name} is weary and takes a –1 penalty to attack rolls and AC.",
             "levelUpOffer": {
-                "description": "{{name}} has earned {{xp}} XP (threshold: {{threshold}}). Level up to {{level}}?",
+                "description": "{name} has earned {xp} XP (threshold: {threshold}). Level up to {level}?",
                 "dismiss": "关闭",
-                "dismissed": "{{name}} level-up 提议 关闭ed.",
+                "dismissed": "{name} level-up 提议 关闭ed.",
                 "levelUp": "Level Up",
-                "leveledUp": "{{name}} leveled up to level {{level}}!",
-                "title": "{{name}} Ready to Level Up!"
+                "leveledUp": "{name} leveled up to level {level}!",
+                "title": "{name} Ready to Level Up!"
             },
             "moraleCheckFail": "{name} fails the morale check (roll {roll} + {bonus} = {total} vs DC {dc}) and becomes routed!",
             "moraleCheckPass": "{name} passes the morale check (roll {roll} + {bonus} = {total} vs DC {dc}) and recovers.",
@@ -8235,7 +8235,27 @@
             },
             "toggleResolved": "标记为已解决 / 重新打开",
             "resolvedGuard": "此追踪器已解决；请重新打开后再记录检定。",
-            "corruptStore": "子系统存储设置包含无法读取的 JSON；已拒绝覆盖。请修复或清空世界设置 'subsystemStore'。"
+            "corruptStore": "子系统存储设置包含无法读取的 JSON；已拒绝覆盖。请修复或清空世界设置 'subsystemStore'。",
+            "runAsResearch": "作为研究项目运行",
+            "eventAlreadyLinked": "此事件已有一个进行中的研究项目。",
+            "offer": {
+                "influenceTitle": "达到影响阈值",
+                "researchTitle": "研究突破",
+                "body": "{name} 已达到 {points} 点。",
+                "gmActions": "GM 操作",
+                "grant": "授予",
+                "convert": "转换为任务",
+                "dismiss": "忽略",
+                "granted": "{name}（{points} 点）：{effect}",
+                "alreadyAnswered": "此阈值提议已被处理。",
+                "pickKingdom": "哪个王国接收该任务？"
+            },
+            "import": {
+                "title": "导入 JSON",
+                "help": "粘贴文档中的 JSON 格式；条目将被追加，绝不替换。任何格式错误的条目都会阻止整个导入。",
+                "invalid": "未导入任何内容：JSON 无法读取或存在格式错误的条目。",
+                "done": "已导入 {encounters} 个影响遭遇和 {projects} 个研究项目。"
+            }
         }
     }
 }

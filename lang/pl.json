@@ -2650,11 +2650,11 @@
                 "resetSolutions": "Setting available Supernatural and Creative Solutions to 0",
                 "moveValues": "Adding values from the next columns to the now columns, respecting their resource limits",
                 "factionStanding": "Faction Standing Changes",
-                "factionStandingChange": "{{group}}: {{oldAttitude}} → {{newAttitude}} ({{delta}})",
+                "factionStandingChange": "{group}: {oldAttitude} → {newAttitude} ({delta})",
                 "raiseWarThreat": "Raise War Threat",
                 "offerDiplomacyQuest": "Offer Diplomacy Quest",
-                "warThreatName": "{{group}} Aggression",
-                "diplomacyQuestTitle": "Diplomatic Accord with {{group}}",
+                "warThreatName": "{group} Aggression",
+                "diplomacyQuestTitle": "Diplomatic Accord with {group}",
                 "endTurnUndone": "Tura {turn} end reverted; królestwo state restored.",
                 "endTurnUndoneTooltip": "Reverts królestwo state (PZ, fame, commodities, niepokój, quests, zagrożenies, clocks) to before End Tura. Does NOT remove chat wiadomośćs or calendar notes.",
                 "undoEndTurn": "Undo Last End Tura",
@@ -7963,18 +7963,18 @@
             "defenderStatus": "Defender Status",
             "resolveRound": "Resolve Round",
             "battleLog": "Battle Log",
-            "chatTitle": "{{battleName}} — Round {{round}}",
+            "chatTitle": "{battleName} — Round {round}",
             "victory": "Victory! The kingdom's armies have defeated the threat.",
             "defeat": "Defeat… the kingdom's armies have been destroyed.",
             "conditionPinnedNoStrike": "{name} is pinned and cannot strike!",
             "conditionWearyPenalty": "{name} is weary and takes a –1 penalty to attack rolls and AC.",
             "levelUpOffer": {
-                "description": "{{name}} has earned {{xp}} XP (threshold: {{threshold}}). Level up to {{level}}?",
+                "description": "{name} has earned {xp} XP (threshold: {threshold}). Level up to {level}?",
                 "dismiss": "Odrzuć",
-                "dismissed": "{{name}} level-up oferta odrzućed.",
+                "dismissed": "{name} level-up oferta odrzućed.",
                 "levelUp": "Level Up",
-                "leveledUp": "{{name}} leveled up to level {{level}}!",
-                "title": "{{name}} Ready to Level Up!"
+                "leveledUp": "{name} leveled up to level {level}!",
+                "title": "{name} Ready to Level Up!"
             },
             "moraleCheckFail": "{name} fails the morale check (roll {roll} + {bonus} = {total} vs DC {dc}) and becomes routed!",
             "moraleCheckPass": "{name} passes the morale check (roll {roll} + {bonus} = {total} vs DC {dc}) and recovers.",
@@ -8235,7 +8235,27 @@
             },
             "toggleResolved": "Oznacz jako rozstrzygnięty / otwórz ponownie",
             "resolvedGuard": "Ten tracker jest rozstrzygnięty; otwórz go ponownie, aby rejestrować testy.",
-            "corruptStore": "Ustawienie magazynu podsystemów zawiera nieczytelny JSON; odmowa nadpisania. Napraw lub wyczyść ustawienie świata 'subsystemStore'."
+            "corruptStore": "Ustawienie magazynu podsystemów zawiera nieczytelny JSON; odmowa nadpisania. Napraw lub wyczyść ustawienie świata 'subsystemStore'.",
+            "runAsResearch": "Uruchom jako projekt badawczy",
+            "eventAlreadyLinked": "To wydarzenie ma już aktywny projekt badawczy.",
+            "offer": {
+                "influenceTitle": "Osiągnięto próg wpływu",
+                "researchTitle": "Przełom w badaniach",
+                "body": "{name} osiągnęło {points} punktów.",
+                "gmActions": "Akcje MG",
+                "grant": "Przyznaj",
+                "convert": "Zamień na zadanie",
+                "dismiss": "Odrzuć",
+                "granted": "{name} ({points} punktów): {effect}",
+                "alreadyAnswered": "Ta oferta progu została już rozstrzygnięta.",
+                "pickKingdom": "Które królestwo otrzyma zadanie?"
+            },
+            "import": {
+                "title": "Importuj JSON",
+                "help": "Wklej udokumentowany format JSON; wpisy są dodawane, nigdy nie zastępowane. Jeden błędny wpis blokuje cały import.",
+                "invalid": "Nic nie zaimportowano: JSON był nieczytelny lub wpis błędny.",
+                "done": "Zaimportowano {encounters} spotkań wpływu i {projects} projektów badawczych."
+            }
         }
     }
 }
