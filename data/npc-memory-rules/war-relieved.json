@@ -1,0 +1,7 @@
+{
+  "id": "war-relieved",
+  "trigger": "warPressureRelieved",
+  "deltas": { "Farmer": 2, "Shepherd": 2, "Soldier": -1 },
+  "defaultDelta": 0,
+  "cooldownTurns": 0
+}

@@ -1,0 +1,8 @@
+{
+  "id": "strife-worsens",
+  "trigger": "ruinWorsened",
+  "ref": "strife",
+  "deltas": { "Priest": -2, "Healer": -1 },
+  "defaultDelta": 0,
+  "cooldownTurns": 1
+}

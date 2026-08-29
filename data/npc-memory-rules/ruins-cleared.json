@@ -1,0 +1,7 @@
+{
+  "id": "ruins-cleared",
+  "trigger": "ruinsCleared",
+  "deltas": { "Priest": 2, "Healer": 2, "Mason": 1 },
+  "defaultDelta": 0,
+  "cooldownTurns": 0
+}

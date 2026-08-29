@@ -129,6 +129,7 @@ tasks {
             "validateGovernments",
             "validateHeartlands",
             "validateMilestones",
+            "validateNpcMemoryRules",
             "validateKingdomEvents",
             "validateExpeditionActivities",
         )
@@ -136,6 +137,12 @@ tasks {
 }
 
 // JSON Schema validation tasks
+tasks.register<JsonSchemaValidator>("validateNpcMemoryRules") {
+    outputs.upToDateWhen { true }
+    schema = layout.projectDirectory.file("src/commonMain/resources/schemas/npc-memory-rule.json")
+    files = layout.projectDirectory.dir("data/npc-memory-rules")
+}
+
 tasks.register<JsonSchemaValidator>("validateKingdomEvents") {
     outputs.upToDateWhen { true } // no outputs, only depend on input files
     schema = layout.projectDirectory.file("src/commonMain/resources/schemas/event.json")

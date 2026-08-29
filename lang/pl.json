@@ -2698,6 +2698,59 @@
                     "gatherHorde": "Zebrać hordę",
                     "sackSettlement": "Splądrować osadę"
                 }
+            },
+            "npcMemory": {
+                "unrestSpike": {
+                    "entry": "Niepokoje gwałtownie wzrosły w tej turze."
+                },
+                "unrestCalmed": {
+                    "entry": "Niepokoje całkowicie opadły."
+                },
+                "decayWorsens": {
+                    "entry": "Rozkład szerzył się po królestwie."
+                },
+                "crimeWorsens": {
+                    "entry": "Przestępczość w królestwie wzrosła."
+                },
+                "corruptionWorsens": {
+                    "entry": "Korupcja w królestwie się pogłębiła."
+                },
+                "strifeWorsens": {
+                    "entry": "Waśnie w królestwie narosły."
+                },
+                "ruinsCleared": {
+                    "entry": "Wszystkie ruiny wreszcie usunięto."
+                },
+                "realmExpanded": {
+                    "entry": "Królestwo zajęło nowe ziemie."
+                },
+                "kingdomAdvanced": {
+                    "entry": "Królestwo awansowało o poziom."
+                },
+                "renownPeaked": {
+                    "entry": "Sława królestwa sięgnęła szczytu."
+                },
+                "warLooms": {
+                    "entry": "Napięcie wojenne wzrosło."
+                },
+                "warRelieved": {
+                    "entry": "Groźba wojny minęła."
+                },
+                "leanYear": {
+                    "entry": "Chudy rok: zużycie przewyższyło zapasy."
+                },
+                "clockFired": {
+                    "entry": "Nadciągające wydarzenie się spełniło."
+                },
+                "caravanRaided": {
+                    "entry": "Karawana została napadnięta."
+                },
+                "caravanDelivered": {
+                    "entry": "Karawana dotarła bezpiecznie."
+                },
+                "milestoneEarned": {
+                    "entry": "Królestwo osiągnęło kamień milowy."
+                }
             }
         },
         "chatMessages": {

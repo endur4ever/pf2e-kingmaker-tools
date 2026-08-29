@@ -1,0 +1,8 @@
+{
+  "id": "decay-worsens",
+  "trigger": "ruinWorsened",
+  "ref": "decay",
+  "deltas": { "Carpenter": -2, "Mason": -2, "Cobbler": -1 },
+  "defaultDelta": 0,
+  "cooldownTurns": 1
+}

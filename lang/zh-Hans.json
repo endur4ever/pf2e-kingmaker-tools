@@ -2698,6 +2698,59 @@
                     "gatherHorde": "集结部落",
                     "sackSettlement": "洗劫聚落"
                 }
+            },
+            "npcMemory": {
+                "unrestSpike": {
+                    "entry": "本回合动荡骤增。"
+                },
+                "unrestCalmed": {
+                    "entry": "动荡彻底平息。"
+                },
+                "decayWorsens": {
+                    "entry": "衰败在王国蔓延。"
+                },
+                "crimeWorsens": {
+                    "entry": "王国的犯罪加剧。"
+                },
+                "corruptionWorsens": {
+                    "entry": "王国的腐败加深。"
+                },
+                "strifeWorsens": {
+                    "entry": "王国的纷争加剧。"
+                },
+                "ruinsCleared": {
+                    "entry": "所有废墟终于清除。"
+                },
+                "realmExpanded": {
+                    "entry": "王国开拓了新领土。"
+                },
+                "kingdomAdvanced": {
+                    "entry": "王国提升了一级。"
+                },
+                "renownPeaked": {
+                    "entry": "王国声望达到顶峰。"
+                },
+                "warLooms": {
+                    "entry": "战争压力上升。"
+                },
+                "warRelieved": {
+                    "entry": "战争威胁解除。"
+                },
+                "leanYear": {
+                    "entry": "歉收之年：消耗超过了储备。"
+                },
+                "clockFired": {
+                    "entry": "迫近的事件成真了。"
+                },
+                "caravanRaided": {
+                    "entry": "一支商队遭到劫掠。"
+                },
+                "caravanDelivered": {
+                    "entry": "一支商队安全抵达。"
+                },
+                "milestoneEarned": {
+                    "entry": "王国达成了一座里程碑。"
+                }
             }
         },
         "chatMessages": {

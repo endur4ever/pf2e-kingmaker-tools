@@ -1,0 +1,7 @@
+{
+  "id": "renown-peaked",
+  "trigger": "fameAtMax",
+  "deltas": { "Innkeeper": 2, "Tavern Keeper": 2, "Painter": 1 },
+  "defaultDelta": 0,
+  "cooldownTurns": 0
+}

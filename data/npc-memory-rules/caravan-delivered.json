@@ -1,0 +1,8 @@
+{
+  "id": "caravan-delivered",
+  "trigger": "shipmentOutcome",
+  "ref": "delivered",
+  "deltas": { "Merchant": 1, "Teamster": 1, "Brewer": 1 },
+  "defaultDelta": 0,
+  "cooldownTurns": 1
+}

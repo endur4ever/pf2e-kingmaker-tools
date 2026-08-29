@@ -1,0 +1,8 @@
+{
+  "id": "clock-fired",
+  "trigger": "clockFired",
+  "ref": null,
+  "deltas": { "Scribe": 1 },
+  "defaultDelta": 0,
+  "cooldownTurns": 1
+}

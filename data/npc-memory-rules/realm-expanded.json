@@ -1,0 +1,7 @@
+{
+  "id": "realm-expanded",
+  "trigger": "sizeIncreased",
+  "deltas": { "Farmer": 1, "Shepherd": 1, "Ranger": 1, "Miner": 1 },
+  "defaultDelta": 0,
+  "cooldownTurns": 1
+}

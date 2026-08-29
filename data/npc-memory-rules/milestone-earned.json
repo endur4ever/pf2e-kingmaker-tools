@@ -1,0 +1,7 @@
+{
+  "id": "milestone-earned",
+  "trigger": "milestoneEarned",
+  "deltas": { "Priest": 1, "Scribe": 1, "Painter": 1 },
+  "defaultDelta": 0,
+  "cooldownTurns": 1
+}

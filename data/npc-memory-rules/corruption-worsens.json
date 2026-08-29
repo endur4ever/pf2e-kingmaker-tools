@@ -1,0 +1,8 @@
+{
+  "id": "corruption-worsens",
+  "trigger": "ruinWorsened",
+  "ref": "corruption",
+  "deltas": { "Scribe": -2, "Priest": -2 },
+  "defaultDelta": 0,
+  "cooldownTurns": 1
+}

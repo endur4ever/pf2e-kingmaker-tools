@@ -1,0 +1,7 @@
+{
+  "id": "kingdom-advanced",
+  "trigger": "levelIncreased",
+  "deltas": { "Scribe": 2, "Merchant": 1 },
+  "defaultDelta": 0,
+  "cooldownTurns": 0
+}

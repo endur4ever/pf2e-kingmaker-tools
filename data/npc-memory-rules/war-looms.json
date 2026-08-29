@@ -1,0 +1,7 @@
+{
+  "id": "war-looms",
+  "trigger": "warPressureRose",
+  "deltas": { "Soldier": 1, "Fletcher": 1, "Farmer": -2, "Shepherd": -2 },
+  "defaultDelta": 0,
+  "cooldownTurns": 3
+}

@@ -2820,6 +2820,59 @@
                     "gatherHorde": "Gather the Horde",
                     "sackSettlement": "Sack a Settlement"
                 }
+            },
+            "npcMemory": {
+                "unrestSpike": {
+                    "entry": "Unrest surged this turn."
+                },
+                "unrestCalmed": {
+                    "entry": "Unrest settled back to nothing."
+                },
+                "decayWorsens": {
+                    "entry": "Decay spread through the kingdom."
+                },
+                "crimeWorsens": {
+                    "entry": "Crime worsened across the kingdom."
+                },
+                "corruptionWorsens": {
+                    "entry": "Corruption deepened in the kingdom."
+                },
+                "strifeWorsens": {
+                    "entry": "Strife grew in the kingdom."
+                },
+                "ruinsCleared": {
+                    "entry": "Every ruin was finally cleared."
+                },
+                "realmExpanded": {
+                    "entry": "The realm claimed new territory."
+                },
+                "kingdomAdvanced": {
+                    "entry": "The kingdom advanced a level."
+                },
+                "renownPeaked": {
+                    "entry": "The kingdom's fame reached its peak."
+                },
+                "warLooms": {
+                    "entry": "War pressure mounted."
+                },
+                "warRelieved": {
+                    "entry": "The threat of war lifted."
+                },
+                "leanYear": {
+                    "entry": "A lean year: consumption outran the stores."
+                },
+                "clockFired": {
+                    "entry": "A looming event came to pass."
+                },
+                "caravanRaided": {
+                    "entry": "A caravan was raided."
+                },
+                "caravanDelivered": {
+                    "entry": "A caravan arrived safely."
+                },
+                "milestoneEarned": {
+                    "entry": "The kingdom earned a milestone."
+                }
             }
         },
         "chatMessages": {

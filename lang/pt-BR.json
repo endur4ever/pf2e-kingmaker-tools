@@ -2698,6 +2698,59 @@
                     "gatherHorde": "Reunir a horda",
                     "sackSettlement": "Saquear um assentamento"
                 }
+            },
+            "npcMemory": {
+                "unrestSpike": {
+                    "entry": "A inquietação disparou neste turno."
+                },
+                "unrestCalmed": {
+                    "entry": "A inquietação se dissipou por completo."
+                },
+                "decayWorsens": {
+                    "entry": "A decadência se espalhou pelo reino."
+                },
+                "crimeWorsens": {
+                    "entry": "O crime piorou no reino."
+                },
+                "corruptionWorsens": {
+                    "entry": "A corrupção se aprofundou no reino."
+                },
+                "strifeWorsens": {
+                    "entry": "Os conflitos cresceram no reino."
+                },
+                "ruinsCleared": {
+                    "entry": "Toda ruína foi enfim eliminada."
+                },
+                "realmExpanded": {
+                    "entry": "O reino reivindicou novas terras."
+                },
+                "kingdomAdvanced": {
+                    "entry": "O reino avançou um nível."
+                },
+                "renownPeaked": {
+                    "entry": "A fama do reino chegou ao auge."
+                },
+                "warLooms": {
+                    "entry": "A pressão de guerra aumentou."
+                },
+                "warRelieved": {
+                    "entry": "A ameaça de guerra passou."
+                },
+                "leanYear": {
+                    "entry": "Um ano magro: o consumo superou os estoques."
+                },
+                "clockFired": {
+                    "entry": "Um evento iminente se concretizou."
+                },
+                "caravanRaided": {
+                    "entry": "Uma caravana foi saqueada."
+                },
+                "caravanDelivered": {
+                    "entry": "Uma caravana chegou em segurança."
+                },
+                "milestoneEarned": {
+                    "entry": "O reino conquistou um marco."
+                }
             }
         },
         "chatMessages": {

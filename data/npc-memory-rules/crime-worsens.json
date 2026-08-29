@@ -1,0 +1,8 @@
+{
+  "id": "crime-worsens",
+  "trigger": "ruinWorsened",
+  "ref": "crime",
+  "deltas": { "Merchant": -2, "Jeweler": -2, "Guard": -1 },
+  "defaultDelta": 0,
+  "cooldownTurns": 1
+}

@@ -2698,6 +2698,59 @@
                     "gatherHorde": "Radunare l'orda",
                     "sackSettlement": "Saccheggiare un insediamento"
                 }
+            },
+            "npcMemory": {
+                "unrestSpike": {
+                    "entry": "Il malcontento è balzato questo turno."
+                },
+                "unrestCalmed": {
+                    "entry": "Il malcontento si è del tutto placato."
+                },
+                "decayWorsens": {
+                    "entry": "Il degrado si è diffuso nel regno."
+                },
+                "crimeWorsens": {
+                    "entry": "La criminalità è peggiorata nel regno."
+                },
+                "corruptionWorsens": {
+                    "entry": "La corruzione si è radicata nel regno."
+                },
+                "strifeWorsens": {
+                    "entry": "I conflitti sono cresciuti nel regno."
+                },
+                "ruinsCleared": {
+                    "entry": "Ogni rovina è stata finalmente sanata."
+                },
+                "realmExpanded": {
+                    "entry": "Il regno ha rivendicato nuove terre."
+                },
+                "kingdomAdvanced": {
+                    "entry": "Il regno è salito di livello."
+                },
+                "renownPeaked": {
+                    "entry": "La fama del regno ha toccato il culmine."
+                },
+                "warLooms": {
+                    "entry": "La pressione bellica è aumentata."
+                },
+                "warRelieved": {
+                    "entry": "La minaccia di guerra si è dissolta."
+                },
+                "leanYear": {
+                    "entry": "Un anno magro: i consumi hanno superato le scorte."
+                },
+                "clockFired": {
+                    "entry": "Un evento incombente si è compiuto."
+                },
+                "caravanRaided": {
+                    "entry": "Una carovana è stata assalita."
+                },
+                "caravanDelivered": {
+                    "entry": "Una carovana è giunta a destinazione."
+                },
+                "milestoneEarned": {
+                    "entry": "Il regno ha raggiunto una pietra miliare."
+                }
             }
         },
         "chatMessages": {

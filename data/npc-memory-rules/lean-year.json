@@ -1,0 +1,7 @@
+{
+  "id": "lean-year",
+  "trigger": "leanYear",
+  "deltas": { "Farmer": -2, "Miller": -2, "Baker": -2, "Butcher": -1 },
+  "defaultDelta": 0,
+  "cooldownTurns": 1
+}

@@ -1,0 +1,8 @@
+{
+  "id": "unrest-spike",
+  "trigger": "unrestRose",
+  "threshold": 3,
+  "deltas": { "Guard": 1, "Soldier": 1, "Merchant": -2, "Innkeeper": -1 },
+  "defaultDelta": 0,
+  "cooldownTurns": 1
+}

@@ -2698,6 +2698,59 @@
                     "gatherHorde": "Die Horde sammeln",
                     "sackSettlement": "Eine Siedlung plündern"
                 }
+            },
+            "npcMemory": {
+                "unrestSpike": {
+                    "entry": "Die Unruhe stieg in diesem Zug stark an."
+                },
+                "unrestCalmed": {
+                    "entry": "Die Unruhe legte sich vollständig."
+                },
+                "decayWorsens": {
+                    "entry": "Der Verfall breitete sich im Königreich aus."
+                },
+                "crimeWorsens": {
+                    "entry": "Die Kriminalität im Königreich nahm zu."
+                },
+                "corruptionWorsens": {
+                    "entry": "Die Korruption im Königreich vertiefte sich."
+                },
+                "strifeWorsens": {
+                    "entry": "Die Zwietracht im Königreich wuchs."
+                },
+                "ruinsCleared": {
+                    "entry": "Alle Ruin-Werte wurden endlich getilgt."
+                },
+                "realmExpanded": {
+                    "entry": "Das Reich beanspruchte neues Gebiet."
+                },
+                "kingdomAdvanced": {
+                    "entry": "Das Königreich stieg eine Stufe auf."
+                },
+                "renownPeaked": {
+                    "entry": "Der Ruhm des Königreichs erreichte seinen Höhepunkt."
+                },
+                "warLooms": {
+                    "entry": "Der Kriegsdruck nahm zu."
+                },
+                "warRelieved": {
+                    "entry": "Die Kriegsgefahr wich."
+                },
+                "leanYear": {
+                    "entry": "Ein mageres Jahr: Der Verbrauch überstieg die Vorräte."
+                },
+                "clockFired": {
+                    "entry": "Ein drohendes Ereignis trat ein."
+                },
+                "caravanRaided": {
+                    "entry": "Eine Karawane wurde überfallen."
+                },
+                "caravanDelivered": {
+                    "entry": "Eine Karawane kam sicher an."
+                },
+                "milestoneEarned": {
+                    "entry": "Das Königreich erreichte einen Meilenstein."
+                }
             }
         },
         "chatMessages": {

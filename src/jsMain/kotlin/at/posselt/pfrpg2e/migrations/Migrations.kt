@@ -64,6 +64,7 @@ import at.posselt.pfrpg2e.migrations.migrations.Migration69
 import at.posselt.pfrpg2e.migrations.migrations.Migration70
 import at.posselt.pfrpg2e.migrations.migrations.Migration71
 import at.posselt.pfrpg2e.migrations.migrations.Migration72
+import at.posselt.pfrpg2e.migrations.migrations.Migration73
 import at.posselt.pfrpg2e.kingdom.BackupSlots
 import at.posselt.pfrpg2e.kingdom.backupSlotContent
 import at.posselt.pfrpg2e.kingdom.rotateBackupSlots
@@ -167,6 +168,7 @@ internal val migrations = listOf(
     Migration70(),
     Migration71(),
     Migration72(),
+    Migration73(),
 )
 
 private val latestMigrationVersion = migrations.maxOfOrNull { it.version }!!

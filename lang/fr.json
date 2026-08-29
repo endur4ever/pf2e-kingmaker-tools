@@ -2698,6 +2698,59 @@
                     "gatherHorde": "Rassembler la horde",
                     "sackSettlement": "Mettre à sac une colonie"
                 }
+            },
+            "npcMemory": {
+                "unrestSpike": {
+                    "entry": "L'agitation a bondi ce tour-ci."
+                },
+                "unrestCalmed": {
+                    "entry": "L'agitation est entièrement retombée."
+                },
+                "decayWorsens": {
+                    "entry": "Le délabrement s'est répandu dans le royaume."
+                },
+                "crimeWorsens": {
+                    "entry": "La criminalité s'est aggravée dans le royaume."
+                },
+                "corruptionWorsens": {
+                    "entry": "La corruption s'est enracinée dans le royaume."
+                },
+                "strifeWorsens": {
+                    "entry": "Les discordes ont grandi dans le royaume."
+                },
+                "ruinsCleared": {
+                    "entry": "Toutes les ruines ont enfin été résorbées."
+                },
+                "realmExpanded": {
+                    "entry": "Le royaume a revendiqué de nouvelles terres."
+                },
+                "kingdomAdvanced": {
+                    "entry": "Le royaume a gagné un niveau."
+                },
+                "renownPeaked": {
+                    "entry": "La renommée du royaume a atteint son sommet."
+                },
+                "warLooms": {
+                    "entry": "La pression de guerre s'est accrue."
+                },
+                "warRelieved": {
+                    "entry": "La menace de guerre s'est dissipée."
+                },
+                "leanYear": {
+                    "entry": "Année de disette : la consommation a dépassé les réserves."
+                },
+                "clockFired": {
+                    "entry": "Un événement redouté s'est produit."
+                },
+                "caravanRaided": {
+                    "entry": "Une caravane a été pillée."
+                },
+                "caravanDelivered": {
+                    "entry": "Une caravane est arrivée à bon port."
+                },
+                "milestoneEarned": {
+                    "entry": "Le royaume a franchi un jalon."
+                }
             }
         },
         "chatMessages": {

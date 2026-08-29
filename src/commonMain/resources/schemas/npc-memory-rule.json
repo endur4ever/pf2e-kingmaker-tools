@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://posselt.at/pf2e-kingmaker-tools/schemas/npc-memory-rule.json",
+  "title": "NpcMemoryRule",
+  "description": "One NPC memory rule: a trigger over consecutive turn snapshots plus per-occupation attitude deltas",
+  "$ref": "#/$defs/NpcMemoryRule",
+  "$defs": {
+    "NpcMemoryRule": {
+      "type": "object",
+      "required": ["id", "trigger", "deltas", "defaultDelta", "cooldownTurns"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+        "trigger": {
+          "enum": [
+            "unrestRose", "unrestCalmed", "ruinWorsened", "ruinsCleared",
+            "sizeIncreased", "levelIncreased", "fameAtMax",
+            "warPressureRose", "warPressureRelieved", "leanYear",
+            "clockFired", "shipmentOutcome", "milestoneEarned"
+          ]
+        },
+        "threshold": { "type": "integer", "minimum": 0 },
+        "ref": { "type": ["string", "null"] },
+        "deltas": {
+          "type": "object",
+          "additionalProperties": { "type": "integer" }
+        },
+        "defaultDelta": { "type": "integer" },
+        "cooldownTurns": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": { "properties": { "trigger": { "const": "ruinWorsened" } } },
+          "then": { "properties": { "ref": { "enum": ["corruption", "crime", "decay", "strife"] } }, "required": ["ref"] }
+        },
+        {
+          "if": { "properties": { "trigger": { "const": "shipmentOutcome" } } },
+          "then": { "properties": { "ref": { "type": "string", "minLength": 1 } }, "required": ["ref"] }
+        },
+        {
+          "if": { "properties": { "trigger": { "const": "unrestRose" } } },
+          "then": { "properties": { "threshold": { "minimum": 1 } }, "required": ["threshold"] }
+        }
+      ]
+    }
+  }
+}

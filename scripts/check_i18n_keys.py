@@ -424,6 +424,46 @@ def check_rival_profile_keys():
     return 0
 
 
+NPC_MEMORY_RULE_DIR = "data/npc-memory-rules"
+
+
+def _kebab_to_camel(s):
+    parts = s.split("-")
+    return parts[0] + "".join(w.capitalize() for w in parts[1:])
+
+
+def check_npc_memory_rule_keys():
+    """Check 10: every NPC memory rule id must have its entry text in every locale.
+
+    Rule ids come from data/npc-memory-rules/*.json and the memory log renders them through a
+    literal-key `when` keyed by rule id (plan section 8) -- so a NEW rule file whose entry key was
+    never added would ship a raw key with every other check green. Same shape as check 8.
+    """
+    paths = sorted(glob.glob(f"{NPC_MEMORY_RULE_DIR}/*.json"))
+    if not paths:
+        return 0
+    ids = []
+    for p in paths:
+        rid = json.load(open(p, encoding="utf-8")).get("id")
+        if not isinstance(rid, str) or not rid:
+            print(f"[i18n] NPCMEMORY: {p} has no string id -- fix the rule file")
+            return 1
+        ids.append(rid)
+    problems = [(path, f"kingdom.npcMemory.{_kebab_to_camel(i)}.entry")
+                for path in sorted(glob.glob("lang/*.json"))
+                for i in ids
+                if not isinstance(
+                    lookup_value(json.load(open(path, encoding="utf-8")).get(NS, {}),
+                                 f"kingdom.npcMemory.{_kebab_to_camel(i)}.entry"), str)]
+    if problems:
+        print(f"[i18n] NPCMEMORY: {len(problems)} missing rule entry key(s):")
+        for path, key in problems:
+            print(f"  {path}: {key}")
+        return 1
+    print(f"[i18n] NPCMEMORY OK -- {len(ids)} memory rule(s) have entry text in every locale.")
+    return 0
+
+
 RENOWN_ENGINE_SRC = "src/commonMain/kotlin/at/posselt/pfrpg2e/data/kingdom/RenownEngine.kt"
 
 def check_epithet_keys():
@@ -540,6 +580,7 @@ def main():
         failed += check_setup_wizard_keys() or 0
         failed += check_rival_profile_keys() or 0
         failed += check_epithet_keys() or 0
+        failed += check_npc_memory_rule_keys() or 0
         if failed:
             return 1
     

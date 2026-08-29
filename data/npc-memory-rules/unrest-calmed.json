@@ -1,0 +1,8 @@
+{
+  "id": "unrest-calmed",
+  "trigger": "unrestCalmed",
+  "threshold": 5,
+  "deltas": { "Merchant": 2, "Innkeeper": 2, "Priest": 1 },
+  "defaultDelta": 0,
+  "cooldownTurns": 0
+}

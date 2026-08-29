@@ -36,6 +36,23 @@ external interface RawNpcEntry {
     var name: String
     var occupation: String
     var notes: String?
+
+    // NPC memory ledger (docs/plans/2026-07-09-plan-npc-memory.md 3.1) -- additive, nullable.
+    /** GM opted this resident into memory tracking. Null/false = untracked: no log, no cost. */
+    var memoryTracked: Boolean?
+    /** Oldest first, capped at MEMORY_LOG_CAP; null on legacy data until Migration73 seeds it. */
+    var memoryLog: Array<RawNpcMemoryEntry>?
+    /** Running total of deltas, deliberately NEVER recomputed from the log; null = 0. */
+    var attitudeScore: Int?
+}
+
+@JsPlainObject
+external interface RawNpcMemoryEntry {
+    var ruleId: String
+    var turn: Int
+    var delta: Int
+    /** Interpolation value for the entry's i18n key, e.g. a caravan partner's name. */
+    var subject: String?
 }
 
 fun PopulationRoster.toRaw(): RawPopulationRoster =

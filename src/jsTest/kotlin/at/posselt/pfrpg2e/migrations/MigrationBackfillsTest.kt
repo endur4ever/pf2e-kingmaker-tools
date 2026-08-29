@@ -2,6 +2,7 @@ package at.posselt.pfrpg2e.migrations
 
 import at.posselt.pfrpg2e.camping.CampingData
 import at.posselt.pfrpg2e.migrations.migrations.Migration72
+import at.posselt.pfrpg2e.migrations.migrations.Migration73
 import at.posselt.pfrpg2e.migrations.migrations.Migration25
 import at.posselt.pfrpg2e.migrations.migrations.Migration28
 import at.posselt.pfrpg2e.migrations.migrations.Migration29
@@ -445,5 +446,42 @@ class MigrationBackfillsTest {
         val k = kingdom()
         Migration72().migrateKingdom(game, k.unsafeCast<at.posselt.pfrpg2e.kingdom.KingdomData>())
         assertEquals(null, k.groups)
+    }
+
+    // ── Migration73: NPC memory logs on roster residents ─────────────────────────────────────
+    @Test
+    fun migration73SeedsMemoryLogsAndPreservesExistingOnes() = runTest {
+        val k = kingdom {
+            it.settlements = arrayOf(
+                unsafeJso<dynamic> {
+                    populationRoster = unsafeJso<dynamic> {
+                        npcs = arrayOf(
+                            unsafeJso<dynamic> { id = "n1" },
+                            unsafeJso<dynamic> {
+                                id = "n2"
+                                memoryLog = arrayOf(unsafeJso<dynamic> { ruleId = "war-looms"; turn = 3; delta = 1 })
+                                attitudeScore = 4
+                            },
+                        )
+                    }
+                },
+                unsafeJso<dynamic> {},
+            )
+        }
+        Migration73().migrateKingdom(game, k.unsafeCast<at.posselt.pfrpg2e.kingdom.KingdomData>())
+        val npcs = k.settlements[0].populationRoster.npcs.unsafeCast<Array<dynamic>>()
+        assertEquals(0, size(npcs[0].memoryLog))
+        // a seeded second run must keep the history AND the running attitude
+        assertEquals(1, size(npcs[1].memoryLog))
+        assertEquals(4, npcs[1].attitudeScore.unsafeCast<Int>())
+        Migration73().migrateKingdom(game, k.unsafeCast<at.posselt.pfrpg2e.kingdom.KingdomData>())
+        assertEquals(1, size(npcs[1].memoryLog))
+    }
+
+    @Test
+    fun migration73SkipsKingdomsWithoutSettlements() = runTest {
+        val k = kingdom()
+        Migration73().migrateKingdom(game, k.unsafeCast<at.posselt.pfrpg2e.kingdom.KingdomData>())
+        assertEquals(null, k.settlements)
     }
 }
