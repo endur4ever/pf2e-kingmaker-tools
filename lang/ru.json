@@ -3012,7 +3012,8 @@
                 "deedsTitle": "Обнаружены деяния",
                 "deedsBody": "Эти достижения верны на этот ход. Даруйте или отклоните каждое.",
                 "dismissAll": "Отклонить все",
-                "dismissedAll": "Отклонено предложений деяний: {count}."
+                "dismissedAll": "Отклонено предложений деяний: {count}.",
+                "alreadyAwarded": "«{name}» уже был начислен."
             },
             "travelRoute": {
                 "title": "Travel",

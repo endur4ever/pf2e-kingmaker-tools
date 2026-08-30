@@ -3012,7 +3012,8 @@
                 "deedsTitle": "Exploits détectés",
                 "deedsBody": "Ces accomplissements sont vrais à ce tour. Accordez ou rejetez chacun.",
                 "dismissAll": "Tout rejeter",
-                "dismissedAll": "{count} offre(s) d'exploit rejetée(s)."
+                "dismissedAll": "{count} offre(s) d'exploit rejetée(s).",
+                "alreadyAwarded": "{name} a déjà été accordé."
             },
             "travelRoute": {
                 "title": "Travel",

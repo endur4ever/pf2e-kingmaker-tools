@@ -3012,7 +3012,8 @@
                 "deedsTitle": "Imprese rilevate",
                 "deedsBody": "Questi traguardi sono validi da questo turno. Concedi o ignora ciascuno.",
                 "dismissAll": "Ignora tutto",
-                "dismissedAll": "Ignorate {count} offerte di impresa."
+                "dismissedAll": "Ignorate {count} offerte di impresa.",
+                "alreadyAwarded": "{name} è già stato concesso."
             },
             "travelRoute": {
                 "title": "Travel",

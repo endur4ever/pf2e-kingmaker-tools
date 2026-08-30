@@ -3012,7 +3012,8 @@
                 "deedsTitle": "检测到功绩",
                 "deedsBody": "这些成就在本回合成立。请逐项授予或忽略。",
                 "dismissAll": "全部忽略",
-                "dismissedAll": "已忽略 {count} 项功绩提议。"
+                "dismissedAll": "已忽略 {count} 项功绩提议。",
+                "alreadyAwarded": "{name} 已经授予过了。"
             },
             "travelRoute": {
                 "title": "Travel",

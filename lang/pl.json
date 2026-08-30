@@ -3012,7 +3012,8 @@
                 "deedsTitle": "Wykryto czyny",
                 "deedsBody": "Te osiągnięcia są prawdziwe w tej turze. Przyznaj lub odrzuć każde.",
                 "dismissAll": "Odrzuć wszystko",
-                "dismissedAll": "Odrzucono {count} ofert(y) czynów."
+                "dismissedAll": "Odrzucono {count} ofert(y) czynów.",
+                "alreadyAwarded": "{name} zostało już przyznane."
             },
             "travelRoute": {
                 "title": "Travel",

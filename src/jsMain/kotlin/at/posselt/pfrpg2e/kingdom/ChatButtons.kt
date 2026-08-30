@@ -1895,10 +1895,20 @@ private val buttons = listOf(
         // The deeds digest presents a whole column of Award buttons, and setKingdom suspends: two
         // quick clicks each read the kingdom BEFORE the other's write landed, so the second
         // silently discarded the first award. Serialize the read-modify-write.
+        // withLock is INLINE, so return@withLock leaves the lambda and falls straight through to
+        // whatever follows -- it does not leave the handler. The award message therefore has to
+        // be gated on what the locked block actually did, not merely placed after it.
+        var awarded = false
         councilVoteMutex.withLock {
         val kingdom = actor.getKingdom() ?: return@withLock
         val existing = kingdom.milestones.find { it.id == milestoneId }
-        if (existing?.completed == true) return@withLock
+        if (existing?.completed == true) {
+            // already ticked, here or on the sheet: say so rather than announcing it twice
+            ui.notifications.info(
+                t("chatMessages.milestone.alreadyAwarded", recordOf("name" to milestone.name))
+            )
+            return@withLock
+        }
         if (existing == null) {
             kingdom.milestones = kingdom.milestones + MilestoneChoice(
                 id = milestoneId,
@@ -1921,16 +1931,20 @@ private val buttons = listOf(
         appendDeedGazetteLine(kingdom, milestone.name)
         beforeKingdomUpdate(previous, kingdom)
         actor.setKingdom(kingdom)
+        awarded = true
         }
-        postChatMessage(
-            t("chatMessages.milestone.awarded", recordOf("name" to milestone.name, "xp" to milestone.xp)),
-        )
+        if (awarded) {
+            postChatMessage(
+                t("chatMessages.milestone.awarded", recordOf("name" to milestone.name, "xp" to milestone.xp)),
+            )
+        }
     },
     ChatButton("km-offer-milestone-dismiss-all") { game, actor, _, button ->
         // Adopting the module mid-campaign fires a dozen true deeds at once; without this the GM
         // faces a dozen individual dismissals to silence them (plan 7).
         if (!game.user.isGM) return@ChatButton
         val ids = button.dataset["allIds"]?.split(",")?.filter { it.isNotBlank() } ?: return@ChatButton
+        var dismissed = false
         councilVoteMutex.withLock {
         val kingdom = actor.getKingdom() ?: return@withLock
         val existing = kingdom.milestones.associateBy { it.id }
@@ -1942,8 +1956,11 @@ private val buttons = listOf(
             if (it.id in ids && !it.completed) MilestoneChoice.copy(it, offerDismissed = true) else it
         } + missing).toTypedArray()
         actor.setKingdom(kingdom)
+        dismissed = true
         }
-        postChatMessage(t("chatMessages.milestone.dismissedAll", recordOf("count" to ids.size)))
+        if (dismissed) {
+            postChatMessage(t("chatMessages.milestone.dismissedAll", recordOf("count" to ids.size)))
+        }
     },
     // Jump-to-settlement on the pacing-alert CHAT card. It MUST be a ChatButton (bound to #chat by
     // CSS class) — the sheet-panel copy uses data-action/_onClickAction, but that only fires inside

@@ -3134,7 +3134,8 @@
                 "deedsTitle": "Deeds Detected",
                 "deedsBody": "These achievements are true as of this turn. Award or dismiss each.",
                 "dismissAll": "Dismiss all",
-                "dismissedAll": "Dismissed {count} deed offer(s)."
+                "dismissedAll": "Dismissed {count} deed offer(s).",
+                "alreadyAwarded": "{name} was already awarded."
             },
             "travelRoute": {
                 "title": "Travel",

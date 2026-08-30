@@ -160,6 +160,12 @@ fun CampingData.categoryWeightsOrDefault(): CategoryWeights =
 
 fun CampingData.rumorList(): List<Rumor> = rumors?.mapNotNull { it.toModel() } ?: emptyList()
 
+/**
+ * UNREACHABLE TODAY, deliberately kept: nothing writes [CampingData.merchantStock] and this
+ * helper has no caller, so the MERCHANT encounter category can draw a result but never stock or
+ * show a merchant. Left in place as the curator plan's scaffolding rather than deleted -- but
+ * marked, so the next reader does not assume merchants work.
+ */
 fun CampingData.merchantStockList(): List<MerchantStock> =
     merchantStock?.map { it.toModel() } ?: emptyList()
 

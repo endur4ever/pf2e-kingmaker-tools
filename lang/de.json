@@ -3012,7 +3012,8 @@
                 "deedsTitle": "Taten erkannt",
                 "deedsBody": "Diese Errungenschaften treffen ab diesem Zug zu. Jede gewähren oder verwerfen.",
                 "dismissAll": "Alle verwerfen",
-                "dismissedAll": "{count} Taten-Angebot(e) verworfen."
+                "dismissedAll": "{count} Taten-Angebot(e) verworfen.",
+                "alreadyAwarded": "{name} wurde bereits gewährt."
             },
             "travelRoute": {
                 "title": "Travel",

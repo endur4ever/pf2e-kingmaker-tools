@@ -3012,7 +3012,8 @@
                 "deedsTitle": "Feitos detectados",
                 "deedsBody": "Estas conquistas são válidas neste turno. Conceda ou descarte cada uma.",
                 "dismissAll": "Descartar tudo",
-                "dismissedAll": "{count} oferta(s) de feito descartada(s)."
+                "dismissedAll": "{count} oferta(s) de feito descartada(s).",
+                "alreadyAwarded": "{name} já foi concedido."
             },
             "travelRoute": {
                 "title": "Travel",
