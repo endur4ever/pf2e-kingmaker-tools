@@ -18,6 +18,7 @@ import at.posselt.pfrpg2e.questevent.QuestStatus
 import at.posselt.pfrpg2e.questevent.QuestType
 import at.posselt.pfrpg2e.utils.d20Check
 import at.posselt.pfrpg2e.utils.fromUuidTypeSafe
+import com.foundryvtt.core.documents.TableResult
 import at.posselt.pfrpg2e.utils.getPF2EWorldTime
 import at.posselt.pfrpg2e.utils.isDay
 import at.posselt.pfrpg2e.utils.buildPromise
@@ -132,12 +133,15 @@ suspend fun rollCuratedEncounter(game: Game, actor: CampingActor, offerRestore: 
         ui.notifications.error(t("camping.encounterTableNotFound", recordOf("regionName" to region.name)))
         return false
     }
-    val resultText = categoryTable
+    val drawnResult = categoryTable
         .rollWithDraw(rollMode = rollMode, displayChat = false)
-        .draw.results.get(0)?.text?.trim()
-        ?: ""
+        .draw.results.get(0)
+    val resultText = drawnResult?.text?.trim() ?: ""
+    // The drawn result often POINTS AT a real actor and the curator has always thrown that away,
+    // reading only .text. Seed the stage manifest from it when it does (encounter-stager 2.1).
+    val seededManifest = drawnResult?.let { manifestFromTableResult(it) }
 
-    showEncounterPreview(game, actor, camping, category, region.name, resultText)
+    showEncounterPreview(game, actor, camping, category, region.name, resultText, seededManifest)
     return true
 }
 
@@ -154,6 +158,7 @@ private suspend fun showEncounterPreview(
     category: EncounterCategory,
     regionName: String,
     resultText: String,
+    seededManifest: RawEncounterManifest? = null,
 ) {
     camping.lastEncounterCategory = category.value
     camping.lastEncounterResult = resultText
@@ -179,9 +184,12 @@ private suspend fun showEncounterPreview(
     } else null
 
     EncounterPreviewDialog(
+        game = game,
+        partyActor = actor,
         category = category,
         regionName = regionName,
         resultText = resultText,
+        manifest = seededManifest,
         rumor = rumor,
         onAccept = { buildPromise {
             postChatTemplate(
@@ -514,4 +522,39 @@ suspend fun convertRumorToQuest(game: Game, rumor: Rumor): String? {
     kingdomActor.setKingdom(kingdom)
     ui.notifications.info(t("camping.encounterRumorConverted"))
     return questId
+}
+
+/**
+ * A stage manifest from a drawn table result, when the result actually references an actor.
+ *
+ * Foundry's TableResult carries `type`, `documentCollection` and `documentId`, and a result whose
+ * type is "document" (a world actor) or "pack" (a compendium entry) names a real creature. The
+ * curator reads only `.text`, so that reference was being discarded before it reached the
+ * preview. A text-only result seeds nothing and the Stage button stays disabled until the GM
+ * curates creatures by hand -- which is most of the shipped tables (plan open question 1's
+ * stated default: doc/pack results only).
+ */
+fun manifestFromTableResult(result: TableResult): RawEncounterManifest? {
+    val type = result.type
+    if (type != "document" && type != "pack") return null
+    val collection = result.documentCollection.takeIf { it.isNotBlank() } ?: return null
+    val documentId = result.documentId.takeIf { it.isNotBlank() } ?: return null
+    // a world result names a collection ("Actor"); a pack result names the pack itself
+    val uuid = if (type == "pack") {
+        "Compendium.$collection.Actor.$documentId"
+    } else {
+        "$collection.$documentId"
+    }
+    return RawEncounterManifest(
+        creatures = arrayOf(
+            RawEncounterCreature(
+                uuid = uuid,
+                count = 1,
+                adjustment = null,
+                displayName = result.text.trim().takeIf { it.isNotBlank() },
+            )
+        ),
+        startDistanceFt = null,
+        xpBudgetNote = null,
+    )
 }

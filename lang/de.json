@@ -665,6 +665,33 @@
                     }
                 },
                 "rowGone": "Dieses Gerücht steht nicht mehr auf der Tafel."
+            },
+            "encounterStage": "Begegnung aufstellen",
+            "encounterStageTitle": "Begegnung aufstellen",
+            "encounterStageCreatures": "Kreaturen",
+            "encounterStageAddCreature": "Kreatur hinzufügen",
+            "encounterStageCreatureUuid": "Kreatur-UUID",
+            "encounterStageCreatureUuidHelp": "UUID aus der Kopfzeile eines Akteursblatts kopieren, z. B. Compendium.pf2e.pathfinder-bestiary.Actor.xxxx",
+            "encounterStageBadUuid": "Kein Akteur zu {uuid} gefunden.",
+            "encounterStageStartDistance": "Startentfernung (ft)",
+            "encounterStageSpawnHidden": "Versteckt aufstellen",
+            "encounterStageNote": "Budget-Notiz",
+            "encounterStageXpNote": "Begegnungsbudget",
+            "encounterStageBudgets": "Gruppe von {size} auf Stufe {level} — mittel {moderate}, schwer {severe}",
+            "encounterStageRowXp": "Stufe {level}, {xp} EP",
+            "encounterStageNoCreatures": "Mindestens eine Kreatur zum Aufstellen hinzufügen.",
+            "encounterStaged": "{count} Kreatur(en) auf {distance} ft aufgestellt.",
+            "encounterStageNoParty": "Kein Gruppen-Token auf der aktiven Szene gefunden.",
+            "encounterStageNoScene": "Keine aktive Szene zum Aufstellen.",
+            "encounterStageNoCombat": "Token wurden erzeugt, aber der Kampf konnte nicht erstellt werden.",
+            "encounterStageMissingActor": "Kreatur übersprungen: kein Akteur zu {uuid} gefunden.",
+            "encounterStageUndo": "Aufgestellte Token und Kampf entfernt.",
+            "encounterThreat": {
+                "trivial": "Trivial",
+                "low": "Leicht",
+                "moderate": "Mittel",
+                "severe": "Schwer",
+                "extreme": "Extrem"
             }
         },
         "settlementNav": {

@@ -665,6 +665,33 @@
                     }
                 },
                 "rowGone": "该传闻已不在传闻板上。"
+            },
+            "encounterStage": "布置遭遇",
+            "encounterStageTitle": "布置遭遇",
+            "encounterStageCreatures": "生物",
+            "encounterStageAddCreature": "添加生物",
+            "encounterStageCreatureUuid": "生物 UUID",
+            "encounterStageCreatureUuidHelp": "从角色卡头部复制 UUID，例如 Compendium.pf2e.pathfinder-bestiary.Actor.xxxx",
+            "encounterStageBadUuid": "未找到 {uuid} 对应的角色。",
+            "encounterStageStartDistance": "起始距离（尺）",
+            "encounterStageSpawnHidden": "以隐藏状态生成",
+            "encounterStageNote": "预算备注",
+            "encounterStageXpNote": "遭遇预算",
+            "encounterStageBudgets": "{size} 人队伍，等级 {level} — 中等 {moderate}，严重 {severe}",
+            "encounterStageRowXp": "等级 {level}，{xp} 经验",
+            "encounterStageNoCreatures": "请至少添加一个生物。",
+            "encounterStaged": "已在 {distance} 尺处布置 {count} 个生物。",
+            "encounterStageNoParty": "活动场景中没有队伍标记。",
+            "encounterStageNoScene": "没有可用于布置的活动场景。",
+            "encounterStageNoCombat": "标记已生成，但无法创建战斗。",
+            "encounterStageMissingActor": "已跳过一个生物：未找到 {uuid} 对应的角色。",
+            "encounterStageUndo": "已移除布置的标记与战斗。",
+            "encounterThreat": {
+                "trivial": "微不足道",
+                "low": "轻松",
+                "moderate": "中等",
+                "severe": "严重",
+                "extreme": "极端"
             }
         },
         "settlementNav": {

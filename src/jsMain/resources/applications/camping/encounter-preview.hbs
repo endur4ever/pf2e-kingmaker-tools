@@ -21,6 +21,12 @@
         {{/if}}
     </section>
     <footer class="km-encounter-preview-actions">
+        {{#if canStage}}
+            <button type="button" data-action="km-stage"
+                    {{#unless creatureCount}}data-tooltip="{{localizeKM "camping.encounterStageNoCreatures"}}"{{/unless}}>
+                <i class="fa-solid fa-swords"></i> {{stageLabel}}{{#if creatureCount}} ({{creatureCount}}){{/if}}
+            </button>
+        {{/if}}
         <button type="button" data-action="km-accept" class="km-encounter-accept">
             <i class="fa-solid fa-check"></i> {{acceptLabel}}
         </button>

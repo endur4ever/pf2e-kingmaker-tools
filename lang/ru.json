@@ -665,6 +665,33 @@
                     }
                 },
                 "rowGone": "Этого слуха больше нет на доске."
+            },
+            "encounterStage": "Подготовить встречу",
+            "encounterStageTitle": "Подготовить встречу",
+            "encounterStageCreatures": "Существа",
+            "encounterStageAddCreature": "Добавить существо",
+            "encounterStageCreatureUuid": "UUID существа",
+            "encounterStageCreatureUuidHelp": "Скопируйте UUID из заголовка листа актёра, напр. Compendium.pf2e.pathfinder-bestiary.Actor.xxxx",
+            "encounterStageBadUuid": "Актёр для {uuid} не найден.",
+            "encounterStageStartDistance": "Начальная дистанция (фт)",
+            "encounterStageSpawnHidden": "Создать скрытыми",
+            "encounterStageNote": "Заметка о бюджете",
+            "encounterStageXpNote": "Бюджет встречи",
+            "encounterStageBudgets": "группа из {size} на уровне {level} — умеренный {moderate}, тяжёлый {severe}",
+            "encounterStageRowXp": "уровень {level}, {xp} опыта",
+            "encounterStageNoCreatures": "Добавьте хотя бы одно существо.",
+            "encounterStaged": "Подготовлено существ: {count} на дистанции {distance} фт.",
+            "encounterStageNoParty": "На активной сцене нет токена группы.",
+            "encounterStageNoScene": "Нет активной сцены.",
+            "encounterStageNoCombat": "Токены созданы, но бой создать не удалось.",
+            "encounterStageMissingActor": "Существо пропущено: актёр для {uuid} не найден.",
+            "encounterStageUndo": "Подготовленные токены и бой удалены.",
+            "encounterThreat": {
+                "trivial": "Тривиальная",
+                "low": "Лёгкая",
+                "moderate": "Умеренная",
+                "severe": "Тяжёлая",
+                "extreme": "Экстремальная"
             }
         },
         "settlementNav": {

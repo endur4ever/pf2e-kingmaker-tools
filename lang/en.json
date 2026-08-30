@@ -787,6 +787,33 @@
                     }
                 },
                 "rowGone": "That rumor is no longer on the board."
+            },
+            "encounterStage": "Stage Encounter",
+            "encounterStageTitle": "Stage Encounter",
+            "encounterStageCreatures": "Creatures",
+            "encounterStageAddCreature": "Add Creature",
+            "encounterStageCreatureUuid": "Creature UUID",
+            "encounterStageCreatureUuidHelp": "Copy a UUID from an actor sheet's header, e.g. Compendium.pf2e.pathfinder-bestiary.Actor.xxxx",
+            "encounterStageBadUuid": "No actor found for {uuid}.",
+            "encounterStageStartDistance": "Start distance (ft)",
+            "encounterStageSpawnHidden": "Spawn hidden",
+            "encounterStageNote": "Budget note",
+            "encounterStageXpNote": "Encounter budget",
+            "encounterStageBudgets": "party of {size} at level {level} — moderate {moderate}, severe {severe}",
+            "encounterStageRowXp": "level {level}, {xp} XP",
+            "encounterStageNoCreatures": "Add at least one creature to stage.",
+            "encounterStaged": "Staged {count} creature(s) at {distance} ft.",
+            "encounterStageNoParty": "No party token found on the active scene.",
+            "encounterStageNoScene": "No active scene to stage on.",
+            "encounterStageNoCombat": "Tokens were spawned, but the combat could not be created.",
+            "encounterStageMissingActor": "Skipped a creature: no actor found for {uuid}.",
+            "encounterStageUndo": "Removed the staged tokens and combat.",
+            "encounterThreat": {
+                "trivial": "Trivial",
+                "low": "Low",
+                "moderate": "Moderate",
+                "severe": "Severe",
+                "extreme": "Extreme"
             }
         },
         "settlementNav": {

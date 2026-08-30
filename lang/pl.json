@@ -665,6 +665,33 @@
                     }
                 },
                 "rowGone": "Tej plotki nie ma już na tablicy."
+            },
+            "encounterStage": "Przygotuj spotkanie",
+            "encounterStageTitle": "Przygotuj spotkanie",
+            "encounterStageCreatures": "Istoty",
+            "encounterStageAddCreature": "Dodaj istotę",
+            "encounterStageCreatureUuid": "UUID istoty",
+            "encounterStageCreatureUuidHelp": "Skopiuj UUID z nagłówka karty aktora, np. Compendium.pf2e.pathfinder-bestiary.Actor.xxxx",
+            "encounterStageBadUuid": "Nie znaleziono aktora dla {uuid}.",
+            "encounterStageStartDistance": "Odległość początkowa (ft)",
+            "encounterStageSpawnHidden": "Utwórz ukryte",
+            "encounterStageNote": "Notatka o budżecie",
+            "encounterStageXpNote": "Budżet spotkania",
+            "encounterStageBudgets": "drużyna {size} osób na poziomie {level} — umiarkowane {moderate}, ciężkie {severe}",
+            "encounterStageRowXp": "poziom {level}, {xp} PD",
+            "encounterStageNoCreatures": "Dodaj co najmniej jedną istotę.",
+            "encounterStaged": "Przygotowano {count} istot w odległości {distance} ft.",
+            "encounterStageNoParty": "Brak żetonu drużyny na aktywnej scenie.",
+            "encounterStageNoScene": "Brak aktywnej sceny.",
+            "encounterStageNoCombat": "Żetony utworzono, ale nie udało się utworzyć walki.",
+            "encounterStageMissingActor": "Pominięto istotę: nie znaleziono aktora dla {uuid}.",
+            "encounterStageUndo": "Usunięto przygotowane żetony i walkę.",
+            "encounterThreat": {
+                "trivial": "Trywialne",
+                "low": "Łatwe",
+                "moderate": "Umiarkowane",
+                "severe": "Ciężkie",
+                "extreme": "Ekstremalne"
             }
         },
         "settlementNav": {

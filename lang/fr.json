@@ -665,6 +665,33 @@
                     }
                 },
                 "rowGone": "Cette rumeur n'est plus au tableau."
+            },
+            "encounterStage": "Mettre en place",
+            "encounterStageTitle": "Mettre en place la rencontre",
+            "encounterStageCreatures": "Créatures",
+            "encounterStageAddCreature": "Ajouter une créature",
+            "encounterStageCreatureUuid": "UUID de la créature",
+            "encounterStageCreatureUuidHelp": "Copiez un UUID depuis l'en-tête d'une fiche d'acteur, p. ex. Compendium.pf2e.pathfinder-bestiary.Actor.xxxx",
+            "encounterStageBadUuid": "Aucun acteur trouvé pour {uuid}.",
+            "encounterStageStartDistance": "Distance initiale (ft)",
+            "encounterStageSpawnHidden": "Apparaître caché",
+            "encounterStageNote": "Note de budget",
+            "encounterStageXpNote": "Budget de rencontre",
+            "encounterStageBudgets": "groupe de {size} au niveau {level} — modéré {moderate}, sévère {severe}",
+            "encounterStageRowXp": "niveau {level}, {xp} PX",
+            "encounterStageNoCreatures": "Ajoutez au moins une créature pour la mise en place.",
+            "encounterStaged": "{count} créature(s) placée(s) à {distance} ft.",
+            "encounterStageNoParty": "Aucun jeton de groupe sur la scène active.",
+            "encounterStageNoScene": "Aucune scène active pour la mise en place.",
+            "encounterStageNoCombat": "Les jetons ont été créés, mais le combat n'a pas pu être créé.",
+            "encounterStageMissingActor": "Créature ignorée : aucun acteur trouvé pour {uuid}.",
+            "encounterStageUndo": "Jetons et combat retirés.",
+            "encounterThreat": {
+                "trivial": "Trivial",
+                "low": "Faible",
+                "moderate": "Modéré",
+                "severe": "Sévère",
+                "extreme": "Extrême"
             }
         },
         "settlementNav": {

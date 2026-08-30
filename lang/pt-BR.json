@@ -665,6 +665,33 @@
                     }
                 },
                 "rowGone": "Esse rumor não está mais no quadro."
+            },
+            "encounterStage": "Preparar encontro",
+            "encounterStageTitle": "Preparar encontro",
+            "encounterStageCreatures": "Criaturas",
+            "encounterStageAddCreature": "Adicionar criatura",
+            "encounterStageCreatureUuid": "UUID da criatura",
+            "encounterStageCreatureUuidHelp": "Copie um UUID do cabeçalho da ficha de um ator, ex.: Compendium.pf2e.pathfinder-bestiary.Actor.xxxx",
+            "encounterStageBadUuid": "Nenhum ator encontrado para {uuid}.",
+            "encounterStageStartDistance": "Distância inicial (ft)",
+            "encounterStageSpawnHidden": "Criar oculto",
+            "encounterStageNote": "Nota de orçamento",
+            "encounterStageXpNote": "Orçamento do encontro",
+            "encounterStageBudgets": "grupo de {size} no nível {level} — moderado {moderate}, severo {severe}",
+            "encounterStageRowXp": "nível {level}, {xp} XP",
+            "encounterStageNoCreatures": "Adicione ao menos uma criatura para preparar.",
+            "encounterStaged": "{count} criatura(s) preparada(s) a {distance} ft.",
+            "encounterStageNoParty": "Nenhum token de grupo na cena ativa.",
+            "encounterStageNoScene": "Nenhuma cena ativa para preparar.",
+            "encounterStageNoCombat": "Os tokens foram criados, mas o combate não pôde ser criado.",
+            "encounterStageMissingActor": "Criatura ignorada: nenhum ator encontrado para {uuid}.",
+            "encounterStageUndo": "Tokens preparados e combate removidos.",
+            "encounterThreat": {
+                "trivial": "Trivial",
+                "low": "Baixo",
+                "moderate": "Moderado",
+                "severe": "Severo",
+                "extreme": "Extremo"
             }
         },
         "settlementNav": {

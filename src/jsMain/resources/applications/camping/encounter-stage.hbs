@@ -1,0 +1,63 @@
+<div class="km-encounter-stage">
+    <section class="km-stage-budget">
+        <p>
+            <b>{{localizeKM "camping.encounterStageXpNote"}}:</b>
+            {{totalXp}} XP — {{threatLabel}}
+            <span class="km-sub-note">({{localizeKM "camping.encounterStageBudgets" moderate=moderateBudget severe=severeBudget size=partySize level=partyLevel}})</span>
+        </p>
+    </section>
+
+    <section class="km-stage-creatures">
+        <h3>
+            {{localizeKM "camping.encounterStageCreatures"}} ({{totalCount}})
+            <button type="button" data-action="km-stage-add"><i class="fa-solid fa-plus"></i> {{localizeKM "camping.encounterStageAddCreature"}}</button>
+        </h3>
+        {{#if hasCreatures}}
+            <ul class="km-stage-list">
+                {{#each creatures}}
+                    <li class="km-stage-row">
+                        <span class="km-stage-name">{{this.name}}</span>
+                        <span class="km-sub-note">{{this.xpNote}}</span>
+                        <span class="km-stage-count">
+                            <button type="button" data-action="km-stage-dec" data-index="{{this.index}}"><i class="fa-solid fa-minus"></i></button>
+                            <b>{{this.count}}</b>
+                            <button type="button" data-action="km-stage-inc" data-index="{{this.index}}"><i class="fa-solid fa-plus"></i></button>
+                        </span>
+                        <button type="button" data-action="km-stage-remove" data-index="{{this.index}}"><i class="fa-solid fa-trash"></i></button>
+                    </li>
+                {{/each}}
+            </ul>
+        {{else}}
+            <p class="km-sub-empty">{{localizeKM "camping.encounterStageNoCreatures"}}</p>
+        {{/if}}
+    </section>
+
+    <section class="km-stage-options">
+        <label>
+            {{localizeKM "camping.encounterStageStartDistance"}}
+            <input type="number" name="startDistanceFt" value="{{startDistanceFt}}" min="0" step="5" />
+        </label>
+        <label>
+            <input type="checkbox" name="spawnHidden" {{#if spawnHidden}}checked{{/if}} />
+            {{localizeKM "camping.encounterStageSpawnHidden"}}
+        </label>
+        <label>
+            {{localizeKM "camping.encounterStageNote"}}
+            <input type="text" name="xpBudgetNote" value="{{xpBudgetNote}}" />
+        </label>
+    </section>
+
+    <hr>
+
+    <div class="km-stage-actions">
+        <button type="button" data-action="km-stage-confirm" class="km-primary-btn">
+            <i class="fa-solid fa-swords"></i> {{localizeKM "camping.encounterStage"}}
+        </button>
+        <button type="button" data-action="km-stage-save">
+            <i class="fa-solid fa-floppy-disk"></i> {{localizeKM "applications.save"}}
+        </button>
+        <button type="button" data-action="km-stage-cancel">
+            {{localizeKM "applications.cancel"}}
+        </button>
+    </div>
+</div>

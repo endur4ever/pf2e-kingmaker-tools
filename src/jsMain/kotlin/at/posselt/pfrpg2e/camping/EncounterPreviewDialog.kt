@@ -17,7 +17,13 @@ import kotlinx.js.JsPlainObject
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.get
 import org.w3c.dom.pointerevents.PointerEvent
+import com.foundryvtt.core.Game
+import at.posselt.pfrpg2e.camping.dialogs.ModifyEncounterStage
+import at.posselt.pfrpg2e.utils.launch
 import kotlin.js.Promise
+
+/** The resolver's own "surprised at close range" distance; the stage dialog can override it. */
+const val DEFAULT_STAGE_DISTANCE_FT = 60
 
 @Suppress("unused")
 @JsPlainObject
@@ -35,6 +41,12 @@ external interface EncounterPreviewContext : ValidatedHandlebarsContext {
     val rerollLabel: String
     val rejectLabel: String
     val convertLabel: String
+    /** COMBAT-only: nothing to spawn for an RP, merchant, rumor, weather or lore result. */
+    val canStage: Boolean
+    val stageLabel: String
+    val startDistanceFt: Int
+    /** 0 renders the button disabled with a "curate creatures first" tooltip. */
+    val creatureCount: Int
 }
 
 @JsExport
@@ -58,9 +70,15 @@ external interface EncounterPreviewData
  * [at.posselt.pfrpg2e.camping.dialogs.ConfirmWatchApplication].
  */
 class EncounterPreviewDialog(
+    private val game: Game,
+    private val partyActor: CampingActor,
     private val category: EncounterCategory,
     private val regionName: String,
     private val resultText: String,
+    /** Auto-seeded from the drawn table result when it referenced an actor; GM-editable. */
+    private var manifest: RawEncounterManifest?,
+    private val startDistanceFt: Int = DEFAULT_STAGE_DISTANCE_FT,
+    private val spawnHidden: Boolean = false,
     private val rumor: Rumor?,
     private val onAccept: () -> Unit,
     private val onReroll: () -> Unit,
@@ -81,6 +99,22 @@ class EncounterPreviewDialog(
             "km-reroll" -> { close(); onReroll() }
             "km-reject" -> { close(); onReject() }
             "km-convert-quest" -> rumor?.let { close(); onConvertToQuest(it) }
+            "km-stage" -> {
+                if (category != EncounterCategory.COMBAT) return
+                ModifyEncounterStage(
+                    game = game,
+                    partyActor = partyActor,
+                    initial = manifest,
+                    startDistanceFt = startDistanceFt,
+                    spawnHidden = spawnHidden,
+                    onSaved = { updated ->
+                        // keep the edited manifest so re-opening the stage dialog from this
+                        // preview resumes the GM's curation instead of the seed
+                        manifest = updated
+                        render()
+                    },
+                ).launch()
+            }
         }
     }
 
@@ -98,6 +132,10 @@ class EncounterPreviewDialog(
             categoryIcon = category.iconClass,
             regionName = regionName,
             resultText = resultText,
+            canStage = category == EncounterCategory.COMBAT,
+            stageLabel = t("camping.encounterStage"),
+            startDistanceFt = startDistanceFt,
+            creatureCount = manifest.spawnCount(),
             hasResult = resultText.isNotBlank(),
             hasRumor = rumor != null,
             rumorText = rumor?.text,
