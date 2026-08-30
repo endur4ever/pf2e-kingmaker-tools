@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://posselt.at/pf2e-kingmaker-tools/schemas/petition.json",
+  "title": "PetitionTemplate",
+  "description": "One petition template: who it is addressed to, when it may fire, and the options a leader may answer with",
+  "$ref": "#/$defs/PetitionTemplate",
+  "$defs": {
+    "PetitionTemplate": {
+      "type": "object",
+      "required": ["id", "targetRole", "weight", "options"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+        "targetRole": {
+          "enum": ["ruler", "counselor", "emissary", "general", "magister", "treasurer", "viceroy", "warden"]
+        },
+        "weight": { "type": "integer", "minimum": 1 },
+        "requiresStructure": { "type": ["string", "null"] },
+        "requiresEvent": { "type": ["string", "null"] },
+        "options": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "items": {
+            "type": "object",
+            "required": ["id", "consequences"],
+            "additionalProperties": false,
+            "properties": {
+              "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+              "consequences": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["kind"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "kind": { "enum": ["unrest", "rp", "standing", "quest", "rumor"] },
+                    "amount": { "type": ["integer", "null"] },
+                    "ref": { "type": ["string", "null"] }
+                  },
+                  "allOf": [
+                    {
+                      "if": { "properties": { "kind": { "enum": ["unrest", "rp", "standing"] } } },
+                      "then": { "required": ["amount"] }
+                    },
+                    {
+                      "if": { "properties": { "kind": { "const": "standing" } } },
+                      "then": { "required": ["ref"] }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

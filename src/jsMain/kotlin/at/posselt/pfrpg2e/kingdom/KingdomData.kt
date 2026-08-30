@@ -356,6 +356,13 @@ external interface KingdomData {
      */
     var shipmentHistory: Array<RawShipmentHistoryEntry>?
 
+    /**
+     * NPC audiences awaiting a leader's answer (petition-inbox section 2). Nullable for
+     * back-compat; Migration76 seeds it, because the inbox APPENDS and an append against
+     * undefined throws.
+     */
+    var petitions: Array<at.posselt.pfrpg2e.kingdom.data.RawPetition>?
+
     /** Active caravan shipments for equipment/supplies. */
     var shipments: Array<RawCaravanShipment>?
 

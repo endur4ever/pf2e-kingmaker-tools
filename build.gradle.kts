@@ -131,6 +131,7 @@ tasks {
             "validateMilestones",
             "validateNpcMemoryRules",
             "validateSettlementLifeEvents",
+            "validatePetitions",
             "validateKingdomEvents",
             "validateExpeditionActivities",
         )
@@ -138,6 +139,12 @@ tasks {
 }
 
 // JSON Schema validation tasks
+tasks.register<JsonSchemaValidator>("validatePetitions") {
+    outputs.upToDateWhen { true }
+    schema = layout.projectDirectory.file("src/commonMain/resources/schemas/petition.json")
+    files = layout.projectDirectory.dir("data/petitions")
+}
+
 tasks.register<JsonSchemaValidator>("validateSettlementLifeEvents") {
     outputs.upToDateWhen { true }
     schema = layout.projectDirectory.file("src/commonMain/resources/schemas/settlement-life-event.json")
