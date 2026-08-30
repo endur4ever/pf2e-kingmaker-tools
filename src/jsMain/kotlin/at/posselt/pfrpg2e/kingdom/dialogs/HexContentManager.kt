@@ -11,6 +11,7 @@ import at.posselt.pfrpg2e.kingdom.KingdomActor
 import at.posselt.pfrpg2e.kingdom.getKingdom
 import at.posselt.pfrpg2e.kingdom.setKingdom
 import at.posselt.pfrpg2e.kingdom.data.RawHexContent
+import at.posselt.pfrpg2e.kingdom.data.carryHexEngineState
 import at.posselt.pfrpg2e.kingdom.data.RawLootManifestEntry
 import at.posselt.pfrpg2e.kingdom.data.toModel
 import at.posselt.pfrpg2e.kingdom.loot.manifestTotals
@@ -492,7 +493,7 @@ class HexContentManager(
                 linkedUuids = current.linkedUuids,
                 linkedWarThreatId = current.linkedWarThreatId,
                 icon = current.icon,
-            )
+            ).let { carryHexEngineState(it, current) }
             kingdom.hexContents = contents.toTypedArray()
             actor.setKingdom(kingdom)
         }
@@ -530,12 +531,10 @@ class HexContentManager(
                     linkedUuids = uuids,
                     linkedWarThreatId = warThreatId,
                     icon = formData["icon"] as? String,
-                ).also { created -> created.lootManifest = manifest }.also { updated ->
-                    updated.lootManifest = manifest
-                    // The rebuild above would DROP these; an edited hex must keep its award
-                    // history or a re-clear could double-grant.
-                    updated.manifestAwarded = existing.manifestAwarded
-                    updated.manifestAwardedTurn = existing.manifestAwardedTurn
+                ).let { rebuilt ->
+                    // carry engine-owned state first, then let the dialog's edited loot manifest
+                    // win -- the form DOES render that one
+                    carryHexEngineState(rebuilt, existing).also { it.lootManifest = manifest }
                 }
             }
         } else {

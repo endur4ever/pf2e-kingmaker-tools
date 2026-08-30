@@ -8,6 +8,7 @@ import at.posselt.pfrpg2e.data.hex.HexContentVisibility
 import at.posselt.pfrpg2e.kingdom.data.RawCompanionExpedition
 import at.posselt.pfrpg2e.kingdom.data.RawCharacter
 import at.posselt.pfrpg2e.kingdom.data.RawHexContent
+import at.posselt.pfrpg2e.kingdom.data.encounterManifestOrNull
 import at.posselt.pfrpg2e.settings.Pfrpg2eKingdomCampingWeatherSettings
 import at.posselt.pfrpg2e.kingdom.data.RawQuest
 import at.posselt.pfrpg2e.kingdom.data.RawTurnRecord
@@ -41,6 +42,8 @@ data class SessionPrepEntry(
     val outcomeDegree: String? = null,
     val willLevelUp: Boolean = false,
     val completesQuest: Boolean = false,
+    /** Pending-encounter rows only: this hex has curated creatures ready to spawn. */
+    val canStage: Boolean = false,
 )
 
 /**
@@ -164,6 +167,7 @@ private fun buildPendingEncounters(hexContents: Array<RawHexContent>?, warThreat
                 id = hex.id,
                 name = hex.name,
                 detail = "${hex.hexKey} — $threatName",
+                canStage = hex.encounterManifestOrNull() != null,
             )
         }
 

@@ -264,6 +264,9 @@
                         <li class="km-session-prep-item km-pending-encounter-item">
                             <span class="km-session-prep-item__name">{{this.name}}</span>
                             {{#if this.hasDetail}}<span class="km-session-prep-item__detail">{{this.detail}}</span>{{/if}}
+                            <button type="button" class="km-session-prep-item__action" data-action="km-stage-pending" data-hex-content-id="{{this.id}}" title="{{localizeKM "camping.encounterStageTitle"}}">
+                                <i class="fa-solid fa-swords"></i> {{localizeKM "camping.encounterStage"}}{{#unless this.canStage}} …{{/unless}}
+                            </button>
                             <button type="button" class="km-session-prep-item__action km-mark-pending-encounter-run" data-action="mark-pending-encounter-run" data-hex-content-id="{{this.id}}" title="{{localizeKM "kingdom.sessionPrep.markAsRunTooltip"}}">{{localizeKM "kingdom.sessionPrep.markAsRun"}}</button>
                         </li>
                     {{/each}}

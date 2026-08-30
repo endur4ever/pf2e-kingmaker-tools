@@ -4,6 +4,9 @@ import at.posselt.pfrpg2e.kingdom.data.RawFactionAgenda
 import at.posselt.pfrpg2e.kingdom.data.RawResearchProject
 import at.posselt.pfrpg2e.kingdom.getSubsystemStore
 import at.posselt.pfrpg2e.kingdom.updateSubsystemStore
+import at.posselt.pfrpg2e.camping.dialogs.ModifyEncounterStage
+import at.posselt.pfrpg2e.camping.DEFAULT_STAGE_DISTANCE_FT
+import at.posselt.pfrpg2e.camping.getCampingActors
 import at.posselt.pfrpg2e.kingdom.dialogs.ModifyFactionAgenda
 import at.posselt.pfrpg2e.kingdom.dialogs.openSubsystemTrackers
 import at.posselt.pfrpg2e.kingdom.postHoldingRepairOffer
@@ -872,6 +875,39 @@ class KingdomSheet(
                     kingdom.warPressure,
                 )
                 actor.setKingdom(kingdom)
+            }
+
+            "km-stage-pending" -> buildPromise {
+                // Opens the stage dialog for a queued hex encounter. The manifest lives ON the hex,
+                // so curation survives a reload -- unlike the preview's in-memory one.
+                if (!game.user.isGM) return@buildPromise
+                val hexContentId = target.dataset["hexContentId"] ?: return@buildPromise
+                val kingdom = getKingdom()
+                val hexContent = kingdom.hexContents?.find { it.id == hexContentId } ?: return@buildPromise
+                val party = game.getCampingActors().firstOrNull()
+                if (party == null) {
+                    ui.notifications.warn(t("camping.encounterStageNoParty"))
+                    return@buildPromise
+                }
+                ModifyEncounterStage(
+                    game = game,
+                    partyActor = party,
+                    initial = hexContent.encounterManifest,
+                    startDistanceFt = hexContent.encounterManifest?.startDistanceFt
+                        ?: DEFAULT_STAGE_DISTANCE_FT,
+                    spawnHidden = false,
+                    onSaved = { manifest ->
+                        buildPromise {
+                            // re-read: the dialog was open across suspension points, and another
+                            // client may have touched the kingdom meanwhile
+                            val fresh = getKingdom()
+                            fresh.hexContents?.find { it.id == hexContentId }?.let { hex ->
+                                hex.encounterManifest = manifest
+                                actor.setKingdom(fresh)
+                            }
+                        }
+                    },
+                ).launch()
             }
 
             "mark-pending-encounter-run" -> buildPromise {

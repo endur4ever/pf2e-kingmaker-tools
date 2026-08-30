@@ -21,6 +21,8 @@ external interface SessionPrepEntryContext {
     val turnsRemaining: Int?
     val hasTurns: Boolean
     val hasDetail: Boolean
+    /** Pending-encounter rows: true once creatures are curated; false still opens the dialog. */
+    val canStage: Boolean
 }
 
 @JsPlainObject
@@ -92,6 +94,7 @@ private fun List<SessionPrepEntry>.toContexts(): Array<SessionPrepEntryContext> 
             detail = entry.detail,
             turnsRemaining = entry.turnsRemaining,
             hasTurns = entry.turnsRemaining != null,
+            canStage = entry.canStage,
             hasDetail = entry.detail.isNotBlank(),
         )
     }.toTypedArray()
