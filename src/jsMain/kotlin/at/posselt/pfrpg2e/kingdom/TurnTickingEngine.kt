@@ -440,7 +440,7 @@ object TurnTickingEngine {
 		val archivedBattles = activeBattles.map { battle ->
 			if (battle.status != BattleStatus.ACTIVE.value && battle.status != ARCHIVED_BATTLE_STATUS) {
 				changes += TickChange("battle", "archived", battle.id, battle.status)
-				RawArmyBattle.copy(battle, status = ARCHIVED_BATTLE_STATUS)
+				RawArmyBattle.copy(battle, status = ARCHIVED_BATTLE_STATUS, archivedOutcome = battle.archivedOutcome ?: battle.status)
 			} else {
 				battle
 			}

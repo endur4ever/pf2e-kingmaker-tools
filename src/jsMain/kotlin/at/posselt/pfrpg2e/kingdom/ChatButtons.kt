@@ -75,6 +75,8 @@ import at.posselt.pfrpg2e.app.forms.Select
 import at.posselt.pfrpg2e.app.forms.SelectOption
 import at.posselt.pfrpg2e.app.forms.formContext
 import at.posselt.pfrpg2e.kingdom.data.RawSubsystemThreshold
+import at.posselt.pfrpg2e.kingdom.councilVoteMutex
+import kotlinx.coroutines.sync.withLock
 import js.objects.recordOf
 import kotlinx.html.org.w3c.dom.events.Event
 import kotlinx.js.JsPlainObject
@@ -1890,8 +1892,13 @@ private val buttons = listOf(
             return@ChatButton
         }
         if (action != "award") return@ChatButton
+        // The deeds digest presents a whole column of Award buttons, and setKingdom suspends: two
+        // quick clicks each read the kingdom BEFORE the other's write landed, so the second
+        // silently discarded the first award. Serialize the read-modify-write.
+        councilVoteMutex.withLock {
+        val kingdom = actor.getKingdom() ?: return@withLock
         val existing = kingdom.milestones.find { it.id == milestoneId }
-        if (existing?.completed == true) return@ChatButton
+        if (existing?.completed == true) return@withLock
         if (existing == null) {
             kingdom.milestones = kingdom.milestones + MilestoneChoice(
                 id = milestoneId,
@@ -1914,6 +1921,7 @@ private val buttons = listOf(
         appendDeedGazetteLine(kingdom, milestone.name)
         beforeKingdomUpdate(previous, kingdom)
         actor.setKingdom(kingdom)
+        }
         postChatMessage(
             t("chatMessages.milestone.awarded", recordOf("name" to milestone.name, "xp" to milestone.xp)),
         )
@@ -1923,7 +1931,8 @@ private val buttons = listOf(
         // faces a dozen individual dismissals to silence them (plan 7).
         if (!game.user.isGM) return@ChatButton
         val ids = button.dataset["allIds"]?.split(",")?.filter { it.isNotBlank() } ?: return@ChatButton
-        val kingdom = actor.getKingdom() ?: return@ChatButton
+        councilVoteMutex.withLock {
+        val kingdom = actor.getKingdom() ?: return@withLock
         val existing = kingdom.milestones.associateBy { it.id }
         val missing = ids.filter { it !in existing }
             .map { MilestoneChoice(id = it, completed = false, enabled = true, offerDismissed = true) }
@@ -1933,6 +1942,7 @@ private val buttons = listOf(
             if (it.id in ids && !it.completed) MilestoneChoice.copy(it, offerDismissed = true) else it
         } + missing).toTypedArray()
         actor.setKingdom(kingdom)
+        }
         postChatMessage(t("chatMessages.milestone.dismissedAll", recordOf("count" to ids.size)))
     },
     // Jump-to-settlement on the pacing-alert CHAT card. It MUST be a ChatButton (bound to #chat by
@@ -2125,10 +2135,16 @@ fun bindChatButtons(game: Game, dispatcher: ActionDispatcher? = null) {
 }
 /** Cosmetic, per-client: fades one faction-move row; the real guard is the standing log. */
 private fun markFactionMoveRowDone(button: HTMLElement) {
+    // Disable ONLY the standing-shift pair. A row can also carry a war-threat and a
+    // diplomacy-quest offer, and answering the shift is not answering those -- greying the whole
+    // row silently threw away two offers the GM never saw a chance to take.
     val row = button.closest(".km-faction-move-row") as? HTMLElement ?: return
-    row.classList.add("km-pressure-row-done")
-    row.querySelectorAll("button").asList().filterIsInstance<HTMLElement>()
-        .forEach { it.setAttribute("disabled", "disabled") }
+    row.querySelectorAll(".km-offer-faction-standing-shift").asList()
+        .filterIsInstance<HTMLElement>()
+        .forEach {
+            it.setAttribute("disabled", "disabled")
+            it.classList.add("km-pressure-row-done")
+        }
 }
 
 /** Cosmetic, per-client: fades the handled row. The real double-apply guard is lastHandledDay. */

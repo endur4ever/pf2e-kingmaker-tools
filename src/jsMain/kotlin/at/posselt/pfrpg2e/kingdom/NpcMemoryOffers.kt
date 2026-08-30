@@ -17,6 +17,9 @@ suspend fun postNpcAttitudeShiftOffers(
 ) {
     if (crossings.isEmpty()) return
     val gmUserIds = game.users.filter { it.isGM }.mapNotNull { it.id }.toTypedArray()
+    // an EMPTY whisper array is not "whisper to nobody", it is "post publicly" -- a GM-only
+    // card with no GM online would show the table every secret on it
+    if (gmUserIds.isEmpty()) return
     for (crossing in crossings) {
         val settlementName = game.scenes.find { it.id == crossing.settlementSceneId }?.name ?: ""
         postChatTemplate(

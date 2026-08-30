@@ -118,6 +118,7 @@ import at.posselt.pfrpg2e.kingdom.data.ChosenFeature
 import at.posselt.pfrpg2e.kingdom.data.RawPacingAlert
 import at.posselt.pfrpg2e.kingdom.data.RawTurnRecord
 import at.posselt.pfrpg2e.kingdom.appendTurnRecord
+import at.posselt.pfrpg2e.kingdom.countArmyVictories
 import at.posselt.pfrpg2e.kingdom.detectFiredDeeds
 import at.posselt.pfrpg2e.kingdom.postDeedsDigest
 import at.posselt.pfrpg2e.kingdom.computeLastTurnRecap
@@ -382,11 +383,6 @@ private suspend fun performEndTurnLocked(game: Game, actor: KingdomActor): TickR
     val preTickBattleDefeats = (kingdom.activeBattles ?: emptyArray())
         .filter { it.status == BattleStatus.DEFEAT.value }
         .map { it.name }
-
-    // Same trap, mirrored: the tick rewrites every finished battle to "archived", so a victory
-    // read after it can never match and the first-battle-won deed could never fire.
-    val preTickBattleVictories = (kingdom.activeBattles ?: emptyArray())
-        .count { it.status == BattleStatus.VICTORY.value }
 
     val preTickThreats = kingdom.warThreats?.toList() ?: emptyList()
     val tickResult = runKingdomTurnTick(kingdom, storage, currentTurn, resolveHoldingOwnerLevels(kingdom))
@@ -1007,7 +1003,9 @@ private suspend fun performEndTurnLocked(game: Game, actor: KingdomActor): TickR
             realmSize = realm.size,
             // parsed, not RawSettlement.level: that field is written once as 1 and never updated
             settlementSizes = kingdom.getAllSettlements(game).allSettlements.map { it.size.type },
-            armiesWon = preTickBattleVictories,
+            // counted AFTER the tick from archivedOutcome, so the deed stays
+            // level-triggered instead of vanishing the turn after a win
+            armiesWon = countArmyVictories(kingdom),
         ),
     )
 

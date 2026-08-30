@@ -42,6 +42,16 @@ external interface RawArmyBattle {
     var status: String
 
     /**
+     * The status this battle held when the tick archived it.
+     *
+     * Archiving OVERWRITES status, so without this the fact that a battle was won is destroyed on
+     * the next End Turn -- which made the first-battle-won deed a one-shot offer that vanished
+     * forever if the GM ignored one digest. Nullable: battles archived before this field existed
+     * simply report no recorded outcome.
+     */
+    var archivedOutcome: String?
+
+    /**
      * Keys of the defeat consequences the GM has already applied from this battle's offer card
      * (see [at.posselt.pfrpg2e.kingdom.defeatOffers]). Nullable and defaulted to empty on read, so
      * battles persisted before defeat consequences existed load unchanged — same approach as

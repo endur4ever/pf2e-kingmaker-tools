@@ -55,6 +55,11 @@ data class KingdomTurnFacts(
     val warPressure: Int? = null,
     val consumption: Int,
     val resourcePoints: Int,
+    /**
+     * The clock events that fired this turn, as the turn record stores them: LABELS, not ids.
+     * A CLOCK_FIRED rule's `ref` must therefore be a clock's display label -- an id will never
+     * match, and matching is case-insensitive because a label is GM-typed.
+     */
     val clockEventIds: Set<String> = emptySet(),
     val shipmentOutcomes: List<String> = emptyList(),
     val milestonesEarnedThisTurn: Int = 0,
@@ -126,7 +131,7 @@ fun ruleFires(rule: MemoryRule, prev: KingdomTurnFacts, curr: KingdomTurnFacts):
             (curr.warPressure ?: 0) == 0 && (prev.warPressure ?: 0) > 0
         MemoryTriggerKind.LEAN_YEAR -> curr.consumption > curr.resourcePoints
         MemoryTriggerKind.CLOCK_FIRED ->
-            rule.ref != null && rule.ref in curr.clockEventIds
+            rule.ref != null && curr.clockEventIds.any { it.trim().equals(rule.ref.trim(), ignoreCase = true) }
         MemoryTriggerKind.SHIPMENT_OUTCOME ->
             rule.ref != null && curr.shipmentOutcomes.contains(rule.ref)
         MemoryTriggerKind.MILESTONE_EARNED -> curr.milestonesEarnedThisTurn > 0

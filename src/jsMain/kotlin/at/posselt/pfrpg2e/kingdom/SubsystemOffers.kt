@@ -45,6 +45,9 @@ suspend fun postSubsystemThresholdOffers(
 ) {
     if (offers.isEmpty()) return
     val gmUserIds = game.users.filter { it.isGM }.mapNotNull { it.id }.toTypedArray()
+    // an EMPTY whisper array is not "whisper to nobody", it is "post publicly" -- a GM-only
+    // card with no GM online would show the table every secret on it
+    if (gmUserIds.isEmpty()) return
     val templatePath = if (storeKind == "influence") {
         "chatmessages/influence-threshold-offer.hbs"
     } else {

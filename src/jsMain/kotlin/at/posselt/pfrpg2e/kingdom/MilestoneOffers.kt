@@ -5,6 +5,7 @@ import at.posselt.pfrpg2e.data.kingdom.extractRegionData
 import at.posselt.pfrpg2e.kingdom.deeds.DeedCatalogEntry
 import at.posselt.pfrpg2e.kingdom.deeds.DeedHistoryPoint
 import at.posselt.pfrpg2e.kingdom.data.RawGroup
+import at.posselt.pfrpg2e.data.armies.BattleStatus
 import at.posselt.pfrpg2e.data.kingdom.Relations
 import at.posselt.pfrpg2e.data.kingdom.settlements.SettlementSizeType
 import at.posselt.pfrpg2e.kingdom.deeds.DeedInputs
@@ -37,7 +38,7 @@ fun detectFiredDeeds(
     /** Parsed settlement size bands. RawSettlement.level is written once as 1 and never updated;
      *  the live size is derived from occupied blocks, so only the caller can supply this. */
     settlementSizes: List<SettlementSizeType>,
-    /** Victories counted BEFORE the tick, which rewrites every finished battle to "archived". */
+    /** Victories that have EVER happened; see [countArmyVictories]. */
     armiesWon: Int,
 ): List<String> {
     // Level-triggered detectors re-fire forever on standing state, so an offer is suppressed once
@@ -166,3 +167,15 @@ suspend fun postDeedsDigest(game: Game, actor: KingdomActor, kingdom: KingdomDat
         whisper = gmUserIds,
     )
 }
+
+/**
+ * Battles this kingdom has ever won.
+ *
+ * Level-triggered, as every deed detector must be: archiving rewrites `status` to "archived", so
+ * a live count of VICTORY rows drops to zero the turn after a win and the first-battle-won deed
+ * could never fire again. `archivedOutcome` preserves what the row was archived AS.
+ */
+fun countArmyVictories(kingdom: KingdomData): Int =
+    (kingdom.activeBattles ?: emptyArray()).count {
+        it.status == BattleStatus.VICTORY.value || it.archivedOutcome == BattleStatus.VICTORY.value
+    }

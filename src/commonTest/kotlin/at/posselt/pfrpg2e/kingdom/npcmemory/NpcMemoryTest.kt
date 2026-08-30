@@ -312,4 +312,23 @@ class NpcMemoryTest {
         assertEquals(MemoryTriggerKind.UNREST_ROSE, MemoryTriggerKind.fromValue("unrestRose"))
         assertEquals(AttitudeBand.HELPFUL, AttitudeBand.fromValue("helpful"))
     }
+
+    @Test
+    fun clockRulesMatchTheLABELtheTurnRecordStores() {
+        // the tick writes clock EVENT LABELS into the record, not ids, so a rule keyed on an id
+        // could never fire -- and the shipped clock-fired rule had a null ref besides
+        val rule = MemoryRule(
+            id = "clock-fired",
+            trigger = MemoryTriggerKind.CLOCK_FIRED,
+            ref = "Cult of the Bloom",
+        )
+        val prev = facts(turn = 1)
+        val fired = facts(turn = 2, clockEventIds = setOf("Cult of the Bloom"))
+        assertTrue(ruleFires(rule, prev, fired))
+        // labels are GM-typed, so matching tolerates case and padding
+        assertTrue(ruleFires(rule, prev, facts(turn = 2, clockEventIds = setOf("  cult of the bloom  "))))
+        assertFalse(ruleFires(rule, prev, facts(turn = 2, clockEventIds = setOf("Some Other Clock"))))
+        // a rule with no ref can never fire, which is why the shipped file must carry one
+        assertFalse(ruleFires(rule.copy(ref = null), prev, fired))
+    }
 }
