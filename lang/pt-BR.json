@@ -692,7 +692,9 @@
                 "moderate": "Moderado",
                 "severe": "Severo",
                 "extreme": "Extremo"
-            }
+            },
+            "encounterStageUndoAction": "Desfazer preparação",
+            "encounterStageSkipped": "{count} criatura(s) ignorada(s): atores não encontrados."
         },
         "settlementNav": {
             "status": "Status",

@@ -2,10 +2,12 @@ package at.posselt.pfrpg2e.camping
 
 import at.posselt.pfrpg2e.utils.fromUuidTypeSafe
 import at.posselt.pfrpg2e.utils.postChatMessage
+import at.posselt.pfrpg2e.utils.postChatTemplate
 import at.posselt.pfrpg2e.utils.t
 import com.foundryvtt.core.AnyObject
 import com.foundryvtt.core.Game
 import com.foundryvtt.core.documents.Combat
+import com.foundryvtt.core.documents.CreateCombatantOptions
 import com.foundryvtt.core.documents.Scene
 import com.foundryvtt.core.documents.TokenDocument
 import com.foundryvtt.core.ui
@@ -81,44 +83,42 @@ suspend fun stageEncounter(
         gridSizePx = grid.size.toDouble(),
     )
 
-    // one entry per TOKEN, so a count of 3 resolves its actor once and reuses the prototype
+    // One entry per TOKEN. Each token's data comes from the actor's OWN prototype via
+    // getTokenDocument, not a hand-built object: the prototype carries size, bars, vision, name
+    // and appendNumber, and a hand-built token spawned every Large creature as a 1x1.
     val tokenData = mutableListOf<AnyObject>()
     var pointIndex = 0
+    var skipped = 0
     for (creature in creatures) {
         val repeats = creature.count.coerceAtLeast(0)
         if (repeats == 0) continue
-        val actor = fromUuidTypeSafe<PF2EActor>(creature.uuid)
-        if (actor == null) {
+        val worldActor = resolveWorldActor(game, creature.uuid)
+        if (worldActor == null) {
             // a manifest can outlive the compendium entry it names; skip the row, keep the rest
             ui.notifications.warn(
                 t("camping.encounterStageMissingActor", recordOf("uuid" to creature.uuid))
             )
-            pointIndex += repeats
+            skipped += repeats
             continue
         }
         repeat(repeats) {
             val point = points.getOrNull(pointIndex) ?: return@repeat
             pointIndex += 1
-            val data = js("({})").unsafeCast<AnyObject>()
-            val dyn = data.asDynamic()
-            dyn.name = actor.name
-            dyn.actorId = actor.id
-            // unlinked: an adjustment or a wound on one spawned goblin must not edit the
-            // bestiary entry every future encounter draws from
-            dyn.actorLink = false
-            dyn.x = point.x
-            dyn.y = point.y
-            dyn.hidden = hidden
-            dyn.disposition = -1
-            dyn.texture = actor.prototypeToken.texture
-            tokenData.add(data)
+            val token = worldActor.getTokenDocument(
+                recordOf(
+                    "x" to point.x,
+                    "y" to point.y,
+                    "hidden" to hidden,
+                    // hostile: the ring exists to be fought
+                    "disposition" to -1,
+                    // unlinked, so a wound or an adjustment on one spawned goblin never edits the
+                    // world actor every future stage copies from
+                    "actorLink" to false,
+                ).unsafeCast<AnyObject>()
+            ).await()
+            tokenData.add(token.asDynamic().toObject().unsafeCast<AnyObject>())
         }
     }
-    if (tokenData.isEmpty()) {
-        ui.notifications.warn(t("camping.encounterStageNoCreatures"))
-        return null
-    }
-
     val created = scene.createEmbeddedDocuments<TokenDocument>("Token", tokenData.toTypedArray())
         .await()
     val spawnedIds = created.mapNotNull { it._id }
@@ -135,23 +135,42 @@ suspend fun stageEncounter(
         return StageOutcome(sceneId = scene.id, spawnedTokenIds = spawnedIds, createdCombatId = null)
     }
     if (existing == null) combat.activate().await()
-    TokenDocument.createCombatants(created).await()
+    // WITHOUT the combat option this defaults to game.combats.viewed -- the encounter merely
+    // SELECTED in the tracker, which need not be the one resolved above. The tokens then join a
+    // different combat than the one this code rolls initiative on.
+    TokenDocument.createCombatants(created, CreateCombatantOptions(combat = combat)).await()
     combat.rollNPC().await()
     if (!combat.started) combat.startCombat().await()
 
-    postChatMessage(
-        t(
-            "camping.encounterStaged",
-            recordOf("count" to total, "distance" to startDistanceFt),
-        ),
-        whisper = game.users.filter { it.isGM }.mapNotNull { it.id }.toTypedArray(),
-    )
-    return StageOutcome(
+    val outcome = StageOutcome(
         sceneId = scene.id,
         spawnedTokenIds = spawnedIds,
         createdCombatId = if (existing == null) combat.id else null,
     )
+    // the summary carries the ids, so Undo works from chat after the dialog is long closed --
+    // without it StageOutcome had no reachable caller and the undo half was dead code
+    postChatTemplate(
+        templatePath = "chatmessages/encounter-staged.hbs",
+        templateContext = recordOf<String, Any?>(
+            "count" to spawnedIds.size,
+            "distance" to startDistanceFt,
+            "skipped" to skipped,
+            "sceneId" to outcome.sceneId,
+            "tokenIds" to spawnedIds.joinToString(","),
+            "combatId" to outcome.createdCombatId,
+        ),
+        whisper = game.users.filter { it.isGM }.mapNotNull { it.id }.toTypedArray(),
+    )
+    return outcome
 }
+
+/** Rebuild an outcome from an undo button's data attributes. */
+fun stageOutcomeFromDataset(sceneId: String?, tokenIds: String?, combatId: String?): StageOutcome =
+    StageOutcome(
+        sceneId = sceneId?.takeIf { it.isNotBlank() },
+        spawnedTokenIds = tokenIds?.split(",")?.filter { it.isNotBlank() } ?: emptyList(),
+        createdCombatId = combatId?.takeIf { it.isNotBlank() },
+    )
 
 /**
  * Reverse a [StageOutcome]: delete exactly the tokens this stage spawned, then delete the combat
@@ -169,4 +188,29 @@ suspend fun undoStage(game: Game, outcome: StageOutcome) {
         game.combats.get(id)?.delete()?.await()
     }
     ui.notifications.info(t("camping.encounterStageUndo"))
+}
+
+/**
+ * The WORLD actor for [uuid], importing a compendium entry the first time it is staged.
+ *
+ * A token's `actorId` is resolved through `game.actors`, so pointing it at a compendium actor's
+ * pack-local id produces a token whose `.actor` is null: no HP, no bars, no sheet, and a
+ * combatant with no initiative modifier. Foundry's own compendium drag-drop imports first, and so
+ * does this. A previous import is REUSED via `_stats.compendiumSource`, so staging the same
+ * bestiary entry every session does not fill the sidebar with copies.
+ */
+private suspend fun resolveWorldActor(game: Game, uuid: String): PF2EActor? {
+    val resolved = fromUuidTypeSafe<PF2EActor>(uuid) ?: return null
+    val packId = resolved.pack ?: return resolved
+    val existing = game.actors.contents.find {
+        it.asDynamic()._stats?.compendiumSource as? String == uuid
+    }
+    if (existing != null) return existing.unsafeCast<PF2EActor>()
+    val pack = game.packs.get(packId) ?: return resolved
+    val documentId = resolved.id ?: return resolved
+    return runCatching {
+        game.actors.importFromCompendium(pack.unsafeCast<com.foundryvtt.core.documents.collections.CompendiumCollection<com.foundryvtt.core.abstract.Document>>(), documentId)
+            .await()
+            .unsafeCast<PF2EActor>()
+    }.getOrNull()
 }

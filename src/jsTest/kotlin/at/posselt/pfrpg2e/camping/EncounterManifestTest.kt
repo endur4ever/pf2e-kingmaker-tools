@@ -7,18 +7,19 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
 class EncounterManifestTest {
-    private fun result(type: String, collection: String = "", documentId: String = "", text: String = "") =
+    private fun result(type: String, documentUuid: String? = null, text: String = "") =
         unsafeJso<dynamic> {
             this.type = type
-            this.documentCollection = collection
-            this.documentId = documentId
+            this.documentUuid = documentUuid
             this.text = text
         }.unsafeCast<TableResult>()
 
     @Test
-    fun packResultSeedsOneCompendiumCreature() {
+    fun aDocumentResultSeedsTheUuidItAlreadyCarries() {
+        // v13+ merged "compendium" into "document" and replaced the collection/id PAIR with one
+        // complete uuid; re-assembling a uuid from the deprecated pair matched nothing on v14
         val manifest = manifestFromTableResult(
-            result("pack", "pf2e.pathfinder-bestiary", "abc123", "Gnoll Sergeant")
+            result("document", "Compendium.pf2e.pathfinder-bestiary.Actor.abc123", "Gnoll Sergeant")
         )
         val creature = manifest?.creatures?.single()
         assertEquals("Compendium.pf2e.pathfinder-bestiary.Actor.abc123", creature?.uuid)
@@ -28,18 +29,18 @@ class EncounterManifestTest {
     }
 
     @Test
-    fun worldDocumentResultSeedsAWorldActor() {
-        val manifest = manifestFromTableResult(result("document", "Actor", "xyz789", "Bandit"))
+    fun aWorldActorResultSeedsItsWorldUuid() {
+        val manifest = manifestFromTableResult(result("document", "Actor.xyz789", "Bandit"))
         assertEquals("Actor.xyz789", manifest?.creatures?.single()?.uuid)
     }
 
     @Test
-    fun textOnlyResultSeedsNothing() {
+    fun textOnlyOrUuidlessResultsSeedNothing() {
         // most shipped tables are prose; the Stage button stays disabled until the GM curates
         assertNull(manifestFromTableResult(result("text", text = "A pack of wolves circles")))
-        // a doc-typed result missing its ids is not a usable reference either
-        assertNull(manifestFromTableResult(result("pack", "", "abc")))
-        assertNull(manifestFromTableResult(result("document", "Actor", "")))
+        // a document-typed result with no uuid is not a usable reference either
+        assertNull(manifestFromTableResult(result("document", null, "Something")))
+        assertNull(manifestFromTableResult(result("document", "", "Something")))
     }
 
     @Test

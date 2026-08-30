@@ -535,16 +535,14 @@ suspend fun convertRumorToQuest(game: Game, rumor: Rumor): String? {
  * stated default: doc/pack results only).
  */
 fun manifestFromTableResult(result: TableResult): RawEncounterManifest? {
-    val type = result.type
-    if (type != "document" && type != "pack") return null
-    val collection = result.documentCollection.takeIf { it.isNotBlank() } ?: return null
-    val documentId = result.documentId.takeIf { it.isNotBlank() } ?: return null
-    // a world result names a collection ("Actor"); a pack result names the pack itself
-    val uuid = if (type == "pack") {
-        "Compendium.$collection.Actor.$documentId"
-    } else {
-        "$collection.$documentId"
-    }
+    // v13 MERGED the "compendium"/"pack" result type into "document" and replaced the
+    // documentCollection + documentId pair with one complete documentUuid; the old fields survive
+    // only as deprecated getters. Reading the pair and re-assembling a uuid -- as the first draft
+    // did -- both missed every compendium result (type is never "pack" on v13+) and built a
+    // malformed uuid when it did fire. Read the uuid the result already carries.
+    if (result.type != "document") return null
+    val uuid = result.asDynamic().documentUuid as? String ?: return null
+    if (uuid.isBlank()) return null
     return RawEncounterManifest(
         creatures = arrayOf(
             RawEncounterCreature(

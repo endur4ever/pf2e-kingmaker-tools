@@ -896,13 +896,14 @@ class KingdomSheet(
                     startDistanceFt = hexContent.encounterManifest?.startDistanceFt
                         ?: DEFAULT_STAGE_DISTANCE_FT,
                     spawnHidden = false,
-                    onSaved = { manifest ->
+                    onSaved = { manifest, distance, _ ->
                         buildPromise {
                             // re-read: the dialog was open across suspension points, and another
                             // client may have touched the kingdom meanwhile
                             val fresh = getKingdom()
                             fresh.hexContents?.find { it.id == hexContentId }?.let { hex ->
-                                hex.encounterManifest = manifest
+                                // the override rides ON the manifest, so a re-open resumes it
+                                hex.encounterManifest = manifest.also { it.startDistanceFt = distance }
                                 actor.setKingdom(fresh)
                             }
                         }

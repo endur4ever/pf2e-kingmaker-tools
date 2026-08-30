@@ -77,8 +77,8 @@ class EncounterPreviewDialog(
     private val resultText: String,
     /** Auto-seeded from the drawn table result when it referenced an actor; GM-editable. */
     private var manifest: RawEncounterManifest?,
-    private val startDistanceFt: Int = DEFAULT_STAGE_DISTANCE_FT,
-    private val spawnHidden: Boolean = false,
+    startDistanceFt: Int = DEFAULT_STAGE_DISTANCE_FT,
+    spawnHidden: Boolean = false,
     private val rumor: Rumor?,
     private val onAccept: () -> Unit,
     private val onReroll: () -> Unit,
@@ -93,6 +93,10 @@ class EncounterPreviewDialog(
     width = 480,
     id = "kmEncounterPreview",
 ) {
+    /** The GM's staging edits live across re-opens of the stage dialog within this preview. */
+    private var stageDistanceFt: Int = startDistanceFt
+    private var stageHidden: Boolean = spawnHidden
+
     override fun _onClickAction(event: PointerEvent, target: HTMLElement) {
         when (target.dataset["action"]) {
             "km-accept" -> { close(); onAccept() }
@@ -105,12 +109,14 @@ class EncounterPreviewDialog(
                     game = game,
                     partyActor = partyActor,
                     initial = manifest,
-                    startDistanceFt = startDistanceFt,
-                    spawnHidden = spawnHidden,
-                    onSaved = { updated ->
-                        // keep the edited manifest so re-opening the stage dialog from this
-                        // preview resumes the GM's curation instead of the seed
+                    startDistanceFt = stageDistanceFt,
+                    spawnHidden = stageHidden,
+                    onSaved = { updated, distance, hidden ->
+                        // keep the WHOLE edited state so re-opening resumes the GM's curation
+                        // instead of resurrecting the seed and the default distance
                         manifest = updated
+                        stageDistanceFt = distance
+                        stageHidden = hidden
                         render()
                     },
                 ).launch()
@@ -134,7 +140,7 @@ class EncounterPreviewDialog(
             resultText = resultText,
             canStage = category == EncounterCategory.COMBAT,
             stageLabel = t("camping.encounterStage"),
-            startDistanceFt = startDistanceFt,
+            startDistanceFt = stageDistanceFt,
             creatureCount = manifest.spawnCount(),
             hasResult = resultText.isNotBlank(),
             hasRumor = rumor != null,

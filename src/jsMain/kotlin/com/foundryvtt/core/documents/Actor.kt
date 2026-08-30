@@ -20,6 +20,13 @@ open external class Actor : ClientDocument {
     var img: String?
     var type: String
     var prototypeToken: PrototypeToken
+
+    /**
+     * A TokenDocument built from this actor's prototypeToken, merged with [data]. Foundry's own
+     * token-drop path: it carries size, bars, vision, name and appendNumber, none of which a
+     * hand-built token object has.
+     */
+    fun getTokenDocument(data: AnyObject = definedExternally): Promise<TokenDocument>
     var items: EmbeddedCollection<Item>
 
     // var effects: EmbeddedCollection<Effect>

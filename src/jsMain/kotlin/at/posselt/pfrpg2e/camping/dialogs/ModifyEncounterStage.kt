@@ -75,7 +75,8 @@ class ModifyEncounterStage(
     initial: RawEncounterManifest?,
     private var startDistanceFt: Int,
     private var spawnHidden: Boolean,
-    private val onSaved: (RawEncounterManifest) -> Unit,
+    /** Receives the manifest AND the edited distance/hidden, so the caller can resume them. */
+    private val onSaved: (RawEncounterManifest, Int, Boolean) -> Unit,
 ) : SimpleApp<EncounterStageContext>(
     title = t("camping.encounterStageTitle"),
     template = "applications/camping/encounter-stage.hbs",
@@ -159,7 +160,7 @@ class ModifyEncounterStage(
                     return@buildPromise
                 }
                 val saved = manifest()
-                onSaved(saved)
+                onSaved(saved, startDistanceFt, spawnHidden)
                 close()
                 stageEncounter(
                     game = game,
@@ -172,7 +173,7 @@ class ModifyEncounterStage(
 
             "km-stage-save" -> {
                 readDistance()
-                onSaved(manifest())
+                onSaved(manifest(), startDistanceFt, spawnHidden)
                 close()
             }
 

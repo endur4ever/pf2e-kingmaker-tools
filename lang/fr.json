@@ -692,7 +692,9 @@
                 "moderate": "Modéré",
                 "severe": "Sévère",
                 "extreme": "Extrême"
-            }
+            },
+            "encounterStageUndoAction": "Annuler la mise en place",
+            "encounterStageSkipped": "{count} créature(s) ignorée(s) : acteurs introuvables."
         },
         "settlementNav": {
             "status": "Status",

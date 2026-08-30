@@ -33,6 +33,22 @@ suspend fun postPassTimeMessage(message: String, hours: Int) {
 }
 
 fun bindCampingChatEventListeners(game: Game, dispatcher: ActionDispatcher) {
+    bindChatClick(".km-stage-undo") { _, el, _ ->
+        // Undo lives on the summary card, not in the dialog: by the time a GM realises the ring
+        // landed badly the dialog is long closed, and the ids are all the reversal needs.
+        buildPromise {
+            if (!game.user.isGM) return@buildPromise
+            undoStage(
+                game,
+                stageOutcomeFromDataset(
+                    sceneId = el.dataset["sceneId"],
+                    tokenIds = el.dataset["tokenIds"],
+                    combatId = el.dataset["combatId"],
+                ),
+            )
+        }
+    }
+
     bindChatClick(".km-add-recipe") { _, el, _ ->
         val actorUuid = el.dataset["actorUuid"]
         val id = el.dataset["id"]

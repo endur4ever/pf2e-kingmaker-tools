@@ -692,7 +692,9 @@
                 "moderate": "Umiarkowane",
                 "severe": "Ciężkie",
                 "extreme": "Ekstremalne"
-            }
+            },
+            "encounterStageUndoAction": "Cofnij przygotowanie",
+            "encounterStageSkipped": "Pominięto {count} istot: nie znaleziono aktorów."
         },
         "settlementNav": {
             "status": "Status",

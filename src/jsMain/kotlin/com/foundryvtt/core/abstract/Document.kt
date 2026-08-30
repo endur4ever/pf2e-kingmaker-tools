@@ -51,6 +51,8 @@ abstract external class Document(
     companion object : DocumentStatic<Document>
 
     val id: String?
+    /** The compendium collection this document lives in, or null for a world document. */
+    val pack: String?
     val uuid: String
     val isEmbedded: Boolean
 

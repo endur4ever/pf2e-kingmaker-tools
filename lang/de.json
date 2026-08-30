@@ -692,7 +692,9 @@
                 "moderate": "Mittel",
                 "severe": "Schwer",
                 "extreme": "Extrem"
-            }
+            },
+            "encounterStageUndoAction": "Aufstellung rückgängig",
+            "encounterStageSkipped": "{count} Kreatur(en) übersprungen: Akteure nicht gefunden."
         },
         "settlementNav": {
             "status": "Status",

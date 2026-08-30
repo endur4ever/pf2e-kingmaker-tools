@@ -1,0 +1,14 @@
+<h2>{{localizeKM "camping.encounterStageTitle"}}</h2>
+<p>{{localizeKM "camping.encounterStaged" count=count distance=distance}}</p>
+{{#if skipped}}
+    <p class="km-sub-note">{{localizeKM "camping.encounterStageSkipped" count=skipped}}</p>
+{{/if}}
+<div class="km-subsystem-offer__buttons">
+    <button type="button"
+            class="km-stage-undo"
+            data-scene-id="{{sceneId}}"
+            data-token-ids="{{tokenIds}}"
+            data-combat-id="{{combatId}}">
+        {{localizeKM "camping.encounterStageUndoAction"}}
+    </button>
+</div>

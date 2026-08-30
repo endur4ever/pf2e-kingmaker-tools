@@ -692,7 +692,9 @@
                 "moderate": "中等",
                 "severe": "严重",
                 "extreme": "极端"
-            }
+            },
+            "encounterStageUndoAction": "撤销布置",
+            "encounterStageSkipped": "已跳过 {count} 个生物：找不到对应角色。"
         },
         "settlementNav": {
             "status": "Status",

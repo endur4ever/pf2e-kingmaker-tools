@@ -692,7 +692,9 @@
                 "moderate": "Moderato",
                 "severe": "Severo",
                 "extreme": "Estremo"
-            }
+            },
+            "encounterStageUndoAction": "Annulla preparazione",
+            "encounterStageSkipped": "{count} creatura/e saltata/e: attori non trovati."
         },
         "settlementNav": {
             "status": "Status",

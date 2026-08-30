@@ -814,7 +814,9 @@
                 "moderate": "Moderate",
                 "severe": "Severe",
                 "extreme": "Extreme"
-            }
+            },
+            "encounterStageUndoAction": "Undo stage",
+            "encounterStageSkipped": "{count} creature(s) skipped: their actors could not be found."
         },
         "settlementNav": {
             "status": "Status",

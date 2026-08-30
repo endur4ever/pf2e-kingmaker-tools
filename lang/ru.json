@@ -692,7 +692,9 @@
                 "moderate": "Умеренная",
                 "severe": "Тяжёлая",
                 "extreme": "Экстремальная"
-            }
+            },
+            "encounterStageUndoAction": "Отменить подготовку",
+            "encounterStageSkipped": "Пропущено существ: {count} — актёры не найдены."
         },
         "settlementNav": {
             "status": "Status",
