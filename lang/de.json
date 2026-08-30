@@ -2809,6 +2809,37 @@
                 "title": "Chronik",
                 "empty": "Noch keine Meilensteine verzeichnet.",
                 "turnLabel": "Zug {turn}"
+            },
+            "xpLedger": {
+                "title": "Gruppen-EP-Hauptbuch",
+                "addEntry": "Eintrag hinzufügen",
+                "empty": "Noch keine EP verzeichnet.",
+                "granted": "Über das Hauptbuch vergeben",
+                "actual": "Gruppenmitglied hat {xp} EP",
+                "drift": "Abweichung {drift}",
+                "turn": "Zug",
+                "turnLabel": "Zug {turn}",
+                "source": {
+                    "hexReconnoitered": "Hex erkundet",
+                    "siteCleared": "Ort geräumt",
+                    "questCompleted": "Quest abgeschlossen",
+                    "expeditionResolved": "Expedition abgeschlossen",
+                    "rpEncounter": "Rollenspiel-Begegnung",
+                    "manual": "Manuell"
+                },
+                "sourceRef": "Referenz",
+                "sourceRefHelp": "Hex-Schlüssel, Quest-ID oder Ähnliches; leer ist in Ordnung.",
+                "amount": "EP",
+                "status": {
+                    "offered": "Angeboten",
+                    "confirmed": "Bestätigt",
+                    "dismissed": "Verworfen"
+                },
+                "note": "Notiz",
+                "noParty": "Kein Gruppen-Akteur für das Hauptbuch gefunden.",
+                "confirmDelete": "Diesen Eintrag löschen? Bereits vergebene EP werden nicht zurückgenommen.",
+                "sourceColumn": "Quelle",
+                "statusColumn": "Status"
             }
         },
         "chatMessages": {

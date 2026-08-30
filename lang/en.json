@@ -2931,6 +2931,37 @@
                 "title": "Chronicle",
                 "empty": "No milestones recorded yet.",
                 "turnLabel": "Turn {turn}"
+            },
+            "xpLedger": {
+                "title": "Party XP Ledger",
+                "addEntry": "Add entry",
+                "empty": "No XP recorded yet.",
+                "granted": "Granted through the ledger",
+                "actual": "party member holds {xp} XP",
+                "drift": "drift {drift}",
+                "turn": "Turn",
+                "turnLabel": "Turn {turn}",
+                "source": {
+                    "hexReconnoitered": "Hex reconnoitered",
+                    "siteCleared": "Site cleared",
+                    "questCompleted": "Quest completed",
+                    "expeditionResolved": "Expedition resolved",
+                    "rpEncounter": "Roleplay encounter",
+                    "manual": "Manual"
+                },
+                "sourceRef": "Reference",
+                "sourceRefHelp": "Hex key, quest id, or anything that identifies the beat; blank is fine.",
+                "amount": "XP",
+                "status": {
+                    "offered": "Offered",
+                    "confirmed": "Confirmed",
+                    "dismissed": "Dismissed"
+                },
+                "note": "Note",
+                "noParty": "No party actor found to hold the ledger.",
+                "confirmDelete": "Delete this ledger entry? The XP already granted is not taken back.",
+                "sourceColumn": "Source",
+                "statusColumn": "Status"
             }
         },
         "chatMessages": {

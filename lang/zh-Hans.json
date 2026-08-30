@@ -2809,6 +2809,37 @@
                 "title": "编年史",
                 "empty": "尚未记录任何里程碑。",
                 "turnLabel": "第 {turn} 回合"
+            },
+            "xpLedger": {
+                "title": "队伍经验账本",
+                "addEntry": "添加条目",
+                "empty": "尚未记录经验。",
+                "granted": "通过账本发放",
+                "actual": "队伍成员拥有 {xp} 经验",
+                "drift": "偏差 {drift}",
+                "turn": "回合",
+                "turnLabel": "第 {turn} 回合",
+                "source": {
+                    "hexReconnoitered": "已侦察六格",
+                    "siteCleared": "据点已清理",
+                    "questCompleted": "任务完成",
+                    "expeditionResolved": "远征完成",
+                    "rpEncounter": "角色扮演遭遇",
+                    "manual": "手动"
+                },
+                "sourceRef": "引用",
+                "sourceRefHelp": "六格键、任务 id 或任何标识；留空亦可。",
+                "amount": "经验",
+                "status": {
+                    "offered": "已提议",
+                    "confirmed": "已确认",
+                    "dismissed": "已忽略"
+                },
+                "note": "备注",
+                "noParty": "未找到承载账本的队伍角色。",
+                "confirmDelete": "删除此条目？已发放的经验不会收回。",
+                "sourceColumn": "来源",
+                "statusColumn": "状态"
             }
         },
         "chatMessages": {

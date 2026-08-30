@@ -2809,6 +2809,37 @@
                 "title": "Хроника",
                 "empty": "Вехи ещё не записаны.",
                 "turnLabel": "Ход {turn}"
+            },
+            "xpLedger": {
+                "title": "Журнал опыта группы",
+                "addEntry": "Добавить запись",
+                "empty": "Опыт ещё не записан.",
+                "granted": "Начислено через журнал",
+                "actual": "у участника {xp} опыта",
+                "drift": "расхождение {drift}",
+                "turn": "Ход",
+                "turnLabel": "Ход {turn}",
+                "source": {
+                    "hexReconnoitered": "Гекс разведан",
+                    "siteCleared": "Место зачищено",
+                    "questCompleted": "Задание выполнено",
+                    "expeditionResolved": "Экспедиция завершена",
+                    "rpEncounter": "Ролевая сцена",
+                    "manual": "Вручную"
+                },
+                "sourceRef": "Ссылка",
+                "sourceRefHelp": "Ключ гекса, id задания или что угодно; можно оставить пустым.",
+                "amount": "Опыт",
+                "status": {
+                    "offered": "Предложено",
+                    "confirmed": "Подтверждено",
+                    "dismissed": "Отклонено"
+                },
+                "note": "Заметка",
+                "noParty": "Не найден актёр группы для журнала.",
+                "confirmDelete": "Удалить эту запись? Уже начисленный опыт не отзывается.",
+                "sourceColumn": "Источник",
+                "statusColumn": "Статус"
             }
         },
         "chatMessages": {

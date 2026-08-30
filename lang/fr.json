@@ -2809,6 +2809,37 @@
                 "title": "Chronique",
                 "empty": "Aucun jalon enregistré pour l'instant.",
                 "turnLabel": "Tour {turn}"
+            },
+            "xpLedger": {
+                "title": "Registre d'XP du groupe",
+                "addEntry": "Ajouter une entrée",
+                "empty": "Aucun XP enregistré.",
+                "granted": "Accordé via le registre",
+                "actual": "un membre possède {xp} XP",
+                "drift": "écart {drift}",
+                "turn": "Tour",
+                "turnLabel": "Tour {turn}",
+                "source": {
+                    "hexReconnoitered": "Hex reconnu",
+                    "siteCleared": "Site nettoyé",
+                    "questCompleted": "Quête terminée",
+                    "expeditionResolved": "Expédition résolue",
+                    "rpEncounter": "Rencontre de rôle",
+                    "manual": "Manuel"
+                },
+                "sourceRef": "Référence",
+                "sourceRefHelp": "Clé d'hex, id de quête, ou tout identifiant ; vide accepté.",
+                "amount": "XP",
+                "status": {
+                    "offered": "Proposé",
+                    "confirmed": "Confirmé",
+                    "dismissed": "Rejeté"
+                },
+                "note": "Note",
+                "noParty": "Aucun acteur de groupe pour porter le registre.",
+                "confirmDelete": "Supprimer cette entrée ? L'XP déjà accordé n'est pas repris.",
+                "sourceColumn": "Source",
+                "statusColumn": "Statut"
             }
         },
         "chatMessages": {

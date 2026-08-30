@@ -2809,6 +2809,37 @@
                 "title": "Kronika",
                 "empty": "Nie zapisano jeszcze żadnych kamieni milowych.",
                 "turnLabel": "Tura {turn}"
+            },
+            "xpLedger": {
+                "title": "Księga PD drużyny",
+                "addEntry": "Dodaj wpis",
+                "empty": "Nie zapisano jeszcze PD.",
+                "granted": "Przyznane przez księgę",
+                "actual": "członek drużyny ma {xp} PD",
+                "drift": "rozbieżność {drift}",
+                "turn": "Tura",
+                "turnLabel": "Tura {turn}",
+                "source": {
+                    "hexReconnoitered": "Heks zwiadowany",
+                    "siteCleared": "Miejsce oczyszczone",
+                    "questCompleted": "Zadanie ukończone",
+                    "expeditionResolved": "Wyprawa rozstrzygnięta",
+                    "rpEncounter": "Spotkanie fabularne",
+                    "manual": "Ręcznie"
+                },
+                "sourceRef": "Odniesienie",
+                "sourceRefHelp": "Klucz heksu, id zadania lub cokolwiek; puste jest w porządku.",
+                "amount": "PD",
+                "status": {
+                    "offered": "Zaproponowano",
+                    "confirmed": "Potwierdzono",
+                    "dismissed": "Odrzucono"
+                },
+                "note": "Notatka",
+                "noParty": "Brak aktora drużyny dla księgi.",
+                "confirmDelete": "Usunąć ten wpis? Już przyznane PD nie zostaną odebrane.",
+                "sourceColumn": "Źródło",
+                "statusColumn": "Status"
             }
         },
         "chatMessages": {

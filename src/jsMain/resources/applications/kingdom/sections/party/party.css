@@ -1,0 +1,32 @@
+
+/* Party XP ledger */
+.km-xp-ledger-kinds {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin: 0.25rem 0;
+    padding: 0;
+    font-size: 0.9rem;
+}
+
+.km-xp-ledger-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.km-xp-ledger-table th,
+.km-xp-ledger-table td {
+    text-align: left;
+    padding: 0.15rem 0.3rem;
+    border-bottom: 1px dotted rgba(0, 0, 0, 0.15);
+}
+
+.km-xp-ledger-row--offered {
+    font-style: italic;
+    opacity: 0.85;
+}
+
+.km-xp-ledger-totals {
+    margin: 0.25rem 0;
+}

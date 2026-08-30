@@ -124,6 +124,8 @@ external interface KingdomSheetContext : ValidatedHandlebarsContext {
     val sessionPrepContext: SessionPrepContext
     /** Completed milestones, newest first; read-only and player-visible. */
     val chronicle: Array<DeedChronicleRowContext>
+    /** Party XP ledger (Party tab); GM-editable, player-visible history. */
+    val xpLedger: XpLedgerContext
     val councilVotesContext: CouncilVotesContext
     val renownCardContext: RenownCardContext
     val personalHoldingsContext: PersonalHoldingsSectionContext

@@ -2809,6 +2809,37 @@
                 "title": "Crônica",
                 "empty": "Nenhum marco registrado ainda.",
                 "turnLabel": "Turno {turn}"
+            },
+            "xpLedger": {
+                "title": "Registro de XP do grupo",
+                "addEntry": "Adicionar entrada",
+                "empty": "Nenhum XP registrado.",
+                "granted": "Concedido pelo registro",
+                "actual": "um membro tem {xp} XP",
+                "drift": "desvio {drift}",
+                "turn": "Turno",
+                "turnLabel": "Turno {turn}",
+                "source": {
+                    "hexReconnoitered": "Hex reconhecido",
+                    "siteCleared": "Local limpo",
+                    "questCompleted": "Missão concluída",
+                    "expeditionResolved": "Expedição resolvida",
+                    "rpEncounter": "Encontro de interpretação",
+                    "manual": "Manual"
+                },
+                "sourceRef": "Referência",
+                "sourceRefHelp": "Chave de hex, id de missão ou similar; em branco tudo bem.",
+                "amount": "XP",
+                "status": {
+                    "offered": "Oferecido",
+                    "confirmed": "Confirmado",
+                    "dismissed": "Descartado"
+                },
+                "note": "Nota",
+                "noParty": "Nenhum ator de grupo para o registro.",
+                "confirmDelete": "Excluir esta entrada? O XP já concedido não é retirado.",
+                "sourceColumn": "Fonte",
+                "statusColumn": "Status"
             }
         },
         "chatMessages": {

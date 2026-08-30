@@ -296,6 +296,13 @@ import at.posselt.pfrpg2e.kingdom.sheet.contexts.buildArmyPressureContext
 import at.posselt.pfrpg2e.kingdom.buildArmyPressureView
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.buildPacingAlertContext
 import at.posselt.pfrpg2e.kingdom.buildPacingAlertView
+import at.posselt.pfrpg2e.kingdom.xp.xpLedgerActor
+import at.posselt.pfrpg2e.kingdom.xp.xpLedger
+import at.posselt.pfrpg2e.kingdom.xp.updateXpLedger
+import at.posselt.pfrpg2e.kingdom.xp.partyLifetimeXp
+import at.posselt.pfrpg2e.kingdom.xp.appendEntry
+import at.posselt.pfrpg2e.kingdom.sheet.contexts.buildXpLedgerContext
+import at.posselt.pfrpg2e.kingdom.dialogs.askXpLedgerEntry
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.buildChronicleRows
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.buildSessionPrepContext
 import at.posselt.pfrpg2e.kingdom.SessionPrepView
@@ -1990,6 +1997,30 @@ class KingdomSheet(
                         postChatMessage(content, speaker = actor, isHtml = true)
                     }
                 }
+            }
+
+            "add-xp-ledger-entry" -> buildPromise {
+                // MANUAL entries only for now: the plan's proposed per-source award table needs
+                // Gregory's sign-off before anything auto-proposes a number, so every amount here
+                // is one a GM typed.
+                if (!game.user.isGM) return@buildPromise
+                val party = game.xpLedgerActor()
+                if (party == null) {
+                    ui.notifications.warn(t("kingdom.xpLedger.noParty"))
+                    return@buildPromise
+                }
+                val entry = askXpLedgerEntry(getKingdom().currentTurn ?: 0) ?: return@buildPromise
+                party.updateXpLedger { existing -> appendEntry(existing, entry) }
+                render()
+            }
+
+            "delete-xp-ledger-entry" -> buildPromise {
+                if (!game.user.isGM) return@buildPromise
+                val entryId = target.dataset["entryId"] ?: return@buildPromise
+                val party = game.xpLedgerActor() ?: return@buildPromise
+                if (!at.posselt.pfrpg2e.app.confirm(t("kingdom.xpLedger.confirmDelete"))) return@buildPromise
+                party.updateXpLedger { existing -> existing.filter { it.id != entryId } }
+                render()
             }
 
             "edit-faction-agenda" -> {
@@ -4290,6 +4321,13 @@ class KingdomSheet(
                 voterNameOf = { userId -> runCatching { game.users.get(userId)?.name }.getOrNull() },
             ),
             chronicle = buildChronicleRows(kingdom, isGM = isGM),
+            xpLedger = game.xpLedgerActor()?.let { party ->
+                buildXpLedgerContext(
+                    entries = party.xpLedger(),
+                    actualLifetimeXp = party.partyLifetimeXp(),
+                    isGM = isGM,
+                )
+            } ?: buildXpLedgerContext(emptyList(), actualLifetimeXp = 0, isGM = isGM),
             sessionPrepContext = buildSessionPrepContext(
                 forecast = buildForecastPanelContext(buildForecast(game, actor, horizonDays = forecastHorizonDays)),
                 view = buildSessionPrepView(

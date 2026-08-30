@@ -1,0 +1,60 @@
+<section class="km-party-section km-xp-ledger">
+    <h2>
+        {{localizeKM "kingdom.xpLedger.title"}}
+        {{#if xpLedger.isGM}}
+            <span class="km-header-right-align">
+                <button type="button" data-action="add-xp-ledger-entry">
+                    <i class="fa-solid fa-plus"></i> {{localizeKM "kingdom.xpLedger.addEntry"}}
+                </button>
+            </span>
+        {{/if}}
+    </h2>
+
+    <p class="km-xp-ledger-totals">
+        <b>{{localizeKM "kingdom.xpLedger.granted"}}:</b> {{xpLedger.confirmedTotal}} XP
+        <span class="km-sub-note">
+            {{localizeKM "kingdom.xpLedger.actual" xp=xpLedger.actualLifetimeXp}}{{#if xpLedger.hasDrift}} — {{localizeKM "kingdom.xpLedger.drift" drift=xpLedger.drift}}{{/if}}
+        </span>
+    </p>
+
+    {{#if xpLedger.byKind.length}}
+        <ul class="km-xp-ledger-kinds">
+            {{#each xpLedger.byKind}}
+                <li>{{this.label}}: <b>{{this.total}}</b></li>
+            {{/each}}
+        </ul>
+    {{/if}}
+
+    {{#if xpLedger.hasRows}}
+        <table class="km-xp-ledger-table">
+            <thead>
+                <tr>
+                    <th>{{localizeKM "kingdom.xpLedger.turn"}}</th>
+                    <th>{{localizeKM "kingdom.xpLedger.sourceColumn"}}</th>
+                    <th>{{localizeKM "kingdom.xpLedger.amount"}}</th>
+                    <th>{{localizeKM "kingdom.xpLedger.statusColumn"}}</th>
+                    {{#if xpLedger.isGM}}<th></th>{{/if}}
+                </tr>
+            </thead>
+            <tbody>
+                {{#each xpLedger.rows}}
+                    <tr class="{{#if this.isOffered}}km-xp-ledger-row--offered{{/if}}">
+                        <td>{{this.turnLabel}}</td>
+                        <td>{{this.sourceLabel}}{{#if this.note}} <span class="km-sub-note">{{this.note}}</span>{{/if}}</td>
+                        <td>{{this.amount}}</td>
+                        <td>{{this.statusLabel}}</td>
+                        {{#if @root.xpLedger.isGM}}
+                            <td>
+                                <button type="button" data-action="delete-xp-ledger-entry" data-entry-id="{{this.id}}" data-tooltip="{{localizeKM "applications.delete"}}">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </td>
+                        {{/if}}
+                    </tr>
+                {{/each}}
+            </tbody>
+        </table>
+    {{else}}
+        <p class="km-session-prep-empty">{{localizeKM "kingdom.xpLedger.empty"}}</p>
+    {{/if}}
+</section>

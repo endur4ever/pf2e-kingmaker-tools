@@ -2809,6 +2809,37 @@
                 "title": "Cronaca",
                 "empty": "Nessuna pietra miliare registrata.",
                 "turnLabel": "Turno {turn}"
+            },
+            "xpLedger": {
+                "title": "Registro PE del gruppo",
+                "addEntry": "Aggiungi voce",
+                "empty": "Nessun PE registrato.",
+                "granted": "Concessi tramite il registro",
+                "actual": "un membro ha {xp} PE",
+                "drift": "scarto {drift}",
+                "turn": "Turno",
+                "turnLabel": "Turno {turn}",
+                "source": {
+                    "hexReconnoitered": "Esagono esplorato",
+                    "siteCleared": "Sito ripulito",
+                    "questCompleted": "Missione completata",
+                    "expeditionResolved": "Spedizione risolta",
+                    "rpEncounter": "Incontro interpretativo",
+                    "manual": "Manuale"
+                },
+                "sourceRef": "Riferimento",
+                "sourceRefHelp": "Chiave esagono, id missione o simili; vuoto va bene.",
+                "amount": "PE",
+                "status": {
+                    "offered": "Offerto",
+                    "confirmed": "Confermato",
+                    "dismissed": "Ignorato"
+                },
+                "note": "Nota",
+                "noParty": "Nessun attore gruppo per il registro.",
+                "confirmDelete": "Eliminare questa voce? I PE già concessi non vengono ritirati.",
+                "sourceColumn": "Fonte",
+                "statusColumn": "Stato"
             }
         },
         "chatMessages": {
