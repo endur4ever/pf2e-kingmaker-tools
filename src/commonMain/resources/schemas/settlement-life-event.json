@@ -1,0 +1,172 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://posselt.at/pf2e-kingmaker-tools/schemas/settlement-life-event.json",
+  "title": "SettlementLifeEvent",
+  "description": "One settlement life-event template: eligibility, weighting, cast slots and a single mechanical hook",
+  "$ref": "#/$defs/SettlementLifeEvent",
+  "$defs": {
+    "SettlementLifeEvent": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "gazette",
+        "category",
+        "baseWeight"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]+$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "gazette": {
+          "type": "string",
+          "minLength": 1
+        },
+        "category": {
+          "enum": [
+            "festival",
+            "feud",
+            "crime",
+            "birth",
+            "market",
+            "civic"
+          ]
+        },
+        "baseWeight": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "minSettlementLevel": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "requiresStructures": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "structureWeights": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "anyOf",
+              "multiplier"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "anyOf": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "string"
+                }
+              },
+              "multiplier": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              }
+            }
+          }
+        },
+        "seasonWeights": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "spring": {
+              "type": "number",
+              "minimum": 0
+            },
+            "summer": {
+              "type": "number",
+              "minimum": 0
+            },
+            "fall": {
+              "type": "number",
+              "minimum": 0
+            },
+            "winter": {
+              "type": "number",
+              "minimum": 0
+            }
+          }
+        },
+        "cast": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "slot"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "slot": {
+                "type": "string",
+                "minLength": 1
+              },
+              "preferOccupation": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "distinctFrom": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "hook": {
+          "type": "object",
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "enum": [
+                "none",
+                "unrest-delta",
+                "rp-delta",
+                "quest-spawn",
+                "rumor-spawn"
+              ]
+            },
+            "magnitude": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "questTemplate": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        },
+        "cooldownTurns": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        }
+      }
+    }
+  }
+}

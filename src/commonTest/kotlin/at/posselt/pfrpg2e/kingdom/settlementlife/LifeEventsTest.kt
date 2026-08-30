@@ -18,9 +18,19 @@ class LifeEventsTest {
         hookMagnitude: Int = 0,
         castOccupation: String? = null,
     ) = LifeEventTemplate(
-        id = id, weight = weight, requiresStructure = requiresStructure,
-        requiresSeason = requiresSeason, minPopulation = minPopulation, hookKind = hookKind,
-        hookMagnitude = hookMagnitude, castOccupation = castOccupation,
+        id = id,
+        weight = weight,
+        requiresStructures = listOfNotNull(requiresStructure),
+        // a single required season reads as "every OTHER season weighs zero", which is how the
+        // richer model expresses what requiresSeason used to say outright
+        seasonWeights = requiresSeason?.let { wanted ->
+            listOf("spring", "summer", "fall", "winter").associateWith { if (it == wanted) 1.0 else 0.0 }
+        } ?: emptyMap(),
+        minPopulation = minPopulation,
+        castSlots = castOccupation?.let { listOf(Triple("slot", listOf(it), emptyList<String>())) }
+            ?: emptyList(),
+        hookKind = hookKind,
+        hookMagnitude = hookMagnitude,
     )
 
     private fun member(id: String = "n1", name: String = "Svetlana Morozov", occupation: String = "Innkeeper") =
@@ -48,7 +58,9 @@ class LifeEventsTest {
         assertEquals(listOf(midwinter), eligibleTemplates(listOf(midwinter), emptySet(), "winter", 0))
         assertTrue(eligibleTemplates(listOf(midwinter), emptySet(), "summer", 0).isEmpty())
         // A calendar that reports no season cannot host a winter-only feast...
-        assertTrue(eligibleTemplates(listOf(midwinter), emptySet(), null, 0).isEmpty())
+        // a calendar reporting NO season is neutral now, not hostile: the richer model weights
+        // seasons rather than gating on them, and a null season applies no multiplier at all
+        assertEquals(listOf(midwinter), eligibleTemplates(listOf(midwinter), emptySet(), null, 0))
         // ...but a template with no season requirement does not care.
         val any = template(id = "any")
         assertEquals(listOf(any), eligibleTemplates(listOf(any), emptySet(), null, 0))
@@ -93,7 +105,8 @@ class LifeEventsTest {
         val a = template(id = "a")
         val d = template(id = "d", requiresSeason = "fall")
         val m = template(id = "m")
-        val kept = eligibleTemplates(listOf(z, b, a, d, m), emptySet(), season = null, population = 0)
+        // winter, so d's fall-only weighting zeroes it out; b fails the population floor
+        val kept = eligibleTemplates(listOf(z, b, a, d, m), emptySet(), season = "winter", population = 0)
         assertEquals(listOf("z", "a", "m"), kept.map { it.id })
     }
 
@@ -189,7 +202,11 @@ class LifeEventsTest {
 
     @Test
     fun unknownStoredHookKindsMapToNullRatherThanThrowing() {
-        assertEquals(LifeEventHookKind.UNREST, LifeEventHookKind.fromValue("unrest"))
+        assertEquals(LifeEventHookKind.UNREST, LifeEventHookKind.fromValue("unrest-delta"))
+        assertEquals(LifeEventHookKind.RP, LifeEventHookKind.fromValue("rp-delta"))
+        assertEquals(LifeEventHookKind.RUMOR, LifeEventHookKind.fromValue("rumor-spawn"))
+        // the shortened spellings the core briefly used are NOT the contract
+        assertNull(LifeEventHookKind.fromValue("unrest"))
         assertEquals(LifeEventHookKind.NONE, LifeEventHookKind.fromValue("none"))
         assertNull(LifeEventHookKind.fromValue("goldRain"))
         assertNull(LifeEventHookKind.fromValue(null))

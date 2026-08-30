@@ -8502,6 +8502,22 @@
                 "invalid": "Nic nie zaimportowano: JSON był nieczytelny lub wpis błędny.",
                 "done": "Zaimportowano {encounters} spotkań wpływu i {projects} projektów badawczych."
             }
+        },
+        "settlementLife": {
+            "event": {
+                "midwinterFeast": {
+                    "name": "Uczta przesilenia",
+                    "gazette": "{host} wydaje zimową ucztę w {settlement}; {guest} bierze udział."
+                },
+                "guildTheft": {
+                    "name": "Kradzież gildii",
+                    "gazette": "{culprit} zostaje oskarżony o okradzenie {victim} w {settlement}."
+                },
+                "marketDay": {
+                    "name": "Dzień targowy",
+                    "gazette": "{trader} przyciąga tłumy w dzień targowy w {settlement}."
+                }
+            }
         }
     }
 }

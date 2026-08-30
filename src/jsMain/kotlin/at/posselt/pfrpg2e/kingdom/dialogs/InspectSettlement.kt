@@ -238,6 +238,8 @@ class InspectSettlement(
         // siege state the dialog never renders: rebuilding without it un-razes every structure
         // a siege destroyed the moment the GM opens and saves this dialog
         destroyedStructureIds = settlement.destroyedStructureIds,
+        // engine-owned like destroyedStructureIds: the form renders none of it
+        lifeEventHistory = settlement.lifeEventHistory,
     )
 
     init {

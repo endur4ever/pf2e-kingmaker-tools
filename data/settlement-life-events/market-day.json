@@ -1,0 +1,13 @@
+{
+  "id": "market-day",
+  "name": "settlementLife.event.marketDay.name",
+  "gazette": "settlementLife.event.marketDay.gazette",
+  "category": "market",
+  "baseWeight": 12,
+  "requiresStructures": [],
+  "structureWeights": [{ "anyOf": ["marketplace", "general-store", "stockyard"], "multiplier": 2.0 }],
+  "seasonWeights": { "spring": 1.2, "summer": 1.4, "fall": 1.4, "winter": 0.6 },
+  "cast": [{ "slot": "trader", "preferOccupation": ["Merchant", "Teamster", "Farmer"] }],
+  "hook": { "kind": "rp-delta", "magnitude": 1 },
+  "cooldownTurns": 1
+}

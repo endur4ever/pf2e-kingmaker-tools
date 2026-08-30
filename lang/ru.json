@@ -8502,6 +8502,22 @@
                 "invalid": "Ничего не импортировано: JSON нечитаем или запись повреждена.",
                 "done": "Импортировано встреч влияния: {encounters}, исследовательских проектов: {projects}."
             }
+        },
+        "settlementLife": {
+            "event": {
+                "midwinterFeast": {
+                    "name": "Зимний пир",
+                    "gazette": "{host} устраивает зимний пир в {settlement}; {guest} присутствует."
+                },
+                "guildTheft": {
+                    "name": "Кража гильдии",
+                    "gazette": "{culprit} обвиняют в краже у {victim} в {settlement}."
+                },
+                "marketDay": {
+                    "name": "Базарный день",
+                    "gazette": "{trader} собирает оживлённый базарный день в {settlement}."
+                }
+            }
         }
     }
 }

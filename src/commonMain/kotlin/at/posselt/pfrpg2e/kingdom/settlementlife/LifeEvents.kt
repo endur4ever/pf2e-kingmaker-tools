@@ -18,10 +18,13 @@ package at.posselt.pfrpg2e.kingdom.settlementlife
  * kind maps to null so one bad file loses its hook instead of crashing the tick.
  */
 enum class LifeEventHookKind(val value: String) {
-    UNREST("unrest"),
-    RP("rp"),
-    QUEST("quest"),
-    RUMOR("rumor"),
+    // the serialized spellings are the plan's section 5.2 vocabulary verbatim, which is also what
+    // the shipped template JSON carries -- the phase-1 core had shortened them, and a template
+    // written to the plan would then have parsed to a null hook
+    UNREST("unrest-delta"),
+    RP("rp-delta"),
+    QUEST("quest-spawn"),
+    RUMOR("rumor-spawn"),
     NONE("none");
 
     companion object {
@@ -48,13 +51,21 @@ fun clampLifeEventUnrest(delta: Int): Int = delta.coerceIn(-1, 1)
  */
 data class LifeEventTemplate(
     val id: String,
+    /** Relative selection weight BEFORE structure and season multipliers. */
     val weight: Int,
-    val requiresStructure: String? = null,
-    val requiresSeason: String? = null,
+    /** ALL of these base structure ids must be present; empty = always eligible. */
+    val requiresStructures: List<String> = emptyList(),
+    /** (anyOf ids, multiplier): having ANY id in the group multiplies the weight once. */
+    val structureWeights: List<Pair<List<String>, Double>> = emptyList(),
+    /** Per-season multiplier; a season absent from the map is 1.0, never 0. */
+    val seasonWeights: Map<String, Double> = emptyMap(),
+    val minSettlementLevel: Int = 0,
     val minPopulation: Int = 0,
+    /** (slot, preferredOccupations, distinctFromSlots) in cast order. */
+    val castSlots: List<Triple<String, List<String>, List<String>>> = emptyList(),
     val hookKind: LifeEventHookKind,
     val hookMagnitude: Int = 0,
-    val castOccupation: String? = null,
+    val cooldownTurns: Int = 0,
 )
 
 /**
@@ -77,21 +88,64 @@ const val MAX_LIFE_EVENTS_PER_TURN = 2
  */
 fun eligibleTemplates(
     templates: List<LifeEventTemplate>,
-    structureNames: Set<String>,
+    structureIds: Set<String>,
     season: String?,
     population: Int,
+    settlementLevel: Int = 0,
+    /** templateId -> the turn it last fired here; a template on cooldown is filtered out. */
+    lastFiredByTemplate: Map<String, Int> = emptyMap(),
+    currentTurn: Int = 0,
 ): List<LifeEventTemplate> =
     templates.filter { template ->
-        structureSatisfied(template.requiresStructure, structureNames) &&
-            (template.requiresSeason == null || template.requiresSeason == season) &&
-            population >= template.minPopulation
+        template.requiresStructures.all { required -> structureMatches(required, structureIds) } &&
+            population >= template.minPopulation &&
+            settlementLevel >= template.minSettlementLevel &&
+            cooldownElapsed(lastFiredByTemplate[template.id], currentTurn, template.cooldownTurns) &&
+            // a season the template weights at ZERO is not merely unlikely, it is out of season
+            seasonWeightOf(template, season) > 0.0
     }
 
-private fun structureSatisfied(required: String?, structureNames: Set<String>): Boolean {
-    if (required == null) return true
+/** Structure ids are data, not GM prose, but trimmed/case-insensitive matching costs nothing. */
+private fun structureMatches(required: String, structureIds: Set<String>): Boolean {
     val wanted = required.trim()
-    return structureNames.any { it.trim().equals(wanted, ignoreCase = true) }
+    return structureIds.any { it.trim().equals(wanted, ignoreCase = true) }
 }
+
+private fun cooldownElapsed(lastFired: Int?, currentTurn: Int, cooldownTurns: Int): Boolean =
+    lastFired == null || cooldownTurns <= 0 || currentTurn - lastFired > cooldownTurns
+
+/** A season the template says nothing about is neutral (1.0); a null season is likewise neutral. */
+fun seasonWeightOf(template: LifeEventTemplate, season: String?): Double {
+    if (season == null) return 1.0
+    return template.seasonWeights[season.trim().lowercase()] ?: 1.0
+}
+
+/**
+ * The template's weight in THIS settlement: base, times each structure group it satisfies, times
+ * the season multiplier, floored at 0 and rounded to an Int so [weightedPick]'s cumulative walk
+ * stays integral. A multiplier group counts ONCE however many of its ids the settlement has --
+ * owning three taverns does not make a feast eight times likelier.
+ */
+fun effectiveWeight(
+    template: LifeEventTemplate,
+    structureIds: Set<String>,
+    season: String?,
+): Int {
+    var weight = template.weight.toDouble()
+    template.structureWeights.forEach { (anyOf, multiplier) ->
+        if (anyOf.any { structureMatches(it, structureIds) }) weight *= multiplier
+    }
+    weight *= seasonWeightOf(template, season)
+    return weight.coerceAtLeast(0.0).toInt()
+}
+
+/** The eligible templates re-weighted for this settlement, ready for [weightedPick]. */
+fun weightedForSettlement(
+    templates: List<LifeEventTemplate>,
+    structureIds: Set<String>,
+    season: String?,
+): List<LifeEventTemplate> =
+    templates.map { it.copy(weight = effectiveWeight(it, structureIds, season)) }
 
 /**
  * Deterministic cumulative-weight walk: the positive weights partition `0 until total` (total

@@ -8502,6 +8502,22 @@
                 "invalid": "未导入任何内容：JSON 无法读取或存在格式错误的条目。",
                 "done": "已导入 {encounters} 个影响遭遇和 {projects} 个研究项目。"
             }
+        },
+        "settlementLife": {
+            "event": {
+                "midwinterFeast": {
+                    "name": "仲冬宴",
+                    "gazette": "{host} 在 {settlement} 举办仲冬宴，{guest} 出席。"
+                },
+                "guildTheft": {
+                    "name": "行会盗窃",
+                    "gazette": "{culprit} 被指控在 {settlement} 偷窃 {victim}。"
+                },
+                "marketDay": {
+                    "name": "集市日",
+                    "gazette": "{trader} 在 {settlement} 带来热闹的集市日。"
+                }
+            }
         }
     }
 }

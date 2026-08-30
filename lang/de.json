@@ -8502,6 +8502,22 @@
                 "invalid": "Nichts importiert: Das JSON war unlesbar oder ein Eintrag fehlerhaft.",
                 "done": "{encounters} Einfluss-Begegnung(en) und {projects} Forschungsprojekt(e) importiert."
             }
+        },
+        "settlementLife": {
+            "event": {
+                "midwinterFeast": {
+                    "name": "Mittwinterfest",
+                    "gazette": "{host} richtet in {settlement} ein Mittwinterfest aus; {guest} nimmt teil."
+                },
+                "guildTheft": {
+                    "name": "Gildendiebstahl",
+                    "gazette": "{culprit} wird beschuldigt, {victim} in {settlement} bestohlen zu haben."
+                },
+                "marketDay": {
+                    "name": "Markttag",
+                    "gazette": "{trader} sorgt in {settlement} für einen lebhaften Markttag."
+                }
+            }
         }
     }
 }

@@ -1,0 +1,49 @@
+{
+  "id": "midwinter-feast",
+  "name": "settlementLife.event.midwinterFeast.name",
+  "gazette": "settlementLife.event.midwinterFeast.gazette",
+  "category": "festival",
+  "baseWeight": 10,
+  "minSettlementLevel": 1,
+  "requiresStructures": [],
+  "structureWeights": [
+    {
+      "anyOf": [
+        "theater",
+        "tavern-dive",
+        "tavern-popular",
+        "tavern-luxury",
+        "tavern-world-class",
+        "marketplace"
+      ],
+      "multiplier": 2.5
+    }
+  ],
+  "seasonWeights": {
+    "spring": 0.5,
+    "summer": 1.0,
+    "fall": 1.5,
+    "winter": 2.0
+  },
+  "cast": [
+    {
+      "slot": "host",
+      "preferOccupation": [
+        "Tavern Keeper",
+        "Innkeeper",
+        "Brewer"
+      ]
+    },
+    {
+      "slot": "guest",
+      "distinctFrom": [
+        "host"
+      ]
+    }
+  ],
+  "hook": {
+    "kind": "rp-delta",
+    "magnitude": 1
+  },
+  "cooldownTurns": 3
+}

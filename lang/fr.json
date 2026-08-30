@@ -8502,6 +8502,22 @@
                 "invalid": "Rien n'a été importé : JSON illisible ou entrée mal formée.",
                 "done": "{encounters} rencontre(s) d'influence et {projects} projet(s) de recherche importés."
             }
+        },
+        "settlementLife": {
+            "event": {
+                "midwinterFeast": {
+                    "name": "Festin du solstice",
+                    "gazette": "{host} organise un festin d'hiver à {settlement} ; {guest} y assiste."
+                },
+                "guildTheft": {
+                    "name": "Vol de guilde",
+                    "gazette": "{culprit} est accusé d'avoir volé {victim} à {settlement}."
+                },
+                "marketDay": {
+                    "name": "Jour de marché",
+                    "gazette": "{trader} anime un jour de marché chargé à {settlement}."
+                }
+            }
         }
     }
 }

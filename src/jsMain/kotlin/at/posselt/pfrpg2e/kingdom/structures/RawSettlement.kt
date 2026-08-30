@@ -23,6 +23,12 @@ external interface RawSettlement {
      * restores it, so a sack is recoverable rather than destructive.
      */
     var destroyedStructureIds: Array<String>?
+
+    /**
+     * Life events that have fired here (settlement-life 2.2/2.3). Null on legacy data; the
+     * records live beside the roster they cast from, so castNpcIds need no cross-document join.
+     */
+    var lifeEventHistory: Array<at.posselt.pfrpg2e.kingdom.RawSettlementLifeEventRecord>?
 }
 
 @JsPlainObject

@@ -8502,6 +8502,22 @@
                 "invalid": "Nothing imported: the JSON was unreadable or an entry was malformed.",
                 "done": "Imported {encounters} influence encounter(s) and {projects} research project(s)."
             }
+        },
+        "settlementLife": {
+            "event": {
+                "midwinterFeast": {
+                    "name": "Midwinter Feast",
+                    "gazette": "{host} hosts a midwinter feast in {settlement}; {guest} attends."
+                },
+                "guildTheft": {
+                    "name": "Guild Theft",
+                    "gazette": "{culprit} is accused of robbing {victim} in {settlement}."
+                },
+                "marketDay": {
+                    "name": "Market Day",
+                    "gazette": "{trader} draws a busy market day in {settlement}."
+                }
+            }
         }
     }
 }

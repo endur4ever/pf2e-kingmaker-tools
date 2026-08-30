@@ -8502,6 +8502,22 @@
                 "invalid": "Nulla importato: JSON illeggibile o voce malformata.",
                 "done": "Importati {encounters} incontri di influenza e {projects} progetti di ricerca."
             }
+        },
+        "settlementLife": {
+            "event": {
+                "midwinterFeast": {
+                    "name": "Festa di mezzo inverno",
+                    "gazette": "{host} ospita una festa di mezzo inverno a {settlement}; {guest} partecipa."
+                },
+                "guildTheft": {
+                    "name": "Furto della gilda",
+                    "gazette": "{culprit} è accusato di aver derubato {victim} a {settlement}."
+                },
+                "marketDay": {
+                    "name": "Giorno di mercato",
+                    "gazette": "{trader} anima un affollato giorno di mercato a {settlement}."
+                }
+            }
         }
     }
 }

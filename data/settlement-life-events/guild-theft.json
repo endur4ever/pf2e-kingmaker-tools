@@ -1,0 +1,17 @@
+{
+  "id": "guild-theft",
+  "name": "settlementLife.event.guildTheft.name",
+  "gazette": "settlementLife.event.guildTheft.gazette",
+  "category": "crime",
+  "baseWeight": 8,
+  "minSettlementLevel": 1,
+  "requiresStructures": ["thieves-guild"],
+  "structureWeights": [{ "anyOf": ["marketplace", "luxury-store"], "multiplier": 1.5 }],
+  "seasonWeights": { "winter": 1.3 },
+  "cast": [
+    { "slot": "culprit", "preferOccupation": ["Rat Catcher", "Courier", "Tinker"] },
+    { "slot": "victim", "preferOccupation": ["Merchant", "Jeweler"], "distinctFrom": ["culprit"] }
+  ],
+  "hook": { "kind": "unrest-delta", "magnitude": 1 },
+  "cooldownTurns": 2
+}
