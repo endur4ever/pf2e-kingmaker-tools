@@ -1,6 +1,6 @@
-# New Subsystems Overview (June/July 2026)
+# New Subsystems Overview (June–August 2026)
 
-This guide provides an overview of the major subsystems implemented during the June and July 2026 feature waves for the Kingmaker Campaign Automation module.
+This guide provides an overview of the major subsystems implemented during the June, July and August 2026 feature waves for the Kingmaker Campaign Automation module.
 
 ## Core Systems
 
@@ -38,6 +38,83 @@ A flexible system allowing GMs to switch between "Rules As Written" (RAW) and va
 
 ### Player-Facing Views
 Provides players with permission-filtered, read-only access to essential kingdom information (like territory boundaries, known settlements, and active threats) without leaking sensitive GM-only data like secret war plans or troop counts.
+
+## August 2026 Wave
+
+Every mechanical effect below is a **GM-confirmed offer**: the module detects, proposes and
+whispers, and nothing is applied to the kingdom or the party until a GM clicks. Where a feature is
+deliberately incomplete, this guide says so rather than implying it works.
+
+### Influence & Research Trackers
+Runs the PF2e Influence and Research subsystems for named NPCs and long projects. Track influence
+points against thresholds, record checks by degree of success, and let discoveries, skills and
+threshold effects stay hidden until you reveal them — players only ever *receive* what has been
+revealed, so nothing leaks through the sheet. Crossing a threshold whispers a Grant / Convert to
+Quest / Dismiss card. Encounters and projects can be pasted in as JSON.
+
+Deliberately manual: you enter each check's degree of success; auto-rolling is not implemented.
+Elite/Weak adjustments are recorded on a creature but not applied.
+
+### Faction Agendas
+NPC factions pursue goals of their own. Each faction gets a progress clock and an archetype
+(aggressive, mercantile, fey, political, monster) that weights which move it takes: expanding,
+sabotaging a rival, courting an ally, raising an army, or sending envoys to the party. One
+whispered digest per turn lists what everyone did; standing shifts, war threats and quests are all
+offers. The public gazette records *what* happened, never the weights behind it.
+
+### NPC Memory Ledger
+Named residents remember what the kingdom did to them. Opt an NPC in with **Track memory** (capped
+at ten kingdom-wide), and each turn compares the last two turn records — unrest spiking, ruin
+clearing, a caravan raided, war pressure lifting — against seventeen rules that move attitude by
+occupation. Grudges decay toward indifference unless renewed. Crossing an attitude band whispers a
+card offering an encounter, a quest, or a scene note.
+
+GM-only: players see no attitude score and no memory log anywhere.
+
+### Deeds Chronicle
+Auto-detects twenty-one kingdom achievements from standing state — first settlement, roads to the
+capital, regions claimed, size and level milestones, recovery from ruin or unrest, trade and war
+firsts — and offers their milestone XP in one whispered digest per turn, with **Dismiss all** for a
+kingdom adopted mid-campaign. Awarded deeds are dated in a read-only **Chronicle** on Session Prep
+and announced in the gazette; declined ones are not.
+
+### Encounter Stager
+Turns a rolled combat encounter into a fought one. Curate creatures (a table result that points at
+a bestiary actor seeds itself), set the opening distance and whether they arrive hidden, then Stage:
+tokens are placed in a ring around the party at that distance, added to combat with initiative
+rolled, and the existing combat-track hook supplies the music. The summary whisper carries an Undo
+that removes exactly what was spawned. Queued encounters on a hex can be curated and staged from
+Session Prep.
+
+Deliberately out of scope: no wall or collision awareness — the ring is geometric, so nudge a token
+if one lands badly.
+
+### Party XP Ledger
+A running record of party XP on the Party tab, with per-source totals and a reconciliation against
+what a character actually holds. Drift is expected and never corrected: combat XP and hand edits
+never pass through the ledger.
+
+**Entries are GM-entered.** Automatic offers on hex clears, quest completions and expedition beats
+are built but not enabled, because their award amounts are PF2e defaults rather than a recorded
+house rule and need a table decision first.
+
+### Groundwork, not yet usable
+Two subsystems have their data model, schema, storage and migrations in place but no content or
+tick yet, so nothing surfaces in play: **Settlement Life Events** (three of ten templates ship; the
+per-turn cap and probability curve are undecided) and the **Petition Inbox** (the catalog is
+intentionally empty until its forty templates are written).
+
+## Known limitations
+
+Two long-standing behaviours report an effect the module does not apply. Both are awaiting a
+table decision, because every way of fixing them changes what happens in play. Until then, treat
+these numbers as advisory:
+
+- **"XP Awarded: N" on the End Turn card.** The RP-to-XP conversion is computed and recorded (it
+  also reaches the turn history and the analytics chart) but is never added to the kingdom's XP.
+  The **Convert RP to XP** button on the kingdom sheet does work, and is the path to use.
+- **The Liquidate Resources penalty.** Liquidating announces that next turn's Resource Dice are
+  reduced, but the reduction is never applied to the dice actually rolled.
 
 ---
 

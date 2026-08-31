@@ -45,6 +45,12 @@ including optional and popular homebrew from Vance & Kerenshara:
 * **Calendar Integration** — Simple Calendar / Seasons & Stars notes for weather, rests and turns
 * **Backup & Restore** — per-actor export/import plus a one-click whole-campaign backup
 * **Player-facing views** — read-only sheets so players can follow the kingdom without GM controls
+* **Influence & Research** — run the PF2e influence and research subsystems, with GM-controlled reveals
+* **Faction Agendas** — NPC factions pursue goals on progress clocks and act each turn
+* **NPC Memory** — tracked residents remember what the kingdom did, and shift attitude over time
+* **Deeds Chronicle** — auto-detected achievements, offered as milestone XP and dated in a chronicle
+* **Encounter Stager** — place a rolled encounter's creatures around the party and roll initiative
+* **Party XP Ledger** — a running record of party XP with reconciliation against the sheet
 * **Weather**
 * **Combat Tracks**
 
