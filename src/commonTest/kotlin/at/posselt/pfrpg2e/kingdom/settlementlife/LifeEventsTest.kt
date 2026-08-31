@@ -216,4 +216,78 @@ class LifeEventsTest {
     fun theKingdomWidePerTurnCapIsTwo() {
         assertEquals(2, MAX_LIFE_EVENTS_PER_TURN)
     }
+
+    // ── weighting: two documented behaviours that mutation testing found untested ──────────────
+
+    @Test
+    fun aStructureGroupMultipliesOnceHoweverManyOfItsIdsAreOwned() {
+        // The KDoc promises this outright: owning three taverns must not make a feast eight times
+        // likelier. Nothing tested it, so a per-matching-id loop passed the whole suite.
+        val feast = LifeEventTemplate(
+            id = "feast",
+            weight = 10,
+            structureWeights = listOf(listOf("tavern-dive", "tavern-popular", "theater") to 2.0),
+            hookKind = LifeEventHookKind.NONE,
+        )
+        val one = effectiveWeight(feast, setOf("tavern-dive"), season = null)
+        val all = effectiveWeight(feast, setOf("tavern-dive", "tavern-popular", "theater"), season = null)
+        assertEquals(20, one)
+        assertEquals(20, all, "the group multiplied more than once")
+        // a settlement with none of them keeps the base weight
+        assertEquals(10, effectiveWeight(feast, setOf("marketplace"), season = null))
+    }
+
+    @Test
+    fun separateGroupsEachApplyAndSeasonsCompose() {
+        val template = LifeEventTemplate(
+            id = "market",
+            weight = 10,
+            structureWeights = listOf(
+                listOf("marketplace") to 2.0,
+                listOf("stockyard") to 1.5,
+            ),
+            seasonWeights = mapOf("summer" to 2.0),
+            hookKind = LifeEventHookKind.NONE,
+        )
+        // 10 * 2.0 * 1.5 = 30, then summer doubles it
+        assertEquals(30, effectiveWeight(template, setOf("marketplace", "stockyard"), season = null))
+        assertEquals(60, effectiveWeight(template, setOf("marketplace", "stockyard"), season = "summer"))
+    }
+
+    @Test
+    fun cooldownKeepsATemplateOutUntilItsTurnsHavePassed() {
+        // cooldownTurns had no test at all: ignoring it entirely passed the suite
+        val template = LifeEventTemplate(
+            id = "feud",
+            weight = 5,
+            hookKind = LifeEventHookKind.NONE,
+            cooldownTurns = 2,
+        )
+        val fired = mapOf("feud" to 5)
+        fun eligibleOn(turn: Int) = eligibleTemplates(
+            listOf(template), emptySet(), season = null, population = 0,
+            lastFiredByTemplate = fired, currentTurn = turn,
+        )
+        // fired on turn 5 with a 2-turn cooldown: 6 and 7 are suppressed, 8 is clear
+        assertTrue(eligibleOn(6).isEmpty())
+        assertTrue(eligibleOn(7).isEmpty())
+        assertEquals(listOf(template), eligibleOn(8))
+        // a template that has never fired is always eligible
+        assertEquals(
+            listOf(template),
+            eligibleTemplates(
+                listOf(template), emptySet(), season = null, population = 0,
+                lastFiredByTemplate = emptyMap(), currentTurn = 6,
+            ),
+        )
+        // cooldown 0 never suppresses
+        val noCooldown = template.copy(cooldownTurns = 0)
+        assertEquals(
+            listOf(noCooldown),
+            eligibleTemplates(
+                listOf(noCooldown), emptySet(), season = null, population = 0,
+                lastFiredByTemplate = mapOf("feud" to 5), currentTurn = 5,
+            ),
+        )
+    }
 }
