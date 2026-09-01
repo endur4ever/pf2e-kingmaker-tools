@@ -2416,19 +2416,8 @@ class KingdomSheet(
                 }
             }
 
-            "rp-xp" -> buildPromise {
-                actor.getKingdom()?.let { kingdom ->
-                    val xp = calculateRpXP(
-                        rp = kingdom.resourcePoints.now,
-                        kingdomLevel = kingdom.level,
-                        rpToXpConversionRate = kingdom.settings.rpToXpConversionRate,
-                        rpToXpConversionLimit = kingdom.settings.rpToXpConversionLimit,
-                        useVK = kingdom.settings.vanceAndKerensharaXP,
-                    )
-                    actor.gainXp(xp)
-                }
-            }
-
+            // "rp-xp" removed: End Turn now converts RP to XP automatically with this exact
+            // calculation, so a manual button beside it could only ever double-grant.
             "solution-xp" -> buildPromise {
                 actor.getKingdom()?.let { kingdom ->
                     val xp = (kingdom.supernaturalSolutions + kingdom.creativeSolutions) * 10

@@ -1,6 +1,7 @@
 package at.posselt.pfrpg2e.kingdom
 
 import at.posselt.pfrpg2e.data.kingdom.AgendaArchetypeSpec
+import at.posselt.pfrpg2e.data.kingdom.calculateRpXP
 import at.posselt.pfrpg2e.data.kingdom.AgendaFactionMove
 import at.posselt.pfrpg2e.data.kingdom.AgendaMoveSpec
 import at.posselt.pfrpg2e.kingdom.data.RawPersonalHolding
@@ -218,6 +219,8 @@ object TurnTickingEngine {
 		kingdomName: String = "",
 		agendaMoves: Map<String, AgendaMoveSpec> = emptyMap(),
 		agendaArchetypes: Map<String, AgendaArchetypeSpec> = emptyMap(),
+		/** Honours the Vance & Kerenshara XP variant, exactly as the sheet's converter did. */
+		vanceAndKerensharaXp: Boolean = false,
 	): TickResult {
 		val changes = mutableListOf<TickChange>()
 
@@ -401,18 +404,24 @@ object TurnTickingEngine {
 		// ruin-specific GM-confirmed offer card. (It previously bumped warThreatOffers — a
 		// counter no consumer reads — so the promised offer silently vanished.)
 
-		// 13) RP-to-XP conversion: convert current RP into XP based on rate and limit
-		var xpAwarded = 0
-		if (rpToXpConversionRate > 0 && rpNow > 0) {
-			val convertibleRp = if (rpToXpConversionLimit > 0) {
-				minOf(rpNow, rpToXpConversionLimit)
-			} else {
-				rpNow
-			}
-			xpAwarded = convertibleRp / rpToXpConversionRate
-			if (xpAwarded > 0) {
-				changes += TickChange("xp", "xpAwarded", null, xpAwarded)
-			}
+		// 13) RP-to-XP conversion.
+		// Uses calculateRpXP -- the SAME function the kingdom sheet's converter used -- rather
+		// than a second, simpler formula. The engine's own copy divided where this multiplies and
+		// ignored the Vance & Kerenshara XP setting entirely, so the two paths disagreed about
+		// what a turn's RP was worth. performEndTurn APPLIES this value; it used to be computed,
+		// reported on the card, written into turn history and plotted on the analytics chart
+		// while kingdom.xp was never touched.
+		val xpAwarded = if (rpNow > 0) {
+			calculateRpXP(
+				rp = rpNow,
+				kingdomLevel = kingdomLevel,
+				rpToXpConversionRate = rpToXpConversionRate,
+				rpToXpConversionLimit = rpToXpConversionLimit,
+				useVK = vanceAndKerensharaXp,
+			)
+		} else 0
+		if (xpAwarded > 0) {
+			changes += TickChange("xp", "xpAwarded", null, xpAwarded)
 		}
 
 		// 14) Auto-gain fame per turn (up to maximumFamePoints)

@@ -2,6 +2,7 @@ package at.posselt.pfrpg2e.kingdom.sheet
 
 import com.foundryvtt.core.Game
 import at.posselt.pfrpg2e.kingdom.KingdomActor
+import at.posselt.pfrpg2e.kingdom.LIQUIDATE_RESOURCES_NEXT_TURN_RD_PENALTY
 import at.posselt.pfrpg2e.kingdom.KingdomData
 import at.posselt.pfrpg2e.kingdom.currentSeasonalModifiers
 import at.posselt.pfrpg2e.kingdom.data.getChosenFeatures
@@ -83,11 +84,18 @@ suspend fun KingdomActor.upkeepCollectResources(game: Game, kingdom: KingdomData
         seasonal = game.currentSeasonalModifiers(),
         kingdomData = kingdom,
         realmData = realm,
-        resourceDice = kingdom.getResourceDiceAmount(
-            chosenFeats,
-            settlements.allSettlements,
-            kingdomLevel = kingdom.level,
-        ),
+        // "At the start of your next Kingdom turn, roll 4 fewer Resource Dice than normal."
+        // This is the only place the rolled count exists, so it is the only place the penalty can
+        // land; the End Turn code that used to "apply" it wrote to a field already zeroed.
+        resourceDice = (
+            kingdom.getResourceDiceAmount(
+                chosenFeats,
+                settlements.allSettlements,
+                kingdomLevel = kingdom.level,
+            ) - if (kingdom.liquidateResourcesPenaltyNextTurn == true) {
+                LIQUIDATE_RESOURCES_NEXT_TURN_RD_PENALTY
+            } else 0
+            ).coerceAtLeast(0),
         // Zero once the turn's single luxury bonus has already been spent elsewhere -- the feat
         // says "the first time you gain Luxury Commodities in a Kingdom turn", not "during Upkeep".
         increaseGainedLuxuries = if (kingdom.luxuryBonusUsedThisTurn == true) {
@@ -100,6 +108,18 @@ suspend fun KingdomActor.upkeepCollectResources(game: Game, kingdom: KingdomData
         modifiers = kingdom.createModifiers(settlements),
         suppressChat = suppressChat,
     )
+    // spend the marker only once the reduced roll has actually happened
+    if (kingdom.liquidateResourcesPenaltyNextTurn == true) {
+        kingdom.liquidateResourcesPenaltyNextTurn = false
+        if (!suppressChat) {
+            postChatMessage(
+                t(
+                    "kingdom.liquidate.penaltyApplied",
+                    recordOf("dice" to LIQUIDATE_RESOURCES_NEXT_TURN_RD_PENALTY),
+                ),
+            )
+        }
+    }
     kingdom.resourcePoints.now = resources.resourcePoints
     kingdom.resourceDice.now = resources.resourceDice
     kingdom.commodities.now.lumber = resources.lumber

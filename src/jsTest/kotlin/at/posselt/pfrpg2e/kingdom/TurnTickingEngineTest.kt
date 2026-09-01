@@ -843,74 +843,65 @@ class TurnTickingEngineTest {
     }
 
     // ── RP-to-XP conversion ────────────────────────────────────────────
+    //
+    // These previously encoded the ENGINE'S OWN formula (rp / rate, limit capping RP), which
+    // disagreed with the kingdom sheet's converter (rp * rate, limit capping XP) and ignored the
+    // Vance & Kerenshara variant. Every one of them asserted only that a number was computed --
+    // none asserted the kingdom ever received it, which is how "XP Awarded: N" shipped for months
+    // while kingdom.xp was never touched. The engine now calls calculateRpXP, the same function
+    // the sheet used, so there is one answer to "what is this turn's RP worth".
 
     @Test
-    fun testRpToXpConversionBasic() {
-        val result = TurnTickingEngine.tick(
-            fame = fame(), resourcePoints = resourcePoints(), resourceDice = resourcePoints(),
-            consumption = consumption(), commodities = commodities(), storage = storage(),
-            councilCooldowns = null, modifiers = emptyArray(),
-            rpToXpConversionRate = 10, rpNow = 50,
-        )
-        assertEquals(5, result.xpAwarded)
+    fun rpToXpUsesTheSheetsFormulaNotItsOwn() {
+        val result = tickXp(rate = 10, limit = 1000, rpNow = 50)
+        // 50 RP * rate 10 = 500, under the limit
+        assertEquals(500, result.xpAwarded)
     }
 
     @Test
-    fun testRpToXpConversionWithLimit() {
-        val result = TurnTickingEngine.tick(
-            fame = fame(), resourcePoints = resourcePoints(), resourceDice = resourcePoints(),
-            consumption = consumption(), commodities = commodities(), storage = storage(),
-            councilCooldowns = null, modifiers = emptyArray(),
-            rpToXpConversionRate = 10, rpToXpConversionLimit = 30, rpNow = 100,
-        )
-        assertEquals(3, result.xpAwarded)
+    fun rpToXpLimitCapsTheXpNotTheRp() {
+        // the old engine capped the RP first (100 -> 30 -> /10 = 3); the limit caps the XP
+        val result = tickXp(rate = 10, limit = 30, rpNow = 100)
+        assertEquals(30, result.xpAwarded)
     }
 
     @Test
-    fun testRpToXpConversionDisabledWhenRateIsZero() {
-        val result = TurnTickingEngine.tick(
-            fame = fame(), resourcePoints = resourcePoints(), resourceDice = resourcePoints(),
-            consumption = consumption(), commodities = commodities(), storage = storage(),
-            councilCooldowns = null, modifiers = emptyArray(),
-            rpToXpConversionRate = 0, rpNow = 100,
-        )
-        assertEquals(0, result.xpAwarded)
+    fun rpToXpHonoursTheVanceAndKerensharaBands() {
+        // VK ignores the rate entirely and pays by kingdom level: under 5 it is 10 XP per RP
+        val low = tickXp(rate = 1, limit = 10000, rpNow = 10, level = 4, vk = true)
+        assertEquals(100, low.xpAwarded)
+        // ...dropping to 7 per RP from level 5
+        val mid = tickXp(rate = 1, limit = 10000, rpNow = 10, level = 5, vk = true)
+        assertEquals(70, mid.xpAwarded)
+        // and the same call without VK falls back to the rate
+        val plain = tickXp(rate = 1, limit = 10000, rpNow = 10, level = 4, vk = false)
+        assertEquals(10, plain.xpAwarded)
     }
 
     @Test
-    fun testRpToXpConversionNoXpWhenNoRp() {
-        val result = TurnTickingEngine.tick(
-            fame = fame(), resourcePoints = resourcePoints(), resourceDice = resourcePoints(),
-            consumption = consumption(), commodities = commodities(), storage = storage(),
-            councilCooldowns = null, modifiers = emptyArray(),
-            rpToXpConversionRate = 10, rpNow = 0,
-        )
-        assertEquals(0, result.xpAwarded)
+    fun rpToXpAwardsNothingWithoutRp() {
+        assertEquals(0, tickXp(rate = 10, limit = 1000, rpNow = 0).xpAwarded)
     }
 
     @Test
-    fun testRpToXpConversionTruncatesFractional() {
-        val result = TurnTickingEngine.tick(
-            fame = fame(), resourcePoints = resourcePoints(), resourceDice = resourcePoints(),
-            consumption = consumption(), commodities = commodities(), storage = storage(),
-            councilCooldowns = null, modifiers = emptyArray(),
-            rpToXpConversionRate = 3, rpNow = 10,
-        )
-        assertEquals(3, result.xpAwarded)
+    fun rpToXpRecordsAChangeEntryOnlyWhenSomethingWasAwarded() {
+        val awarded = tickXp(rate = 10, limit = 1000, rpNow = 20)
+        val change = awarded.changes.find { it.category == "xp" && it.field == "xpAwarded" }
+        assertNotNull(change)
+        assertEquals(200, change.newValue)
+        val none = tickXp(rate = 10, limit = 1000, rpNow = 0)
+        assertNull(none.changes.find { it.category == "xp" && it.field == "xpAwarded" })
     }
 
-    @Test
-    fun testRpToXpConversionCreatesChangeEntry() {
-        val result = TurnTickingEngine.tick(
+    private fun tickXp(rate: Int, limit: Int, rpNow: Int, level: Int = 1, vk: Boolean = false) =
+        TurnTickingEngine.tick(
             fame = fame(), resourcePoints = resourcePoints(), resourceDice = resourcePoints(),
             consumption = consumption(), commodities = commodities(), storage = storage(),
             councilCooldowns = null, modifiers = emptyArray(),
-            rpToXpConversionRate = 10, rpNow = 20,
+            kingdomLevel = level,
+            rpToXpConversionRate = rate, rpToXpConversionLimit = limit, rpNow = rpNow,
+            vanceAndKerensharaXp = vk,
         )
-        val xpChange = result.changes.find { it.category == "xp" && it.field == "xpAwarded" }
-        assertNotNull(xpChange)
-        assertEquals(2, xpChange.newValue)
-    }
 
     // ── Auto-gain fame per turn ────────────────────────────────────────
 

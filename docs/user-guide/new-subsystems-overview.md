@@ -104,17 +104,19 @@ tick yet, so nothing surfaces in play: **Settlement Life Events** (three of ten 
 per-turn cap and probability curve are undecided) and the **Petition Inbox** (the catalog is
 intentionally empty until its forty templates are written).
 
-## Known limitations
+## Recently corrected
 
-Two long-standing behaviours report an effect the module does not apply. Both are awaiting a
-table decision, because every way of fixing them changes what happens in play. Until then, treat
-these numbers as advisory:
+Two long-standing behaviours reported an effect the module never applied. Both are now fixed:
 
-- **"XP Awarded: N" on the End Turn card.** The RP-to-XP conversion is computed and recorded (it
-  also reaches the turn history and the analytics chart) but is never added to the kingdom's XP.
-  The **Convert RP to XP** button on the kingdom sheet does work, and is the path to use.
+- **RP-to-XP conversion.** End Turn announced "XP Awarded: N" and recorded it in turn history and
+  the analytics chart, but never added it to the kingdom's XP. End Turn now grants it, using the
+  same calculation the kingdom sheet's converter used — including the Vance & Kerenshara XP
+  variant, which the engine's own copy ignored. The sheet's separate **Convert RP to XP** button
+  has been removed: with the automatic grant in place it could only ever double-grant.
 - **The Liquidate Resources penalty.** Liquidating announces that next turn's Resource Dice are
-  reduced, but the reduction is never applied to the dice actually rolled.
+  reduced by four; that reduction now applies to the dice actually rolled. Previously it was
+  subtracted from a value the turn tick had already zeroed, so it never landed in any
+  configuration.
 
 ---
 

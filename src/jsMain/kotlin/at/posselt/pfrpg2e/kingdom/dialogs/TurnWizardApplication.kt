@@ -118,6 +118,7 @@ import at.posselt.pfrpg2e.kingdom.data.ChosenFeature
 import at.posselt.pfrpg2e.kingdom.data.RawPacingAlert
 import at.posselt.pfrpg2e.kingdom.data.RawTurnRecord
 import at.posselt.pfrpg2e.kingdom.appendTurnRecord
+import at.posselt.pfrpg2e.kingdom.sheet.calculateXpChange
 import at.posselt.pfrpg2e.kingdom.countArmyVictories
 import at.posselt.pfrpg2e.kingdom.detectFiredDeeds
 import at.posselt.pfrpg2e.kingdom.postDeedsDigest
@@ -294,6 +295,7 @@ fun runKingdomTurnTick(
         kingdomName = kingdom.name,
         agendaMoves = factionAgendaMoveSpecs(),
         agendaArchetypes = factionAgendaArchetypeSpecs(),
+        vanceAndKerensharaXp = kingdom.settings.vanceAndKerensharaXP,
         // Rival realms ride the SAME chokepoint as groups, so the End Turn commit, the wizard
         // preview and the forecast adapter all see identical growth (the KDoc above forbids
         // calling tick() directly for exactly this reason).
@@ -428,16 +430,15 @@ private suspend fun performEndTurnLocked(game: Game, actor: KingdomActor): TickR
     }
     // Liquidate Resources: the next turn rolls 4 fewer Resource Dice. Spending the penalty here
     // also clears the flag, which is what makes it the once-per-turn marker during the turn itself.
-    if (kingdom.liquidateResourcesPenaltyNextTurn == true) {
-        kingdom.resourceDice.next =
-            (kingdom.resourceDice.next - LIQUIDATE_RESOURCES_NEXT_TURN_RD_PENALTY).coerceAtLeast(0)
-        kingdom.liquidateResourcesPenaltyNextTurn = false
-        postChatMessage(
-            t(
-                "kingdom.liquidate.penaltyApplied",
-                recordOf("dice" to LIQUIDATE_RESOURCES_NEXT_TURN_RD_PENALTY),
-            ),
-        )
+    // The Liquidate penalty is NOT applied here. It reduces the dice actually ROLLED, which happens
+    // in collectResources at the start of the next turn -- this spot wrote to resourceDice.next,
+    // which the tick has already zeroed, and cleared the flag so nothing could retry.
+        // THE apply step that never existed: the conversion was reported three ways and granted
+    // nowhere. Level handling mirrors the sheet converter's calculateXpChange.
+    if (tickResult.xpAwarded > 0) {
+        val xpChange = kingdom.calculateXpChange(tickResult.xpAwarded)
+        kingdom.level += xpChange.addLevel
+        kingdom.xp += xpChange.addXp
     }
     kingdom.modifiers = tickResult.modifiers
     kingdom.campaignQuests = tickResult.campaignQuests
