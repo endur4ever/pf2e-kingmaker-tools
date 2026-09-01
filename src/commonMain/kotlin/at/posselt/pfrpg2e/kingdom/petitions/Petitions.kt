@@ -165,3 +165,52 @@ fun unreadPetitionCount(
 ): Int = petitions.count {
     it.status == PetitionStatus.OPEN && it.targetRole in ownedRoles && it.id !in seenIds
 }
+
+/**
+ * §3: the chance an eligible role is offered a petition at End Turn.
+ *
+ * With [MAX_NEW_PETITIONS_PER_TURN] holding the ceiling at two, this sets the FLOOR of the
+ * cadence rather than the ceiling: it is what keeps quiet turns quiet. The plan asks a petition to
+ * "nudge, not swing a turn", so a table sees roughly one every turn or two rather than a full
+ * inbox every End Turn.
+ */
+const val PETITION_ROLE_CHANCE_PERCENT = 35
+
+/** One template as the weighted draw sees it; the prose and consequences stay in the catalog. */
+data class PetitionTemplateChoice(val id: String, val weight: Int)
+
+/**
+ * Pick one template proportional to weight, with [roll] drawn by the caller from `0 until total`.
+ *
+ * Non-positive weights are skipped rather than treated as zero-width, and an out-of-range roll
+ * returns null instead of silently clamping to the first entry — a bad draw must not bias the
+ * catalog toward whichever template happens to sort first.
+ */
+fun weightedPickPetition(choices: List<PetitionTemplateChoice>, roll: Int): PetitionTemplateChoice? {
+    val total = choices.sumOf { maxOf(it.weight, 0) }
+    if (roll < 0 || roll >= total) return null
+    var cumulative = 0
+    for (choice in choices) {
+        if (choice.weight <= 0) continue
+        cumulative += choice.weight
+        if (roll < cumulative) return choice
+    }
+    return null
+}
+
+/**
+ * Rotate the candidate roles so every office reaches the front of the queue over time.
+ *
+ * [rolesEligibleForNewPetitions] returns roles in [Leader] declaration order, which is exactly
+ * right for determinism and exactly wrong for fairness: truncating that list to two would mean
+ * RULER and COUNSELOR take every petition and WARDEN — last in the enum — effectively never
+ * receives one. Rotating by the turn number keeps the choice deterministic (same turn, same
+ * order, so a preview and the commit agree) while giving each office its turn at the front.
+ *
+ * Callers therefore ask that function for ALL eligible roles and cap here, after rotating.
+ */
+fun rotatePetitionCandidates(roles: List<Leader>, turn: Int): List<Leader> {
+    if (roles.size < 2) return roles
+    val offset = ((turn % roles.size) + roles.size) % roles.size
+    return roles.drop(offset) + roles.take(offset)
+}

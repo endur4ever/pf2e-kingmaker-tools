@@ -1,0 +1,26 @@
+{
+  "id": "ley-survey",
+  "targetRole": "magister",
+  "weight": 10,
+  "requiresStructure": null,
+  "requiresEvent": null,
+  "options": [
+    {
+      "id": "option-a",
+      "consequences": [
+        {
+          "kind": "rp",
+          "amount": -2
+        }
+      ]
+    },
+    {
+      "id": "option-b",
+      "consequences": [
+        {
+          "kind": "rumor"
+        }
+      ]
+    }
+  ]
+}

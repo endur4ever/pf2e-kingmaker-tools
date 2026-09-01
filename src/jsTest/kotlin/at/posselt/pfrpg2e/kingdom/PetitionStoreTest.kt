@@ -8,6 +8,7 @@ import at.posselt.pfrpg2e.kingdom.petitions.Petition
 import at.posselt.pfrpg2e.kingdom.petitions.PetitionStatus
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -56,19 +57,73 @@ class PetitionStoreTest {
     }
 
     @Test
-    fun theBundleResolvesEvenWithNoTemplates() {
+    fun theBundleResolvesAndCarriesTheStarterCatalog() {
         // the @JsModule import is only satisfied because data/petitions/ exists and
-        // combineJsonFiles emits "[]" for it. If this ever throws instead of returning an empty
-        // array, the directory (and its load-bearing .gitkeep) has gone missing.
-        assertEquals(0, petitionTemplates().size)
+        // combineJsonFiles emits a bundle for it. Forty is the plan's starter catalog, five per
+        // office -- a drop here means template files stopped being bundled, which would empty
+        // every inbox while the rest of the suite stayed green.
+        assertEquals(40, petitionTemplates().size)
     }
 
     @Test
-    fun theCatalogShipsEmptyUntilTheTemplatesLand() {
-        // the forty starter templates need option ids and labels that are Gregory's to write;
-        // everything around them is here, so they drop in as pure data
-        assertEquals(0, petitionTemplates().size)
-        assertNull(petitionTemplateById("succession-question"))
-        assertTrue(petitionTemplatesForRole(Leader.RULER.value).isEmpty())
+    fun everyOfficeHasTemplatesToDrawFrom() {
+        // an office with no templates silently never generates, however eligible it is
+        Leader.entries.forEach { role ->
+            assertTrue(
+                petitionTemplatesForRole(role.value).isNotEmpty(),
+                "no petition templates for ${role.value}",
+            )
+        }
+        assertNotNull(petitionTemplateById("succession-question"))
+    }
+
+    @Test
+    fun everyTemplateOffersAtLeastTwoRealChoices() {
+        // a single-option petition is not a decision, and a zero-weight one can never be drawn
+        petitionTemplates().forEach { template ->
+            val options = template.options ?: emptyArray()
+            assertTrue(options.size >= 2, "${template.id} offers ${options.size} option(s)")
+            assertTrue(template.weight > 0, "${template.id} has weight ${template.weight}")
+            options.forEach { option ->
+                assertTrue(
+                    (option.consequences ?: emptyArray()).isNotEmpty(),
+                    "${template.id}/${option.id} does nothing",
+                )
+            }
+        }
+    }
+
+    @Test
+    fun everyConsequenceUsesTheClosedVocabulary() {
+        // section 4 is a CLOSED set: a kind outside it is a new feature, not a new template, and
+        // would apply nothing at all while looking like a priced choice on the card
+        val allowed = setOf("unrest", "rp", "standing", "quest", "rumor")
+        petitionTemplates().forEach { template ->
+            (template.options ?: emptyArray()).forEach { option ->
+                (option.consequences ?: emptyArray()).forEach { consequence ->
+                    assertTrue(
+                        consequence.kind in allowed,
+                        "${template.id}/${option.id}: unknown kind ${consequence.kind}",
+                    )
+                    if (consequence.kind in setOf("unrest", "rp", "standing")) {
+                        assertNotNull(
+                            consequence.amount,
+                            "${template.id}/${option.id}: ${consequence.kind} carries no amount",
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    fun everyTemplateNamesARoleThatExists() {
+        // targetRole is a Leader.value string; a typo drops the template from every draw silently
+        petitionTemplates().forEach { template ->
+            assertNotNull(
+                Leader.fromString(template.targetRole),
+                "${template.id} targets unknown role ${template.targetRole}",
+            )
+        }
     }
 }

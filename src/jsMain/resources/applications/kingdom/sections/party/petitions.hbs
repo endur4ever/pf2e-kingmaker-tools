@@ -1,0 +1,42 @@
+<section class="km-party-section km-petitions">
+    <h2>
+        {{localizeKM "kingdom.petitions.title"}}
+        {{#if petitions.hasUnread}}
+            <span class="km-petition-badge">{{petitions.unreadCount}}</span>
+        {{/if}}
+    </h2>
+
+    {{#if petitions.hasRows}}
+        <ul class="km-petition-list">
+            {{#each petitions.rows}}
+                <li class="km-petition{{#unless this.isOpen}} km-petition--closed{{/unless}}{{#if this.isUrgent}} km-petition--urgent{{/if}}">
+                    <div class="km-petition-head">
+                        <b>{{this.roleLabel}}</b>
+                        <span class="km-petition-petitioner">{{this.petitionerName}}</span>
+                        {{#if this.isOpen}}
+                            <span class="km-petition-due">{{localizeKM "kingdom.petitions.turnsLeft" turns=this.turnsLeft}}</span>
+                        {{else}}
+                            <span class="km-petition-due">{{this.statusLabel}}</span>
+                        {{/if}}
+                    </div>
+                    <p class="km-petition-premise">{{this.premise}}</p>
+                    {{#if this.isOpen}}
+                        <div class="km-petition-options">
+                            {{#each this.options}}
+                                <button type="button" data-action="answer-petition"
+                                        data-petition-id="{{this.petitionId}}"
+                                        data-option-id="{{this.id}}">
+                                    {{this.label}}
+                                </button>
+                            {{/each}}
+                        </div>
+                    {{else if this.chosenLabel}}
+                        <p class="km-sub-note">{{localizeKM "kingdom.petitions.chose"}}: {{this.chosenLabel}}</p>
+                    {{/if}}
+                </li>
+            {{/each}}
+        </ul>
+    {{else}}
+        <p class="km-session-prep-empty">{{localizeKM "kingdom.petitions.empty"}}</p>
+    {{/if}}
+</section>

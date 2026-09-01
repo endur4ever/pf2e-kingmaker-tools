@@ -1,0 +1,34 @@
+{
+  "id": "stray-beast",
+  "targetRole": "warden",
+  "weight": 10,
+  "requiresStructure": null,
+  "requiresEvent": null,
+  "options": [
+    {
+      "id": "option-a",
+      "consequences": [
+        {
+          "kind": "rumor"
+        }
+      ]
+    },
+    {
+      "id": "option-b",
+      "consequences": [
+        {
+          "kind": "rp",
+          "amount": -1
+        }
+      ]
+    },
+    {
+      "id": "option-c",
+      "consequences": [
+        {
+          "kind": "quest"
+        }
+      ]
+    }
+  ]
+}

@@ -48,3 +48,65 @@
 .km-xp-digest-row input.km-xp-amount {
     width: 4.5rem;
 }
+
+/* Petition inbox (petition-inbox plan section 6) */
+.km-petition-badge {
+    display: inline-block;
+    min-width: 1.4em;
+    padding: 0 0.35em;
+    margin-left: 0.5em;
+    border-radius: 0.7em;
+    background: var(--color-level-error, #7a2020);
+    color: #fff;
+    font-size: 0.75em;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.km-petition-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.km-petition {
+    padding: 0.4em 0.6em;
+    margin-bottom: 0.4em;
+    border-left: 3px solid var(--color-border-dark-tertiary, #7a7971);
+    background: rgba(0, 0, 0, 0.03);
+}
+
+.km-petition--urgent {
+    border-left-color: var(--color-level-warning, #b8860b);
+}
+
+.km-petition--closed {
+    opacity: 0.6;
+}
+
+.km-petition-head {
+    display: flex;
+    gap: 0.5em;
+    align-items: baseline;
+}
+
+.km-petition-due {
+    margin-left: auto;
+    font-size: 0.85em;
+    opacity: 0.8;
+}
+
+.km-petition-premise {
+    margin: 0.2em 0 0.4em;
+}
+
+.km-petition-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3em;
+}
+
+.km-petition-effects {
+    margin: 0.3em 0;
+    padding-left: 1.2em;
+}

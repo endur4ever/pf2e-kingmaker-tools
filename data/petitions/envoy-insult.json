@@ -1,0 +1,41 @@
+{
+  "id": "envoy-insult",
+  "targetRole": "emissary",
+  "weight": 10,
+  "requiresStructure": null,
+  "requiresEvent": null,
+  "options": [
+    {
+      "id": "option-a",
+      "consequences": [
+        {
+          "kind": "standing",
+          "amount": 1,
+          "ref": null
+        },
+        {
+          "kind": "rp",
+          "amount": -1
+        }
+      ]
+    },
+    {
+      "id": "option-b",
+      "consequences": [
+        {
+          "kind": "standing",
+          "amount": -1,
+          "ref": null
+        }
+      ]
+    },
+    {
+      "id": "option-c",
+      "consequences": [
+        {
+          "kind": "quest"
+        }
+      ]
+    }
+  ]
+}

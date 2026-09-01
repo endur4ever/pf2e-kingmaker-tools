@@ -33,6 +33,10 @@ import at.posselt.pfrpg2e.kingdom.rivalGrowthProfilesById
 import at.posselt.pfrpg2e.kingdom.collectRivalOffers
 import at.posselt.pfrpg2e.kingdom.data.withWarOfferRecorded
 import at.posselt.pfrpg2e.kingdom.evaluateNpcMemoriesForTurn
+import at.posselt.pfrpg2e.kingdom.expirePetitionsForTurn
+import at.posselt.pfrpg2e.kingdom.generatePetitionsForTurn
+import at.posselt.pfrpg2e.kingdom.postNewPetitionNotice
+import at.posselt.pfrpg2e.kingdom.postPetitionExpiryOffers
 import at.posselt.pfrpg2e.kingdom.npcMemoryRules
 import at.posselt.pfrpg2e.kingdom.postNpcAttitudeShiftOffers
 import at.posselt.pfrpg2e.kingdom.xp.postXpLedgerDigest
@@ -840,6 +844,18 @@ private suspend fun performEndTurnLocked(game: Game, actor: KingdomActor): TickR
         } else holding
     }?.toTypedArray()
 
+    // Expiry runs BEFORE generation so a role whose audience lapses this turn is free to receive
+    // the next one immediately, rather than sitting a turn out behind a petition already dead.
+    val expiredPetitions = expirePetitionsForTurn(kingdom, currentTurn)
+    val newPetitions = generatePetitionsForTurn(
+        kingdom = kingdom,
+        currentTurn = currentTurn,
+        structureNames = kingdom.getAllSettlements(game).allSettlements
+            .flatMap { settlement -> settlement.constructedStructures.map { it.name } }
+            .toSet(),
+        ongoingEventNames = kingdom.ongoingEvents.map { it.id }.toSet(),
+    )
+
     // Rewild bookkeeping is part of the tick, so it belongs inside the persist below rather than
     // in the offer poster that runs after it (where its write would clobber card clicks).
     runCatching { reconcileRewild(kingdom, clearedUnclaimedHexes(), currentTurn) }
@@ -939,6 +955,9 @@ private suspend fun performEndTurnLocked(game: Game, actor: KingdomActor): TickR
     )
 
     postXpLedgerDigest(game, actor.uuid, currentTurn)
+
+    postPetitionExpiryOffers(game, actor.uuid, expiredPetitions)
+    postNewPetitionNotice(game, actor.uuid, newPetitions)
 
     postNpcAttitudeShiftOffers(
         game = game,

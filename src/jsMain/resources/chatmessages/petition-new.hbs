@@ -1,0 +1,13 @@
+<div class="km-chat-card km-petition-notice">
+    <h3>{{localizeKM "kingdom.petitions.newTitle"}}</h3>
+    <ul class="km-petition-notice-list">
+        {{#each petitions}}
+            <li>
+                <b>{{this.roleLabel}}</b> — {{this.petitionerName}}
+                <div class="km-sub-note">{{this.premise}}</div>
+                <div class="km-sub-note">{{localizeKM "kingdom.petitions.dueBy" turn=this.dueTurn}}</div>
+            </li>
+        {{/each}}
+    </ul>
+    <p class="km-sub-note">{{localizeKM "kingdom.petitions.newHint"}}</p>
+</div>

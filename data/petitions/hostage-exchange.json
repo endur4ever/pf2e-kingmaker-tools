@@ -1,0 +1,36 @@
+{
+  "id": "hostage-exchange",
+  "targetRole": "emissary",
+  "weight": 10,
+  "requiresStructure": null,
+  "requiresEvent": null,
+  "options": [
+    {
+      "id": "option-a",
+      "consequences": [
+        {
+          "kind": "standing",
+          "amount": 1,
+          "ref": null
+        }
+      ]
+    },
+    {
+      "id": "option-b",
+      "consequences": [
+        {
+          "kind": "unrest",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "id": "option-c",
+      "consequences": [
+        {
+          "kind": "quest"
+        }
+      ]
+    }
+  ]
+}

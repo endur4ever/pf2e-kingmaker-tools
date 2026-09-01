@@ -1,0 +1,31 @@
+<div class="km-chat-card km-petition-answer">
+    <h3>{{localizeKM "kingdom.petitions.answerTitle"}}</h3>
+    <p><b>{{roleLabel}}</b> — {{petitionerName}}</p>
+    <p class="km-sub-note">{{premise}}</p>
+    <p>{{localizeKM "kingdom.petitions.chose"}}: <b>{{optionLabel}}</b></p>
+    {{#if effects.length}}
+        <ul class="km-petition-effects">
+            {{#each effects}}<li>{{this}}</li>{{/each}}
+        </ul>
+    {{/if}}
+    {{#if needsFaction}}
+        <p class="km-petition-faction-row">
+            <label>{{localizeKM "kingdom.petitions.pickFaction"}}
+                <select class="km-petition-faction">
+                    {{#each factions}}<option value="{{this}}">{{this}}</option>{{/each}}
+                </select>
+            </label>
+        </p>
+    {{/if}}
+    <div class="km-chat-buttons">
+        <button type="button" class="km-petition-confirm"
+                data-petition-id="{{petitionId}}" data-option-id="{{optionId}}"
+                data-actor-uuid="{{actorUuid}}">
+            {{localizeKM "kingdom.petitions.confirm"}}
+        </button>
+        <button type="button" class="km-petition-dismiss"
+                data-petition-id="{{petitionId}}" data-actor-uuid="{{actorUuid}}">
+            {{localizeKM "kingdom.petitions.dismiss"}}
+        </button>
+    </div>
+</div>

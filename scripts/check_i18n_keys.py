@@ -498,6 +498,49 @@ def check_epithet_keys():
     return 0
 
 
+def check_petition_catalog_keys():
+    """Check 10: every petition template needs a premise and an option label in every locale.
+
+    The inbox and both chat cards localize with t("petitions.$templateId.premise") and
+    t("petitions.$templateId.$optionId.label") -- composed at runtime from data/petitions/, so
+    check 2's literal-string scan cannot see any of them. A template shipped without its strings
+    would render a raw key where the audience's request should be, with every guard green; the
+    plan calls for exactly this catalog check for exactly that reason.
+    """
+    files = sorted(glob.glob("data/petitions/*.json"))
+    if not files:
+        return 0
+    expected = []
+    for f in files:
+        template = json.load(open(f, encoding="utf-8"))
+        tid = template.get("id")
+        if not tid:
+            print(f"[i18n] PETITION: {f} has no id -- check the data, not the guard")
+            return 1
+        expected.append(f"petitions.{tid}.premise")
+        for option in template.get("options") or []:
+            oid = option.get("id")
+            if not oid:
+                print(f"[i18n] PETITION: {f} has an option with no id")
+                return 1
+            expected.append(f"petitions.{tid}.{oid}.label")
+    problems = [(path, key)
+                for path in sorted(glob.glob("lang/*.json"))
+                for key in expected
+                if not isinstance(
+                    lookup_value(json.load(open(path, encoding="utf-8")).get(NS, {}), key), str)]
+    if problems:
+        print(f"[i18n] PETITION: {len(problems)} missing petition string(s):")
+        for path, key in problems[:20]:
+            print(f"  {path}: {key}")
+        if len(problems) > 20:
+            print(f"  ... and {len(problems) - 20} more")
+        return 1
+    print(f"[i18n] PETITION OK -- {len(files)} template(s), "
+          f"{len(expected)} string(s) present in every locale.")
+    return 0
+
+
 def main():
     parser = argparse.ArgumentParser(description="i18n key guard for pf2e-kingmaker-tools")
     parser.add_argument("--parity", action="store_true", help="Run cross-language parity check only")
@@ -581,6 +624,7 @@ def main():
         failed += check_rival_profile_keys() or 0
         failed += check_epithet_keys() or 0
         failed += check_npc_memory_rule_keys() or 0
+        failed += check_petition_catalog_keys() or 0
         if failed:
             return 1
     

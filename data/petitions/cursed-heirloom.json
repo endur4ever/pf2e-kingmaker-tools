@@ -1,0 +1,35 @@
+{
+  "id": "cursed-heirloom",
+  "targetRole": "magister",
+  "weight": 10,
+  "requiresStructure": null,
+  "requiresEvent": null,
+  "options": [
+    {
+      "id": "option-a",
+      "consequences": [
+        {
+          "kind": "rp",
+          "amount": -1
+        }
+      ]
+    },
+    {
+      "id": "option-b",
+      "consequences": [
+        {
+          "kind": "unrest",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "id": "option-c",
+      "consequences": [
+        {
+          "kind": "quest"
+        }
+      ]
+    }
+  ]
+}

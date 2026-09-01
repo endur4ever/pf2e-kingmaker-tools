@@ -197,4 +197,57 @@ class PetitionsTest {
         assertNull(PetitionStatus.fromValue(null))
         assertEquals(PetitionStatus.ANSWERED, PetitionStatus.fromValue("answered"))
     }
+
+    @Test
+    fun weightedPickIsProportionalAndSkipsNonPositiveWeights() {
+        val choices = listOf(
+            PetitionTemplateChoice("a", 1),
+            PetitionTemplateChoice("never", 0),
+            PetitionTemplateChoice("b", 2),
+        )
+        // roll 0 lands in a's single slot; 1 and 2 in b's two -- the zero-weight entry occupies
+        // no slot at all rather than a zero-width one that a boundary roll could still hit
+        assertEquals("a", weightedPickPetition(choices, 0)?.id)
+        assertEquals("b", weightedPickPetition(choices, 1)?.id)
+        assertEquals("b", weightedPickPetition(choices, 2)?.id)
+    }
+
+    @Test
+    fun anOutOfRangeRollPicksNothingRatherThanTheFirstTemplate() {
+        // a bad draw must not silently bias the catalog toward whatever sorts first
+        val choices = listOf(PetitionTemplateChoice("a", 1), PetitionTemplateChoice("b", 1))
+        assertNull(weightedPickPetition(choices, -1))
+        assertNull(weightedPickPetition(choices, 2))
+        assertNull(weightedPickPetition(emptyList(), 0))
+    }
+
+    @Test
+    fun everyOfficeReachesTheFrontOfTheQueueAcrossTurns() {
+        // THE fairness property: rolesEligibleForNewPetitions returns declaration order, and the
+        // per-turn cap of 2 would otherwise hand every petition to RULER and COUNSELOR while
+        // WARDEN -- last in the enum -- never received one at all.
+        val all = Leader.entries.toList()
+        val firstPlaces = (0 until all.size).map { turn ->
+            rotatePetitionCandidates(all, turn).first()
+        }.toSet()
+        assertEquals(all.toSet(), firstPlaces)
+    }
+
+    @Test
+    fun theRotationIsStableWithinATurn() {
+        // same turn, same order: a Turn Wizard preview and the End Turn commit must agree
+        val all = Leader.entries.toList()
+        assertEquals(rotatePetitionCandidates(all, 3), rotatePetitionCandidates(all, 3))
+        // and it is a rotation, not a shuffle -- no role is lost or duplicated
+        assertEquals(all.toSet(), rotatePetitionCandidates(all, 5).toSet())
+        assertEquals(all.size, rotatePetitionCandidates(all, 5).size)
+    }
+
+    @Test
+    fun rotationSurvivesADegenerateCandidateList() {
+        assertEquals(emptyList(), rotatePetitionCandidates(emptyList(), 3))
+        assertEquals(listOf(Leader.WARDEN), rotatePetitionCandidates(listOf(Leader.WARDEN), 3))
+        // a negative turn must not throw or index backwards off the list
+        assertEquals(2, rotatePetitionCandidates(listOf(Leader.RULER, Leader.WARDEN), -1).size)
+    }
 }

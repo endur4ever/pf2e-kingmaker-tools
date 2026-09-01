@@ -32,6 +32,8 @@ import kotlin.math.min
 import at.posselt.pfrpg2e.data.events.KingdomEventTrait
 import at.posselt.pfrpg2e.kingdom.dialogs.AddExpeditionDialog
 import at.posselt.pfrpg2e.kingdom.dialogs.AddQuest
+import at.posselt.pfrpg2e.kingdom.applyPetitionAnswer
+import at.posselt.pfrpg2e.kingdom.applyPetitionOverdue
 import at.posselt.pfrpg2e.kingdom.dialogs.AddWarThreat
 import at.posselt.pfrpg2e.kingdom.launchExpedition
 import at.posselt.pfrpg2e.kingdom.buildExpeditionDestinationOptions
@@ -320,6 +322,33 @@ private val buttons = listOf(
             return@ChatButton
         }
         rollRandomEncounter(game, campingActor, false)
+    },
+    ChatButton("km-petition-confirm") { game, actor, _, button ->
+        if (!game.user.isGM) return@ChatButton
+        val petitionId = button.dataset["petitionId"] ?: return@ChatButton
+        val optionId = button.dataset["optionId"] ?: return@ChatButton
+        // the faction select exists only when a standing consequence named none; reading it from
+        // THIS card rather than the document keeps two open offers from stealing each other's pick
+        val faction = (button.closest(".km-petition-answer")
+            ?.querySelector("select.km-petition-faction") as? org.w3c.dom.HTMLSelectElement)?.value
+        if (applyPetitionAnswer(game, actor, petitionId, optionId, faction)) {
+            markPetitionCardDone(button)
+        }
+    },
+    ChatButton("km-petition-dismiss") { game, actor, _, button ->
+        // dismissing applies nothing and closes nothing: the petition stays OPEN and the role can
+        // choose again, because a GM waving off a card is not the office withdrawing its answer
+        if (!game.user.isGM) return@ChatButton
+        markPetitionCardDone(button)
+    },
+    ChatButton("km-petition-overdue-apply") { game, actor, _, button ->
+        if (!game.user.isGM) return@ChatButton
+        val petitionId = button.dataset["petitionId"] ?: return@ChatButton
+        if (applyPetitionOverdue(game, actor, petitionId)) markPetitionCardDone(button)
+    },
+    ChatButton("km-petition-overdue-dismiss") { game, _, _, button ->
+        if (!game.user.isGM) return@ChatButton
+        markPetitionCardDone(button)
     },
     ChatButton("km-offer-npc-quest") { game, actor, event, button ->
         if (!game.user.isGM) return@ChatButton
@@ -2294,6 +2323,15 @@ private fun markXpRowDone(button: HTMLElement) {
     row.classList.add("km-pressure-row-done")
     row.querySelectorAll("button, input").asList().filterIsInstance<HTMLElement>()
         .forEach { it.setAttribute("disabled", "disabled") }
+}
+
+/** Grey out a petition card once answered, so scrollback cannot be clicked a second time. */
+private fun markPetitionCardDone(button: HTMLElement) {
+    val card = button.closest(".km-chat-card") as? HTMLElement ?: return
+    card.querySelectorAll("button").asList().filterIsInstance<HTMLElement>().forEach {
+        it.setAttribute("disabled", "disabled")
+    }
+    card.classList.add("km-card-resolved")
 }
 
 private fun markXpCardDone(button: HTMLElement) {

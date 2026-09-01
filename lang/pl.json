@@ -2847,6 +2847,41 @@
                 "confirmAll": "Potwierdź wszystko",
                 "dismissAll": "Odrzuć wszystko",
                 "alreadyAnswered": "Ta oferta PD została już rozstrzygnięta."
+            },
+            "petitions": {
+                "title": "Petitions",
+                "empty": "No audiences are waiting.",
+                "turnsLeft": "{turns} turns left",
+                "dueBy": "Due by turn {turn}",
+                "chose": "Chose",
+                "status": {
+                    "open": "Open",
+                    "answered": "Answered",
+                    "expired": "Lapsed"
+                },
+                "newTitle": "New petitions",
+                "newHint": "The role's player answers from the Party tab; you confirm before anything applies.",
+                "expiredTitle": "Petition lapsed unanswered",
+                "expiredPrompt": "Apply the overdue consequence (+1 Unrest), or let it pass?",
+                "applyOverdue": "Apply +1 Unrest",
+                "dismissOverdue": "Let it pass",
+                "answerTitle": "Petition answered",
+                "confirm": "Confirm",
+                "dismiss": "Dismiss",
+                "pickFaction": "Faction",
+                "sentToGm": "Your answer was sent to the GM for confirmation.",
+                "alreadyAnswered": "That petition has already been answered.",
+                "noGm": "No GM is online to confirm this answer.",
+                "missingFaction": "No faction named {name} — adjust its standing by hand.",
+                "partiallyApplied": "Some consequences could not be applied; see the warnings above.",
+                "noCampingActor": "No camping actor exists to hold the rumour.",
+                "effect": {
+                    "unrest": "Unrest {amount}",
+                    "rp": "Resource Points {amount}",
+                    "standing": "Faction standing {amount}",
+                    "quest": "Spawns a quest",
+                    "rumor": "Spreads a rumour"
+                }
             }
         },
         "chatMessages": {
@@ -8524,6 +8559,437 @@
                 "marketDay": {
                     "name": "Dzień targowy",
                     "gazette": "{trader} przyciąga tłumy w dzień targowy w {settlement}."
+                }
+            }
+        },
+        "petitions": {
+            "absentee-lord": {
+                "premise": "A landholder has abandoned their charge",
+                "option-a": {
+                    "label": "Option A — +1 RP"
+                },
+                "option-b": {
+                    "label": "Option B — +1 Unrest"
+                },
+                "option-c": {
+                    "label": "Option C — spawn a quest"
+                }
+            },
+            "apprentice-licence": {
+                "premise": "A hedge-wizard asks to teach openly",
+                "option-a": {
+                    "label": "Option A — -1 Unrest"
+                },
+                "option-b": {
+                    "label": "Option B — +1 Unrest"
+                },
+                "option-c": {
+                    "label": "Option C — spread a rumour"
+                }
+            },
+            "arcane-dispute": {
+                "premise": "Two mages claim the same discovery",
+                "option-a": {
+                    "label": "Option A — -1 Unrest"
+                },
+                "option-b": {
+                    "label": "Option B — -1 Standing"
+                },
+                "option-c": {
+                    "label": "Option C — spawn a quest"
+                }
+            },
+            "banned-tome": {
+                "premise": "A librarian asks whether to burn a dangerous book",
+                "option-a": {
+                    "label": "Option A — +1 Unrest"
+                },
+                "option-b": {
+                    "label": "Option B — spread a rumour"
+                },
+                "option-c": {
+                    "label": "Option C — spawn a quest"
+                }
+            },
+            "border-oath": {
+                "premise": "A frontier village asks to swear directly to the crown",
+                "option-a": {
+                    "label": "Option A — -1 RP, +1 Standing"
+                },
+                "option-b": {
+                    "label": "Option B — +1 Unrest"
+                }
+            },
+            "censorship-appeal": {
+                "premise": "A playwright's satire has offended the court",
+                "option-a": {
+                    "label": "Option A — +1 Unrest"
+                },
+                "option-b": {
+                    "label": "Option B — -1 Standing"
+                },
+                "option-c": {
+                    "label": "Option C — spread a rumour"
+                }
+            },
+            "coin-debasement": {
+                "premise": "A mintmaster proposes stretching the coin",
+                "option-a": {
+                    "label": "Option A — +2 RP, +1 Unrest"
+                },
+                "option-b": {
+                    "label": "Option B — -1 Unrest"
+                },
+                "option-c": {
+                    "label": "Option C — spread a rumour"
+                }
+            },
+            "cursed-heirloom": {
+                "premise": "A family asks the crown to cleanse an heirloom",
+                "option-a": {
+                    "label": "Option A — -1 RP"
+                },
+                "option-b": {
+                    "label": "Option B — +1 Unrest"
+                },
+                "option-c": {
+                    "label": "Option C — spawn a quest"
+                }
+            },
+            "customs-exemption": {
+                "premise": "A partner's traders ask exemption",
+                "option-a": {
+                    "label": "Option A — -1 RP, +1 Standing"
+                },
+                "option-b": {
+                    "label": "Option B — -1 Standing"
+                }
+            },
+            "debt-forgiveness": {
+                "premise": "Farmers ask relief after a bad harvest",
+                "option-a": {
+                    "label": "Option A — -2 RP, -1 Unrest"
+                },
+                "option-b": {
+                    "label": "Option B — +1 Unrest"
+                }
+            },
+            "deserter-trial": {
+                "premise": "A deserter's family pleads for mercy",
+                "option-a": {
+                    "label": "Option A — -1 Unrest"
+                },
+                "option-b": {
+                    "label": "Option B — +1 Unrest"
+                }
+            },
+            "drainage-works": {
+                "premise": "A hamlet asks for flood works",
+                "option-a": {
+                    "label": "Option A — -2 RP, -1 Unrest"
+                },
+                "option-b": {
+                    "label": "Option B — +1 Unrest"
+                },
+                "option-c": {
+                    "label": "Option C — spawn a quest"
+                }
+            },
+            "envoy-insult": {
+                "premise": "A neighbour's envoy claims an insult at court",
+                "option-a": {
+                    "label": "Option A — +1 Standing, -1 RP"
+                },
+                "option-b": {
+                    "label": "Option B — -1 Standing"
+                },
+                "option-c": {
+                    "label": "Option C — spawn a quest"
+                }
+            },
+            "festival-petition": {
+                "premise": "The capital asks for a feast day at the treasury's expense",
+                "option-a": {
+                    "label": "Option A — -2 RP, -1 Unrest"
+                },
+                "option-b": {
+                    "label": "Option B — +1 Unrest"
+                }
+            },
+            "festival-rites": {
+                "premise": "Elders want an old rite restored",
+                "option-a": {
+                    "label": "Option A — -1 Unrest"
+                },
+                "option-b": {
+                    "label": "Option B — spread a rumour"
+                }
+            },
+            "foreign-creed": {
+                "premise": "Immigrants ask to build their own shrine",
+                "option-a": {
+                    "label": "Option A — -1 Unrest, +1 Standing"
+                },
+                "option-b": {
+                    "label": "Option B — +1 Unrest"
+                }
+            },
+            "guild-charter": {
+                "premise": "A guild asks for a monopoly charter",
+                "option-a": {
+                    "label": "Option A — +2 RP, +1 Unrest"
+                },
+                "option-b": {
+                    "label": "Option B — -1 Unrest"
+                }
+            },
+            "hostage-exchange": {
+                "premise": "A rival offers a prisoner swap",
+                "option-a": {
+                    "label": "Option A — +1 Standing"
+                },
+                "option-b": {
+                    "label": "Option B — +1 Unrest"
+                },
+                "option-c": {
+                    "label": "Option C — spawn a quest"
+                }
+            },
+            "land-claim": {
+                "premise": "Two settlers claim the same lot",
+                "option-a": {
+                    "label": "Option A — -1 Unrest"
+                },
+                "option-b": {
+                    "label": "Option B — +1 Unrest"
+                }
+            },
+            "ley-survey": {
+                "premise": "A scholar asks funding to survey the hexes",
+                "option-a": {
+                    "label": "Option A — -2 RP"
+                },
+                "option-b": {
+                    "label": "Option B — spread a rumour"
+                }
+            },
+            "logging-dispute": {
+                "premise": "A camp is felling beyond its grant",
+                "option-a": {
+                    "label": "Option A — +1 RP, +1 Unrest"
+                },
+                "option-b": {
+                    "label": "Option B — -1 Unrest"
+                }
+            },
+            "militia-request": {
+                "premise": "A border village asks to raise a militia",
+                "option-a": {
+                    "label": "Option A — -2 RP"
+                },
+                "option-b": {
+                    "label": "Option B — +1 Unrest"
+                },
+                "option-c": {
+                    "label": "Option C — spawn a quest"
+                }
+            },
+            "monster-bounty": {
+                "premise": "A hunter asks a bounty for a beast in the hills",
+                "option-a": {
+                    "label": "Option A — -1 RP"
+                },
+                "option-b": {
+                    "label": "Option B — +1 Unrest"
+                },
+                "option-c": {
+                    "label": "Option C — spawn a quest"
+                }
+            },
+            "orphanage-appeal": {
+                "premise": "A matron asks for support for war orphans",
+                "option-a": {
+                    "label": "Option A — -2 RP, -1 Unrest"
+                },
+                "option-b": {
+                    "label": "Option B — +1 Unrest"
+                }
+            },
+            "pardon-plea": {
+                "premise": "A family begs clemency for a condemned poacher",
+                "option-a": {
+                    "label": "Option A — -1 Unrest"
+                },
+                "option-b": {
+                    "label": "Option B — +1 Unrest"
+                },
+                "option-c": {
+                    "label": "Option C — spread a rumour"
+                }
+            },
+            "poaching-ring": {
+                "premise": "Foresters report organised poaching",
+                "option-a": {
+                    "label": "Option A — +1 Unrest"
+                },
+                "option-b": {
+                    "label": "Option B — -1 RP"
+                },
+                "option-c": {
+                    "label": "Option C — spawn a quest"
+                }
+            },
+            "refugee-column": {
+                "premise": "Refugees from a rival's war ask entry",
+                "option-a": {
+                    "label": "Option A — +1 Unrest, -1 Standing"
+                },
+                "option-b": {
+                    "label": "Option B — +1 Standing"
+                }
+            },
+            "resettlement": {
+                "premise": "Displaced farmers ask for new land",
+                "option-a": {
+                    "label": "Option A — -1 RP, -1 Unrest"
+                },
+                "option-b": {
+                    "label": "Option B — +1 Unrest"
+                }
+            },
+            "road-patrol": {
+                "premise": "Merchants ask for escorted roads",
+                "option-a": {
+                    "label": "Option A — -1 RP"
+                },
+                "option-b": {
+                    "label": "Option B — spread a rumour"
+                },
+                "option-c": {
+                    "label": "Option C — spawn a quest"
+                }
+            },
+            "road-toll": {
+                "premise": "A village asks to levy its own toll",
+                "option-a": {
+                    "label": "Option A — +1 RP, +1 Unrest"
+                },
+                "option-b": {
+                    "label": "Option B — -1 Unrest"
+                }
+            },
+            "royal-wedding": {
+                "premise": "A minor house proposes a marriage alliance",
+                "option-a": {
+                    "label": "Option A — +2 Standing"
+                },
+                "option-b": {
+                    "label": "Option B — -1 Standing"
+                },
+                "option-c": {
+                    "label": "Option C — spawn a quest"
+                }
+            },
+            "sacred-grove": {
+                "premise": "Druids ask that a grove be left unclaimed",
+                "option-a": {
+                    "label": "Option A — -1 Unrest, +1 Standing"
+                },
+                "option-b": {
+                    "label": "Option B — +1 RP, +1 Unrest"
+                },
+                "option-c": {
+                    "label": "Option C — spawn a quest"
+                }
+            },
+            "spy-accusation": {
+                "premise": "A resident is accused of spying for a rival",
+                "option-a": {
+                    "label": "Option A — -1 Standing"
+                },
+                "option-b": {
+                    "label": "Option B — +1 Unrest"
+                },
+                "option-c": {
+                    "label": "Option C — spawn a quest"
+                }
+            },
+            "stray-beast": {
+                "premise": "Something large was seen near a worksite",
+                "option-a": {
+                    "label": "Option A — spread a rumour"
+                },
+                "option-b": {
+                    "label": "Option B — -1 RP"
+                },
+                "option-c": {
+                    "label": "Option C — spawn a quest"
+                }
+            },
+            "succession-question": {
+                "premise": "A noble asks whom the realm answers to if the ruler falls",
+                "option-a": {
+                    "label": "Option A — -1 Unrest"
+                },
+                "option-b": {
+                    "label": "Option B — +1 Standing"
+                },
+                "option-c": {
+                    "label": "Option C — spawn a quest"
+                }
+            },
+            "tax-revolt": {
+                "premise": "A ward refuses this season's assessment",
+                "option-a": {
+                    "label": "Option A — -2 RP"
+                },
+                "option-b": {
+                    "label": "Option B — +1 Unrest"
+                },
+                "option-c": {
+                    "label": "Option C — -1 Standing"
+                }
+            },
+            "temple-dispute": {
+                "premise": "Two faiths claim the same shrine plot",
+                "option-a": {
+                    "label": "Option A — -1 Unrest, -1 RP"
+                },
+                "option-b": {
+                    "label": "Option B — +1 Unrest"
+                },
+                "option-c": {
+                    "label": "Option C — spawn a quest"
+                }
+            },
+            "trade-concession": {
+                "premise": "A partner asks for favourable terms",
+                "option-a": {
+                    "label": "Option A — -2 RP, +2 Standing"
+                },
+                "option-b": {
+                    "label": "Option B — -1 Standing"
+                }
+            },
+            "veteran-pension": {
+                "premise": "Veterans ask for support after a campaign",
+                "option-a": {
+                    "label": "Option A — -2 RP, -1 Unrest"
+                },
+                "option-b": {
+                    "label": "Option B — +1 Unrest"
+                }
+            },
+            "wolf-season": {
+                "premise": "Herders ask for a cull",
+                "option-a": {
+                    "label": "Option A — -1 RP"
+                },
+                "option-b": {
+                    "label": "Option B — +1 Unrest"
+                },
+                "option-c": {
+                    "label": "Option C — spawn a quest"
                 }
             }
         }

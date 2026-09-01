@@ -301,6 +301,13 @@ import at.posselt.pfrpg2e.kingdom.xp.XpSourceKind
 import at.posselt.pfrpg2e.kingdom.xp.XpBeatTier
 import at.posselt.pfrpg2e.kingdom.xp.xpLedgerActor
 import at.posselt.pfrpg2e.kingdom.xp.xpLedger
+import at.posselt.pfrpg2e.kingdom.sheet.contexts.petitionInboxContext
+import at.posselt.pfrpg2e.kingdom.sheet.contexts.PetitionInboxContext
+import at.posselt.pfrpg2e.kingdom.postPetitionAnswerOffer
+import at.posselt.pfrpg2e.kingdom.data.toModel
+import at.posselt.pfrpg2e.kingdom.getOwnedLeaderRoles
+import at.posselt.pfrpg2e.utils.getAppFlag
+import at.posselt.pfrpg2e.utils.setAppFlag
 import at.posselt.pfrpg2e.kingdom.xp.updateXpLedger
 import at.posselt.pfrpg2e.kingdom.xp.partyLifetimeXp
 import at.posselt.pfrpg2e.kingdom.xp.appendEntry
@@ -2011,9 +2018,8 @@ class KingdomSheet(
             }
 
             "add-xp-ledger-entry" -> buildPromise {
-                // MANUAL entries only for now: the plan's proposed per-source award table needs
-                // Gregory's sign-off before anything auto-proposes a number, so every amount here
-                // is one a GM typed.
+                // The hand-written row, for beats the module cannot see. Automatic beats propose
+                // themselves through proposeXpOffer and arrive in the End Turn digest instead.
                 if (!game.user.isGM) return@buildPromise
                 val party = game.xpLedgerActor()
                 if (party == null) {
@@ -2023,6 +2029,15 @@ class KingdomSheet(
                 val entry = askXpLedgerEntry(getKingdom().currentTurn ?: 0) ?: return@buildPromise
                 party.updateXpLedger { existing -> appendEntry(existing, entry) }
                 render()
+            }
+
+            "answer-petition" -> buildPromise {
+                // §5: the player's click writes NOTHING to the kingdom. It posts a GM-whispered
+                // offer naming the choice; only the GM's confirm applies a consequence. That is
+                // why this handler carries no isGM guard -- there is nothing here to guard.
+                val petitionId = target.dataset["petitionId"] ?: return@buildPromise
+                val optionId = target.dataset["optionId"] ?: return@buildPromise
+                postPetitionAnswerOffer(game, actor.uuid, getKingdom(), petitionId, optionId)
             }
 
             "delete-xp-ledger-entry" -> buildPromise {
@@ -3405,6 +3420,41 @@ class KingdomSheet(
     }
 
     /** (sceneId, name) pairs for the quest access-grant settlement picker. */
+    /**
+     * The inbox for the current user, marking its petitions seen only when the PARTY tab — where
+     * the section lives — is the one actually open.
+     *
+     * Marking on every render would clear the badge from any tab, which is the opposite of what a
+     * badge is for. The flag is written only when it would actually change, so re-rendering the
+     * open tab does not write the User document on every frame.
+     */
+    private suspend fun buildPetitionInbox(
+        kingdom: KingdomData,
+        markSeen: Boolean,
+    ): PetitionInboxContext {
+        val petitions = kingdom.petitions?.mapNotNull { it.toModel() } ?: emptyList()
+        val ownedRoles = getOwnedLeaderRoles(game, kingdom)
+        val seen = (game.user.getAppFlag<com.foundryvtt.core.documents.User, Array<String>>(
+            "seenPetitions"
+        ) ?: emptyArray()).toSet()
+        val context = petitionInboxContext(
+            petitions = petitions,
+            ownedRoles = ownedRoles,
+            seenIds = seen,
+            currentTurn = kingdom.currentTurn ?: 0,
+        )
+        if (markSeen) {
+            val visible = petitions.filter { it.targetRole in ownedRoles }.map { it.id }
+            if (visible.any { it !in seen }) {
+                // keep only ids that still exist, so the flag cannot grow without bound as
+                // petitions are trimmed out of history
+                val live = petitions.map { it.id }.toSet()
+                game.user.setAppFlag("seenPetitions", (seen + visible).filter { it in live }.toTypedArray())
+            }
+        }
+        return context
+    }
+
     private fun questSettlementOptions(): List<Pair<String, String>> =
         getKingdom().getAllSettlements(game).allSettlements.map { it.id to it.name }
 
@@ -4328,6 +4378,7 @@ class KingdomSheet(
                     isGM = isGM,
                 )
             } ?: buildXpLedgerContext(emptyList(), actualLifetimeXp = 0, isGM = isGM),
+            petitions = buildPetitionInbox(kingdom, markSeen = currentNavEntry == MainNavEntry.PARTY),
             sessionPrepContext = buildSessionPrepContext(
                 forecast = buildForecastPanelContext(buildForecast(game, actor, horizonDays = forecastHorizonDays)),
                 view = buildSessionPrepView(

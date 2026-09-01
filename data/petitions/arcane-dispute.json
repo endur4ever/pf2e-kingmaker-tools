@@ -1,0 +1,36 @@
+{
+  "id": "arcane-dispute",
+  "targetRole": "magister",
+  "weight": 10,
+  "requiresStructure": null,
+  "requiresEvent": null,
+  "options": [
+    {
+      "id": "option-a",
+      "consequences": [
+        {
+          "kind": "unrest",
+          "amount": -1
+        }
+      ]
+    },
+    {
+      "id": "option-b",
+      "consequences": [
+        {
+          "kind": "standing",
+          "amount": -1,
+          "ref": null
+        }
+      ]
+    },
+    {
+      "id": "option-c",
+      "consequences": [
+        {
+          "kind": "quest"
+        }
+      ]
+    }
+  ]
+}

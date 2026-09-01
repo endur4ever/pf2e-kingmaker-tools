@@ -1,0 +1,26 @@
+{
+  "id": "festival-rites",
+  "targetRole": "counselor",
+  "weight": 10,
+  "requiresStructure": null,
+  "requiresEvent": null,
+  "options": [
+    {
+      "id": "option-a",
+      "consequences": [
+        {
+          "kind": "unrest",
+          "amount": -1
+        }
+      ]
+    },
+    {
+      "id": "option-b",
+      "consequences": [
+        {
+          "kind": "rumor"
+        }
+      ]
+    }
+  ]
+}

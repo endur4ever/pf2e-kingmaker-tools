@@ -1,0 +1,37 @@
+{
+  "id": "royal-wedding",
+  "targetRole": "ruler",
+  "weight": 10,
+  "requiresStructure": null,
+  "requiresEvent": null,
+  "options": [
+    {
+      "id": "option-a",
+      "consequences": [
+        {
+          "kind": "standing",
+          "amount": 2,
+          "ref": null
+        }
+      ]
+    },
+    {
+      "id": "option-b",
+      "consequences": [
+        {
+          "kind": "standing",
+          "amount": -1,
+          "ref": null
+        }
+      ]
+    },
+    {
+      "id": "option-c",
+      "consequences": [
+        {
+          "kind": "quest"
+        }
+      ]
+    }
+  ]
+}

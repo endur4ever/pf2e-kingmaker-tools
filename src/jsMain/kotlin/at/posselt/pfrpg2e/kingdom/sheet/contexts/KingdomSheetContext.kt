@@ -126,6 +126,7 @@ external interface KingdomSheetContext : ValidatedHandlebarsContext {
     val chronicle: Array<DeedChronicleRowContext>
     /** Party XP ledger (Party tab); GM-editable, player-visible history. */
     val xpLedger: XpLedgerContext
+    val petitions: PetitionInboxContext
     val councilVotesContext: CouncilVotesContext
     val renownCardContext: RenownCardContext
     val personalHoldingsContext: PersonalHoldingsSectionContext

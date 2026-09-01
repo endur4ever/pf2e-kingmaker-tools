@@ -1,0 +1,14 @@
+<div class="km-chat-card km-petition-expired">
+    <h3>{{localizeKM "kingdom.petitions.expiredTitle"}}</h3>
+    <p><b>{{roleLabel}}</b> — {{petitionerName}}</p>
+    <p class="km-sub-note">{{premise}}</p>
+    <p>{{localizeKM "kingdom.petitions.expiredPrompt"}}</p>
+    <div class="km-chat-buttons">
+        <button type="button" class="km-petition-overdue-apply" data-petition-id="{{petitionId}}" data-actor-uuid="{{actorUuid}}">
+            {{localizeKM "kingdom.petitions.applyOverdue"}}
+        </button>
+        <button type="button" class="km-petition-overdue-dismiss" data-petition-id="{{petitionId}}" data-actor-uuid="{{actorUuid}}">
+            {{localizeKM "kingdom.petitions.dismissOverdue"}}
+        </button>
+    </div>
+</div>

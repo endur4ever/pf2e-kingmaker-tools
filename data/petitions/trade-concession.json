@@ -1,0 +1,33 @@
+{
+  "id": "trade-concession",
+  "targetRole": "emissary",
+  "weight": 10,
+  "requiresStructure": null,
+  "requiresEvent": null,
+  "options": [
+    {
+      "id": "option-a",
+      "consequences": [
+        {
+          "kind": "rp",
+          "amount": -2
+        },
+        {
+          "kind": "standing",
+          "amount": 2,
+          "ref": null
+        }
+      ]
+    },
+    {
+      "id": "option-b",
+      "consequences": [
+        {
+          "kind": "standing",
+          "amount": -1,
+          "ref": null
+        }
+      ]
+    }
+  ]
+}
