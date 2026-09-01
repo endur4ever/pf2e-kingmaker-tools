@@ -2204,8 +2204,11 @@ private fun appendDeedGazetteLine(kingdom: KingdomData, milestoneName: String) {
     val history = kingdom.turnHistory ?: return
     val record = history.lastOrNull() ?: return
     val line = t("kingdom.turnGazette.deed", recordOf("name" to milestoneName))
+    // formatTurnGazette joins its segments with " | " into ONE string, and the journal exporter
+    // escapes that string into HTML where a newline collapses to whitespace -- appending with \n
+    // ran the deed straight into the previous segment with no separator at all.
     fun append(existing: String?): String =
-        if (existing.isNullOrBlank()) line else if (existing.contains(line)) existing else "$existing\n$line"
+        if (existing.isNullOrBlank()) line else if (existing.contains(line)) existing else "$existing | $line"
     record.notes = append(record.notes)
     record.playerNotes = append(record.playerNotes)
 }

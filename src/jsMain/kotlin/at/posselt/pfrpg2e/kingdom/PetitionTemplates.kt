@@ -9,6 +9,10 @@ import kotlinx.js.JsPlainObject
  * labels are i18n values, which is what lets a wording fix reach petitions already sitting in
  * inboxes without touching stored data.
  *
+ * `data/petitions/` must EXIST for combineJsonFiles to emit the bundle this @JsModule imports;
+ * an absent directory means no petitions.json and a hard import failure at load. The `.gitkeep`
+ * in there is load-bearing, which SettlementLifeCatalogTest's sibling guard below pins.
+ *
  * The catalog ships EMPTY: the plan's forty starter templates are fully specified for
  * consequences but not for their option ids and labels, which are Gregory's to write (plan
  * section 6, Tone). Everything around them is here, so the templates drop in as pure data.

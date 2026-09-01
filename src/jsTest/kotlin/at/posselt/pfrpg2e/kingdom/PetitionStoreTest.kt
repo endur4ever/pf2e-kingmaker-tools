@@ -56,6 +56,14 @@ class PetitionStoreTest {
     }
 
     @Test
+    fun theBundleResolvesEvenWithNoTemplates() {
+        // the @JsModule import is only satisfied because data/petitions/ exists and
+        // combineJsonFiles emits "[]" for it. If this ever throws instead of returning an empty
+        // array, the directory (and its load-bearing .gitkeep) has gone missing.
+        assertEquals(0, petitionTemplates().size)
+    }
+
+    @Test
     fun theCatalogShipsEmptyUntilTheTemplatesLand() {
         // the forty starter templates need option ids and labels that are Gregory's to write;
         // everything around them is here, so they drop in as pure data

@@ -3,6 +3,9 @@ package at.posselt.pfrpg2e.migrations
 import at.posselt.pfrpg2e.camping.CampingData
 import at.posselt.pfrpg2e.migrations.migrations.Migration72
 import at.posselt.pfrpg2e.migrations.migrations.Migration73
+import at.posselt.pfrpg2e.migrations.migrations.Migration76
+import at.posselt.pfrpg2e.migrations.migrations.Migration75
+import at.posselt.pfrpg2e.migrations.migrations.Migration74
 import at.posselt.pfrpg2e.migrations.migrations.Migration25
 import at.posselt.pfrpg2e.migrations.migrations.Migration28
 import at.posselt.pfrpg2e.migrations.migrations.Migration29
@@ -483,5 +486,55 @@ class MigrationBackfillsTest {
         val k = kingdom()
         Migration73().migrateKingdom(game, k.unsafeCast<at.posselt.pfrpg2e.kingdom.KingdomData>())
         assertEquals(null, k.settlements)
+    }
+
+    // ── Migrations 74-76: the seeding branches the chain test never exercises ─────────────────
+
+    @Test
+    fun migration74TouchesNothingByDesign() = runTest {
+        // encounterManifest is nullable with guarded reads, so 74 exists only for chain
+        // contiguity -- this pins that it really is inert rather than quietly seeding
+        val k = kingdom { it.hexContents = arrayOf(unsafeJso<dynamic> { id = "h1" }) }
+        Migration74().migrateKingdom(game, k.unsafeCast<at.posselt.pfrpg2e.kingdom.KingdomData>())
+        assertEquals(null, k.hexContents.unsafeCast<Array<dynamic>>()[0].encounterManifest)
+    }
+
+    @Test
+    fun migration75SeedsLifeEventHistoryAndPreservesExisting() = runTest {
+        val k = kingdom {
+            it.settlements = arrayOf(
+                unsafeJso<dynamic> { sceneId = "s1" },
+                unsafeJso<dynamic> {
+                    sceneId = "s2"
+                    lifeEventHistory = arrayOf(unsafeJso<dynamic> { recordId = "r1"; templateId = "market-day"; turn = 3 })
+                },
+            )
+        }
+        val kd = k.unsafeCast<at.posselt.pfrpg2e.kingdom.KingdomData>()
+        Migration75().migrateKingdom(game, kd)
+        val settlements = k.settlements.unsafeCast<Array<dynamic>>()
+        assertEquals(0, size(settlements[0].lifeEventHistory))
+        assertEquals(1, size(settlements[1].lifeEventHistory))
+        // idempotent: a second run keeps the history
+        Migration75().migrateKingdom(game, kd)
+        assertEquals(1, size(settlements[1].lifeEventHistory))
+    }
+
+    @Test
+    fun migration75SkipsKingdomsWithoutSettlements() = runTest {
+        val k = kingdom()
+        Migration75().migrateKingdom(game, k.unsafeCast<at.posselt.pfrpg2e.kingdom.KingdomData>())
+        assertEquals(null, k.settlements)
+    }
+
+    @Test
+    fun migration76SeedsPetitionsOnlyWhenAbsent() = runTest {
+        val fresh = kingdom()
+        Migration76().migrateKingdom(game, fresh.unsafeCast<at.posselt.pfrpg2e.kingdom.KingdomData>())
+        assertEquals(0, size(fresh.petitions))
+        // an inbox with a petition in it must survive the migration untouched
+        val used = kingdom { it.petitions = arrayOf(unsafeJso<dynamic> { id = "p1" }) }
+        Migration76().migrateKingdom(game, used.unsafeCast<at.posselt.pfrpg2e.kingdom.KingdomData>())
+        assertEquals(1, size(used.petitions))
     }
 }

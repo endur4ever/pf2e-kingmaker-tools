@@ -132,6 +132,8 @@ tasks {
             "validateNpcMemoryRules",
             "validateSettlementLifeEvents",
             "validatePetitions",
+            "validateFactionAgendaMoves",
+            "validateFactionAgendaArchetypes",
             "validateKingdomEvents",
             "validateExpeditionActivities",
         )
@@ -139,6 +141,18 @@ tasks {
 }
 
 // JSON Schema validation tasks
+tasks.register<JsonSchemaValidator>("validateFactionAgendaMoves") {
+    outputs.upToDateWhen { true }
+    schema = layout.projectDirectory.file("src/commonMain/resources/schemas/faction-agenda-move.json")
+    files = layout.projectDirectory.dir("data/faction-agenda-moves")
+}
+
+tasks.register<JsonSchemaValidator>("validateFactionAgendaArchetypes") {
+    outputs.upToDateWhen { true }
+    schema = layout.projectDirectory.file("src/commonMain/resources/schemas/faction-agenda-archetype.json")
+    files = layout.projectDirectory.dir("data/faction-agenda-archetypes")
+}
+
 tasks.register<JsonSchemaValidator>("validatePetitions") {
     outputs.upToDateWhen { true }
     schema = layout.projectDirectory.file("src/commonMain/resources/schemas/petition.json")

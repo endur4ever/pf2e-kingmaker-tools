@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://posselt.at/pf2e-kingmaker-tools/schemas/faction-agenda-move.json",
+  "title": "FactionAgendaMove",
+  "description": "One move in a faction's agenda table",
+  "type": "object",
+  "required": [
+    "id",
+    "label",
+    "weight",
+    "cooldownTurns",
+    "validTargets",
+    "effect",
+    "effectMagnitude"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$"
+    },
+    "label": {
+      "type": "string",
+      "minLength": 1
+    },
+    "weight": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "cooldownTurns": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "validTargets": {
+      "enum": [
+        "self",
+        "rival",
+        "ally",
+        "pcs",
+        "any-faction"
+      ]
+    },
+    "effect": {
+      "enum": [
+        "clock",
+        "standing-delta",
+        "war-threat",
+        "quest",
+        "army"
+      ]
+    },
+    "effectMagnitude": {
+      "type": "integer"
+    },
+    "requires": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "not-at-war",
+        "has-hex",
+        null
+      ]
+    }
+  }
+}
