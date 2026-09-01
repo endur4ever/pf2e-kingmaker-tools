@@ -94,9 +94,13 @@ A running record of party XP on the Party tab, with per-source totals and a reco
 what a character actually holds. Drift is expected and never corrected: combat XP and hand edits
 never pass through the ledger.
 
-**Entries are GM-entered.** Automatic offers on hex clears, quest completions and expedition beats
-are built but not enabled, because their award amounts are PF2e defaults rather than a recorded
-house rule and need a table decision first.
+Beats are recorded automatically as they happen — a site cleared on a hex, a quest completed, an
+expedition resolved — and End Turn whispers one digest listing everything unanswered, with
+**Confirm** / **Dismiss** per row and for the whole card. Each row's amount is editable before you
+confirm, and the ledger records what was actually granted rather than what was proposed. Defaults
+follow PF2e accomplishment XP: 10 for a hex, 10/30/80 for a minor/moderate/major site, 30 or 80
+for a quest, 30 for an expedition. You can still add rows by hand for anything the module cannot
+see.
 
 ### Groundwork, not yet usable
 Two subsystems have their data model, schema, storage and migrations in place but no content or

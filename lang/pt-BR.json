@@ -2839,7 +2839,14 @@
                 "noParty": "Nenhum ator de grupo para o registro.",
                 "confirmDelete": "Excluir esta entrada? O XP já concedido não é retirado.",
                 "sourceColumn": "Fonte",
-                "statusColumn": "Status"
+                "statusColumn": "Status",
+                "digestTitle": "XP do grupo obtido",
+                "digestBody": "Feitos registrados neste turno. Edite um valor antes de confirmar se não couber.",
+                "confirm": "Confirmar",
+                "dismiss": "Descartar",
+                "confirmAll": "Confirmar tudo",
+                "dismissAll": "Descartar tudo",
+                "alreadyAnswered": "Essa oferta de XP já foi respondida."
             }
         },
         "chatMessages": {

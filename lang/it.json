@@ -2839,7 +2839,14 @@
                 "noParty": "Nessun attore gruppo per il registro.",
                 "confirmDelete": "Eliminare questa voce? I PE già concessi non vengono ritirati.",
                 "sourceColumn": "Fonte",
-                "statusColumn": "Stato"
+                "statusColumn": "Stato",
+                "digestTitle": "PE del gruppo guadagnati",
+                "digestBody": "Eventi registrati questo turno. Modifica un importo prima di confermare se non è adatto.",
+                "confirm": "Conferma",
+                "dismiss": "Ignora",
+                "confirmAll": "Conferma tutto",
+                "dismissAll": "Ignora tutto",
+                "alreadyAnswered": "Questa offerta di PE ha già ricevuto risposta."
             }
         },
         "chatMessages": {

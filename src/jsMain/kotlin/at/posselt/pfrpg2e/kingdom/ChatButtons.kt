@@ -76,6 +76,14 @@ import at.posselt.pfrpg2e.app.forms.SelectOption
 import at.posselt.pfrpg2e.app.forms.formContext
 import at.posselt.pfrpg2e.kingdom.data.RawSubsystemThreshold
 import at.posselt.pfrpg2e.kingdom.councilVoteMutex
+import at.posselt.pfrpg2e.kingdom.xp.xpLedgerActor
+import at.posselt.pfrpg2e.kingdom.xp.xpLedger
+import at.posselt.pfrpg2e.kingdom.xp.updateXpLedger
+import at.posselt.pfrpg2e.kingdom.xp.answerEntry
+import at.posselt.pfrpg2e.kingdom.xp.XpOfferStatus
+import at.posselt.pfrpg2e.macros.updateXP
+import at.posselt.pfrpg2e.actor.partyMembers
+import at.posselt.pfrpg2e.kingdom.xp.proposeXpOffer
 import kotlinx.coroutines.sync.withLock
 import js.objects.recordOf
 import kotlinx.html.org.w3c.dom.events.Event
@@ -260,6 +268,47 @@ private val buttons = listOf(
                 }
             }
         }
+    },
+    ChatButton("km-offer-xp-confirm") { game, actor, event, button ->
+        // The ONLY path that grants party XP from the ledger. The amount comes from the row's
+        // input, so a default that did not fit the beat costs one edit, not a wrong award --
+        // and the ledger records what was granted, never merely what was proposed.
+        if (!game.user.isGM) return@ChatButton
+        val entryId = button.dataset["entryId"] ?: return@ChatButton
+        val typed = (button.closest(".km-xp-digest-row")
+            ?.querySelector("input.km-xp-amount") as? org.w3c.dom.HTMLInputElement)
+            ?.value?.toIntOrNull()
+        grantXpLedgerEntry(game, entryId, typed)
+        markXpRowDone(button)
+    },
+    ChatButton("km-offer-xp-dismiss") { game, actor, event, button ->
+        if (!game.user.isGM) return@ChatButton
+        val entryId = button.dataset["entryId"] ?: return@ChatButton
+        val party = game.xpLedgerActor() ?: return@ChatButton
+        party.updateXpLedger { answerEntry(it, entryId, granted = null) }
+        markXpRowDone(button)
+    },
+    ChatButton("km-offer-xp-confirm-all") { game, actor, event, button ->
+        // A session of exploration can queue a dozen offers; confirming them one by one is how a
+        // GM learns to ignore the digest. Each row keeps its own (possibly edited) amount.
+        if (!game.user.isGM) return@ChatButton
+        val ids = button.dataset["allIds"]?.split(",")?.filter { it.isNotBlank() } ?: return@ChatButton
+        val card = button.closest(".chat-message")
+        ids.forEach { id ->
+            val typed = (card?.querySelector("input.km-xp-amount[data-entry-id='$id']")
+                as? org.w3c.dom.HTMLInputElement)?.value?.toIntOrNull()
+            grantXpLedgerEntry(game, id, typed)
+        }
+        markXpCardDone(button)
+    },
+    ChatButton("km-offer-xp-dismiss-all") { game, actor, event, button ->
+        if (!game.user.isGM) return@ChatButton
+        val ids = button.dataset["allIds"]?.split(",")?.filter { it.isNotBlank() } ?: return@ChatButton
+        val party = game.xpLedgerActor() ?: return@ChatButton
+        party.updateXpLedger { existing ->
+            ids.fold(existing) { acc, id -> answerEntry(acc, id, granted = null) }
+        }
+        markXpCardDone(button)
     },
     ChatButton("km-offer-npc-encounter") { game, actor, event, button ->
         // NPC attitude crossing (npc-memory plan section 7): rolls a random encounter through
@@ -1557,6 +1606,12 @@ private val buttons = listOf(
             }
             if (applyExpeditionRewardToKingdom(kingdom, expedition)) {
                 actor.setKingdom(kingdom)
+                game.proposeXpOffer(
+                    kind = at.posselt.pfrpg2e.kingdom.xp.XpSourceKind.EXPEDITION_RESOLVED,
+                    sourceRef = expedition.id,
+                    turn = kingdom.currentTurn ?: 0,
+                    note = expedition.title,
+                )
                 postChatMessage(t("kingdom.expeditionRewardApplied", recordOf("name" to expedition.title)))
             } else {
                 ui.notifications.warn(
@@ -2211,4 +2266,41 @@ private fun appendDeedGazetteLine(kingdom: KingdomData, milestoneName: String) {
         if (existing.isNullOrBlank()) line else if (existing.contains(line)) existing else "$existing | $line"
     record.notes = append(record.notes)
     record.playerNotes = append(record.playerNotes)
+}
+
+/**
+ * Confirm one ledger offer: grant the party the amount, then record it.
+ *
+ * The grant happens BEFORE the ledger write so a failure to reach the characters cannot leave a
+ * row claiming XP nobody received. answerEntry only touches an OFFERED row, so a second click --
+ * or a stale card in scrollback -- grants nothing.
+ */
+private suspend fun grantXpLedgerEntry(game: Game, entryId: String, typedAmount: Int?) {
+    val party = game.xpLedgerActor() ?: return
+    val entry = party.xpLedger().find { it.id == entryId && it.status == XpOfferStatus.OFFERED }
+    if (entry == null) {
+        ui.notifications.info(t("kingdom.xpLedger.alreadyAnswered"))
+        return
+    }
+    val amount = (typedAmount ?: entry.proposedAmount).coerceAtLeast(0)
+    if (amount > 0) {
+        updateXP(party.partyMembers(), amount)
+    }
+    party.updateXpLedger { answerEntry(it, entryId, granted = amount) }
+}
+
+private fun markXpRowDone(button: HTMLElement) {
+    val row = button.closest(".km-xp-digest-row") as? HTMLElement ?: return
+    row.classList.add("km-pressure-row-done")
+    row.querySelectorAll("button, input").asList().filterIsInstance<HTMLElement>()
+        .forEach { it.setAttribute("disabled", "disabled") }
+}
+
+private fun markXpCardDone(button: HTMLElement) {
+    val card = button.closest(".chat-message") as? HTMLElement ?: return
+    card.querySelectorAll(".km-xp-digest-row").asList().filterIsInstance<HTMLElement>()
+        .forEach { it.classList.add("km-pressure-row-done") }
+    card.querySelectorAll("button[class*='km-offer-xp'], input.km-xp-amount").asList()
+        .filterIsInstance<HTMLElement>()
+        .forEach { it.setAttribute("disabled", "disabled") }
 }

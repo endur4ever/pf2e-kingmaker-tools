@@ -2839,7 +2839,14 @@
                 "noParty": "Aucun acteur de groupe pour porter le registre.",
                 "confirmDelete": "Supprimer cette entrée ? L'XP déjà accordé n'est pas repris.",
                 "sourceColumn": "Source",
-                "statusColumn": "Statut"
+                "statusColumn": "Statut",
+                "digestTitle": "XP du groupe gagné",
+                "digestBody": "Faits marquants de ce tour. Modifiez un montant avant de confirmer s'il ne convient pas.",
+                "confirm": "Confirmer",
+                "dismiss": "Rejeter",
+                "confirmAll": "Tout confirmer",
+                "dismissAll": "Tout rejeter",
+                "alreadyAnswered": "Cette offre d'XP a déjà reçu une réponse."
             }
         },
         "chatMessages": {

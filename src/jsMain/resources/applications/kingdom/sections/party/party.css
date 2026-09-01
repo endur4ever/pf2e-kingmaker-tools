@@ -30,3 +30,21 @@
 .km-xp-ledger-totals {
     margin: 0.25rem 0;
 }
+
+/* XP ledger digest rows (chat) */
+.km-xp-digest {
+    list-style: none;
+    margin: 0.3rem 0;
+    padding: 0;
+}
+
+.km-xp-digest-row {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.15rem 0;
+}
+
+.km-xp-digest-row input.km-xp-amount {
+    width: 4.5rem;
+}

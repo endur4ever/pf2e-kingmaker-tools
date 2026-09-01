@@ -2839,7 +2839,14 @@
                 "noParty": "Brak aktora drużyny dla księgi.",
                 "confirmDelete": "Usunąć ten wpis? Już przyznane PD nie zostaną odebrane.",
                 "sourceColumn": "Źródło",
-                "statusColumn": "Status"
+                "statusColumn": "Status",
+                "digestTitle": "Zdobyte PD drużyny",
+                "digestBody": "Wydarzenia zapisane w tej turze. Zmień kwotę przed potwierdzeniem, jeśli nie pasuje.",
+                "confirm": "Potwierdź",
+                "dismiss": "Odrzuć",
+                "confirmAll": "Potwierdź wszystko",
+                "dismissAll": "Odrzuć wszystko",
+                "alreadyAnswered": "Ta oferta PD została już rozstrzygnięta."
             }
         },
         "chatMessages": {

@@ -2839,7 +2839,14 @@
                 "noParty": "Kein Gruppen-Akteur für das Hauptbuch gefunden.",
                 "confirmDelete": "Diesen Eintrag löschen? Bereits vergebene EP werden nicht zurückgenommen.",
                 "sourceColumn": "Quelle",
-                "statusColumn": "Status"
+                "statusColumn": "Status",
+                "digestTitle": "Gruppen-EP verdient",
+                "digestBody": "Diese Turn aufgezeichneten Ereignisse. Betrag vor dem Bestätigen anpassen, falls er nicht passt.",
+                "confirm": "Bestätigen",
+                "dismiss": "Verwerfen",
+                "confirmAll": "Alle bestätigen",
+                "dismissAll": "Alle verwerfen",
+                "alreadyAnswered": "Dieses EP-Angebot wurde bereits beantwortet."
             }
         },
         "chatMessages": {

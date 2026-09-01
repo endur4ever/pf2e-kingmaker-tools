@@ -2961,7 +2961,14 @@
                 "noParty": "No party actor found to hold the ledger.",
                 "confirmDelete": "Delete this ledger entry? The XP already granted is not taken back.",
                 "sourceColumn": "Source",
-                "statusColumn": "Status"
+                "statusColumn": "Status",
+                "digestTitle": "Party XP Earned",
+                "digestBody": "Beats recorded this turn. Edit an amount before confirming if it doesn't fit.",
+                "confirm": "Confirm",
+                "dismiss": "Dismiss",
+                "confirmAll": "Confirm all",
+                "dismissAll": "Dismiss all",
+                "alreadyAnswered": "That XP offer was already answered."
             }
         },
         "chatMessages": {

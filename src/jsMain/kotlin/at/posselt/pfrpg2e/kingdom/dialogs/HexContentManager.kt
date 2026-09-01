@@ -16,6 +16,7 @@ import at.posselt.pfrpg2e.kingdom.data.RawLootManifestEntry
 import at.posselt.pfrpg2e.kingdom.data.toModel
 import at.posselt.pfrpg2e.kingdom.loot.manifestTotals
 import at.posselt.pfrpg2e.kingdom.loot.postLootAwardOffer
+import at.posselt.pfrpg2e.kingdom.xp.proposeXpOffer
 import com.foundryvtt.core.game
 import js.objects.recordOf
 import at.posselt.pfrpg2e.utils.buildPromise
@@ -429,8 +430,19 @@ class HexContentManager(
                 buildPromise {
                     updateVisibility(contentId, at.posselt.pfrpg2e.kingdom.map.DiscoveryEvent.CLEAR)
                     // Clearing SURFACES the treasure offer; it never moves items (plan SS5.1).
-                    currentKingdom()?.hexContents?.find { it.id == contentId }
-                        ?.let { postLootAwardOffer(game, actor, it) }
+                    val kingdom = currentKingdom()
+                    kingdom?.hexContents?.find { it.id == contentId }
+                        ?.let { content ->
+                            postLootAwardOffer(game, actor, content)
+                            // party XP for the site, recorded silently and answered in the End
+                            // Turn digest (xp-ledger plan 6)
+                            game.proposeXpOffer(
+                                kind = at.posselt.pfrpg2e.kingdom.xp.XpSourceKind.SITE_CLEARED,
+                                sourceRef = content.id,
+                                turn = kingdom.currentTurn ?: 0,
+                                note = content.name,
+                            )
+                        }
                     onContentChanged()
                     render()
                 }

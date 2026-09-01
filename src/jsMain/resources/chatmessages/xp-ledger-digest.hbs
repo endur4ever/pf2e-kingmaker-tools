@@ -1,0 +1,28 @@
+<h2>{{localizeKM "kingdom.xpLedger.digestTitle"}}</h2>
+<p>{{localizeKM "kingdom.xpLedger.digestBody"}}</p>
+<ul class="km-xp-digest">
+    {{#each rows}}
+        <li class="km-xp-digest-row">
+            <span>{{this.sourceLabel}}{{#if this.sourceRef}} <span class="km-sub-note">{{this.sourceRef}}</span>{{/if}}</span>
+            <input type="number" class="km-xp-amount" data-entry-id="{{this.id}}" value="{{this.amount}}" min="0" step="5" />
+            <button type="button" class="km-offer-xp-confirm"
+                    data-kingdom-actor-uuid="{{@root.actorUuid}}" data-entry-id="{{this.id}}">
+                {{localizeKM "kingdom.xpLedger.confirm"}}
+            </button>
+            <button type="button" class="km-offer-xp-dismiss"
+                    data-kingdom-actor-uuid="{{@root.actorUuid}}" data-entry-id="{{this.id}}">
+                {{localizeKM "kingdom.xpLedger.dismiss"}}
+            </button>
+        </li>
+    {{/each}}
+</ul>
+<div class="km-subsystem-offer__buttons">
+    <button type="button" class="km-offer-xp-confirm-all"
+            data-kingdom-actor-uuid="{{actorUuid}}" data-all-ids="{{allIds}}">
+        {{localizeKM "kingdom.xpLedger.confirmAll"}}
+    </button>
+    <button type="button" class="km-offer-xp-dismiss-all"
+            data-kingdom-actor-uuid="{{actorUuid}}" data-all-ids="{{allIds}}">
+        {{localizeKM "kingdom.xpLedger.dismissAll"}}
+    </button>
+</div>

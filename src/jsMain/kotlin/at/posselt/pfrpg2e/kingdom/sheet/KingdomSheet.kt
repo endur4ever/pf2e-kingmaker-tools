@@ -296,6 +296,9 @@ import at.posselt.pfrpg2e.kingdom.sheet.contexts.buildArmyPressureContext
 import at.posselt.pfrpg2e.kingdom.buildArmyPressureView
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.buildPacingAlertContext
 import at.posselt.pfrpg2e.kingdom.buildPacingAlertView
+import at.posselt.pfrpg2e.kingdom.xp.proposeXpOffer
+import at.posselt.pfrpg2e.kingdom.xp.XpSourceKind
+import at.posselt.pfrpg2e.kingdom.xp.XpBeatTier
 import at.posselt.pfrpg2e.kingdom.xp.xpLedgerActor
 import at.posselt.pfrpg2e.kingdom.xp.xpLedger
 import at.posselt.pfrpg2e.kingdom.xp.updateXpLedger
@@ -1156,6 +1159,14 @@ class KingdomSheet(
                     if (quest != null && quest.status == "active") {
                         val priorStatus = quest.status
                         quest.status = "completed"
+                        // a main-story quest is the plan's "major" tier; everything else is small
+                        game.proposeXpOffer(
+                            kind = XpSourceKind.QUEST_COMPLETED,
+                            sourceRef = quest.id,
+                            turn = kingdom.currentTurn ?: 0,
+                            tier = if (quest.category == "main_story") XpBeatTier.MAJOR else XpBeatTier.MODERATE,
+                            note = quest.title,
+                        )
                         val realm = game.getRealmData(actor, kingdom)
                         val settlements = kingdom.getAllSettlements(game)
                         val storage = calculateStorage(realm, settlements.allSettlements)

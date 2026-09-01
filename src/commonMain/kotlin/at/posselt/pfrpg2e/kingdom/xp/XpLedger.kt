@@ -132,3 +132,59 @@ fun reconcile(entries: List<XpLedgerEntry>, actualLifetimeXp: Int): XpReconcilia
         drift = actualLifetimeXp - ledgerTotal,
     )
 }
+
+// ── Default award table (plan section 3, signed off 2026-09-01) ───────────────────────────────
+//
+// PF2e accomplishment XP. These are DEFAULTS ONLY: every offer is GM-confirmed and its amount is
+// editable at confirm time, so a default that does not fit a particular beat costs one edit --
+// the ledger records what was actually granted, never merely what was proposed.
+
+const val XP_AWARD_HEX_RECONNOITERED = 10
+const val XP_AWARD_SITE_MINOR = 10
+const val XP_AWARD_SITE_MODERATE = 30
+const val XP_AWARD_SITE_MAJOR = 80
+const val XP_AWARD_QUEST_SMALL = 30
+const val XP_AWARD_QUEST_MAJOR = 80
+const val XP_AWARD_EXPEDITION = 30
+const val XP_AWARD_RP_ENCOUNTER = 30
+
+/** How significant a beat was, where the source data can tell us. */
+enum class XpBeatTier { MINOR, MODERATE, MAJOR }
+
+/**
+ * The proposed award for one beat.
+ *
+ * A cleared site defaults to MODERATE because nothing in the hex data records difficulty -- the
+ * GM raises or lowers it on the card rather than the module guessing from a type name it cannot
+ * interpret.
+ */
+fun defaultXpAward(kind: XpSourceKind, tier: XpBeatTier = XpBeatTier.MODERATE): Int = when (kind) {
+    XpSourceKind.HEX_RECONNOITERED -> XP_AWARD_HEX_RECONNOITERED
+    XpSourceKind.SITE_CLEARED -> when (tier) {
+        XpBeatTier.MINOR -> XP_AWARD_SITE_MINOR
+        XpBeatTier.MODERATE -> XP_AWARD_SITE_MODERATE
+        XpBeatTier.MAJOR -> XP_AWARD_SITE_MAJOR
+    }
+    XpSourceKind.QUEST_COMPLETED -> if (tier == XpBeatTier.MAJOR) XP_AWARD_QUEST_MAJOR else XP_AWARD_QUEST_SMALL
+    XpSourceKind.EXPEDITION_RESOLVED -> XP_AWARD_EXPEDITION
+    XpSourceKind.RP_ENCOUNTER -> XP_AWARD_RP_ENCOUNTER
+    // a hand-entered row carries the GM's own number; there is no default to propose
+    XpSourceKind.MANUAL -> 0
+}
+
+/** The entries still awaiting an answer, oldest first -- the digest's contents. */
+fun pendingOffers(entries: List<XpLedgerEntry>): List<XpLedgerEntry> =
+    entries.filter { it.status == XpOfferStatus.OFFERED }
+
+/**
+ * [id] answered: confirmed with [granted], or dismissed when [granted] is null.
+ *
+ * Only an OFFERED entry can be answered, so a second click on a card already resolved -- or on a
+ * stale card in chat scrollback -- is a no-op rather than a second grant.
+ */
+fun answerEntry(entries: List<XpLedgerEntry>, id: String, granted: Int?): List<XpLedgerEntry> =
+    entries.map { entry ->
+        if (entry.id != id || entry.status != XpOfferStatus.OFFERED) entry
+        else if (granted == null) entry.copy(status = XpOfferStatus.DISMISSED)
+        else entry.copy(status = XpOfferStatus.CONFIRMED, grantedAmount = granted)
+    }

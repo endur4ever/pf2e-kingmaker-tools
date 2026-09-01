@@ -2839,7 +2839,14 @@
                 "noParty": "未找到承载账本的队伍角色。",
                 "confirmDelete": "删除此条目？已发放的经验不会收回。",
                 "sourceColumn": "来源",
-                "statusColumn": "状态"
+                "statusColumn": "状态",
+                "digestTitle": "队伍获得经验",
+                "digestBody": "本回合记录的事件。若数值不合适，请在确认前修改。",
+                "confirm": "确认",
+                "dismiss": "忽略",
+                "confirmAll": "全部确认",
+                "dismissAll": "全部忽略",
+                "alreadyAnswered": "该经验提议已被处理。"
             }
         },
         "chatMessages": {

@@ -35,6 +35,7 @@ import at.posselt.pfrpg2e.kingdom.data.withWarOfferRecorded
 import at.posselt.pfrpg2e.kingdom.evaluateNpcMemoriesForTurn
 import at.posselt.pfrpg2e.kingdom.npcMemoryRules
 import at.posselt.pfrpg2e.kingdom.postNpcAttitudeShiftOffers
+import at.posselt.pfrpg2e.kingdom.xp.postXpLedgerDigest
 import at.posselt.pfrpg2e.kingdom.postFactionMoveDigest
 import at.posselt.pfrpg2e.kingdom.postRivalOfferDigests
 import at.posselt.pfrpg2e.kingdom.localizeRivalHeadline
@@ -936,6 +937,8 @@ private suspend fun performEndTurnLocked(game: Game, actor: KingdomActor): TickR
         currentTurn = currentTurn,
         moves = tickResult.factionAgendaMoves,
     )
+
+    postXpLedgerDigest(game, actor.uuid, currentTurn)
 
     postNpcAttitudeShiftOffers(
         game = game,
