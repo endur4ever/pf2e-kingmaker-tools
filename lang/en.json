@@ -825,7 +825,8 @@
             "storage": "Storage",
             "notes": "Notes",
             "bonuses": "Bonuses",
-            "population": "Population"
+            "population": "Population",
+            "life": "Town Life"
         },
         "structureBrowserNav": {
             "buildable": "Buildable",
@@ -8580,7 +8581,15 @@
             "applied": "{settlement}: life event applied.",
             "alreadyApplied": "That life event has already been resolved.",
             "questTitle": "Trouble in {settlement}",
-            "rumorTitle": "Rumour from {settlement}"
+            "rumorTitle": "Rumour from {settlement}",
+            "history": {
+                "title": "Town life",
+                "turn": "Turn",
+                "event": "Event",
+                "empty": "Nothing has happened here yet.",
+                "resolved": "resolved",
+                "pending": "awaiting the GM"
+            }
         },
         "petitions": {
             "absentee-lord": {

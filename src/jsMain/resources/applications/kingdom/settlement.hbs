@@ -222,5 +222,35 @@
                 {{/if}}
             </div>
         </div>
+        <div {{#unless (eq currentTab 'life')}}hidden{{/unless}}>
+            <div class="km-life-history">
+                <h3><i class="fa-solid fa-scroll"></i> {{localizeKM "settlementLife.history.title"}}</h3>
+                {{#if lifeEvents.length}}
+                <table class="km-life-history-table">
+                    <thead>
+                        <tr>
+                            <th>{{localizeKM "settlementLife.history.turn"}}</th>
+                            <th>{{localizeKM "settlementLife.history.event"}}</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#each lifeEvents}}
+                        <tr>
+                            <td>{{this.turn}}</td>
+                            <td><b>{{this.name}}</b><div class="km-sub-note">{{this.line}}</div></td>
+                            <td class="km-sub-note">{{this.statusLabel}}</td>
+                        </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+                {{else}}
+                <div class="km-empty-population">
+                    <i class="fa-regular fa-folder-open"></i>
+                    <p>{{localizeKM "settlementLife.history.empty"}}</p>
+                </div>
+                {{/if}}
+            </div>
+        </div>
     </div>
 </div>

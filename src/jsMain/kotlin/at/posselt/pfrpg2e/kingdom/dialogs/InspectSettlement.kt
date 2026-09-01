@@ -39,6 +39,8 @@ import at.posselt.pfrpg2e.utils.buildPromise
 import at.posselt.pfrpg2e.utils.buildUuid
 import at.posselt.pfrpg2e.utils.formatAsModifier
 import at.posselt.pfrpg2e.utils.t
+import at.posselt.pfrpg2e.kingdom.LifeHistoryRowContext
+import at.posselt.pfrpg2e.kingdom.lifeHistoryRows
 import at.posselt.pfrpg2e.utils.toRecord
 import com.foundryvtt.core.AnyObject
 import com.foundryvtt.core.Game
@@ -117,6 +119,8 @@ external interface InspectSettlementContext : ValidatedHandlebarsContext {
     val storage: Array<LabelValueContext>
     val settlementActions: Int
     val populationNpcs: Array<RawNpcEntry>
+    /** Read-only town-life chronicle, newest first (settlement-life plan section 4.2). */
+    val lifeEvents: Array<LifeHistoryRowContext>
     val itemPurchaseLevel: Int
     val trainers: Array<String>
     val craftingAccess: Array<String>
@@ -162,7 +166,8 @@ enum class SettlementNav : Translatable, ValueEnum {
     STORAGE,
     NOTES,
     BONUSES,
-    POPULATION;
+    POPULATION,
+    LIFE;
 
     companion object {
         fun fromString(value: String) = fromCamelCase<SettlementNav>(value)
@@ -643,6 +648,7 @@ class InspectSettlement(
                 }
                 .toTypedArray(),
             populationNpcs = current.populationRoster?.npcs ?: emptyArray(),
+            lifeEvents = lifeHistoryRows(parsed?.name ?: game.scenes.get(current.sceneId)?.name ?: "", current.lifeEventHistory),
             trainers = trainersList.toTypedArray(),
             craftingAccess = craftingList.toTypedArray(),
             itemPurchaseLevel = basePurchaseLevel,
