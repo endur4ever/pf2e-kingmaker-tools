@@ -102,9 +102,17 @@ fun formatTurnGazette(
     /** Pre-localized faction agenda move lines; public per plan 7.1 (what happened, never why). */
     factionMoves: List<String> = emptyList(),
     spotlight: String? = null,
+    /** Pre-localized settlement life lines (settlement-life plan section 4); public flavor. */
+    lifeEvents: List<String> = emptyList(),
     localize: (key: String, data: AnyObject) -> String = ::defaultLocalize,
 ): String? {
     val gazetteEvents = mutableListOf<String>()
+
+    if (lifeEvents.isNotEmpty()) {
+        val data = js("{}")
+        data.list = lifeEvents.joinToString("; ")
+        gazetteEvents.add(localize("kingdom.turnGazette.lifeEvents", data.unsafeCast<AnyObject>()))
+    }
 
     if (tributeRp > 0) {
         val data = js("{}")

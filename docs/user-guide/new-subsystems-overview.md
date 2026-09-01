@@ -125,3 +125,17 @@ Two long-standing behaviours reported an effect the module never applied. Both a
 ---
 
 *Note: For technical details on implementation and integration, see the [Official Module Integration](./../README.md#official-module-integration) section of the README.*
+
+### Settlement life events
+
+Each End Turn, every settlement has a chance — rising with its level and population, never a
+certainty — to produce one line of town life: a market day, a midwinter feast, a guild theft.
+At most two fire kingdom-wide per turn, and a busy capital cannot take both slots every month.
+Residents are cast from the settlement's population roster by occupation, so the same brewer
+hosts the feast and the same rat-catcher gets accused.
+
+The line is written into the turn gazette whether or not anyone acts on it. Some events also
+carry a small mechanical hook (±1 Unrest, +1 RP, create a quest, spread a rumour); those arrive
+on **one whispered digest card** per turn with an apply and a dismiss button per row. Nothing
+applies on its own. The catalog lives in `data/settlement-life-events/` and ships with three
+templates; adding one is a JSON file plus its two gazette strings.

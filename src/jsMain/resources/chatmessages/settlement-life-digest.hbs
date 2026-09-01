@@ -1,0 +1,27 @@
+<div class="km-chat-card km-settlement-life-digest">
+    <h3>{{localizeKM "settlementLife.digest.title" turn=turn}}</h3>
+    {{#each rows}}
+        <div class="km-life-row" data-record-id="{{this.recordId}}">
+            <div><b>{{this.settlementName}}</b> — {{this.gazetteLine}}</div>
+            {{#if this.hookLabel}}
+                <div class="km-chat-buttons">
+                    <button type="button" class="km-offer-life-event"
+                            data-settlement-id="{{this.settlementId}}"
+                            data-record-id="{{this.recordId}}"
+                            data-hook-kind="{{this.hookKind}}"
+                            data-kingdom-actor-uuid="{{@root.actorUuid}}">
+                        {{this.hookLabel}}
+                    </button>
+                    <button type="button" class="km-offer-life-event"
+                            data-settlement-id="{{this.settlementId}}"
+                            data-record-id="{{this.recordId}}"
+                            data-hook-kind="dismiss"
+                            data-kingdom-actor-uuid="{{@root.actorUuid}}">
+                        {{localizeKM "settlementLife.digest.dismiss"}}
+                    </button>
+                </div>
+            {{/if}}
+        </div>
+    {{/each}}
+    <p class="km-sub-note">{{localizeKM "settlementLife.digest.hint"}}</p>
+</div>

@@ -2145,7 +2145,8 @@
                 "rivalMove": "Royaumes rivaux : {list}",
                 "spotlight": "Coup de projecteur : {name}",
                 "factionMoves": "Manœuvres de faction : {list}",
-                "deed": "Exploit : {name}"
+                "deed": "Exploit : {name}",
+                "lifeEvents": "Town life: {list}"
             },
             "warfare": {
                 "damaged": "Damaged",
@@ -8560,7 +8561,26 @@
                     "name": "Jour de marché",
                     "gazette": "{trader} anime un jour de marché chargé à {settlement}."
                 }
-            }
+            },
+            "digest": {
+                "title": "Town life — turn {turn}",
+                "dismiss": "Dismiss",
+                "hint": "Each line is already in the gazette. A button applies its effect; nothing applies on its own."
+            },
+            "hook": {
+                "unrestUp": "+1 Unrest",
+                "unrestDown": "−1 Unrest",
+                "rp": "+1 RP",
+                "quest": "Create quest",
+                "rumor": "Spread rumour"
+            },
+            "cast": {
+                "someone": "someone"
+            },
+            "applied": "{settlement}: life event applied.",
+            "alreadyApplied": "That life event has already been resolved.",
+            "questTitle": "Trouble in {settlement}",
+            "rumorTitle": "Rumour from {settlement}"
         },
         "petitions": {
             "absentee-lord": {

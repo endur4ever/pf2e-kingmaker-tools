@@ -212,3 +212,16 @@ fun castFromRoster(
     val chosen = preferred ?: roster.first()
     return CastMember(npcId = chosen.id, name = chosen.name)
 }
+
+/**
+ * The chance, in whole percent, that a settlement rolls a life event this turn (§3.2 / §9 Q2).
+ *
+ * The plan's proposed curve, `0.15 + 0.05·level + population/20000`: a fresh village sits near a
+ * one-in-five, a metropolis near certainty, and the kingdom-wide cap above keeps even a realm of
+ * cities to two lines a turn. Capped at 90 rather than 100 so no settlement is EVER a certainty —
+ * a town whose chronicle never has a quiet month reads as a machine, not a place.
+ */
+fun lifeEventChancePercent(settlementLevel: Int, population: Int): Int {
+    val chance = 0.15 + 0.05 * settlementLevel.coerceAtLeast(0) + population.coerceAtLeast(0) / 20000.0
+    return (chance * 100).toInt().coerceIn(0, 90)
+}

@@ -31,6 +31,8 @@ import com.foundryvtt.pf2e.actor.PF2ENpc
 import kotlin.math.min
 import at.posselt.pfrpg2e.data.events.KingdomEventTrait
 import at.posselt.pfrpg2e.kingdom.dialogs.AddExpeditionDialog
+import at.posselt.pfrpg2e.kingdom.data.RawQuest
+import at.posselt.pfrpg2e.kingdom.data.RawQuestRewards
 import at.posselt.pfrpg2e.kingdom.dialogs.AddQuest
 import at.posselt.pfrpg2e.kingdom.applyPetitionAnswer
 import at.posselt.pfrpg2e.kingdom.applyPetitionOverdue
@@ -322,6 +324,76 @@ private val buttons = listOf(
             return@ChatButton
         }
         rollRandomEncounter(game, campingActor, false)
+    },
+    ChatButton("km-offer-life-event") { game, actor, _, button ->
+        // plan section 5.1 verbatim: GM gate -> locate (settlement, record) -> idempotency on
+        // hookApplied -> apply the closed hook -> persist -> announce
+        if (!game.user.isGM) return@ChatButton
+        val settlementId = button.dataset["settlementId"] ?: return@ChatButton
+        val recordId = button.dataset["recordId"] ?: return@ChatButton
+        val hookKind = button.dataset["hookKind"] ?: return@ChatButton
+        val kingdom = actor.getKingdom() ?: return@ChatButton
+        val settlement = kingdom.settlements.find { it.sceneId == settlementId } ?: return@ChatButton
+        val record = settlement.lifeEventHistory?.find { it.recordId == recordId } ?: return@ChatButton
+        if (record.hookApplied == true) {
+            ui.notifications.info(t("settlementLife.alreadyApplied"))
+            return@ChatButton
+        }
+        val settlementName = game.scenes.get(settlementId)?.name ?: settlementId
+        val gazette = record.castNames.joinToString(", ")
+        when (hookKind) {
+            "dismiss" -> Unit
+            // the magnitude was clamped to one point either way at parse time; clamping the
+            // RESULT at zero is the same rule every unrest write follows
+            "unrest-delta" -> kingdom.unrest = (kingdom.unrest + (record.hookMagnitude ?: 0)).coerceAtLeast(0)
+            "rp-delta" -> kingdom.resourcePoints.now =
+                (kingdom.resourcePoints.now + (record.hookMagnitude ?: 0)).coerceAtLeast(0)
+            "quest-spawn" -> AddQuest(
+                prefillTitle = t("settlementLife.questTitle", recordOf("settlement" to settlementName)),
+                prefillGiver = record.castNames.firstOrNull() ?: settlementName,
+                settlements = kingdom.getAllSettlements(game).allSettlements.map { it.id to it.name },
+            ) { quest ->
+                // fires long after this handler's setKingdom: re-read and persist, or the quest
+                // lands on a kingdom object nobody saves
+                actor.getKingdom()?.let { fresh ->
+                    fresh.quests = (fresh.quests ?: emptyArray()) + quest
+                    actor.setKingdom(fresh)
+                }
+            }.launch()
+            // a hidden rumor quest -- the plan's default target, reusing the quest surface rather
+            // than a new subsystem; a GM promotes it by un-hiding it
+            "rumor-spawn" -> kingdom.quests = (kingdom.quests ?: emptyArray()) + RawQuest(
+                id = "quest-life-$recordId",
+                title = t("settlementLife.rumorTitle", recordOf("settlement" to settlementName)),
+                description = gazette,
+                giver = record.castNames.firstOrNull() ?: settlementName,
+                status = "active",
+                type = "other",
+                category = "side",
+                level = null,
+                target = null,
+                rewards = RawQuestRewards(),
+                flavorTextCompleted = "",
+                notes = null,
+                hidden = true,
+                source = null,
+                createdAt = js("Date.now()") as Double,
+                updatedAt = null,
+                completionSnapshot = null,
+            )
+            else -> return@ChatButton
+        }
+        record.hookApplied = true
+        actor.setKingdom(kingdom)
+        if (hookKind != "dismiss") {
+            postChatMessage(t("settlementLife.applied", recordOf("settlement" to settlementName)))
+        }
+        // grey out only THIS row; the digest carries several independent offers
+        (button.closest(".km-life-row") as? HTMLElement)?.let { row ->
+            row.querySelectorAll("button").asList().filterIsInstance<HTMLElement>()
+                .forEach { it.setAttribute("disabled", "disabled") }
+            row.classList.add("km-card-resolved")
+        }
     },
     ChatButton("km-petition-confirm") { game, actor, _, button ->
         if (!game.user.isGM) return@ChatButton

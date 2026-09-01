@@ -37,6 +37,10 @@ import at.posselt.pfrpg2e.kingdom.expirePetitionsForTurn
 import at.posselt.pfrpg2e.kingdom.generatePetitionsForTurn
 import at.posselt.pfrpg2e.kingdom.postNewPetitionNotice
 import at.posselt.pfrpg2e.kingdom.postPetitionExpiryOffers
+import at.posselt.pfrpg2e.kingdom.postSettlementLifeDigest
+import at.posselt.pfrpg2e.kingdom.rollSettlementLifeEvents
+import at.posselt.pfrpg2e.data.regions.getSeasonForMonth
+import at.posselt.pfrpg2e.utils.getCurrentMonth
 import at.posselt.pfrpg2e.kingdom.npcMemoryRules
 import at.posselt.pfrpg2e.kingdom.postNpcAttitudeShiftOffers
 import at.posselt.pfrpg2e.kingdom.xp.postXpLedgerDigest
@@ -729,6 +733,16 @@ private suspend fun performEndTurnLocked(game: Game, actor: KingdomActor): TickR
     val spotlightLine = spotlightOfTheTurn(
         (kingdom.currentTurnContributions ?: emptyArray()).toTurnTallies()
     )?.let { localizeSpotlight(it) }
+    // Settlement life rolls here, before the gazette is written, so its lines land in the turn
+    // record; the records it appends ride the single persist below and the digest posts after.
+    val lifeEventsFired = rollSettlementLifeEvents(
+        kingdom = kingdom,
+        settlements = kingdom.getAllSettlements(game).allSettlements,
+        season = runCatching { getSeasonForMonth(game.getCurrentMonth().ordinal).value }.getOrNull(),
+        currentTurn = currentTurn,
+    )
+    val lifeEventLines = lifeEventsFired.map { it.gazetteLine }
+
     val turnNotes = formatTurnGazette(
         activities = activitySummaries,
         sizeChange = sizeChange,
@@ -743,6 +757,7 @@ private suspend fun performEndTurnLocked(game: Game, actor: KingdomActor): TickR
         rivalMoves = rivalHeadlines,
         factionMoves = factionMoveLines,
         spotlight = spotlightLine,
+        lifeEvents = lifeEventLines,
         localize = ::t,
     )
     // Player-safe gazette: identical EXCEPT the secret campaign-clock progress is dropped, so the
@@ -761,6 +776,7 @@ private suspend fun performEndTurnLocked(game: Game, actor: KingdomActor): TickR
         rivalMoves = rivalHeadlines,
         factionMoves = factionMoveLines,
         spotlight = spotlightLine,
+        lifeEvents = lifeEventLines,
         localize = ::t,
     )
 
@@ -956,6 +972,7 @@ private suspend fun performEndTurnLocked(game: Game, actor: KingdomActor): TickR
 
     postXpLedgerDigest(game, actor.uuid, currentTurn)
 
+    postSettlementLifeDigest(game, actor.uuid, currentTurn, lifeEventsFired)
     postPetitionExpiryOffers(game, actor.uuid, expiredPetitions)
     postNewPetitionNotice(game, actor.uuid, newPetitions)
 

@@ -1537,7 +1537,8 @@
                 "rivalMove": "Rival Realms: {list}",
                 "spotlight": "Spotlight: {name}",
                 "factionMoves": "Faction Moves: {list}",
-                "deed": "Deed: {name}"
+                "deed": "Deed: {name}",
+                "lifeEvents": "Town life: {list}"
             },
             "xpRules": "XP Rules",
             "xpRulesHelp": "Adds additional milestones, gain XP buttons and increases XP for claiming hexes and converting XP based on kingdom level",
@@ -8560,7 +8561,26 @@
                     "name": "Market Day",
                     "gazette": "{trader} draws a busy market day in {settlement}."
                 }
-            }
+            },
+            "digest": {
+                "title": "Town life — turn {turn}",
+                "dismiss": "Dismiss",
+                "hint": "Each line is already in the gazette. A button applies its effect; nothing applies on its own."
+            },
+            "hook": {
+                "unrestUp": "+1 Unrest",
+                "unrestDown": "−1 Unrest",
+                "rp": "+1 RP",
+                "quest": "Create quest",
+                "rumor": "Spread rumour"
+            },
+            "cast": {
+                "someone": "someone"
+            },
+            "applied": "{settlement}: life event applied.",
+            "alreadyApplied": "That life event has already been resolved.",
+            "questTitle": "Trouble in {settlement}",
+            "rumorTitle": "Rumour from {settlement}"
         },
         "petitions": {
             "absentee-lord": {

@@ -2145,7 +2145,8 @@
                 "rivalMove": "敌对王国：{list}",
                 "spotlight": "聚光灯：{name}",
                 "factionMoves": "势力动向：{list}",
-                "deed": "功绩：{name}"
+                "deed": "功绩：{name}",
+                "lifeEvents": "Town life: {list}"
             },
             "warfare": {
                 "damaged": "Damaged",
@@ -8560,7 +8561,26 @@
                     "name": "集市日",
                     "gazette": "{trader} 在 {settlement} 带来热闹的集市日。"
                 }
-            }
+            },
+            "digest": {
+                "title": "Town life — turn {turn}",
+                "dismiss": "Dismiss",
+                "hint": "Each line is already in the gazette. A button applies its effect; nothing applies on its own."
+            },
+            "hook": {
+                "unrestUp": "+1 Unrest",
+                "unrestDown": "−1 Unrest",
+                "rp": "+1 RP",
+                "quest": "Create quest",
+                "rumor": "Spread rumour"
+            },
+            "cast": {
+                "someone": "someone"
+            },
+            "applied": "{settlement}: life event applied.",
+            "alreadyApplied": "That life event has already been resolved.",
+            "questTitle": "Trouble in {settlement}",
+            "rumorTitle": "Rumour from {settlement}"
         },
         "petitions": {
             "absentee-lord": {

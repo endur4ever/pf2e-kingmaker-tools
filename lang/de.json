@@ -1313,7 +1313,8 @@
                 "rivalMove": "Rivalisierende Reiche: {list}",
                 "spotlight": "Im Rampenlicht: {name}",
                 "factionMoves": "Fraktionszüge: {list}",
-                "deed": "Tat: {name}"
+                "deed": "Tat: {name}",
+                "lifeEvents": "Town life: {list}"
             },
             "xpRules": "XP Rules",
             "xpRulesHelp": "Adds additional milestones, gain XP buttons and increases XP for claiming hexes and converting XP based on kingdom level",
@@ -8560,7 +8561,26 @@
                     "name": "Markttag",
                     "gazette": "{trader} sorgt in {settlement} für einen lebhaften Markttag."
                 }
-            }
+            },
+            "digest": {
+                "title": "Town life — turn {turn}",
+                "dismiss": "Dismiss",
+                "hint": "Each line is already in the gazette. A button applies its effect; nothing applies on its own."
+            },
+            "hook": {
+                "unrestUp": "+1 Unrest",
+                "unrestDown": "−1 Unrest",
+                "rp": "+1 RP",
+                "quest": "Create quest",
+                "rumor": "Spread rumour"
+            },
+            "cast": {
+                "someone": "someone"
+            },
+            "applied": "{settlement}: life event applied.",
+            "alreadyApplied": "That life event has already been resolved.",
+            "questTitle": "Trouble in {settlement}",
+            "rumorTitle": "Rumour from {settlement}"
         },
         "petitions": {
             "absentee-lord": {
