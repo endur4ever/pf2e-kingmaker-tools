@@ -1,6 +1,7 @@
 package at.posselt.pfrpg2e.kingdom.sheet.contexts
 
 import at.posselt.pfrpg2e.data.kingdom.leaders.Leader
+import at.posselt.pfrpg2e.kingdom.OVERDUE_APPLIED
 import at.posselt.pfrpg2e.kingdom.RawPetitionTemplate
 import at.posselt.pfrpg2e.kingdom.petitionTemplateById
 import at.posselt.pfrpg2e.kingdom.petitions.Petition
@@ -109,9 +110,12 @@ fun petitionInboxContext(
                 options = optionsOf(template, petition.id),
                 isOpen = petition.status == PetitionStatus.OPEN,
                 statusLabel = localizeStatus(petition.status),
-                chosenLabel = petition.chosenOptionId?.let {
-                    t("petitions.${petition.templateId}.$it.label")
-                },
+                // the overdue sentinel rides in chosenOptionId but names no option: composing a
+                // label from it would print the raw key, and claim the office "chose" something on
+                // a petition nobody ever answered
+                chosenLabel = petition.chosenOptionId
+                    ?.takeIf { it != OVERDUE_APPLIED }
+                    ?.let { t("petitions.${petition.templateId}.$it.label") },
             )
         }
         .toTypedArray()

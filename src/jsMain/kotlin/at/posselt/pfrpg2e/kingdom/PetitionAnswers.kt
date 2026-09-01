@@ -46,8 +46,10 @@ private fun findPetition(kingdom: KingdomData, petitionId: String): Petition? =
 /**
  * Whisper the GM the choice a role's player made.
  *
- * Guards on the petition still being OPEN so two players — or one player clicking twice — cannot
- * produce two live offers for the same audience, which would let one petition be paid for twice.
+ * Clicking twice DOES post two cards -- the click writes nothing, so there is no state to debounce
+ * against -- and the GM may see an answer the player has since changed their mind about. What
+ * cannot happen is paying twice: [applyPetitionAnswer] acts only on an OPEN petition, so whichever
+ * card the GM confirms first closes the audience and every other card for it becomes inert.
  */
 suspend fun postPetitionAnswerOffer(
     game: Game,

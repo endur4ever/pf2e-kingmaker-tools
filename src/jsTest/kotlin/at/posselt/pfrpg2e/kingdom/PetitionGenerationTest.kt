@@ -26,6 +26,7 @@ class PetitionGenerationTest {
         filled: List<Leader> = Leader.entries.toList(),
         withRoster: Boolean = true,
         petitions: Array<dynamic> = emptyArray(),
+        rosterSize: Int = 3,
     ): KingdomData {
         val leaderSlots = unsafeJso<dynamic> {}
         for (role in Leader.entries) {
@@ -40,7 +41,7 @@ class PetitionGenerationTest {
                 unsafeJso<dynamic> {
                     sceneId = "scene-1"
                     populationRoster = unsafeJso<dynamic> {
-                        npcs = if (withRoster) arrayOf(npc("n1"), npc("n2")) else emptyArray<dynamic>()
+                        npcs = if (withRoster) (1..rosterSize).map { npc("n$it") }.toTypedArray() else emptyArray<dynamic>()
                     }
                 }
             )
@@ -153,5 +154,66 @@ class PetitionGenerationTest {
     fun aVacantOfficeReceivesNoAudiences() {
         val k = kingdom(filled = emptyList())
         assertEquals(0, alwaysGenerate(k, turn = 1).size)
+    }
+
+    @Test
+    fun successiveTurnsDoNotSignEveryPetitionWithTheSameResident() {
+        // rosters.first() plus castPetitioner's own first-entry fallback are each deterministic,
+        // so without a rotation every petition the campaign ever generates names one NPC
+        val names = (1..6).map { turn -> alwaysGenerate(kingdom(), turn).first().petitionerName }
+        assertTrue(names.toSet().size > 1, "every petition was signed by ${names.first()}")
+    }
+
+    @Test
+    fun theSameTurnCastsTheSameResident() {
+        // determinism still holds within a turn: a preview and its commit must agree
+        assertEquals(
+            alwaysGenerate(kingdom(), turn = 3).map { it.petitionerId },
+            alwaysGenerate(kingdom(), turn = 3).map { it.petitionerId },
+        )
+    }
+
+    @Test
+    fun aRowThisBuildCannotParseSurvivesGenerationAndExpiry() {
+        // an unknown role or status -- a newer build's data, or a hand-edited flag -- is dropped
+        // from EVALUATION by contract, but dropping it from STORAGE would make one End Turn under
+        // an older build permanently destroy petitions it merely did not understand
+        val alien = unsafeJso<dynamic> {
+            id = "petition-from-the-future"
+            petitionerId = "n1"
+            petitionerName = "Someone"
+            targetRole = "archduke"
+            templateId = "unknown"
+            createdTurn = 1
+            dueTurn = 4
+            status = "open"
+        }
+        val k = kingdom(petitions = arrayOf(alien))
+        alwaysGenerate(k, turn = 1)
+        assertTrue(
+            k.petitions!!.any { it.id == "petition-from-the-future" },
+            "generation deleted a row it could not parse",
+        )
+        expirePetitionsForTurn(k, currentTurn = 9)
+        assertTrue(
+            k.petitions!!.any { it.id == "petition-from-the-future" },
+            "expiry deleted a row it could not parse",
+        )
+    }
+
+    @Test
+    fun theResidentRotationHoldsForEveryRosterSize() {
+        // the real invariant, not the one size that happened to fail: the role rotation puts the
+        // office with ordinal == turn % 8 at the front, so ANY linear seed collapses to a multiple
+        // of the turn and dies whenever the roster size divides it. Sizes 2 and 4 caught the
+        // arithmetic the first two attempts got wrong.
+        for (size in 2..6) {
+            val k = { kingdom(rosterSize = size) }
+            val names = (1..12).map { turn -> alwaysGenerate(k(), turn).first().petitionerName }
+            assertTrue(
+                names.toSet().size > 1,
+                "roster of $size always cast ${names.first()}",
+            )
+        }
     }
 }

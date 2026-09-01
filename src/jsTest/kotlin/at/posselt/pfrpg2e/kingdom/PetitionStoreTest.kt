@@ -6,6 +6,7 @@ import at.posselt.pfrpg2e.kingdom.data.toModel
 import at.posselt.pfrpg2e.kingdom.data.toRaw
 import at.posselt.pfrpg2e.kingdom.petitions.Petition
 import at.posselt.pfrpg2e.kingdom.petitions.PetitionStatus
+import at.posselt.pfrpg2e.kingdom.sheet.contexts.petitionInboxContext
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -125,5 +126,68 @@ class PetitionStoreTest {
                 "${template.id} targets unknown role ${template.targetRole}",
             )
         }
+    }
+
+    @Test
+    fun theOverdueSentinelIsNeverRenderedAsAChosenOption() {
+        // applyPetitionOverdue parks a sentinel in chosenOptionId; composing a label from it would
+        // print the raw i18n key and claim the office "chose" something nobody ever answered
+        val expired = Petition(
+            id = "p1",
+            petitionerId = "n1",
+            petitionerName = "Someone",
+            targetRole = Leader.RULER,
+            templateId = "succession-question",
+            createdTurn = 1,
+            dueTurn = 4,
+            status = PetitionStatus.EXPIRED,
+            chosenOptionId = OVERDUE_APPLIED,
+        )
+        val row = petitionInboxContext(
+            petitions = listOf(expired),
+            ownedRoles = setOf(Leader.RULER),
+            seenIds = emptySet(),
+            currentTurn = 5,
+        ).rows.single()
+        assertNull(row.chosenLabel)
+    }
+
+    @Test
+    fun theInboxShowsOnlyTheRolesAUserOwns() {
+        fun petition(id: String, role: Leader) = Petition(
+            id = id,
+            petitionerId = "n1",
+            petitionerName = "Someone",
+            targetRole = role,
+            templateId = if (role == Leader.RULER) "succession-question" else "tax-revolt",
+            createdTurn = 1,
+            dueTurn = 4,
+        )
+        val all = listOf(petition("a", Leader.RULER), petition("b", Leader.TREASURER))
+        val mine = petitionInboxContext(all, setOf(Leader.TREASURER), emptySet(), currentTurn = 2)
+        assertEquals(listOf("b"), mine.rows.map { it.id })
+        assertEquals(1, mine.unreadCount)
+        // a user owning no office gets no inbox and no badge, however full the realm's is
+        val none = petitionInboxContext(all, emptySet(), emptySet(), currentTurn = 2)
+        assertEquals(0, none.rows.size)
+        assertEquals(0, none.unreadCount)
+    }
+
+    @Test
+    fun eachOptionCarriesItsOwnPetitionId() {
+        // petitions.hbs is a registered partial with no parent frame: without this denormalisation
+        // every option button in the list would name the first petition
+        val p = Petition(
+            id = "p-42",
+            petitionerId = "n1",
+            petitionerName = "Someone",
+            targetRole = Leader.RULER,
+            templateId = "succession-question",
+            createdTurn = 1,
+            dueTurn = 4,
+        )
+        val row = petitionInboxContext(listOf(p), setOf(Leader.RULER), emptySet(), 2).rows.single()
+        assertTrue(row.options.isNotEmpty())
+        row.options.forEach { assertEquals("p-42", it.petitionId) }
     }
 }

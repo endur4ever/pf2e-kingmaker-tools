@@ -37,6 +37,25 @@ private data class RosterSource(
     val candidates: List<PetitionerCandidate>,
 )
 
+/**
+ * Deterministic rotation: the same turn casts the same resident, successive turns do not.
+ *
+ * The seed is MIXED rather than used directly. The role rotation already puts the office whose
+ * ordinal is `turn % 8` at the front, so any seed of the form `a*turn + b*ordinal` collapses to
+ * `(a+b)*turn` for the first petition of every turn — and whenever the roster size divides
+ * `(a+b)`, that picks the same resident forever. No choice of constants avoids it for every roster
+ * size, so the fix is to destroy the linear relationship instead of tuning around it.
+ */
+private fun rotateCandidates(candidates: List<PetitionerCandidate>, seed: Int): List<PetitionerCandidate> {
+    if (candidates.size < 2) return candidates
+    var mixed = seed * -1640531527
+    mixed = mixed xor (mixed ushr 15)
+    mixed *= 668265263
+    mixed = mixed xor (mixed ushr 13)
+    val offset = ((mixed % candidates.size) + candidates.size) % candidates.size
+    return candidates.drop(offset) + candidates.take(offset)
+}
+
 private fun rosterSources(kingdom: KingdomData): List<RosterSource> =
     kingdom.settlements.mapNotNull { settlement ->
         val npcs = settlement.populationRoster?.npcs?.map {
@@ -44,6 +63,17 @@ private fun rosterSources(kingdom: KingdomData): List<RosterSource> =
         }.orEmpty()
         if (npcs.isEmpty()) null else RosterSource(settlement.sceneId, npcs)
     }
+
+/**
+ * Rows this build cannot parse -- an unknown role or status from a newer build, or a hand-edited
+ * flag -- carried through every write UNTOUCHED.
+ *
+ * Dropping them from evaluation is the documented contract; dropping them from STORAGE would make
+ * one End Turn under an older build permanently destroy petitions it merely did not understand.
+ * This is the same rule the rumor store's write funnel follows for the same reason.
+ */
+private fun unparseableRows(kingdom: KingdomData): List<RawPetition> =
+    kingdom.petitions?.filter { it.toModel() == null } ?: emptyList()
 
 /** Roles with somebody actually appointed; a vacant office receives no audiences. */
 private fun filledLeaderRoles(kingdom: KingdomData): Set<Leader> {
@@ -116,8 +146,12 @@ fun generatePetitionsForTurn(
         val total = choices.sumOf { maxOf(it.weight, 0) }
         if (total <= 0) continue
         val picked = weightedPickPetition(choices, pickRoll(total)) ?: continue
-        val source = rosters.first()
-        val petitioner = castPetitioner(source.candidates, preferredOccupation = null) ?: continue
+        // rotate the settlement AND the resident by turn and office, or every petition the
+        // campaign ever generates is signed by the same person in the same town: rosters.first()
+        // plus castPetitioner's own first-entry fallback are each deterministic on their own
+        val source = rosters[((currentTurn + role.ordinal) % rosters.size + rosters.size) % rosters.size]
+        val rotated = rotateCandidates(source.candidates, currentTurn * 2 + role.ordinal)
+        val petitioner = castPetitioner(rotated, preferredOccupation = null) ?: continue
         val petition = Petition(
             id = "petition-$currentTurn-${role.value}-${picked.id}",
             petitionerId = petitioner.id,
@@ -132,7 +166,7 @@ fun generatePetitionsForTurn(
         created.add(petition)
     }
     if (created.isNotEmpty()) {
-        kingdom.petitions = petitions.map { it.toRaw() }.toTypedArray()
+        kingdom.petitions = (petitions.map { it.toRaw() } + unparseableRows(kingdom)).toTypedArray()
     }
     return created
 }
@@ -147,7 +181,7 @@ fun expirePetitionsForTurn(kingdom: KingdomData, currentTurn: Int): List<Petitio
     val petitions = kingdom.petitions?.mapNotNull { it.toModel() } ?: return emptyList()
     val outcome = expirePetitions(petitions, currentTurn)
     if (outcome.newlyExpired.isEmpty()) return emptyList()
-    kingdom.petitions = outcome.petitions.map { it.toRaw() }.toTypedArray()
+    kingdom.petitions = (outcome.petitions.map { it.toRaw() } + unparseableRows(kingdom)).toTypedArray()
     return outcome.newlyExpired
 }
 
