@@ -28,7 +28,7 @@ import com.foundryvtt.core.helpers.onCanvasReady
 import com.foundryvtt.core.helpers.onDrawDrawing
 import com.foundryvtt.kingmaker.HexState
 import com.foundryvtt.kingmaker.kingmaker
-import com.foundryvtt.kingmaker.onCloseKingmakerHexEdit
+import com.foundryvtt.kingmaker.onCloseHexEditor
 import js.objects.ReadonlyRecord
 import js.objects.recordOf
 import kotlinx.coroutines.await
@@ -100,7 +100,7 @@ fun registerHexGridSync(game: Game) {
     // Only the GM writes overlay Drawings; players just render the replicated documents.
     if (!isGM) return
 
-    TypedHooks.onCloseKingmakerHexEdit { _, _ ->
+    TypedHooks.onCloseHexEditor { _, _ ->
         buildPromise {
             syncHexDrawingsToNativeState(game)
             syncSettlementMarkers(game)

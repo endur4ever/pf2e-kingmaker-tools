@@ -704,7 +704,7 @@
             "notes": "Notes",
             "bonuses": "Bonuses",
             "population": "Population",
-            "life": "Town Life"
+            "life": "Vie urbaine"
         },
         "structureBrowserNav": {
             "buildable": "Buildable",
@@ -874,7 +874,7 @@
                     "changeConsumption": "Consumption: {old} → {new}",
                     "expiredModifiers": "{count} modifier(s) expired",
                     "tributeRp": "Vassal Tribute: +{amount} RP",
-                    "lifeEvents": "Town life this turn"
+                    "lifeEvents": "Vie urbaine ce tour"
                 },
                 "commit": "Complete Turn",
                 "cancel": "Cancel",
@@ -2148,7 +2148,7 @@
                 "spotlight": "Coup de projecteur : {name}",
                 "factionMoves": "Manœuvres de faction : {list}",
                 "deed": "Exploit : {name}",
-                "lifeEvents": "Town life: {list}"
+                "lifeEvents": "Vie urbaine : {list}"
             },
             "warfare": {
                 "damaged": "Damaged",
@@ -2814,76 +2814,76 @@
                 "turnLabel": "Tour {turn}"
             },
             "xpLedger": {
-                "title": "Registre d'XP du groupe",
+                "title": "Registre de PX du groupe",
                 "addEntry": "Ajouter une entrée",
-                "empty": "Aucun XP enregistré.",
-                "granted": "Accordé via le registre",
-                "actual": "un membre possède {xp} XP",
+                "empty": "Aucun PX enregistré pour l'instant.",
+                "granted": "Accordés via le registre",
+                "actual": "un membre du groupe détient {xp} PX",
                 "drift": "écart {drift}",
                 "turn": "Tour",
                 "turnLabel": "Tour {turn}",
                 "source": {
-                    "hexReconnoitered": "Hex reconnu",
+                    "hexReconnoitered": "Hexagone reconnu",
                     "siteCleared": "Site nettoyé",
-                    "questCompleted": "Quête terminée",
+                    "questCompleted": "Quête accomplie",
                     "expeditionResolved": "Expédition résolue",
-                    "rpEncounter": "Rencontre de rôle",
+                    "rpEncounter": "Rencontre de jeu de rôle",
                     "manual": "Manuel"
                 },
                 "sourceRef": "Référence",
-                "sourceRefHelp": "Clé d'hex, id de quête, ou tout identifiant ; vide accepté.",
-                "amount": "XP",
+                "sourceRefHelp": "Clé d'hexagone, identifiant de quête ou tout ce qui identifie le moment ; vide convient.",
+                "amount": "PX",
                 "status": {
                     "offered": "Proposé",
                     "confirmed": "Confirmé",
-                    "dismissed": "Rejeté"
+                    "dismissed": "Écarté"
                 },
                 "note": "Note",
-                "noParty": "Aucun acteur de groupe pour porter le registre.",
-                "confirmDelete": "Supprimer cette entrée ? L'XP déjà accordé n'est pas repris.",
+                "noParty": "Aucun acteur de groupe trouvé pour tenir le registre.",
+                "confirmDelete": "Supprimer cette entrée ? Les PX déjà accordés ne sont pas repris.",
                 "sourceColumn": "Source",
                 "statusColumn": "Statut",
-                "digestTitle": "XP du groupe gagné",
-                "digestBody": "Faits marquants de ce tour. Modifiez un montant avant de confirmer s'il ne convient pas.",
+                "digestTitle": "PX gagnés par le groupe",
+                "digestBody": "Moments enregistrés ce tour. Modifiez un montant avant de confirmer s'il ne convient pas.",
                 "confirm": "Confirmer",
-                "dismiss": "Rejeter",
+                "dismiss": "Écarter",
                 "confirmAll": "Tout confirmer",
-                "dismissAll": "Tout rejeter",
-                "alreadyAnswered": "Cette offre d'XP a déjà reçu une réponse."
+                "dismissAll": "Tout écarter",
+                "alreadyAnswered": "Cette proposition de PX a déjà reçu une réponse."
             },
             "petitions": {
-                "title": "Petitions",
-                "empty": "No audiences are waiting.",
-                "turnsLeft": "{turns} turns left",
-                "dueBy": "Due by turn {turn}",
-                "chose": "Chose",
+                "title": "Pétitions",
+                "empty": "Aucune audience en attente.",
+                "turnsLeft": "{turns} tours restants",
+                "dueBy": "Échéance au tour {turn}",
+                "chose": "A choisi",
                 "status": {
-                    "open": "Open",
-                    "answered": "Answered",
-                    "expired": "Lapsed"
+                    "open": "Ouverte",
+                    "answered": "Répondue",
+                    "expired": "Caduque"
                 },
-                "newTitle": "New petitions",
-                "newHint": "The role's player answers from the Party tab; you confirm before anything applies.",
-                "expiredTitle": "Petition lapsed unanswered",
-                "expiredPrompt": "Apply the overdue consequence (+1 Unrest), or let it pass?",
-                "applyOverdue": "Apply +1 Unrest",
-                "dismissOverdue": "Let it pass",
-                "answerTitle": "Petition answered",
-                "confirm": "Confirm",
-                "dismiss": "Dismiss",
+                "newTitle": "Nouvelles pétitions",
+                "newHint": "Le joueur du rôle répond depuis l'onglet Groupe ; vous confirmez avant que rien ne s'applique.",
+                "expiredTitle": "Pétition restée sans réponse",
+                "expiredPrompt": "Appliquer la conséquence du retard (+1 Troubles) ou laisser passer ?",
+                "applyOverdue": "Appliquer +1 Troubles",
+                "dismissOverdue": "Laisser passer",
+                "answerTitle": "Pétition répondue",
+                "confirm": "Confirmer",
+                "dismiss": "Écarter",
                 "pickFaction": "Faction",
-                "sentToGm": "Your answer was sent to the GM for confirmation.",
-                "alreadyAnswered": "That petition has already been answered.",
-                "noGm": "No GM is online to confirm this answer.",
-                "missingFaction": "No faction named {name} — adjust its standing by hand.",
-                "partiallyApplied": "Some consequences could not be applied; see the warnings above.",
-                "noCampingActor": "No camping actor exists to hold the rumour.",
+                "sentToGm": "Votre réponse a été envoyée au MJ pour confirmation.",
+                "alreadyAnswered": "Cette pétition a déjà reçu une réponse.",
+                "noGm": "Aucun MJ n'est en ligne pour confirmer cette réponse.",
+                "missingFaction": "Aucune faction nommée {name} — ajustez sa réputation à la main.",
+                "partiallyApplied": "Certaines conséquences n'ont pas pu s'appliquer ; voyez les avertissements ci-dessus.",
+                "noCampingActor": "Aucun acteur de campement ne peut recevoir la rumeur.",
                 "effect": {
-                    "unrest": "Unrest {amount}",
-                    "rp": "Resource Points {amount}",
-                    "standing": "Faction standing {amount}",
-                    "quest": "Spawns a quest",
-                    "rumor": "Spreads a rumour"
+                    "unrest": "Troubles {amount}",
+                    "rp": "Points de ressources {amount}",
+                    "standing": "Réputation auprès de la faction {amount}",
+                    "quest": "Génère une quête",
+                    "rumor": "Répand une rumeur"
                 }
             }
         },
@@ -3058,7 +3058,7 @@
                 "deedsBody": "Ces accomplissements sont vrais à ce tour. Accordez ou rejetez chacun.",
                 "dismissAll": "Tout rejeter",
                 "dismissedAll": "{count} offre(s) d'exploit rejetée(s).",
-                "alreadyAwarded": "{name} a déjà été accordé."
+                "alreadyAwarded": "{name} a déjà été attribué."
             },
             "travelRoute": {
                 "title": "Travel",
@@ -8552,45 +8552,45 @@
         "settlementLife": {
             "event": {
                 "midwinterFeast": {
-                    "name": "Festin du solstice",
-                    "gazette": "{host} organise un festin d'hiver à {settlement} ; {guest} y assiste."
+                    "name": "Fête du solstice d'hiver",
+                    "gazette": "{host} donne une fête du solstice d'hiver à {settlement} ; {guest} y assiste."
                 },
                 "guildTheft": {
                     "name": "Vol de guilde",
-                    "gazette": "{culprit} est accusé d'avoir volé {victim} à {settlement}."
+                    "gazette": "{culprit} est accusé d'avoir dévalisé {victim} à {settlement}."
                 },
                 "marketDay": {
                     "name": "Jour de marché",
-                    "gazette": "{trader} anime un jour de marché chargé à {settlement}."
+                    "gazette": "{trader} anime un jour de marché très fréquenté à {settlement}."
                 }
             },
             "digest": {
-                "title": "Town life — turn {turn}",
-                "dismiss": "Dismiss",
-                "hint": "Each line is already in the gazette. A button applies its effect; nothing applies on its own."
+                "title": "Vie urbaine — tour {turn}",
+                "dismiss": "Écarter",
+                "hint": "Chaque ligne figure déjà dans la gazette. Un bouton applique son effet ; rien ne s'applique tout seul."
             },
             "hook": {
-                "unrestUp": "+1 Unrest",
-                "unrestDown": "−1 Unrest",
-                "rp": "+1 RP",
-                "quest": "Create quest",
-                "rumor": "Spread rumour"
+                "unrestUp": "+1 Troubles",
+                "unrestDown": "−1 Troubles",
+                "rp": "+1 PR",
+                "quest": "Créer une quête",
+                "rumor": "Répandre une rumeur"
             },
             "cast": {
-                "someone": "someone"
+                "someone": "quelqu'un"
             },
-            "applied": "{settlement}: life event applied.",
-            "alreadyApplied": "That life event has already been resolved.",
-            "rumorTitle": "Rumour from {settlement}",
+            "applied": "{settlement} : événement appliqué.",
+            "alreadyApplied": "Cet événement a déjà été résolu.",
+            "rumorTitle": "Rumeur venue de {settlement}",
             "history": {
-                "title": "Town life",
-                "turn": "Turn",
-                "event": "Event",
-                "empty": "Nothing has happened here yet.",
-                "resolved": "resolved",
-                "pending": "awaiting the GM"
+                "title": "Vie urbaine",
+                "turn": "Tour",
+                "event": "Événement",
+                "empty": "Rien ne s'est encore passé ici.",
+                "resolved": "résolu",
+                "pending": "en attente du MJ"
             },
-            "recordGone": "That life event is no longer on record — the turn it belonged to was undone."
+            "recordGone": "Cet événement n'est plus enregistré — le tour auquel il appartenait a été annulé."
         },
         "petitions": {
             "absentee-lord": {

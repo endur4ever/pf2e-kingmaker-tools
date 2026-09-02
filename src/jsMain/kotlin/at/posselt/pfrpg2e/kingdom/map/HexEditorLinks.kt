@@ -16,6 +16,10 @@ import com.foundryvtt.core.applications.ux.TextEditor.TextEditor
 import com.foundryvtt.core.helpers.TypedHooks
 import com.foundryvtt.core.utils.fromUuid
 import com.foundryvtt.kingmaker.onRenderHexEditor
+import com.foundryvtt.kingmaker.onCloseHexEditor
+import com.foundryvtt.kingmaker.kingmaker
+import at.posselt.pfrpg2e.kingdom.xp.XpSourceKind
+import at.posselt.pfrpg2e.kingdom.xp.proposeXpOffer
 import com.foundryvtt.kingmaker.onRenderHexHud
 import kotlinx.browser.document
 import kotlinx.coroutines.await
@@ -31,10 +35,31 @@ import org.w3c.dom.get
  * independently: every change is applied immediately to this module's per-hex content entry
  * (`kingdom.hexContents`, keyed by hex key) — the same data the Hex Content Manager edits.
  */
+/** `explored` as it was when the editor opened, by hex key — the "before" half of the diff. */
+private val exploredAtOpen = mutableMapOf<String, Boolean>()
+
 fun registerHexEditorLinks(game: Game) {
     if (!game.user.isGM) return
     TypedHooks.onRenderHexEditor { app, html, _ ->
+        hexKeyOf(app)?.let { key ->
+            exploredAtOpen[key] = kingmaker.state.hexes[key]?.explored == true
+        }
         buildPromise { injectHexLinksPanel(game, app, html) }
+    }
+    // A hex going unexplored -> explored through the native editor is the reconnoiter beat the XP
+    // ledger has an award for and never had a moment to hang it on. Edge-triggered on the diff,
+    // so re-saving an already explored hex proposes nothing; the ledger's own (kind, ref) guard
+    // catches the rest. Silent like every other beat: it surfaces in the End Turn digest.
+    TypedHooks.onCloseHexEditor { app, _ ->
+        val key = hexKeyOf(app) ?: return@onCloseHexEditor
+        val before = exploredAtOpen.remove(key) ?: return@onCloseHexEditor
+        val after = kingmaker.state.hexes[key]?.explored == true
+        if (before || !after) return@onCloseHexEditor
+        buildPromise {
+            val actor = game.getKingdomActors().firstOrNull() ?: return@buildPromise
+            val turn = actor.getKingdom()?.currentTurn ?: 0
+            game.proposeXpOffer(XpSourceKind.HEX_RECONNOITERED, "hex-$key", turn)
+        }
     }
     // Also surface a hex's linked quests in the native hover tooltip.
     TypedHooks.onRenderHexHud { app, html, _ ->

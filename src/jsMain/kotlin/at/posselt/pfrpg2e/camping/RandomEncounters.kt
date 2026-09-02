@@ -9,6 +9,8 @@ import at.posselt.pfrpg2e.fromCamelCase
 import at.posselt.pfrpg2e.homebrew.HomebrewProfileRegistry
 import at.posselt.pfrpg2e.homebrew.RuleResolutionHelper
 import at.posselt.pfrpg2e.kingdom.getKingdom
+import at.posselt.pfrpg2e.kingdom.xp.XpSourceKind
+import at.posselt.pfrpg2e.kingdom.xp.proposeXpOffer
 import at.posselt.pfrpg2e.kingdom.getKingdomActors
 import at.posselt.pfrpg2e.kingdom.setKingdom
 import at.posselt.pfrpg2e.questevent.CampaignQuest
@@ -210,6 +212,20 @@ private suspend fun showEncounterPreview(
                 actor.updateRumors { existing ->
                     existing + rumor.copy(id = v4(), bornDay = currentWorldDay(game))
                 }
+            }
+            // Accepting a roleplay encounter is the RP beat the XP ledger has an award for and
+            // never had a moment to hang on -- an RP result never reaches stageEncounter, which
+            // is where combat beats are seen. Silent like every other beat: it surfaces in the
+            // End Turn digest. The ref carries the world time so two RP encounters in one day
+            // are two beats, while a reload re-accepting the same preview is still one.
+            if (category == EncounterCategory.RP) {
+                val turn = game.getKingdomActors().firstOrNull()?.getKingdom()?.currentTurn ?: 0
+                game.proposeXpOffer(
+                    kind = XpSourceKind.RP_ENCOUNTER,
+                    sourceRef = "rp-${game.time.worldTime}-${resultText.hashCode()}",
+                    turn = turn,
+                    note = resultText.take(80),
+                )
             }
             clearEncounterPreview(actor)
         } },

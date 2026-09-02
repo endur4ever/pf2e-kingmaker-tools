@@ -1,6 +1,5 @@
 package com.foundryvtt.kingmaker
 
-import com.foundryvtt.core.AnyObject
 import com.foundryvtt.core.grid.GridHex
 import com.foundryvtt.core.grid.GridOffset2D
 import com.foundryvtt.core.grid.HexagonalGrid
@@ -19,6 +18,28 @@ external interface HexOffsetCoordinate {
 external interface Terrain {
     val id: String
     val img: String
+    val label: String
+}
+
+/** One entry of kingmaker.CONST.TRAVEL (verified against pf2e-km-compiled.mjs, 2026-09-02). */
+@JsPlainObject
+external interface TravelKind {
+    val id: String
+    val label: String
+    val multiplier: Double
+}
+
+/** One entry of kingmaker.CONST.DISCOVERY_TRAITS. */
+@JsPlainObject
+external interface DiscoveryTrait {
+    val id: String
+    val label: String
+}
+
+/** One entry of kingmaker.CONST.EXPLORATION_STATES: value 0 NONE, 1 RECON, 2 MAP. */
+@JsPlainObject
+external interface ExplorationState {
+    val value: Int
     val label: String
 }
 
@@ -52,10 +73,14 @@ external class KingmakerHex(
     val name: String
     val zone: Zone
     val terrain: Terrain
-    val travel: AnyObject // TODO
-    val difficulty: AnyObject // TODO
-    val discoveryTrait: AnyObject // TODO
-    val explorationState: AnyObject // TODO
+    /** kingmaker.CONST.TRAVEL[data.travel]: open | difficult | greater-difficult. */
+    val travel: TravelKind
+    /** Also a TRAVEL entry: the module reuses the travel table for difficulty. */
+    val difficulty: TravelKind
+    /** kingmaker.CONST.DISCOVERY_TRAITS[data.discoveryTrait]: landmark | standard | secret. */
+    val discoveryTrait: DiscoveryTrait
+    /** The EXPLORATION_STATES entry whose value matches data.exploration (0 none, 1 recon, 2 map). */
+    val explorationState: ExplorationState?
     val color: Color
 
     companion object {

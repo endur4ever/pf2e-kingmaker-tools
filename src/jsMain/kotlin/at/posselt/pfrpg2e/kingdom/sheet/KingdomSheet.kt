@@ -411,7 +411,7 @@ import com.foundryvtt.core.helpers.onApplyTokenStatusEffect
 import com.foundryvtt.core.helpers.onCanvasReady
 import com.foundryvtt.core.ui
 import com.foundryvtt.core.utils.deepClone
-import com.foundryvtt.kingmaker.onCloseKingmakerHexEdit
+import com.foundryvtt.kingmaker.onCloseHexEditor
 import io.github.uuidjs.uuid.v4
 import js.array.toTypedArray
 import js.array.tupleOf
@@ -543,7 +543,7 @@ class KingdomSheet(
         }
         appHook.onCanvasReady { _ -> render() }
         appHook.onApplyTokenStatusEffect { _, _, _ -> render() }
-        appHook.onCloseKingmakerHexEdit { _, _ -> render() }
+        appHook.onCloseHexEditor { _, _ -> render() }
         appHook.onUpdateActor { actor, _, _, _ -> checkUpdateActorReRenders(actor) }
         appHook.onUpdateItem { item, _, _, _ ->
             val actor = item.actor

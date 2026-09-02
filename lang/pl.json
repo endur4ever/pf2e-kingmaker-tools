@@ -704,7 +704,7 @@
             "notes": "Notes",
             "bonuses": "Bonuses",
             "population": "Population",
-            "life": "Town Life"
+            "life": "Życie miasta"
         },
         "structureBrowserNav": {
             "buildable": "Buildable",
@@ -874,7 +874,7 @@
                     "changeConsumption": "Consumption: {old} → {new}",
                     "expiredModifiers": "{count} modifier(s) expired",
                     "tributeRp": "Vassal Tribute: +{amount} RP",
-                    "lifeEvents": "Town life this turn"
+                    "lifeEvents": "Życie miasta w tej turze"
                 },
                 "commit": "Complete Turn",
                 "cancel": "Cancel",
@@ -2148,7 +2148,7 @@
                 "spotlight": "W centrum uwagi: {name}",
                 "factionMoves": "Ruchy frakcji: {list}",
                 "deed": "Czyn: {name}",
-                "lifeEvents": "Town life: {list}"
+                "lifeEvents": "Życie miasta: {list}"
             },
             "warfare": {
                 "damaged": "Damaged",
@@ -2816,22 +2816,22 @@
             "xpLedger": {
                 "title": "Księga PD drużyny",
                 "addEntry": "Dodaj wpis",
-                "empty": "Nie zapisano jeszcze PD.",
+                "empty": "Nie zapisano jeszcze żadnych PD.",
                 "granted": "Przyznane przez księgę",
                 "actual": "członek drużyny ma {xp} PD",
                 "drift": "rozbieżność {drift}",
                 "turn": "Tura",
                 "turnLabel": "Tura {turn}",
                 "source": {
-                    "hexReconnoitered": "Heks zwiadowany",
-                    "siteCleared": "Miejsce oczyszczone",
-                    "questCompleted": "Zadanie ukończone",
-                    "expeditionResolved": "Wyprawa rozstrzygnięta",
+                    "hexReconnoitered": "Rozpoznano heks",
+                    "siteCleared": "Oczyszczono miejsce",
+                    "questCompleted": "Ukończono zadanie",
+                    "expeditionResolved": "Zakończono wyprawę",
                     "rpEncounter": "Spotkanie fabularne",
                     "manual": "Ręcznie"
                 },
                 "sourceRef": "Odniesienie",
-                "sourceRefHelp": "Klucz heksu, id zadania lub cokolwiek; puste jest w porządku.",
+                "sourceRefHelp": "Klucz heksu, id zadania lub cokolwiek, co wskazuje ten moment; puste pole jest w porządku.",
                 "amount": "PD",
                 "status": {
                     "offered": "Zaproponowano",
@@ -2839,51 +2839,51 @@
                     "dismissed": "Odrzucono"
                 },
                 "note": "Notatka",
-                "noParty": "Brak aktora drużyny dla księgi.",
-                "confirmDelete": "Usunąć ten wpis? Już przyznane PD nie zostaną odebrane.",
+                "noParty": "Nie znaleziono aktora drużyny, który prowadziłby księgę.",
+                "confirmDelete": "Usunąć ten wpis? Przyznane już PD nie zostaną odebrane.",
                 "sourceColumn": "Źródło",
-                "statusColumn": "Status",
-                "digestTitle": "Zdobyte PD drużyny",
-                "digestBody": "Wydarzenia zapisane w tej turze. Zmień kwotę przed potwierdzeniem, jeśli nie pasuje.",
+                "statusColumn": "Stan",
+                "digestTitle": "PD zdobyte przez drużynę",
+                "digestBody": "Momenty zapisane w tej turze. Zmień kwotę przed potwierdzeniem, jeśli nie pasuje.",
                 "confirm": "Potwierdź",
                 "dismiss": "Odrzuć",
                 "confirmAll": "Potwierdź wszystko",
                 "dismissAll": "Odrzuć wszystko",
-                "alreadyAnswered": "Ta oferta PD została już rozstrzygnięta."
+                "alreadyAnswered": "Na tę propozycję PD już odpowiedziano."
             },
             "petitions": {
-                "title": "Petitions",
-                "empty": "No audiences are waiting.",
-                "turnsLeft": "{turns} turns left",
-                "dueBy": "Due by turn {turn}",
-                "chose": "Chose",
+                "title": "Petycje",
+                "empty": "Żadne audiencje nie czekają.",
+                "turnsLeft": "pozostało tur: {turns}",
+                "dueBy": "Termin: tura {turn}",
+                "chose": "Wybrano",
                 "status": {
-                    "open": "Open",
-                    "answered": "Answered",
-                    "expired": "Lapsed"
+                    "open": "Otwarta",
+                    "answered": "Rozpatrzona",
+                    "expired": "Przedawniona"
                 },
-                "newTitle": "New petitions",
-                "newHint": "The role's player answers from the Party tab; you confirm before anything applies.",
-                "expiredTitle": "Petition lapsed unanswered",
-                "expiredPrompt": "Apply the overdue consequence (+1 Unrest), or let it pass?",
-                "applyOverdue": "Apply +1 Unrest",
-                "dismissOverdue": "Let it pass",
-                "answerTitle": "Petition answered",
-                "confirm": "Confirm",
-                "dismiss": "Dismiss",
-                "pickFaction": "Faction",
-                "sentToGm": "Your answer was sent to the GM for confirmation.",
-                "alreadyAnswered": "That petition has already been answered.",
-                "noGm": "No GM is online to confirm this answer.",
-                "missingFaction": "No faction named {name} — adjust its standing by hand.",
-                "partiallyApplied": "Some consequences could not be applied; see the warnings above.",
-                "noCampingActor": "No camping actor exists to hold the rumour.",
+                "newTitle": "Nowe petycje",
+                "newHint": "Gracz pełniący rolę odpowiada z zakładki Drużyna; ty potwierdzasz, zanim cokolwiek zadziała.",
+                "expiredTitle": "Petycja przedawniła się bez odpowiedzi",
+                "expiredPrompt": "Zastosować skutek zwłoki (+1 Niepokój) czy puścić płazem?",
+                "applyOverdue": "Zastosuj +1 Niepokój",
+                "dismissOverdue": "Puść płazem",
+                "answerTitle": "Petycja rozpatrzona",
+                "confirm": "Potwierdź",
+                "dismiss": "Odrzuć",
+                "pickFaction": "Frakcja",
+                "sentToGm": "Twoja odpowiedź została wysłana do MG do potwierdzenia.",
+                "alreadyAnswered": "Ta petycja została już rozpatrzona.",
+                "noGm": "Żaden MG nie jest online, by potwierdzić tę odpowiedź.",
+                "missingFaction": "Brak frakcji o nazwie {name} — dostosuj jej reputację ręcznie.",
+                "partiallyApplied": "Niektórych skutków nie udało się zastosować; zobacz ostrzeżenia powyżej.",
+                "noCampingActor": "Nie istnieje aktor obozowiska, który mógłby przyjąć plotkę.",
                 "effect": {
-                    "unrest": "Unrest {amount}",
-                    "rp": "Resource Points {amount}",
-                    "standing": "Faction standing {amount}",
-                    "quest": "Spawns a quest",
-                    "rumor": "Spreads a rumour"
+                    "unrest": "Niepokój {amount}",
+                    "rp": "Punkty Zasobów {amount}",
+                    "standing": "Reputacja u frakcji {amount}",
+                    "quest": "Tworzy zadanie",
+                    "rumor": "Rozsiewa plotkę"
                 }
             }
         },
@@ -8552,45 +8552,45 @@
         "settlementLife": {
             "event": {
                 "midwinterFeast": {
-                    "name": "Uczta przesilenia",
-                    "gazette": "{host} wydaje zimową ucztę w {settlement}; {guest} bierze udział."
+                    "name": "Uczta przesilenia zimowego",
+                    "gazette": "{host} wydaje w {settlement} ucztę przesilenia zimowego; {guest} bierze w niej udział."
                 },
                 "guildTheft": {
-                    "name": "Kradzież gildii",
+                    "name": "Kradzież gildyjna",
                     "gazette": "{culprit} zostaje oskarżony o okradzenie {victim} w {settlement}."
                 },
                 "marketDay": {
                     "name": "Dzień targowy",
-                    "gazette": "{trader} przyciąga tłumy w dzień targowy w {settlement}."
+                    "gazette": "{trader} ściąga tłumy na dzień targowy w {settlement}."
                 }
             },
             "digest": {
-                "title": "Town life — turn {turn}",
-                "dismiss": "Dismiss",
-                "hint": "Each line is already in the gazette. A button applies its effect; nothing applies on its own."
+                "title": "Życie miasta — tura {turn}",
+                "dismiss": "Odrzuć",
+                "hint": "Każdy wiersz jest już w gazecie. Przycisk stosuje jego skutek; nic nie dzieje się samo."
             },
             "hook": {
-                "unrestUp": "+1 Unrest",
-                "unrestDown": "−1 Unrest",
-                "rp": "+1 RP",
-                "quest": "Create quest",
-                "rumor": "Spread rumour"
+                "unrestUp": "+1 Niepokój",
+                "unrestDown": "−1 Niepokój",
+                "rp": "+1 PZ",
+                "quest": "Utwórz zadanie",
+                "rumor": "Rozsiej plotkę"
             },
             "cast": {
-                "someone": "someone"
+                "someone": "ktoś"
             },
-            "applied": "{settlement}: life event applied.",
-            "alreadyApplied": "That life event has already been resolved.",
-            "rumorTitle": "Rumour from {settlement}",
+            "applied": "{settlement}: zastosowano wydarzenie.",
+            "alreadyApplied": "To wydarzenie zostało już rozstrzygnięte.",
+            "rumorTitle": "Plotka z {settlement}",
             "history": {
-                "title": "Town life",
-                "turn": "Turn",
-                "event": "Event",
-                "empty": "Nothing has happened here yet.",
-                "resolved": "resolved",
-                "pending": "awaiting the GM"
+                "title": "Życie miasta",
+                "turn": "Tura",
+                "event": "Wydarzenie",
+                "empty": "Nic się tu jeszcze nie wydarzyło.",
+                "resolved": "rozstrzygnięte",
+                "pending": "czeka na MG"
             },
-            "recordGone": "That life event is no longer on record — the turn it belonged to was undone."
+            "recordGone": "Tego wydarzenia nie ma już w zapisach — tura, do której należało, została cofnięta."
         },
         "petitions": {
             "absentee-lord": {

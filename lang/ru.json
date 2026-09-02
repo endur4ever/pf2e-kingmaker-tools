@@ -704,7 +704,7 @@
             "notes": "Notes",
             "bonuses": "Bonuses",
             "population": "Population",
-            "life": "Town Life"
+            "life": "Жизнь города"
         },
         "structureBrowserNav": {
             "buildable": "Buildable",
@@ -874,7 +874,7 @@
                     "changeConsumption": "Consumption: {old} → {new}",
                     "expiredModifiers": "{count} modifier(s) expired",
                     "tributeRp": "Vassal Tribute: +{amount} RP",
-                    "lifeEvents": "Town life this turn"
+                    "lifeEvents": "Жизнь города в этом ходу"
                 },
                 "commit": "Complete Turn",
                 "cancel": "Cancel",
@@ -2148,7 +2148,7 @@
                 "spotlight": "В центре внимания: {name}",
                 "factionMoves": "Ходы фракций: {list}",
                 "deed": "Деяние: {name}",
-                "lifeEvents": "Town life: {list}"
+                "lifeEvents": "Жизнь города: {list}"
             },
             "warfare": {
                 "damaged": "Damaged",
@@ -2816,9 +2816,9 @@
             "xpLedger": {
                 "title": "Журнал опыта группы",
                 "addEntry": "Добавить запись",
-                "empty": "Опыт ещё не записан.",
-                "granted": "Начислено через журнал",
-                "actual": "у участника {xp} опыта",
+                "empty": "Опыт пока не записан.",
+                "granted": "Выдано через журнал",
+                "actual": "у члена группы {xp} опыта",
                 "drift": "расхождение {drift}",
                 "turn": "Ход",
                 "turnLabel": "Ход {turn}",
@@ -2827,11 +2827,11 @@
                     "siteCleared": "Место зачищено",
                     "questCompleted": "Задание выполнено",
                     "expeditionResolved": "Экспедиция завершена",
-                    "rpEncounter": "Ролевая сцена",
+                    "rpEncounter": "Ролевая встреча",
                     "manual": "Вручную"
                 },
                 "sourceRef": "Ссылка",
-                "sourceRefHelp": "Ключ гекса, id задания или что угодно; можно оставить пустым.",
+                "sourceRefHelp": "Ключ гекса, id задания или что угодно, обозначающее момент; можно оставить пустым.",
                 "amount": "Опыт",
                 "status": {
                     "offered": "Предложено",
@@ -2839,51 +2839,51 @@
                     "dismissed": "Отклонено"
                 },
                 "note": "Заметка",
-                "noParty": "Не найден актёр группы для журнала.",
-                "confirmDelete": "Удалить эту запись? Уже начисленный опыт не отзывается.",
+                "noParty": "Не найден актёр группы, который вёл бы журнал.",
+                "confirmDelete": "Удалить эту запись? Уже выданный опыт не отбирается.",
                 "sourceColumn": "Источник",
                 "statusColumn": "Статус",
-                "digestTitle": "Опыт группы получен",
-                "digestBody": "События, записанные за этот ход. Измените сумму перед подтверждением, если она не подходит.",
+                "digestTitle": "Опыт, заработанный группой",
+                "digestBody": "Моменты, записанные в этом ходу. Измените сумму перед подтверждением, если она не подходит.",
                 "confirm": "Подтвердить",
                 "dismiss": "Отклонить",
                 "confirmAll": "Подтвердить всё",
                 "dismissAll": "Отклонить всё",
-                "alreadyAnswered": "На это предложение опыта уже ответили."
+                "alreadyAnswered": "На это предложение опыта уже дан ответ."
             },
             "petitions": {
-                "title": "Petitions",
-                "empty": "No audiences are waiting.",
-                "turnsLeft": "{turns} turns left",
-                "dueBy": "Due by turn {turn}",
-                "chose": "Chose",
+                "title": "Прошения",
+                "empty": "Аудиенций не ожидается.",
+                "turnsLeft": "осталось ходов: {turns}",
+                "dueBy": "Срок: ход {turn}",
+                "chose": "Выбрано",
                 "status": {
-                    "open": "Open",
-                    "answered": "Answered",
-                    "expired": "Lapsed"
+                    "open": "Открыто",
+                    "answered": "Отвечено",
+                    "expired": "Просрочено"
                 },
-                "newTitle": "New petitions",
-                "newHint": "The role's player answers from the Party tab; you confirm before anything applies.",
-                "expiredTitle": "Petition lapsed unanswered",
-                "expiredPrompt": "Apply the overdue consequence (+1 Unrest), or let it pass?",
-                "applyOverdue": "Apply +1 Unrest",
-                "dismissOverdue": "Let it pass",
-                "answerTitle": "Petition answered",
-                "confirm": "Confirm",
-                "dismiss": "Dismiss",
-                "pickFaction": "Faction",
-                "sentToGm": "Your answer was sent to the GM for confirmation.",
-                "alreadyAnswered": "That petition has already been answered.",
-                "noGm": "No GM is online to confirm this answer.",
-                "missingFaction": "No faction named {name} — adjust its standing by hand.",
-                "partiallyApplied": "Some consequences could not be applied; see the warnings above.",
-                "noCampingActor": "No camping actor exists to hold the rumour.",
+                "newTitle": "Новые прошения",
+                "newHint": "Игрок, занимающий должность, отвечает на вкладке «Группа»; вы подтверждаете, прежде чем что-либо применится.",
+                "expiredTitle": "Прошение просрочено без ответа",
+                "expiredPrompt": "Применить последствие просрочки (+1 Волнения) или оставить без внимания?",
+                "applyOverdue": "Применить +1 Волнения",
+                "dismissOverdue": "Оставить без внимания",
+                "answerTitle": "На прошение дан ответ",
+                "confirm": "Подтвердить",
+                "dismiss": "Отклонить",
+                "pickFaction": "Фракция",
+                "sentToGm": "Ваш ответ отправлен ведущему на подтверждение.",
+                "alreadyAnswered": "На это прошение уже дан ответ.",
+                "noGm": "Нет ведущего в сети, чтобы подтвердить этот ответ.",
+                "missingFaction": "Нет фракции с именем {name} — измените её репутацию вручную.",
+                "partiallyApplied": "Некоторые последствия применить не удалось; см. предупреждения выше.",
+                "noCampingActor": "Нет актёра лагеря, который мог бы принять слух.",
                 "effect": {
-                    "unrest": "Unrest {amount}",
-                    "rp": "Resource Points {amount}",
-                    "standing": "Faction standing {amount}",
-                    "quest": "Spawns a quest",
-                    "rumor": "Spreads a rumour"
+                    "unrest": "Волнения {amount}",
+                    "rp": "Очки ресурсов {amount}",
+                    "standing": "Репутация у фракции {amount}",
+                    "quest": "Создаёт задание",
+                    "rumor": "Распространяет слух"
                 }
             }
         },
@@ -3058,7 +3058,7 @@
                 "deedsBody": "Эти достижения верны на этот ход. Даруйте или отклоните каждое.",
                 "dismissAll": "Отклонить все",
                 "dismissedAll": "Отклонено предложений деяний: {count}.",
-                "alreadyAwarded": "«{name}» уже был начислен."
+                "alreadyAwarded": "{name} уже присуждено."
             },
             "travelRoute": {
                 "title": "Travel",
@@ -8552,12 +8552,12 @@
         "settlementLife": {
             "event": {
                 "midwinterFeast": {
-                    "name": "Зимний пир",
-                    "gazette": "{host} устраивает зимний пир в {settlement}; {guest} присутствует."
+                    "name": "Праздник середины зимы",
+                    "gazette": "{host} устраивает в {settlement} праздник середины зимы; {guest} присутствует."
                 },
                 "guildTheft": {
-                    "name": "Кража гильдии",
-                    "gazette": "{culprit} обвиняют в краже у {victim} в {settlement}."
+                    "name": "Кража в гильдии",
+                    "gazette": "{culprit} обвиняется в ограблении {victim} в {settlement}."
                 },
                 "marketDay": {
                     "name": "Базарный день",
@@ -8565,32 +8565,32 @@
                 }
             },
             "digest": {
-                "title": "Town life — turn {turn}",
-                "dismiss": "Dismiss",
-                "hint": "Each line is already in the gazette. A button applies its effect; nothing applies on its own."
+                "title": "Жизнь города — ход {turn}",
+                "dismiss": "Отклонить",
+                "hint": "Каждая строка уже в газете. Кнопка применяет её эффект; само по себе ничего не применяется."
             },
             "hook": {
-                "unrestUp": "+1 Unrest",
-                "unrestDown": "−1 Unrest",
-                "rp": "+1 RP",
-                "quest": "Create quest",
-                "rumor": "Spread rumour"
+                "unrestUp": "+1 Волнения",
+                "unrestDown": "−1 Волнения",
+                "rp": "+1 ОР",
+                "quest": "Создать задание",
+                "rumor": "Пустить слух"
             },
             "cast": {
-                "someone": "someone"
+                "someone": "кто-то"
             },
-            "applied": "{settlement}: life event applied.",
-            "alreadyApplied": "That life event has already been resolved.",
-            "rumorTitle": "Rumour from {settlement}",
+            "applied": "{settlement}: событие применено.",
+            "alreadyApplied": "Это событие уже разрешено.",
+            "rumorTitle": "Слух из {settlement}",
             "history": {
-                "title": "Town life",
-                "turn": "Turn",
-                "event": "Event",
-                "empty": "Nothing has happened here yet.",
-                "resolved": "resolved",
-                "pending": "awaiting the GM"
+                "title": "Жизнь города",
+                "turn": "Ход",
+                "event": "Событие",
+                "empty": "Здесь пока ничего не произошло.",
+                "resolved": "разрешено",
+                "pending": "ждёт ведущего"
             },
-            "recordGone": "That life event is no longer on record — the turn it belonged to was undone."
+            "recordGone": "Этого события больше нет в записях — ход, к которому оно относилось, отменён."
         },
         "petitions": {
             "absentee-lord": {

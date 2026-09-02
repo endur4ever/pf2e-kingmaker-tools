@@ -704,7 +704,7 @@
             "notes": "Notes",
             "bonuses": "Bonuses",
             "population": "Population",
-            "life": "Town Life"
+            "life": "Stadtleben"
         },
         "structureBrowserNav": {
             "buildable": "Buildable",
@@ -882,7 +882,7 @@
                     "changeConsumption": "Consumption: {old} → {new}",
                     "expiredModifiers": "{count} modifier(s) expired",
                     "tributeRp": "Vassal Tribute: +{amount} RP",
-                    "lifeEvents": "Town life this turn"
+                    "lifeEvents": "Stadtleben in diesem Zug"
                 },
                 "commit": "Complete Turn",
                 "cancel": "Cancel",
@@ -1316,7 +1316,7 @@
                 "spotlight": "Im Rampenlicht: {name}",
                 "factionMoves": "Fraktionszüge: {list}",
                 "deed": "Tat: {name}",
-                "lifeEvents": "Town life: {list}"
+                "lifeEvents": "Stadtleben: {list}"
             },
             "xpRules": "XP Rules",
             "xpRulesHelp": "Adds additional milestones, gain XP buttons and increases XP for claiming hexes and converting XP based on kingdom level",
@@ -2814,24 +2814,24 @@
                 "turnLabel": "Zug {turn}"
             },
             "xpLedger": {
-                "title": "Gruppen-EP-Hauptbuch",
+                "title": "EP-Buch der Gruppe",
                 "addEntry": "Eintrag hinzufügen",
                 "empty": "Noch keine EP verzeichnet.",
-                "granted": "Über das Hauptbuch vergeben",
+                "granted": "Über das Buch vergeben",
                 "actual": "Gruppenmitglied hat {xp} EP",
                 "drift": "Abweichung {drift}",
                 "turn": "Zug",
                 "turnLabel": "Zug {turn}",
                 "source": {
-                    "hexReconnoitered": "Hex erkundet",
-                    "siteCleared": "Ort geräumt",
-                    "questCompleted": "Quest abgeschlossen",
-                    "expeditionResolved": "Expedition abgeschlossen",
-                    "rpEncounter": "Rollenspiel-Begegnung",
+                    "hexReconnoitered": "Hexfeld erkundet",
+                    "siteCleared": "Ort gesäubert",
+                    "questCompleted": "Auftrag abgeschlossen",
+                    "expeditionResolved": "Expedition beendet",
+                    "rpEncounter": "Rollenspielbegegnung",
                     "manual": "Manuell"
                 },
-                "sourceRef": "Referenz",
-                "sourceRefHelp": "Hex-Schlüssel, Quest-ID oder Ähnliches; leer ist in Ordnung.",
+                "sourceRef": "Verweis",
+                "sourceRefHelp": "Hexschlüssel, Auftrags-ID oder etwas anderes, das den Moment kennzeichnet; leer ist in Ordnung.",
                 "amount": "EP",
                 "status": {
                     "offered": "Angeboten",
@@ -2839,12 +2839,12 @@
                     "dismissed": "Verworfen"
                 },
                 "note": "Notiz",
-                "noParty": "Kein Gruppen-Akteur für das Hauptbuch gefunden.",
+                "noParty": "Kein Gruppenakteur gefunden, der das Buch führen könnte.",
                 "confirmDelete": "Diesen Eintrag löschen? Bereits vergebene EP werden nicht zurückgenommen.",
                 "sourceColumn": "Quelle",
                 "statusColumn": "Status",
-                "digestTitle": "Gruppen-EP verdient",
-                "digestBody": "Diese Turn aufgezeichneten Ereignisse. Betrag vor dem Bestätigen anpassen, falls er nicht passt.",
+                "digestTitle": "Erhaltene Gruppen-EP",
+                "digestBody": "In diesem Zug verzeichnete Momente. Passe einen Betrag vor dem Bestätigen an, wenn er nicht passt.",
                 "confirm": "Bestätigen",
                 "dismiss": "Verwerfen",
                 "confirmAll": "Alle bestätigen",
@@ -2852,38 +2852,38 @@
                 "alreadyAnswered": "Dieses EP-Angebot wurde bereits beantwortet."
             },
             "petitions": {
-                "title": "Petitions",
-                "empty": "No audiences are waiting.",
-                "turnsLeft": "{turns} turns left",
-                "dueBy": "Due by turn {turn}",
-                "chose": "Chose",
+                "title": "Petitionen",
+                "empty": "Keine Audienzen stehen an.",
+                "turnsLeft": "noch {turns} Züge",
+                "dueBy": "Fällig bis Zug {turn}",
+                "chose": "Entschieden",
                 "status": {
-                    "open": "Open",
-                    "answered": "Answered",
-                    "expired": "Lapsed"
+                    "open": "Offen",
+                    "answered": "Beantwortet",
+                    "expired": "Verfallen"
                 },
-                "newTitle": "New petitions",
-                "newHint": "The role's player answers from the Party tab; you confirm before anything applies.",
-                "expiredTitle": "Petition lapsed unanswered",
-                "expiredPrompt": "Apply the overdue consequence (+1 Unrest), or let it pass?",
-                "applyOverdue": "Apply +1 Unrest",
-                "dismissOverdue": "Let it pass",
-                "answerTitle": "Petition answered",
-                "confirm": "Confirm",
-                "dismiss": "Dismiss",
-                "pickFaction": "Faction",
-                "sentToGm": "Your answer was sent to the GM for confirmation.",
-                "alreadyAnswered": "That petition has already been answered.",
-                "noGm": "No GM is online to confirm this answer.",
-                "missingFaction": "No faction named {name} — adjust its standing by hand.",
-                "partiallyApplied": "Some consequences could not be applied; see the warnings above.",
-                "noCampingActor": "No camping actor exists to hold the rumour.",
+                "newTitle": "Neue Petitionen",
+                "newHint": "Der Spieler der Rolle antwortet im Gruppen-Reiter; du bestätigst, bevor etwas wirksam wird.",
+                "expiredTitle": "Petition unbeantwortet verfallen",
+                "expiredPrompt": "Die Säumnisfolge anwenden (+1 Unruhe) oder durchgehen lassen?",
+                "applyOverdue": "+1 Unruhe anwenden",
+                "dismissOverdue": "Durchgehen lassen",
+                "answerTitle": "Petition beantwortet",
+                "confirm": "Bestätigen",
+                "dismiss": "Verwerfen",
+                "pickFaction": "Fraktion",
+                "sentToGm": "Deine Antwort wurde dem SL zur Bestätigung geschickt.",
+                "alreadyAnswered": "Diese Petition wurde bereits beantwortet.",
+                "noGm": "Kein SL ist online, um diese Antwort zu bestätigen.",
+                "missingFaction": "Keine Fraktion namens {name} — passe ihr Ansehen von Hand an.",
+                "partiallyApplied": "Einige Folgen konnten nicht angewendet werden; siehe die Warnungen oben.",
+                "noCampingActor": "Es gibt keinen Lagerakteur, der das Gerücht aufnehmen könnte.",
                 "effect": {
-                    "unrest": "Unrest {amount}",
-                    "rp": "Resource Points {amount}",
-                    "standing": "Faction standing {amount}",
-                    "quest": "Spawns a quest",
-                    "rumor": "Spreads a rumour"
+                    "unrest": "Unruhe {amount}",
+                    "rp": "Ressourcenpunkte {amount}",
+                    "standing": "Fraktionsansehen {amount}",
+                    "quest": "Erzeugt einen Auftrag",
+                    "rumor": "Verbreitet ein Gerücht"
                 }
             }
         },
@@ -3058,7 +3058,7 @@
                 "deedsBody": "Diese Errungenschaften treffen ab diesem Zug zu. Jede gewähren oder verwerfen.",
                 "dismissAll": "Alle verwerfen",
                 "dismissedAll": "{count} Taten-Angebot(e) verworfen.",
-                "alreadyAwarded": "{name} wurde bereits gewährt."
+                "alreadyAwarded": "{name} wurde bereits vergeben."
             },
             "travelRoute": {
                 "title": "Travel",
@@ -8561,36 +8561,36 @@
                 },
                 "marketDay": {
                     "name": "Markttag",
-                    "gazette": "{trader} sorgt in {settlement} für einen lebhaften Markttag."
+                    "gazette": "{trader} sorgt in {settlement} für einen belebten Markttag."
                 }
             },
             "digest": {
-                "title": "Town life — turn {turn}",
-                "dismiss": "Dismiss",
-                "hint": "Each line is already in the gazette. A button applies its effect; nothing applies on its own."
+                "title": "Stadtleben — Zug {turn}",
+                "dismiss": "Verwerfen",
+                "hint": "Jede Zeile steht bereits in der Gazette. Ein Knopf wendet die Wirkung an; nichts geschieht von selbst."
             },
             "hook": {
-                "unrestUp": "+1 Unrest",
-                "unrestDown": "−1 Unrest",
+                "unrestUp": "+1 Unruhe",
+                "unrestDown": "−1 Unruhe",
                 "rp": "+1 RP",
-                "quest": "Create quest",
-                "rumor": "Spread rumour"
+                "quest": "Auftrag anlegen",
+                "rumor": "Gerücht verbreiten"
             },
             "cast": {
-                "someone": "someone"
+                "someone": "jemand"
             },
-            "applied": "{settlement}: life event applied.",
-            "alreadyApplied": "That life event has already been resolved.",
-            "rumorTitle": "Rumour from {settlement}",
+            "applied": "{settlement}: Ereignis angewendet.",
+            "alreadyApplied": "Dieses Ereignis wurde bereits abgeschlossen.",
+            "rumorTitle": "Gerücht aus {settlement}",
             "history": {
-                "title": "Town life",
-                "turn": "Turn",
-                "event": "Event",
-                "empty": "Nothing has happened here yet.",
-                "resolved": "resolved",
-                "pending": "awaiting the GM"
+                "title": "Stadtleben",
+                "turn": "Zug",
+                "event": "Ereignis",
+                "empty": "Hier ist noch nichts geschehen.",
+                "resolved": "abgeschlossen",
+                "pending": "wartet auf den SL"
             },
-            "recordGone": "That life event is no longer on record — the turn it belonged to was undone."
+            "recordGone": "Dieses Ereignis ist nicht mehr verzeichnet — der zugehörige Zug wurde rückgängig gemacht."
         },
         "petitions": {
             "absentee-lord": {

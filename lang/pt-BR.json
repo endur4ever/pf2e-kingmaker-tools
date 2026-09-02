@@ -704,7 +704,7 @@
             "notes": "Notes",
             "bonuses": "Bonuses",
             "population": "Population",
-            "life": "Town Life"
+            "life": "Vida urbana"
         },
         "structureBrowserNav": {
             "buildable": "Buildable",
@@ -874,7 +874,7 @@
                     "changeConsumption": "Consumption: {old} → {new}",
                     "expiredModifiers": "{count} modifier(s) expired",
                     "tributeRp": "Vassal Tribute: +{amount} RP",
-                    "lifeEvents": "Town life this turn"
+                    "lifeEvents": "Vida urbana neste turno"
                 },
                 "commit": "Complete Turn",
                 "cancel": "Cancel",
@@ -2148,7 +2148,7 @@
                 "spotlight": "Destaque: {name}",
                 "factionMoves": "Manobras de facção: {list}",
                 "deed": "Feito: {name}",
-                "lifeEvents": "Town life: {list}"
+                "lifeEvents": "Vida urbana: {list}"
             },
             "warfare": {
                 "damaged": "Damaged",
@@ -2814,16 +2814,16 @@
                 "turnLabel": "Turno {turn}"
             },
             "xpLedger": {
-                "title": "Registro de XP do grupo",
+                "title": "Livro de XP do grupo",
                 "addEntry": "Adicionar entrada",
-                "empty": "Nenhum XP registrado.",
-                "granted": "Concedido pelo registro",
-                "actual": "um membro tem {xp} XP",
+                "empty": "Nenhum XP registrado ainda.",
+                "granted": "Concedidos pelo livro",
+                "actual": "um membro do grupo possui {xp} XP",
                 "drift": "desvio {drift}",
                 "turn": "Turno",
                 "turnLabel": "Turno {turn}",
                 "source": {
-                    "hexReconnoitered": "Hex reconhecido",
+                    "hexReconnoitered": "Hexágono reconhecido",
                     "siteCleared": "Local limpo",
                     "questCompleted": "Missão concluída",
                     "expeditionResolved": "Expedição resolvida",
@@ -2831,59 +2831,59 @@
                     "manual": "Manual"
                 },
                 "sourceRef": "Referência",
-                "sourceRefHelp": "Chave de hex, id de missão ou similar; em branco tudo bem.",
+                "sourceRefHelp": "Chave do hexágono, id da missão ou qualquer coisa que identifique o momento; em branco também serve.",
                 "amount": "XP",
                 "status": {
-                    "offered": "Oferecido",
+                    "offered": "Proposto",
                     "confirmed": "Confirmado",
                     "dismissed": "Descartado"
                 },
                 "note": "Nota",
-                "noParty": "Nenhum ator de grupo para o registro.",
+                "noParty": "Nenhum ator de grupo encontrado para manter o livro.",
                 "confirmDelete": "Excluir esta entrada? O XP já concedido não é retirado.",
-                "sourceColumn": "Fonte",
-                "statusColumn": "Status",
-                "digestTitle": "XP do grupo obtido",
-                "digestBody": "Feitos registrados neste turno. Edite um valor antes de confirmar se não couber.",
+                "sourceColumn": "Origem",
+                "statusColumn": "Estado",
+                "digestTitle": "XP ganho pelo grupo",
+                "digestBody": "Momentos registrados neste turno. Ajuste um valor antes de confirmar se não couber.",
                 "confirm": "Confirmar",
                 "dismiss": "Descartar",
                 "confirmAll": "Confirmar tudo",
                 "dismissAll": "Descartar tudo",
-                "alreadyAnswered": "Essa oferta de XP já foi respondida."
+                "alreadyAnswered": "Essa proposta de XP já foi respondida."
             },
             "petitions": {
-                "title": "Petitions",
-                "empty": "No audiences are waiting.",
-                "turnsLeft": "{turns} turns left",
-                "dueBy": "Due by turn {turn}",
-                "chose": "Chose",
+                "title": "Petições",
+                "empty": "Nenhuma audiência aguardando.",
+                "turnsLeft": "{turns} turnos restantes",
+                "dueBy": "Prazo: turno {turn}",
+                "chose": "Escolheu",
                 "status": {
-                    "open": "Open",
-                    "answered": "Answered",
-                    "expired": "Lapsed"
+                    "open": "Aberta",
+                    "answered": "Respondida",
+                    "expired": "Caducada"
                 },
-                "newTitle": "New petitions",
-                "newHint": "The role's player answers from the Party tab; you confirm before anything applies.",
-                "expiredTitle": "Petition lapsed unanswered",
-                "expiredPrompt": "Apply the overdue consequence (+1 Unrest), or let it pass?",
-                "applyOverdue": "Apply +1 Unrest",
-                "dismissOverdue": "Let it pass",
-                "answerTitle": "Petition answered",
-                "confirm": "Confirm",
-                "dismiss": "Dismiss",
-                "pickFaction": "Faction",
-                "sentToGm": "Your answer was sent to the GM for confirmation.",
-                "alreadyAnswered": "That petition has already been answered.",
-                "noGm": "No GM is online to confirm this answer.",
-                "missingFaction": "No faction named {name} — adjust its standing by hand.",
-                "partiallyApplied": "Some consequences could not be applied; see the warnings above.",
-                "noCampingActor": "No camping actor exists to hold the rumour.",
+                "newTitle": "Novas petições",
+                "newHint": "O jogador do cargo responde pela aba Grupo; você confirma antes que algo se aplique.",
+                "expiredTitle": "Petição caducou sem resposta",
+                "expiredPrompt": "Aplicar a consequência do atraso (+1 Agitação) ou deixar passar?",
+                "applyOverdue": "Aplicar +1 Agitação",
+                "dismissOverdue": "Deixar passar",
+                "answerTitle": "Petição respondida",
+                "confirm": "Confirmar",
+                "dismiss": "Descartar",
+                "pickFaction": "Facção",
+                "sentToGm": "Sua resposta foi enviada ao Mestre para confirmação.",
+                "alreadyAnswered": "Essa petição já foi respondida.",
+                "noGm": "Nenhum Mestre está online para confirmar esta resposta.",
+                "missingFaction": "Nenhuma facção chamada {name} — ajuste sua reputação manualmente.",
+                "partiallyApplied": "Algumas consequências não puderam ser aplicadas; veja os avisos acima.",
+                "noCampingActor": "Não existe ator de acampamento para receber o boato.",
                 "effect": {
-                    "unrest": "Unrest {amount}",
-                    "rp": "Resource Points {amount}",
-                    "standing": "Faction standing {amount}",
-                    "quest": "Spawns a quest",
-                    "rumor": "Spreads a rumour"
+                    "unrest": "Agitação {amount}",
+                    "rp": "Pontos de Recurso {amount}",
+                    "standing": "Reputação com a facção {amount}",
+                    "quest": "Gera uma missão",
+                    "rumor": "Espalha um boato"
                 }
             }
         },
@@ -8552,45 +8552,45 @@
         "settlementLife": {
             "event": {
                 "midwinterFeast": {
-                    "name": "Festim de meio-inverno",
-                    "gazette": "{host} organiza um festim de inverno em {settlement}; {guest} comparece."
+                    "name": "Festa do Solstício de Inverno",
+                    "gazette": "{host} oferece uma festa do solstício de inverno em {settlement}; {guest} comparece."
                 },
                 "guildTheft": {
-                    "name": "Roubo da guilda",
+                    "name": "Roubo na guilda",
                     "gazette": "{culprit} é acusado de roubar {victim} em {settlement}."
                 },
                 "marketDay": {
                     "name": "Dia de feira",
-                    "gazette": "{trader} movimenta um dia de feira em {settlement}."
+                    "gazette": "{trader} atrai um movimentado dia de feira em {settlement}."
                 }
             },
             "digest": {
-                "title": "Town life — turn {turn}",
-                "dismiss": "Dismiss",
-                "hint": "Each line is already in the gazette. A button applies its effect; nothing applies on its own."
+                "title": "Vida urbana — turno {turn}",
+                "dismiss": "Descartar",
+                "hint": "Cada linha já está na gazeta. Um botão aplica seu efeito; nada se aplica sozinho."
             },
             "hook": {
-                "unrestUp": "+1 Unrest",
-                "unrestDown": "−1 Unrest",
-                "rp": "+1 RP",
-                "quest": "Create quest",
-                "rumor": "Spread rumour"
+                "unrestUp": "+1 Agitação",
+                "unrestDown": "−1 Agitação",
+                "rp": "+1 PR",
+                "quest": "Criar missão",
+                "rumor": "Espalhar boato"
             },
             "cast": {
-                "someone": "someone"
+                "someone": "alguém"
             },
-            "applied": "{settlement}: life event applied.",
-            "alreadyApplied": "That life event has already been resolved.",
-            "rumorTitle": "Rumour from {settlement}",
+            "applied": "{settlement}: evento aplicado.",
+            "alreadyApplied": "Esse evento já foi resolvido.",
+            "rumorTitle": "Boato de {settlement}",
             "history": {
-                "title": "Town life",
-                "turn": "Turn",
-                "event": "Event",
-                "empty": "Nothing has happened here yet.",
-                "resolved": "resolved",
-                "pending": "awaiting the GM"
+                "title": "Vida urbana",
+                "turn": "Turno",
+                "event": "Evento",
+                "empty": "Nada aconteceu aqui ainda.",
+                "resolved": "resolvido",
+                "pending": "aguardando o Mestre"
             },
-            "recordGone": "That life event is no longer on record — the turn it belonged to was undone."
+            "recordGone": "Esse evento não consta mais no registro — o turno ao qual pertencia foi desfeito."
         },
         "petitions": {
             "absentee-lord": {

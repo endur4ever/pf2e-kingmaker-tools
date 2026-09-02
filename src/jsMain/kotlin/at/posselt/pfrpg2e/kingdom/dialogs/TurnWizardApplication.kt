@@ -738,7 +738,10 @@ private suspend fun performEndTurnLocked(game: Game, actor: KingdomActor): TickR
     val lifeEventsFired = rollSettlementLifeEvents(
         kingdom = kingdom,
         settlements = kingdom.getAllSettlements(game).allSettlements,
-        season = runCatching { getSeasonForMonth(game.getCurrentMonth().ordinal).value }.getOrNull(),
+        // prefer the season the preview pinned, so preview and commit agree even across a
+        // month boundary; a commit with no preview reads the calendar itself
+        season = (actor.getAppFlag<KingdomActor, dynamic>("turn-wizard-state")?.previewSeason as? String)
+            ?: runCatching { getSeasonForMonth(game.getCurrentMonth().ordinal).value }.getOrNull(),
         currentTurn = currentTurn,
     )
     val lifeEventLines = lifeEventsFired.map { it.gazetteLine }
@@ -1530,10 +1533,15 @@ class TurnWizardApplication(
         cachedChanges = (tickResult.changes + storageCapChanges).toTypedArray()
         // same seed, same turn number, same settlements as performEndTurn: byte-identical lines.
         // dryRun so the preview writes no record -- only the commit does.
+        // the season is pinned INTO the wizard state so the commit reads the one the preview
+        // showed: a month rolling over between the two would otherwise change the weights
+        val previewSeason = runCatching { getSeasonForMonth(game.getCurrentMonth().ordinal).value }.getOrNull()
+        state.previewSeason = previewSeason
+        kingdomActor.setAppFlag("turn-wizard-state", state)
         cachedLifeLines = rollSettlementLifeEvents(
             kingdom = kingdom,
             settlements = settlements.allSettlements,
-            season = runCatching { getSeasonForMonth(game.getCurrentMonth().ordinal).value }.getOrNull(),
+            season = previewSeason,
             currentTurn = (kingdom.currentTurn ?: 0) + 1,
             dryRun = true,
         ).map { it.gazetteLine }.toTypedArray()

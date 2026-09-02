@@ -704,7 +704,7 @@
             "notes": "Notes",
             "bonuses": "Bonuses",
             "population": "Population",
-            "life": "Town Life"
+            "life": "城镇生活"
         },
         "structureBrowserNav": {
             "buildable": "Buildable",
@@ -874,7 +874,7 @@
                     "changeConsumption": "Consumption: {old} → {new}",
                     "expiredModifiers": "{count} modifier(s) expired",
                     "tributeRp": "Vassal Tribute: +{amount} RP",
-                    "lifeEvents": "Town life this turn"
+                    "lifeEvents": "本回合的城镇生活"
                 },
                 "commit": "Complete Turn",
                 "cancel": "Cancel",
@@ -2148,7 +2148,7 @@
                 "spotlight": "聚光灯：{name}",
                 "factionMoves": "势力动向：{list}",
                 "deed": "功绩：{name}",
-                "lifeEvents": "Town life: {list}"
+                "lifeEvents": "城镇生活：{list}"
             },
             "warfare": {
                 "damaged": "Damaged",
@@ -2814,76 +2814,76 @@
                 "turnLabel": "第 {turn} 回合"
             },
             "xpLedger": {
-                "title": "队伍经验账本",
+                "title": "队伍经验账簿",
                 "addEntry": "添加条目",
-                "empty": "尚未记录经验。",
-                "granted": "通过账本发放",
-                "actual": "队伍成员拥有 {xp} 经验",
+                "empty": "尚未记录任何经验。",
+                "granted": "经账簿发放",
+                "actual": "队伍成员持有 {xp} 经验",
                 "drift": "偏差 {drift}",
                 "turn": "回合",
                 "turnLabel": "第 {turn} 回合",
                 "source": {
-                    "hexReconnoitered": "已侦察六格",
-                    "siteCleared": "据点已清理",
-                    "questCompleted": "任务完成",
-                    "expeditionResolved": "远征完成",
+                    "hexReconnoitered": "侦察六角格",
+                    "siteCleared": "清理地点",
+                    "questCompleted": "完成任务",
+                    "expeditionResolved": "远征结束",
                     "rpEncounter": "角色扮演遭遇",
                     "manual": "手动"
                 },
                 "sourceRef": "引用",
-                "sourceRefHelp": "六格键、任务 id 或任何标识；留空亦可。",
+                "sourceRefHelp": "六角格键、任务 ID 或任何能标识该事件的内容；留空亦可。",
                 "amount": "经验",
                 "status": {
                     "offered": "已提议",
                     "confirmed": "已确认",
-                    "dismissed": "已忽略"
+                    "dismissed": "已驳回"
                 },
                 "note": "备注",
-                "noParty": "未找到承载账本的队伍角色。",
+                "noParty": "找不到可保存账簿的队伍角色。",
                 "confirmDelete": "删除此条目？已发放的经验不会收回。",
                 "sourceColumn": "来源",
                 "statusColumn": "状态",
-                "digestTitle": "队伍获得经验",
+                "digestTitle": "队伍获得的经验",
                 "digestBody": "本回合记录的事件。若数值不合适，请在确认前修改。",
                 "confirm": "确认",
-                "dismiss": "忽略",
+                "dismiss": "驳回",
                 "confirmAll": "全部确认",
-                "dismissAll": "全部忽略",
+                "dismissAll": "全部驳回",
                 "alreadyAnswered": "该经验提议已被处理。"
             },
             "petitions": {
-                "title": "Petitions",
-                "empty": "No audiences are waiting.",
-                "turnsLeft": "{turns} turns left",
-                "dueBy": "Due by turn {turn}",
-                "chose": "Chose",
+                "title": "请愿",
+                "empty": "没有等待中的觐见。",
+                "turnsLeft": "剩余 {turns} 回合",
+                "dueBy": "截止于第 {turn} 回合",
+                "chose": "选择了",
                 "status": {
-                    "open": "Open",
-                    "answered": "Answered",
-                    "expired": "Lapsed"
+                    "open": "待处理",
+                    "answered": "已答复",
+                    "expired": "已失效"
                 },
-                "newTitle": "New petitions",
-                "newHint": "The role's player answers from the Party tab; you confirm before anything applies.",
-                "expiredTitle": "Petition lapsed unanswered",
-                "expiredPrompt": "Apply the overdue consequence (+1 Unrest), or let it pass?",
-                "applyOverdue": "Apply +1 Unrest",
-                "dismissOverdue": "Let it pass",
-                "answerTitle": "Petition answered",
-                "confirm": "Confirm",
-                "dismiss": "Dismiss",
-                "pickFaction": "Faction",
-                "sentToGm": "Your answer was sent to the GM for confirmation.",
-                "alreadyAnswered": "That petition has already been answered.",
-                "noGm": "No GM is online to confirm this answer.",
-                "missingFaction": "No faction named {name} — adjust its standing by hand.",
-                "partiallyApplied": "Some consequences could not be applied; see the warnings above.",
-                "noCampingActor": "No camping actor exists to hold the rumour.",
+                "newTitle": "新请愿",
+                "newHint": "担任该职位的玩家在“队伍”页答复；在任何效果生效前由你确认。",
+                "expiredTitle": "请愿逾期未答复",
+                "expiredPrompt": "施加逾期后果（+1 动荡），还是就此放过？",
+                "applyOverdue": "施加 +1 动荡",
+                "dismissOverdue": "就此放过",
+                "answerTitle": "请愿已答复",
+                "confirm": "确认",
+                "dismiss": "驳回",
+                "pickFaction": "派系",
+                "sentToGm": "你的答复已发送给 GM 确认。",
+                "alreadyAnswered": "该请愿已被答复。",
+                "noGm": "没有在线的 GM 可以确认此答复。",
+                "missingFaction": "没有名为 {name} 的派系——请手动调整其好感。",
+                "partiallyApplied": "部分后果未能生效；请查看上方警告。",
+                "noCampingActor": "没有可承载谣言的营地角色。",
                 "effect": {
-                    "unrest": "Unrest {amount}",
-                    "rp": "Resource Points {amount}",
-                    "standing": "Faction standing {amount}",
-                    "quest": "Spawns a quest",
-                    "rumor": "Spreads a rumour"
+                    "unrest": "动荡 {amount}",
+                    "rp": "资源点 {amount}",
+                    "standing": "派系好感 {amount}",
+                    "quest": "生成一个任务",
+                    "rumor": "散布一则谣言"
                 }
             }
         },
@@ -8553,44 +8553,44 @@
             "event": {
                 "midwinterFeast": {
                     "name": "仲冬宴",
-                    "gazette": "{host} 在 {settlement} 举办仲冬宴，{guest} 出席。"
+                    "gazette": "{host} 在 {settlement} 举办仲冬宴；{guest} 前来赴宴。"
                 },
                 "guildTheft": {
-                    "name": "行会盗窃",
-                    "gazette": "{culprit} 被指控在 {settlement} 偷窃 {victim}。"
+                    "name": "公会窃案",
+                    "gazette": "{culprit} 被指控在 {settlement} 抢劫了 {victim}。"
                 },
                 "marketDay": {
                     "name": "集市日",
-                    "gazette": "{trader} 在 {settlement} 带来热闹的集市日。"
+                    "gazette": "{trader} 在 {settlement} 带来了热闹的集市日。"
                 }
             },
             "digest": {
-                "title": "Town life — turn {turn}",
-                "dismiss": "Dismiss",
-                "hint": "Each line is already in the gazette. A button applies its effect; nothing applies on its own."
+                "title": "城镇生活——第 {turn} 回合",
+                "dismiss": "驳回",
+                "hint": "每一行都已写入公报。按钮会施加其效果；没有任何效果会自动生效。"
             },
             "hook": {
-                "unrestUp": "+1 Unrest",
-                "unrestDown": "−1 Unrest",
-                "rp": "+1 RP",
-                "quest": "Create quest",
-                "rumor": "Spread rumour"
+                "unrestUp": "+1 动荡",
+                "unrestDown": "−1 动荡",
+                "rp": "+1 资源点",
+                "quest": "创建任务",
+                "rumor": "散布谣言"
             },
             "cast": {
-                "someone": "someone"
+                "someone": "某人"
             },
-            "applied": "{settlement}: life event applied.",
-            "alreadyApplied": "That life event has already been resolved.",
-            "rumorTitle": "Rumour from {settlement}",
+            "applied": "{settlement}：事件已生效。",
+            "alreadyApplied": "该事件已被处理。",
+            "rumorTitle": "来自 {settlement} 的谣言",
             "history": {
-                "title": "Town life",
-                "turn": "Turn",
-                "event": "Event",
-                "empty": "Nothing has happened here yet.",
-                "resolved": "resolved",
-                "pending": "awaiting the GM"
+                "title": "城镇生活",
+                "turn": "回合",
+                "event": "事件",
+                "empty": "这里尚未发生任何事。",
+                "resolved": "已处理",
+                "pending": "等待 GM"
             },
-            "recordGone": "That life event is no longer on record — the turn it belonged to was undone."
+            "recordGone": "该事件已不在记录中——它所属的回合已被撤销。"
         },
         "petitions": {
             "absentee-lord": {
