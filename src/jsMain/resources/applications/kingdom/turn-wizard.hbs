@@ -119,6 +119,14 @@
     {{else}}
     <p style="margin: 4px 0; font-style: italic; color: #aaaaaa;">{{localizeKM "kingdom.turnWizard.preview.empty"}}</p>
     {{/if}}
+    {{#if previewLifeEvents.length}}
+    <p style="margin: 6px 0 2px;"><b>{{localizeKM "kingdom.turnWizard.preview.lifeEvents"}}</b></p>
+    <ul class="km-preview-list" style="padding-left: 20px; margin: 4px 0;">
+      {{#each previewLifeEvents}}
+      <li style="margin-bottom: 4px;">{{this}}</li>
+      {{/each}}
+    </ul>
+    {{/if}}
   </fieldset>
   {{/if}}
 

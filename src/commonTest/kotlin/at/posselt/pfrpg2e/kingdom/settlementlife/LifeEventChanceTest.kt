@@ -23,4 +23,11 @@ class LifeEventChanceTest {
     fun garbageInputsClampInsteadOfGoingNegative() {
         assertTrue(lifeEventChancePercent(settlementLevel = -5, population = -100) >= 0)
     }
+
+    @Test
+    fun theStreamSeedIsPureAndTellsSettlementsApart() {
+        assertEquals(lifeEventStreamSeed("Realm", 3, "a"), lifeEventStreamSeed("Realm", 3, "a"))
+        assertTrue(lifeEventStreamSeed("Realm", 3, "a") != lifeEventStreamSeed("Realm", 3, "b"))
+        assertTrue(lifeEventStreamSeed("Realm", 3, "a") != lifeEventStreamSeed("Realm", 4, "a"))
+    }
 }

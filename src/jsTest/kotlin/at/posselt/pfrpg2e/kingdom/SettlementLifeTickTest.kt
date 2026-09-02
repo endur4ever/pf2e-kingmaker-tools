@@ -61,7 +61,8 @@ class SettlementLifeTickTest {
     }.unsafeCast<KingdomData>()
 
     private fun roll(k: KingdomData, settlements: List<Settlement>, turn: Int, chance: Int = 1) =
-        rollSettlementLifeEvents(k, settlements, season = null, currentTurn = turn, chanceRoll = { chance }, pickRoll = { 0 })
+        rollSettlementLifeEvents(k, settlements, season = null, currentTurn = turn,
+            rolls = { LifeRolls(chance = { chance }, pick = { 0 }) })
 
     private fun history(k: KingdomData, id: String) =
         k.settlements.first { it.sceneId == id }.lifeEventHistory?.toList().orEmpty()
@@ -150,5 +151,34 @@ class SettlementLifeTickTest {
         }
         assertTrue("guild-theft" in firedWith(listOf("thieves-guild-vk")), "the V&K guild did not count")
         assertTrue("guild-theft" !in firedWith(emptyList()), "guild-theft fired with no guild at all")
+    }
+
+    @Test
+    fun thePreviewAndTheCommitRollTheSameEventsFromTheSameSeed() {
+        // plan 3.4: a preview must show exactly the lines the commit will write. Default rolls are
+        // seeded from (kingdom name, turn, settlement), never the clock.
+        fun named(k: KingdomData): KingdomData { k.asDynamic().name = "Tusk Hold Realm"; return k }
+        val towns = listOf("a", "b", "c").map { settlement(it) }
+        val preview = rollSettlementLifeEvents(named(kingdom("a", "b", "c")), towns, null, currentTurn = 7, dryRun = true)
+        val commit = rollSettlementLifeEvents(named(kingdom("a", "b", "c")), towns, null, currentTurn = 7)
+        assertEquals(preview.map { it.recordId to it.gazetteLine }, commit.map { it.recordId to it.gazetteLine })
+    }
+
+    @Test
+    fun aDryRunWritesNoRecord() {
+        val k = kingdom("a")
+        k.asDynamic().name = "Realm"
+        val fired = rollSettlementLifeEvents(k, listOf(settlement("a")), null, currentTurn = 1,
+            rolls = { LifeRolls({ 1 }, { 0 }) }, dryRun = true)
+        assertEquals(1, fired.size)
+        assertTrue(history(k, "a").isEmpty(), "a preview must not write history")
+    }
+
+    @Test
+    fun differentTurnsDrawFromDifferentStreams() {
+        // across many turns a seeded stream must not be constant -- otherwise every town would
+        // roll the same gate result forever
+        val gates = (1..40).map { turn -> seededLifeRolls("Realm", turn)("a").chance() }.toSet()
+        assertTrue(gates.size > 5, "seeded gate rolls barely vary: $gates")
     }
 }

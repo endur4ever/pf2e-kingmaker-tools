@@ -72,6 +72,7 @@ external interface TurnWizardContext : ValidatedHandlebarsContext {
     val kingdomState: KingdomStateContext
     val activityCaps: Array<ActivityCapContext>
     val previewChanges: Array<TickChangeContext>
+    val previewLifeEvents: Array<String>
     val showPreview: Boolean
     val canCommit: Boolean
     /** Whether an undo snapshot exists for the most recent End Turn. */

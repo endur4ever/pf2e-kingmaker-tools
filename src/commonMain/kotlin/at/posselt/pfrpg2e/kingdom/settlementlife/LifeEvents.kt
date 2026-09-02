@@ -225,3 +225,16 @@ fun lifeEventChancePercent(settlementLevel: Int, population: Int): Int {
     val chance = 0.15 + 0.05 * settlementLevel.coerceAtLeast(0) + population.coerceAtLeast(0) / 20000.0
     return (chance * 100).toInt().coerceIn(0, 90)
 }
+
+/**
+ * The seed for ONE settlement's draws in ONE turn (§3.4): a pure function of the kingdom, the
+ * turn and the settlement, never of the clock. That is what lets the Turn Wizard preview and the
+ * End Turn commit roll byte-identical events — the same property TurnTickingEngine already has.
+ *
+ * Per-settlement rather than per-turn so adding or removing a town does not shift every other
+ * town's draw, and mixed with a life-specific salt so the stream never coincides with the faction
+ * agendas', which seed from the same kingdom name and turn.
+ */
+fun lifeEventStreamSeed(kingdomName: String, currentTurn: Int, settlementId: String): Int =
+    ((at.posselt.pfrpg2e.data.kingdom.stableFactionHash(kingdomName) * 31 + currentTurn) * 17 +
+        at.posselt.pfrpg2e.data.kingdom.stableFactionHash(settlementId)) xor 0x1F3D5B79

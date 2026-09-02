@@ -1219,6 +1219,8 @@ class TurnWizardApplication(
     resizable = true,
 ) {
     private var cachedChanges: Array<TickChange> = emptyArray()
+    /** Town-life lines the commit will write, from the same seed it will use. */
+    private var cachedLifeLines: Array<String> = emptyArray()
 
     override fun _preparePartContext(
         partId: String,
@@ -1253,7 +1255,8 @@ class TurnWizardApplication(
             isFormValid = true,
             checkedItems = checkedItems,
             showPreview = showPreview,
-            previewChanges = previewChangesContext
+            previewChanges = previewChangesContext,
+            previewLifeEvents = cachedLifeLines,
         )
     }
 
@@ -1525,6 +1528,15 @@ class TurnWizardApplication(
         }
 
         cachedChanges = (tickResult.changes + storageCapChanges).toTypedArray()
+        // same seed, same turn number, same settlements as performEndTurn: byte-identical lines.
+        // dryRun so the preview writes no record -- only the commit does.
+        cachedLifeLines = rollSettlementLifeEvents(
+            kingdom = kingdom,
+            settlements = settlements.allSettlements,
+            season = runCatching { getSeasonForMonth(game.getCurrentMonth().ordinal).value }.getOrNull(),
+            currentTurn = (kingdom.currentTurn ?: 0) + 1,
+            dryRun = true,
+        ).map { it.gazetteLine }.toTypedArray()
         render()
     }
 
@@ -1581,6 +1593,7 @@ class TurnWizardApplication(
             checkedItems: Set<String> = emptySet(),
             showPreview: Boolean = false,
             previewChanges: Array<TickChangeContext> = emptyArray(),
+            previewLifeEvents: Array<String> = emptyArray(),
         ): TurnWizardContext {
             class ChecklistItemInfo(
                 val id: String,
@@ -1777,6 +1790,7 @@ class TurnWizardApplication(
                 kingdomState = stateContext,
                 activityCaps = activityCaps,
                 previewChanges = previewChanges,
+                previewLifeEvents = previewLifeEvents,
                 showPreview = showPreview,
                 canCommit = canCommit,
                 hasUndoSnapshot = actor?.getAppFlag<KingdomActor, Any>("lastTurnSnapshot") != null,

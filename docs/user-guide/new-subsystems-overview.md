@@ -134,7 +134,7 @@ At most two fire kingdom-wide per turn, and a busy capital cannot take both slot
 Residents are cast from the settlement's population roster by occupation, so the same brewer
 hosts the feast and the same rat-catcher gets accused.
 
-The line is written into the turn gazette whether or not anyone acts on it. Some events also
+The Turn Wizard's preview shows the exact lines End Turn will write — the draw is seeded from the kingdom, the turn and the settlement, never the clock — and the line is written into the turn gazette whether or not anyone acts on it. Some events also
 carry a small mechanical hook (±1 Unrest, +1 RP, create a quest, spread a rumour); those arrive
 on **one whispered digest card** per turn with an apply and a dismiss button per row. Nothing
 applies on its own. The catalog lives in `data/settlement-life-events/` and ships with three

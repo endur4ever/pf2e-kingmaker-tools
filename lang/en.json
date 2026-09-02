@@ -1004,7 +1004,8 @@
                     "changeFame": "Fame: {old} → {new}",
                     "changeConsumption": "Consumption: {old} → {new}",
                     "expiredModifiers": "{count} modifier(s) expired",
-                    "tributeRp": "Vassal Tribute: +{amount} RP"
+                    "tributeRp": "Vassal Tribute: +{amount} RP",
+                    "lifeEvents": "Town life this turn"
                 },
                 "commit": "Complete Turn",
                 "cancel": "Cancel",

@@ -9,6 +9,8 @@ import at.posselt.pfrpg2e.kingdom.settlementlife.RosterMember
 import at.posselt.pfrpg2e.kingdom.settlementlife.castFromRoster
 import at.posselt.pfrpg2e.kingdom.settlementlife.eligibleTemplates
 import at.posselt.pfrpg2e.kingdom.settlementlife.lifeEventChancePercent
+import at.posselt.pfrpg2e.kingdom.settlementlife.lifeEventStreamSeed
+import at.posselt.pfrpg2e.data.kingdom.TurnRng
 import at.posselt.pfrpg2e.kingdom.settlementlife.weightedForSettlement
 import at.posselt.pfrpg2e.kingdom.settlementlife.weightedPick
 import at.posselt.pfrpg2e.utils.postChatTemplate
@@ -16,7 +18,6 @@ import at.posselt.pfrpg2e.utils.t
 import com.foundryvtt.core.AnyObject
 import com.foundryvtt.core.Game
 import js.objects.recordOf
-import kotlin.random.Random
 
 /**
  * End Turn integration for settlement life events
@@ -75,6 +76,19 @@ private fun castTemplate(
     return cast
 }
 
+/** One settlement's two draws for one turn: the gate roll (1..100) and the template pick. */
+data class LifeRolls(val chance: () -> Int, val pick: (Int) -> Int)
+
+/**
+ * Draws seeded purely from (kingdom, turn, settlement) — the plan's §3.4 parity guarantee. One
+ * iterated stream per settlement; the gate consumes the first value and the pick the second, in
+ * a fixed order, so the same inputs replay the same events in preview and in commit.
+ */
+fun seededLifeRolls(kingdomName: String, currentTurn: Int): (String) -> LifeRolls = { settlementId ->
+    val rng = TurnRng(lifeEventStreamSeed(kingdomName, currentTurn, settlementId))
+    LifeRolls(chance = { rng.next(100) + 1 }, pick = { bound -> rng.next(bound) })
+}
+
 /**
  * Roll this turn's life events, mutating each acting settlement's `lifeEventHistory` in place.
  *
@@ -88,8 +102,11 @@ fun rollSettlementLifeEvents(
     settlements: List<Settlement>,
     season: String?,
     currentTurn: Int,
-    chanceRoll: () -> Int = { Random.nextInt(1, 101) },
-    pickRoll: (Int) -> Int = { bound -> Random.nextInt(0, bound) },
+    /** Per-settlement draws. The default is SEEDED from (kingdom, turn, settlement), so a preview
+     *  and the commit that follows it agree; tests inject fixed draws. */
+    rolls: (settlementId: String) -> LifeRolls = seededLifeRolls(kingdom.name, currentTurn),
+    /** Preview mode: compute what WOULD fire without writing a record. */
+    dryRun: Boolean = false,
 ): List<LifeEventFired> {
     val catalog = settlementLifeTemplates()
     if (catalog.isEmpty()) return emptyList()
@@ -100,7 +117,8 @@ fun rollSettlementLifeEvents(
         if (fired.size >= MAX_LIFE_EVENTS_PER_TURN) break
         val raw = kingdom.settlements.find { it.sceneId == settlement.id } ?: continue
         val population = settlement.size.populationNumber
-        if (chanceRoll() > lifeEventChancePercent(settlement.level, population)) continue
+        val draw = rolls(settlement.id)
+        if (draw.chance() > lifeEventChancePercent(settlement.level, population)) continue
 
         val history = raw.lifeEventHistory ?: emptyArray()
         // ONE roll per settlement per turn. Re-entering End Turn on the same turn number -- the
@@ -125,7 +143,7 @@ fun rollSettlementLifeEvents(
         val weighted = weightedForSettlement(eligible, structureIds, season)
         val total = weighted.sumOf { maxOf(it.weight, 0) }
         if (total <= 0) continue
-        val template = weightedPick(weighted, pickRoll(total)) ?: continue
+        val template = weightedPick(weighted, draw.pick(total)) ?: continue
 
         val roster = settlement.populationRoster.npcs.map { RosterMember(it.id, it.name, it.occupation) }
         val cast = castTemplate(template, roster)
@@ -134,7 +152,7 @@ fun rollSettlementLifeEvents(
         cast.forEach { (slot, member) -> params[slot] = member.name }
         val recordId = "life-${settlement.id}-$currentTurn-${template.id}"
 
-        raw.lifeEventHistory = history + RawSettlementLifeEventRecord(
+        if (!dryRun) raw.lifeEventHistory = history + RawSettlementLifeEventRecord(
             recordId = recordId,
             templateId = template.id,
             turn = currentTurn,
