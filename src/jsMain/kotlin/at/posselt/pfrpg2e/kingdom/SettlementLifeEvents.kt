@@ -2,6 +2,7 @@ package at.posselt.pfrpg2e.kingdom
 
 import at.posselt.pfrpg2e.kingdom.settlementlife.LifeEventHookKind
 import at.posselt.pfrpg2e.kingdom.settlementlife.LifeEventTemplate
+import at.posselt.pfrpg2e.kingdom.settlementlife.clampLifeEventUnrest
 import kotlinx.js.JsPlainObject
 
 /**
@@ -79,8 +80,11 @@ private external val rawSettlementLifeEvents: Array<RawSettlementLifeEvent>
  * set keeps its flavor and loses its hook -- one bad file must not remove the whole event, and it
  * certainly must not crash the tick.
  */
-fun settlementLifeTemplates(): List<LifeEventTemplate> =
-    rawSettlementLifeEvents.map { raw ->
+fun settlementLifeTemplates(): List<LifeEventTemplate> = rawSettlementLifeEvents.map { it.toLifeTemplate() }
+
+/** The catalog mapping, exposed so the parse-time constraints can be tested against a synthetic row. */
+fun RawSettlementLifeEvent.toLifeTemplate(): LifeEventTemplate = let { raw ->
+        val hookKind = LifeEventHookKind.fromValue(raw.hook?.kind) ?: LifeEventHookKind.NONE
         LifeEventTemplate(
             id = raw.id,
             weight = raw.baseWeight,
@@ -102,8 +106,16 @@ fun settlementLifeTemplates(): List<LifeEventTemplate> =
                     slot.distinctFrom?.toList() ?: emptyList(),
                 )
             },
-            hookKind = LifeEventHookKind.fromValue(raw.hook?.kind) ?: LifeEventHookKind.NONE,
-            hookMagnitude = raw.hook?.magnitude ?: 0,
+            hookKind = hookKind,
+            // section 5.2's closed constraints, enforced HERE because this is the only place a
+            // magnitude enters the system: unrest moves one point either way, RP by 0 or 1. The
+            // button labels are fixed strings ("+1 Unrest"), so an unclamped 10 would be a card
+            // promising one thing and a click doing another
+            hookMagnitude = when (hookKind) {
+                LifeEventHookKind.UNREST -> clampLifeEventUnrest(raw.hook?.magnitude ?: 1).let { if (it == 0) 1 else it }
+                LifeEventHookKind.RP -> (raw.hook?.magnitude ?: 1).coerceIn(0, 1)
+                else -> 0
+            },
             cooldownTurns = raw.cooldownTurns ?: 0,
         )
     }

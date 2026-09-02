@@ -149,7 +149,9 @@
               "type": [
                 "integer",
                 "null"
-              ]
+              ],
+              "minimum": -1,
+              "maximum": 1
             },
             "questTemplate": {
               "type": [

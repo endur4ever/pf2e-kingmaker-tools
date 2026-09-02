@@ -28,24 +28,37 @@ const val LIFE_HISTORY_VIEW_ROWS = 20
  * left the catalog still renders — as its names and turn — rather than vanishing from a chronicle
  * that already happened.
  */
+/**
+ * The gazette line for a stored record, rebuilt from the catalog.
+ *
+ * The record deliberately stores no prose -- only the template id and the cast -- so a wording
+ * fix reaches every chronicle already written. A record whose template has left the catalog falls
+ * back to its cast names rather than a raw key.
+ */
+fun lifeEventGazetteLine(settlementName: String, record: RawSettlementLifeEventRecord): String {
+    val raw = rawSettlementLifeTemplates().find { it.id == record.templateId }
+        ?: return record.castNames.joinToString(", ")
+    val slots = settlementLifeTemplates().find { it.id == record.templateId }?.castSlots?.map { it.first }.orEmpty()
+    val params = recordOf<String, Any?>("settlement" to settlementName)
+    slots.zip(record.castNames).forEach { (slot, name) -> params[slot] = name }
+    return t(raw.gazette, params.unsafeCast<AnyObject>())
+}
+
 fun lifeHistoryRows(
     settlementName: String,
     history: Array<RawSettlementLifeEventRecord>?,
 ): Array<LifeHistoryRowContext> {
     val byId = rawSettlementLifeTemplates().associateBy { it.id }
-    val slotsById = settlementLifeTemplates().associate { it.id to it.castSlots.map { slot -> slot.first } }
     return (history ?: emptyArray())
         .sortedByDescending { it.turn }
         .take(LIFE_HISTORY_VIEW_ROWS)
         .map { record ->
             val raw = byId[record.templateId]
-            val params = recordOf<String, Any?>("settlement" to settlementName)
-            slotsById[record.templateId].orEmpty().zip(record.castNames).forEach { (slot, name) -> params[slot] = name }
             val hook = LifeEventHookKind.fromValue(record.hookKind) ?: LifeEventHookKind.NONE
             LifeHistoryRowContext(
                 turn = record.turn,
                 name = raw?.let { t(it.name) } ?: record.templateId,
-                line = raw?.let { t(it.gazette, params.unsafeCast<AnyObject>()) } ?: record.castNames.joinToString(", "),
+                line = lifeEventGazetteLine(settlementName, record),
                 statusLabel = when {
                     hook == LifeEventHookKind.NONE -> ""
                     record.hookApplied == true -> t("settlementLife.history.resolved")

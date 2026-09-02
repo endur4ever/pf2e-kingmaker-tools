@@ -108,7 +108,10 @@ fun rollSettlementLifeEvents(
         // template that already fired and happily pick a different one on top of it.
         if (history.any { it.turn == currentTurn }) continue
         val lastFired = history.groupBy { it.templateId }.mapValues { (_, rs) -> rs.maxOf { it.turn } }
-        val structureIds = settlement.constructedStructures.map { it.id }.toSet()
+        // BASE ids (plan 6.1): the catalog names "tavern-dive", the V&K variant is "tavern-dive-vk",
+        // and the engine's match is exact -- raw ids would make every template that names a tavern
+        // silently un-fireable in a town whose only tavern is the V&K one
+        val structureIds = settlement.baseStructureIds
         val eligible = eligibleTemplates(
             templates = catalog,
             structureIds = structureIds,

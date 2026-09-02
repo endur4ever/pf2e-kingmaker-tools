@@ -35,6 +35,7 @@ import at.posselt.pfrpg2e.kingdom.data.RawQuest
 import at.posselt.pfrpg2e.kingdom.data.RawQuestRewards
 import at.posselt.pfrpg2e.kingdom.dialogs.AddQuest
 import at.posselt.pfrpg2e.kingdom.applyPetitionAnswer
+import at.posselt.pfrpg2e.kingdom.lifeEventGazetteLine
 import at.posselt.pfrpg2e.kingdom.applyPetitionOverdue
 import at.posselt.pfrpg2e.kingdom.dialogs.AddWarThreat
 import at.posselt.pfrpg2e.kingdom.launchExpedition
@@ -333,33 +334,62 @@ private val buttons = listOf(
         val recordId = button.dataset["recordId"] ?: return@ChatButton
         val hookKind = button.dataset["hookKind"] ?: return@ChatButton
         val kingdom = actor.getKingdom() ?: return@ChatButton
-        val settlement = kingdom.settlements.find { it.sceneId == settlementId } ?: return@ChatButton
-        val record = settlement.lifeEventHistory?.find { it.recordId == recordId } ?: return@ChatButton
-        if (record.hookApplied == true) {
-            ui.notifications.info(t("settlementLife.alreadyApplied"))
+        // grey this row before any await: the idempotency guard reads the actor flag, which is
+        // only updated once the server acknowledges the write, so a second click inside that
+        // window would pass the guard on the stale flag and run the hook again
+        val row = button.closest(".km-life-row") as? HTMLElement
+        fun settleRow() {
+            row?.querySelectorAll("button")?.asList()?.filterIsInstance<HTMLElement>()
+                ?.forEach { it.setAttribute("disabled", "disabled") }
+            row?.classList?.add("km-card-resolved")
+        }
+        val settlement = kingdom.settlements.find { it.sceneId == settlementId }
+        val record = settlement?.lifeEventHistory?.find { it.recordId == recordId }
+        if (record == null) {
+            // an End Turn undo restores the pre-roll history but leaves this digest in scrollback
+            ui.notifications.info(t("settlementLife.recordGone"))
+            settleRow()
             return@ChatButton
         }
+        if (record.hookApplied == true) {
+            ui.notifications.info(t("settlementLife.alreadyApplied"))
+            settleRow()
+            return@ChatButton
+        }
+        settleRow()
         val settlementName = game.scenes.get(settlementId)?.name ?: settlementId
-        val gazette = record.castNames.joinToString(", ")
+        val gazette = lifeEventGazetteLine(settlementName, record)
         when (hookKind) {
             "dismiss" -> Unit
-            // the magnitude was clamped to one point either way at parse time; clamping the
-            // RESULT at zero is the same rule every unrest write follows
+            // the magnitude is clamped to one point either way where the catalog is parsed
+            // (settlementLifeTemplates); clamping the RESULT at zero is the rule every unrest
+            // write follows
             "unrest-delta" -> kingdom.unrest = (kingdom.unrest + (record.hookMagnitude ?: 0)).coerceAtLeast(0)
             "rp-delta" -> kingdom.resourcePoints.now =
                 (kingdom.resourcePoints.now + (record.hookMagnitude ?: 0)).coerceAtLeast(0)
-            "quest-spawn" -> AddQuest(
-                prefillTitle = t("settlementLife.questTitle", recordOf("settlement" to settlementName)),
-                prefillGiver = record.castNames.firstOrNull() ?: settlementName,
-                settlements = kingdom.getAllSettlements(game).allSettlements.map { it.id to it.name },
-            ) { quest ->
-                // fires long after this handler's setKingdom: re-read and persist, or the quest
-                // lands on a kingdom object nobody saves
-                actor.getKingdom()?.let { fresh ->
-                    fresh.quests = (fresh.quests ?: emptyArray()) + quest
-                    actor.setKingdom(fresh)
-                }
-            }.launch()
+            "quest-spawn" -> {
+                // plan 5.1: "returns; marks applied on save". launch() is a non-suspending render,
+                // so consuming the offer here would spend it the moment the form OPENS -- a GM who
+                // cancels would find the row resolved and no quest anywhere. The callback re-reads
+                // the kingdom (this handler's copy is stale by then), appends the quest, marks the
+                // record, and persists, all in one write.
+                AddQuest(
+                    prefillTitle = gazette,
+                    prefillGiver = record.castNames.firstOrNull() ?: settlementName,
+                    settlements = kingdom.getAllSettlements(game).allSettlements.map { it.id to it.name },
+                ) { quest ->
+                    actor.getKingdom()?.let { fresh ->
+                        val freshRecord = fresh.settlements.find { it.sceneId == settlementId }
+                            ?.lifeEventHistory?.find { it.recordId == recordId }
+                        if (freshRecord?.hookApplied == true) return@AddQuest
+                        fresh.quests = (fresh.quests ?: emptyArray()) + quest
+                        freshRecord?.hookApplied = true
+                        actor.setKingdom(fresh)
+                        postChatMessage(t("settlementLife.applied", recordOf("settlement" to settlementName)))
+                    }
+                }.launch()
+                return@ChatButton
+            }
             // a hidden rumor quest -- the plan's default target, reusing the quest surface rather
             // than a new subsystem; a GM promotes it by un-hiding it
             "rumor-spawn" -> kingdom.quests = (kingdom.quests ?: emptyArray()) + RawQuest(
@@ -387,12 +417,6 @@ private val buttons = listOf(
         actor.setKingdom(kingdom)
         if (hookKind != "dismiss") {
             postChatMessage(t("settlementLife.applied", recordOf("settlement" to settlementName)))
-        }
-        // grey out only THIS row; the digest carries several independent offers
-        (button.closest(".km-life-row") as? HTMLElement)?.let { row ->
-            row.querySelectorAll("button").asList().filterIsInstance<HTMLElement>()
-                .forEach { it.setAttribute("disabled", "disabled") }
-            row.classList.add("km-card-resolved")
         }
     },
     ChatButton("km-petition-confirm") { game, actor, _, button ->

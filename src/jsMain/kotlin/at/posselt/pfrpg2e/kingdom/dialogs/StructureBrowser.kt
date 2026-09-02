@@ -1,5 +1,6 @@
 package at.posselt.pfrpg2e.kingdom.dialogs
 
+import at.posselt.pfrpg2e.kingdom.structures.carrySettlementEngineState
 import at.posselt.pfrpg2e.actor.openActor
 import at.posselt.pfrpg2e.app.FormApp
 import at.posselt.pfrpg2e.app.HandlebarsRenderContext
@@ -326,9 +327,13 @@ class StructureBrowser(
                             actor.setKingdom(kingdom)
                         },
                     ) { data ->
+                        val merged = carrySettlementEngineState(
+                            live = kingdom.settlements.find { it.sceneId == data.sceneId },
+                            submitted = data,
+                        )
                         kingdom.settlements = kingdom.settlements
                             .filter { it.sceneId != data.sceneId }
-                            .toTypedArray() + data
+                            .toTypedArray() + merged
                         actor.setKingdom(kingdom)
                     }.launch()
                 }

@@ -138,4 +138,17 @@ class SettlementLifeTickTest {
         val fired = roll(k, listOf(settlement("ghost"), settlement("a")), turn = 1)
         assertTrue(fired.all { it.settlementId == "a" })
     }
+
+    @Test
+    fun aVkVariantStructureSatisfiesTheTemplatesBaseId() {
+        // plan 6.1: the catalog names "thieves-guild"; the V&K variant is "thieves-guild-vk". The
+        // engine matches exactly, so raw ids would make guild-theft un-fireable in such a town.
+        fun firedWith(structures: List<String>): Set<String> {
+            val k = kingdom("a")
+            return (1..4).flatMap { turn -> roll(k, listOf(settlement("a", structures = structures)), turn) }
+                .map { it.templateId }.toSet()
+        }
+        assertTrue("guild-theft" in firedWith(listOf("thieves-guild-vk")), "the V&K guild did not count")
+        assertTrue("guild-theft" !in firedWith(emptyList()), "guild-theft fired with no guild at all")
+    }
 }

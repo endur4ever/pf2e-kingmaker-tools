@@ -348,6 +348,7 @@ import at.posselt.pfrpg2e.kingdom.sheet.navigation.MainNavEntry
 import at.posselt.pfrpg2e.kingdom.sheet.navigation.TurnNavEntry
 import at.posselt.pfrpg2e.kingdom.structures.BlockTile
 import at.posselt.pfrpg2e.kingdom.structures.RawSettlement
+import at.posselt.pfrpg2e.kingdom.structures.carrySettlementEngineState
 import at.posselt.pfrpg2e.kingdom.structures.createSettlementBlocks
 import at.posselt.pfrpg2e.kingdom.structures.getImportedStructures
 import at.posselt.pfrpg2e.kingdom.structures.importSettlementScene
@@ -2276,9 +2277,13 @@ class KingdomSheet(
                         },
                     ) { data ->
                         val kingdom = getKingdom()
+                        val merged = carrySettlementEngineState(
+                            live = kingdom.settlements.find { it.sceneId == data.sceneId },
+                            submitted = data,
+                        )
                         kingdom.settlements = kingdom.settlements
                             .filter { it.sceneId != data.sceneId }
-                            .toTypedArray() + data
+                            .toTypedArray() + merged
                         actor.setKingdom(kingdom)
                     }.launch()
                 }
