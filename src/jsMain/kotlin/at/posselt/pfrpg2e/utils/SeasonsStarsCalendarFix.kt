@@ -27,13 +27,17 @@ fun fixSeasonsStarsActiveCalendar() {
                     if (!mgr || typeof mgr.getActiveCalendar !== 'function') return true;
                     var saved = game.settings.get('seasons-and-stars', 'activeCalendar');
                     if (!saved) return true;
-                    var savedBase = String(saved).split('(')[0];
+                    // S&S variant calendars carry the variant IN the id ("golarion-pf2e(absalom-reckoning)"),
+                    // so the saved id must be compared whole. Comparing only the base id read a
+                    // correctly selected variant as "fallen back" and re-applied it on every load.
+                    var savedFull = String(saved);
+                    var savedBase = savedFull.split('(')[0];
                     var active = mgr.getActiveCalendar();
-                    if (active && active.id === savedBase) return true;
+                    if (active && (active.id === savedFull || active.id === savedBase)) return true;
                     var all = (typeof mgr.getAllCalendars === 'function') ? mgr.getAllCalendars() : [];
                     var known = false;
                     for (var i = 0; i < (all ? all.length : 0); i++) {
-                        if (all[i] && all[i].id === savedBase) { known = true; break; }
+                        if (all[i] && (all[i].id === savedFull || all[i].id === savedBase)) { known = true; break; }
                     }
                     if (!known) return false;
                     console.log('[pf2e-kingmaker-tools] Re-applying Seasons & Stars active calendar "' + saved + '" (S&S 0.26 had fallen back to "' + (active && active.id) + '" due to an async calendar-pack load race)');
