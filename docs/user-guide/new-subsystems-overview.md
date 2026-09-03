@@ -137,5 +137,7 @@ hosts the feast and the same rat-catcher gets accused.
 The Turn Wizard's preview shows the exact lines End Turn will write — the draw is seeded from the kingdom, the turn and the settlement, never the clock — and the line is written into the turn gazette whether or not anyone acts on it. Some events also
 carry a small mechanical hook (±1 Unrest, +1 RP, create a quest, spread a rumour); those arrive
 on **one whispered digest card** per turn with an apply and a dismiss button per row. Nothing
-applies on its own. The catalog lives in `data/settlement-life-events/` and ships with three
-templates; adding one is a JSON file plus its two gazette strings.
+applies on its own. The catalog lives in `data/settlement-life-events/` and ships with ten
+templates (three with finished prose, seven with placeholder lines to rewrite); adding one is a
+JSON file plus its two gazette strings, and the build fails if either string is missing in any
+locale.
