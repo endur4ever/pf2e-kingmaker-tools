@@ -305,6 +305,7 @@ import at.posselt.pfrpg2e.kingdom.sheet.contexts.petitionInboxContext
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.PetitionInboxContext
 import at.posselt.pfrpg2e.kingdom.postPetitionAnswerOffer
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.buildRivalCharterContext
+import at.posselt.pfrpg2e.kingdom.rival.mergeRivalFormFields
 import at.posselt.pfrpg2e.kingdom.dialogs.ModifyRivalCharterParty
 import at.posselt.pfrpg2e.kingdom.mapdynamism.hexDisplayLabel
 import at.posselt.pfrpg2e.data.kingdom.activeRivalBandCount
@@ -2048,9 +2049,13 @@ class KingdomSheet(
                 }
                 ModifyRivalCharterParty(existing = existing, factions = kingdom.groups.map { it.name }) { band ->
                     buildPromise {
+                        // merge onto the LIVE row, in place: the dialog's capture is stale by save
+                        // time, and an edit must not reorder the board
                         val fresh = getKingdom()
-                        val others = (fresh.rivalCharterParties ?: emptyArray()).filter { it.id != band.id }
-                        fresh.rivalCharterParties = (others + band).toTypedArray()
+                        val current = fresh.rivalCharterParties ?: emptyArray()
+                        val live = current.find { it.id == band.id }
+                        val merged = mergeRivalFormFields(live, band)
+                        fresh.rivalCharterParties = if (live == null) current + merged else current.map { if (it.id == merged.id) merged else it }.toTypedArray()
                         actor.setKingdom(fresh)
                     }
                 }.launch()

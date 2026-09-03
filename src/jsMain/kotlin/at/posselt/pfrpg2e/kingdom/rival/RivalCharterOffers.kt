@@ -39,8 +39,62 @@ fun rivalCoLocationBands(game: Game, kingdom: KingdomData, turn: Int): List<RawR
     }.onEach { it.lastEncounterOfferTurn = turn }
 }
 
+/**
+ * A chapter beat (plan section 2.4) is a campaign clock EXPIRING this tick -- not any clock event.
+ * The manager emits ADVANCED for every running clock every turn; keying the lifecycle card to
+ * that would whisper four destructive buttons per band per month for the whole life of a clock.
+ */
+fun isRivalChapterBeat(events: Array<at.posselt.pfrpg2e.campaign.ClockTickEvent>): Boolean =
+    events.any { it.type == "EXPIRED" }
+
+/**
+ * Copy the FORM fields of a submitted band onto the LIVE row, keeping every engine-owned field
+ * the tick or a digest button wrote while the dialog was open. The dialog captured its row at
+ * OPEN; replacing the live row with that capture is the raw-field-wipe class by staleness. A
+ * changed hex clears the countdown, or the band would arrive at the old objective from the new hex.
+ */
+fun mergeRivalFormFields(live: RawRivalCharterParty?, submitted: RawRivalCharterParty): RawRivalCharterParty {
+    if (live == null) return submitted
+    val moved = live.currentHexKey != submitted.currentHexKey
+    live.name = submitted.name
+    live.members = submitted.members
+    live.factionRef = submitted.factionRef
+    live.status = submitted.status
+    live.levelOffset = submitted.levelOffset
+    live.currentHexKey = submitted.currentHexKey
+    live.agenda = submitted.agenda
+    live.pace = submitted.pace
+    live.pauseMovement = submitted.pauseMovement
+    live.aggressionThreshold = submitted.aggressionThreshold
+    live.visibleToPlayers = submitted.visibleToPlayers
+    if (moved) { live.objectiveHexKey = null; live.objectiveKind = null; live.distanceToObjective = null }
+    return live
+}
+
+/**
+ * Accept a hex key as the board shows it ("12.34"), as the map stores it ("12034"), or with
+ * padding, and return the stored form; null for anything that is not a hex key at all, so a typo
+ * is reported rather than becoming a band that silently idles forever.
+ */
+fun parseRivalHexKey(input: String?): String? {
+    val raw = input?.trim().orEmpty()
+    if (raw.isEmpty()) return null
+    Regex("^(\\d+)[.,:](\\d+)$").find(raw)?.let { m ->
+        val (i, j) = m.destructured
+        return (i.toInt() * 1000 + j.toInt()).toString()
+    }
+    return raw.toIntOrNull()?.toString()
+}
+
+/** ETA in turns; null when idle, paused, or standing still (pace 0), which the core never counts down. */
+fun rivalEtaTurns(band: RawRivalCharterParty): Int? {
+    val pace = band.pace ?: 1
+    if (band.objectiveHexKey == null || band.pauseMovement == true || pace <= 0) return null
+    return band.distanceToObjective?.let { (it + pace - 1) / pace }
+}
+
 /** Upsert the discovery-on-arrival row (plan section 5.5 stage 3); idempotent by hex and name. */
-fun applyRivalDiscovery(kingdom: KingdomData, band: RawRivalCharterParty, hexKey: String, turn: Int, pendingEncounter: Boolean = false) {
+fun applyRivalDiscovery(kingdom: KingdomData, band: RawRivalCharterParty, hexKey: String, turn: Int, pendingEncounter: Boolean = false, kind: String? = null) {
     val name = t("kingdom.rivalCharter.discovery.name", recordOf("band" to band.name))
     val existing = (kingdom.hexContents ?: emptyArray()).find { it.hexKey == hexKey && it.name == name }
     if (existing != null) {
@@ -53,7 +107,8 @@ fun applyRivalDiscovery(kingdom: KingdomData, band: RawRivalCharterParty, hexKey
         type = HexContentType.CUSTOM.value,
         name = name,
         visibility = HexContentVisibility.DISCOVERED.value,
-        gmNotes = "${band.name} -- turn $turn (${band.objectiveKind ?: "arrival"})",
+        // the kind rides on the card: by click time the tick has already cleared the band's objective
+        gmNotes = "${band.name} -- turn $turn (${kind ?: "arrival"})",
         playerText = t("kingdom.rivalCharter.discovery.playerText"),
         pendingEncounter = pendingEncounter,
     )
@@ -110,7 +165,7 @@ suspend fun postRivalCharterDigest(
             "turn" to turn,
             "arrivals" to arrivals.map { m ->
                 recordOf<String, Any?>(
-                    "bandId" to m.bandId, "band" to m.bandName, "hexKey" to m.arrivedAt!!.hexKey,
+                    "bandId" to m.bandId, "band" to m.bandName, "hexKey" to m.arrivedAt!!.hexKey, "kind" to m.arrivedAt.kind,
                     "title" to t("kingdom.rivalCharter.arrivalOffer.title", recordOf("band" to m.bandName, "place" to m.arrivedAt.label)),
                 )
             }.toTypedArray(),

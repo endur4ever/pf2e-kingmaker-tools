@@ -12,6 +12,10 @@ import at.posselt.pfrpg2e.kingdom.data.RawRivalCharterParty
 import at.posselt.pfrpg2e.kingdom.rival.RegionHexInfo
 import at.posselt.pfrpg2e.kingdom.rival.advanceAllRivalParties
 import at.posselt.pfrpg2e.kingdom.rival.classifyRivalTargets
+import at.posselt.pfrpg2e.kingdom.rival.isRivalChapterBeat
+import at.posselt.pfrpg2e.kingdom.rival.mergeRivalFormFields
+import at.posselt.pfrpg2e.kingdom.rival.parseRivalHexKey
+import at.posselt.pfrpg2e.kingdom.rival.rivalEtaTurns
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.buildRivalCharterContext
 import com.foundryvtt.kingmaker.HexState
 import js.objects.unsafeJso
@@ -130,5 +134,55 @@ class RivalCharterEngineTest {
         assertEquals(5, gm.rows.first { it.id == "a" }.aggressionMax)
         assertEquals(MAX_RIVAL_CHARTER_PARTIES, 2)
         assertFalse(buildRivalCharterContext(arrayOf(band(id = "a")), emptyArray(), isGM = true) { it }.atCap)
+    }
+
+    @Test
+    fun aHiddenBandIsStrippedForPlayersAndKeptForTheGm() {
+        val hidden = band(id = "h"); hidden.visibleToPlayers = false
+        val shown = band(id = "s")
+        assertEquals(listOf("s"), buildRivalCharterContext(arrayOf(hidden, shown), emptyArray(), isGM = false) { it }.rows.map { it.id })
+        assertEquals(setOf("h", "s"), buildRivalCharterContext(arrayOf(hidden, shown), emptyArray(), isGM = true) { it }.rows.map { it.id }.toSet())
+    }
+
+    @Test
+    fun aChapterBeatIsAnExpiringClockNotAnyClockEvent() {
+        fun ev(type: String) = unsafeJso<dynamic> { clockId = "c"; this.type = type; label = "x"; oldTurns = 2; newTurns = 1; message = null; unrestChange = 0 }
+            .unsafeCast<at.posselt.pfrpg2e.campaign.ClockTickEvent>()
+        assertFalse(isRivalChapterBeat(arrayOf(ev("ADVANCED"), ev("PAUSED"))), "a running clock is not a chapter beat")
+        assertTrue(isRivalChapterBeat(arrayOf(ev("ADVANCED"), ev("EXPIRED"))))
+        assertFalse(isRivalChapterBeat(emptyArray()))
+    }
+
+    @Test
+    fun theDialogMergePreservesEngineStateAndClearsTheCountdownOnAMove() {
+        val live = band(id = "b", currentHexKey = "1001", aggression = 4); live.arrivals = 3; live.objectiveHexKey = "1002"; live.distanceToObjective = 2; live.lastArrivalTurn = 9
+        val submitted = band(id = "b", currentHexKey = "1001"); submitted.name = "Renamed"; submitted.pace = 2
+        val merged = mergeRivalFormFields(live, submitted)
+        assertEquals("Renamed", merged.name); assertEquals(2, merged.pace)
+        assertEquals(4, merged.aggression); assertEquals(3, merged.arrivals); assertEquals(9, merged.lastArrivalTurn)
+        assertEquals("1002", merged.objectiveHexKey, "same hex keeps the countdown")
+        val moved = band(id = "b", currentHexKey = "1003")
+        val mergedMoved = mergeRivalFormFields(live, moved)
+        assertNull(mergedMoved.objectiveHexKey); assertNull(mergedMoved.distanceToObjective)
+        assertEquals(3, mergedMoved.arrivals, "moving a band by hand never touches its scoreboard")
+    }
+
+    @Test
+    fun hexKeysAreAcceptedInTheBoardsFormAndTheStoredForm() {
+        assertEquals("12034", parseRivalHexKey("12.34"))
+        assertEquals("12034", parseRivalHexKey(" 12034 "))
+        assertEquals("1001", parseRivalHexKey("1,1"))
+        assertNull(parseRivalHexKey("Temple of the Elk"))
+        assertNull(parseRivalHexKey(""))
+    }
+
+    @Test
+    fun etaIsNullWhenTheBandCannotActuallyArrive() {
+        val moving = band(pace = 2); moving.objectiveHexKey = "1002"; moving.distanceToObjective = 3
+        assertEquals(2, rivalEtaTurns(moving))
+        val still = band(pace = 0); still.objectiveHexKey = "1002"; still.distanceToObjective = 3
+        assertNull(rivalEtaTurns(still), "pace 0 never counts down")
+        val paused = band(pace = 1); paused.objectiveHexKey = "1002"; paused.distanceToObjective = 3; paused.pauseMovement = true
+        assertNull(rivalEtaTurns(paused))
     }
 }

@@ -32,6 +32,9 @@ import at.posselt.pfrpg2e.data.kingdom.RIVAL_STATUS_JOINED
 import at.posselt.pfrpg2e.data.kingdom.RIVAL_STATUS_RETIRED
 import at.posselt.pfrpg2e.kingdom.data.RawRivalCharterParty
 import io.github.uuidjs.uuid.v4
+import at.posselt.pfrpg2e.kingdom.rival.parseRivalHexKey
+import com.foundryvtt.core.ui
+import js.objects.recordOf
 
 @JsPlainObject
 external interface RivalCharterFormData {
@@ -127,7 +130,12 @@ class ModifyRivalCharterParty(
                             label = t("kingdom.rivalCharter.dialog.faction"),
                             value = data.factionRef,
                             required = false,
-                            options = factions.map { SelectOption(value = it, label = it) },
+                            // a faction that was renamed or deleted keeps its option, marked, so a
+                            // save cannot silently drop the ref the board's unlinked hint preserves
+                            options = (factions.map { SelectOption(value = it, label = it) } +
+                                listOfNotNull(existing?.factionRef?.takeIf { it !in factions }?.let {
+                                    SelectOption(value = it, label = t("kingdom.rivalCharter.dialog.unlinkedOption", recordOf("name" to it)))
+                                })),
                             stacked = false,
                         ),
                         Select(
@@ -163,7 +171,11 @@ class ModifyRivalCharterParty(
     override fun _onClickAction(event: PointerEvent, target: HTMLElement) {
         when (target.dataset["action"]) {
             "km-save" -> {
-                val agendaKeys = data.agenda.split('\n', ',', ';').map { it.trim() }.filter { it.isNotEmpty() }
+                val agendaInputs = data.agenda.split('\n', ',', ';').map { it.trim() }.filter { it.isNotEmpty() }
+                val agendaKeys = agendaInputs.mapNotNull { parseRivalHexKey(it) }
+                val currentKey = data.currentHexKey?.takeIf { it.isNotBlank() }?.let { parseRivalHexKey(it) }
+                val badInputs = agendaInputs.size - agendaKeys.size + (if (!data.currentHexKey.isNullOrBlank() && currentKey == null) 1 else 0)
+                if (badInputs > 0) ui.notifications.warn(t("kingdom.rivalCharter.dialog.badHexKey", recordOf("count" to badInputs.toString())))
                 val band = RawRivalCharterParty(
                     id = existing?.id ?: v4(),
                     name = data.name.ifBlank { t("kingdom.rivalCharter.title") },
@@ -171,7 +183,7 @@ class ModifyRivalCharterParty(
                     status = data.status,
                     members = data.members.ifBlank { null },
                     levelOffset = data.levelOffset.takeIf { it != 0 },
-                    currentHexKey = data.currentHexKey?.ifBlank { null },
+                    currentHexKey = currentKey,
                     agenda = agendaKeys.toTypedArray(),
                     // engine-owned fields survive an edit untouched
                     objectiveHexKey = existing?.objectiveHexKey,

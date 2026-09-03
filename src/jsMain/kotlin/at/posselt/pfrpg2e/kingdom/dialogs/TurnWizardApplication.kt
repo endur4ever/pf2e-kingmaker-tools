@@ -42,6 +42,7 @@ import at.posselt.pfrpg2e.kingdom.postSpringFloodOffer
 import at.posselt.pfrpg2e.kingdom.rival.buildRivalMapSnapshot
 import at.posselt.pfrpg2e.kingdom.rival.postRivalCharterDigest
 import at.posselt.pfrpg2e.kingdom.rival.rivalCoLocationBands
+import at.posselt.pfrpg2e.kingdom.rival.isRivalChapterBeat
 import at.posselt.pfrpg2e.kingdom.data.isActive
 import at.posselt.pfrpg2e.utils.toRecord
 import at.posselt.pfrpg2e.kingdom.seasonaleconomy.shouldOfferSpringFlood
@@ -739,9 +740,11 @@ private suspend fun performEndTurnLocked(game: Game, actor: KingdomActor): TickR
     val rivalHeadlines = tickResult.rivalMoves.map { localizeRivalHeadline(it) }
     // Faction agenda lines are public by the same argument: the move is visible in the world.
     val factionMoveLines = tickResult.factionAgendaMoves.map { localizeAgendaMoveLine(it) }
-    val rivalCharterLines = tickResult.rivalPartyMoves.map { move ->
+    fun rivalLine(move: at.posselt.pfrpg2e.kingdom.rival.RivalPartyMove) =
         t(move.headlineKey, move.headlineData.toList().toRecord().unsafeCast<com.foundryvtt.core.AnyObject>())
-    }
+    val rivalCharterLines = tickResult.rivalPartyMoves.map { rivalLine(it) }
+    // a band the GM hid stays out of the players' timeline entirely
+    val rivalCharterPlayerLines = tickResult.rivalPartyMoves.filter { it.visibleToPlayers }.map { rivalLine(it) }
     // the Spotlight names a PC and counts their own public deeds, so it is player-safe by
     // construction and goes into BOTH gazettes -- a line that only reached the GM's whisper
     // would vanish from the campaign's written record
@@ -796,7 +799,7 @@ private suspend fun performEndTurnLocked(game: Game, actor: KingdomActor): TickR
         factionMoves = factionMoveLines,
         spotlight = spotlightLine,
         lifeEvents = lifeEventLines,
-        rivalCharterMoves = rivalCharterLines,
+        rivalCharterMoves = rivalCharterPlayerLines,
         localize = ::t,
     )
 
@@ -895,7 +898,7 @@ private suspend fun performEndTurnLocked(game: Game, actor: KingdomActor): TickR
     // Co-location stamps lastEncounterOfferTurn, so it runs inside the persist; the digest posts after
     val rivalCoLocated = rivalCoLocationBands(game, kingdom, currentTurn)
     // A chapter beat (any campaign clock event this tick) offers each active band a lifecycle change
-    val rivalLifecycleBands = if (tickResult.clockEvents.isNotEmpty()) {
+    val rivalLifecycleBands = if (isRivalChapterBeat(tickResult.clockEvents)) {
         (kingdom.rivalCharterParties ?: emptyArray()).filter { it.isActive() }
     } else emptyList()
 

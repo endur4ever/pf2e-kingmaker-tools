@@ -2998,9 +2998,14 @@
                     "pace": "Pace (hexes / turn)",
                     "pauseMovement": "Pause Movement",
                     "aggressionThreshold": "Aggression Threshold (0 = never)",
-                    "visibleToPlayers": "Visible to Players"
+                    "visibleToPlayers": "Visible to Players",
+                    "unlinkedOption": "{name} (no longer a faction)",
+                    "badHexKey": "{count} hex key(s) were not recognised and were dropped. Use the board's 12.34 form."
                 },
-                "bandGone": "That rival band is no longer on the board."
+                "bandGone": "That rival band is no longer on the board.",
+                "arrivalGone": "That arrival no longer stands — the turn it happened in was undone.",
+                "confrontationPending": "A confrontation card for this band is already open.",
+                "confrontationSpent": "This confrontation has already been resolved."
             }
         },
         "chatMessages": {

@@ -141,3 +141,20 @@ applies on its own. The catalog lives in `data/settlement-life-events/` and ship
 templates (three with finished prose, seven with placeholder lines to rewrite); adding one is a
 JSON file plus its two gazette strings, and the build fails if either string is missing in any
 locale.
+
+### Rival charter parties
+
+A competing adventuring band explores the same hex map off-screen. Each End Turn it chooses a prize
+— a landmark, an uncleared lair, explored ground you have not claimed, or plain unexplored hexes,
+in that order of preference — and walks toward it at its pace; when it gets there first, that is a
+race you lost. Claiming a hex takes it off the board for them, which is how you win one.
+
+Everything the band does that would change the world is a GM-confirmed offer on **one whispered
+digest per turn**: it reached a prize (let them have it, race them with a quest, confront them, or
+just narrate); its aggression crossed the threshold (raise a war threat, queue an encounter at its
+hex with a level budget relative to the party, or dismiss); it picked a new objective (plant a
+rumour the players can hear in play, or keep it quiet); the party token is standing in its hex; or a
+campaign clock has expired and the charter changes hands. The turn gazette carries a public
+headline per moving band. The Trade Agreements board shows where each band was last seen, what it
+is making for, the ETA and how many races you have lost; the GM edits the dials there. At most two
+bands are in the field at once.

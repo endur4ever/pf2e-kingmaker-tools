@@ -46,6 +46,8 @@ import at.posselt.pfrpg2e.camping.Rumor
 import at.posselt.pfrpg2e.camping.currentWorldDay
 import at.posselt.pfrpg2e.camping.updateRumors
 import at.posselt.pfrpg2e.actor.partyMembers
+import at.posselt.pfrpg2e.kingdom.rival.mergeRivalFormFields
+import at.posselt.pfrpg2e.kingdom.dialogs.ModifyRivalCharterParty
 import at.posselt.pfrpg2e.kingdom.dialogs.AddQuest
 import at.posselt.pfrpg2e.kingdom.applyPetitionAnswer
 import at.posselt.pfrpg2e.kingdom.SPRING_FLOOD_EVENT_ID
@@ -356,10 +358,16 @@ private val buttons = listOf(
         }
         val currentTurn = kingdom.currentTurn ?: 0
         markRivalRowDone(button)
+        // the arrival this card describes must still stand: an End Turn undo restores a band that
+        // never got here, and a discovery row for a reverted arrival would be fiction
+        if (band.lastArrivalHexKey != hexKey) {
+            ui.notifications.info(t("kingdom.rivalCharter.arrivalGone"))
+            return@ChatButton
+        }
         when (button.dataset["choice"]) {
             // the two outcomes where the band keeps the ground leave a discovery for the players
             "cede", "dismiss" -> {
-                applyRivalDiscovery(kingdom, band, hexKey, currentTurn)
+                applyRivalDiscovery(kingdom, band, hexKey, currentTurn, kind = button.dataset["kind"])
                 actor.setKingdom(kingdom)
             }
             "race" -> AddQuest(
@@ -373,7 +381,12 @@ private val buttons = listOf(
                 }
             }.launch()
             "confront" -> {
-                // escalate: the confrontation card, without waiting for aggression to cross
+                // escalate: the confrontation card, without waiting for aggression to cross --
+                // unless this turn's digest already carries one for the same peak
+                if (band.confrontationOffered == true) {
+                    ui.notifications.info(t("kingdom.rivalCharter.confrontationPending"))
+                    return@ChatButton
+                }
                 band.confrontationOffered = true
                 actor.setKingdom(kingdom)
                 postRivalCharterDigest(game, actor.uuid, currentTurn,
@@ -395,25 +408,30 @@ private val buttons = listOf(
         }
         val currentTurn = kingdom.currentTurn ?: 0
         markRivalRowDone(button)
+        // one peak, one resolution: a second live card for the same peak finds it already spent
+        if (button.dataset["choice"] != "dismiss" && band.confrontationOffered != true) {
+            ui.notifications.info(t("kingdom.rivalCharter.confrontationSpent"))
+            return@ChatButton
+        }
         when (button.dataset["choice"]) {
-            "warThreat" -> {
-                // spending the aggression: the peak is over once the GM turns it into a threat
-                band.aggression = 0
-                band.confrontationOffered = false
-                actor.setKingdom(kingdom)
-                AddWarThreat(
-                    prefillName = t("kingdom.rivalCharter.warThreatName", recordOf("band" to band.name)),
-                    prefillEnemyFaction = band.factionRef,
-                    factions = kingdom.groups.map { it.name },
-                ) { threat ->
-                    buildPromise {
-                        actor.getKingdom()?.let { fresh ->
-                            fresh.warThreats = (fresh.warThreats ?: emptyArray()) + threat
-                            actor.setKingdom(fresh)
+            "warThreat" -> AddWarThreat(
+                prefillName = t("kingdom.rivalCharter.warThreatName", recordOf("band" to band.name)),
+                prefillEnemyFaction = band.factionRef,
+                factions = kingdom.groups.map { it.name },
+            ) { threat ->
+                // the peak is spent when the threat EXISTS, not when the dialog opens: a cancelled
+                // dialog leaves the confrontation unresolved rather than silently consumed
+                buildPromise {
+                    actor.getKingdom()?.let { fresh ->
+                        fresh.warThreats = (fresh.warThreats ?: emptyArray()) + threat
+                        fresh.rivalCharterParties?.find { it.id == bandId }?.let { live ->
+                            live.aggression = 0
+                            live.confrontationOffered = false
                         }
+                        actor.setKingdom(fresh)
                     }
-                }.launch()
-            }
+                }
+            }.launch()
             "encounter" -> {
                 // no encounter is rolled or spawned here: a pending-encounter marker at the band's
                 // hex carries the level budget for the GM to stage when the table gets there
@@ -451,11 +469,14 @@ private val buttons = listOf(
             return@ChatButton
         }
         val place = hexDisplayLabel(hexKey)
+        val rumorId = "rumor-rival-${band.id}-$hexKey"
         campingActor.updateRumors { existing ->
+            // a second live copy of the card must not plant the same rumor twice
+            if (existing.any { it.id == rumorId }) return@updateRumors existing
             existing + Rumor(
                 text = t("kingdom.rivalCharter.rumor.sighted", recordOf("faction" to (band.factionRef ?: band.name), "place" to place)),
                 location = place,
-                id = "rumor-rival-${band.id}-$hexKey",
+                id = rumorId,
                 bornDay = currentWorldDay(game),
             )
         }
@@ -493,16 +514,30 @@ private val buttons = listOf(
             return@ChatButton
         }
         markRivalRowDone(button)
-        if (band.status == status) return@ChatButton
+        // "Leave Be" does nothing -- in particular it must not un-defect a defected band, which is
+        // still active and so still receives lifecycle rows
+        if (button.dataset["choice"] == "keep" || band.status == status) return@ChatButton
         band.status = status
+        // a band that stops competing has no objective; a defector starts its new charter calm
+        band.objectiveHexKey = null; band.objectiveKind = null; band.distanceToObjective = null
+        if (status == RIVAL_STATUS_DEFECTED) { band.aggression = 0; band.confrontationOffered = false }
         actor.setKingdom(kingdom)
-        val key = when (status) {
-            RIVAL_STATUS_RETIRED -> "kingdom.rivalCharter.lifecycle.retired"
-            RIVAL_STATUS_DEFECTED -> "kingdom.rivalCharter.lifecycle.defected"
-            RIVAL_STATUS_JOINED -> "kingdom.rivalCharter.lifecycle.joined"
-            else -> null
+        when (status) {
+            RIVAL_STATUS_RETIRED -> postChatMessage(t("kingdom.rivalCharter.lifecycle.retired", recordOf("band" to band.name)))
+            RIVAL_STATUS_JOINED -> postChatMessage(t("kingdom.rivalCharter.lifecycle.joined", recordOf("band" to band.name)))
+            // the new banner is the GM's to pick: the line names the faction they SAVE, never the one they left
+            RIVAL_STATUS_DEFECTED -> ModifyRivalCharterParty(existing = band, factions = kingdom.groups.map { it.name }) { edited ->
+                buildPromise {
+                    actor.getKingdom()?.let { fresh ->
+                        val live = mergeRivalFormFields(fresh.rivalCharterParties?.find { it.id == edited.id }, edited)
+                        if (fresh.rivalCharterParties?.none { it.id == live.id } != false) fresh.rivalCharterParties = (fresh.rivalCharterParties ?: emptyArray()) + live
+                        actor.setKingdom(fresh)
+                        postChatMessage(t("kingdom.rivalCharter.lifecycle.defected", recordOf("band" to live.name, "faction" to (live.factionRef ?: live.name))))
+                    }
+                }
+            }.launch()
+            else -> Unit
         }
-        if (key != null) postChatMessage(t(key, recordOf("band" to band.name, "faction" to (band.factionRef ?: band.name))))
     },
     ChatButton("km-offer-seasonal-flood") { game, actor, _, button ->
         // seasonal-economy 5.1: spawn the spring-flood kingdom event. Idempotent through the

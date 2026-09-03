@@ -14,6 +14,7 @@ import at.posselt.pfrpg2e.kingdom.data.RawGroup
 import at.posselt.pfrpg2e.kingdom.data.RawRivalCharterParty
 import at.posselt.pfrpg2e.kingdom.data.isActive
 import at.posselt.pfrpg2e.kingdom.data.objectiveKindOrNull
+import at.posselt.pfrpg2e.kingdom.rival.rivalEtaTurns
 import at.posselt.pfrpg2e.utils.t
 import kotlinx.js.JsPlainObject
 
@@ -70,8 +71,9 @@ fun buildRivalCharterContext(
     hexLabel: (String) -> String,
 ): RivalCharterContext {
     val groupNames = groups.map { it.name }.toSet()
-    val rows = parties.map { band ->
-        val pace = (band.pace ?: 1).coerceAtLeast(1)
+    // a hidden band is STRIPPED for players, not blanked: the row itself is the leak
+    val visible = if (isGM) parties.toList() else parties.filter { it.visibleToPlayers != false }
+    val rows = visible.map { band ->
         val threshold = band.aggressionThreshold
         RivalCharterRowContext(
             id = band.id,
@@ -83,7 +85,7 @@ fun buildRivalCharterContext(
             positionLabel = band.currentHexKey?.let(hexLabel) ?: t("kingdom.rivalCharter.offMap"),
             objectiveLabel = band.objectiveHexKey?.let(hexLabel) ?: "\u2014",
             objectiveKindLabel = kindLabel(band.objectiveKindOrNull()),
-            etaTurns = band.distanceToObjective?.let { (it + pace - 1) / pace }?.takeIf { band.objectiveHexKey != null },
+            etaTurns = rivalEtaTurns(band),
             queuedCount = band.agenda?.size ?: 0,
             arrivals = band.arrivals ?: 0,
             aggression = if (isGM) (band.aggression ?: 0) else null,

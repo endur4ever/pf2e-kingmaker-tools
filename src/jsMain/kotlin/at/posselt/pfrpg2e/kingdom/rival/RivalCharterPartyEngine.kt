@@ -102,6 +102,8 @@ data class RivalPartyMove(
     /** The band's hex after the move, for the co-location check. */
     val currentHexKey: String?,
     val levelOffset: Int?,
+    /** false = a band the GM hid: its headline stays out of the PLAYER gazette. */
+    val visibleToPlayers: Boolean = true,
 )
 
 /**
@@ -162,6 +164,7 @@ fun advanceAllRivalParties(
                 rumorTarget = rumorTarget,
                 currentHexKey = move.newState.currentKey,
                 levelOffset = band.levelOffset,
+                visibleToPlayers = band.visibleToPlayers != false,
             )
         }
         raw
