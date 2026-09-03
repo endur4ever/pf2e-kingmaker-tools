@@ -30,5 +30,6 @@ fun <O> HooksEventListener.onRenderHexEditor(callback: (app: AnyObject, html: HT
 fun <O> HooksEventListener.onRenderHexHud(callback: (app: AnyObject, html: HTMLElement, context: AnyObject) -> O) =
     on("renderHexHUD", callback)
 
+@Deprecated("pf2e-kingmaker 2.3.x renders HexHUD, so Foundry fires renderHexHUD; this name never fires", ReplaceWith("onRenderHexHud(callback)"))
 fun <O> HooksEventListener.onRenderKingmakerHexHud(callback: (app: KingmakerHexHud, html: HTMLElement, messageData: AnyObject) -> O) =
     on("renderKingmakerHexHUD", callback)

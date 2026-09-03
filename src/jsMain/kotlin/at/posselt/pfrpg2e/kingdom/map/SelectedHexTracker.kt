@@ -1,7 +1,7 @@
 package at.posselt.pfrpg2e.kingdom.map
 
 import com.foundryvtt.core.helpers.TypedHooks
-import com.foundryvtt.kingmaker.onRenderKingmakerHexHud
+import com.foundryvtt.kingmaker.onRenderHexHud
 
 /**
  * Remembers the last hex the GM opened on the Kingmaker map (its native hex key
@@ -13,7 +13,12 @@ var lastSelectedHexKey: String? = null
     private set
 
 fun registerSelectedHexTracker() {
-    TypedHooks.onRenderKingmakerHexHud { hud, _, _ ->
-        lastSelectedHexKey = hud.hex.key.toString()
+    // renderHexHUD is what pf2e-kingmaker 2.3.x fires (class HexHUD); the old
+    // renderKingmakerHexHUD binding never fired, so this tracker -- and the "Add hex content"
+    // prefill it feeds -- was dead. The hovered hex rides on app.hex; its key is a Number.
+    TypedHooks.onRenderHexHud { app, _, _ ->
+        val rawKey = app.asDynamic().hex?.key
+        val key = (rawKey as? Int)?.toString() ?: (rawKey as? Double)?.toInt()?.toString()
+        if (key != null) lastSelectedHexKey = key
     }
 }
