@@ -1,0 +1,36 @@
+{
+  "id": "birth",
+  "name": "settlementLife.event.birth.name",
+  "gazette": "settlementLife.event.birth.gazette",
+  "category": "birth",
+  "baseWeight": 10,
+  "requiresStructures": [],
+  "structureWeights": [
+    {
+      "anyOf": [
+        "hospital",
+        "temple",
+        "shrine"
+      ],
+      "multiplier": 1.3
+    }
+  ],
+  "seasonWeights": {
+    "spring": 1.3
+  },
+  "cast": [
+    {
+      "slot": "parent",
+      "preferOccupation": [
+        "Weaver",
+        "Baker",
+        "Potter",
+        "Farmer"
+      ]
+    }
+  ],
+  "hook": {
+    "kind": "none"
+  },
+  "cooldownTurns": 1
+}

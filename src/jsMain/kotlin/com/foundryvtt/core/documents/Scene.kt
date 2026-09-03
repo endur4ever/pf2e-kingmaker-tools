@@ -35,11 +35,12 @@ external class Scene : ClientDocument {
     var regions: EmbeddedCollection<RegionDocument>
     var levels: EmbeddedCollection<Level>
 
-    // TODO
-    //    var lights: EmbeddedCollection<Light>
-    //    var sounds: EmbeddedCollection<AmbientSound>
-    //    var templates: EmbeddedCollection<MeasuredTemplate>
-    //    var walls : EmbeddedCollection<Wall>
+    // Verified against the served v14.363 Scene schema (2026-09-02): lights, sounds and walls are
+    // EmbeddedCollectionFields of BaseAmbientLight / BaseAmbientSound / BaseWall. Measured
+    // templates were NOT confirmed in that schema and are deliberately left unbound.
+    var lights: EmbeddedCollection<AmbientLightDocument>
+    var sounds: EmbeddedCollection<AmbientSoundDocument>
+    var walls: EmbeddedCollection<WallDocument>
     var playlist: Playlist?
     var playlistSound: PlaylistSound?
     var firstLevel: Level

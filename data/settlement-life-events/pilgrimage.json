@@ -1,0 +1,46 @@
+{
+  "id": "pilgrimage",
+  "name": "settlementLife.event.pilgrimage.name",
+  "gazette": "settlementLife.event.pilgrimage.gazette",
+  "category": "festival",
+  "baseWeight": 6,
+  "minSettlementLevel": 1,
+  "requiresStructures": [],
+  "structureWeights": [
+    {
+      "anyOf": [
+        "temple",
+        "shrine"
+      ],
+      "multiplier": 2.0
+    },
+    {
+      "anyOf": [
+        "inn",
+        "tavern-popular",
+        "tavern-luxury"
+      ],
+      "multiplier": 1.3
+    }
+  ],
+  "seasonWeights": {
+    "spring": 1.3,
+    "summer": 1.3,
+    "winter": 0.5
+  },
+  "cast": [
+    {
+      "slot": "pilgrim",
+      "preferOccupation": [
+        "Priest",
+        "Healer",
+        "Scribe"
+      ]
+    }
+  ],
+  "hook": {
+    "kind": "rp-delta",
+    "magnitude": 1
+  },
+  "cooldownTurns": 3
+}

@@ -1,0 +1,40 @@
+{
+  "id": "good-harvest",
+  "name": "settlementLife.event.goodHarvest.name",
+  "gazette": "settlementLife.event.goodHarvest.gazette",
+  "category": "market",
+  "baseWeight": 8,
+  "requiresStructures": [],
+  "structureWeights": [
+    {
+      "anyOf": [
+        "granary",
+        "mill",
+        "stockyard"
+      ],
+      "multiplier": 1.5
+    }
+  ],
+  "seasonWeights": {
+    "spring": 0.5,
+    "summer": 1.2,
+    "fall": 2.5,
+    "winter": 0.0
+  },
+  "cast": [
+    {
+      "slot": "farmer",
+      "preferOccupation": [
+        "Farmer",
+        "Miller",
+        "Shepherd",
+        "Beekeeper"
+      ]
+    }
+  ],
+  "hook": {
+    "kind": "rp-delta",
+    "magnitude": 1
+  },
+  "cooldownTurns": 4
+}

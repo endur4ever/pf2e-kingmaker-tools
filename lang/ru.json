@@ -8562,6 +8562,34 @@
                 "marketDay": {
                     "name": "Базарный день",
                     "gazette": "{trader} собирает оживлённый базарный день в {settlement}."
+                },
+                "feud": {
+                    "name": "Feud",
+                    "gazette": "{partyA} and {partyB} have fallen out in {settlement}; neighbours are taking sides."
+                },
+                "birth": {
+                    "name": "A Birth",
+                    "gazette": "{parent} welcomes a child in {settlement}."
+                },
+                "pilgrimage": {
+                    "name": "Pilgrims",
+                    "gazette": "Pilgrims led by {pilgrim} pass through {settlement} and spend freely."
+                },
+                "tavernBrawl": {
+                    "name": "Tavern Brawl",
+                    "gazette": "A brawl started by {instigator} wrecks a taproom in {settlement}; {victim} is hurt."
+                },
+                "civicDispute": {
+                    "name": "Civic Dispute",
+                    "gazette": "{petitioner} brings a grievance before {official} at {settlement}'s hall; the matter is unresolved."
+                },
+                "goodHarvest": {
+                    "name": "Good Harvest",
+                    "gazette": "{farmer} brings in a heavy harvest around {settlement}; the granaries are full."
+                },
+                "plagueScare": {
+                    "name": "Plague Scare",
+                    "gazette": "A sickness takes {afflicted} in {settlement}; {healer} works to keep it from spreading."
                 }
             },
             "digest": {

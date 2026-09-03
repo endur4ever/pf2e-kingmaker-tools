@@ -21,5 +21,5 @@ open external class DocumentSheet {
         )
     }
 
-    // TODO
+    // Partial binding. `class DocumentSheet` verified present in served foundry.mjs v14.363 (2026-09-02).
 }

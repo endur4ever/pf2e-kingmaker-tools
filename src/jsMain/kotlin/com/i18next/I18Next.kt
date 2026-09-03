@@ -11,7 +11,7 @@ external interface I18NextInterpolationOptions {
     val suffix: String?
     val escape: ((value: String) -> String)?
     val useRawValueToEscape: Boolean?
-    // TODO
+    // Partial binding of i18next InitOptions; add options as the module starts using them.
 }
 
 @JsPlainObject

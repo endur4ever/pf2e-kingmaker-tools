@@ -1,0 +1,49 @@
+{
+  "id": "feud",
+  "name": "settlementLife.event.feud.name",
+  "gazette": "settlementLife.event.feud.gazette",
+  "category": "feud",
+  "baseWeight": 8,
+  "minSettlementLevel": 1,
+  "requiresStructures": [],
+  "structureWeights": [
+    {
+      "anyOf": [
+        "tavern-dive",
+        "tavern-popular",
+        "tavern-luxury",
+        "tavern-world-class"
+      ],
+      "multiplier": 1.3
+    }
+  ],
+  "seasonWeights": {
+    "winter": 1.3
+  },
+  "cast": [
+    {
+      "slot": "partyA",
+      "preferOccupation": [
+        "Farmer",
+        "Miller",
+        "Blacksmith"
+      ]
+    },
+    {
+      "slot": "partyB",
+      "preferOccupation": [
+        "Merchant",
+        "Butcher",
+        "Tanner"
+      ],
+      "distinctFrom": [
+        "partyA"
+      ]
+    }
+  ],
+  "hook": {
+    "kind": "unrest-delta",
+    "magnitude": 1
+  },
+  "cooldownTurns": 3
+}

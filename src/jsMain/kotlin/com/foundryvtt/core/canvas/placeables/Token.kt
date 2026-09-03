@@ -45,5 +45,6 @@ external class Token(document: TokenDocument) : PlaceableObject<TokenDocument> {
     fun initializeVisionSource(options: InitializeOptions = definedExternally)
     fun getRingEffects(): Array<Int>
 
-    // TODO
+    // Partial binding. `class Token` verified present in served foundry.mjs v14.363 (2026-09-02).
+    // Add members from the served bundle as needed, never from memory.
 }

@@ -10,7 +10,8 @@ abstract external class DataModel(
     data: AnyObject? = definedExternally,
     options: DocumentConstructionContext? = definedExternally
 ) {
-    // TODO: lacking static data
+    // Static members (defineSchema, schema, cleanData, fromSource) are deliberately unbound: Kotlin/JS
+    // statics on an abstract external class need a companion, and nothing calls them yet.
     open fun toObject(source: Boolean = definedExternally): AnyObject
     open fun toJSON(): AnyObject
     open fun reset()

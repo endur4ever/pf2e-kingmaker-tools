@@ -1,0 +1,59 @@
+{
+  "id": "plague-scare",
+  "name": "settlementLife.event.plagueScare.name",
+  "gazette": "settlementLife.event.plagueScare.gazette",
+  "category": "civic",
+  "baseWeight": 5,
+  "minSettlementLevel": 2,
+  "requiresStructures": [],
+  "structureWeights": [
+    {
+      "anyOf": [
+        "sewer-system"
+      ],
+      "multiplier": 0.5
+    },
+    {
+      "anyOf": [
+        "dump"
+      ],
+      "multiplier": 1.5
+    },
+    {
+      "anyOf": [
+        "hospital",
+        "herbalist"
+      ],
+      "multiplier": 0.8
+    }
+  ],
+  "seasonWeights": {
+    "summer": 1.4
+  },
+  "cast": [
+    {
+      "slot": "afflicted",
+      "preferOccupation": [
+        "Rat Catcher",
+        "Lamplighter",
+        "Fisher"
+      ]
+    },
+    {
+      "slot": "healer",
+      "preferOccupation": [
+        "Healer",
+        "Herbalist",
+        "Priest"
+      ],
+      "distinctFrom": [
+        "afflicted"
+      ]
+    }
+  ],
+  "hook": {
+    "kind": "unrest-delta",
+    "magnitude": 1
+  },
+  "cooldownTurns": 4
+}

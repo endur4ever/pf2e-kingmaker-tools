@@ -1,0 +1,44 @@
+{
+  "id": "civic-dispute",
+  "name": "settlementLife.event.civicDispute.name",
+  "gazette": "settlementLife.event.civicDispute.gazette",
+  "category": "civic",
+  "baseWeight": 7,
+  "minSettlementLevel": 2,
+  "requiresStructures": [],
+  "structureWeights": [
+    {
+      "anyOf": [
+        "town-hall",
+        "castle",
+        "palace"
+      ],
+      "multiplier": 1.5
+    }
+  ],
+  "seasonWeights": {},
+  "cast": [
+    {
+      "slot": "petitioner",
+      "preferOccupation": [
+        "Merchant",
+        "Mason",
+        "Cartwright"
+      ]
+    },
+    {
+      "slot": "official",
+      "preferOccupation": [
+        "Scribe",
+        "Guard"
+      ],
+      "distinctFrom": [
+        "petitioner"
+      ]
+    }
+  ],
+  "hook": {
+    "kind": "quest-spawn"
+  },
+  "cooldownTurns": 3
+}

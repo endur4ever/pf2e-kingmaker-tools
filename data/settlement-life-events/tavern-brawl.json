@@ -1,0 +1,55 @@
+{
+  "id": "tavern-brawl",
+  "name": "settlementLife.event.tavernBrawl.name",
+  "gazette": "settlementLife.event.tavernBrawl.gazette",
+  "category": "crime",
+  "baseWeight": 9,
+  "requiresStructures": [],
+  "structureWeights": [
+    {
+      "anyOf": [
+        "tavern-dive",
+        "tavern-popular",
+        "tavern-luxury",
+        "tavern-world-class"
+      ],
+      "multiplier": 2.0
+    },
+    {
+      "anyOf": [
+        "brewery"
+      ],
+      "multiplier": 1.3
+    }
+  ],
+  "seasonWeights": {
+    "winter": 1.2
+  },
+  "cast": [
+    {
+      "slot": "instigator",
+      "preferOccupation": [
+        "Soldier",
+        "Guard",
+        "Miner",
+        "Woodcutter"
+      ]
+    },
+    {
+      "slot": "victim",
+      "preferOccupation": [
+        "Tavern Keeper",
+        "Innkeeper",
+        "Brewer"
+      ],
+      "distinctFrom": [
+        "instigator"
+      ]
+    }
+  ],
+  "hook": {
+    "kind": "unrest-delta",
+    "magnitude": 1
+  },
+  "cooldownTurns": 2
+}

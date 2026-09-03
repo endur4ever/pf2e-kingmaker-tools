@@ -33,6 +33,6 @@ abstract external class DocumentDirectory<T : Document> {
         includeFolder: (folder: Folder, entryIds: JsSet<String>, folderIds: JsSet<String>, config: Boolean?) -> Unit
     )
     protected open fun _handleDroppedFolder(target: HTMLElement, data: AnyObject)
-    // TODO
+    // Partial binding. `class DocumentDirectory` verified present in served foundry.mjs v14.363 (2026-09-02).
 
 }

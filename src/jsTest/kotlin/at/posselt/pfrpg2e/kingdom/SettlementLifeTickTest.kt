@@ -144,13 +144,24 @@ class SettlementLifeTickTest {
     fun aVkVariantStructureSatisfiesTheTemplatesBaseId() {
         // plan 6.1: the catalog names "thieves-guild"; the V&K variant is "thieves-guild-vk". The
         // engine matches exactly, so raw ids would make guild-theft un-fireable in such a town.
-        fun firedWith(structures: List<String>): Set<String> {
+        // Every OTHER template is parked on cooldown (fired last turn), so guild-theft is the only
+        // thing that can fire -- which makes the assertion about the adapter's ids, not the draw.
+        fun onlyGuildTheftCanFire(structures: List<String>): List<String> {
+            val turn = 5
             val k = kingdom("a")
-            return (1..4).flatMap { turn -> roll(k, listOf(settlement("a", structures = structures)), turn) }
-                .map { it.templateId }.toSet()
+            k.settlements.first().lifeEventHistory = settlementLifeTemplates()
+                .filter { it.id != "guild-theft" }
+                .map { t ->
+                    unsafeJso<dynamic> {
+                        recordId = "life-a-${turn - 1}-${t.id}"; templateId = t.id; this.turn = turn - 1
+                        castNpcIds = emptyArray<String>(); castNames = emptyArray<String>()
+                        hookKind = "none"; hookMagnitude = 0; hookApplied = true
+                    }.unsafeCast<RawSettlementLifeEventRecord>()
+                }.toTypedArray()
+            return roll(k, listOf(settlement("a", structures = structures)), turn).map { it.templateId }
         }
-        assertTrue("guild-theft" in firedWith(listOf("thieves-guild-vk")), "the V&K guild did not count")
-        assertTrue("guild-theft" !in firedWith(emptyList()), "guild-theft fired with no guild at all")
+        assertEquals(listOf("guild-theft"), onlyGuildTheftCanFire(listOf("thieves-guild-vk")), "the V&K guild did not count")
+        assertEquals(emptyList(), onlyGuildTheftCanFire(emptyList()), "guild-theft fired with no guild at all")
     }
 
     @Test

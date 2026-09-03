@@ -13,5 +13,5 @@ open external class TypeDataModel(
     open fun prepareBaseData()
     open fun prepareDerivedData()
     fun toEmbed(): Promise<HTMLElement?>
-    // TODO
+    // Partial binding. `class TypeDataModel` verified present in served foundry.mjs v14.363 (2026-09-02).
 }
