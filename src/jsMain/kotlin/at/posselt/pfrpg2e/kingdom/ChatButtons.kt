@@ -35,6 +35,7 @@ import at.posselt.pfrpg2e.kingdom.data.RawQuest
 import at.posselt.pfrpg2e.kingdom.data.RawQuestRewards
 import at.posselt.pfrpg2e.kingdom.dialogs.AddQuest
 import at.posselt.pfrpg2e.kingdom.applyPetitionAnswer
+import at.posselt.pfrpg2e.kingdom.SPRING_FLOOD_EVENT_ID
 import at.posselt.pfrpg2e.kingdom.lifeEventGazetteLine
 import at.posselt.pfrpg2e.kingdom.applyPetitionOverdue
 import at.posselt.pfrpg2e.kingdom.dialogs.AddWarThreat
@@ -325,6 +326,33 @@ private val buttons = listOf(
             return@ChatButton
         }
         rollRandomEncounter(game, campingActor, false)
+    },
+    ChatButton("km-offer-seasonal-flood") { game, actor, _, button ->
+        // seasonal-economy 5.1: spawn the spring-flood kingdom event. Idempotent through the
+        // ongoing-event list rather than the year marker -- the marker is stamped when the card is
+        // POSTED (once per spring), so it cannot also be the guard for the click
+        if (!game.user.isGM) return@ChatButton
+        val kingdom = actor.getKingdom() ?: return@ChatButton
+        if (kingdom.ongoingEvents.any { it.id == SPRING_FLOOD_EVENT_ID }) {
+            ui.notifications.info(t("kingdom.seasonalEconomy.flood.alreadyTriggered"))
+            markPetitionCardDone(button)
+            return@ChatButton
+        }
+        if (kingdom.getEvent(SPRING_FLOOD_EVENT_ID) == null) {
+            // the event is a data asset the plan leaves to authoring; say so instead of failing silently
+            ui.notifications.error(t("kingdom.seasonalEconomy.flood.eventMissing"))
+            return@ChatButton
+        }
+        kingdom.ongoingEvents = kingdom.ongoingEvents + RawOngoingKingdomEvent(stage = 0, id = SPRING_FLOOD_EVENT_ID)
+        actor.setKingdom(kingdom)
+        postChatMessage(t("kingdom.seasonalEconomy.flood.triggered"))
+        markPetitionCardDone(button)
+    },
+    ChatButton("km-offer-seasonal-flood-dismiss") { game, _, _, button ->
+        // "Hold back the waters": no mechanical effect; the year marker was stamped at posting, so
+        // dismissing needs no write to keep the card from re-offering this spring
+        if (!game.user.isGM) return@ChatButton
+        markPetitionCardDone(button)
     },
     ChatButton("km-offer-life-event") { game, actor, _, button ->
         // plan section 5.1 verbatim: GM gate -> locate (settlement, record) -> idempotency on

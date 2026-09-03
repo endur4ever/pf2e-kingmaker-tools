@@ -23,6 +23,8 @@ data class SeasonalEconomyModifiers(
     val caravanRaidDcDelta: Int = 0,
     /** Frozen rivers: applied to the river-no-bridge surcharge, floored at 0 by the consumer (§6). */
     val riverCrossingCostDelta: Int = 0,
+    /** Spring only: the one EVENT-shaped consequence, a GM-confirmed offer, never standing math (§5). */
+    val springFloodOffer: Boolean = false,
 ) {
     companion object {
         /** The identity: what every season gets when the profile gate is closed. */
@@ -38,7 +40,9 @@ data class SeasonalEconomyModifiers(
 fun seasonalModifiers(season: Season, enabled: Boolean): SeasonalEconomyModifiers {
     if (!enabled) return SeasonalEconomyModifiers.none()
     return when (season) {
-        Season.SPRING, Season.SUMMER -> SeasonalEconomyModifiers.none()
+        // spring's multipliers stay neutral; its one consequence is the flood OFFER (§5.1)
+        Season.SPRING -> SeasonalEconomyModifiers(springFloodOffer = true)
+        Season.SUMMER -> SeasonalEconomyModifiers.none()
         Season.FALL -> SeasonalEconomyModifiers(farmlandFoodMultiplier = 1.25)
         Season.WINTER -> SeasonalEconomyModifiers(
             commodityWorksiteMultiplier = 0.9,
@@ -59,3 +63,13 @@ fun seasonalModifiers(season: Season, enabled: Boolean): SeasonalEconomyModifier
  */
 fun applyWorksiteMultiplier(amount: Int, multiplier: Double): Int =
     (amount * multiplier).roundToInt().coerceAtLeast(0)
+
+/**
+ * Whether this End Turn posts the spring-flood offer (§5.1): only in spring, only when the
+ * profile gate is open, and only ONCE per world-year — spring is three kingdom turns long, and a
+ * flood that re-offered every month would be the chat spam the feature promises not to be. The
+ * marker is stamped when the card is POSTED, so a GM who ignores the card is not asked again until
+ * next spring; the card's own buttons are idempotent through the ongoing-event list instead.
+ */
+fun shouldOfferSpringFlood(modifiers: SeasonalEconomyModifiers, lastFloodYear: Int?, worldYear: Int): Boolean =
+    modifiers.springFloodOffer && lastFloodYear != worldYear

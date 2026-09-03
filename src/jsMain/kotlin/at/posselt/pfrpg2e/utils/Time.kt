@@ -27,6 +27,9 @@ fun Game.getPF2EWorldTime(): LocalDateTime {
 fun Game.getCurrentMonth(): Month =
     getMonth(getPF2EWorldTime().month.number - 1)
 
+/** The world calendar year, from the same clock the month comes from. */
+fun Game.getCurrentYear(): Int = getPF2EWorldTime().year
+
 fun Date.toInstant() =
     Instant.fromEpochSeconds(getSeconds().toLong())
 

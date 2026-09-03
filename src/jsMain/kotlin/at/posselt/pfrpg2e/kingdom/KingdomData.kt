@@ -302,6 +302,8 @@ external interface KingdomData {
     var pullTogetherCurrentDC: Int?
     var pullTogetherTurnsSinceLastUsed: Int?
     var liquidateResourcesPenaltyNextTurn: Boolean?
+    /** World calendar year the spring-flood offer was last POSTED; null = never (seasonal-economy §2.2). */
+    var lastSeasonalFloodYear: Int?
     var envyOfTheWorldFirstIgnoreUsed: Boolean?
 
     /**

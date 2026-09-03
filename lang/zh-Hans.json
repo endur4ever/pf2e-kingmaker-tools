@@ -2885,6 +2885,17 @@
                     "quest": "生成一个任务",
                     "rumor": "散布一则谣言"
                 }
+            },
+            "seasonalEconomy": {
+                "flood": {
+                    "offerTitle": "Spring Flood",
+                    "offerBody": "The spring thaw threatens bridges and lowland worksites. Trigger the flood event, or hold back the waters this year.",
+                    "spawnEvent": "Trigger flood event",
+                    "dismiss": "Hold back the waters",
+                    "triggered": "The spring flood is now an ongoing kingdom event.",
+                    "alreadyTriggered": "The spring flood is already under way.",
+                    "eventMissing": "No 'spring-flood' kingdom event exists in the event data yet. Author it under data/events/ first."
+                }
             }
         },
         "chatMessages": {

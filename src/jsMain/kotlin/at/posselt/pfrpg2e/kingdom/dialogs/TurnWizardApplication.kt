@@ -38,6 +38,9 @@ import at.posselt.pfrpg2e.kingdom.generatePetitionsForTurn
 import at.posselt.pfrpg2e.kingdom.postNewPetitionNotice
 import at.posselt.pfrpg2e.kingdom.postPetitionExpiryOffers
 import at.posselt.pfrpg2e.kingdom.postSettlementLifeDigest
+import at.posselt.pfrpg2e.kingdom.postSpringFloodOffer
+import at.posselt.pfrpg2e.kingdom.seasonaleconomy.shouldOfferSpringFlood
+import at.posselt.pfrpg2e.utils.getCurrentYear
 import at.posselt.pfrpg2e.kingdom.rollSettlementLifeEvents
 import at.posselt.pfrpg2e.data.regions.getSeasonForMonth
 import at.posselt.pfrpg2e.utils.getCurrentMonth
@@ -875,6 +878,14 @@ private suspend fun performEndTurnLocked(game: Game, actor: KingdomActor): TickR
         ongoingEventNames = kingdom.ongoingEvents.map { it.id }.toSet(),
     )
 
+    // The spring flood is the seasonal economy's one event-shaped consequence: an OFFER, once per
+    // spring, never standing math. The marker is stamped here, inside the single persist, so a GM
+    // who ignores the card is not asked again until next spring.
+    val floodYear = runCatching { game.getCurrentYear() }.getOrNull()
+    val offerSpringFlood = floodYear != null &&
+        shouldOfferSpringFlood(seasonal, kingdom.lastSeasonalFloodYear, floodYear)
+    if (offerSpringFlood) kingdom.lastSeasonalFloodYear = floodYear
+
     // Rewild bookkeeping is part of the tick, so it belongs inside the persist below rather than
     // in the offer poster that runs after it (where its write would clobber card clicks).
     runCatching { reconcileRewild(kingdom, clearedUnclaimedHexes(), currentTurn) }
@@ -974,6 +985,7 @@ private suspend fun performEndTurnLocked(game: Game, actor: KingdomActor): TickR
     )
 
     postXpLedgerDigest(game, actor.uuid, currentTurn)
+    if (offerSpringFlood) postSpringFloodOffer(game, actor.uuid)
 
     postSettlementLifeDigest(game, actor.uuid, currentTurn, lifeEventsFired)
     postPetitionExpiryOffers(game, actor.uuid, expiredPetitions)

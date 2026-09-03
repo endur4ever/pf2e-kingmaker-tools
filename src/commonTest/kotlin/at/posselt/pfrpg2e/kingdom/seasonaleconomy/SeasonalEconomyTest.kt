@@ -16,8 +16,10 @@ class SeasonalEconomyTest {
 
     @Test
     fun springAndSummerAreNeutralEvenWhenEnabled() {
+        // spring's MATH is neutral; its flood OFFER flag is the season's one consequence and is
+        // covered by SpringFloodOfferTest, so it is masked here to keep this a statement about math
         // Spring's flood is an offer, not a multiplier; summer's war season is flavour only.
-        assertEquals(SeasonalEconomyModifiers.none(), seasonalModifiers(Season.SPRING, enabled = true))
+        assertEquals(SeasonalEconomyModifiers.none(), seasonalModifiers(Season.SPRING, enabled = true).copy(springFloodOffer = false))
         assertEquals(SeasonalEconomyModifiers.none(), seasonalModifiers(Season.SUMMER, enabled = true))
     }
 
