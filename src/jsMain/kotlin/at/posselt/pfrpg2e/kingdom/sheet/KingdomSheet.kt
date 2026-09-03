@@ -304,6 +304,11 @@ import at.posselt.pfrpg2e.kingdom.xp.xpLedger
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.petitionInboxContext
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.PetitionInboxContext
 import at.posselt.pfrpg2e.kingdom.postPetitionAnswerOffer
+import at.posselt.pfrpg2e.kingdom.sheet.contexts.buildRivalCharterContext
+import at.posselt.pfrpg2e.kingdom.dialogs.ModifyRivalCharterParty
+import at.posselt.pfrpg2e.kingdom.mapdynamism.hexDisplayLabel
+import at.posselt.pfrpg2e.data.kingdom.activeRivalBandCount
+import at.posselt.pfrpg2e.data.kingdom.MAX_RIVAL_CHARTER_PARTIES
 import at.posselt.pfrpg2e.kingdom.data.toModel
 import at.posselt.pfrpg2e.kingdom.getOwnedLeaderRoles
 import at.posselt.pfrpg2e.utils.getAppFlag
@@ -2030,6 +2035,34 @@ class KingdomSheet(
                 val entry = askXpLedgerEntry(getKingdom().currentTurn ?: 0) ?: return@buildPromise
                 party.updateXpLedger { existing -> appendEntry(existing, entry) }
                 render()
+            }
+
+            "add-rival-charter", "edit-rival-charter" -> buildPromise {
+                if (!game.user.isGM) return@buildPromise
+                val kingdom = getKingdom()
+                val existing = target.dataset["id"]?.let { id -> kingdom.rivalCharterParties?.find { it.id == id } }
+                // the cap applies to ADDING only (plan 2.5): an edit is always allowed
+                if (existing == null && activeRivalBandCount((kingdom.rivalCharterParties ?: emptyArray()).map { it.status }) >= MAX_RIVAL_CHARTER_PARTIES) {
+                    ui.notifications.warn(t("kingdom.rivalCharter.capReached"))
+                    return@buildPromise
+                }
+                ModifyRivalCharterParty(existing = existing, factions = kingdom.groups.map { it.name }) { band ->
+                    buildPromise {
+                        val fresh = getKingdom()
+                        val others = (fresh.rivalCharterParties ?: emptyArray()).filter { it.id != band.id }
+                        fresh.rivalCharterParties = (others + band).toTypedArray()
+                        actor.setKingdom(fresh)
+                    }
+                }.launch()
+            }
+
+            "delete-rival-charter" -> buildPromise {
+                if (!game.user.isGM) return@buildPromise
+                val id = target.dataset["id"] ?: return@buildPromise
+                if (!at.posselt.pfrpg2e.app.confirm(t("kingdom.rivalCharter.confirmDelete"))) return@buildPromise
+                val kingdom = getKingdom()
+                kingdom.rivalCharterParties = (kingdom.rivalCharterParties ?: emptyArray()).filter { it.id != id }.toTypedArray()
+                actor.setKingdom(kingdom)
             }
 
             "answer-petition" -> buildPromise {
@@ -4195,6 +4228,12 @@ class KingdomSheet(
                 skillRanks = kingdomSkillRanks,
             ),
             groups = kingdom.groups.toContext(isGM = game.user.isGM),
+            rivalCharter = buildRivalCharterContext(
+                parties = kingdom.rivalCharterParties ?: emptyArray(),
+                groups = kingdom.groups,
+                isGM = isGM,
+                hexLabel = { hexDisplayLabel(it) },
+            ),
             rivalRealms = buildRivalRealmsContext(
                 rivals = kingdom.rivalRealms,
                 groups = kingdom.groups,

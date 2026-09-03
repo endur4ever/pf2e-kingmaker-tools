@@ -1,0 +1,55 @@
+<div class="km-chat-card km-rival-charter-digest">
+    <h3><i class="fa-solid fa-chess-rook"></i> {{localizeKM "kingdom.rivalCharter.digestTitle" turn=turn}}</h3>
+    {{#each arrivals}}
+        <div class="km-rival-row" data-band-id="{{this.bandId}}">
+            <b>{{this.title}}</b>
+            <div class="km-chat-buttons">
+                <button type="button" class="km-offer-rival-reached-target" data-choice="cede" data-band-id="{{this.bandId}}" data-hex-key="{{this.hexKey}}" data-kingdom-actor-uuid="{{@root.actorUuid}}">{{localizeKM "kingdom.rivalCharter.arrivalOffer.cede"}}</button>
+                <button type="button" class="km-offer-rival-reached-target" data-choice="race" data-band-id="{{this.bandId}}" data-hex-key="{{this.hexKey}}" data-kingdom-actor-uuid="{{@root.actorUuid}}">{{localizeKM "kingdom.rivalCharter.arrivalOffer.race"}}</button>
+                <button type="button" class="km-offer-rival-reached-target" data-choice="confront" data-band-id="{{this.bandId}}" data-hex-key="{{this.hexKey}}" data-kingdom-actor-uuid="{{@root.actorUuid}}">{{localizeKM "kingdom.rivalCharter.arrivalOffer.confront"}}</button>
+                <button type="button" class="km-offer-rival-reached-target" data-choice="dismiss" data-band-id="{{this.bandId}}" data-hex-key="{{this.hexKey}}" data-kingdom-actor-uuid="{{@root.actorUuid}}">{{localizeKM "kingdom.rivalCharter.arrivalOffer.dismiss"}}</button>
+            </div>
+        </div>
+    {{/each}}
+    {{#each confrontations}}
+        <div class="km-rival-row" data-band-id="{{this.bandId}}">
+            <b>{{this.title}}</b>
+            <div class="km-chat-buttons">
+                <button type="button" class="km-offer-rival-confrontation" data-choice="warThreat" data-band-id="{{this.bandId}}" data-hex-key="{{this.hexKey}}" data-kingdom-actor-uuid="{{@root.actorUuid}}">{{localizeKM "kingdom.rivalCharter.confrontationOffer.warThreat"}}</button>
+                <button type="button" class="km-offer-rival-confrontation" data-choice="encounter" data-band-id="{{this.bandId}}" data-hex-key="{{this.hexKey}}" data-kingdom-actor-uuid="{{@root.actorUuid}}">{{localizeKM "kingdom.rivalCharter.confrontationOffer.encounter"}}</button>
+                <button type="button" class="km-offer-rival-confrontation" data-choice="dismiss" data-band-id="{{this.bandId}}" data-hex-key="{{this.hexKey}}" data-kingdom-actor-uuid="{{@root.actorUuid}}">{{localizeKM "kingdom.rivalCharter.confrontationOffer.dismiss"}}</button>
+            </div>
+        </div>
+    {{/each}}
+    {{#each rumors}}
+        <div class="km-rival-row" data-band-id="{{this.bandId}}">
+            {{this.line}}
+            <div class="km-chat-buttons">
+                <button type="button" class="km-offer-rival-rumor" data-choice="plant" data-band-id="{{this.bandId}}" data-hex-key="{{this.hexKey}}" data-kingdom-actor-uuid="{{@root.actorUuid}}">{{localizeKM "kingdom.rivalCharter.rumorOffer.plant"}}</button>
+                <button type="button" class="km-offer-rival-rumor" data-choice="quiet" data-band-id="{{this.bandId}}" data-hex-key="{{this.hexKey}}" data-kingdom-actor-uuid="{{@root.actorUuid}}">{{localizeKM "kingdom.rivalCharter.rumorOffer.quiet"}}</button>
+            </div>
+        </div>
+    {{/each}}
+    {{#each encounters}}
+        <div class="km-rival-row" data-band-id="{{this.bandId}}">
+            {{this.line}}
+            <div class="km-chat-buttons">
+                <button type="button" class="km-offer-rival-encounter" data-choice="queue" data-band-id="{{this.bandId}}" data-hex-key="{{this.hexKey}}" data-kingdom-actor-uuid="{{@root.actorUuid}}">{{localizeKM "kingdom.rivalCharter.encounterOffer.queue"}}</button>
+                <button type="button" class="km-offer-rival-encounter" data-choice="sighting" data-band-id="{{this.bandId}}" data-hex-key="{{this.hexKey}}" data-kingdom-actor-uuid="{{@root.actorUuid}}">{{localizeKM "kingdom.rivalCharter.encounterOffer.sighting"}}</button>
+                <button type="button" class="km-offer-rival-encounter" data-choice="nothing" data-band-id="{{this.bandId}}" data-hex-key="{{this.hexKey}}" data-kingdom-actor-uuid="{{@root.actorUuid}}">{{localizeKM "kingdom.rivalCharter.encounterOffer.nothing"}}</button>
+            </div>
+        </div>
+    {{/each}}
+    {{#each lifecycle}}
+        <div class="km-rival-row" data-band-id="{{this.bandId}}">
+            <b>{{this.title}}</b>
+            <div class="km-chat-buttons">
+                <button type="button" class="km-offer-rival-lifecycle" data-choice="retire" data-band-id="{{this.bandId}}" data-kingdom-actor-uuid="{{@root.actorUuid}}">{{localizeKM "kingdom.rivalCharter.lifecycle.retire"}}</button>
+                <button type="button" class="km-offer-rival-lifecycle" data-choice="defect" data-band-id="{{this.bandId}}" data-kingdom-actor-uuid="{{@root.actorUuid}}">{{localizeKM "kingdom.rivalCharter.lifecycle.defect"}}</button>
+                <button type="button" class="km-offer-rival-lifecycle" data-choice="join" data-band-id="{{this.bandId}}" data-kingdom-actor-uuid="{{@root.actorUuid}}">{{localizeKM "kingdom.rivalCharter.lifecycle.join"}}</button>
+                <button type="button" class="km-offer-rival-lifecycle" data-choice="keep" data-band-id="{{this.bandId}}" data-kingdom-actor-uuid="{{@root.actorUuid}}">{{localizeKM "kingdom.rivalCharter.lifecycle.dismiss"}}</button>
+            </div>
+        </div>
+    {{/each}}
+    <p class="km-sub-note">{{localizeKM "kingdom.rivalCharter.digestHint"}}</p>
+</div>

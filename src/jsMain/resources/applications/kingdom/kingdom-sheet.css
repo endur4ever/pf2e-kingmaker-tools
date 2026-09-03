@@ -2922,3 +2922,9 @@ fieldset.km-hex-editor-links {
     font-variant-numeric: tabular-nums;
     font-weight: bold;
 }
+
+/* Rival charter parties (rival-charter plan section 4.1) */
+.km-rival-charter .km-row-inactive { opacity: 0.55; }
+.km-rival-charter meter { width: 5em; vertical-align: middle; }
+.km-rival-row { padding: 0.3em 0; border-bottom: 1px solid rgba(0, 0, 0, 0.08); }
+.km-rival-row:last-of-type { border-bottom: none; }

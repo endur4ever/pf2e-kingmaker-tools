@@ -33,6 +33,19 @@ import at.posselt.pfrpg2e.data.events.KingdomEventTrait
 import at.posselt.pfrpg2e.kingdom.dialogs.AddExpeditionDialog
 import at.posselt.pfrpg2e.kingdom.data.RawQuest
 import at.posselt.pfrpg2e.kingdom.data.RawQuestRewards
+import at.posselt.pfrpg2e.kingdom.rival.RivalPartyMove
+import at.posselt.pfrpg2e.kingdom.rival.applyRivalColocation
+import at.posselt.pfrpg2e.kingdom.rival.applyRivalDiscovery
+import at.posselt.pfrpg2e.kingdom.rival.postRivalCharterDigest
+import at.posselt.pfrpg2e.kingdom.rival.rivalLifecycleStatus
+import at.posselt.pfrpg2e.kingdom.data.effectiveLevel
+import at.posselt.pfrpg2e.data.kingdom.RIVAL_STATUS_DEFECTED
+import at.posselt.pfrpg2e.data.kingdom.RIVAL_STATUS_JOINED
+import at.posselt.pfrpg2e.data.kingdom.RIVAL_STATUS_RETIRED
+import at.posselt.pfrpg2e.camping.Rumor
+import at.posselt.pfrpg2e.camping.currentWorldDay
+import at.posselt.pfrpg2e.camping.updateRumors
+import at.posselt.pfrpg2e.actor.partyMembers
 import at.posselt.pfrpg2e.kingdom.dialogs.AddQuest
 import at.posselt.pfrpg2e.kingdom.applyPetitionAnswer
 import at.posselt.pfrpg2e.kingdom.SPRING_FLOOD_EVENT_ID
@@ -326,6 +339,170 @@ private val buttons = listOf(
             return@ChatButton
         }
         rollRandomEncounter(game, campingActor, false)
+    },
+    ChatButton("km-offer-rival-reached-target") { game, actor, _, button ->
+        // rival-charter 5.2: the band beat the players to a prize. Every outcome is a GM click; the
+        // arrival itself was stamped by the tick, so a re-run of the turn cannot re-offer it.
+        if (!game.user.isGM) return@ChatButton
+        val bandId = button.dataset["bandId"] ?: return@ChatButton
+        val hexKey = button.dataset["hexKey"] ?: return@ChatButton
+        val kingdom = actor.getKingdom() ?: return@ChatButton
+        val band = kingdom.rivalCharterParties?.find { it.id == bandId }
+        if (band == null) {
+            // the band was deleted or the turn undone since this card was posted
+            ui.notifications.info(t("kingdom.rivalCharter.bandGone"))
+            markRivalRowDone(button)
+            return@ChatButton
+        }
+        val currentTurn = kingdom.currentTurn ?: 0
+        markRivalRowDone(button)
+        when (button.dataset["choice"]) {
+            // the two outcomes where the band keeps the ground leave a discovery for the players
+            "cede", "dismiss" -> {
+                applyRivalDiscovery(kingdom, band, hexKey, currentTurn)
+                actor.setKingdom(kingdom)
+            }
+            "race" -> AddQuest(
+                prefillTitle = t("kingdom.rivalCharter.raceQuestTitle", recordOf("band" to band.name, "place" to hexDisplayLabel(hexKey))),
+                prefillGiver = band.name,
+                settlements = kingdom.getAllSettlements(game).allSettlements.map { it.id to it.name },
+            ) { quest ->
+                actor.getKingdom()?.let { fresh ->
+                    fresh.quests = (fresh.quests ?: emptyArray()) + quest
+                    actor.setKingdom(fresh)
+                }
+            }.launch()
+            "confront" -> {
+                // escalate: the confrontation card, without waiting for aggression to cross
+                band.confrontationOffered = true
+                actor.setKingdom(kingdom)
+                postRivalCharterDigest(game, actor.uuid, currentTurn,
+                    moves = listOf(RivalPartyMove(band.id, band.name, band.factionRef, "", emptyMap(), null, true, null, band.currentHexKey, band.levelOffset)),
+                    coLocated = emptyList(), lifecycleBands = emptyList())
+            }
+        }
+    },
+    ChatButton("km-offer-rival-confrontation") { game, actor, _, button ->
+        if (!game.user.isGM) return@ChatButton
+        val bandId = button.dataset["bandId"] ?: return@ChatButton
+        val kingdom = actor.getKingdom() ?: return@ChatButton
+        val band = kingdom.rivalCharterParties?.find { it.id == bandId }
+        if (band == null) {
+            // the band was deleted or the turn undone since this card was posted
+            ui.notifications.info(t("kingdom.rivalCharter.bandGone"))
+            markRivalRowDone(button)
+            return@ChatButton
+        }
+        val currentTurn = kingdom.currentTurn ?: 0
+        markRivalRowDone(button)
+        when (button.dataset["choice"]) {
+            "warThreat" -> {
+                // spending the aggression: the peak is over once the GM turns it into a threat
+                band.aggression = 0
+                band.confrontationOffered = false
+                actor.setKingdom(kingdom)
+                AddWarThreat(
+                    prefillName = t("kingdom.rivalCharter.warThreatName", recordOf("band" to band.name)),
+                    prefillEnemyFaction = band.factionRef,
+                    factions = kingdom.groups.map { it.name },
+                ) { threat ->
+                    buildPromise {
+                        actor.getKingdom()?.let { fresh ->
+                            fresh.warThreats = (fresh.warThreats ?: emptyArray()) + threat
+                            actor.setKingdom(fresh)
+                        }
+                    }
+                }.launch()
+            }
+            "encounter" -> {
+                // no encounter is rolled or spawned here: a pending-encounter marker at the band's
+                // hex carries the level budget for the GM to stage when the table gets there
+                val hexKey = band.currentHexKey
+                if (hexKey == null) {
+                    ui.notifications.warn(t("kingdom.rivalCharter.noPosition"))
+                    return@ChatButton
+                }
+                band.aggression = 0
+                band.confrontationOffered = false
+                applyRivalColocation(kingdom, band, hexKey, currentTurn, queueEncounter = true)
+                actor.setKingdom(kingdom)
+                postChatMessage(t("kingdom.rivalCharter.encounterQueued", recordOf("band" to band.name, "level" to band.effectiveLevel(partyLevelFor(game)).toString())))
+            }
+            else -> Unit
+        }
+    },
+    ChatButton("km-offer-rival-rumor") { game, actor, _, button ->
+        if (!game.user.isGM) return@ChatButton
+        val bandId = button.dataset["bandId"] ?: return@ChatButton
+        val hexKey = button.dataset["hexKey"] ?: return@ChatButton
+        val kingdom = actor.getKingdom() ?: return@ChatButton
+        val band = kingdom.rivalCharterParties?.find { it.id == bandId }
+        if (band == null) {
+            // the band was deleted or the turn undone since this card was posted
+            ui.notifications.info(t("kingdom.rivalCharter.bandGone"))
+            markRivalRowDone(button)
+            return@ChatButton
+        }
+        markRivalRowDone(button)
+        if (button.dataset["choice"] != "plant") return@ChatButton
+        val campingActor = game.getCampingActors().firstOrNull()
+        if (campingActor == null) {
+            ui.notifications.warn(t("kingdom.petitions.noCampingActor"))
+            return@ChatButton
+        }
+        val place = hexDisplayLabel(hexKey)
+        campingActor.updateRumors { existing ->
+            existing + Rumor(
+                text = t("kingdom.rivalCharter.rumor.sighted", recordOf("faction" to (band.factionRef ?: band.name), "place" to place)),
+                location = place,
+                id = "rumor-rival-${band.id}-$hexKey",
+                bornDay = currentWorldDay(game),
+            )
+        }
+    },
+    ChatButton("km-offer-rival-encounter") { game, actor, _, button ->
+        if (!game.user.isGM) return@ChatButton
+        val bandId = button.dataset["bandId"] ?: return@ChatButton
+        val hexKey = button.dataset["hexKey"] ?: return@ChatButton
+        val kingdom = actor.getKingdom() ?: return@ChatButton
+        val band = kingdom.rivalCharterParties?.find { it.id == bandId }
+        if (band == null) {
+            // the band was deleted or the turn undone since this card was posted
+            ui.notifications.info(t("kingdom.rivalCharter.bandGone"))
+            markRivalRowDone(button)
+            return@ChatButton
+        }
+        markRivalRowDone(button)
+        when (button.dataset["choice"]) {
+            "queue" -> { applyRivalColocation(kingdom, band, hexKey, kingdom.currentTurn ?: 0, queueEncounter = true); actor.setKingdom(kingdom) }
+            "sighting" -> { applyRivalColocation(kingdom, band, hexKey, kingdom.currentTurn ?: 0, queueEncounter = false); actor.setKingdom(kingdom) }
+            else -> Unit
+        }
+    },
+    ChatButton("km-offer-rival-lifecycle") { game, actor, _, button ->
+        // plan 2.4: a lifecycle change is a GM click, never something the tick writes
+        if (!game.user.isGM) return@ChatButton
+        val bandId = button.dataset["bandId"] ?: return@ChatButton
+        val status = rivalLifecycleStatus(button.dataset["choice"]) ?: return@ChatButton
+        val kingdom = actor.getKingdom() ?: return@ChatButton
+        val band = kingdom.rivalCharterParties?.find { it.id == bandId }
+        if (band == null) {
+            // the band was deleted or the turn undone since this card was posted
+            ui.notifications.info(t("kingdom.rivalCharter.bandGone"))
+            markRivalRowDone(button)
+            return@ChatButton
+        }
+        markRivalRowDone(button)
+        if (band.status == status) return@ChatButton
+        band.status = status
+        actor.setKingdom(kingdom)
+        val key = when (status) {
+            RIVAL_STATUS_RETIRED -> "kingdom.rivalCharter.lifecycle.retired"
+            RIVAL_STATUS_DEFECTED -> "kingdom.rivalCharter.lifecycle.defected"
+            RIVAL_STATUS_JOINED -> "kingdom.rivalCharter.lifecycle.joined"
+            else -> null
+        }
+        if (key != null) postChatMessage(t(key, recordOf("band" to band.name, "faction" to (band.factionRef ?: band.name))))
     },
     ChatButton("km-offer-seasonal-flood") { game, actor, _, button ->
         // seasonal-economy 5.1: spawn the spring-flood kingdom event. Idempotent through the
@@ -2454,6 +2631,17 @@ private fun markXpRowDone(button: HTMLElement) {
 }
 
 /** Grey out a petition card once answered, so scrollback cannot be clicked a second time. */
+/** Grey out one digest row; the rival digest carries several independent offers. */
+private fun markRivalRowDone(button: HTMLElement) {
+    val row = button.closest(".km-rival-row") as? HTMLElement ?: return
+    row.querySelectorAll("button").asList().filterIsInstance<HTMLElement>().forEach { it.setAttribute("disabled", "disabled") }
+    row.classList.add("km-card-resolved")
+}
+
+/** The party's level for a confrontation budget: the highest PC level, or 1 with no party. */
+private fun partyLevelFor(game: Game): Int =
+    runCatching { game.xpLedgerActor()?.partyMembers()?.maxOfOrNull { it.system.details.level.value } }.getOrNull() ?: 1
+
 private fun markPetitionCardDone(button: HTMLElement) {
     val card = button.closest(".km-chat-card") as? HTMLElement ?: return
     card.querySelectorAll("button").asList().filterIsInstance<HTMLElement>().forEach {

@@ -1,0 +1,48 @@
+<section class="km-rival-charter">
+    <h2>
+        {{localizeKM "kingdom.rivalCharter.title"}}
+        {{#if rivalCharter.isGM}}
+            <span class="km-header-right-align">
+                <button type="button" data-action="add-rival-charter" {{#if rivalCharter.atCap}}disabled data-tooltip="{{localizeKM "kingdom.rivalCharter.capReached"}}"{{/if}}>
+                    <i class="fa-solid fa-plus"></i>
+                </button>
+            </span>
+        {{/if}}
+    </h2>
+    {{#if rivalCharter.hasRows}}
+        <table class="km-rival-charter-table">
+            <thead>
+                <tr>
+                    <th>{{localizeKM "kingdom.rivalCharter.band"}}</th>
+                    <th>{{localizeKM "kingdom.rivalCharter.faction"}}</th>
+                    <th>{{localizeKM "kingdom.rivalCharter.position"}}</th>
+                    <th>{{localizeKM "kingdom.rivalCharter.objective"}}</th>
+                    <th>{{localizeKM "kingdom.rivalCharter.eta"}}</th>
+                    <th>{{localizeKM "kingdom.rivalCharter.arrivals"}}</th>
+                    {{#if rivalCharter.isGM}}<th>{{localizeKM "kingdom.rivalCharter.aggression"}}</th><th></th>{{/if}}
+                </tr>
+            </thead>
+            <tbody>
+                {{#each rivalCharter.rows}}
+                    <tr class="{{#if this.inactive}}km-row-inactive{{/if}}">
+                        <td>{{this.band}} <span class="km-tag">{{this.statusLabel}}</span>{{#if this.queuedCount}} <i class="fa-solid fa-list-ol" data-tooltip="{{localizeKM "kingdom.rivalCharter.queued" count=this.queuedCount}}"></i>{{/if}}</td>
+                        <td>{{this.faction}}{{#unless this.linked}} <i class="fa-solid fa-link-slash" data-tooltip="{{localizeKM "kingdom.rivalCharter.unlinked"}}"></i>{{/unless}}</td>
+                        <td>{{this.positionLabel}}</td>
+                        <td>{{this.objectiveLabel}} {{#if this.objectiveKindLabel}}<span class="km-tag">{{this.objectiveKindLabel}}</span>{{/if}}</td>
+                        <td>{{#if this.etaTurns}}{{localizeKM "kingdom.rivalCharter.etaTurns" turns=this.etaTurns}}{{else}}&mdash;{{/if}}</td>
+                        <td>{{this.arrivals}}</td>
+                        {{#if @root.rivalCharter.isGM}}
+                            <td><meter min="0" max="{{this.aggressionMax}}" value="{{this.aggression}}"></meter> {{this.aggression}}</td>
+                            <td>
+                                <button type="button" data-action="edit-rival-charter" data-id="{{this.id}}"><i class="fa-solid fa-sliders"></i></button>
+                                <button type="button" data-action="delete-rival-charter" data-id="{{this.id}}"><i class="fa-solid fa-trash"></i></button>
+                            </td>
+                        {{/if}}
+                    </tr>
+                {{/each}}
+            </tbody>
+        </table>
+    {{else}}
+        <p class="km-session-prep-empty">{{localizeKM "kingdom.rivalCharter.empty"}}</p>
+    {{/if}}
+</section>

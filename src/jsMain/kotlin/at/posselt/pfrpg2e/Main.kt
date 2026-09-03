@@ -173,6 +173,7 @@ fun main() {
                     "kingdom-renown-card" to "applications/kingdom/sections/party/renown-card.hbs",
                     "kingdom-xp-ledger" to "applications/kingdom/sections/party/xp-ledger.hbs",
                     "kingdom-petitions" to "applications/kingdom/sections/party/petitions.hbs",
+                    "kingdom-rival-charter" to "applications/kingdom/sections/trade-agreements/rival-charter.hbs",
                     "kingdom-holdings" to "applications/kingdom/sections/holdings/page.hbs",
                     "kingdom-holding-card" to "applications/kingdom/sections/holdings/holding-card.hbs",
                     "kingdom-analytics" to "applications/kingdom/sections/analytics/page.hbs",

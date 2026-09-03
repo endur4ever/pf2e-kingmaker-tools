@@ -67,6 +67,7 @@ const report = await page.evaluate(async () => {
   const cases = [
     ['petition-answer', { actorUuid: actor.uuid, petitionId: 'probe', optionId: 'option-a', roleLabel: 'Ruler', petitionerName: 'Probe', premise: 'probe', optionLabel: 'probe', effects: [], needsFaction: false, factions: [] }, '.km-petition-dismiss', '.km-chat-card'],
     ['settlement-life-digest', { actorUuid: actor.uuid, turn: 1, rows: [{ settlementId: 'probe', settlementName: 'Probe', recordId: 'probe', gazetteLine: 'probe', hookKind: 'rp-delta', hookLabel: '+1 RP' }] }, '.km-offer-life-event[data-hook-kind="dismiss"]', '.km-life-row'],
+    ['rival-charter-digest', { actorUuid: actor.uuid, turn: 1, arrivals: [], confrontations: [], rumors: [], encounters: [], lifecycle: [{ bandId: 'probe', band: 'Probe', title: 'probe' }] }, '.km-offer-rival-lifecycle[data-choice="keep"]', '.km-rival-row'],
   ];
   out.cards = {};
   for (const [name, ctx, sel, rowSel] of cases) {

@@ -1,5 +1,9 @@
 package at.posselt.pfrpg2e.kingdom
 
+import at.posselt.pfrpg2e.data.kingdom.RivalMapSnapshot
+import at.posselt.pfrpg2e.kingdom.data.RawRivalCharterParty
+import at.posselt.pfrpg2e.kingdom.rival.RivalPartyMove
+import at.posselt.pfrpg2e.kingdom.rival.advanceAllRivalParties
 import at.posselt.pfrpg2e.data.kingdom.AgendaArchetypeSpec
 import at.posselt.pfrpg2e.data.kingdom.calculateRpXP
 import at.posselt.pfrpg2e.data.kingdom.AgendaFactionMove
@@ -137,6 +141,9 @@ data class TickResult(
 	val rivalMoves: Array<RivalMove> = emptyArray(),
 	/** Faction agenda moves this turn -- intents only; every external effect is a GM offer. */
 	val factionAgendaMoves: List<AgendaFactionMove> = emptyList(),
+	/** Rival charter parties after this tick's movement (rival-charter plan section 3.5). */
+	val rivalCharterParties: Array<RawRivalCharterParty> = emptyArray(),
+	val rivalPartyMoves: List<RivalPartyMove> = emptyList(),
 )
 
 /**
@@ -211,6 +218,9 @@ object TurnTickingEngine {
 		activeBattles: Array<RawArmyBattle> = emptyArray(),
 		groups: Array<RawGroup> = emptyArray(),
 		factionStandingDriftPerTurn: Int = 0,
+		rivalCharterParties: Array<RawRivalCharterParty> = emptyArray(),
+		/** Built by the caller (runKingdomTurnTick); null skips the feature entirely. */
+		rivalMapSnapshot: RivalMapSnapshot? = null,
 		rivalRealms: Array<RawRivalRealm> = emptyArray(),
 		personalHoldings: Array<RawPersonalHolding> = emptyArray(),
 		holdingOwnerLevels: Map<String, Int> = emptyMap(),
@@ -517,6 +527,14 @@ object TurnTickingEngine {
 			null
 		}
 
+		// Rival charter parties walk the same chokepoint, so preview and commit see the same
+		// movement; a null snapshot (no map, feature unused) copies the records through untouched.
+		val rivalTurn = if (rivalMapSnapshot != null && rivalCharterParties.isNotEmpty()) {
+			advanceAllRivalParties(rivalCharterParties, rivalMapSnapshot, currentTurn)
+		} else {
+			rivalCharterParties to emptyList()
+		}
+
 		return TickResult(
 					supernaturalSolutions = 0,
 					creativeSolutions = 0,
@@ -545,6 +563,8 @@ object TurnTickingEngine {
 					holdingIncomeOffers = holdingAccrual.offers.toTypedArray(),
 					rivalMoves = rivalMoves.toTypedArray(),
 					factionAgendaMoves = agendaOutcome?.moves ?: emptyList(),
+					rivalCharterParties = rivalTurn.first,
+					rivalPartyMoves = rivalTurn.second,
 					factionStandingDrift = factionStandingDriftPerTurn != 0,
 					warThreatOffers = warThreatOffers,
 					diplomacyQuestOffers = diplomacyQuestOffers,

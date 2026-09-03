@@ -2148,7 +2148,8 @@
                 "spotlight": "Coup de projecteur : {name}",
                 "factionMoves": "Manœuvres de faction : {list}",
                 "deed": "Exploit : {name}",
-                "lifeEvents": "Vie urbaine : {list}"
+                "lifeEvents": "Vie urbaine : {list}",
+                "rivalCharterMove": "Rival charters: {list}"
             },
             "warfare": {
                 "damaged": "Damaged",
@@ -2896,6 +2897,110 @@
                     "alreadyTriggered": "The spring flood is already under way.",
                     "eventMissing": "No 'spring-flood' kingdom event exists in the event data yet. Author it under data/events/ first."
                 }
+            },
+            "rivalCharter": {
+                "title": "Rival Charter Parties",
+                "digestTitle": "Rival charter parties \\u2014 turn {turn}",
+                "digestHint": "Every button is a GM decision; nothing on this card applied by itself.",
+                "band": "Band",
+                "faction": "Chartered By",
+                "position": "Last Seen",
+                "objective": "Making For",
+                "eta": "ETA",
+                "arrivals": "Beat You To",
+                "aggression": "Aggression",
+                "etaTurns": "{turns} turn(s)",
+                "empty": "No rival bands on the map. Add one to put a competitor in the field.",
+                "unlinked": "This band's faction no longer exists.",
+                "unaffiliated": "Freebooters",
+                "offMap": "off-map",
+                "capReached": "Two rival charter parties are already in the field.",
+                "queued": "{count} scripted objective(s) still queued.",
+                "confirmDelete": "Delete this rival band? Its arrivals tally goes with it.",
+                "noPosition": "This band has no map position.",
+                "raceQuestTitle": "Race {band} to {place}",
+                "warThreatName": "{band} turn hostile",
+                "encounterQueued": "An encounter with {band} (level {level} budget) is queued at their hex.",
+                "kind": {
+                    "unexplored": "Unexplored hex",
+                    "unclearedLair": "Uncleared lair",
+                    "contestedClaim": "Contested claim",
+                    "landmark": "Landmark"
+                },
+                "status": {
+                    "active": "In the field",
+                    "defected": "Changed banner",
+                    "retired": "Recalled",
+                    "joined": "Joined you"
+                },
+                "headline": {
+                    "advance1": "{band} presses toward {place}.",
+                    "advance2": "Scouts spot {band} moving on {place}.",
+                    "advance3": "{band} is {turns} turn(s) from {place}.",
+                    "arriveUnexplored1": "{band} reached {place} ahead of you.",
+                    "arriveLair1": "{band} cleared the lair at {place} first.",
+                    "arriveContested1": "{band} planted {faction}'s banner on {place}.",
+                    "arriveLandmark1": "{band} claimed {place} \\u2014 {faction} got there first.",
+                    "idle1": "{band} has gone to ground; no sign of movement."
+                },
+                "rumor": {
+                    "sighted": "A {faction} banner was seen making for {place}."
+                },
+                "discovery": {
+                    "name": "{band} was here",
+                    "playerText": "Someone has already been through here: cold campfires, a stripped cache, a scrap of banner."
+                },
+                "colocation": {
+                    "note": "{band} is in this hex right now."
+                },
+                "lifecycle": {
+                    "title": "{band} \\u2014 the charter changes",
+                    "retire": "Recall Them",
+                    "defect": "Change Banner",
+                    "join": "They Join You",
+                    "dismiss": "Leave Be",
+                    "retired": "{band} has been recalled; their charter is spent.",
+                    "defected": "{band} now flies {faction}'s colors.",
+                    "joined": "{band} has thrown in with you."
+                },
+                "arrivalOffer": {
+                    "title": "{band} reached {place} first",
+                    "cede": "Let Them Have It",
+                    "race": "Race Them",
+                    "confront": "Confront",
+                    "dismiss": "Narrate Only"
+                },
+                "confrontationOffer": {
+                    "title": "{band} grows bold",
+                    "warThreat": "Raise War Threat",
+                    "encounter": "Spawn Encounter",
+                    "dismiss": "Dismiss"
+                },
+                "rumorOffer": {
+                    "plant": "Plant the Rumor",
+                    "quiet": "Keep It Quiet"
+                },
+                "encounterOffer": {
+                    "queue": "Queue Encounter Here",
+                    "sighting": "Just a Sighting",
+                    "nothing": "Nothing Happens"
+                },
+                "dialog": {
+                    "add": "Add Rival Charter Party",
+                    "edit": "Edit Rival Charter Party",
+                    "band": "Band Name",
+                    "members": "Roster",
+                    "levelOffset": "Level vs. Party",
+                    "faction": "Chartered By",
+                    "status": "Status",
+                    "agenda": "Objective Queue (one hex key per line)",
+                    "currentHex": "Current Hex",
+                    "pace": "Pace (hexes / turn)",
+                    "pauseMovement": "Pause Movement",
+                    "aggressionThreshold": "Aggression Threshold (0 = never)",
+                    "visibleToPlayers": "Visible to Players"
+                },
+                "bandGone": "That rival band is no longer on the board."
             }
         },
         "chatMessages": {

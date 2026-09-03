@@ -39,6 +39,11 @@ import at.posselt.pfrpg2e.kingdom.postNewPetitionNotice
 import at.posselt.pfrpg2e.kingdom.postPetitionExpiryOffers
 import at.posselt.pfrpg2e.kingdom.postSettlementLifeDigest
 import at.posselt.pfrpg2e.kingdom.postSpringFloodOffer
+import at.posselt.pfrpg2e.kingdom.rival.buildRivalMapSnapshot
+import at.posselt.pfrpg2e.kingdom.rival.postRivalCharterDigest
+import at.posselt.pfrpg2e.kingdom.rival.rivalCoLocationBands
+import at.posselt.pfrpg2e.kingdom.data.isActive
+import at.posselt.pfrpg2e.utils.toRecord
 import at.posselt.pfrpg2e.kingdom.seasonaleconomy.shouldOfferSpringFlood
 import at.posselt.pfrpg2e.utils.getCurrentYear
 import at.posselt.pfrpg2e.kingdom.rollSettlementLifeEvents
@@ -316,6 +321,9 @@ fun runKingdomTurnTick(
         holdingOwnerLevels = holdingOwnerLevels,
         rivalProfiles = runCatching { rivalGrowthProfilesById() }.getOrDefault(emptyMap()),
         factionStandingDriftPerTurn = kingdom.settings.factionStandingDriftPerTurn ?: 0,
+        // the snapshot is built HERE, not by each caller, so preview and commit cannot drift
+        rivalCharterParties = kingdom.rivalCharterParties ?: emptyArray(),
+        rivalMapSnapshot = buildRivalMapSnapshot(kingdom),
     )
 
 /**
@@ -461,6 +469,7 @@ private suspend fun performEndTurnLocked(game: Game, actor: KingdomActor): TickR
     kingdom.activeBattles = tickResult.activeBattles
     kingdom.groups = tickResult.groups
     kingdom.rivalRealms = tickResult.rivalRealms
+    kingdom.rivalCharterParties = tickResult.rivalCharterParties
     kingdom.personalHoldings = tickResult.updatedPersonalHoldings.takeIf { it.isNotEmpty() } ?: kingdom.personalHoldings
 
     // GM-confirmed rival offers (plan section 5): collect from the post-growth state, then stamp
@@ -730,6 +739,9 @@ private suspend fun performEndTurnLocked(game: Game, actor: KingdomActor): TickR
     val rivalHeadlines = tickResult.rivalMoves.map { localizeRivalHeadline(it) }
     // Faction agenda lines are public by the same argument: the move is visible in the world.
     val factionMoveLines = tickResult.factionAgendaMoves.map { localizeAgendaMoveLine(it) }
+    val rivalCharterLines = tickResult.rivalPartyMoves.map { move ->
+        t(move.headlineKey, move.headlineData.toList().toRecord().unsafeCast<com.foundryvtt.core.AnyObject>())
+    }
     // the Spotlight names a PC and counts their own public deeds, so it is player-safe by
     // construction and goes into BOTH gazettes -- a line that only reached the GM's whisper
     // would vanish from the campaign's written record
@@ -764,6 +776,7 @@ private suspend fun performEndTurnLocked(game: Game, actor: KingdomActor): TickR
         factionMoves = factionMoveLines,
         spotlight = spotlightLine,
         lifeEvents = lifeEventLines,
+        rivalCharterMoves = rivalCharterLines,
         localize = ::t,
     )
     // Player-safe gazette: identical EXCEPT the secret campaign-clock progress is dropped, so the
@@ -783,6 +796,7 @@ private suspend fun performEndTurnLocked(game: Game, actor: KingdomActor): TickR
         factionMoves = factionMoveLines,
         spotlight = spotlightLine,
         lifeEvents = lifeEventLines,
+        rivalCharterMoves = rivalCharterLines,
         localize = ::t,
     )
 
@@ -877,6 +891,13 @@ private suspend fun performEndTurnLocked(game: Game, actor: KingdomActor): TickR
             .toSet(),
         ongoingEventNames = kingdom.ongoingEvents.map { it.id }.toSet(),
     )
+
+    // Co-location stamps lastEncounterOfferTurn, so it runs inside the persist; the digest posts after
+    val rivalCoLocated = rivalCoLocationBands(game, kingdom, currentTurn)
+    // A chapter beat (any campaign clock event this tick) offers each active band a lifecycle change
+    val rivalLifecycleBands = if (tickResult.clockEvents.isNotEmpty()) {
+        (kingdom.rivalCharterParties ?: emptyArray()).filter { it.isActive() }
+    } else emptyList()
 
     // The spring flood is the seasonal economy's one event-shaped consequence: an OFFER, once per
     // spring, never standing math. The marker is stamped here, inside the single persist, so a GM
@@ -986,6 +1007,7 @@ private suspend fun performEndTurnLocked(game: Game, actor: KingdomActor): TickR
 
     postXpLedgerDigest(game, actor.uuid, currentTurn)
     if (offerSpringFlood) postSpringFloodOffer(game, actor.uuid)
+    postRivalCharterDigest(game, actor.uuid, currentTurn, tickResult.rivalPartyMoves, rivalCoLocated, rivalLifecycleBands)
 
     postSettlementLifeDigest(game, actor.uuid, currentTurn, lifeEventsFired)
     postPetitionExpiryOffers(game, actor.uuid, expiredPetitions)
