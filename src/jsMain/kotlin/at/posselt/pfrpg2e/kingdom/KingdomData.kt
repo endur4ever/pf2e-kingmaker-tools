@@ -304,6 +304,9 @@ external interface KingdomData {
     var liquidateResourcesPenaltyNextTurn: Boolean?
     /** World calendar year the spring-flood offer was last POSTED; null = never (seasonal-economy §2.2). */
     var lastSeasonalFloodYear: Int?
+    /** World calendar year a flood was ACCEPTED. The posted marker cannot serve: it is stamped
+     *  whether or not the GM clicked, and the ongoing-event list empties when the event resolves. */
+    var springFloodTriggeredYear: Int?
     var envyOfTheWorldFirstIgnoreUsed: Boolean?
 
     /**

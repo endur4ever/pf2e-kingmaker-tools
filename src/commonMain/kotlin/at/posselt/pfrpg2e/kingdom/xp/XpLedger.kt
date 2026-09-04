@@ -188,3 +188,14 @@ fun answerEntry(entries: List<XpLedgerEntry>, id: String, granted: Int?): List<X
         else if (granted == null) entry.copy(status = XpOfferStatus.DISMISSED)
         else entry.copy(status = XpOfferStatus.CONFIRMED, grantedAmount = granted)
     }
+
+/**
+ * Drop the UNANSWERED offer for one beat, so a reversed transition leaves no proposal behind.
+ *
+ * OFFERED rows only: a confirmed grant is XP the party already holds and a dismissal is a decision
+ * already taken, and neither may be rewritten by an undo elsewhere in the module. Removing the row
+ * outright rather than dismissing it matters because proposeEntry's (kind, ref) guard matches ANY
+ * status — a dismissed row would silently block the offer when the beat really happens.
+ */
+fun withdrawOffer(entries: List<XpLedgerEntry>, kind: XpSourceKind, sourceRef: String): List<XpLedgerEntry> =
+    entries.filterNot { it.status == XpOfferStatus.OFFERED && it.sourceKind == kind && it.sourceRef == sourceRef }

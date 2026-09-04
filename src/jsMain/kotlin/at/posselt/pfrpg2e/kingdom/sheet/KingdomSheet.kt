@@ -315,6 +315,7 @@ import at.posselt.pfrpg2e.kingdom.getOwnedLeaderRoles
 import at.posselt.pfrpg2e.utils.getAppFlag
 import at.posselt.pfrpg2e.utils.setAppFlag
 import at.posselt.pfrpg2e.kingdom.xp.updateXpLedger
+import at.posselt.pfrpg2e.kingdom.xp.withdrawOffer
 import at.posselt.pfrpg2e.kingdom.xp.partyLifetimeXp
 import at.posselt.pfrpg2e.kingdom.xp.appendEntry
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.buildXpLedgerContext
@@ -1256,6 +1257,13 @@ class KingdomSheet(
                     val kingdom = getKingdom()
                     val quest = (kingdom.quests ?: emptyArray()).find { it.id == questId }
                     if (quest != null && quest.status == "completed") {
+                        // the party ledger lives on another actor, so the kingdom-side reversal
+                        // below cannot reach it: withdraw the unanswered offer this completion
+                        // proposed, or the digest offers XP for a quest that is active again --
+                        // and dismissing it would block the offer when the quest is really finished
+                        game.xpLedgerActor()?.updateXpLedger { entries ->
+                            withdrawOffer(entries, XpSourceKind.QUEST_COMPLETED, questId)
+                        }
                         // Revoke any access this quest granted, whether or not a completion snapshot
                         // exists: grants are keyed by sourceQuestId, so they need no numeric delta to
                         // reverse, and a legacy completion should not leave an unrevokable benefit.

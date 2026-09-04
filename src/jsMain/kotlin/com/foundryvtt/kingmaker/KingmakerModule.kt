@@ -26,7 +26,9 @@ external interface HexState {
     val explored: Boolean?
     /** kingmaker.CONST.EXPLORATION_STATES value: 0 NONE, 1 RECON, 2 MAP. */
     val exploration: Int?
-    val discovered: Boolean?
+    // NO `discovered` here: the served schema has it only INSIDE the nested features SchemaField,
+    // never on the hex. The first version of this binding invented it, and the field guard caught
+    // it once the guard stopped matching nested sub-fields.
     val cleared: Boolean?
 }
 

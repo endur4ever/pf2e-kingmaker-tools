@@ -12,6 +12,7 @@ import at.posselt.pfrpg2e.kingdom.getKingdomActors
 import at.posselt.pfrpg2e.kingdom.getKingdom
 import com.foundryvtt.core.game
 import com.foundryvtt.kingmaker.KingmakerHex
+import at.posselt.pfrpg2e.camping.routing.kingmakerTerrain
 import com.foundryvtt.kingmaker.kingmaker
 import kotlin.js.unsafeCast
 import kotlin.runCatching
@@ -81,8 +82,10 @@ class KingmakerHexGridProvider : TravelProvider {
     override fun getTerrainForHex(hexKey: String): Terrain? {
         return runCatching {
             val hexObj = kingmaker.region.hexes.find { it.key.toString() == hexKey }
-            val terrainName = hexObj?.zone?.terrain
-            terrainName?.let { fromCamelCase<Terrain>(it) }
+            // the hex's own terrain overrides its zone's default; and the ids are Kingmaker's
+            // ("mountains", "wetlands", "lake"), which fromCamelCase can never match
+            val terrainName = hexObj?.terrain?.id?.takeIf { it.isNotBlank() } ?: hexObj?.zone?.terrain
+            terrainName?.let { kingmakerTerrain(it) }
         }.getOrNull()
     }
 

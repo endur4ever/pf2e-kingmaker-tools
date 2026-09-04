@@ -23,6 +23,7 @@
 @import "./applications/kingdom/structure-browser.css";
 @import "./applications/kingdom/settlement.css";
 @import "./applications/settings/actor-actions.css";
+@import "./applications/kingdom/sections/party/party.css";
 @import "./chatmessages/chat.css";
 @import "./components/simple-app.css";
 

@@ -76,6 +76,7 @@ import at.posselt.pfrpg2e.utils.launch
 import at.posselt.pfrpg2e.utils.getAppFlag
 import at.posselt.pfrpg2e.utils.postChatMessage
 import at.posselt.pfrpg2e.utils.postChatTemplate
+import at.posselt.pfrpg2e.utils.getCurrentYear
 import at.posselt.pfrpg2e.utils.t
 import kotlinx.coroutines.await
 import com.foundryvtt.core.AnyObject
@@ -553,11 +554,19 @@ private val buttons = listOf(
         }
     },
     ChatButton("km-offer-seasonal-flood") { game, actor, _, button ->
-        // seasonal-economy 5.1: spawn the spring-flood kingdom event. Idempotent through the
-        // ongoing-event list rather than the year marker -- the marker is stamped when the card is
-        // POSTED (once per spring), so it cannot also be the guard for the click
+        // seasonal-economy 5.1. Two guards, because neither alone is durable: the ongoing-event
+        // list answers "is a flood running right now" but is emptied when the event RESOLVES, and
+        // lastSeasonalFloodYear is stamped at POST time so it cannot say whether the GM accepted.
+        // springFloodTriggeredYear is the durable record of an accepted flood, so a card still in
+        // scrollback after the event is resolved cannot spawn a second one the same spring.
         if (!game.user.isGM) return@ChatButton
         val kingdom = actor.getKingdom() ?: return@ChatButton
+        val floodYear = runCatching { game.getCurrentYear() }.getOrNull()
+        if (floodYear != null && kingdom.springFloodTriggeredYear == floodYear) {
+            ui.notifications.info(t("kingdom.seasonalEconomy.flood.alreadyTriggered"))
+            markPetitionCardDone(button)
+            return@ChatButton
+        }
         if (kingdom.ongoingEvents.any { it.id == SPRING_FLOOD_EVENT_ID }) {
             ui.notifications.info(t("kingdom.seasonalEconomy.flood.alreadyTriggered"))
             markPetitionCardDone(button)
@@ -569,6 +578,7 @@ private val buttons = listOf(
             return@ChatButton
         }
         kingdom.ongoingEvents = kingdom.ongoingEvents + RawOngoingKingdomEvent(stage = 0, id = SPRING_FLOOD_EVENT_ID)
+        kingdom.springFloodTriggeredYear = floodYear
         actor.setKingdom(kingdom)
         postChatMessage(t("kingdom.seasonalEconomy.flood.triggered"))
         markPetitionCardDone(button)
@@ -2657,23 +2667,42 @@ private fun appendDeedGazetteLine(kingdom: KingdomData, milestoneName: String) {
  * row claiming XP nobody received. answerEntry only touches an OFFERED row, so a second click --
  * or a stale card in scrollback -- grants nothing.
  */
+/**
+ * Entries whose grant is in flight on THIS client.
+ *
+ * The OFFERED check below is a read, and the grant awaits an actor update per party member before
+ * the ledger write lands — a window in which a second click reads OFFERED again and grants the
+ * whole amount twice. The ledger would then record ONE confirmed row, so the surplus survives as
+ * drift the module reports and never corrects. Claiming the id synchronously closes that window.
+ * It is per-client: two GMs clicking the same row remains last-write-wins, like every other
+ * offer here.
+ */
+private val xpGrantsInFlight = mutableSetOf<String>()
+
 private suspend fun grantXpLedgerEntry(game: Game, entryId: String, typedAmount: Int?) {
     val party = game.xpLedgerActor() ?: return
-    val entry = party.xpLedger().find { it.id == entryId && it.status == XpOfferStatus.OFFERED }
-    if (entry == null) {
-        ui.notifications.info(t("kingdom.xpLedger.alreadyAnswered"))
-        return
+    if (!xpGrantsInFlight.add(entryId)) return
+    try {
+        val entry = party.xpLedger().find { it.id == entryId && it.status == XpOfferStatus.OFFERED }
+        if (entry == null) {
+            ui.notifications.info(t("kingdom.xpLedger.alreadyAnswered"))
+            return
+        }
+        val amount = (typedAmount ?: entry.proposedAmount).coerceAtLeast(0)
+        if (amount > 0) {
+            updateXP(party.partyMembers(), amount)
+        }
+        party.updateXpLedger { answerEntry(it, entryId, granted = amount) }
+    } finally {
+        xpGrantsInFlight.remove(entryId)
     }
-    val amount = (typedAmount ?: entry.proposedAmount).coerceAtLeast(0)
-    if (amount > 0) {
-        updateXP(party.partyMembers(), amount)
-    }
-    party.updateXpLedger { answerEntry(it, entryId, granted = amount) }
 }
 
 private fun markXpRowDone(button: HTMLElement) {
     val row = button.closest(".km-xp-digest-row") as? HTMLElement ?: return
-    row.classList.add("km-pressure-row-done")
+    // km-card-resolved, not km-pressure-row-done: the latter is only styled by a compound selector
+    // (.km-pressure-row.km-pressure-row-done) an XP row can never match, so it rendered nothing
+    row.classList.add("km-card-resolved")
     row.querySelectorAll("button, input").asList().filterIsInstance<HTMLElement>()
         .forEach { it.setAttribute("disabled", "disabled") }
 }

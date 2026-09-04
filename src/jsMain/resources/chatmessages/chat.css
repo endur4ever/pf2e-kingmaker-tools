@@ -326,3 +326,9 @@
     flex: 1 1 auto;
     width: auto;
 }
+
+/* Any resolved offer row or card, whatever subsystem posted it. The older
+   .km-pressure-row.km-pressure-row-done rule only matches pressure rows. */
+.km-card-resolved {
+    opacity: 0.55;
+}

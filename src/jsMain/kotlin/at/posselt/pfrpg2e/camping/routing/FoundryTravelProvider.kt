@@ -68,8 +68,10 @@ class FoundryTravelProvider : TravelProvider {
     override fun getTerrainForHex(hexKey: String): Terrain? {
         return runCatching {
             val hexObj = kingmaker.region.hexes.find { it.key.toString() == hexKey }
-            val terrainName = hexObj?.zone?.terrain
-            terrainName?.let { fromCamelCase<Terrain>(it) }
+            // the HEX's own terrain first: a hex may override its zone's default, and pricing the
+            // zone's terrain misprices every hex that does
+            val terrainName = hexObj?.terrain?.id?.takeIf { it.isNotBlank() } ?: hexObj?.zone?.terrain
+            terrainName?.let { kingmakerTerrain(it) }
         }.getOrNull()
     }
 
@@ -79,4 +81,26 @@ class FoundryTravelProvider : TravelProvider {
             hexState?.features?.mapNotNull { it.type } ?: emptyList()
         }.getOrDefault(emptyList())
     }
+}
+
+/**
+ * Map a pf2e-kingmaker TERRAIN id onto this module's [Terrain].
+ *
+ * NOT fromCamelCase: the served TERRAIN table (verified 2026-09-04) uses plains, forest, hills,
+ * mountains, wetlands, swamp and lake, while the enum spells MOUNTAIN, has no WETLANDS and no LAKE.
+ * "mountains" therefore resolved to null and every mountain hex priced as OPEN terrain -- one
+ * Travel activity to cross a mountain range. An unrecognised id still returns null, which the cost
+ * model reads as open ground, but the seven ids the module actually ships are now covered.
+ */
+internal fun kingmakerTerrain(id: String): Terrain? = when (id.trim().lowercase()) {
+    "plains" -> Terrain.PLAINS
+    "forest" -> Terrain.FOREST
+    "hills" -> Terrain.HILLS
+    "mountains", "mountain" -> Terrain.MOUNTAIN
+    "swamp", "wetlands" -> Terrain.SWAMP
+    "lake", "aquatic", "water" -> Terrain.AQUATIC
+    "desert" -> Terrain.DESERT
+    "urban" -> Terrain.URBAN
+    "dungeon" -> Terrain.DUNGEON
+    else -> null
 }

@@ -27,6 +27,7 @@ import com.foundryvtt.core.abstract.DatabaseUpdateOperation
 import at.posselt.pfrpg2e.kingdom.KingdomActor
 import at.posselt.pfrpg2e.kingdom.KingdomData
 import at.posselt.pfrpg2e.kingdom.clearPerformedActivities
+import at.posselt.pfrpg2e.kingdom.clearTurnChecklist
 import at.posselt.pfrpg2e.kingdom.restoreTurnWizardState
 import com.foundryvtt.pf2e.item.PF2EItem
 import at.posselt.pfrpg2e.kingdom.rivalGrowthProfilesById
@@ -271,6 +272,14 @@ suspend fun resolveHoldingOwnerLevels(kingdom: KingdomData): Map<String, Int> {
     return levels
 }
 
+/** The season the Turn Wizard pinned for [currentTurn], or null when the pin is from another turn. */
+private fun pinnedPreviewSeason(actor: KingdomActor, currentTurn: Int): String? {
+    val state = actor.getAppFlag<KingdomActor, dynamic>("turn-wizard-state") ?: return null
+    val pinnedTurn = state.previewSeasonTurn as? Int
+    if (pinnedTurn != currentTurn) return null
+    return state.previewSeason as? String
+}
+
 fun runKingdomTurnTick(
     kingdom: KingdomData,
     storage: CommodityStorage,
@@ -393,6 +402,9 @@ private suspend fun performEndTurnLocked(game: Game, actor: KingdomActor): TickR
     var shipmentEvents = emptyList<CaravanEvent>()
 
     actor.clearPerformedActivities()
+    // the upkeep checklist is part of the turn, not of the wizard window: ending the turn from the
+    // Kingdom Sheet used to leave all four steps ticked into the next turn
+    actor.clearTurnChecklist()
     val realm = game.getRealmData(actor, kingdom)
     val previousSize = kingdom.turnHistory?.lastOrNull()?.size ?: realm.size
     val sizeChange = realm.size - previousSize
@@ -634,6 +646,11 @@ private suspend fun performEndTurnLocked(game: Game, actor: KingdomActor): TickR
         }
 
         // Save remaining in-transit shipments
+        // the ledger every consumer reads is shipmentHistory; the caravan block records to it and
+        // this one did not, so item shipments were missing from the board and the recap entirely
+        shipmentEvents.forEach { event ->
+            caravanEventToHistory(event, currentTurn)?.let { kingdom.appendShipment(it) }
+        }
         kingdom.shipments = shipmentResult.remaining.toTypedArray()
 
         // Record delivered item ids into the snapshot so undo can remove them (no double-deliver).
@@ -759,7 +776,9 @@ private suspend fun performEndTurnLocked(game: Game, actor: KingdomActor): TickR
         settlements = kingdom.getAllSettlements(game).allSettlements,
         // prefer the season the preview pinned, so preview and commit agree even across a
         // month boundary; a commit with no preview reads the calendar itself
-        season = (actor.getAppFlag<KingdomActor, dynamic>("turn-wizard-state")?.previewSeason as? String)
+        // the preview's season only counts for the turn it previewed: a stale preview from an
+        // earlier turn must not override the live calendar
+        season = pinnedPreviewSeason(actor, currentTurn)
             ?: runCatching { getSeasonForMonth(game.getCurrentMonth().ordinal).value }.getOrNull(),
         currentTurn = currentTurn,
     )
@@ -1575,6 +1594,9 @@ class TurnWizardApplication(
         // showed: a month rolling over between the two would otherwise change the weights
         val previewSeason = runCatching { getSeasonForMonth(game.getCurrentMonth().ordinal).value }.getOrNull()
         state.previewSeason = previewSeason
+        // stamped WITH its turn: a preview taken in an earlier turn must not silently override the
+        // live calendar for every later End Turn
+        state.previewSeasonTurn = (kingdom.currentTurn ?: 0) + 1
         kingdomActor.setAppFlag("turn-wizard-state", state)
         cachedLifeLines = rollSettlementLifeEvents(
             kingdom = kingdom,

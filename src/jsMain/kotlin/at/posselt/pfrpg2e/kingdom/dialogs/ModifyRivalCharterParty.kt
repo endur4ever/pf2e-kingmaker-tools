@@ -199,6 +199,10 @@ class ModifyRivalCharterParty(
                     lastArrivalTurn = existing?.lastArrivalTurn,
                     lastEncounterOfferTurn = existing?.lastEncounterOfferTurn,
                     rumoredObjectiveHexKey = existing?.rumoredObjectiveHexKey,
+                    // engine-owned, added after this dialog was written. Both call sites route
+                    // through mergeRivalFormFields so the omission was inert, but a third caller
+                    // trusting this return value would have shipped raw-field-wipe number seven.
+                    visitedHexKeys = existing?.visitedHexKeys,
                     visibleToPlayers = data.visibleToPlayers,
                 )
                 // a band moved by hand loses its countdown, or it would arrive at the old objective from the new hex

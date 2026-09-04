@@ -81,3 +81,17 @@ fun sumPerformedByPhase(
     }
     return result
 }
+
+/**
+ * Clear the Turn Wizard's upkeep CHECKLIST at End Turn.
+ *
+ * [clearPerformedActivities] deliberately preserves the checklist -- it resets activity counts
+ * only -- and the Turn Wizard's own Commit button clears the whole flag afterwards. Ending the
+ * turn from the Kingdom Sheet never touched it, so the four upkeep steps stayed ticked into every
+ * following turn and strict phase gating read the new turn as already done.
+ */
+suspend fun KingdomActor.clearTurnChecklist() {
+    val state = getAppFlag<KingdomActor, dynamic>("turn-wizard-state") ?: return
+    state.checklist = emptyArray<String>()
+    setAppFlag("turn-wizard-state", state)
+}

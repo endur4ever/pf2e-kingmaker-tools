@@ -81,7 +81,15 @@ def check_hex_state_fields(bundle, source):
     if not cls:
         print("[hex-state] could not find KingmakerHexData in the bundle -- skipping")
         return 0
-    schema_fields = set(re.findall(r"^\s+(\w+): new [A-Za-z.]*Field", cls.group(1), re.M))
+    # TOP-LEVEL fields only. A nested SchemaField (KingmakerHexData's `features` ArrayField holds
+    # its own type/name/discovered) is indented deeper, and matching those let a binding field that
+    # exists only per-feature pass as a hex field. Anchor on the shallowest indentation present.
+    matches = re.findall(r"^([ \t]+)(\w+): new [A-Za-z.]*Field", cls.group(1), re.M)
+    if not matches:
+        print("[hex-state] could not parse KingmakerHexData's schema -- check the guard, not the code")
+        return 1
+    top_indent = min(len(indent) for indent, _ in matches)
+    schema_fields = {name for indent, name in matches if len(indent) == top_indent}
     missing = [f for f in fields if f not in schema_fields]
     if missing:
         print(f"[hex-state] FAIL - HexState binding fields absent from the served KingmakerHexData schema ({source}): {', '.join(missing)}")

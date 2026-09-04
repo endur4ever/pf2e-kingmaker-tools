@@ -55,7 +55,10 @@ const report = await page.evaluate(async () => {
     a.click(); await new Promise(r => setTimeout(r, 1800));
     const el = document.querySelector('[id^="kmKingdomSheet-"]');
     const text = el?.textContent || '';
-    const raw = (text.match(/pf2e-kingmaker-tools\.[a-zA-Z.]+/g) || []);
+    // a leaked key renders as i18next returns it -- "kingdom.petitions.title" -- WITHOUT the
+    // module prefix, so the old prefixed pattern could never match one and the assertion was vacuous
+    const raw = (text.match(/\b[a-z][a-zA-Z0-9]*(?:\.[a-z][a-zA-Z0-9]+){2,}\b/g) || [])
+      .filter(k => !/\.(css|js|mjs|json|hbs|png|webp)$/.test(k));
     const icu = (text.match(/\{[a-zA-Z]+\}/g) || []);
     out.tabs[link] = { rawKeys: raw.slice(0, 3), unresolved: icu.slice(0, 3) };
     if (raw.length) out.failures.push(`tab ${link}: raw i18n key ${raw[0]}`);
@@ -88,8 +91,15 @@ const report = await page.evaluate(async () => {
   return out;
 });
 console.log(JSON.stringify(report, null, 1));
-const moduleErrors = errors.filter(e => /pf2e-kingmaker-tools/.test(e));
-console.log('console errors (all):', errors.length, ' from our module:', moduleErrors.length);
-moduleErrors.forEach(e => console.log('  -', e));
+// An uncaught exception or unhandled rejection carries no module id, so filtering FOR our name
+// dropped exactly the errors that matter and let the exit code report success. Allow-list the
+// known-benign lines instead and treat everything else as a failure.
+const BENIGN = [
+  /screen resolution/i,
+  /Calendar not found/i,            // Seasons & Stars 0.26 setup race, upstream
+];
+const realErrors = errors.filter(e => !BENIGN.some(rx => rx.test(e)));
+console.log('console errors (all):', errors.length, ' unexplained:', realErrors.length);
+realErrors.forEach(e => console.log('  -', e));
 await browser.close();
-process.exit(report.failures.length || moduleErrors.length ? 1 : 0);
+process.exit(report.failures.length || realErrors.length ? 1 : 0);
