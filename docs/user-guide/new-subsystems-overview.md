@@ -102,11 +102,14 @@ follow PF2e accomplishment XP: 10 for a hex, 10/30/80 for a minor/moderate/major
 for a quest, 30 for an expedition. You can still add rows by hand for anything the module cannot
 see.
 
-### Groundwork, not yet usable
-Two subsystems have their data model, schema, storage and migrations in place but no content or
-tick yet, so nothing surfaces in play: **Settlement Life Events** (three of ten templates ship; the
-per-turn cap and probability curve are undecided) and the **Petition Inbox** (the catalog is
-intentionally empty until its forty templates are written).
+### Both groundwork subsystems are now live
+
+Settlement Life Events and the Petition Inbox each shipped as a data model with no tick and no
+content, so nothing surfaced in play. Both are now complete features with their own sections above:
+settlement life ships ten templates and fires at End Turn, and the petition inbox generates,
+renders, and resolves audiences. What remains in both is prose — the gazette lines and the petition
+premises are placeholders written to be rewritten in the campaign's voice.
+
 
 ## Recently corrected
 

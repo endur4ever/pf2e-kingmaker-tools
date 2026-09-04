@@ -7,6 +7,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+* **Petition Inbox.** NPCs of your settlements bring audiences to the leadership roles. Each End Turn
+  a filled office may receive a petition drawn from a catalog of forty, signed by a resident of the
+  population roster; the role's player answers from the Party tab and the GM confirms before anything
+  applies. Unanswered petitions lapse after three turns and offer an overdue consequence. At most two
+  arrive per turn, and an office holds one open audience at a time.
+* **Settlement Life Events.** Each End Turn a settlement may produce a line of town life — a market
+  day, a midwinter feast, a guild theft — cast from its population roster and weighted by the
+  settlement's structures and the season. The line always reaches the turn gazette; events that carry
+  a mechanical hook arrive as one whispered digest with an apply and a dismiss button per row. A new
+  **Town Life** tab in Inspect Settlement lists what has happened in a town.
+* **Rival Charter Parties.** A competing adventuring band explores the same hex map off-screen,
+  choosing prizes — landmarks, uncleared lairs, ground you have explored but not claimed — and
+  walking toward them. Reaching one first is a race you lost; claiming a hex takes it off their board.
+  Arrivals, confrontations, rumours, co-location with the party and charter changes all arrive as
+  GM-confirmed offers on one digest per turn. The Trade Agreements board shows where each band was
+  last seen, what it is making for, and how many races you have lost.
+* **Party XP Ledger offers.** Clearing a site, completing a quest, resolving an expedition and
+  reconnoitering a hex are recorded as they happen and gathered into one whispered digest at End
+  Turn. Every amount is editable before you confirm, and the ledger records what was granted.
+* **Spring flood offer.** In spring, the seasonal economy offers the GM a one-click flood event, once
+  per spring, or the option to hold back the waters.
+* The Turn Wizard's preview now lists the town-life lines End Turn will write.
+
+### Fixed
+
+* **RP-to-XP conversion.** End Turn announced "XP Awarded: N" and recorded it in turn history, but
+  never added it to the kingdom's XP. It now grants it, using the same calculation the sheet's
+  converter used, including the Vance & Kerenshara variant. The separate **Convert RP to XP** button
+  has been removed — with the automatic grant it could only double-grant.
+* **Liquidate Resources penalty.** The announced four-dice reduction is now applied to the dice
+  actually rolled; previously it was subtracted from a value the turn tick had already zeroed.
+* **Hex exploration state.** The module read an `explored` flag that pf2e-kingmaker no longer stores,
+  so explored-hex overlays, the expedition destination list and several other readers saw every hex
+  as unexplored. All of them now read the exploration state the map actually keeps.
+* **Hex editor hooks.** The overlay resync and kingdom-sheet refresh that run when the native hex
+  editor closes had stopped firing after a pf2e-kingmaker rename, as had the tracker that remembers
+  the last hex you looked at.
+* **Faction agendas** were wiped by every kingdom sheet save, refused milestone offers came back on
+  the next save, and the settlement dialog reverted life-event records written while it was open.
+* Several kingdom chat cards could not resolve their actor and did nothing when clicked.
+* Seasons & Stars: the module no longer re-applies a calendar that was already correct on every load.
+
 ## [6.3.1] - 2026-05-18
 
 ### Fixed
