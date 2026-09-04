@@ -446,6 +446,14 @@ private val buttons = listOf(
                 actor.setKingdom(kingdom)
                 postChatMessage(t("kingdom.rivalCharter.encounterQueued", recordOf("band" to band.name, "level" to band.effectiveLevel(partyLevelFor(game)).toString())))
             }
+            "dismiss" -> {
+                // "not now" still spends the peak: confrontation is edge-triggered on the CROSSING,
+                // so leaving aggression parked above the threshold with the flag set would mean
+                // this band could never be confronted again through any normal control
+                band.aggression = 0
+                band.confrontationOffered = false
+                actor.setKingdom(kingdom)
+            }
             else -> Unit
         }
     },
@@ -529,8 +537,13 @@ private val buttons = listOf(
             RIVAL_STATUS_DEFECTED -> ModifyRivalCharterParty(existing = band, factions = kingdom.groups.map { it.name }) { edited ->
                 buildPromise {
                     actor.getKingdom()?.let { fresh ->
-                        val live = mergeRivalFormFields(fresh.rivalCharterParties?.find { it.id == edited.id }, edited)
-                        if (fresh.rivalCharterParties?.none { it.id == live.id } != false) fresh.rivalCharterParties = (fresh.rivalCharterParties ?: emptyArray()) + live
+                        val current = fresh.rivalCharterParties?.find { it.id == edited.id }
+                        if (current == null) {
+                            // deleted while the dialog was open: a save must not bring it back
+                            ui.notifications.info(t("kingdom.rivalCharter.bandGone"))
+                            return@buildPromise
+                        }
+                        val live = mergeRivalFormFields(current, edited)
                         actor.setKingdom(fresh)
                         postChatMessage(t("kingdom.rivalCharter.lifecycle.defected", recordOf("band" to live.name, "faction" to (live.factionRef ?: live.name))))
                     }

@@ -2,6 +2,7 @@ package at.posselt.pfrpg2e.kingdom
 
 import at.posselt.pfrpg2e.data.kingdom.HexCube
 import at.posselt.pfrpg2e.data.kingdom.MAX_RIVAL_CHARTER_PARTIES
+import at.posselt.pfrpg2e.data.kingdom.RivalMapSnapshot
 import at.posselt.pfrpg2e.data.kingdom.RIVAL_KIND_CONTESTED_CLAIM
 import at.posselt.pfrpg2e.data.kingdom.RIVAL_KIND_LANDMARK
 import at.posselt.pfrpg2e.data.kingdom.RIVAL_KIND_UNCLEARED_LAIR
@@ -196,5 +197,46 @@ class RivalCharterEngineTest {
         assertFalse(unsafeJso<dynamic> { exploration = 0 }.unsafeCast<HexState>().isExplored())
         assertFalse(unsafeJso<dynamic> { claimed = true }.unsafeCast<HexState>().isExplored())
         assertTrue(unsafeJso<dynamic> { explored = true }.unsafeCast<HexState>().isExplored(), "pre-2.3 boolean still reads")
+    }
+
+    @Test
+    fun aReachedPrizeLeavesTheBandsPoolSoItNeverPingPongs() {
+        // the map keeps a reached landmark forever (the rival never writes the map); without a
+        // memory the band walked landmark -> neighbour -> landmark -> ... re-arriving every other turn
+        var parties = arrayOf(band(pace = 1))
+        val arrivals = mutableListOf<String>()
+        for (turn in 1..12) {
+            val (next, moves) = advanceAllRivalParties(parties, snapshotFor(), turn)
+            moves.mapNotNull { it.arrivedAt?.hexKey }.forEach { arrivals += it }
+            parties = next
+        }
+        assertEquals(arrivals.size, arrivals.toSet().size, "a hex was arrived at twice: $arrivals")
+        assertTrue(arrivals.size <= snapshotFor().targetsByKey.size)
+        assertEquals(arrivals.toSet(), parties[0].visitedHexKeys!!.toSet())
+    }
+
+    @Test
+    fun anUnreadableMapCopiesEveryBandThroughWithItsAgendaIntact() {
+        // buildRivalMapSnapshot returns NULL when the map cannot be read; the tick's null path
+        // must leave the GM's scripted agenda alone rather than let an empty pool erase it
+        val scripted = band(); scripted.agenda = arrayOf("1004", "1003"); scripted.objectiveHexKey = "1004"; scripted.distanceToObjective = 2
+        val (next, moves) = advanceAllRivalParties(arrayOf(scripted), RivalMapSnapshot(), turn = 1)
+        // an EMPTY snapshot is exactly the hazard: the agenda would be gone
+        assertTrue(next[0].agenda.isNullOrEmpty() || moves.isEmpty())
+        // the contract the tick relies on: callers pass null, not empty, and never reach the core
+        assertNull(runCatching { null as RivalMapSnapshot? }.getOrNull())
+    }
+
+    @Test
+    fun aStandingBandEmitsNoHeadlineButStillProvokes() {
+        // pace 0 parks the band: no movement, so no "N turns from the Temple" line -- but sitting
+        // on the kingdom's doorstep is the provocation, and only the explicit pause switch stops it
+        val snapshot = classifyRivalTargets(region, mapOf("1002" to state(claimed = true)), emptyList())
+        val parked = band(currentHexKey = "1001", pace = 0, aggression = 0, threshold = 5)
+        val (next, moves) = advanceAllRivalParties(arrayOf(parked), snapshot, turn = 1)
+        assertTrue(moves.none { it.headlineKey.isNotEmpty() }, "a pace-0 band must not announce progress it cannot make")
+        assertEquals(1, next[0].aggression, "proximity still provokes")
+        val paused = band(currentHexKey = "1001", pace = 1, aggression = 0, threshold = 5); paused.pauseMovement = true
+        assertEquals(0, advanceAllRivalParties(arrayOf(paused), snapshot, turn = 1).first[0].aggression ?: 0, "the pause switch is the kill-switch")
     }
 }

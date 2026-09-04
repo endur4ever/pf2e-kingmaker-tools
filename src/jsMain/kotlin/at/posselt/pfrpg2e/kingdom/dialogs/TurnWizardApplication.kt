@@ -742,9 +742,10 @@ private suspend fun performEndTurnLocked(game: Game, actor: KingdomActor): TickR
     val factionMoveLines = tickResult.factionAgendaMoves.map { localizeAgendaMoveLine(it) }
     fun rivalLine(move: at.posselt.pfrpg2e.kingdom.rival.RivalPartyMove) =
         t(move.headlineKey, move.headlineData.toList().toRecord().unsafeCast<com.foundryvtt.core.AnyObject>())
-    val rivalCharterLines = tickResult.rivalPartyMoves.map { rivalLine(it) }
+    val announced = tickResult.rivalPartyMoves.filter { it.headlineKey.isNotEmpty() }
+    val rivalCharterLines = announced.map { rivalLine(it) }
     // a band the GM hid stays out of the players' timeline entirely
-    val rivalCharterPlayerLines = tickResult.rivalPartyMoves.filter { it.visibleToPlayers }.map { rivalLine(it) }
+    val rivalCharterPlayerLines = announced.filter { it.visibleToPlayers }.map { rivalLine(it) }
     // the Spotlight names a PC and counts their own public deeds, so it is player-safe by
     // construction and goes into BOTH gazettes -- a line that only reached the GM's whisper
     // would vanish from the campaign's written record

@@ -128,6 +128,12 @@ external interface RawRivalCharterParty {
     /** Turn the last arrival offer fired, for idempotency across preview/commit and reloads. */
     var lastArrivalTurn: Int?
 
+    /** Every hex this band has already reached. A reached prize never leaves the MAP (the rival
+     * never writes it), so without this memory a band ping-pongs between a landmark and its
+     * cheapest neighbour, re-arriving -- and re-offering -- every other turn. Nullable: absent on
+     * rows written before this field existed. */
+    var visitedHexKeys: Array<String>?
+
     /** Guards the co-location encounter offer, one per band per turn: the band cannot leave its
      * hex mid-turn, so a turn stamp is the whole key. Read as `== turn`, so null is "not yet". */
     var lastEncounterOfferTurn: Int?
