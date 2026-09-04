@@ -23,6 +23,7 @@ import at.posselt.pfrpg2e.kingdom.data.toModel
 import at.posselt.pfrpg2e.kingdom.data.toRaw
 import com.foundryvtt.kingmaker.HexState
 import com.foundryvtt.kingmaker.kingmaker
+import com.foundryvtt.kingmaker.isExplored
 import at.posselt.pfrpg2e.utils.toMap
 
 /**
@@ -64,7 +65,7 @@ fun classifyRivalTargets(
         val kind = when {
             hex.key in landmarkKeys -> RIVAL_KIND_LANDMARK
             hex.key in lairKeys && state?.cleared != true -> RIVAL_KIND_UNCLEARED_LAIR
-            state?.explored == true -> RIVAL_KIND_CONTESTED_CLAIM
+            state?.isExplored() == true -> RIVAL_KIND_CONTESTED_CLAIM
             else -> RIVAL_KIND_UNEXPLORED
         }
         val coord = formatHexKeyLabel(hex.key) ?: hex.key

@@ -18,6 +18,7 @@ import com.foundryvtt.core.utils.fromUuid
 import com.foundryvtt.kingmaker.onRenderHexEditor
 import com.foundryvtt.kingmaker.onCloseHexEditor
 import com.foundryvtt.kingmaker.kingmaker
+import com.foundryvtt.kingmaker.isExplored
 import at.posselt.pfrpg2e.kingdom.xp.XpSourceKind
 import at.posselt.pfrpg2e.kingdom.xp.proposeXpOffer
 import com.foundryvtt.kingmaker.onRenderHexHud
@@ -42,7 +43,7 @@ fun registerHexEditorLinks(game: Game) {
     if (!game.user.isGM) return
     TypedHooks.onRenderHexEditor { app, html, _ ->
         hexKeyOf(app)?.let { key ->
-            exploredAtOpen[key] = kingmaker.state.hexes[key]?.explored == true
+            exploredAtOpen[key] = kingmaker.state.hexes[key]?.isExplored() == true
         }
         buildPromise { injectHexLinksPanel(game, app, html) }
     }
@@ -53,7 +54,7 @@ fun registerHexEditorLinks(game: Game) {
     TypedHooks.onCloseHexEditor { app, _ ->
         val key = hexKeyOf(app) ?: return@onCloseHexEditor
         val before = exploredAtOpen.remove(key) ?: return@onCloseHexEditor
-        val after = kingmaker.state.hexes[key]?.explored == true
+        val after = kingmaker.state.hexes[key]?.isExplored() == true
         if (before || !after) return@onCloseHexEditor
         buildPromise {
             val actor = game.getKingdomActors().firstOrNull() ?: return@buildPromise

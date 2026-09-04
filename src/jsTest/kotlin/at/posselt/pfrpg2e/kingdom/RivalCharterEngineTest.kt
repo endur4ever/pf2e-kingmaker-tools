@@ -18,6 +18,7 @@ import at.posselt.pfrpg2e.kingdom.rival.parseRivalHexKey
 import at.posselt.pfrpg2e.kingdom.rival.rivalEtaTurns
 import at.posselt.pfrpg2e.kingdom.sheet.contexts.buildRivalCharterContext
 import com.foundryvtt.kingmaker.HexState
+import com.foundryvtt.kingmaker.isExplored
 import js.objects.unsafeJso
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -29,8 +30,9 @@ import kotlin.test.assertTrue
 /** The ADAPTER around the rival core: the classifier's precedence, the stamps, and the blanking. */
 class RivalCharterEngineTest {
     private fun hex(key: String, q: Int, name: String? = null) = RegionHexInfo(key, name, HexCube(q, -q, 0))
+    /** The 2.3.x shape: exploration is a NUMBER. `explored = true` maps to exploration 1 here. */
     private fun state(claimed: Boolean? = null, explored: Boolean? = null, cleared: Boolean? = null) =
-        unsafeJso<dynamic> { this.claimed = claimed; this.explored = explored; this.cleared = cleared }.unsafeCast<HexState>()
+        unsafeJso<dynamic> { this.claimed = claimed; this.exploration = if (explored == true) 1 else 0; this.cleared = cleared }.unsafeCast<HexState>()
     private fun content(hexKey: String, type: String) =
         unsafeJso<dynamic> { id = "c-$hexKey"; this.hexKey = hexKey; this.type = type; name = "x"; visibility = "discovered"; gmNotes = ""; playerText = "" }.unsafeCast<RawHexContent>()
     private fun band(
@@ -184,5 +186,15 @@ class RivalCharterEngineTest {
         assertNull(rivalEtaTurns(still), "pace 0 never counts down")
         val paused = band(pace = 1); paused.objectiveHexKey = "1002"; paused.distanceToObjective = 3; paused.pauseMovement = true
         assertNull(rivalEtaTurns(paused))
+    }
+
+    @Test
+    fun exploredIsTheNumericExplorationStateWithTheOldBooleanTolerated() {
+        // the live 2.3.x schema has no `explored`; reading it made every explored hex look unexplored
+        assertTrue(unsafeJso<dynamic> { exploration = 1 }.unsafeCast<HexState>().isExplored())
+        assertTrue(unsafeJso<dynamic> { exploration = 2 }.unsafeCast<HexState>().isExplored())
+        assertFalse(unsafeJso<dynamic> { exploration = 0 }.unsafeCast<HexState>().isExplored())
+        assertFalse(unsafeJso<dynamic> { claimed = true }.unsafeCast<HexState>().isExplored())
+        assertTrue(unsafeJso<dynamic> { explored = true }.unsafeCast<HexState>().isExplored(), "pre-2.3 boolean still reads")
     }
 }

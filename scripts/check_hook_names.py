@@ -50,6 +50,47 @@ def load_bundle():
     return None, None
 
 
+STATE_BINDING = os.path.join(ROOT, "src/jsMain/kotlin/com/foundryvtt/kingmaker/KingmakerModule.kt")
+
+
+def check_hex_state_fields(bundle, source):
+    """Every non-deprecated field of the HexState binding must exist in KingmakerHexData's schema.
+
+    The binding declared `explored: Boolean?`; 2.3.x stores `exploration: NumberField`. Every reader
+    of `explored` -- the explored overlay drawings, expedition destinations, the rival classifier,
+    the reconnoiter XP trigger -- silently read undefined for a whole release.
+    """
+    src = open(STATE_BINDING, encoding="utf-8").read()
+    m = re.search(r"external interface HexState \{(.*?)\n\}", src, re.S)
+    if not m:
+        return 0
+    fields = []
+    for line in m.group(1).split("\n"):
+        line = line.strip()
+        if line.startswith("@Deprecated"):
+            fields.append(None)  # marks the NEXT val as exempt
+            continue
+        fm = re.match(r"val (\w+):", line)
+        if fm:
+            if fields and fields[-1] is None:
+                fields.pop()
+            else:
+                fields.append(fm.group(1))
+    fields = [f for f in fields if f]
+    cls = re.search(r"class KingmakerHexData extends[^{]*\{(.*?)\n\}", bundle, re.S)
+    if not cls:
+        print("[hex-state] could not find KingmakerHexData in the bundle -- skipping")
+        return 0
+    schema_fields = set(re.findall(r"^\s+(\w+): new [A-Za-z.]*Field", cls.group(1), re.M))
+    missing = [f for f in fields if f not in schema_fields]
+    if missing:
+        print(f"[hex-state] FAIL - HexState binding fields absent from the served KingmakerHexData schema ({source}): {', '.join(missing)}")
+        print("Readers of such a field get undefined on every hex. Mark it @Deprecated or bind the real field.")
+        return 1
+    print(f"[hex-state] OK - {len(fields)} HexState field(s) present in the served schema ({source}).")
+    return 0
+
+
 def main():
     if not os.path.exists(HOOKS):
         print(f"[hook-names] {HOOKS} not found -- run from the repo")
@@ -94,7 +135,7 @@ def main():
         print("Foundry derives hook names from the class name; a renamed class makes the listener silently dead.")
         return 1
     print(f"[hook-names] OK - {checked} render/close binding(s) name classes present in the served bundle ({source}).")
-    return 0
+    return check_hex_state_fields(bundle, source)
 
 
 if __name__ == "__main__":

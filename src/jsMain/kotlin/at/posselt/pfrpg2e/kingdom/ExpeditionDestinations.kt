@@ -8,6 +8,7 @@ import at.posselt.pfrpg2e.companion.hexCubeDistance
 import at.posselt.pfrpg2e.utils.asSequence
 import com.foundryvtt.core.game
 import com.foundryvtt.kingmaker.kingmaker
+import com.foundryvtt.kingmaker.isExplored
 import js.array.component1
 import js.array.component2
 import kotlinx.js.JsPlainObject
@@ -90,7 +91,7 @@ fun buildExpeditionDestinationOptions(kingdom: KingdomData): ExpeditionDestinati
     }.getOrDefault(emptyList()).toTypedArray()
 
     val hexOptions = stateHexes { it.claimed == true }
-    val exploredOptions = stateHexes { it.claimed != true && it.explored == true }
+    val exploredOptions = stateHexes { it.claimed != true && it.isExplored() }
 
     // Everything else on the map: expeditions — scouting above all — go where nobody has.
     // The kingmaker state record is sparse (only hexes with any state), so the full map

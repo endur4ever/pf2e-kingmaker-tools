@@ -28,6 +28,7 @@ import com.foundryvtt.core.helpers.onCanvasReady
 import com.foundryvtt.core.helpers.onDrawDrawing
 import com.foundryvtt.kingmaker.HexState
 import com.foundryvtt.kingmaker.kingmaker
+import com.foundryvtt.kingmaker.isExplored
 import com.foundryvtt.kingmaker.onCloseHexEditor
 import js.objects.ReadonlyRecord
 import js.objects.recordOf
@@ -247,7 +248,7 @@ suspend fun syncHexDrawingsToNativeState(game: Game) {
             }
         }
 
-        val explored = shouldHaveExploredDrawing(hexState.explored)
+        val explored = shouldHaveExploredDrawing(hexState.isExplored())
         val existingExplored = findHexOverlay(activeDrawings, EXPLORED_DRAWING_TYPE, key)
 
         if (explored) {

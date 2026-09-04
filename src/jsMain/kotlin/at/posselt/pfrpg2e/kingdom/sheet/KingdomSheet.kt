@@ -1976,7 +1976,9 @@ class KingdomSheet(
                                 val state = com.foundryvtt.kingmaker.kingmaker.state.asDynamic()
                                 val hexFlags = js("{}")
                                 hexFlags.claimed = true
-                                hexFlags.explored = true
+                                // 2.3.x stores exploration as a NUMBER (0 none, 1 recon, 2 map); the
+                                // old `explored = true` was a field the schema stripped on save
+                                hexFlags.exploration = 2
                                 hexFlags.cleared = true
                                 val hexes = js("{}")
                                 hexes[hexKey] = hexFlags
