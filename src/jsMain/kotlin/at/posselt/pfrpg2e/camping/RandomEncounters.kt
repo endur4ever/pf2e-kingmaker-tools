@@ -48,7 +48,9 @@ suspend fun rollRandomEncounter(
 ): Boolean {
     actor.getCamping()?.let { camping ->
         if (camping.encounterCategoryProxyTableUuid != null) {
-            return rollCuratedEncounter(game, actor)
+            // the flat check has to survive the curated branch: dropping it made every encounter
+            // check an automatic hit the moment a GM configured a category proxy table
+            return rollCuratedEncounter(game, actor, includeFlatCheck = includeFlatCheck)
         }
         val currentRegion = camping.findCurrentRegion() ?: camping.regionSettings.regions.firstOrNull()
         currentRegion?.let { region ->
@@ -73,7 +75,13 @@ suspend fun rollRandomEncounter(
  * GM previews it (see [EncounterPreviewDialog]) before accepting. On accept the
  * result is posted; reroll re-runs this flow; reject discards it.
  */
-suspend fun rollCuratedEncounter(game: Game, actor: CampingActor, offerRestore: Boolean = true): Boolean {
+suspend fun rollCuratedEncounter(
+    game: Game,
+    actor: CampingActor,
+    offerRestore: Boolean = true,
+    /** False only for the explicit "roll one now" button, which is the GM asking for an encounter. */
+    includeFlatCheck: Boolean = false,
+): Boolean {
     val camping = actor.getCamping() ?: return false
     val region = camping.findCurrentRegion() ?: camping.regionSettings.regions.firstOrNull() ?: return false
     val rollMode = fromCamelCase<RollMode>(camping.randomEncounterRollMode) ?: RollMode.GMROLL

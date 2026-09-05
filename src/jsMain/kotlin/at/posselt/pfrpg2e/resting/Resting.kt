@@ -481,8 +481,13 @@ private suspend fun completeDailyPreparations(
     val secondsToAdvance = camping.watchSecondsRemaining
     camping.watchSecondsRemaining = 0
     camping.encounterModifier = 0
-    camping.secondsSpentTraveling = 0
-    camping.secondsSpentHexploring = 0
+    // PRE-COMPENSATED, exactly like dailyPrepsAtTime on the next line. These are saved before the
+    // world clock advances (deliberately -- a throwing calendar used to abort the whole save), and
+    // the fatigue hook mirrors every advance into both counters. Zeroing them here therefore had
+    // the entire night's rest added straight back: the party woke with its whole hexploration
+    // budget already spent, and in travel mode every camper was fatigued the instant they got up.
+    camping.secondsSpentTraveling = -secondsToAdvance
+    camping.secondsSpentHexploring = -secondsToAdvance
     camping.dailyPrepsAtTime = game.time.worldTimeSeconds + secondsToAdvance
     Object.values(camping.campingActivities).forEach { it.result = null }
     Object.values(camping.cooking.results).forEach { it.result = null }

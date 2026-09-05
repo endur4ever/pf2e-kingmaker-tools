@@ -544,6 +544,13 @@ class CampingSheet(
                 val rumorId = target.dataset["rumorId"] ?: return@buildPromise
                 val rumor = actor.getCamping()?.rumorList()?.firstOrNull { it.id == rumorId }
                     ?: return@buildPromise
+                // the button's visibility comes from a flag computed at the PREVIOUS render, and
+                // the two writes below each await a document round-trip, so a second click inside
+                // that window minted a second quest from one lead. The chat-side twin has this guard.
+                if (rumor.isConverted || rumor.state == RumorState.CONVERTED) {
+                    ui.notifications.info(t("camping.rumors.convertOffer.dismissed"))
+                    return@buildPromise
+                }
                 // the existing rumor->quest pipeline mints the quest; CONVERTED is stamped only
                 // when a quest actually exists -- convertRumorToQuest bails null in a world with
                 // no kingdom actor, and marking anyway would kill the lead with nothing to show
@@ -2167,7 +2174,11 @@ class CampingSheet(
 
     override fun onParsedSubmit(value: CampingSheetFormData): Promise<Void> = buildPromise {
         actor.getCamping()?.let { camping ->
-            camping.currentRegion = value.region
+            // GM-gated controls are ABSENT from a player's form, and the schema cleans a missing
+            // required string to "" and a missing boolean to false. Assigning them unconditionally
+            // meant any player touching the sheet wiped the region and switched travel mode off.
+            // travelMoveToken below already had this guard; these three did not.
+            if (game.user.isGM) camping.currentRegion = value.region
             camping.campingActivities = camping.campingActivities
                 .asSequence().map { (id, data) ->
                     id to CampingActivity(
@@ -2175,6 +2186,9 @@ class CampingSheet(
                         result = value.activities.degreeOfSuccess?.get(id),
                         selectedSkill = value.activities.selectedSkill?.get(id),
                         learnTargetActivityId = value.activities.learnTarget?.get(id),
+                        // the form does not render it, so rebuilding without it reset every
+                        // no-check activity to one repetition while the downtime hours stayed spent
+                        repetitions = data.repetitions,
                     )
                 }.toMutableRecord()
             val cookingResultsByRecipe = camping.cooking.results.toMap()
@@ -2189,11 +2203,11 @@ class CampingSheet(
                     skill = value.recipes?.selectedSkill?.get(it.id) ?: "survival",
                 )
             }.toMutableRecord()
-            camping.travelModeActive = value.travelModeActive
+            if (game.user.isGM) camping.travelModeActive = value.travelModeActive
             // Stopping the march does NOT undo it: the accumulated days stand until the party
             // actually rests. Zeroing here meant a mis-click on the checkbox erased the only record
             // of how long they had been pushing.
-            camping.forcedMarchActive = value.forcedMarchActive
+            if (game.user.isGM) camping.forcedMarchActive = value.forcedMarchActive
             camping.travelStartHex = value.travelStartHex
             camping.travelEndHex = value.travelEndHex
             // The control is GM-gated, so it is absent from a player's form. Only honour it from

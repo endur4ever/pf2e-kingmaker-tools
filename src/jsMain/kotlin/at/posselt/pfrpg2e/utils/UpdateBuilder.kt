@@ -37,7 +37,10 @@ open class RecordPropertyUpdateBuilder<T>(
 ) : PropertyUpdateBuilder<T>(basePath, updates, propertyName) {
     fun deleteEntry(key: String) {
         Reflect.deleteProperty(updates, "$propertyPath.$key")
-        updates["propertyPath.$key"] = _del
+        // "$propertyPath.$key", not "propertyPath.$key": the sigil was missing, so every deletion
+        // landed on a literal path no document has and removed nothing. Silent, because a merge
+        // update simply ignores a key that is not there — the caller saw a successful write.
+        updates["$propertyPath.$key"] = _del
     }
 
     fun deleteEntries(keys: Set<String>) = keys.forEach(::deleteEntry)

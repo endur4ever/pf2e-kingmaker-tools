@@ -745,10 +745,13 @@ fun CampingData.resetTimeTracking(game: Game) {
 }
 
 fun CampingData.persistPassedTime(deltaInSeconds: Int) {
+    // Floored at zero: a rest pre-compensates these by the advance it is about to make, and if that
+    // advance fails the counters would otherwise stay negative and hand the party a bigger budget
+    // than a day holds.
     if (travelModeActive) {
-        secondsSpentTraveling += deltaInSeconds
+        secondsSpentTraveling = (secondsSpentTraveling + deltaInSeconds).coerceAtLeast(0)
     }
-    secondsSpentHexploring += deltaInSeconds
+    secondsSpentHexploring = (secondsSpentHexploring + deltaInSeconds).coerceAtLeast(0)
 }
 
 fun Game.getActiveCampingActor(): CampingActor? =

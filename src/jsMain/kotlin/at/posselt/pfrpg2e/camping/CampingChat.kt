@@ -49,7 +49,7 @@ fun bindCampingChatEventListeners(game: Game, dispatcher: ActionDispatcher) {
         }
     }
 
-    bindChatClick(".km-add-recipe") { _, el, _ ->
+    bindChatClick(".km-add-recipe", once = true) { _, el, _ ->
         val actorUuid = el.dataset["actorUuid"]
         val id = el.dataset["id"]
         val degree = el.dataset["degree"]
@@ -79,7 +79,7 @@ fun bindCampingChatEventListeners(game: Game, dispatcher: ActionDispatcher) {
         ".km-offer-rumor-hex" to "convertRumorHex",
     )) {
         val (selector, actionName) = spec
-        bindChatClick(selector) { _, el, _ ->
+        bindChatClick(selector, once = true) { _, el, _ ->
             val campingActorUuid = el.dataset["campingActorUuid"]
             val rumorId = el.dataset["rumorId"]
             if (campingActorUuid != null && rumorId != null) {
@@ -127,7 +127,7 @@ fun bindCampingChatEventListeners(game: Game, dispatcher: ActionDispatcher) {
             }
         }
     }
-    bindChatClick(".gain-provisions") { _, el, _ ->
+    bindChatClick(".gain-provisions", once = true) { _, el, _ ->
         buildPromise {
             val actorUuid = el.dataset["actorUuid"]
             val quantity = el.dataset["quantity"]?.toInt() ?: 0
@@ -144,7 +144,7 @@ fun bindCampingChatEventListeners(game: Game, dispatcher: ActionDispatcher) {
             }
         }
     }
-    bindChatClick(".km-offer-starvation") { _, el, _ ->
+    bindChatClick(".km-offer-starvation", once = true) { _, el, _ ->
         // The handler is GM-only by policy; this guard makes a player's click a silent no-op
         // instead of a rejected socket message.
         if (!game.user.isGM) return@bindChatClick
@@ -165,7 +165,7 @@ fun bindCampingChatEventListeners(game: Game, dispatcher: ActionDispatcher) {
             }
         }
     }
-    bindChatClick(".km-add-food") { _, el, _ ->
+    bindChatClick(".km-add-food", once = true) { _, el, _ ->
         el.dataset["campingActorUuid"]?.let {
             val action = ActionMessage(
                 action = "addHuntAndGatherResult",
@@ -181,7 +181,7 @@ fun bindCampingChatEventListeners(game: Game, dispatcher: ActionDispatcher) {
             }
         }
     }
-    bindChatClick(".km-apply-meal-effect") { _, el, _ ->
+    bindChatClick(".km-apply-meal-effect", once = true) { _, el, _ ->
         val degree = el.dataset["degree"]
         val id = el.dataset["recipe"]
         val campingActorUuid = el.dataset["campingActorUuid"]

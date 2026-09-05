@@ -51,6 +51,9 @@ class PostRumorBeatHandler(private val game: Game) : ActionHandler("postRumorBea
 }
 
 /** Converts an expiring lead into a quest, through the pipeline the preview dialog already uses. */
+/** Rumor ids whose conversion is mid-flight on this client; see the claim in the handler below. */
+private val rumorConversionsInFlight = mutableSetOf<String>()
+
 class ConvertRumorQuestHandler(private val game: Game) : ActionHandler("convertRumorQuest") {
     override suspend fun execute(action: ActionMessage, dispatcher: ActionDispatcher) {
         val data = action.data.unsafeCast<RumorOfferData>()
@@ -62,7 +65,15 @@ class ConvertRumorQuestHandler(private val game: Game) : ActionHandler("convertR
         // isConverted too, not just state: a pin/unpin cycle could reset the state while the
         // boolean survives, and a second quest for the same lead must never mint
         if (rumor.state == RumorState.CONVERTED || rumor.isConverted) return
-        val questId = convertRumorToQuest(game, rumor) ?: return
+        // the guard above is a READ, and minting the quest awaits a document round-trip before
+        // CONVERTED is stamped below -- a second click inside that window passed the same guard and
+        // minted a second quest, with only the last id recorded so the duplicate was untracked
+        if (!rumorConversionsInFlight.add(data.rumorId)) return
+        val questId = try {
+            convertRumorToQuest(game, rumor)
+        } finally {
+            rumorConversionsInFlight.remove(data.rumorId)
+        } ?: return
         actor.updateRumors { rumors ->
             rumors.map {
                 if (it.id == data.rumorId) {

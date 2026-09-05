@@ -3,6 +3,8 @@ package at.posselt.pfrpg2e.camping
 import at.posselt.pfrpg2e.data.checks.DegreeOfSuccess
 import js.objects.recordOf
 import kotlinx.js.JsPlainObject
+import at.posselt.pfrpg2e.utils.asSequence
+import js.array.component2
 
 /**
  * Rules from Kingmaker Companion Guide p.113:
@@ -66,7 +68,10 @@ fun CampingData.recordCookingResult(
     progress[actorUuid] = actorProgress
     cooking.favoriteMealProgress = progress
 
-    val actorMeal = cooking.actorMeals[actorUuid] ?: return null
+    // actorMeals is keyed by actor.id at every writer (CampingSheet assigns actorMeals[actorId]),
+    // so a uuid lookup always missed and no character ever learned a favourite meal. Match on the
+    // record's own actorUuid field instead, which is correct whichever key the row is filed under.
+    val actorMeal = cooking.actorMeals.asSequence().map { it.component2() }.find { meal -> meal.actorUuid == actorUuid } ?: return null
     val currentFavorite = actorMeal.favoriteMeal
 
     // NPC fixed favorite: never auto-change
@@ -114,6 +119,6 @@ fun CampingData.shouldApplyFavoriteOutcome(
     actorUuid: String,
     recipeId: String,
 ): Boolean {
-    val actorMeal = cooking.actorMeals[actorUuid] ?: return false
+    val actorMeal = cooking.actorMeals.asSequence().map { it.component2() }.find { meal -> meal.actorUuid == actorUuid } ?: return false
     return actorMeal.favoriteMeal == recipeId
 }

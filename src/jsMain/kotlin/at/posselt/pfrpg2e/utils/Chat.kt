@@ -95,9 +95,31 @@ fun fixVisibility(game: Game, html: HTMLElement, message: ChatMessage) {
     }
 }
 
+/**
+ * Marks a one-shot chat button spent, synchronously, before its handler runs.
+ *
+ * Camping handlers apply their effect and then await one or more document round-trips, and no
+ * camping card disables its own buttons -- so a second click inside that window applies the effect
+ * twice. Kingdom cards carry an applied-flag; camping had none anywhere. Claiming the button in the
+ * DOM before the handler starts closes the window for the case that actually happens: one person
+ * clicking again because a card looks unresponsive.
+ *
+ * Per-CLIENT, and honestly so: two people clicking two copies of the same whispered card remain
+ * last-write-wins, the same residual the rumor store documents for camping data generally.
+ */
+private fun claimOnce(button: HTMLElement): Boolean {
+    if (button.hasAttribute("data-km-consumed")) return false
+    button.setAttribute("data-km-consumed", "1")
+    button.setAttribute("disabled", "disabled")
+    button.closest(".chat-message")?.takeIfInstance<HTMLElement>()?.classList?.add("km-card-resolved")
+    return true
+}
+
 fun bindChatClick(
     targetSelector: String,
     parentSelector: String = ".chat-message",
+    /** True for a button whose effect must apply at most once: it is disabled before the handler runs. */
+    once: Boolean = false,
     callback: (event: Event, target: HTMLElement, parent: HTMLElement) -> Unit
 ) {
     listOf("chat-notifications", "chat")
@@ -117,7 +139,7 @@ fun bindChatClick(
                 // the matching button; closest() returns the element itself when it already matches,
                 // so this is safe for text-only buttons too.
                 val clicked = (event.target as? HTMLElement)?.closest(targetSelector)?.takeIfInstance<HTMLElement>()
-                if (clicked != null) {
+                if (clicked != null && (!once || claimOnce(clicked))) {
                     clicked.closest(parentSelector)
                         ?.takeIfInstance<HTMLElement>()
                         ?.let { callback(event, clicked, it) }
