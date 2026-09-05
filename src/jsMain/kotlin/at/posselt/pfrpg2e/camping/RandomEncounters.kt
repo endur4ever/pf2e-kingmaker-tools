@@ -229,20 +229,13 @@ private suspend fun showEncounterPreview(
                 )
             }
             // journal it HERE, not at preview time: a rerolled, rejected or reload-restored
-            // preview used to leave a permanent line for an encounter that never happened
-            if (game.user.isGM) {
-                actor.getCamping()?.let { fresh ->
-                    fresh.appendTravelEntry(
-                        TravelJournalEntry(
-                            worldDate = game.travelJournalWorldDate(),
-                            kind = TravelJournalKind.ENCOUNTER,
-                            hexKey = getPartyCurrentHexKey(game, actor, fresh),
-                            note = resultText.takeIf { it.isNotBlank() },
-                        )
-                    )
-                    actor.setCamping(fresh)
-                }
-            }
+            // preview used to leave a permanent line for an encounter that never happened.
+            // Through the purpose-built helper, which carries the GM-gating rationale.
+            actor.recordEncounter(
+                game = game,
+                hexKey = actor.getCamping()?.let { getPartyCurrentHexKey(game, actor, it) },
+                note = resultText.takeIf { it.isNotBlank() },
+            )
             clearEncounterPreview(actor)
         } },
         onReroll = { buildPromise { rollCuratedEncounter(game, actor, offerRestore = false) } },
@@ -251,17 +244,27 @@ private suspend fun showEncounterPreview(
             // store the lead as well as minting the quest: converting used to drop the rumor
             // entirely -- no board row, no id, no back-link, and the players never heard it
             val questId = convertRumorToQuest(game, hook)
-            if (questId != null) {
-                actor.updateRumors { existing ->
-                    existing + hook.copy(
-                        id = v4(),
-                        bornDay = currentWorldDay(game),
-                        state = RumorState.CONVERTED,
-                        isConverted = true,
-                        convertedQuestId = questId,
-                    )
-                }
+            // A FAILED conversion must not destroy the lead. convertRumorToQuest returns null when
+            // there is no kingdom to hang the quest on; clearing the preview anyway threw the
+            // rumor away -- the exact loss this branch was changed to stop. Leave the preview up
+            // so the GM can accept it, or convert again once a kingdom exists.
+            if (questId == null) return@buildPromise
+            actor.updateRumors { existing ->
+                existing + hook.copy(
+                    id = v4(),
+                    bornDay = currentWorldDay(game),
+                    state = RumorState.CONVERTED,
+                    isConverted = true,
+                    convertedQuestId = questId,
+                )
             }
+            // Converting COMMITS the preview just as accepting does, so it journals too. Moving
+            // the write to the accept branch alone silently dropped the line this path used to get.
+            actor.recordEncounter(
+                game = game,
+                hexKey = actor.getCamping()?.let { getPartyCurrentHexKey(game, actor, it) },
+                note = resultText.takeIf { it.isNotBlank() },
+            )
             clearEncounterPreview(actor)
         } },
     ).render(true)

@@ -773,15 +773,25 @@ class CampingSheet(
             .filterIsInstance<MealChoice.Rations>()
             .map { it.cookingCost }
             .sum()
-        reduceFoodBy(
+        val leftOver = reduceFoodBy(
             actors = camping.getActorsCarryingFood(actor),
             foodAmount = rations,
             foodItems = getCompendiumFoodItems(),
         )
-        // record that tonight's rations are paid: the rest's starvation tick reads the pool
-        // AFTER this button spent it, and without this it judged every rations camper unfed
-        camping.cooking.rationsConsumedForNight = true
-        actor.setCamping(camping)
+        // Stamp the night as paid so the rest's starvation tick does not charge for these
+        // rations a second time -- it reads the pool AFTER this button has spent it.
+        //
+        // Only when the larder actually COVERED the bill: reduceFoodBy takes what it can and
+        // reports the shortfall, so stamping on the button press alone would have fed a party
+        // that owns one ration and needs four entirely for free.
+        //
+        // And through a targeted update rather than setCamping: `camping` was read before a long
+        // await chain (compendium lookups, an item update per food-carrying actor, a chat card),
+        // so saving that whole snapshot would revert anything another client changed meanwhile.
+        if (leftOver.rations <= 0) {
+            val paidDay = currentWorldDay(game)
+            actor.typedCampingUpdate { cooking.rationsPaidForDay.set(paidDay) }
+        }
     }
 
     /**

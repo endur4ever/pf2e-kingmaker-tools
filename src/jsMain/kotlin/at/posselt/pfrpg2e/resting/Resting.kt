@@ -487,8 +487,6 @@ private suspend fun completeDailyPreparations(
     // the fatigue hook mirrors every advance into both counters. Zeroing them here therefore had
     // the entire night's rest added straight back: the party woke with its whole hexploration
     // budget already spent, and in travel mode every camper was fatigued the instant they got up.
-    // tonight is over: the next night's rations must be paid again
-    camping.cooking.rationsConsumedForNight = false
     camping.secondsSpentTraveling = -secondsToAdvance
     camping.secondsSpentHexploring = -secondsToAdvance
     camping.dailyPrepsAtTime = game.time.worldTimeSeconds + secondsToAdvance

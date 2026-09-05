@@ -59,6 +59,22 @@ data class NightlyFeeding(
  * being absent from the meal table means nobody arranged food for them, which is precisely the
  * case this feature exists to notice.
  */
+/**
+ * Whether the sheet's "Consume Rations" button already settled [day]'s ration bill.
+ *
+ * The comment above is the whole problem: this file reads how many rations are ON HAND, and that
+ * button has already spent them. Classifying a night without asking whether they were paid for
+ * charges the party twice -- once at the button, once here, where the emptied pool then reads as
+ * "unfed" and forces Subsist rolls on people who ate.
+ *
+ * A DAY STAMP, not a flag. A flag has to be cleared by someone, and the first attempt at this put
+ * that clear in the rest, fourteen lines above the only code that reads it -- so the guard could
+ * never once fire, and a green suite said nothing because nothing tested it. A stamp needs no
+ * clearing: it simply stops matching tomorrow, which also means a night that ended by breaking
+ * camp instead of resting cannot leave a "paid" behind to feed a later night for free.
+ */
+fun rationsAlreadyPaidFor(paidDay: Int?, day: Int): Boolean = paidDay != null && paidDay == day
+
 fun resolveNightlyFeeding(
     meals: List<NightlyMealChoice>,
     availableRations: Int,

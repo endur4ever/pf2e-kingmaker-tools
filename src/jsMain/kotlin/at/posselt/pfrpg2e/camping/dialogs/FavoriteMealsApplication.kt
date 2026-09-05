@@ -103,12 +103,21 @@ class FavoriteMealsApplication(
                             .filter { it.component2().actorUuid in allowedActorUuids }
                             .forEach { (_, meal) ->
                                 val picked = mealsByActorUuid[meal.actorUuid]?.favoriteMeal
+                                val changed = picked != meal.favoriteMeal
                                 meal.favoriteMeal = picked
-                                // PIN it: this is a hand-picked favourite, and the auto-progression
-                                // in FavoriteMealProgression only respects a choice that says so.
-                                // Nothing set this flag anywhere, so once the progression's lookup
-                                // was repaired it would have overwritten every GM pick.
-                                meal.fixedFavoriteMeal = picked != null
+                                // PIN it, but ONLY where the pick actually changed. The auto-
+                                // progression in FavoriteMealProgression respects a choice that
+                                // says it was hand-made, and nothing set that flag anywhere -- so
+                                // once the progression's lookup was repaired it would have
+                                // overwritten every GM pick.
+                                //
+                                // The loop visits EVERY camper, not just the rows the GM touched,
+                                // and each select round-trips its current value. Pinning on
+                                // `picked != null` therefore pinned everyone who merely HAD a
+                                // favourite the moment anyone opened this dialog and pressed Save
+                                // -- including meals the progression had auto-learned, which are
+                                // exactly the ones that must stay free to advance.
+                                if (changed) meal.fixedFavoriteMeal = picked != null
                             }
                         actor.setCamping(camping)
                     }

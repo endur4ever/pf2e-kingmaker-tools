@@ -2,6 +2,7 @@ package at.posselt.pfrpg2e.camping
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class NightlyFeedingTest {
@@ -78,5 +79,56 @@ class NightlyFeedingTest {
     fun nobodyInCampIsAValidQuietNight() {
         val r = resolveNightlyFeeding(emptyList(), availableRations = 10)
         assertTrue(r.fed.isEmpty() && r.mustSubsist.isEmpty() && r.unfed.isEmpty())
+    }
+}
+
+/**
+ * The "Consume Rations" button spends the pool before the nightly tick reads it. These pin the
+ * day-stamp that stops the tick charging for the same rations a second time -- the first attempt
+ * shipped a flag that was cleared before its only reader ran, and a green suite said nothing
+ * because no test referenced it.
+ */
+class RationsAlreadyPaidTest {
+    @Test
+    fun unpaidWhenNoStamp() {
+        assertFalse(rationsAlreadyPaidFor(paidDay = null, day = 12))
+    }
+
+    @Test
+    fun paidOnTheStampedDay() {
+        assertTrue(rationsAlreadyPaidFor(paidDay = 12, day = 12))
+    }
+
+    @Test
+    fun aStampDoesNotPayForALaterNight() {
+        // the party consumed rations and then broke camp without resting: the stamp survives,
+        // and must NOT feed them free on a later night
+        assertFalse(rationsAlreadyPaidFor(paidDay = 12, day = 13))
+    }
+
+    @Test
+    fun aStampDoesNotPayBackwards() {
+        assertFalse(rationsAlreadyPaidFor(paidDay = 13, day = 12))
+    }
+
+    @Test
+    fun aPaidRationFeedsEvenWithAnEmptyPool() {
+        // what the whole stamp is for: the button already drained the pool, so charging again
+        // judged a party that had eaten as unfed
+        val meals = listOf(
+            NightlyMealChoice(actorUuid = "a", kind = NightlyMealKind.RATIONS, rationCost = 0),
+            NightlyMealChoice(actorUuid = "b", kind = NightlyMealKind.RATIONS, rationCost = 0),
+        )
+        val feeding = resolveNightlyFeeding(meals, availableRations = 0)
+        assertEquals(listOf("a", "b"), feeding.fed)
+        assertTrue(feeding.mustSubsist.isEmpty())
+    }
+
+    @Test
+    fun anUnpaidRationStillNeedsFoodOnHand() {
+        val meals = listOf(NightlyMealChoice(actorUuid = "a", kind = NightlyMealKind.RATIONS, rationCost = 1))
+        val feeding = resolveNightlyFeeding(meals, availableRations = 0)
+        assertEquals(listOf("a"), feeding.mustSubsist)
+        assertTrue(feeding.fed.isEmpty())
     }
 }

@@ -62,9 +62,13 @@ external interface CookingResult {
 external interface Cooking {
     var knownRecipes: Array<String>
     var actorMeals: Record<String, ActorMeal>
-    /** The sheet's "Consume Rations" button already spent tonight's rations. Cleared by the rest
-     *  that follows, so it only ever describes the night in progress. */
-    var rationsConsumedForNight: Boolean?
+    /** World day whose rations the sheet's "Consume Rations" button actually PAID IN FULL.
+     *  A day stamp rather than a boolean deliberately: a boolean has to be cleared by someone,
+     *  and every candidate for that job either runs before the only reader (the rest cleared it
+     *  14 lines above the starvation tick, so the guard could never fire) or does not run at all
+     *  when the party breaks camp without resting, leaving a stale "paid" into a later night.
+     *  A stamp needs no clearing -- it simply stops matching tomorrow. */
+    var rationsPaidForDay: Int?
     var homebrewMeals: Array<RecipeData>
     var results: Record<String, CookingResult>
     var minimumSubsistence: Int

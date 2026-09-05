@@ -91,8 +91,10 @@ suspend fun tickNightlyStarvation(
             else -> NightlyMealKind.RATIONS
         }
         // a ration already paid for by the sheet's Consume Rations button costs nothing more
-        // tonight; charging it again judged the party unfed on its own supplies
-        val alreadyPaid = camping.cooking.rationsConsumedForNight == true && kind == NightlyMealKind.RATIONS
+        // tonight; charging it again judged the party unfed on its own supplies. Matched by DAY,
+        // so a stamp left behind by a night that never ended in a rest cannot pay for a later one.
+        val alreadyPaid = kind == NightlyMealKind.RATIONS
+            && rationsAlreadyPaidFor(camping.cooking.rationsPaidForDay, currentWorldDay(game))
         NightlyMealChoice(actorUuid = actor.uuid, kind = kind, rationCost = if (alreadyPaid) 0 else 1)
     }
 
