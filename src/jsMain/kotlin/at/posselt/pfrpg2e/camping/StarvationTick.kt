@@ -72,7 +72,11 @@ suspend fun tickNightlyStarvation(
     // A recipe only feeds someone if somebody actually cooked it. With no cook assigned the module
     // already downgrades every chosen recipe to rations (see findCookingChoices); mirror that here
     // rather than crediting a meal nobody made.
-    val hasCook = camping.campingActivities[cookMealId]?.actorUuid != null
+    // mirror findCookingChoices exactly: it resolves the cook and then requires a PF2ECharacter,
+    // so an NPC assigned to Cook Meal leaves the sheet downgrading every recipe to rations while
+    // this tick credited a cooked meal nobody could have made
+    val cookUuid = camping.campingActivities[cookMealId]?.actorUuid
+    val hasCook = cookUuid != null && actors.any { it.uuid == cookUuid && it is PF2ECharacter }
     val chosenByUuid = camping.cooking.actorMeals.asSequence()
         .map { (_, meal) -> meal.actorUuid to meal.chosenMeal }
         .toMap()
@@ -86,7 +90,10 @@ suspend fun tickNightlyStarvation(
             hasCook -> NightlyMealKind.COOKED_MEAL
             else -> NightlyMealKind.RATIONS
         }
-        NightlyMealChoice(actorUuid = actor.uuid, kind = kind, rationCost = 1)
+        // a ration already paid for by the sheet's Consume Rations button costs nothing more
+        // tonight; charging it again judged the party unfed on its own supplies
+        val alreadyPaid = camping.cooking.rationsConsumedForNight == true && kind == NightlyMealKind.RATIONS
+        NightlyMealChoice(actorUuid = actor.uuid, kind = kind, rationCost = if (alreadyPaid) 0 else 1)
     }
 
     val availableRations = runCatching {

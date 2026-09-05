@@ -127,7 +127,10 @@ suspend fun stageEncounter(
     // Reuse an active combat when there is one (plan open question 3's stated default): dropping
     // reinforcements into the fight in progress is the common case, and a second combat would
     // orphan the first.
-    val existing = game.combats.active
+    // NOT game.combats.active: Foundry scopes that to the VIEWED scene, so staging onto the
+    // active scene while looking at another one reused (or ignored) the wrong fight entirely.
+    // Scope the lookup to the scene the tokens actually landed on.
+    val existing = game.combats.combats.firstOrNull { it.active && it.scene?.id == scene.id }
     val combat = existing ?: Combat.create(recordOf("scene" to scene.id)).await()
     if (combat == null) {
         // tokens exist but the fight does not: report the ids so the GM can still undo

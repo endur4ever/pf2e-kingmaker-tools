@@ -62,6 +62,9 @@ external interface CookingResult {
 external interface Cooking {
     var knownRecipes: Array<String>
     var actorMeals: Record<String, ActorMeal>
+    /** The sheet's "Consume Rations" button already spent tonight's rations. Cleared by the rest
+     *  that follows, so it only ever describes the night in progress. */
+    var rationsConsumedForNight: Boolean?
     var homebrewMeals: Array<RecipeData>
     var results: Record<String, CookingResult>
     var minimumSubsistence: Int
@@ -240,6 +243,9 @@ external interface CampingData {
 
     /** Transient: the result text rolled for the current (un-committed) encounter preview. */
     var lastEncounterResult: String?
+    /** The creatures drawn with the preview. Persisted so a reload can restore a STAGEABLE
+     *  preview -- without it a restored combat preview came back with a dead Stage button. */
+    var lastEncounterManifest: RawEncounterManifest?
 
     /**
      * Advances by one each time a camping session completes, in the same place the camping

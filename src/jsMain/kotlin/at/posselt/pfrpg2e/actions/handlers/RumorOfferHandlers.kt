@@ -100,11 +100,19 @@ class ConvertRumorHexHandler(private val game: Game) : ActionHandler("convertRum
             return
         }
         if (rumor.state == RumorState.CONVERTED || rumor.isConverted) return
+        // same claim-after-await gap the quest handler has: the guard above is a READ, and the
+        // kingdom write below awaits a round-trip before CONVERTED is stamped, so a second click
+        // inside that window pinned a second rumor-hook to the same hex
+        if (!rumorConversionsInFlight.add(data.rumorId)) return
         val kingdomActor = game.getKingdomActors().firstOrNull() ?: run {
             ui.notifications.warn(t("camping.encounterNoKingdom"))
+            rumorConversionsInFlight.remove(data.rumorId)
             return
         }
-        val kingdom = kingdomActor.getKingdom() ?: return
+        val kingdom = kingdomActor.getKingdom() ?: run {
+            rumorConversionsInFlight.remove(data.rumorId)
+            return
+        }
         kingdom.hexContents = (kingdom.hexContents ?: emptyArray()) + RawHexContent(
             id = "rumor-hook-${v4()}",
             hexKey = hexKey,
@@ -116,11 +124,15 @@ class ConvertRumorHexHandler(private val game: Game) : ActionHandler("convertRum
             gmNotes = rumor.text,
             playerText = "",
         )
-        kingdomActor.setKingdom(kingdom)
-        actor.updateRumors { rumors ->
-            rumors.map {
-                if (it.id == data.rumorId) it.copy(state = RumorState.CONVERTED, isConverted = true) else it
+        try {
+            kingdomActor.setKingdom(kingdom)
+            actor.updateRumors { rumors ->
+                rumors.map {
+                    if (it.id == data.rumorId) it.copy(state = RumorState.CONVERTED, isConverted = true) else it
+                }
             }
+        } finally {
+            rumorConversionsInFlight.remove(data.rumorId)
         }
     }
 }

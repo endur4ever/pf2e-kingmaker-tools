@@ -46,11 +46,16 @@ class ManageRecipesApplication(
         actor.typedCampingUpdate { camping ->
             cooking.knownRecipes.set(camping.cooking.knownRecipes.filter { it != id }.toTypedArray())
             cooking.homebrewMeals.set(camping.cooking.homebrewMeals.filter { it.id != id }.toTypedArray())
-            cooking.actorMeals.set(camping.cooking.actorMeals.asSequence().map { (id, it) ->
-                id to ActorMeal(
+            // `key`, not `id`: the lambda parameter used to shadow the id of the recipe being
+            // deleted, so both comparisons tested the record KEY and the deleted recipe was never
+            // cleared from anyone's chosen or favourite meal.
+            cooking.actorMeals.set(camping.cooking.actorMeals.asSequence().map { (key, it) ->
+                key to ActorMeal(
                     actorUuid = it.actorUuid,
                     favoriteMeal = if (it.favoriteMeal == id) null else it.favoriteMeal,
-                    chosenMeal = if (it.chosenMeal == id) "nothing" else it.chosenMeal
+                    chosenMeal = if (it.chosenMeal == id) "nothing" else it.chosenMeal,
+                    // engine-owned: dropping it un-pinned every hand-picked favourite
+                    fixedFavoriteMeal = it.fixedFavoriteMeal,
                 )
             }.toMutableRecord())
             cooking.results.deleteEntry(id)
@@ -142,6 +147,7 @@ class ManageRecipesApplication(
                             actorUuid = meal.actorUuid,
                             chosenMeal = if (meal.chosenMeal !in enabledRecipes) "nothing" else meal.chosenMeal,
                             favoriteMeal = if (meal.favoriteMeal !in enabledRecipes) null else meal.favoriteMeal,
+                            fixedFavoriteMeal = meal.fixedFavoriteMeal,
                         )
                     }.toMutableRecord()
             )

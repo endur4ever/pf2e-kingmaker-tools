@@ -102,7 +102,13 @@ class FavoriteMealsApplication(
                         camping.cooking.actorMeals.asSequence()
                             .filter { it.component2().actorUuid in allowedActorUuids }
                             .forEach { (_, meal) ->
-                                meal.favoriteMeal = mealsByActorUuid[meal.actorUuid]?.favoriteMeal
+                                val picked = mealsByActorUuid[meal.actorUuid]?.favoriteMeal
+                                meal.favoriteMeal = picked
+                                // PIN it: this is a hand-picked favourite, and the auto-progression
+                                // in FavoriteMealProgression only respects a choice that says so.
+                                // Nothing set this flag anywhere, so once the progression's lookup
+                                // was repaired it would have overwritten every GM pick.
+                                meal.fixedFavoriteMeal = picked != null
                             }
                         actor.setCamping(camping)
                     }

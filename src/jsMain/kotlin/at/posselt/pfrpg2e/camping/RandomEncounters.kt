@@ -100,7 +100,12 @@ suspend fun rollCuratedEncounter(
                 ),
             )
             if (restore) {
-                showEncounterPreview(game, actor, camping, persistedCategory, region.name, persistedResult)
+                // carry the drawn creatures back too: restoring without them left a COMBAT
+                // preview whose Stage button had nothing to spawn
+                showEncounterPreview(
+                    game, actor, camping, persistedCategory, region.name, persistedResult,
+                    seededManifest = camping.lastEncounterManifest,
+                )
                 return true
             }
         }
@@ -172,19 +177,7 @@ private suspend fun showEncounterPreview(
 ) {
     camping.lastEncounterCategory = category.value
     camping.lastEncounterResult = resultText
-    // Journal it on the SAME instance this function is about to save. Camping data is a
-    // player-owned actor flag, so a second read-modify-write here would race this one and lose
-    // entries; and the write is GM-gated because reads are deep clones.
-    if (game.user.isGM) {
-        camping.appendTravelEntry(
-            TravelJournalEntry(
-                worldDate = game.travelJournalWorldDate(),
-                kind = TravelJournalKind.ENCOUNTER,
-                hexKey = getPartyCurrentHexKey(game, actor, camping),
-                note = resultText.takeIf { it.isNotBlank() },
-            )
-        )
-    }
+    camping.lastEncounterManifest = seededManifest
     actor.setCamping(camping)
 
     // A rumor is always offered as a potential quest hook so the GM can convert it
@@ -235,12 +228,40 @@ private suspend fun showEncounterPreview(
                     note = resultText.take(80),
                 )
             }
+            // journal it HERE, not at preview time: a rerolled, rejected or reload-restored
+            // preview used to leave a permanent line for an encounter that never happened
+            if (game.user.isGM) {
+                actor.getCamping()?.let { fresh ->
+                    fresh.appendTravelEntry(
+                        TravelJournalEntry(
+                            worldDate = game.travelJournalWorldDate(),
+                            kind = TravelJournalKind.ENCOUNTER,
+                            hexKey = getPartyCurrentHexKey(game, actor, fresh),
+                            note = resultText.takeIf { it.isNotBlank() },
+                        )
+                    )
+                    actor.setCamping(fresh)
+                }
+            }
             clearEncounterPreview(actor)
         } },
         onReroll = { buildPromise { rollCuratedEncounter(game, actor, offerRestore = false) } },
         onReject = { buildPromise { clearEncounterPreview(actor) } },
         onConvertToQuest = { hook -> buildPromise {
-            convertRumorToQuest(game, hook)
+            // store the lead as well as minting the quest: converting used to drop the rumor
+            // entirely -- no board row, no id, no back-link, and the players never heard it
+            val questId = convertRumorToQuest(game, hook)
+            if (questId != null) {
+                actor.updateRumors { existing ->
+                    existing + hook.copy(
+                        id = v4(),
+                        bornDay = currentWorldDay(game),
+                        state = RumorState.CONVERTED,
+                        isConverted = true,
+                        convertedQuestId = questId,
+                    )
+                }
+            }
             clearEncounterPreview(actor)
         } },
     ).render(true)
@@ -262,6 +283,7 @@ private suspend fun clearEncounterPreview(actor: CampingActor) {
         if (camping.lastEncounterCategory != null || camping.lastEncounterResult != null) {
             camping.lastEncounterCategory = null
             camping.lastEncounterResult = null
+            camping.lastEncounterManifest = null
             actor.setCamping(camping)
         }
     }
@@ -330,17 +352,24 @@ private fun checkEncounterHexFilter(
     val hexClaimed = hexState?.claimed == true
     val hexCleared = hexState?.cleared == true
 
-    // Get hex content suppressesEncounters from kingdom's hexContents
-    val kingdomActor = game.getKingdomActors().firstOrNull() ?: return EncounterFilterDecision.ALLOW
-    val kingdom = kingdomActor.getKingdom() ?: return EncounterFilterDecision.ALLOW
-    val hexContent = kingdom.hexContents?.firstOrNull { it.hexKey == hexKey }
+    // Get hex content suppressesEncounters from kingdom's hexContents. A missing kingdom means
+    // there is no PER-HEX override to read -- it does NOT mean "allow". Returning ALLOW here made
+    // the camping-side "filter by hex state" toggle silently dead in every kingdom-less world,
+    // even though that filter only needs claimed/cleared, which came from kingmaker.state above.
+    val kingdom = game.getKingdomActors().firstOrNull()?.getKingdom()
+    val hexContent = kingdom?.hexContents?.firstOrNull { it.hexKey == hexKey }
     val hexContentSuppresses = hexContent?.suppressesEncounters
 
     // Check homebrew setting overlap: noRandomCombatInClaimedHexes takes precedence
     val registry = loadHomebrewRegistry(game)
     val activeProfile = RuleResolutionHelper.getActiveProfile(registry)
     val homebrewSuppresses = activeProfile?.let { RuleResolutionHelper.isRandomCombatSuppressedInClaimedHexes(it) } ?: false
-    if (homebrewSuppresses && hexClaimed && category == EncounterCategory.COMBAT) {
+    // `hexContentSuppresses != false`: a hex whose content EXPLICITLY allows encounters is a
+    // deliberate per-hex exception, and the homebrew blanket rule used to return before
+    // decideEncounterFilter ever saw that override -- so the exception could never be honoured.
+    if (homebrewSuppresses && hexClaimed && category == EncounterCategory.COMBAT
+        && hexContentSuppresses != false
+    ) {
         return EncounterFilterDecision.SUPPRESS_COMBAT
     }
 

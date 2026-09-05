@@ -37,6 +37,7 @@ import at.posselt.pfrpg2e.camping.resetForcedMarch
 import at.posselt.pfrpg2e.camping.restEntry
 import at.posselt.pfrpg2e.camping.travelJournalDaySummary
 import at.posselt.pfrpg2e.camping.travelJournalList
+import at.posselt.pfrpg2e.camping.travelJournalWorldDate
 import at.posselt.pfrpg2e.camping.tickNightlyStarvation
 import at.posselt.pfrpg2e.camping.groupActivities
 import at.posselt.pfrpg2e.camping.doesNotRequireACheck
@@ -486,6 +487,8 @@ private suspend fun completeDailyPreparations(
     // the fatigue hook mirrors every advance into both counters. Zeroing them here therefore had
     // the entire night's rest added straight back: the party woke with its whole hexploration
     // budget already spent, and in travel mode every camper was fatigued the instant they got up.
+    // tonight is over: the next night's rations must be paid again
+    camping.cooking.rationsConsumedForNight = false
     camping.secondsSpentTraveling = -secondsToAdvance
     camping.secondsSpentHexploring = -secondsToAdvance
     camping.dailyPrepsAtTime = game.time.worldTimeSeconds + secondsToAdvance
@@ -533,8 +536,12 @@ private suspend fun completeDailyPreparations(
     // Give Simple Calendar / Seasons & Stars users the exploration trail too, not just the rest.
     // logToCalendar already no-ops when no calendar bridge is present, and an empty journal yields
     // an empty summary, so this adds nothing when there is nothing to say.
+    // DAY summary: filtered to the day being closed. It used to be handed the whole capped
+    // 200-entry campaign journal, so every rest's calendar note reported cumulative campaign
+    // totals as if they had all happened tonight.
+    val summaryDate = game.travelJournalWorldDate()
     val travelSummary = travelJournalDaySummary(
-        journal = camping.travelJournalList(),
+        journal = camping.travelJournalList().filter { it.worldDate == summaryDate },
         kindLabels = TravelJournalKind.entries.associateWith { t(it) },
     )
     val calendarContent = if (travelSummary.isBlank()) summaryContent else "$summaryContent<hr>$travelSummary"

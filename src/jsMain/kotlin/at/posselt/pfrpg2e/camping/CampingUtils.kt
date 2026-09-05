@@ -63,6 +63,7 @@ data class ClearedCompanionData(
     val clearedActivities: List<String>,
     val clearedWatchSlotsCount: Int,
     val clearedMealChoice: Boolean,
+    val removedMealKeys: List<String> = emptyList(),
 )
 
 fun clearDepartingCompanionFromCamp(
@@ -99,9 +100,11 @@ fun clearDepartingCompanionFromCamp(
     //    entry VALUE's actorUuid, never on the record key.
     val meals = camping.cooking.actorMeals
     val mealKeys = js("Object.keys(meals)").unsafeCast<Array<String>>()
+    val removedMealKeys = mutableListOf<String>()
     mealKeys.forEach { mealKey ->
         if (meals[mealKey]?.actorUuid == companionUuid) {
             js("delete meals[mealKey]")
+            removedMealKeys.add(mealKey)
             clearedMealChoice = true
         }
     }
@@ -110,6 +113,10 @@ fun clearDepartingCompanionFromCamp(
         clearedActivities = clearedActivities,
         clearedWatchSlotsCount = clearedWatchSlotsCount,
         clearedMealChoice = clearedMealChoice,
+        // the caller persists with setCamping, which writes a Foundry FLAG -- and a flag write
+        // MERGES. Deleting the key in memory therefore never removed it from storage; the caller
+        // has to issue a real delete for each one.
+        removedMealKeys = removedMealKeys.toList(),
     )
 }
 
@@ -125,8 +132,10 @@ suspend fun clearDepartingCompanionsFromCamp(game: Game, departing: List<Pair<St
     if (departing.isEmpty()) return
     val campingActor = game.getCampingActors().firstOrNull() ?: return
     val camping = campingActor.getCamping() ?: return
+    val clearedMealKeys = mutableListOf<String>()
     val clearedByName = departing.mapNotNull { (uuid, name) ->
         val cleared = clearDepartingCompanionFromCamp(camping, uuid)
+        clearedMealKeys.addAll(cleared.removedMealKeys)
         val parts = buildList {
             if (cleared.clearedActivities.isNotEmpty()) {
                 add(t("camping.departureClearedActivities", recordOf("count" to cleared.clearedActivities.size)))
@@ -142,6 +151,14 @@ suspend fun clearDepartingCompanionsFromCamp(game: Game, departing: List<Pair<St
     }
     if (clearedByName.isEmpty()) return
     campingActor.setCamping(camping)
+    // setCamping merges, so the keys deleted in memory above are still in storage. Issue the
+    // real deletions -- the update builder emits Foundry's "-=" delete marker per key.
+    val removedMealKeys = clearedMealKeys.distinct()
+    if (removedMealKeys.isNotEmpty()) {
+        campingActor.typedCampingUpdate {
+            removedMealKeys.forEach { cooking.actorMeals.deleteEntry(it) }
+        }
+    }
     val gmUserIds = game.users.filter { it.isGM }.mapNotNull { it.id }.toTypedArray()
     if (gmUserIds.isNotEmpty()) {
         postChatMessage(

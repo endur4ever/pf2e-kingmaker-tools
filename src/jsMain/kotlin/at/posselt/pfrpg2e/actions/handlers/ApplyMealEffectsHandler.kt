@@ -45,8 +45,10 @@ class ApplyMealEffectsHandler(val game: Game) : ActionHandler("applyMealEffects"
         val recipe = recipesById[data.recipeId] ?: return
 
         // reduce meal cost
+        // no PF2ECharacter filter: the sheet counts every camper's serving (CampingSheet's
+        // consumeRations passes the roster unfiltered), so filtering here priced a NARROWER
+        // roster than the one that was fed -- an NPC camper's ingredients were never charged
         val charactersInCampByUuid = camping.getActorsInCamp()
-            .filterIsInstance<PF2ECharacter>()
             .associateBy { it.uuid }
         val party = campingActor
         val parsed = camping.findCookingChoices(

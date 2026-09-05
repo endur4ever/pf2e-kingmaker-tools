@@ -778,6 +778,10 @@ class CampingSheet(
             foodAmount = rations,
             foodItems = getCompendiumFoodItems(),
         )
+        // record that tonight's rations are paid: the rest's starvation tick reads the pool
+        // AFTER this button spent it, and without this it judged every rations camper unfed
+        camping.cooking.rationsConsumedForNight = true
+        actor.setCamping(camping)
     }
 
     /**
@@ -2197,10 +2201,15 @@ class CampingSheet(
                     result = null,
                     skill = "survival",
                 )
-                it.id to CookingResult.copy(
+                // camping-sheet.hbs renders the watch grid INSTEAD of the recipe list in some
+                // states, so `value.recipes` is absent from those submits. Rebuilding from an
+                // absent section reset every stored roll to no-result and every skill to
+                // survival; when the section was not rendered, leave the stored result alone.
+                val recipes = value.recipes
+                it.id to if (recipes == null) result else CookingResult.copy(
                     result,
-                    result = value.recipes?.degreeOfSuccess?.get(it.id),
-                    skill = value.recipes?.selectedSkill?.get(it.id) ?: "survival",
+                    result = recipes.degreeOfSuccess?.get(it.id),
+                    skill = recipes.selectedSkill?.get(it.id) ?: result.skill,
                 )
             }.toMutableRecord()
             if (game.user.isGM) camping.travelModeActive = value.travelModeActive
