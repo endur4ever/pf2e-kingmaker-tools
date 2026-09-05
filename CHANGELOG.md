@@ -51,6 +51,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Several kingdom chat cards could not resolve their actor and did nothing when clicked.
 * Seasons & Stars: the module no longer re-applies a calendar that was already correct on every load.
 
+#### Camping
+
+* **Nothing could be removed from the camping sheet.** Every record deletion — removing a camper,
+  Reset Activities, deleting a homebrew recipe, clearing a meal choice — built its delete instruction
+  from a path that no document has, so the write succeeded and removed nothing.
+* **Rations were charged twice a night.** The Consume Rations button spent the pool, and then the
+  rest's hunger tick re-read the emptied pool and judged the same campers unfed.
+* **Nobody ever learned a favourite meal**, and the favourite-meal outcome was never applied: both
+  looked their diner up by a key the meal record is not stored under. A favourite you pick by hand is
+  now pinned, so the automatic progression leaves it alone.
+* **Deleting a recipe** left it on every camper's plate as a chosen or favourite meal.
+* **Player saves wiped GM-only camping state.** The region, travel mode and forced march are GM
+  controls, so they are absent from a player's submit — and each save reset them. Activity repetition
+  counts and stored cooking rolls were lost the same way.
+* **The encounter flat check was never rolled** once a category proxy table was configured: every
+  check was an automatic encounter.
+* **Resting spent the day it had just restored.** The rest zeroed the travel and exploration clocks
+  and then advanced the world clock, which charged the newly rested party for the hours it had
+  just given back.
+* **The encounter preview wrote history before the GM agreed to it.** A rerolled, rejected or
+  reloaded preview left a permanent journal line for an encounter that never happened. Converting a
+  preview to a quest minted the quest and threw the lead away. A restored preview came back with a
+  Stage button that had nothing to spawn.
+* **A departing companion kept their meal choice** — the sheet cleared it in memory, but the write
+  merges, so it was never actually removed.
+* Camping chat cards could be clicked repeatedly, each click applying again: adding a recipe, gaining
+  provisions, adding food, applying a meal effect, and converting a rumour are now one-shot.
+* NPC campers ate without paying for ingredients; an NPC assigned to Cook Meal was credited with a
+  meal the sheet would not let them cook.
+* Encounter staging joined the fight on the scene you were *looking at* rather than the one the
+  creatures were spawned onto.
+* The "suppress encounters in claimed hexes" filter was dead in any world without a kingdom actor,
+  and the homebrew blanket rule overrode per-hex exceptions instead of honouring them.
+* The rest's calendar note reported the whole campaign's journal totals as if they were today's.
+
 ## [6.3.1] - 2026-05-18
 
 ### Fixed
