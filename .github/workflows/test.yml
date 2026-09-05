@@ -47,5 +47,8 @@ jobs:
       - name: Check chat-button dataset keys
         run: python3 scripts/check_chat_dataset_keys.py
 
+      - name: Guard that an optional form section never falls back to a literal
+        run: python3 scripts/check_optional_section_fallbacks.py
+
       - name: Run build
         run: ./gradlew build
