@@ -331,7 +331,6 @@
         },
         "camping": {
             "restParty": "Rest: {partyName}",
-            "rationsPaidForTonightHelp": "Rations have been paid for tonight.",
             "hexSizeInMiles": "Hex Size in Miles",
             "hexSizeInMilesHelp": "If you are using smaller hexes, change this value to change hexploration activity length and amount",
             "resetTimeTrackingAfterOneDay": "Reset Time Tracking After Advancing More Than 1 Day",

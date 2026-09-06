@@ -11,7 +11,6 @@ import at.posselt.pfrpg2e.camping.CampingActor
 import at.posselt.pfrpg2e.camping.canBeFavoriteMeal
 import at.posselt.pfrpg2e.camping.currentWorldDay
 import at.posselt.pfrpg2e.camping.getActorsInCamp
-import at.posselt.pfrpg2e.camping.getActorsInCamp
 import at.posselt.pfrpg2e.camping.getAllRecipes
 import at.posselt.pfrpg2e.camping.getCamping
 import at.posselt.pfrpg2e.camping.setCamping
