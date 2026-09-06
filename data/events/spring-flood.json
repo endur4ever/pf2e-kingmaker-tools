@@ -1,0 +1,32 @@
+{
+  "id": "spring-flood",
+  "name": "events.spring-flood.name",
+  "traits": [
+    "dangerous",
+    "hex"
+  ],
+  "location": "events.spring-flood.location",
+  "description": "events.spring-flood.description",
+  "stages": [
+    {
+      "leader": "warden",
+      "skills": [
+        "boating",
+        "engineering",
+        "wilderness"
+      ],
+      "criticalSuccess": {
+        "msg": "events.spring-flood.stage-0.criticalSuccess.msg"
+      },
+      "success": {
+        "msg": "events.spring-flood.stage-0.success.msg"
+      },
+      "failure": {
+        "msg": "events.spring-flood.stage-0.failure.msg"
+      },
+      "criticalFailure": {
+        "msg": "events.spring-flood.stage-0.criticalFailure.msg"
+      }
+    }
+  ]
+}

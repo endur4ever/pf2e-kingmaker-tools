@@ -8252,6 +8252,25 @@
                         "msg": "<p>The border holds; the hostile force withdraws to lick its wounds. The 威胁 is contained.</p>"
                     }
                 }
+            },
+            "spring-flood": {
+                "name": "Spring Flood",
+                "description": "<p>Rapid spring thaw and heavy seasonal rains swell waterways past their banks, threatening bridges, roads, and lowland worksites.</p>",
+                "location": "A hex containing a river, bridge, or lowland worksite chosen by the GM.",
+                "stage-0": {
+                    "criticalSuccess": {
+                        "msg": "<p>Quick sandbagging, levee reinforcement, and controlled runoff divert the deluge without harm to the realm. @gain1ResourcePoints</p>"
+                    },
+                    "success": {
+                        "msg": "<p>Your defenses contain the worst of the waters, but local flooding causes minor washouts and slows transport. @gain1ConsumptionNextTurn</p>"
+                    },
+                    "failure": {
+                        "msg": "<p>Swollen waters overflow embankments, inundating roads, farmlands, and worksites. @gain1d4+1ConsumptionNextTurn and @gain1Unrest</p>"
+                    },
+                    "criticalFailure": {
+                        "msg": "<p>Torrential floodwaters sweep through settlements and submerge critical infrastructure. @gain1d4+2ConsumptionNextTurn and @gain2Unrest. In addition, an affected worksite or bridge in the hex must be repaired before it can be used.</p>"
+                    }
+                }
             }
         },
         "hexContentType": {
