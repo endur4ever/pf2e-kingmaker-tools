@@ -28,8 +28,16 @@ private fun Game.isCampaignMapScene(sceneId: String?): Boolean {
 }
 
 fun registerCampingTokenMove(game: Game) {
-    if (game.isFirstGM() && game.isKingmakerInstalled) {
+    // isFirstGM is checked when the hook FIRES, not when it is registered. It answers
+    // "am I the active GM right now", and that changes as GMs connect and disconnect -- so
+    // gating the registration meant a GM who was not the active one at load never bound the hook
+    // at all, and when the first GM logged off nobody was left tracking token moves. The party
+    // could then cross into another zone with currentRegion silently stuck on the old one, which
+    // sets the DC, encounter DC, level, terrain and combat track for every roll that follows.
+    // Every sibling hook in this module checks at fire time (Fatigue.kt, DailyTickHooks.kt).
+    if (game.isKingmakerInstalled) {
         TypedHooks.onMoveToken { document, changed, _, _ ->
+            if (!game.isFirstGM()) return@onMoveToken
             val actor = document.actor
             val scene = document.scene
             if (actor is PF2EParty && game.isCampaignMapScene(scene.id)) {

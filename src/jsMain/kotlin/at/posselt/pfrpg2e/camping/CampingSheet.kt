@@ -2448,8 +2448,13 @@ class CampingSheet(
      * where it is rather than aborting the journey.
      */
     private suspend fun moveCampingTokenToHex(hexKey: String) {
-        val scene = game.scenes.active ?: return
-        if (!scene.grid.isHexagonal) return
+        // resolveHexScene, NOT game.scenes.active: every hex rule downstream reads the party's hex
+        // off the CONFIGURED hexploration scene when there is one. Moving the token on the active
+        // scene instead meant that, with a campsite or battle map active, the token never advanced
+        // on the map the rules read -- so an entire journey's encounter checks, claimed/cleared
+        // lookups and auto-success-in-claimed-hex rules all resolved against the starting hex,
+        // while travelStartHex was updated to the true destination.
+        val scene = resolveHexScene(game, actor.getCamping()) ?: return
         val tokenDoc = scene.tokens.contents.find { it.actorId == actor.id } ?: return
         val hexObj = runCatching { kingmaker.region.hexes.find { it.key.toString() == hexKey } }
             .getOrNull() ?: return

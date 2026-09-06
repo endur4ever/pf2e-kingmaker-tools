@@ -127,10 +127,14 @@ suspend fun stageEncounter(
     // Reuse an active combat when there is one (plan open question 3's stated default): dropping
     // reinforcements into the fight in progress is the common case, and a second combat would
     // orphan the first.
-    // NOT game.combats.active: Foundry scopes that to the VIEWED scene, so staging onto the
-    // active scene while looking at another one reused (or ignored) the wrong fight entirely.
-    // Scope the lookup to the scene the tokens actually landed on.
-    val existing = game.combats.combats.firstOrNull { it.active && it.scene?.id == scene.id }
+    // `.contents`, NOT `.combats` and NOT `.active`. Verified against the SERVED foundry.mjs:
+    //     get combats() { return this.filter(c => (c.scene === null) || (c.scene === game.scenes.current)) }
+    //     get active()  { return this.combats.find(c => c.active && (!c.scene || c.scene === game.scenes.current)) }
+    // Both are scoped to the VIEWED scene. The previous fix here filtered `.combats` by the spawn
+    // scene, which is a no-op whenever the spawn scene is not the one being looked at -- exactly
+    // the case it was written for -- so the running fight was missed and a second combat created
+    // on top of it. `.contents` is the unfiltered collection.
+    val existing = game.combats.contents.firstOrNull { it.active && it.scene?.id == scene.id }
     val combat = existing ?: Combat.create(recordOf("scene" to scene.id)).await()
     if (combat == null) {
         // tokens exist but the fight does not: report the ids so the GM can still undo

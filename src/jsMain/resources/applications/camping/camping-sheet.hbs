@@ -239,7 +239,6 @@
                                         {{/each}}
                                     </ul>
                                 </details>
-                {{> downtimeProjects this}}
                                 <div class="km-route-modifiers">
                                     <b>{{localizeKM "camping.routeModifiers"}}:</b>
                                     <ul>
@@ -256,6 +255,13 @@
                         {{/if}}
                     </div>
                 </details>
+
+                {{!-- Downtime projects are NOT part of the route planner. This partial sat inside
+                      the planner's travelRoute conditional, so the entire section -- including
+                      the GM-only "Start Downtime Project" button, which is the feature's ONLY
+                      creation entry point -- rendered only while a route happened to be computed,
+                      and vanished the moment it was cleared. --}}
+                {{> downtimeProjects this}}
 
                 <details class="km-travel-log">
                     <summary><i class="fa-solid fa-scroll"></i> {{localizeKM "camping.travelLog"}}{{#if travelJournalRows}} ({{travelJournalCount}}){{/if}}</summary>

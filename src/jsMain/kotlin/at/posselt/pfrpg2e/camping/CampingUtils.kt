@@ -5,6 +5,7 @@ import at.posselt.pfrpg2e.kingdom.getKingdomActors
 import at.posselt.pfrpg2e.utils.postChatMessage
 import at.posselt.pfrpg2e.utils.t
 import com.foundryvtt.core.Game
+import com.foundryvtt.core.documents.Scene
 import js.objects.recordOf
 import com.foundryvtt.core.grid.GridHex
 import com.foundryvtt.kingmaker.kingmaker
@@ -20,14 +21,28 @@ import com.pixijs.Point
  *
  * Returns null when no hex map is available or the party has no token on it.
  */
-fun getPartyCurrentHexKey(game: Game, actor: CampingActor, camping: CampingData?): String? {
+/**
+ * The scene every hex rule reads: the configured hexploration scene when it is hexagonal, else
+ * the active one.
+ *
+ * Shared so that MOVING the party token and READING the party's hex can never disagree. They did:
+ * the route executor moved the token on `game.scenes.active` while this resolver preferred
+ * `camping.worldSceneId`, so with a hexploration scene configured and a battle map active, a whole
+ * journey's encounter checks, claimed/cleared lookups and auto-success rules resolved against the
+ * hex the party started on.
+ */
+fun resolveHexScene(game: Game, camping: CampingData?): Scene? {
     val configured = camping?.worldSceneId?.let { game.scenes.get(it) }
     val active = game.scenes.active
-    val scene = when (hexSceneSource(configured?.grid?.isHexagonal, active?.grid?.isHexagonal)) {
+    return when (hexSceneSource(configured?.grid?.isHexagonal, active?.grid?.isHexagonal)) {
         HexSceneSource.CONFIGURED -> configured
         HexSceneSource.ACTIVE -> active
         HexSceneSource.NONE -> null
-    } ?: return null
+    }
+}
+
+fun getPartyCurrentHexKey(game: Game, actor: CampingActor, camping: CampingData?): String? {
+    val scene = resolveHexScene(game, camping) ?: return null
     val token = scene.tokens.contents.find { it.actorId == actor.id } ?: return null
     val grid = scene.grid
     val center = Point(
