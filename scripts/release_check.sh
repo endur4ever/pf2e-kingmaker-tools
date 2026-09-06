@@ -31,7 +31,7 @@ for guard in "${GUARDS[@]}"; do
     args=$(echo "$guard" | cut -d' ' -f2-)
     if [ -f "$cmd" ]; then
         echo "Running $guard..."
-        if ! $cmd $args; then
+        if ! python3 $cmd $args; then
             echo "REMEDIATION: Guard failed: $guard"
             exit 1
         fi
