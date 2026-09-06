@@ -51,14 +51,39 @@ data class CategoryWeights(
 }
 
 /**
- * Roadmap #11: a Combat encounter is suppressed when the region opts into hex
- * filtering and the party is in a claimed + cleared hex. Non-combat categories
- * (rumors, merchants, lore, …) are never suppressed.
+ * Reason describing whether and why the Encounter Curator is active.
  */
-fun shouldSuppressEncounter(
-    category: EncounterCategory,
-    regionSuppressesClearedHex: Boolean,
-    hexClaimedAndCleared: Boolean,
-): Boolean = category == EncounterCategory.COMBAT &&
-    regionSuppressesClearedHex &&
-    hexClaimedAndCleared
+enum class CuratorActiveReason {
+    /** Active because configured category weights total > 0. */
+    ACTIVE_WEIGHTS,
+    /** Active because a category proxy roll table is set (while weights total 0). */
+    ACTIVE_PROXY_TABLE,
+    /** Active with both weights and a proxy table set (weights take precedence, proxy table is fallback). */
+    ACTIVE_BOTH,
+    /** Inactive: neither weights nor a proxy table are configured (falls back to legacy region table). */
+    INACTIVE,
+}
+
+/**
+ * Pure decision function determining whether the Encounter Curator is active.
+ *
+ * The curator engages when EITHER a category proxy table is configured OR
+ * configured category weights total > 0.
+ */
+fun decideCuratorStatus(
+    hasProxyTable: Boolean,
+    weightsTotal: Int,
+): CuratorActiveReason = when {
+    hasProxyTable && weightsTotal > 0 -> CuratorActiveReason.ACTIVE_BOTH
+    weightsTotal > 0 -> CuratorActiveReason.ACTIVE_WEIGHTS
+    hasProxyTable -> CuratorActiveReason.ACTIVE_PROXY_TABLE
+    else -> CuratorActiveReason.INACTIVE
+}
+
+/**
+ * Returns true if the Encounter Curator should handle the encounter roll.
+ */
+fun isEncounterCuratorActive(
+    hasProxyTable: Boolean,
+    weightsTotal: Int,
+): Boolean = decideCuratorStatus(hasProxyTable, weightsTotal) != CuratorActiveReason.INACTIVE

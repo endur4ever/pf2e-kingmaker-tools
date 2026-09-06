@@ -24,11 +24,6 @@ fun nextVisibility(current: HexContentVisibility, event: DiscoveryEvent): HexCon
         DiscoveryEvent.RESET -> HexContentVisibility.HIDDEN
     }
 
-fun suppressesRandomEncounter(claimed: Boolean, cleared: Boolean, content: HexContent?): Boolean {
-    val override = content?.suppressesEncounters
-    if (override != null) return override
-    return claimed || cleared
-}
 
 fun aggregateTravelModifiers(featureTypes: List<String?>, contents: List<HexContent>): Int {
     var total = 0

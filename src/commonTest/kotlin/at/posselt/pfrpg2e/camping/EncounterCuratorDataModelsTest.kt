@@ -131,10 +131,31 @@ class CategoryRoutingTest {
     }
 
     @Test
-    fun combatSuppressedOnlyWhenAllConditionsMet() {
-        assertTrue(shouldSuppressEncounter(EncounterCategory.COMBAT, regionSuppressesClearedHex = true, hexClaimedAndCleared = true))
-        assertFalse(shouldSuppressEncounter(EncounterCategory.COMBAT, regionSuppressesClearedHex = true, hexClaimedAndCleared = false))
-        assertFalse(shouldSuppressEncounter(EncounterCategory.COMBAT, regionSuppressesClearedHex = false, hexClaimedAndCleared = true))
-        assertFalse(shouldSuppressEncounter(EncounterCategory.RUMOR, regionSuppressesClearedHex = true, hexClaimedAndCleared = true))
+    fun curatorGateEngagesWhenWeightsConfiguredWithoutProxyTable() {
+        val weights = CategoryWeights(combat = 30)
+        assertTrue(isEncounterCuratorActive(hasProxyTable = false, weightsTotal = weights.total))
+        assertEquals(CuratorActiveReason.ACTIVE_WEIGHTS, decideCuratorStatus(hasProxyTable = false, weightsTotal = weights.total))
+    }
+
+    @Test
+    fun curatorGateEngagesWhenProxyTableConfiguredWithZeroWeights() {
+        assertFalse(isEncounterCuratorActive(hasProxyTable = false, weightsTotal = 0))
+        assertEquals(CuratorActiveReason.INACTIVE, decideCuratorStatus(hasProxyTable = false, weightsTotal = 0))
+
+        assertTrue(isEncounterCuratorActive(hasProxyTable = true, weightsTotal = 0))
+        assertEquals(CuratorActiveReason.ACTIVE_PROXY_TABLE, decideCuratorStatus(hasProxyTable = true, weightsTotal = 0))
+    }
+
+    @Test
+    fun curatorGateEngagesWithBothConfigured() {
+        val weights = CategoryWeights(combat = 20, rp = 10)
+        assertTrue(isEncounterCuratorActive(hasProxyTable = true, weightsTotal = weights.total))
+        assertEquals(CuratorActiveReason.ACTIVE_BOTH, decideCuratorStatus(hasProxyTable = true, weightsTotal = weights.total))
+    }
+
+    @Test
+    fun curatorGateRemainsInactiveWhenNeitherConfigured() {
+        assertFalse(isEncounterCuratorActive(hasProxyTable = false, weightsTotal = 0))
+        assertEquals(CuratorActiveReason.INACTIVE, decideCuratorStatus(hasProxyTable = false, weightsTotal = 0))
     }
 }

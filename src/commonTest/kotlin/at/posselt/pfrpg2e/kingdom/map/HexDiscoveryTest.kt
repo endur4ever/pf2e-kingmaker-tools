@@ -83,47 +83,6 @@ class HexDiscoveryTest {
         assertEquals(HexContentVisibility.CLEARED, afterClear)
     }
 
-    // ── suppressesRandomEncounter ──
-
-    @Test
-    fun `claimed hex suppresses encounters`() {
-        assertTrue(suppressesRandomEncounter(claimed = true, cleared = false, content = null))
-    }
-
-    @Test
-    fun `cleared hex suppresses encounters`() {
-        assertTrue(suppressesRandomEncounter(claimed = false, cleared = true, content = null))
-    }
-
-    @Test
-    fun `unclaimed uncleared hex does not suppress`() {
-        assertFalse(suppressesRandomEncounter(claimed = false, cleared = false, content = null))
-    }
-
-    @Test
-    fun `content override false prevents suppression on claimed hex`() {
-        val content = HexContent(
-            id = "c1", hexKey = "0,0", type = HexContentType.LANDMARK,
-            name = "Test", suppressesEncounters = false
-        )
-        assertFalse(suppressesRandomEncounter(claimed = true, cleared = false, content = content))
-    }
-
-    @Test
-    fun `content override true enables suppression on unclaimed hex`() {
-        val content = HexContent(
-            id = "c1", hexKey = "0,0", type = HexContentType.LANDMARK,
-            name = "Test", suppressesEncounters = true
-        )
-        assertTrue(suppressesRandomEncounter(claimed = false, cleared = false, content = content))
-    }
-
-    @Test
-    fun `no content uses claimed cleared logic`() {
-        assertFalse(suppressesRandomEncounter(claimed = false, cleared = false, content = null))
-        assertTrue(suppressesRandomEncounter(claimed = true, cleared = false, content = null))
-        assertTrue(suppressesRandomEncounter(claimed = false, cleared = true, content = null))
-    }
 
     // ── aggregateTravelModifiers ──
 

@@ -47,7 +47,9 @@ suspend fun rollRandomEncounter(
     includeFlatCheck: Boolean
 ): Boolean {
     actor.getCamping()?.let { camping ->
-        if (camping.encounterCategoryProxyTableUuid != null) {
+        val weights = camping.categoryWeightsOrDefault()
+        val hasProxyTable = !camping.encounterCategoryProxyTableUuid.isNullOrBlank()
+        if (isEncounterCuratorActive(hasProxyTable = hasProxyTable, weightsTotal = weights.total)) {
             // the flat check has to survive the curated branch: dropping it made every encounter
             // check an automatic hit the moment a GM configured a category proxy table
             return rollCuratedEncounter(game, actor, includeFlatCheck = includeFlatCheck)

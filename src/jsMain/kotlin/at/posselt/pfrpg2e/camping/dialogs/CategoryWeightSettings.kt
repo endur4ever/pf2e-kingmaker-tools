@@ -12,8 +12,10 @@ import at.posselt.pfrpg2e.app.forms.formContext
 import at.posselt.pfrpg2e.app.forms.toOption
 import at.posselt.pfrpg2e.camping.CampingActor
 import at.posselt.pfrpg2e.camping.CategoryWeights
+import at.posselt.pfrpg2e.camping.CuratorActiveReason
 import at.posselt.pfrpg2e.camping.EncounterCategory
 import at.posselt.pfrpg2e.camping.categoryWeightsOrDefault
+import at.posselt.pfrpg2e.camping.decideCuratorStatus
 import at.posselt.pfrpg2e.camping.getCamping
 import at.posselt.pfrpg2e.camping.isFilterByHexState
 import at.posselt.pfrpg2e.camping.setCamping
@@ -120,12 +122,27 @@ class CategoryWeightSettingsApplication(
         options: HandlebarsRenderOptions
     ): Promise<CategoryWeightSettingsContext> = buildPromise {
         val parent = super._preparePartContext(partId, context, options).await()
+        val currentWeights = CategoryWeights(
+            combat = settings.combat, rp = settings.rp, rumor = settings.rumor,
+            merchant = settings.merchant, disease = settings.disease,
+            faction = settings.faction, weather = settings.weather, lore = settings.lore,
+        )
+        val hasProxyTable = !settings.encounterCategoryProxyTableUuid.isNullOrBlank()
+        val curatorStatus = decideCuratorStatus(hasProxyTable = hasProxyTable, weightsTotal = currentWeights.total)
+        val statusText = when (curatorStatus) {
+            CuratorActiveReason.ACTIVE_WEIGHTS -> t("camping.encounterCuratorStatus.activeWeights")
+            CuratorActiveReason.ACTIVE_PROXY_TABLE -> t("camping.encounterCuratorStatus.activeProxyTable")
+            CuratorActiveReason.ACTIVE_BOTH -> t("camping.encounterCuratorStatus.activeBoth")
+            CuratorActiveReason.INACTIVE -> t("camping.encounterCuratorStatus.inactive")
+        }
+        val routingLegend = "${t("camping.encounterCuratorRouting")} ($statusText)"
+
         CategoryWeightSettingsContext(
             partId = parent.partId,
             isFormValid = isFormValid,
             sections = formContext(
                 Section(
-                    legend = t("camping.encounterCuratorRouting"),
+                    legend = routingLegend,
                     formRows = listOf(
                         Select(
                             name = "encounterCategoryProxyTableUuid",

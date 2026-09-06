@@ -502,8 +502,14 @@
             "regionSuppressClearedHexHelp": "When enabled, Combat-category encounters are skipped while the party is in a claimed and cleared hex in this region.",
             "encounterCuratorRouting": "Category Routing",
             "encounterCuratorWeights": "Category Weights",
+            "encounterCuratorStatus": {
+                "activeWeights": "Curateur actif : poids de catégorie configurés",
+                "activeProxyTable": "Curateur actif : table proxy de catégorie configurée",
+                "activeBoth": "Curateur actif : poids configurés (table proxy utilisée comme recours)",
+                "inactive": "Curateur inactif : aucun poids ni table proxy configuré (la table régionale classique sera tirée)"
+            },
             "encounterCategoryProxyTable": "Category Proxy Roll Table",
-            "encounterCategoryProxyTableHelp": "Roll table whose results name an encounter category (Combat, Rumor, Merchant, …). When set, random encounters route through the GM curator preview instead of the legacy creature roll.",
+            "encounterCategoryProxyTableHelp": "Table de tirage optionnelle dont les résultats désignent une catégorie de rencontre. Lorsque les poids de catégorie sont à zéro, cette table sélectionne la catégorie pour l'aperçu du curateur.",
             "filterByHexState": "Suppress Combat in Cleared Hexes",
             "filterByHexStateHelp": "When enabled, Combat-category encounters are suppressed while the party is in a claimed and cleared hex (per-region opt-in still applies).",
             "encounterCuratorRumorSource": "Curated Encounter",
