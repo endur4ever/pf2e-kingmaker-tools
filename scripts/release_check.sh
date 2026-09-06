@@ -32,7 +32,7 @@ for guard in "${GUARDS[@]}"; do
         cmd=$(echo "$guard" | cut -d' ' -f1)
         args=$(echo "$guard" | cut -d' ' -f2-)
         if ! $cmd $args; then
-            echo "REMEDIATION: Guard failed: $...”
+            echo "REMEDIATION: Guard failed: $guard"
             exit 1
         fi
     else
