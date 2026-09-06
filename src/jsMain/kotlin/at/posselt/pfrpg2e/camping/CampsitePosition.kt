@@ -44,9 +44,17 @@ data class CampingTokenPosition(
     val y: Double,
 )
 
+/**
+ * This party's token on [scene], if it has one.
+ *
+ * Matched by actor id, NOT by "the first token whose actor is a PF2EParty". The receiver was
+ * ignored, so on any scene carrying more than one party token -- a second party actor, an NPC
+ * warband, a leftover token from another group -- campsite memory was recorded against, and read
+ * back from, whichever party token happened to be first in the collection.
+ */
 fun PF2EParty.getTokenPosition(scene: Scene): CampingTokenPosition? =
-    scene.tokens
-        .find { it.actor is PF2EParty }
+    scene.tokens.contents
+        .find { it.actorId == id }
         ?.let { CampingTokenPosition(it.x, it.y) }
 
 fun findExistingCampsiteResult(game: Game, sceneId: String, party: PF2EParty?): DegreeOfSuccess? =

@@ -95,6 +95,7 @@ class CampingUpdateBuilder(val updates: Record<String, Any?>, basePath: String =
     val restRollMode = PropertyUpdateBuilder<String>(basePath, updates, "restRollMode")
     val increaseWatchActorNumber = PropertyUpdateBuilder<Int>(basePath, updates, "increaseWatchActorNumber")
     val actorUuidsNotKeepingWatch = PropertyUpdateBuilder<Array<String>>(basePath, updates, "actorUuidsNotKeepingWatch")
+    val watchSlots = PropertyUpdateBuilder<Array<Array<String>>>(basePath, updates, "watchSlots")
     val alwaysPerformActivityIds = PropertyUpdateBuilder<Array<String>>(basePath, updates, "alwaysPerformActivityIds")
     val huntAndGatherTargetActorUuid = PropertyUpdateBuilder<String?>(basePath, updates, "huntAndGatherTargetActorUuid")
     val proxyRandomEncounterTableUuid =

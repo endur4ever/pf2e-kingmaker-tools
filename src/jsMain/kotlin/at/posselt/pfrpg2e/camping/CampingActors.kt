@@ -92,6 +92,18 @@ suspend fun CampingActor.deleteCampingActor(actorUuid: String, actorId: String, 
         campingActivities.deleteEntries(ids)
         actorUuids.set(camping.actorUuids.filter { id -> id != actorUuid }.toTypedArray())
         cooking.actorMeals.deleteEntry(actorId)
+        // Watches too. Removing a camper cleared their activities and their meal but left them
+        // standing watch: the slot still listed a uuid no longer in camp, so the watch read as
+        // staffed, the ambush Perception roll looked for an actor that was gone, and the sheet's
+        // "nobody is on watch" warning never fired.
+        watchSlots.set(
+            camping.watchSlots
+                .map { slot -> slot.filter { it != actorUuid }.toTypedArray() }
+                .toTypedArray()
+        )
+        actorUuidsNotKeepingWatch.set(
+            camping.actorUuidsNotKeepingWatch.filter { it != actorUuid }.toTypedArray()
+        )
         beforeSave(camping)
     }
 }
