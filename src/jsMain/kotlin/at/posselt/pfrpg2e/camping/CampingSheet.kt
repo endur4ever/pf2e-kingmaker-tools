@@ -767,7 +767,7 @@ class CampingSheet(
         }
     }
 
-    private suspend fun consumeRations() {
+    internal suspend fun consumeRations() {
         // the following lines should all be non-null if everything went right
         val camping = actor.getCamping()
         checkNotNull(camping) { "Could not find camping data on actor ${actor.uuid}" }

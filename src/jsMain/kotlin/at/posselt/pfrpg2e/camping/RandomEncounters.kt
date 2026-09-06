@@ -190,7 +190,7 @@ suspend fun rollCuratedEncounter(
  * browser reload mid-preview (offered back by [rollCuratedEncounter]) and are cleared when the GM
  * commits (accept/convert) or discards (reject) the preview; a reroll simply overwrites them.
  */
-private suspend fun showEncounterPreview(
+internal suspend fun showEncounterPreview(
     game: Game,
     actor: CampingActor,
     camping: CampingData,
@@ -305,7 +305,7 @@ private fun loadHomebrewRegistry(game: Game): HomebrewProfileRegistry? =
         ?.let { HomebrewProfileRegistry.fromJson(it) }
 
 /** Clear the persisted preview once it is committed or discarded. */
-private suspend fun clearEncounterPreview(actor: CampingActor) {
+internal suspend fun clearEncounterPreview(actor: CampingActor) {
     actor.getCamping()?.let { camping ->
         if (camping.lastEncounterCategory != null || camping.lastEncounterResult != null) {
             camping.lastEncounterCategory = null
