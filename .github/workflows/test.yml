@@ -38,6 +38,9 @@ jobs:
       - name: Check sheet submit merges
         run: python3 scripts/check_submit_merges.py
 
+      - name: Check migration registrations
+        run: python3 scripts/check_migration_registrations.py
+
       - name: Check dead engine cores
         run: python3 scripts/check_dead_cores.py
 
