@@ -115,6 +115,27 @@ private fun claimOnce(button: HTMLElement): Boolean {
     return true
 }
 
+/**
+ * Undo a [claimOnce] so a click that never got to DO anything does not leave a dead button.
+ *
+ * The claim has to happen BEFORE the handler runs -- that is the entire point, the window it
+ * closes is the one between the click and the server acknowledging the write. But two failure
+ * paths reach the handler and then refuse: the card's actor attribute failing to resolve, and the
+ * handler throwing. Burning the button on either would turn a transient failure into the worst
+ * bug class this module has -- a card the GM can see and can never action.
+ *
+ * The resolved class is removed only when no other claimed button remains on the message, so
+ * releasing one offer never un-greys a sibling that really was answered.
+ */
+fun releaseChatClickClaim(button: HTMLElement) {
+    button.removeAttribute("data-km-consumed")
+    button.removeAttribute("disabled")
+    val message = button.closest(".chat-message")?.takeIfInstance<HTMLElement>() ?: return
+    if (message.querySelector("[data-km-consumed]") == null) {
+        message.classList.remove("km-card-resolved")
+    }
+}
+
 fun bindChatClick(
     targetSelector: String,
     parentSelector: String = ".chat-message",

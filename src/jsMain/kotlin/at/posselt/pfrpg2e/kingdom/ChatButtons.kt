@@ -70,6 +70,7 @@ import at.posselt.pfrpg2e.kingdom.sheet.beforeKingdomUpdate
 import at.posselt.pfrpg2e.kingdom.dialogs.undoEndTurn
 import at.posselt.pfrpg2e.takeIfInstance
 import at.posselt.pfrpg2e.utils.bindChatClick
+import at.posselt.pfrpg2e.utils.releaseChatClickClaim
 import at.posselt.pfrpg2e.utils.buildPromise
 import at.posselt.pfrpg2e.utils.deserializeB64Json
 import at.posselt.pfrpg2e.utils.launch
@@ -140,6 +141,17 @@ import at.posselt.pfrpg2e.kingdom.pressure.pendingPressureRows
 
 private data class ChatButton(
     val buttonClass: String,
+    /**
+     * True for a GM-confirmed offer whose effect must apply at most once.
+     *
+     * This is NOT the same job as the mark*Done helpers below, and does not replace them. Those
+     * settle a SCOPE -- a digest row, a card -- because answering one offer answers its siblings,
+     * and several of them are deliberately narrow (see markFactionMoveRowDone). What they cannot
+     * do is close the window this closes: they run inside the handler, after its awaits, while
+     * the idempotency guards read an actor flag the server has not acknowledged yet. A second
+     * click inside that window passes the stale guard and applies twice.
+     */
+    val once: Boolean = false,
     val callback: suspend (game: Game, actor: KingdomActor, event: Event, button: HTMLElement) -> Unit,
 )
 
@@ -154,7 +166,7 @@ external interface PayStructureContext {
 }
 
 private val buttons = listOf(
-    ChatButton("km-pay-structure") { game, actor, event, button ->
+    ChatButton("km-pay-structure", once = true) { game, actor, event, button ->
         val rp = button.dataset["rp"]?.toInt() ?: 0
         val lumber = button.dataset["lumber"]?.toInt() ?: 0
         val luxuries = button.dataset["luxuries"]?.toInt() ?: 0
@@ -179,7 +191,7 @@ private val buttons = listOf(
             )
         }
     },
-    ChatButton("km-cleanse-pay") { _, actor, _, button ->
+    ChatButton("km-cleanse-pay", once = true) { _, actor, _, button ->
         val luxuries = button.dataset["luxuries"]?.toInt() ?: 0
         actor.getKingdom()?.let { kingdom ->
             kingdom.commodities.now.luxuries = (kingdom.commodities.now.luxuries - luxuries)
@@ -204,14 +216,14 @@ private val buttons = listOf(
         }
 
     },
-    ChatButton("km-gain-fame-button") { game, actor, event, button ->
+    ChatButton("km-gain-fame-button", once = true) { game, actor, event, button ->
         actor.getKingdom()?.let { kingdom ->
             kingdom.fame.now = (kingdom.fame.now + 1).coerceIn(0, kingdom.settings.maximumFamePoints)
             postChatMessage(t("kingdom.gaining1Fame"))
             actor.setKingdom(kingdom)
         }
     },
-    ChatButton("km-resolve-event") { game, actor, event, button ->
+    ChatButton("km-resolve-event", once = true) { game, actor, event, button ->
         actor.getKingdom()?.let { kingdom ->
             val eventIndex = button.dataset["eventIndex"]?.toInt()!!
             val eventId = button.dataset["eventId"]!!
@@ -291,7 +303,7 @@ private val buttons = listOf(
             }
         }
     },
-    ChatButton("km-offer-xp-confirm") { game, actor, event, button ->
+    ChatButton("km-offer-xp-confirm", once = true) { game, actor, event, button ->
         // The ONLY path that grants party XP from the ledger. The amount comes from the row's
         // input, so a default that did not fit the beat costs one edit, not a wrong award --
         // and the ledger records what was granted, never merely what was proposed.
@@ -303,14 +315,14 @@ private val buttons = listOf(
         grantXpLedgerEntry(game, entryId, typed)
         markXpRowDone(button)
     },
-    ChatButton("km-offer-xp-dismiss") { game, actor, event, button ->
+    ChatButton("km-offer-xp-dismiss", once = true) { game, actor, event, button ->
         if (!game.user.isGM) return@ChatButton
         val entryId = button.dataset["entryId"] ?: return@ChatButton
         val party = game.xpLedgerActor() ?: return@ChatButton
         party.updateXpLedger { answerEntry(it, entryId, granted = null) }
         markXpRowDone(button)
     },
-    ChatButton("km-offer-xp-confirm-all") { game, actor, event, button ->
+    ChatButton("km-offer-xp-confirm-all", once = true) { game, actor, event, button ->
         // A session of exploration can queue a dozen offers; confirming them one by one is how a
         // GM learns to ignore the digest. Each row keeps its own (possibly edited) amount.
         if (!game.user.isGM) return@ChatButton
@@ -323,7 +335,7 @@ private val buttons = listOf(
         }
         markXpCardDone(button)
     },
-    ChatButton("km-offer-xp-dismiss-all") { game, actor, event, button ->
+    ChatButton("km-offer-xp-dismiss-all", once = true) { game, actor, event, button ->
         if (!game.user.isGM) return@ChatButton
         val ids = button.dataset["allIds"]?.split(",")?.filter { it.isNotBlank() } ?: return@ChatButton
         val party = game.xpLedgerActor() ?: return@ChatButton
@@ -332,7 +344,7 @@ private val buttons = listOf(
         }
         markXpCardDone(button)
     },
-    ChatButton("km-offer-npc-encounter") { game, actor, event, button ->
+    ChatButton("km-offer-npc-encounter", once = true) { game, actor, event, button ->
         // NPC attitude crossing (npc-memory plan section 7): rolls a random encounter through
         // the existing camping pipeline; the card stays for the other options.
         if (!game.user.isGM) return@ChatButton
@@ -343,7 +355,7 @@ private val buttons = listOf(
         }
         rollRandomEncounter(game, campingActor, false)
     },
-    ChatButton("km-offer-rival-reached-target") { game, actor, _, button ->
+    ChatButton("km-offer-rival-reached-target", once = true) { game, actor, _, button ->
         // rival-charter 5.2: the band beat the players to a prize. Every outcome is a GM click; the
         // arrival itself was stamped by the tick, so a re-run of the turn cannot re-offer it.
         if (!game.user.isGM) return@ChatButton
@@ -396,7 +408,7 @@ private val buttons = listOf(
             }
         }
     },
-    ChatButton("km-offer-rival-confrontation") { game, actor, _, button ->
+    ChatButton("km-offer-rival-confrontation", once = true) { game, actor, _, button ->
         if (!game.user.isGM) return@ChatButton
         val bandId = button.dataset["bandId"] ?: return@ChatButton
         val kingdom = actor.getKingdom() ?: return@ChatButton
@@ -458,7 +470,7 @@ private val buttons = listOf(
             else -> Unit
         }
     },
-    ChatButton("km-offer-rival-rumor") { game, actor, _, button ->
+    ChatButton("km-offer-rival-rumor", once = true) { game, actor, _, button ->
         if (!game.user.isGM) return@ChatButton
         val bandId = button.dataset["bandId"] ?: return@ChatButton
         val hexKey = button.dataset["hexKey"] ?: return@ChatButton
@@ -490,7 +502,7 @@ private val buttons = listOf(
             )
         }
     },
-    ChatButton("km-offer-rival-encounter") { game, actor, _, button ->
+    ChatButton("km-offer-rival-encounter", once = true) { game, actor, _, button ->
         if (!game.user.isGM) return@ChatButton
         val bandId = button.dataset["bandId"] ?: return@ChatButton
         val hexKey = button.dataset["hexKey"] ?: return@ChatButton
@@ -509,7 +521,7 @@ private val buttons = listOf(
             else -> Unit
         }
     },
-    ChatButton("km-offer-rival-lifecycle") { game, actor, _, button ->
+    ChatButton("km-offer-rival-lifecycle", once = true) { game, actor, _, button ->
         // plan 2.4: a lifecycle change is a GM click, never something the tick writes
         if (!game.user.isGM) return@ChatButton
         val bandId = button.dataset["bandId"] ?: return@ChatButton
@@ -553,7 +565,7 @@ private val buttons = listOf(
             else -> Unit
         }
     },
-    ChatButton("km-offer-seasonal-flood") { game, actor, _, button ->
+    ChatButton("km-offer-seasonal-flood", once = true) { game, actor, _, button ->
         // seasonal-economy 5.1. Two guards, because neither alone is durable: the ongoing-event
         // list answers "is a flood running right now" but is emptied when the event RESOLVES, and
         // lastSeasonalFloodYear is stamped at POST time so it cannot say whether the GM accepted.
@@ -583,13 +595,13 @@ private val buttons = listOf(
         postChatMessage(t("kingdom.seasonalEconomy.flood.triggered"))
         markPetitionCardDone(button)
     },
-    ChatButton("km-offer-seasonal-flood-dismiss") { game, _, _, button ->
+    ChatButton("km-offer-seasonal-flood-dismiss", once = true) { game, _, _, button ->
         // "Hold back the waters": no mechanical effect; the year marker was stamped at posting, so
         // dismissing needs no write to keep the card from re-offering this spring
         if (!game.user.isGM) return@ChatButton
         markPetitionCardDone(button)
     },
-    ChatButton("km-offer-life-event") { game, actor, _, button ->
+    ChatButton("km-offer-life-event", once = true) { game, actor, _, button ->
         // plan section 5.1 verbatim: GM gate -> locate (settlement, record) -> idempotency on
         // hookApplied -> apply the closed hook -> persist -> announce
         if (!game.user.isGM) return@ChatButton
@@ -682,7 +694,7 @@ private val buttons = listOf(
             postChatMessage(t("settlementLife.applied", recordOf("settlement" to settlementName)))
         }
     },
-    ChatButton("km-petition-confirm") { game, actor, _, button ->
+    ChatButton("km-petition-confirm", once = true) { game, actor, _, button ->
         if (!game.user.isGM) return@ChatButton
         val petitionId = button.dataset["petitionId"] ?: return@ChatButton
         val optionId = button.dataset["optionId"] ?: return@ChatButton
@@ -694,22 +706,22 @@ private val buttons = listOf(
             markPetitionCardDone(button)
         }
     },
-    ChatButton("km-petition-dismiss") { game, actor, _, button ->
+    ChatButton("km-petition-dismiss", once = true) { game, actor, _, button ->
         // dismissing applies nothing and closes nothing: the petition stays OPEN and the role can
         // choose again, because a GM waving off a card is not the office withdrawing its answer
         if (!game.user.isGM) return@ChatButton
         markPetitionCardDone(button)
     },
-    ChatButton("km-petition-overdue-apply") { game, actor, _, button ->
+    ChatButton("km-petition-overdue-apply", once = true) { game, actor, _, button ->
         if (!game.user.isGM) return@ChatButton
         val petitionId = button.dataset["petitionId"] ?: return@ChatButton
         if (applyPetitionOverdue(game, actor, petitionId)) markPetitionCardDone(button)
     },
-    ChatButton("km-petition-overdue-dismiss") { game, _, _, button ->
+    ChatButton("km-petition-overdue-dismiss", once = true) { game, _, _, button ->
         if (!game.user.isGM) return@ChatButton
         markPetitionCardDone(button)
     },
-    ChatButton("km-offer-npc-quest") { game, actor, event, button ->
+    ChatButton("km-offer-npc-quest", once = true) { game, actor, event, button ->
         if (!game.user.isGM) return@ChatButton
         val npcName = button.dataset["npcName"] ?: ""
         AddQuest(
@@ -725,7 +737,7 @@ private val buttons = listOf(
             }
         }.launch()
     },
-    ChatButton("km-offer-npc-note") { game, actor, event, button ->
+    ChatButton("km-offer-npc-note", once = true) { game, actor, event, button ->
         // writes one line into the GM notes; idempotent per card via a verbatim-line check
         if (!game.user.isGM) return@ChatButton
         val npcName = button.dataset["npcName"] ?: return@ChatButton
@@ -745,7 +757,7 @@ private val buttons = listOf(
             ui.notifications.info(t("kingdom.npcMemory.offer.noted"))
         }
     },
-    ChatButton("km-offer-faction-standing-shift") { game, actor, event, button ->
+    ChatButton("km-offer-faction-standing-shift", once = true) { game, actor, event, button ->
         // GM-confirmed faction-agenda standing shift (faction-agenda plan 6.1): the tick only
         // EMITS the intent; this click is the sole writer. Idempotency is the standing log
         // itself -- an identical (turn, delta, reason) entry means the shift already landed.
@@ -789,7 +801,7 @@ private val buttons = listOf(
             markFactionMoveRowDone(button)
         }
     },
-    ChatButton("km-offer-war-threat") { game, actor, event, button ->
+    ChatButton("km-offer-war-threat", once = true) { game, actor, event, button ->
         // GM-confirmed offer from a faction-standing threshold crossing (#1 → #12).
         // Opens the AddWarThreat dialog prefilled with the faction; nothing is created
         // until the GM saves.
@@ -815,7 +827,7 @@ private val buttons = listOf(
             }
         }.launch()
     },
-    ChatButton("km-offer-holding-income") { game, actor, _, button ->
+    ChatButton("km-offer-holding-income", once = true) { game, actor, _, button ->
         // Award is what makes income REAL: the tick only stamps lastIncomeTurn, and this handler
         // is the sole writer of lifetimeIncomeGold -- the ledger records gold actually handed
         // over, and the GM may dismiss the card. Chat-award only (plan open question 1's
@@ -853,7 +865,7 @@ private val buttons = listOf(
             )
         }
     },
-    ChatButton("km-offer-holding-damage") { game, actor, _, button ->
+    ChatButton("km-offer-holding-damage", once = true) { game, actor, _, button ->
         // Apply advances the ladder ONLY from the condition pinned at post time: a double-click
         // or a stale card whose holding already moved is a visible no-op, never a second blow.
         if (!game.user.isGM) return@ChatButton
@@ -882,12 +894,12 @@ private val buttons = listOf(
             )
         }
     },
-    ChatButton("km-waive-holding-damage") { game, _, _, _ ->
+    ChatButton("km-waive-holding-damage", once = true) { game, _, _, _ ->
         // the plan's Waive records NOTHING; the ack exists because a silent button reads broken
         if (!game.user.isGM) return@ChatButton
         ui.notifications.info(t("kingdom.holdings.damageOffer.waived"))
     },
-    ChatButton("km-offer-holding-repair") { game, actor, _, button ->
+    ChatButton("km-offer-holding-repair", once = true) { game, actor, _, button ->
         // Repair is announced, not silently paid: the card names the cost, the click restores one
         // step, and the public line records who owes what -- the same chat-award discipline as
         // income (plan open question 2 leaves the payer open, so the table settles it).
@@ -917,7 +929,7 @@ private val buttons = listOf(
             )
         }
     },
-    ChatButton("km-offer-renown-epithet") { game, actor, _, button ->
+    ChatButton("km-offer-renown-epithet", once = true) { game, actor, _, button ->
         // Grants a PC the epithet they earned. Pure honour -- no rules effect -- but still
         // GM-confirmed, because it is the table's language about that character.
         if (!game.user.isGM) return@ChatButton
@@ -943,7 +955,7 @@ private val buttons = listOf(
             )
         }
     },
-    ChatButton("km-offer-renown-perk-access") { game, actor, _, button ->
+    ChatButton("km-offer-renown-perk-access", once = true) { game, actor, _, button ->
         // The one mechanical perk: the realm's shops stock better goods. Settlement-scoped, not
         // per-shopper -- InspectSettlement has no viewer, and the GM granted every tier by hand.
         if (!game.user.isGM) return@ChatButton
@@ -964,7 +976,7 @@ private val buttons = listOf(
             ui.notifications.info(t("kingdom.renown.perkGranted"))
         }
     },
-    ChatButton("km-offer-renown-invitation") { game, actor, _, button ->
+    ChatButton("km-offer-renown-invitation", once = true) { game, actor, _, button ->
         // Opens the existing quest pipeline prefilled; nothing is created until the GM saves.
         if (!game.user.isGM) return@ChatButton
         val faction = button.dataset["faction"]?.takeIf { it.isNotBlank() }
@@ -981,7 +993,7 @@ private val buttons = listOf(
             }
         }.launch()
     },
-    ChatButton("km-offer-renown-dismiss") { game, _, _, _ ->
+    ChatButton("km-offer-renown-dismiss", once = true) { game, _, _, _ ->
         if (!game.user.isGM) return@ChatButton
         ui.notifications.info(t("kingdom.renown.offerDismissed"))
     },
@@ -1058,7 +1070,7 @@ private val buttons = listOf(
             )
         )
     },
-    ChatButton("km-offer-rival-war-threat") { game, actor, _, button ->
+    ChatButton("km-offer-rival-war-threat", once = true) { game, actor, _, button ->
         // GM-confirmed offer from a rival realm massing at war (rival-realms plan section 5.2).
         // Reuses the war-threat creation body above: opens AddWarThreat prefilled, nothing exists
         // until the GM saves. Party actors are owner-permissioned to players, so the isGM bail is
@@ -1100,7 +1112,7 @@ private val buttons = listOf(
             }
         }.launch()
     },
-    ChatButton("km-offer-rival-war-dismiss") { game, actor, _, button ->
+    ChatButton("km-offer-rival-war-dismiss", once = true) { game, actor, _, button ->
         // Dismiss re-asserts the post-time watermark (posting already stamped it, so this is
         // belt-and-braces for hand-edited worlds). maxOf so a stale card from an earlier turn
         // can never roll the watermark back and resurrect an answered offer.
@@ -1123,7 +1135,7 @@ private val buttons = listOf(
             ui.notifications.info(t("kingdom.rivalRealms.warOffer.dismissed"))
         }
     },
-    ChatButton("km-offer-rival-standing-shift") { game, actor, _, button ->
+    ChatButton("km-offer-rival-standing-shift", once = true) { game, actor, _, button ->
         // Applies the border-tension standing nudge to the linked group. Idempotent on
         // (turn, group, reason) where the reason is the string PINNED ON THE CARD at post time:
         // resolving it at click time would key the dedup on the clicking client's locale, and a
@@ -1159,13 +1171,13 @@ private val buttons = listOf(
             ui.notifications.info(t("kingdom.rivalRealms.standingOffer.applied"))
         }
     },
-    ChatButton("km-offer-rival-standing-dismiss") { game, _, _, _ ->
+    ChatButton("km-offer-rival-standing-dismiss", once = true) { game, _, _, _ ->
         // The plan's Dismiss "posts nothing" -- but a button that visibly does nothing reads as
         // broken, so acknowledge without touching any state.
         if (!game.user.isGM) return@ChatButton
         ui.notifications.info(t("kingdom.rivalRealms.standingOffer.dismissed"))
     },
-    ChatButton("km-offer-war-threat-arrival") { game, actor, event, button ->
+    ChatButton("km-offer-war-threat-arrival", once = true) { game, actor, event, button ->
         // GM-confirmed offer for a war threat that has arrived (triggered this turn).
         // Buttons: [Spawn kingdom event], [Queue encounter at linked hex], [Dismiss].
         // Idempotent: each button checks if the action was already taken via offerConsumed flag.
@@ -1312,7 +1324,7 @@ private val buttons = listOf(
             }
         }
     },
-    ChatButton("km-offer-war-ruin") { game, actor, event, button ->
+    ChatButton("km-offer-war-ruin", once = true) { game, actor, event, button ->
         // GM-confirmed offer posted when war pressure crosses its ruin threshold at End Turn:
         // the GM picks which Ruin absorbs the strain (+1 to its value) or dismisses.
         // Idempotent per crossing: warPressure.ruinOfferTurn records the answered turn.
@@ -1339,17 +1351,17 @@ private val buttons = listOf(
             }
         }
     },
-    ChatButton("km-offer-loot-award") { game, actor, _, button ->
+    ChatButton("km-offer-loot-award", once = true) { game, actor, _, button ->
         if (!game.user.isGM) return@ChatButton
         val id = button.dataset["contentId"] ?: return@ChatButton
         if (awardLootManifest(game, actor, id)) markLootCardDone(button)
     },
-    ChatButton("km-offer-loot-dismiss") { game, actor, _, button ->
+    ChatButton("km-offer-loot-dismiss", once = true) { game, actor, _, button ->
         if (!game.user.isGM) return@ChatButton
         val id = button.dataset["contentId"] ?: return@ChatButton
         if (dismissLootManifest(actor, id)) markLootCardDone(button)
     },
-    ChatButton("km-offer-loot-cleanse") { game, actor, _, button ->
+    ChatButton("km-offer-loot-cleanse", once = true) { game, actor, _, button ->
         if (!game.user.isGM) return@ChatButton
         val uuid = button.dataset["itemUuid"] ?: return@ChatButton
         val kingdom = actor.getKingdom() ?: return@ChatButton
@@ -1371,7 +1383,7 @@ private val buttons = listOf(
             )
         }
     },
-    ChatButton("km-offer-threat-advance") { game, actor, _, button ->
+    ChatButton("km-offer-threat-advance", once = true) { game, actor, _, button ->
         if (!game.user.isGM) return@ChatButton
         val id = button.dataset["threatId"] ?: return@ChatButton
         val kingdom = actor.getKingdom() ?: return@ChatButton
@@ -1404,7 +1416,7 @@ private val buttons = listOf(
         )
         markMapChangeRowDone(button)
     },
-    ChatButton("km-offer-threat-hold") { game, actor, _, button ->
+    ChatButton("km-offer-threat-hold", once = true) { game, actor, _, button ->
         if (!game.user.isGM) return@ChatButton
         val id = button.dataset["threatId"] ?: return@ChatButton
         val kingdom = actor.getKingdom() ?: return@ChatButton
@@ -1414,7 +1426,7 @@ private val buttons = listOf(
         actor.setKingdom(kingdom)
         markMapChangeRowDone(button)
     },
-    ChatButton("km-offer-hex-rewild") { game, actor, _, button ->
+    ChatButton("km-offer-hex-rewild", once = true) { game, actor, _, button ->
         if (!game.user.isGM) return@ChatButton
         val hexKey = button.dataset["hexKey"] ?: return@ChatButton
         val kingdom = actor.getKingdom() ?: return@ChatButton
@@ -1444,7 +1456,7 @@ private val buttons = listOf(
         ui.notifications.info(t("kingdom.mapDynamism.rewilded", recordOf("hex" to hexDisplayLabel(hexKey))))
         markMapChangeRowDone(button)
     },
-    ChatButton("km-offer-hex-keep") { game, actor, _, button ->
+    ChatButton("km-offer-hex-keep", once = true) { game, actor, _, button ->
         if (!game.user.isGM) return@ChatButton
         val hexKey = button.dataset["hexKey"] ?: return@ChatButton
         val kingdom = actor.getKingdom() ?: return@ChatButton
@@ -1453,7 +1465,7 @@ private val buttons = listOf(
         actor.setKingdom(kingdom)
         markMapChangeRowDone(button)
     },
-    ChatButton("km-offer-downtime-complete") { game, actor, _, button ->
+    ChatButton("km-offer-downtime-complete", once = true) { game, actor, _, button ->
         if (!game.user.isGM) return@ChatButton
         val id = button.dataset["projectId"] ?: return@ChatButton
         val kingdom = actor.getKingdom() ?: return@ChatButton
@@ -1474,7 +1486,7 @@ private val buttons = listOf(
             ?.querySelectorAll("button")?.asList()?.filterIsInstance<HTMLElement>()
             ?.forEach { it.setAttribute("disabled", "disabled") }
     },
-    ChatButton("km-offer-downtime-extend") { game, actor, _, button ->
+    ChatButton("km-offer-downtime-extend", once = true) { game, actor, _, button ->
         if (!game.user.isGM) return@ChatButton
         val id = button.dataset["projectId"] ?: return@ChatButton
         val kingdom = actor.getKingdom() ?: return@ChatButton
@@ -1489,18 +1501,18 @@ private val buttons = listOf(
             ?.querySelectorAll("button")?.asList()?.filterIsInstance<HTMLElement>()
             ?.forEach { it.setAttribute("disabled", "disabled") }
     },
-    ChatButton("km-offer-pressure-fire") { game, actor, _, button ->
+    ChatButton("km-offer-pressure-fire", once = true) { game, actor, _, button ->
         // players are OWNERs of the party actor: the isGM check IS the authorization
         if (!game.user.isGM) return@ChatButton
         val id = button.dataset["scheduleId"] ?: return@ChatButton
         if (confirmPressureFiring(game, actor, id)) markPressureRowDone(button)
     },
-    ChatButton("km-offer-pressure-dismiss") { game, actor, _, button ->
+    ChatButton("km-offer-pressure-dismiss", once = true) { game, actor, _, button ->
         if (!game.user.isGM) return@ChatButton
         val id = button.dataset["scheduleId"] ?: return@ChatButton
         if (dismissPressureFiring(actor, id)) markPressureRowDone(button)
     },
-    ChatButton("km-offer-pressure-fire-all") { game, actor, _, button ->
+    ChatButton("km-offer-pressure-fire-all", once = true) { game, actor, _, button ->
         if (!game.user.isGM) return@ChatButton
         // driven from DATA (pending = fired > handled), never from card DOM
         val pending = pendingPressureRows(actor.getKingdom()?.scheduledPressures)
@@ -1511,7 +1523,7 @@ private val buttons = listOf(
         ui.notifications.info(t("kingdom.deadlines.allConfirmed", recordOf("count" to applied.toString())))
         markPressureCardDone(button)
     },
-    ChatButton("km-offer-pressure-dismiss-all") { game, actor, _, button ->
+    ChatButton("km-offer-pressure-dismiss-all", once = true) { game, actor, _, button ->
         if (!game.user.isGM) return@ChatButton
         val pending = pendingPressureRows(actor.getKingdom()?.scheduledPressures)
         var dismissed = 0
@@ -1534,7 +1546,7 @@ private val buttons = listOf(
         val nav = button.dataset["jumpValue"]?.let { MainNavEntry.fromString(it) }
         KingdomSheet(game, actor, dispatcher, initialNavEntry = nav).launch()
     },
-    ChatButton("km-offer-irrigation-plague") { game, actor, event, button ->
+    ChatButton("km-offer-irrigation-plague", once = true) { game, actor, event, button ->
         // Adds the Plague event after a failed Irrigation flat check. Resolved through getEvent so
         // an id the registry cannot resolve never becomes an invisible ongoing entry -- the same
         // guard the war-threat arrival offer uses.
@@ -1553,7 +1565,7 @@ private val buttons = listOf(
             postChatMessage(t("kingdom.irrigation.plagueAdded"))
         }
     },
-    ChatButton("km-offer-liquidate-resources") { game, actor, event, button ->
+    ChatButton("km-offer-liquidate-resources", once = true) { game, actor, event, button ->
         // "...you may instead reduce your RP to 1 and treat the expense as if it were paid in full.
         // At the start of your next Kingdom turn, roll 4 fewer Resource Dice than normal."
         if (!game.user.isGM) return@ChatButton
@@ -1576,7 +1588,7 @@ private val buttons = listOf(
             )
         }
     },
-    ChatButton("km-offer-pull-together") { game, actor, event, button ->
+    ChatButton("km-offer-pull-together", once = true) { game, actor, event, button ->
         // "Once per Kingdom turn when you roll a critical failure ... attempt a DC 11 flat check.
         // If this succeeds ... treat the Kingdom skill check result as failure instead."
         if (!game.user.isGM) return@ChatButton
@@ -1608,7 +1620,7 @@ private val buttons = listOf(
             postChatMessage(t("kingdom.pullTogether.failed"))
         }
     },
-    ChatButton("km-offer-caravan-recall") { game, actor, event, button ->
+    ChatButton("km-offer-caravan-recall", once = true) { game, actor, event, button ->
         // War was declared on a partner while this shipment was on the road. Recall turns it around
         // and brings the cargo home -- the card's rule is that nothing is silently confiscated.
         if (!game.user.isGM) return@ChatButton
@@ -1622,7 +1634,7 @@ private val buttons = listOf(
             postChatMessage(t("kingdom.caravans.warOfferRecalled"))
         }
     },
-    ChatButton("km-offer-caravan-press-on") { game, actor, event, button ->
+    ChatButton("km-offer-caravan-press-on", once = true) { game, actor, event, button ->
         // Press on: the shipment stays in transit and the war's raid DC penalty applies to it on
         // every tick, exactly as it does for any other shipment to a hostile partner.
         if (!game.user.isGM) return@ChatButton
@@ -1636,7 +1648,7 @@ private val buttons = listOf(
         }
         postChatMessage(t("kingdom.caravans.warOfferPressedOn"))
     },
-    ChatButton("km-spend-banked-aid") { game, actor, event, button ->
+    ChatButton("km-spend-banked-aid", once = true) { game, actor, event, button ->
         // RAW, Request Foreign Aid's bonus is applied to a check you have already seen fail. This
         // spends one banked bonus against THIS card's roll and reposts the corrected degree.
         if (!game.user.isGM) return@ChatButton
@@ -1674,7 +1686,7 @@ private val buttons = listOf(
         )
         postComplexDegreeOfSuccess(meta, improved)
     },
-    ChatButton("km-offer-deploy-army") { game, actor, event, button ->
+    ChatButton("km-offer-deploy-army", once = true) { game, actor, event, button ->
         // GM-confirmed apply buttons for a resolved Deploy Army activity. The activity's own text
         // used to end "HP and Conditions need to be managed by hand"; these replace that.
         if (!game.user.isGM) return@ChatButton
@@ -1743,7 +1755,7 @@ private val buttons = listOf(
         army.recordDeployKeyApplied(cardId, choice)
         postChatMessage(summary)
     },
-    ChatButton("km-offer-war-victory") { game, actor, event, button ->
+    ChatButton("km-offer-war-victory", once = true) { game, actor, event, button ->
         // GM-confirmed offer posted when a war battle against a faction-linked threat resolves as
         // VICTORY. Winning previously moved nothing diplomatic: standing never shifted and atWar
         // stayed set with no way to clear it, so a won war never actually ended.
@@ -1845,7 +1857,7 @@ private val buttons = listOf(
             postChatMessage(summary)
         }
     },
-    ChatButton("km-offer-battle-defeat") { game, actor, event, button ->
+    ChatButton("km-offer-battle-defeat", once = true) { game, actor, event, button ->
         // GM-confirmed offer posted when a war battle resolves as DEFEAT. Each button applies
         // exactly the one delta it was labelled with — never the whole set — and records its key
         // in the battle's defeatConsequencesApplied so re-clicking it (or a re-posted card) is a
@@ -1950,7 +1962,7 @@ private val buttons = listOf(
             )
         }
     },
-    ChatButton("km-offer-diplomacy-quest") { game, actor, event, button ->
+    ChatButton("km-offer-diplomacy-quest", once = true) { game, actor, event, button ->
         // GM-confirmed offer from a faction-standing threshold crossing (#1 → #2).
         // Opens the AddQuest dialog prefilled with the faction as giver.
         // Party actors are owner-permissioned to players, so the isGM check is the real guard.
@@ -1969,7 +1981,7 @@ private val buttons = listOf(
             }
         }.launch()
     },
-    ChatButton("km-offer-expedition-reward") { game, actor, event, button ->
+    ChatButton("km-offer-expedition-reward", once = true) { game, actor, event, button ->
         // GM-confirmed: apply expedition reward (XP, influence, loot, mark resolved).
         // Guards double-apply by checking rewardApplied + status.
         // GM-confirmed: apply the accrued expedition reward + mark resolved (idempotent).
@@ -2008,7 +2020,7 @@ private val buttons = listOf(
             }
         }
     },
-    ChatButton("km-offer-companion-levelup") { game, actor, event, button ->
+    ChatButton("km-offer-companion-levelup", once = true) { game, actor, event, button ->
         // GM-confirmed, separate offer: advance the linked PF2e actor's REAL level.
         // The shadow companion.level is advanced by Apply Reward (applyCompanionXp);
         // this button is the explicit, never-silent offer to bump the real actor.
@@ -2030,7 +2042,7 @@ private val buttons = listOf(
         }
         postChatMessage(t("kingdom.companionLeveledUp", recordOf("name" to linkedActor.name, "level" to targetLevel)))
     },
-    ChatButton("km-offer-injury") { game, actor, event, button ->
+    ChatButton("km-offer-injury", once = true) { game, actor, event, button ->
         // GM-confirmed: apply injury conditions to the companion (actor-linked only).
         if (!game.user.isGM) return@ChatButton
         val expeditionId = button.dataset["expeditionId"] ?: return@ChatButton
@@ -2097,7 +2109,7 @@ private val buttons = listOf(
             postChatMessage(t("kingdom.companionInjured", recordOf("name" to companion.name)))
         }
     },
-    ChatButton("km-apply-modifier-effect") { game, actor, event, button ->
+    ChatButton("km-apply-modifier-effect", once = true) { game, actor, event, button ->
         val mod = deserializeB64Json<RawModifier>(button.dataset["data"] ?: "")
         val jsonMod = JSON.stringify(mod)
         val results = validateUsingSchema(parsedModifierSchema, parseToJsonElement(jsonMod))
@@ -2121,7 +2133,7 @@ private val buttons = listOf(
             }
         }
     },
-    ChatButton("km-offer-companion-autonomy") { game, actor, event, button ->
+    ChatButton("km-offer-companion-autonomy", once = true) { game, actor, event, button ->
         if (!game.user.isGM) return@ChatButton
         val approve = button.dataset["approve"] == "true"
         val sendElsewhere = button.dataset["sendElsewhere"] == "true"
@@ -2200,7 +2212,7 @@ private val buttons = listOf(
             }.launch()
         }
     },
-    ChatButton("km-offer-quest-deadline") { game, actor, event, button ->
+    ChatButton("km-offer-quest-deadline", once = true) { game, actor, event, button ->
         // GM-confirmed offer for a quest that has reached its deadline.
         // Buttons: [Fail Now] (data-action="fail") or [Extend N Turns] (data-action="extend" + data-extend-turns).
         if (!game.user.isGM) return@ChatButton
@@ -2227,7 +2239,7 @@ private val buttons = listOf(
             }
         }
     },
-    ChatButton("km-offer-army-levelup") { game, actor, event, button ->
+    ChatButton("km-offer-army-levelup", once = true) { game, actor, event, button ->
         // GM-confirmed: apply level-up to the PF2EArmy actor.
         if (!game.user.isGM) return@ChatButton
         val approve = button.dataset["approve"] == "true"
@@ -2280,7 +2292,7 @@ private val buttons = listOf(
 
         postChatMessage(t("warBattle.levelUpOffer.leveledUp", recordOf("name" to armyName, "level" to leveledUp.level)))
     },
-    ChatButton("km-undo-end-turn") { game, actor, event, button ->
+    ChatButton("km-undo-end-turn", once = true) { game, actor, event, button ->
         // GM-only: revert the most recent End Turn via the shared undoEndTurn (restores kingdom +
         // turn-wizard-state + deletes delivered shipment items, so undo is exact and re-running
         // End Turn cannot double-deliver).
@@ -2301,7 +2313,7 @@ private val buttons = listOf(
             ui.notifications.warn(t("chatMessages.endTurn.undoStale"))
         }
     },
-    ChatButton("km-offer-milestone") { game, actor, _, button ->
+    ChatButton("km-offer-milestone", once = true) { game, actor, _, button ->
         // GM-confirmed award for an auto-detected milestone (road-to-capital / region-claimed).
         // Awarding flips its MilestoneChoice to completed — seeding a completed=false entry first for
         // kingdoms that never carried the choice — then runs beforeKingdomUpdate so the milestone-XP
@@ -2382,7 +2394,7 @@ private val buttons = listOf(
             )
         }
     },
-    ChatButton("km-offer-milestone-dismiss-all") { game, actor, _, button ->
+    ChatButton("km-offer-milestone-dismiss-all", once = true) { game, actor, _, button ->
         // Adopting the module mid-campaign fires a dozen true deeds at once; without this the GM
         // faces a dozen individual dismissals to silence them (plan 7).
         if (!game.user.isGM) return@ChatButton
@@ -2421,14 +2433,16 @@ private val buttons = listOf(
  */
 private data class WorldChatButton(
     val buttonClass: String,
+    /** See [ChatButton.once]. */
+    val once: Boolean = false,
     val callback: suspend (game: Game, event: Event, button: HTMLElement) -> Unit,
 )
 
 private val worldButtons = listOf(
-    WorldChatButton("km-offer-influence-threshold") { game, _, button ->
+    WorldChatButton("km-offer-influence-threshold", once = true) { game, _, button ->
         handleSubsystemThresholdOffer(game, button)
     },
-    WorldChatButton("km-offer-research-threshold") { game, _, button ->
+    WorldChatButton("km-offer-research-threshold", once = true) { game, _, button ->
         handleSubsystemThresholdOffer(game, button)
     },
     // Jumping to a scene needs no kingdom. It was actor-bound, and the only card that renders it
@@ -2564,12 +2578,15 @@ fun bindChatButtons(game: Game, dispatcher: ActionDispatcher? = null) {
     chatButtonDispatcher = dispatcher
     TypedHooks.onRenderChatLog { application, _, data ->
         buttons.forEach { data ->
-            bindChatClick(".${data.buttonClass}") { ev, target, parent ->
+            bindChatClick(".${data.buttonClass}", once = data.once) { ev, target, parent ->
                 buildPromise {
                     val kingdomActor = parent.findKingdomActor(game)
                     if (kingdomActor == null) {
                         // The uuid attribute failed to resolve to a kingdom actor. Previously the
                         // callback simply never ran and nothing anywhere reported it.
+                        // Hand the click back: nothing was applied, so a once-button must not stay
+                        // consumed or the card is dead for the rest of the session.
+                        if (data.once) releaseChatClickClaim(target)
                         ui.notifications.warn(t("kingdom.chatButtonNoKingdom"))
                     } else {
                         data.callback(game, kingdomActor, ev, target)
@@ -2577,6 +2594,8 @@ fun bindChatButtons(game: Game, dispatcher: ActionDispatcher? = null) {
                 }.catch { e ->
                     // buildPromise's result was discarded, so a throw inside any offer handler was
                     // an unhandled rejection visible only in the console — another dead button.
+                    // A throw is not an application either, so release the claim.
+                    if (data.once) releaseChatClickClaim(target)
                     console.error("kingdom chat button '${data.buttonClass}' failed", e)
                     ui.notifications.error(t("kingdom.chatButtonFailed"))
                     null
@@ -2585,10 +2604,11 @@ fun bindChatButtons(game: Game, dispatcher: ActionDispatcher? = null) {
         }
         worldButtons.forEach { data ->
             // deliberately NO findKingdomActor gate: these cards are world-scoped (plan 5.3)
-            bindChatClick(".${data.buttonClass}") { ev, target, _ ->
+            bindChatClick(".${data.buttonClass}", once = data.once) { ev, target, _ ->
                 buildPromise {
                     data.callback(game, ev, target)
                 }.catch { e ->
+                    if (data.once) releaseChatClickClaim(target)
                     console.error("kingdom chat button '${data.buttonClass}' failed", e)
                     ui.notifications.error(t("kingdom.chatButtonFailed"))
                     null
