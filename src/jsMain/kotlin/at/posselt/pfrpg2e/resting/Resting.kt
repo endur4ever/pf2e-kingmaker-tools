@@ -304,13 +304,23 @@ private suspend fun beginRest(
         skipWatch = camping.restSettings.skipWatch,
         skipDailyPreparations = camping.restSettings.skipDailyPreparations,
     )
-    val randomEncounterAt = findRandomEncounterAt(
-        game = game,
-        campingActor = campingActor,
-        camping = camping,
-        watchDurationSeconds = watchDurationSeconds,
-    )
-    if (camping.restSettings.disableRandomEncounter == false && randomEncounterAt != null) {
+    // The toggle is consulted BEFORE the roll, not after it. findRandomEncounterAt does not
+    // merely compute a time -- it calls rollRandomEncounter, which rolls the flat check, draws
+    // the table, opens the encounter preview dialog and PERSISTS the preview onto the camping
+    // flag. Testing the toggle only against the returned time meant a GM who had switched random
+    // encounters off still got the dialog, still had a preview stored on the actor, and still saw
+    // the roll in chat; only the ambush that followed was skipped.
+    val randomEncounterAt = if (camping.restSettings.disableRandomEncounter == false) {
+        findRandomEncounterAt(
+            game = game,
+            campingActor = campingActor,
+            camping = camping,
+            watchDurationSeconds = watchDurationSeconds,
+        )
+    } else {
+        null
+    }
+    if (randomEncounterAt != null) {
         val campCharacters = actorsByUuid.values.filterIsInstance<PF2ECharacter>()
         val characterWatchers = watchers.filterIsInstance<PF2ECharacter>()
         val numSlots = max(1, camping.watchSlots.size)
@@ -487,7 +497,11 @@ private suspend fun completeDailyPreparations(
     // the fatigue hook mirrors every advance into both counters. Zeroing them here therefore had
     // the entire night's rest added straight back: the party woke with its whole hexploration
     // budget already spent, and in travel mode every camper was fatigued the instant they got up.
-    camping.secondsSpentTraveling = -secondsToAdvance
+    // Travel is pre-compensated ONLY when travel mode is on, because persistPassedTime mirrors
+    // the advance back into secondsSpentTraveling under exactly that condition. Pre-compensating
+    // unconditionally left the counter at minus a night for the whole rest, and the next time the
+    // GM switched travel mode on the party was handed that night back as free travel budget.
+    camping.secondsSpentTraveling = if (camping.travelModeActive) -secondsToAdvance else 0
     camping.secondsSpentHexploring = -secondsToAdvance
     camping.dailyPrepsAtTime = game.time.worldTimeSeconds + secondsToAdvance
     Object.values(camping.campingActivities).forEach { it.result = null }
