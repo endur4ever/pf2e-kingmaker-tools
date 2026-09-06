@@ -1,5 +1,6 @@
 package at.posselt.pfrpg2e.camping
 
+
 import at.posselt.pfrpg2e.utils.asSequence
 import at.posselt.pfrpg2e.utils.fromUuidOfTypes
 import at.posselt.pfrpg2e.utils.fromUuidsOfTypes
@@ -85,25 +86,7 @@ suspend fun CampingActor.deleteCampingActivities(ids: Set<String>, beforeSave: B
 
 suspend fun CampingActor.deleteCampingActor(actorUuid: String, actorId: String, beforeSave: BeforeSave) {
     typedCampingUpdate { camping ->
-        val ids = camping.campingActivities.asSequence()
-            .filter { it.component2().actorUuid == actorUuid }
-            .map { it.component1() }
-            .toSet()
-        campingActivities.deleteEntries(ids)
-        actorUuids.set(camping.actorUuids.filter { id -> id != actorUuid }.toTypedArray())
-        cooking.actorMeals.deleteEntry(actorId)
-        // Watches too. Removing a camper cleared their activities and their meal but left them
-        // standing watch: the slot still listed a uuid no longer in camp, so the watch read as
-        // staffed, the ambush Perception roll looked for an actor that was gone, and the sheet's
-        // "nobody is on watch" warning never fired.
-        watchSlots.set(
-            camping.watchSlots
-                .map { slot -> slot.filter { it != actorUuid }.toTypedArray() }
-                .toTypedArray()
-        )
-        actorUuidsNotKeepingWatch.set(
-            camping.actorUuidsNotKeepingWatch.filter { it != actorUuid }.toTypedArray()
-        )
+        removeCamper(camping, actorUuid, actorId)
         beforeSave(camping)
     }
 }

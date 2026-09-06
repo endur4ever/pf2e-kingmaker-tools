@@ -1,5 +1,6 @@
 package at.posselt.pfrpg2e.camping
 
+import at.posselt.pfrpg2e.fixtures.installFoundryGlobals
 import js.objects.Object
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -24,9 +25,9 @@ import kotlin.test.assertTrue
  */
 class CampingUpdateBuilderTest {
     @BeforeTest
-    fun installForcedDeletionGlobal() {
+    fun installGlobals() {
         // Foundry supplies `_del` at runtime; the builder writes it as the delete marker.
-        js("if (typeof globalThis._del === 'undefined') { globalThis._del = { __forcedDeletion: true } }")
+        installFoundryGlobals()
     }
 
     private fun keysOf(record: Any?): List<String> = Object.keys(record.unsafeCast<js.objects.Record<String, Any?>>()).toList()
