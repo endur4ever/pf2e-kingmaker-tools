@@ -1,0 +1,37 @@
+<div>
+    <p class="km-favorite-meals-help">
+        <i class="fa-solid fa-circle-info"></i> {{localizeKM "camping.favoriteMealsHelp"}}
+    </p>
+    <div class="km-favorite-meals-list">
+        {{#each camperRows}}
+            <div class="km-favorite-meal-row">
+                <div class="km-camper-header">
+                    {{#if this.image}}
+                        <img class="km-camper-portrait" src="{{this.image}}" alt="{{this.name}}">
+                    {{/if}}
+                    <span class="km-camper-name">{{this.name}}</span>
+                    {{#if this.isPinned}}
+                        <i class="fa-solid fa-thumbtack km-pin-indicator" data-tooltip="{{localizeKM "camping.favoriteMealPinnedTooltip"}}"></i>
+                    {{/if}}
+                    {{#if this.rationsPaidForTonight}}
+                        <i class="fa-solid fa-check-circle km-rations-paid-indicator" data-tooltip="{{localizeKM "camping.rationsPaidForTonightHelp"}}"></i>
+                    {{/if}}
+                </div>
+                <div class="km-camper-controls">
+                    {{#if this.isPinned}}
+                        <button type="button" class="km-camping-action km-unpin-button" data-action="unpin-meal" data-actor-uuid="{{this.actorUuid}}" data-tooltip="{{localizeKM "camping.unpinFavoriteMealTooltip"}}">
+                            <i class="fa-solid fa-thumbtack"></i> {{localizeKM "camping.unpinFavoriteMeal"}}
+                        </button>
+                    {{/if}}
+                    <div class="km-camper-select">
+                        {{> formElement this.hiddenActorUuid}}
+                        {{> formElement this.select}}
+                    </div>
+                </div>
+            </div>
+        {{/each}}
+    </div>
+    <button type="submit" class="full-width" data-action="km-save" {{#unless isFormValid}}disabled{{/unless}}>
+        {{localizeKM "applications.save"}}
+    </button>
+</div>

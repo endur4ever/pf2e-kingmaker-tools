@@ -49,6 +49,11 @@
             </div>
             {{#if rations }}
                 <div class="km-recipe-rations">
+                    {{#if rationsPaidTonight}}
+                        <div class="km-rations-paid" title="{{localizeKM "camping.rationsPaidTonightHelp"}}">
+                            <i class="fa-solid fa-circle-check"></i> {{localizeKM "camping.rationsPaidTonight"}}
+                        </div>
+                    {{/if}}
                     <button type="button" data-action="consume-rations"
                             {{#unless consumeRationsEnabled}}disabled{{/unless}}>{{localizeKM "camping.consumeRations"}}
                     </button>

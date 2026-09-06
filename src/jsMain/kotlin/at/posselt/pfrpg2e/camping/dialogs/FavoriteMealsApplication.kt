@@ -9,10 +9,13 @@ import at.posselt.pfrpg2e.app.forms.Select
 import at.posselt.pfrpg2e.app.forms.SelectOption
 import at.posselt.pfrpg2e.camping.CampingActor
 import at.posselt.pfrpg2e.camping.canBeFavoriteMeal
+import at.posselt.pfrpg2e.camping.currentWorldDay
+import at.posselt.pfrpg2e.camping.getActorsInCamp
 import at.posselt.pfrpg2e.camping.getActorsInCamp
 import at.posselt.pfrpg2e.camping.getAllRecipes
 import at.posselt.pfrpg2e.camping.getCamping
 import at.posselt.pfrpg2e.camping.setCamping
+import at.posselt.pfrpg2e.camping.shouldRowBePinned
 import at.posselt.pfrpg2e.utils.asSequence
 import at.posselt.pfrpg2e.utils.buildPromise
 import at.posselt.pfrpg2e.utils.t
@@ -57,8 +60,20 @@ external interface FavoriteMealChoice {
 }
 
 @JsPlainObject
+external interface FavoriteMealRowContext {
+    val actorUuid: String
+    val name: String
+    val image: String?
+    val isPinned: Boolean
+    val rationsPaidForTonight: Boolean
+    val select: FormElementContext
+    val hiddenActorUuid: FormElementContext
+}
+
+@JsPlainObject
 external interface FavoriteMealContext : ValidatedHandlebarsContext {
     val formRows: Array<FormElementContext>
+    val camperRows: Array<FavoriteMealRowContext>
 }
 
 @JsPlainObject
@@ -73,11 +88,14 @@ class FavoriteMealsApplication(
     private val actor: CampingActor,
 ) : FormApp<FavoriteMealContext, FavoriteMealSubmitData>(
     title = t("camping.favoriteMeals"),
-    template = "components/forms/application-form.hbs",
+    template = "applications/camping/favorite-meals.hbs",
     debug = true,
     dataModel = FavoriteMealDataModel::class.js,
-    id = "kmFavoriteMeals-${actor.uuid}"
+    id = "kmFavoriteMeals-${actor.uuid}",
+    width = 480,
 ) {
+    private val unpinnedActorUuids = mutableSetOf<String>()
+
     private var meals: List<FavoriteMealChoice> = actor.getCamping()
         ?.cooking
         ?.actorMeals
@@ -91,6 +109,23 @@ class FavoriteMealsApplication(
 
     override fun _onClickAction(event: PointerEvent, target: HTMLElement) {
         when (val action = target.dataset["action"]) {
+            "unpin-meal" -> {
+                val actorUuid = target.dataset["actorUuid"] ?: return
+                buildPromise {
+                    unpinnedActorUuids.add(actorUuid)
+                    actor.getCamping()?.let { camping ->
+                        camping.cooking.actorMeals.asSequence()
+                            .map { it.component2() }
+                            .find { it.actorUuid == actorUuid }
+                            ?.let { meal ->
+                                meal.fixedFavoriteMeal = false
+                                actor.setCamping(camping)
+                            }
+                    }
+                    render(force = true)
+                }
+            }
+
             "km-save" -> {
                 buildPromise {
                     actor.getCamping()?.let { camping ->
@@ -103,21 +138,16 @@ class FavoriteMealsApplication(
                             .filter { it.component2().actorUuid in allowedActorUuids }
                             .forEach { (_, meal) ->
                                 val picked = mealsByActorUuid[meal.actorUuid]?.favoriteMeal
-                                val changed = picked != meal.favoriteMeal
+                                val wasPinned = meal.fixedFavoriteMeal == true
+                                val explicitlyUnpinned = meal.actorUuid in unpinnedActorUuids
+                                val shouldPin = shouldRowBePinned(
+                                    wasPinned = wasPinned,
+                                    previousMeal = meal.favoriteMeal,
+                                    pickedMeal = picked,
+                                    explicitlyUnpinned = explicitlyUnpinned,
+                                )
                                 meal.favoriteMeal = picked
-                                // PIN it, but ONLY where the pick actually changed. The auto-
-                                // progression in FavoriteMealProgression respects a choice that
-                                // says it was hand-made, and nothing set that flag anywhere -- so
-                                // once the progression's lookup was repaired it would have
-                                // overwritten every GM pick.
-                                //
-                                // The loop visits EVERY camper, not just the rows the GM touched,
-                                // and each select round-trips its current value. Pinning on
-                                // `picked != null` therefore pinned everyone who merely HAD a
-                                // favourite the moment anyone opened this dialog and pressed Save
-                                // -- including meals the progression had auto-learned, which are
-                                // exactly the ones that must stay free to advance.
-                                if (changed) meal.fixedFavoriteMeal = picked != null
+                                meal.fixedFavoriteMeal = shouldPin
                             }
                         actor.setCamping(camping)
                     }
@@ -147,29 +177,65 @@ class FavoriteMealsApplication(
             ?.map { SelectOption(label = it.name, value = it.id) }
             ?: emptyList()
 
+        val actorMealsByUuid = camping?.cooking?.actorMeals?.asSequence()
+            ?.map { it.component2() }
+            ?.associateBy { it.actorUuid } ?: emptyMap()
+
+        val activeMeals = meals.filter { it.actorUuid in actors }
+        val formRows = mutableListOf<FormElementContext>()
+        val camperRows = mutableListOf<FavoriteMealRowContext>()
+
+        activeMeals.forEachIndexed { index, meal ->
+            val camper = actors[meal.actorUuid]
+            val name = camper?.name ?: ""
+            val image = camper?.img
+            val existingMeal = actorMealsByUuid[meal.actorUuid]
+            val wasPinned = existingMeal?.fixedFavoriteMeal == true
+            val isExplicitlyUnpinned = meal.actorUuid in unpinnedActorUuids
+            val isPinned = shouldRowBePinned(
+                wasPinned = wasPinned,
+                previousMeal = existingMeal?.favoriteMeal,
+                pickedMeal = meal.favoriteMeal,
+                explicitlyUnpinned = isExplicitlyUnpinned,
+            )
+            val rationsPaidForTonight = camping?.cooking?.rationsPaidForDay == currentWorldDay(game)
+
+            val hiddenActorUuid = HiddenInput(
+                name = "meals.$index.actorUuid",
+                value = meal.actorUuid,
+            ).toContext()
+
+            val select = Select(
+                label = name,
+                hideLabel = true,
+                name = "meals.$index.favoriteMeal",
+                value = meal.favoriteMeal,
+                options = mealChoices,
+                stacked = false,
+                required = false,
+            ).toContext()
+
+            formRows.add(hiddenActorUuid)
+            formRows.add(select)
+
+            camperRows.add(
+                FavoriteMealRowContext(
+                    actorUuid = meal.actorUuid,
+                    name = name,
+                    image = image,
+                    isPinned = isPinned,
+                    rationsPaidForTonight = rationsPaidForTonight,
+                    select = select,
+                    hiddenActorUuid = hiddenActorUuid,
+                )
+            )
+        }
+
         FavoriteMealContext(
             partId = parent.partId,
             isFormValid = isFormValid,
-            formRows = meals
-                .filter { it.actorUuid in actors }
-                .flatMapIndexed { index, meal ->
-                    val name = actors[meal.actorUuid]?.name
-                    listOf(
-                        HiddenInput(
-                            name = "meals.$index.actorUuid",
-                            value = meal.actorUuid,
-                        ).toContext(),
-                        Select(
-                            label = name ?: "",
-                            name = "meals.$index.favoriteMeal",
-                            value = meal.favoriteMeal,
-                            options = mealChoices,
-                            stacked = false,
-                            required = false,
-                        ).toContext(),
-                    )
-                }
-                .toTypedArray()
+            formRows = formRows.toTypedArray(),
+            camperRows = camperRows.toTypedArray(),
         )
     }
 

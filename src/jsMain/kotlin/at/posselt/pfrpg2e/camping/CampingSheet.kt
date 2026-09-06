@@ -221,6 +221,7 @@ external interface RecipeContext {
     val requiresCheck: Boolean
     val hidden: Boolean
     val rations: Boolean
+    val rationsPaidTonight: Boolean?
     val consumeRationsEnabled: Boolean
     val actors: Array<RecipeActorContext>
     val skills: FormElementContext?
@@ -308,6 +309,7 @@ external interface CampingSheetContext : ValidatedHandlebarsContext {
     var foodDaysDisplay: String
     /** Whether tonight's meal is covered by current rations + provisions. */
     var foodTonightCovered: Boolean
+    var rationsPaidTonight: Boolean
     var canRollEncounter: Boolean
     var sheetBackground: String
     var travelStartHexSelect: FormElementContext?
@@ -1410,6 +1412,7 @@ class CampingSheet(
                 )
             }
             .groupBy { it.chosenMeal }
+        val rationsPaidTonight = rationsAlreadyPaidFor(camping.cooking.rationsPaidForDay, currentWorldDay(game))
         val starving = RecipeContext(
             name = t("camping.skipMeal"),
             targetRecipe = "nothing",
@@ -1417,6 +1420,7 @@ class CampingSheet(
             requiresCheck = false,
             hidden = section != CampingSheetSection.EATING,
             rations = false,
+            rationsPaidTonight = false,
             consumeRationsEnabled = false,
             actors = actorsByChosenMeal["nothing"]?.toTypedArray() ?: emptyArray(),
         )
@@ -1433,6 +1437,7 @@ class CampingSheet(
                 items = foodItems,
             ),
             rations = true,
+            rationsPaidTonight = rationsPaidTonight,
             consumeRationsEnabled = rationActors.isNotEmpty(),
             actors = rationActors,
             hidden = section != CampingSheetSection.EATING,
@@ -1473,6 +1478,7 @@ class CampingSheet(
                     requiresCheck = true,
                     hidden = section != CampingSheetSection.EATING || cookMealActor == null || recipe.id !in knownRecipes,
                     rations = false,
+                    rationsPaidTonight = false,
                     consumeRationsEnabled = false,
                     actors = actorsByChosenMeal[recipe.name]?.toTypedArray() ?: emptyArray(),
                     skills = Select(
@@ -1982,6 +1988,7 @@ class CampingSheet(
             availableFood = availableFood,
             foodDaysDisplay = foodDaysDisplay,
             foodTonightCovered = foodForecast.tonightCovered,
+            rationsPaidTonight = rationsAlreadyPaidFor(camping.cooking.rationsPaidForDay, currentWorldDay(game)),
             totalFoodCost = calculateTotalFoodCost(
                 actorMeals = parsedCookingChoices.meals
                     .filter { it.name in uncookedMeals || it.id == "rationsOrSubsistence" },

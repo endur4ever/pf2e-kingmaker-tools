@@ -170,6 +170,11 @@
                   title="{{localizeKM "camping.foodDaysHelp"}}">
                 <b>{{localizeKM "camping.foodDays"}}:</b> {{foodDaysDisplay}}
             </span>
+            {{#if rationsPaidTonight}}
+                <span class="km-rations-paid" title="{{localizeKM "camping.rationsPaidTonightHelp"}}">
+                    <i class="fa-solid fa-circle-check"></i> {{localizeKM "camping.rationsPaidTonight"}}
+                </span>
+            {{/if}}
             <span>
                 {{> foodCost availableFood hideEmpty=false title="camping.available"}}
             </span>
