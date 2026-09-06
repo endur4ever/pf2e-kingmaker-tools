@@ -26,6 +26,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.promise
 import org.w3c.dom.HTMLElement
 import kotlin.js.Promise
+import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -39,11 +40,22 @@ class CampingAdapterRegressionTest {
     private val env = FakeFoundryEnvironment()
 
     private fun runTest(block: suspend () -> Unit): dynamic =
-        @Suppress("DELICATE_API_TRANSITIONAL_MINI_MARKER") GlobalScope.promise { block() }
+        @Suppress("DELICATE_API_TRANSITIONAL_MINI_MARKER") GlobalScope.promise {
+            try {
+                block()
+            } finally {
+                env.reset()
+            }
+        }
 
     @BeforeTest
     fun setUp() {
         env.install()
+        env.reset()
+    }
+
+    @AfterTest
+    fun tearDown() {
         env.reset()
     }
 
@@ -496,7 +508,17 @@ class CampingAdapterRegressionTest {
             FavoriteMealChoice(actorUuid = "Actor.c3", favoriteMeal = "hearty-meal"),
             FavoriteMealChoice(actorUuid = "Actor.c4", favoriteMeal = "basic-meal"),
         )
-        (app.asDynamic().onParsedSubmit(submitData).unsafeCast<Promise<*>>()).await()
+        val submitFn: dynamic = js("""
+            (function(a) {
+                for (let p = a; p; p = Object.getPrototypeOf(p)) {
+                    for (let k of Object.getOwnPropertyNames(p)) {
+                        if (k.startsWith('onParsedSubmit')) return p[k];
+                    }
+                }
+                return null;
+            })(app)
+        """)
+        (submitFn.call(app, submitData).unsafeCast<Promise<*>>()).await()
 
         // Explicitly unpin c3 via click action
         val unpinTarget = js("({ dataset: { action: 'unpin-meal', actorUuid: 'Actor.c3' } })").unsafeCast<HTMLElement>()

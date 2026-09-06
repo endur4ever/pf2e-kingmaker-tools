@@ -1,7 +1,11 @@
 class Hooks {
-    static on(key) {
-    }
+    static on(key, cb) {}
+    static once(key, cb) {}
+    static off(key, cb) {}
+    static callAll(key, ...args) {}
+    static call(key, ...args) {}
 }
+globalThis.Hooks = Hooks;
 
 const _del = {}
 
@@ -29,12 +33,37 @@ const foundry = {
         }
     },
     documents: {
-
+        ChatMessage: class {
+            static create(data) {
+                if (globalThis.ChatMessage && globalThis.ChatMessage !== this && globalThis.ChatMessage.create) {
+                    return globalThis.ChatMessage.create(data);
+                }
+                return Promise.resolve(data);
+            }
+            static getSpeaker(opts) {
+                if (globalThis.ChatMessage && globalThis.ChatMessage !== this && globalThis.ChatMessage.getSpeaker) {
+                    return globalThis.ChatMessage.getSpeaker(opts);
+                }
+                return {};
+            }
+            static applyMode(data, mode) {
+                if (globalThis.ChatMessage && globalThis.ChatMessage !== this && globalThis.ChatMessage.applyMode) {
+                    return globalThis.ChatMessage.applyMode(data, mode);
+                }
+                data.mode = mode;
+            }
+        },
+        Combat: class {},
+        TokenDocument: class {},
+        RollTable: class {},
+        JournalEntryPage: class {},
     },
     data: {
         fields: {}
     },
-    helpers: {},
+    helpers: {
+        Hooks: Hooks
+    },
     applications: {
         sidebar: {
             ActorDirectory: class {}
@@ -48,7 +77,17 @@ const foundry = {
                 }
             }
         },
-        handlebars: {},
+        handlebars: {
+            renderTemplate: function(path, data) {
+                if (globalThis.renderTemplateMock) {
+                    return globalThis.renderTemplateMock(path, data);
+                }
+                return Promise.resolve('<template data-path="' + path + '"></template>');
+            },
+            loadTemplates: function() {
+                return Promise.resolve([]);
+            }
+        },
         api: {
             HandlebarsApplicationMixin: (klass) => {
                 return class extends klass {

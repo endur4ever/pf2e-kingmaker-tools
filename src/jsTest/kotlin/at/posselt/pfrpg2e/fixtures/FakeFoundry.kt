@@ -151,16 +151,27 @@ class FakeFoundryEnvironment {
         chatMessageObj.create = chatCreate
         chatMessageObj.getSpeaker = chatSpeaker
         chatMessageObj.applyMode = chatApplyMode
-        js("globalThis.ChatMessage = chatMessageObj;")
+        js("""
+            globalThis.ChatMessage = chatMessageObj;
+            globalThis.foundry = globalThis.foundry || {};
+            globalThis.foundry.documents = globalThis.foundry.documents || {};
+            globalThis.foundry.documents.ChatMessage = chatMessageObj;
+        """)
 
         val renderTemplateFn: (String, dynamic) -> Promise<String> = { path, _ ->
             Promise.resolve("<template data-path='$path'></template>")
         }
-        js("globalThis.renderTemplate = renderTemplateFn;")
+        js("""
+            globalThis.renderTemplate = renderTemplateFn;
+            globalThis.renderTemplateMock = renderTemplateFn;
+            if (globalThis.foundry && globalThis.foundry.applications && globalThis.foundry.applications.handlebars) {
+                globalThis.foundry.applications.handlebars.renderTemplate = renderTemplateFn;
+            }
+        """)
 
         val fromUuidFn: (String) -> Promise<dynamic> = { uuid ->
             val doc = registry.get(uuid)
-            Promise.resolve<dynamic>(doc ?: null)
+            Promise.resolve<dynamic>(doc)
         }
         js("globalThis.fromUuidMock = fromUuidFn;")
     }
@@ -169,6 +180,10 @@ class FakeFoundryEnvironment {
         notifications.clear()
         chat.clear()
         registry.clear()
+        js("""
+            try { delete globalThis.game; } catch (e) {}
+            globalThis.game = undefined;
+        """)
     }
 }
 
@@ -249,9 +264,15 @@ class FakeGame(
         gameObj.actors = actorsObj
         gameObj.scenes = js("({ active: null, contents: [] })")
         gameObj.i18n = js("({ localize: function(k) { return k; }, format: function(k) { return k; } })")
+        val g = gameObj
+        js("globalThis.game = g")
     }
 
-    fun asGame(): Game = gameObj.unsafeCast<Game>()
+    fun asGame(): Game {
+        val g = gameObj
+        js("globalThis.game = g")
+        return gameObj.unsafeCast<Game>()
+    }
 
     fun addActor(actor: dynamic) {
         actorsList.add(actor)
@@ -276,6 +297,46 @@ fun createFakeActorInternal(
     actor.name = name
     actor.isOwner = isOwner
     actor.items = js("({ contents: [], get: function(id) { return null; }, filter: function() { return []; } })")
+    actor.apps = js("({})")
+
+    val itemTypes = js("({})")
+    itemTypes.consumable = emptyArray<dynamic>()
+    itemTypes.weapon = emptyArray<dynamic>()
+    itemTypes.armor = emptyArray<dynamic>()
+    itemTypes.equipment = emptyArray<dynamic>()
+    itemTypes.action = emptyArray<dynamic>()
+    itemTypes.feat = emptyArray<dynamic>()
+    itemTypes.effect = emptyArray<dynamic>()
+    itemTypes.condition = emptyArray<dynamic>()
+    actor.itemTypes = itemTypes
+
+    val updateEmbeddedDocumentsFn: (String, Array<dynamic>) -> Promise<dynamic> = { embeddedName, updates ->
+        if (embeddedName == "Item") {
+            for (u in updates) {
+                val uId = u._id ?: u.id
+                val item = (actor.items.contents.unsafeCast<Array<dynamic>>()).firstOrNull { it.id == uId }
+                if (item != null && u.system != null) {
+                    if (u.system.quantity !== undefined) item.system.quantity = u.system.quantity
+                    if (u.system.uses != null && u.system.uses.value !== undefined) item.system.uses.value = u.system.uses.value
+                }
+            }
+        }
+        Promise.resolve<dynamic>(updates)
+    }
+    actor.updateEmbeddedDocuments = updateEmbeddedDocumentsFn
+
+    val deleteEmbeddedDocumentsFn: (String, Array<String>) -> Promise<dynamic> = { embeddedName, ids ->
+        if (embeddedName == "Item") {
+            val remaining = (actor.items.contents.unsafeCast<Array<dynamic>>()).filter { it.id !in ids }.toTypedArray()
+            actor.items.contents = remaining
+            if (actor.itemTypes != null && actor.itemTypes.consumable != null) {
+                val cons = (actor.itemTypes.consumable.unsafeCast<Array<dynamic>>()).filter { it.id !in ids }.toTypedArray()
+                actor.itemTypes.consumable = cons
+            }
+        }
+        Promise.resolve<dynamic>(ids)
+    }
+    actor.deleteEmbeddedDocuments = deleteEmbeddedDocumentsFn
 
     val flags = js("({})")
     actor.flags = flags
@@ -398,14 +459,19 @@ fun createFakeCharacter(
     actor.type = "character"
     actor.system = js("({ abilities: { con: { mod: 2 } } })")
     val itemsList = mutableListOf<dynamic>()
-    actor.items = js("({ contents: [], get: function(id) { return null; }, filter: function() { return []; } })")
+    val consumableList = mutableListOf<dynamic>()
     actor.items.contents = itemsList.toTypedArray()
-    actor.items.filter = { pred: (dynamic) -> Boolean -> itemsList.filter(pred).toTypedArray() }
-    actor.items.get = { itemId: String -> itemsList.firstOrNull { it.id == itemId } }
+    actor.items.filter = { pred: (dynamic) -> Boolean -> (actor.items.contents.unsafeCast<Array<dynamic>>()).filter(pred).toTypedArray() }
+    actor.items.get = { itemId: String -> (actor.items.contents.unsafeCast<Array<dynamic>>()).firstOrNull { it.id == itemId } }
+    actor.itemTypes.consumable = consumableList.toTypedArray()
 
     actor.addItem = { item: dynamic ->
         itemsList.add(item)
         actor.items.contents = itemsList.toTypedArray()
+        if (item.type == "consumable") {
+            consumableList.add(item)
+            actor.itemTypes.consumable = consumableList.toTypedArray()
+        }
     }
     return actor.unsafeCast<PF2ECharacter>()
 }
