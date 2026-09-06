@@ -1,6 +1,8 @@
 # "Meanwhile in the Stolen Lands" — End-Turn Interlude Digest Plan
 
-> Status: Plan-only · Branch: `kingmaker.5` · Plan file: `docs/plans/2026-07-09-plan-meanwhile-digest.md`
+> Status: Implemented (Core & End-Turn Interlude) · Branch: `kingmaker.5` · Plan file: `docs/plans/2026-07-09-plan-meanwhile-digest.md`
+> Implementation: Core scoring (`kingdom/digest/DigestScoring.kt`), adapter (`kingdom/digest/DigestAdapter.kt`), chat template (`chatmessages/meanwhile-interlude.hbs`), settings (`meanwhileDigestEnabled`/`meanwhileDigestMaxBeats` in `kingdom/dialogs/KingdomSettings.kt`), and End-Turn wizard wiring (`kingdom/dialogs/TurnWizardApplication.kt`) are live.
+> Remaining / deferred: Feeds currently included are player-safe (caravans, expeditions, and player-visible war threats). Feeds without player-visibility flags (campaign clocks, raw faction standing drift) remain GM-only and are deliberately excluded from the public card until visibility gating exists.
 > Source of truth for persisted state: the free-form `kingdom-sheet` Foundry flag on the `PF2EParty` actor (`getAppFlag`/`setAppFlag`), NOT `KingdomSheetDataModel`.
 
 ---

@@ -456,7 +456,7 @@ write a `docs/plans/` doc before implementing any of these.
 5. ✅ **Player-facing collaborative kingdom view.** Permission-filtered read-only sheet access for players, character-owned active leader selection gating, and roll/assurance button checks. Shipped in `KingdomSheet.kt`, `KingdomCheckDialog.kt`, `check.hbs`, and `Leaders.kt`.
 6. ✅ **Chronological Kingdom Event Log & Gazette.** `formatTurnGazette` in `kingdom/TurnHistory.kt` + journal export from Session Prep (`kingdom/SessionPrepView.kt` → `SessionPrepNarrativeGenerator.kt`).
 7. ✅ **Hex-based Resource Worksite & Yield Calculator.** `calculateProjectedResources` in `kingdom/sheet/CalculateIncome.kt` + tests in `CalculateIncomeTest.kt`.
-8. ⬜ **Vassal State, Settlement Annexation, & Tribute Tracking.** Automate diplomacy-based or conquest-based integration of adjacent territories, calculating monthly tribute, unrest penalties, and structural changes on annexation.
+8. ✅ **Vassal State, Settlement Annexation, & Tribute Tracking.** Automate diplomacy-based or conquest-based integration of adjacent territories, calculating monthly tribute, unrest penalties, and structural changes on annexation. Shipped in `kingdom/TurnTickingEngine.kt` (vassal tribute RP accrual), `kingdom/sheet/KingdomSheet.kt` (`annex-group` action with hex claim, unrest increase, and standing log), `trade-agreements/page.hbs`, `kingdom/TurnHistory.kt`, and `kingdom/dialogs/TurnWizardApplication.kt`.
 9. ✅ **Caravan Route Safety Overlays & Threat Indicators.** `syncCaravanRoutes` in `kingdom/map/HexGridSync.kt` + `CaravanRouteSafetyTest.kt`.
 
 ## Decisions resolved by implementation

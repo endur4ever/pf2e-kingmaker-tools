@@ -2,6 +2,8 @@
 
 This guide provides an overview of the major subsystems implemented during the June, July and August 2026 feature waves for the Kingmaker Campaign Automation module.
 
+For wilderness exploration, watches, cooking, and camping encounters, see the dedicated [Camping & Wilderness Exploration Guide](camping.md).
+
 ## Core Systems
 
 ### Turn Wizard
