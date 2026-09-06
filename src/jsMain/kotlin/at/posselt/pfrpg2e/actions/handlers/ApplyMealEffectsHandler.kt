@@ -13,6 +13,7 @@ import at.posselt.pfrpg2e.camping.getAllRecipes
 import at.posselt.pfrpg2e.camping.getCamping
 import at.posselt.pfrpg2e.camping.getCompendiumFoodItems
 import at.posselt.pfrpg2e.camping.recordCookingResult
+import at.posselt.pfrpg2e.camping.typedCampingUpdate
 import at.posselt.pfrpg2e.camping.reduceFoodBy
 import at.posselt.pfrpg2e.camping.removeMealEffects
 import at.posselt.pfrpg2e.camping.setCamping
@@ -127,8 +128,18 @@ class ApplyMealEffectsHandler(val game: Game) : ActionHandler("applyMealEffects"
             }
         }
 
-        // Persist updated camping data (progression + favorite changes)
-        campingActor.setCamping(camping)
+        // Persist the progression + favourite changes, and ONLY those. `camping` was read at
+        // handler entry and applyConsumptionMealEffects awaits a run of embedded-effect creations
+        // per actor in between, so writing the whole snapshot back reverted whatever any client
+        // had changed on the camping flag during that window -- and two diners finishing at once
+        // meant the slower write erased the faster one's learned favourite. recordCookingResult
+        // writes BOTH cooking.favoriteMealProgress (the success/crit counts that decide when a
+        // favourite is earned) and cooking.actorMeals (the favourite itself), so both are written
+        // here -- narrowing to actorMeals alone would have silently dropped every progression count.
+        campingActor.typedCampingUpdate {
+            cooking.favoriteMealProgress.set(camping.cooking.favoriteMealProgress)
+            cooking.actorMeals.set(camping.cooking.actorMeals)
+        }
 
         // Surface eligible favorite changes in chat
         for (eligibility in eligibilities) {

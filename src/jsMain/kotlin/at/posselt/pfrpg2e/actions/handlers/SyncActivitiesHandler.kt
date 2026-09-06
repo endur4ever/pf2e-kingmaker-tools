@@ -13,6 +13,7 @@ import at.posselt.pfrpg2e.camping.setCamping
 import at.posselt.pfrpg2e.camping.getCamping
 import at.posselt.pfrpg2e.camping.removeMealEffects
 import at.posselt.pfrpg2e.camping.syncCampingEffects
+import at.posselt.pfrpg2e.camping.typedCampingUpdate
 import at.posselt.pfrpg2e.camping.updateCampingPosition
 import at.posselt.pfrpg2e.data.checks.DegreeOfSuccess
 import at.posselt.pfrpg2e.data.checks.RollMode
@@ -65,7 +66,14 @@ class SyncActivitiesHandler(
             camping.syncCampingEffects(data.activities)
             val learnedChanged = handleLearnFromCompanion(camping, data.activities)
             if (learnedChanged) {
-                campingActor.setCamping(camping)
+                // A TARGETED write. `camping` was read at handler entry, and removeMealEffects and
+                // syncCampingEffects above each await a run of embedded-document writes -- so
+                // saving the whole snapshot back here reverted anything any client changed on the
+                // camping flag during that window. Only the two learned fields are written.
+                campingActor.typedCampingUpdate {
+                    learnedCompanionActivities.set(camping.learnedCompanionActivities)
+                    learnedCompanionActivitiesByActor.set(camping.learnedCompanionActivitiesByActor)
+                }
             }
             if (data.rollRandomEncounter) {
                 postChatTemplate(
