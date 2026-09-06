@@ -69,17 +69,20 @@ class ConvertRumorQuestHandler(private val game: Game) : ActionHandler("convertR
         // CONVERTED is stamped below -- a second click inside that window passed the same guard and
         // minted a second quest, with only the last id recorded so the duplicate was untracked
         if (!rumorConversionsInFlight.add(data.rumorId)) return
-        val questId = try {
-            convertRumorToQuest(game, rumor)
+        // The release has to happen AFTER the stamp, not around the mint alone. Releasing when
+        // convertRumorToQuest returned left a window in which the claim was gone and CONVERTED was
+        // not yet written -- precisely the window the claim exists to close.
+        try {
+            val questId = convertRumorToQuest(game, rumor) ?: return
+            actor.updateRumors { rumors ->
+                rumors.map {
+                    if (it.id == data.rumorId) {
+                        it.copy(state = RumorState.CONVERTED, isConverted = true, convertedQuestId = questId)
+                    } else it
+                }
+            }
         } finally {
             rumorConversionsInFlight.remove(data.rumorId)
-        } ?: return
-        actor.updateRumors { rumors ->
-            rumors.map {
-                if (it.id == data.rumorId) {
-                    it.copy(state = RumorState.CONVERTED, isConverted = true, convertedQuestId = questId)
-                } else it
-            }
         }
     }
 }

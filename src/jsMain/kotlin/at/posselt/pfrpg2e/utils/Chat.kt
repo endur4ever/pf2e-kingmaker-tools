@@ -111,7 +111,13 @@ private fun claimOnce(button: HTMLElement): Boolean {
     if (button.hasAttribute("data-km-consumed")) return false
     button.setAttribute("data-km-consumed", "1")
     button.setAttribute("disabled", "disabled")
-    button.closest(".chat-message")?.takeIfInstance<HTMLElement>()?.classList?.add("km-card-resolved")
+    // Deliberately NOT marking the whole .chat-message resolved. `.km-card-resolved` is
+    // `opacity: 0.55` on whatever carries it, and a digest card routinely holds several
+    // INDEPENDENT one-shot offers -- a pressure digest, a rival digest, an XP digest, a faction
+    // move row. Fading the card because one of them was answered dimmed offers the GM had not
+    // answered yet and made a live card look spent. Settling a group is the handler's job, and
+    // the mark*Done helpers already do it at the right scope; this claim's only job is to stop
+    // the same button applying twice.
     return true
 }
 
@@ -124,16 +130,12 @@ private fun claimOnce(button: HTMLElement): Boolean {
  * handler throwing. Burning the button on either would turn a transient failure into the worst
  * bug class this module has -- a card the GM can see and can never action.
  *
- * The resolved class is removed only when no other claimed button remains on the message, so
- * releasing one offer never un-greys a sibling that really was answered.
+ * Only the button is restored. A claim never touches the card's styling, so there is nothing
+ * else to undo -- settling a group is the handler's job.
  */
 fun releaseChatClickClaim(button: HTMLElement) {
     button.removeAttribute("data-km-consumed")
     button.removeAttribute("disabled")
-    val message = button.closest(".chat-message")?.takeIfInstance<HTMLElement>() ?: return
-    if (message.querySelector("[data-km-consumed]") == null) {
-        message.classList.remove("km-card-resolved")
-    }
 }
 
 fun bindChatClick(

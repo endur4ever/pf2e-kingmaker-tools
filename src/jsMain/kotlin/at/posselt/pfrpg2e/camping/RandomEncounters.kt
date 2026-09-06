@@ -41,6 +41,25 @@ import com.pixijs.Point
 import js.objects.ReadonlyRecord
 import kotlin.random.Random
 
+/**
+ * The encounter DC flat check, shared by both branches.
+ *
+ * Extracted so it cannot be lost again by being handed to a function that does not roll it: a
+ * caller that skips this call is visibly skipping a check, where a caller that passed a flag into
+ * a function ignoring it looked correct at every call site.
+ */
+private suspend fun passesEncounterFlatCheck(game: Game, camping: CampingData): Boolean {
+    val region = camping.findCurrentRegion() ?: camping.regionSettings.regions.firstOrNull()
+    val rollMode = fromCamelCase<RollMode>(camping.randomEncounterRollMode) ?: RollMode.GMROLL
+    val isDay = game.getPF2EWorldTime().time.isDay()
+    val dc = findEncounterDcModifier(camping, isDay, game.currentWeatherModifiers(camping).encounterDcDelta)
+    return d20Check(
+        dc = dc,
+        flavor = t("camping.rollingRandomEncounter", recordOf("regionName" to (region?.name ?: ""), "dc" to dc)),
+        rollMode = rollMode,
+    ).degreeOfSuccess.succeeded()
+}
+
 suspend fun rollRandomEncounter(
     game: Game,
     actor: CampingActor,
@@ -50,9 +69,14 @@ suspend fun rollRandomEncounter(
         val weights = camping.categoryWeightsOrDefault()
         val hasProxyTable = !camping.encounterCategoryProxyTableUuid.isNullOrBlank()
         if (isEncounterCuratorActive(hasProxyTable = hasProxyTable, weightsTotal = weights.total)) {
-            // the flat check has to survive the curated branch: dropping it made every encounter
-            // check an automatic hit the moment a GM configured a category proxy table
-            return rollCuratedEncounter(game, actor, includeFlatCheck = includeFlatCheck)
+            // The flat check is rolled HERE, not delegated. The previous attempt to fix this
+            // threaded includeFlatCheck into rollCuratedEncounter -- which declares the parameter
+            // and never reads it, because the only d20Check lives in the region-table path. So the
+            // flag travelled and nothing rolled, and the curated branch stayed an automatic hit on
+            // every check. That branch is now the DEFAULT for any world with category weights, so
+            // the blast radius was every table using the Encounter Curator.
+            if (includeFlatCheck && !passesEncounterFlatCheck(game, camping)) return false
+            return rollCuratedEncounter(game, actor)
         }
         val currentRegion = camping.findCurrentRegion() ?: camping.regionSettings.regions.firstOrNull()
         currentRegion?.let { region ->
@@ -81,8 +105,6 @@ suspend fun rollCuratedEncounter(
     game: Game,
     actor: CampingActor,
     offerRestore: Boolean = true,
-    /** False only for the explicit "roll one now" button, which is the GM asking for an encounter. */
-    includeFlatCheck: Boolean = false,
 ): Boolean {
     val camping = actor.getCamping() ?: return false
     val region = camping.findCurrentRegion() ?: camping.regionSettings.regions.firstOrNull() ?: return false

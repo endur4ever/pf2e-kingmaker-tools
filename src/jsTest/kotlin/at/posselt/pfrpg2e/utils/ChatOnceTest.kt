@@ -57,10 +57,11 @@ class ChatOnceTest {
         assertEquals(1, clicks, "the first click must run the handler")
         assertTrue(button().hasAttribute("disabled"), "a consumed offer must be disabled")
         assertTrue(button().hasAttribute("data-km-consumed"), "a consumed offer must be marked")
-        assertTrue(
+        assertFalse(
             chatLog().querySelector(".chat-message")!!.unsafeCast<HTMLElement>()
                 .classList.contains("km-card-resolved"),
-            "the message must read as resolved",
+            "a claim must NOT fade the whole card: digest cards carry several independent offers, " +
+                "and the ones still awaiting an answer have to stay legible",
         )
     }
 
@@ -98,7 +99,7 @@ class ChatOnceTest {
     }
 
     @Test
-    fun releasingOneOfferDoesNotUnGreyASiblingThatWasAnswered() {
+    fun claimingOneOfferLeavesAnIndependentSiblingClickable() {
         document.body?.innerHTML = """
             <div id="chat">
               <div class="chat-message">
@@ -107,15 +108,21 @@ class ChatOnceTest {
               </div>
             </div>
         """.trimIndent()
-        bindChatClick(".km-test-sibling", once = true) { _, _, _ -> }
-        bindChatClick(".km-test-offer", once = true) { _, target, _ -> releaseChatClickClaim(target) }
-        document.querySelector(".km-test-sibling").unsafeCast<HTMLElement>()
-            .dispatchEvent(MouseEvent("click", MouseEventInit(bubbles = true)))
+        var siblingClicks = 0
+        bindChatClick(".km-test-sibling", once = true) { _, _, _ -> siblingClicks++ }
+        bindChatClick(".km-test-offer", once = true) { _, _, _ -> clicks++ }
         click()
-        val message = document.querySelector(".chat-message").unsafeCast<HTMLElement>()
-        assertTrue(
-            message.classList.contains("km-card-resolved"),
-            "the sibling was genuinely answered, so the message must stay resolved",
+        assertEquals(1, clicks)
+        // answering one offer must leave the other answerable -- the pressure, rival and XP
+        // digests all post several independent offers inside one card
+        val sibling = document.querySelector(".km-test-sibling").unsafeCast<HTMLElement>()
+        assertFalse(sibling.hasAttribute("disabled"), "an unanswered sibling offer must stay enabled")
+        sibling.dispatchEvent(MouseEvent("click", MouseEventInit(bubbles = true)))
+        assertEquals(1, siblingClicks, "the sibling offer must still be clickable and fire")
+        assertFalse(
+            document.querySelector(".chat-message").unsafeCast<HTMLElement>()
+                .classList.contains("km-card-resolved"),
+            "the card must not be faded by a claim",
         )
     }
 }

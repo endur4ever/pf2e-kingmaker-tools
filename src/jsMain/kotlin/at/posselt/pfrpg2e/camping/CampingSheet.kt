@@ -2200,13 +2200,23 @@ class CampingSheet(
             // meant any player touching the sheet wiped the region and switched travel mode off.
             // travelMoveToken below already had this guard; these three did not.
             if (game.user.isGM) camping.currentRegion = value.region
+            // camping-sheet.hbs renders the WATCH grid instead of the activity tiles in the
+            // set-watches step, exactly as it does for the recipe list. An absent section submits
+            // no degreeOfSuccess/selectedSkill/learnTarget at all, and rebuilding from it wiped
+            // every activity's stored roll -- the same defect already fixed for cooking results,
+            // missed here because `value.activities` is itself non-null and only its CONTENTS go
+            // missing. Detect the unrendered section and leave the stored activities alone.
+            val activitiesForm = value.activities
+            val activitiesRendered = activitiesForm.degreeOfSuccess != null ||
+                activitiesForm.selectedSkill != null ||
+                activitiesForm.learnTarget != null
             camping.campingActivities = camping.campingActivities
                 .asSequence().map { (id, data) ->
-                    id to CampingActivity(
+                    id to if (!activitiesRendered) data else CampingActivity(
                         actorUuid = data.actorUuid,
-                        result = value.activities.degreeOfSuccess?.get(id),
-                        selectedSkill = value.activities.selectedSkill?.get(id),
-                        learnTargetActivityId = value.activities.learnTarget?.get(id),
+                        result = activitiesForm.degreeOfSuccess?.get(id),
+                        selectedSkill = activitiesForm.selectedSkill?.get(id),
+                        learnTargetActivityId = activitiesForm.learnTarget?.get(id),
                         // the form does not render it, so rebuilding without it reset every
                         // no-check activity to one repetition while the downtime hours stayed spent
                         repetitions = data.repetitions,
