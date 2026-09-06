@@ -1769,17 +1769,14 @@ class CampingSheet(
         val background = game.settings.pfrpg2eKingdomCampingWeather
             .resolveCampingBackground(currentTerrain, time.isDay())
 
-        val weatherType = try {
-            game.settings.pfrpg2eKingdomCampingWeather.getCurrentWeatherType()
-        } catch (e: Throwable) {
-            "sunny"
-        }
-        val weatherModifier = when (weatherType.lowercase()) {
-            "rainy" -> 1.5
-            "snowy" -> 2.0
-            "cold" -> 1.5
-            else -> 1.0
-        }
+        // NO second weather multiplier here. Weather already stretches a journey through the
+        // hexploration budget: WeatherModifiers.hexplorationActivityDelta removes an activity in
+        // snow, which raises seconds-per-activity (the 8-hour day divided by fewer activities), so
+        // the same route costs more time. This hardcoded 1.5x/2.0x table counted it a SECOND time,
+        // from a different set of numbers, and ignored the enableWeatherEffects toggle that the
+        // shared table respects -- and because the executor never applied it, the panel promised a
+        // duration the journey did not take, breaking the invariant stated just below that the
+        // panel can never price a route differently from the way it is executed.
 
         val travelSpeed = try {
             actor.system.movement.speeds.travel.value.toDouble()
@@ -1889,7 +1886,7 @@ class CampingSheet(
             val costModel = travelCostModel()
             val service = TravelService(
                 hexContents = hexContentsMap,
-                weatherModifier = weatherModifier,
+                weatherModifier = 1.0,
                 riverNoBridgeExtraDegrees = costModel.riverExtraDegrees,
                 pavedSettlementHexKeys = costModel.pavedSettlementHexKeys,
             )
@@ -1914,9 +1911,8 @@ class CampingSheet(
                 )
                 
                 val routeModifiersList = mutableListOf<String>()
-                if (weatherModifier != 1.0) {
-                    routeModifiersList.add(t("camping.weatherModifierLabel", recordOf("value" to weatherModifier.toString())))
-                }
+                // Weather is reported by the activities-per-day line below, which the speed
+                // breakdown already explains; it is not a separate multiplier on the route.
                 routeModifiersList.add(
                     t(
                         "camping.activitiesPerDayLabel",
