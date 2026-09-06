@@ -17,19 +17,6 @@ fi
 GUARDS=(
     "scripts/check_i18n_keys.py --all"
     "scripts/check_hbs_scope.py"
-    "splits/check_packs_consistency.py"
-    "scripts/check_uuid_lookups.py"
-    "scripts/check_submit_merges.py"
-    "scripts/check_dead_cores.py"
-    "scripts/check_hook_names.py"
-    "scripts/check_chat_dataset_keys.py"
-    "scripts/check_optional_section_fallbacks.py"
-)
-
-# I noticed a typo in the array above (splits -> scripts). Correcting it.
-GUARDS=(
-    "scripts/check_i18n_keys.py --all"
-    "scripts/check_hbs_scope.py"
     "scripts/check_packs_consistency.py"
     "scripts/check_uuid_lookups.py"
     "scripts/check_submit_merges.py"
@@ -40,13 +27,12 @@ GUARDS=(
 )
 
 for guard in "${GUARDS[@]}"; do
-    if [ -f "$guard" ] || [ -f "${guard%% *}"]; then
+    if [ -f "$guard" ] || [ -f "${guard%% *}" ]; then
         echo "Running $guard..."
-        # We use the first part of the string if it contains arguments
         cmd=$(echo "$guard" | cut -d' ' -f1)
         args=$(echo "$guard" | cut -d' ' -f2-)
         if ! $cmd $args; then
-            echo "REMEDIATION: Guard failed: $guard"
+            echo "REMEDIATION: Guard failed: $...”
             exit 1
         fi
     else
@@ -88,6 +74,6 @@ echo "Checking bundle integrity (MD5)..."
 echo "✅ Automated release checks passed!"
 echo ""
 echo "Remaining Manual Steps:"
-echo "7. Live Render Check: GM_PW=... node scripts/live/live_check.m5"
+echo "7. Live Render Check: GM_PW=... node scripts/live/live_check.mjs"
 echo "8. Commit via isolated index, then tag: git tag -a v$VERSION -m \"Release $VERSION\""
 echo "9. Post the changelog section to the release card."
