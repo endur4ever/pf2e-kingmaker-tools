@@ -706,7 +706,8 @@
                 "extreme": "Экстремальная"
             },
             "encounterStageUndoAction": "Отменить подготовку",
-            "encounterStageSkipped": "Пропущено существ: {count} — актёры не найдены."
+            "encounterStageSkipped": "Пропущено существ: {count} — актёры не найдены.",
+            "consumeRationsGmOnly": "Только Мастер может расходовать припасы группы."
         },
         "settlementNav": {
             "status": "Status",

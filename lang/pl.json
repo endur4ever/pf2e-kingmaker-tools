@@ -706,7 +706,8 @@
                 "extreme": "Ekstremalne"
             },
             "encounterStageUndoAction": "Cofnij przygotowanie",
-            "encounterStageSkipped": "Pominięto {count} istot: nie znaleziono aktorów."
+            "encounterStageSkipped": "Pominięto {count} istot: nie znaleziono aktorów.",
+            "consumeRationsGmOnly": "Tylko MG może zużyć racje drużyny."
         },
         "settlementNav": {
             "status": "Status",

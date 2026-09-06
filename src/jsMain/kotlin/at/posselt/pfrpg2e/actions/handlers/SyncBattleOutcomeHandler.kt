@@ -42,22 +42,12 @@ class SyncBattleOutcomeHandler(
             .map { if (it.id == battle.id) battle else it }
             .toTypedArray()
 
-        if (battle.status == BattleStatus.VICTORY.value) {
-            kingdom.warThreats = (kingdom.warThreats ?: emptyArray())
-                .map {
-                    if (it.id == battle.threatId) {
-                        RawWarThreat.copy(it, status = WarThreatStatus.DEFEATED.value)
-                    } else {
-                        it
-                    }
-                }
-                .toTypedArray()
-            kingdom.warPressure = recalculateWarPressure(
-                kingdom.warThreats ?: emptyArray(),
-                kingdom.armyDeployments ?: emptyArray(),
-                kingdom.warPressure,
-            )
-        }
+        // Deliberately NOT marking the threat defeated or recalculating war pressure here.
+        // KingdomSheet's resolve-battle callback already does both and persists BEFORE dispatching
+        // this action, and recalculateWarPressure is NOT idempotent -- it returns
+        // `base.currentPressure + perTurn`, so running it a second time on the already-updated
+        // kingdom charged a single victory's pressure delta twice. This handler's job is the part
+        // the sheet cannot do: pushing the outcome onto the PF2EArmy actor sheets below.
 
         kingdomActor.setKingdom(kingdom)
 

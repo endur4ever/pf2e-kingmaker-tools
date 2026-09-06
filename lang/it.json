@@ -706,7 +706,8 @@
                 "extreme": "Estremo"
             },
             "encounterStageUndoAction": "Annulla preparazione",
-            "encounterStageSkipped": "{count} creatura/e saltata/e: attori non trovati."
+            "encounterStageSkipped": "{count} creatura/e saltata/e: attori non trovati.",
+            "consumeRationsGmOnly": "Solo il GM può consumare le razioni del gruppo."
         },
         "settlementNav": {
             "status": "Status",

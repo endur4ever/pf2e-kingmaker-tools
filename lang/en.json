@@ -828,7 +828,8 @@
                 "extreme": "Extreme"
             },
             "encounterStageUndoAction": "Undo stage",
-            "encounterStageSkipped": "{count} creature(s) skipped: their actors could not be found."
+            "encounterStageSkipped": "{count} creature(s) skipped: their actors could not be found.",
+            "consumeRationsGmOnly": "Only the GM can spend the party's rations."
         },
         "settlementNav": {
             "status": "Status",

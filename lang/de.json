@@ -706,7 +706,8 @@
                 "extreme": "Extrem"
             },
             "encounterStageUndoAction": "Aufstellung rückgängig",
-            "encounterStageSkipped": "{count} Kreatur(en) übersprungen: Akteure nicht gefunden."
+            "encounterStageSkipped": "{count} Kreatur(en) übersprungen: Akteure nicht gefunden.",
+            "consumeRationsGmOnly": "Nur der SL kann die Rationen der Gruppe verbrauchen."
         },
         "settlementNav": {
             "status": "Status",

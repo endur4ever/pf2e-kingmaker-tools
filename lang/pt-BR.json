@@ -706,7 +706,8 @@
                 "extreme": "Extremo"
             },
             "encounterStageUndoAction": "Desfazer preparação",
-            "encounterStageSkipped": "{count} criatura(s) ignorada(s): atores não encontrados."
+            "encounterStageSkipped": "{count} criatura(s) ignorada(s): atores não encontrados.",
+            "consumeRationsGmOnly": "Apenas o Mestre pode gastar as rações do grupo."
         },
         "settlementNav": {
             "status": "Status",

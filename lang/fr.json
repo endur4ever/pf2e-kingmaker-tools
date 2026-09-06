@@ -706,7 +706,8 @@
                 "extreme": "Extrême"
             },
             "encounterStageUndoAction": "Annuler la mise en place",
-            "encounterStageSkipped": "{count} créature(s) ignorée(s) : acteurs introuvables."
+            "encounterStageSkipped": "{count} créature(s) ignorée(s) : acteurs introuvables.",
+            "consumeRationsGmOnly": "Seul le MJ peut dépenser les rations du groupe."
         },
         "settlementNav": {
             "status": "Status",

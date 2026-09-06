@@ -609,7 +609,13 @@ class CampingSheet(
             }
 
             "consume-rations" -> buildPromise {
-                consumeRations()
+                // defence in depth: the button is rendered disabled for players, but a disabled
+                // attribute is not a permission check
+                if (!game.user.isGM) {
+                    ui.notifications.warn(t("camping.consumeRationsGmOnly"))
+                } else {
+                    consumeRations()
+                }
             }
 
             "roll-camping-check" -> buildPromise {
@@ -1438,7 +1444,12 @@ class CampingSheet(
             ),
             rations = true,
             rationsPaidTonight = rationsPaidTonight,
-            consumeRationsEnabled = rationActors.isNotEmpty(),
+            // GM only: this button DELETES consumable items from the food-carrying actors, and a
+            // player who does not own one of those actors gets "User X lacks permission" from
+            // Foundry -- silently spending some campers' rations and not others. Every sibling
+            // food action routes through the ActionDispatcher for exactly this reason; this one
+            // calls into the sheet directly, so it has to be gated here.
+            consumeRationsEnabled = rationActors.isNotEmpty() && game.user.isGM,
             actors = rationActors,
             hidden = section != CampingSheetSection.EATING,
         )
