@@ -8762,432 +8762,432 @@
         },
         "petitions": {
             "absentee-lord": {
-                "premise": "A landholder has abandoned their charge",
+                "premise": "Your Excellency, Lord Kenneth has not visited his frontier holding since last autumn, leaving the tenants untended and the perimeter walls crumbling. The local bailiff begs the crown to intervene before the tenants abandon the lands entirely.",
                 "option-a": {
-                    "label": "Option A — +1 RP"
+                    "label": "Seize the estate and auction its holdings"
                 },
                 "option-b": {
-                    "label": "Option B — +1 Unrest"
+                    "label": "Leave the estate in trust until the lord answers"
                 },
                 "option-c": {
-                    "label": "Option C — spawn a quest"
+                    "label": "Commission an inquiry to track down the missing lord"
                 }
             },
             "apprentice-licence": {
-                "premise": "A hedge-wizard asks to teach openly",
+                "premise": "Your Magistracy, a hedge-wizard from the riverlands has gathered pupils in the lower ward without registration or guild sanction. She petitions for an official license to teach, warning that driving raw magic underground invites disaster.",
                 "option-a": {
-                    "label": "Option A — -1 Unrest"
+                    "label": "Grant an academy teaching license with regular oversight"
                 },
                 "option-b": {
-                    "label": "Option B — +1 Unrest"
+                    "label": "Ban unlicensed instruction and disperse the students"
                 },
                 "option-c": {
-                    "label": "Option C — spread a rumour"
+                    "label": "Permit quiet study while quietly observing their arts"
                 }
             },
             "arcane-dispute": {
-                "premise": "Two mages claim the same discovery",
+                "premise": "Your Magistracy, two prominent arcanists both claim discovery of a resonant crystal vein in the northern crags, each accusing the other of scrying theft. The collegiate faculty is divided and scholarly work has ground to a halt.",
                 "option-a": {
-                    "label": "Option A — -1 Unrest"
+                    "label": "Arbitrate equal rights and divide the quarry between them"
                 },
                 "option-b": {
-                    "label": "Option B — -1 Standing"
+                    "label": "Rule summarily in favor of the academy guildmaster"
                 },
                 "option-c": {
-                    "label": "Option C — spawn a quest"
+                    "label": "Send an expedition to survey the deposit's true nature"
                 }
             },
             "banned-tome": {
-                "premise": "A librarian asks whether to burn a dangerous book",
+                "premise": "Your Magistracy, an archivist in the capital has unearthed an ancient grimoire bound in ironwood that whispers when opened. The head librarian urges that it be destroyed in cleansing fire, while scholars beg to study its pages.",
                 "option-a": {
-                    "label": "Option A — +1 Unrest"
+                    "label": "Order the grimoire incinerated under strict ritual guard"
                 },
                 "option-b": {
-                    "label": "Option B — spread a rumour"
+                    "label": "Seal the text in the deep vault and restrict all access"
                 },
                 "option-c": {
-                    "label": "Option C — spawn a quest"
+                    "label": "Commission a trusted ward to decipher its protective wards"
                 }
             },
             "border-oath": {
-                "premise": "A frontier village asks to swear directly to the crown",
+                "premise": "Your Grace, an exposed settlement along the border marches requests to swear its fealty directly to the throne rather than the regional baron. Their reeve pledges full allegiance in exchange for royal garrison charters and frontier defense.",
                 "option-a": {
-                    "label": "Option A — -1 RP, +1 Standing"
+                    "label": "Accept their royal charter and dispatch crown defenders"
                 },
                 "option-b": {
-                    "label": "Option B — +1 Unrest"
+                    "label": "Reaffirm the regional baron's traditional jurisdiction"
                 }
             },
             "censorship-appeal": {
-                "premise": "A playwright's satire has offended the court",
+                "premise": "Honored Counselor, a traveling troupe of satirists has staged a ribald comedy mocking the council's foibles to packed taverns. Certain nobles demand the troupe's arrest for sedition, while the commons celebrate the spectacle.",
                 "option-a": {
-                    "label": "Option A — +1 Unrest"
+                    "label": "Ban the scandalous production and seize the stage wagons"
                 },
                 "option-b": {
-                    "label": "Option B — -1 Standing"
+                    "label": "Defend the troupe's right to perform without hindrance"
                 },
                 "option-c": {
-                    "label": "Option C — spread a rumour"
+                    "label": "Privately sponsor a rival pageant celebrating civic virtue"
                 }
             },
             "coin-debasement": {
-                "premise": "A mintmaster proposes stretching the coin",
+                "premise": "Lord Treasurer, the master of the royal mint proposes stretching the kingdom's silver reserves by introducing a modest copper alloy into new coinage. He promises an immediate surplus for the crown, though merchants whisper of rising market prices.",
                 "option-a": {
-                    "label": "Option A — +2 RP, +1 Unrest"
+                    "label": "Authorize the alloyed mintage to expand the royal treasury"
                 },
                 "option-b": {
-                    "label": "Option B — -1 Unrest"
+                    "label": "Enforce strict purity standards on all crown currency"
                 },
                 "option-c": {
-                    "label": "Option C — spread a rumour"
+                    "label": "Study the markets quietly while circulating trial scrip"
                 }
             },
             "cursed-heirloom": {
-                "premise": "A family asks the crown to cleanse an heirloom",
+                "premise": "Your Magistracy, a grieving merchant family brings forth an ancestral signet that bleeds cold frost and sours nearby wine. They plead for court abjurers to cleanse the dark enchantment before their household is ruined.",
                 "option-a": {
-                    "label": "Option A — -1 RP"
+                    "label": "Fund a thorough ritual cleanse by academy specialists"
                 },
                 "option-b": {
-                    "label": "Option B — +1 Unrest"
+                    "label": "Turn the family away and advise them to bury the relic"
                 },
                 "option-c": {
-                    "label": "Option C — spawn a quest"
+                    "label": "Task the court investigators with tracing the curse's lineage"
                 }
             },
             "customs-exemption": {
-                "premise": "A partner's traders ask exemption",
+                "premise": "Lord Treasurer, foreign trade delegations urge a temporary waiver on import tariffs at the river docks, citing hazardous road conditions. Local guildmasters grumble that foreign wares will undercut their own workshops.",
                 "option-a": {
-                    "label": "Option A — -1 RP, +1 Standing"
+                    "label": "Grant the tariff exemption to cultivate foreign goodwill"
                 },
                 "option-b": {
-                    "label": "Option B — -1 Standing"
+                    "label": "Uphold full customs duties on all foreign shipments"
                 }
             },
             "debt-forgiveness": {
-                "premise": "Farmers ask relief after a bad harvest",
+                "premise": "Lord Treasurer, smallholders across the river valley face ruin after early frosts spoiled their harvest, leaving them unable to pay seasonal crown rents. Village elders beseech your office for debt forgiveness until next spring.",
                 "option-a": {
-                    "label": "Option A — -2 RP, -1 Unrest"
+                    "label": "Forgive the season's overdue arrears and offer relief"
                 },
                 "option-b": {
-                    "label": "Option B — +1 Unrest"
+                    "label": "Demand full repayment according to statutory crown terms"
                 }
             },
             "deserter-trial": {
-                "premise": "A deserter's family pleads for mercy",
+                "premise": "General, a young border scout has been arrested for abandoning his post during the autumn skirmishes. His family begs for royal clemency, presenting commendations from prior patrols and pleading sudden fever.",
                 "option-a": {
-                    "label": "Option A — -1 Unrest"
+                    "label": "Grant a merciful reprieve and reassign him to labor duty"
                 },
                 "option-b": {
-                    "label": "Option B — +1 Unrest"
+                    "label": "Uphold the martial code and order his summary execution"
                 }
             },
             "drainage-works": {
-                "premise": "A hamlet asks for flood works",
+                "premise": "Your Excellency, seasonal runoff from the foothills has inundated low-lying pastures and waterlogged the trade road near a lakeside hamlet. The headman requests crown funding for drainage canals before the foundations rot.",
                 "option-a": {
-                    "label": "Option A — -2 RP, -1 Unrest"
+                    "label": "Dispatch engineers to dig comprehensive drainage channels"
                 },
                 "option-b": {
-                    "label": "Option B — +1 Unrest"
+                    "label": "Leave ditching and flood management to local landowners"
                 },
                 "option-c": {
-                    "label": "Option C — spawn a quest"
+                    "label": "Survey the watershed to plan regional culvert infrastructure"
                 }
             },
             "envoy-insult": {
-                "premise": "A neighbour's envoy claims an insult at court",
+                "premise": "Your Excellency, an ambassador from a neighboring realm took sharp offense at seating arrangements during the midsummer banquet, calling it a deliberate snub. Their retinue threatens an early departure unless suitable amends are made.",
                 "option-a": {
-                    "label": "Option A — +1 Standing, -1 RP"
+                    "label": "Offer lavish ceremonial apologies and gifts of state"
                 },
                 "option-b": {
-                    "label": "Option B — -1 Standing"
+                    "label": "Dismiss the haughty protest as groundless court vanity"
                 },
                 "option-c": {
-                    "label": "Option C — spawn a quest"
+                    "label": "Arrange private diplomatic meetings to smooth grievances"
                 }
             },
             "festival-petition": {
-                "premise": "The capital asks for a feast day at the treasury's expense",
+                "premise": "Your Grace, guild elders and citizens petition the crown to declare a national day of revelry commemorating the kingdom's founding charter. They request royal coffers furnish free ale and bread in every public square.",
                 "option-a": {
-                    "label": "Option A — -2 RP, -1 Unrest"
+                    "label": "Proclaim a public holiday and finance the civic feast"
                 },
                 "option-b": {
-                    "label": "Option B — +1 Unrest"
+                    "label": "Decline the expense and urge frugal attention to labor"
                 }
             },
             "festival-rites": {
-                "premise": "Elders want an old rite restored",
+                "premise": "Honored Counselor, village elders from the forest fringe ask permission to revive an ancient seasonal solstice rite with traditional bonfires. Certain orthodox clerics object, denouncing the rite as pagan superstition.",
                 "option-a": {
-                    "label": "Option A — -1 Unrest"
+                    "label": "Sanction the ancient festival rites as harmless tradition"
                 },
                 "option-b": {
-                    "label": "Option B — spread a rumour"
+                    "label": "Defer judgment while investigating the rite's origins"
                 }
             },
             "foreign-creed": {
-                "premise": "Immigrants ask to build their own shrine",
+                "premise": "Honored Counselor, a community of immigrant craftspeople from the southern coast petitions for ground to erect a temple to their seafaring gods. Local worshipers express unease over strange incense and foreign ceremonies.",
                 "option-a": {
-                    "label": "Option A — -1 Unrest, +1 Standing"
+                    "label": "Consecrate ground for their shrine in the artisan ward"
                 },
                 "option-b": {
-                    "label": "Option B — +1 Unrest"
+                    "label": "Deny the shrine petition to preserve traditional observances"
                 }
             },
             "guild-charter": {
-                "premise": "A guild asks for a monopoly charter",
+                "premise": "Lord Treasurer, the master masons propose a monopoly charter that would guarantee their guild exclusive rights to stone dressing throughout the realm. In return, the guild promises an upfront charter fee and fixed stone prices.",
                 "option-a": {
-                    "label": "Option A — +2 RP, +1 Unrest"
+                    "label": "Grant the exclusive masonry charter for royal revenue"
                 },
                 "option-b": {
-                    "label": "Option B — -1 Unrest"
+                    "label": "Preserve open competition among independent stonecutters"
                 }
             },
             "hostage-exchange": {
-                "premise": "A rival offers a prisoner swap",
+                "premise": "Your Excellency, emissaries from an adversarial realm propose a mutual exchange of noble captives taken during previous border conflicts. Families of the prisoners crowd the audience hall, weeping and pleading for their kin's return.",
                 "option-a": {
-                    "label": "Option A — +1 Standing"
+                    "label": "Ratify the prisoner exchange under diplomatic truce"
                 },
                 "option-b": {
-                    "label": "Option B — +1 Unrest"
+                    "label": "Refuse the swap and retain valuable hostages of war"
                 },
                 "option-c": {
-                    "label": "Option C — spawn a quest"
+                    "label": "Dispatch trusted envoys to inspect conditions in their camps"
                 }
             },
             "land-claim": {
-                "premise": "Two settlers claim the same lot",
+                "premise": "Your Excellency, two veteran settler families dispute ownership of a fertile clearing, both presenting conflicting crown land grants bearing similar seals. Neighbors are dividing along clan lines, and scythes have been brandished.",
                 "option-a": {
-                    "label": "Option A — -1 Unrest"
+                    "label": "Survey the boundary and split the clearing equally"
                 },
                 "option-b": {
-                    "label": "Option B — +1 Unrest"
+                    "label": "Award the grant unconditionally to the senior claimant"
                 }
             },
             "ley-survey": {
-                "premise": "A scholar asks funding to survey the hexes",
+                "premise": "Your Magistracy, a geomancer from the royal academy requests funding to chart magical convergence points and ley paths across the kingdom's hexes. She argues the maps will safeguard settlements from erratic wild magic surges.",
                 "option-a": {
-                    "label": "Option A — -2 RP"
+                    "label": "Grant full treasury backing for the geomantic survey"
                 },
                 "option-b": {
-                    "label": "Option B — spread a rumour"
+                    "label": "Circulate inquiries among rangers regarding odd phenomenon"
                 }
             },
             "logging-dispute": {
-                "premise": "A camp is felling beyond its grant",
+                "premise": "Warden, a timber consortium has begun clear-cutting ancient oaks beyond the borders of its designated logging lease. Woodland folk and trappers threaten armed resistance if the woods are further despoiled.",
                 "option-a": {
-                    "label": "Option A — +1 RP, +1 Unrest"
+                    "label": "Permit expanded felling in exchange for lumber tariffs"
                 },
                 "option-b": {
-                    "label": "Option B — -1 Unrest"
+                    "label": "Dispatch wardens to enforce the strict boundary markers"
                 }
             },
             "militia-request": {
-                "premise": "A border village asks to raise a militia",
+                "premise": "General, aldermen from frontier hamlets petition for weapons and royal warrants to drill home defense companies. They warn that regular garrisons are too distant to repel roving bandit bands.",
                 "option-a": {
-                    "label": "Option A — -2 RP"
+                    "label": "Furnish arms, armor, and veteran drillmasters to the towns"
                 },
                 "option-b": {
-                    "label": "Option B — +1 Unrest"
+                    "label": "Forbid unsanctioned militias and rely on regular crown troops"
                 },
                 "option-c": {
-                    "label": "Option C — spawn a quest"
+                    "label": "Commission seasoned captains to inspect frontier outposts"
                 }
             },
             "monster-bounty": {
-                "premise": "A hunter asks a bounty for a beast in the hills",
+                "premise": "General, hill shepherds report that a savage predator has slaughtered dozens of rams and terrified remote homesteads. A scarred hunter offers to track down the beast if the crown posts a respectable bounty.",
                 "option-a": {
-                    "label": "Option A — -1 RP"
+                    "label": "Authorize the bounty from royal military coffers"
                 },
                 "option-b": {
-                    "label": "Option B — +1 Unrest"
+                    "label": "Dismiss the sighting as wild exaggerations by herders"
                 },
                 "option-c": {
-                    "label": "Option C — spawn a quest"
+                    "label": "Deploy a detachment of royal scouts to hunt the beast"
                 }
             },
             "orphanage-appeal": {
-                "premise": "A matron asks for support for war orphans",
+                "premise": "Honored Counselor, a compassionate matron in the capital cares for scores of children orphaned by recent wars and frontier hazards. She warns that without crown support, her charges will be cast into the streets.",
                 "option-a": {
-                    "label": "Option A — -2 RP, -1 Unrest"
+                    "label": "Endow the civic orphanage with regular crown stipends"
                 },
                 "option-b": {
-                    "label": "Option B — +1 Unrest"
+                    "label": "Encourage private charitable donations from wealthy burghers"
                 }
             },
             "pardon-plea": {
-                "premise": "A family begs clemency for a condemned poacher",
+                "premise": "Your Grace, a forester condemned to the gallows for felling a royal stag begs for mercy, swearing he acted only to feed starving children. His petition is supported by petitions signed by dozens of village neighbors.",
                 "option-a": {
-                    "label": "Option A — -1 Unrest"
+                    "label": "Grant royal clemency and commute his sentence to service"
                 },
                 "option-b": {
-                    "label": "Option B — +1 Unrest"
+                    "label": "Uphold the harsh sentence to discourage forestry theft"
                 },
                 "option-c": {
-                    "label": "Option C — spread a rumour"
+                    "label": "Pardon the man quietly while publicly affirming royal law"
                 }
             },
             "poaching-ring": {
-                "premise": "Foresters report organised poaching",
+                "premise": "Warden, rangers report an organized ring of poachers systematically slaughtering game in the royal preserves for black-market fur trade. The wardens need additional trackers and warrants to root out the gang's wilderness camps.",
                 "option-a": {
-                    "label": "Option A — +1 Unrest"
+                    "label": "Crack down with aggressive roundups across neighboring towns"
                 },
                 "option-b": {
-                    "label": "Option B — -1 RP"
+                    "label": "Equip specialized ranger teams to hunt the poachers"
                 },
                 "option-c": {
-                    "label": "Option C — spawn a quest"
+                    "label": "Task the party with tracking down the smuggler ringleaders"
                 }
             },
             "refugee-column": {
-                "premise": "Refugees from a rival's war ask entry",
+                "premise": "Your Excellency, hundreds of refugees fleeing war in a neighboring principality have gathered at our frontier border checkpoints, begging for sanctuary. Harboring them will strain frontier granaries but demonstrates kingdom magnanimity.",
                 "option-a": {
-                    "label": "Option A — +1 Unrest, -1 Standing"
+                    "label": "Grant asylum and establish frontier relief encampments"
                 },
                 "option-b": {
-                    "label": "Option B — +1 Standing"
+                    "label": "Seal the border crossings and turn the refugees back"
                 }
             },
             "resettlement": {
-                "premise": "Displaced farmers ask for new land",
+                "premise": "Your Excellency, displaced tenant farmers whose previous homesteads were overrun by wilderness perils petition for allotments in newly claimed territory. They ask for modest seed grain and survey assistance to rebuild.",
                 "option-a": {
-                    "label": "Option A — -1 RP, -1 Unrest"
+                    "label": "Grant homestead allotments and provide initial supplies"
                 },
                 "option-b": {
-                    "label": "Option B — +1 Unrest"
+                    "label": "Direct the applicants to seek tenant employment in town"
                 }
             },
             "road-patrol": {
-                "premise": "Merchants ask for escorted roads",
+                "premise": "General, merchant convoys along the main highway complain of bold ambushers lurking near unpatrolled passes. They plead for regular cavalry escorts to safeguard trade and travel.",
                 "option-a": {
-                    "label": "Option A — -1 RP"
+                    "label": "Station permanent cavalry patrols along the trade route"
                 },
                 "option-b": {
-                    "label": "Option B — spread a rumour"
+                    "label": "Spread rumors of vigilant patrols to deter robbers"
                 },
                 "option-c": {
-                    "label": "Option C — spawn a quest"
+                    "label": "Send an expeditionary strike to eliminate the bandit lair"
                 }
             },
             "road-toll": {
-                "premise": "A village asks to levy its own toll",
+                "premise": "Your Excellency, a prosperous river village petitions for permission to levy a bridge toll on passing merchant wagons to fund road repairs. Traveling merchants vigorously object, threatening to bypass the settlement.",
                 "option-a": {
-                    "label": "Option A — +1 RP, +1 Unrest"
+                    "label": "Grant permission for the village to collect local tolls"
                 },
                 "option-b": {
-                    "label": "Option B — -1 Unrest"
+                    "label": "Prohibit local tolls and mandate free transit on roads"
                 }
             },
             "royal-wedding": {
-                "premise": "A minor house proposes a marriage alliance",
+                "premise": "Your Grace, a proud noble dynasty from a bordering realm formally proposes an honorable marriage alliance with the kingdom's ruling house. Courtiers celebrate the diplomatic prestige, though traditionalists caution against foreign influence.",
                 "option-a": {
-                    "label": "Option A — +2 Standing"
+                    "label": "Consent to the honorable marriage alliance"
                 },
                 "option-b": {
-                    "label": "Option B — -1 Standing"
+                    "label": "Decline the proposal with polite courtly reserve"
                 },
                 "option-c": {
-                    "label": "Option C — spawn a quest"
+                    "label": "Invite the suitor to court to assess their true motives"
                 }
             },
             "sacred-grove": {
-                "premise": "Druids ask that a grove be left unclaimed",
+                "premise": "Warden, an elder druid circle petitions the realm to designate an ancient briar grove as inviolable sanctuary, exempt from logging and quarrying. The stonecutters' guild protests that the grove sits upon valuable granite.",
                 "option-a": {
-                    "label": "Option A — -1 Unrest, +1 Standing"
+                    "label": "Declare the ancient grove a protected natural sanctuary"
                 },
                 "option-b": {
-                    "label": "Option B — +1 RP, +1 Unrest"
+                    "label": "Authorize quarrying operations for the good of the realm"
                 },
                 "option-c": {
-                    "label": "Option C — spawn a quest"
+                    "label": "Visit the grove to commune with its resident guardian spirits"
                 }
             },
             "spy-accusation": {
-                "premise": "A resident is accused of spying for a rival",
+                "premise": "Your Excellency, court informants accuse an influential merchant of passing sensitive troop counts to a rival potentate. The merchant vehemently professes loyalty, claiming a rival merchant fabricated the rumors.",
                 "option-a": {
-                    "label": "Option A — -1 Standing"
+                    "label": "Detain and question the merchant under diplomatic guard"
                 },
                 "option-b": {
-                    "label": "Option B — +1 Unrest"
+                    "label": "Dismiss the unproven charges to maintain civic trust"
                 },
                 "option-c": {
-                    "label": "Option C — spawn a quest"
+                    "label": "Instruct spymasters to shadow the merchant's contacts"
                 }
             },
             "stray-beast": {
-                "premise": "Something large was seen near a worksite",
+                "premise": "Warden, quarry workers report glimpsing a gigantic behemoth prowling the wooded edges of their worksite, causing several laborers to refuse their shifts. Foremen urge action before work ceases entirely.",
                 "option-a": {
-                    "label": "Option A — spread a rumour"
+                    "label": "Spread calming reassurances to quell superstitions"
                 },
                 "option-b": {
-                    "label": "Option B — -1 RP"
+                    "label": "Reinforce worksite defenses with fortified palisades"
                 },
                 "option-c": {
-                    "label": "Option C — spawn a quest"
+                    "label": "Lead a tracking party to confront the woodland monstrosity"
                 }
             },
             "succession-question": {
-                "premise": "A noble asks whom the realm answers to if the ruler falls",
+                "premise": "Your Grace, respected elders and councilors respectfully raise the matter of royal succession should tragedy befall the crown. They request a clear proclamation naming the heirs or succession council to avert future civil discord.",
                 "option-a": {
-                    "label": "Option A — -1 Unrest"
+                    "label": "Proclaim formal succession statutes before the grand council"
                 },
                 "option-b": {
-                    "label": "Option B — +1 Standing"
+                    "label": "Establish a council of regents appointed from loyal houses"
                 },
                 "option-c": {
-                    "label": "Option C — spawn a quest"
+                    "label": "Convene an assembly of scholars to codify dynastic charter law"
                 }
             },
             "tax-revolt": {
-                "premise": "A ward refuses this season's assessment",
+                "premise": "Lord Treasurer, prominent merchants and burghers in the commercial quarter have organized a tax boycott, loudly protesting recent assessments. Tax collectors report slammed shutters and angry mobs in the plaza.",
                 "option-a": {
-                    "label": "Option A — -2 RP"
+                    "label": "Grant a temporary rebate and renegotiate assessment terms"
                 },
                 "option-b": {
-                    "label": "Option B — +1 Unrest"
+                    "label": "Dispatch town bailiffs to enforce full tax compliance"
                 },
                 "option-c": {
-                    "label": "Option C — -1 Standing"
+                    "label": "Offer private concessions to the ringleading merchant guild"
                 }
             },
             "temple-dispute": {
-                "premise": "Two faiths claim the same shrine plot",
+                "premise": "Honored Counselor, rival clergies dispute the rights to a sacred hill where celestial phenomena were recently witnessed. Both factions have laid cornerstones and threaten physical confrontations over the holy ground.",
                 "option-a": {
-                    "label": "Option A — -1 Unrest, -1 RP"
+                    "label": "Endow a shared ecumenical shrine for both faiths"
                 },
                 "option-b": {
-                    "label": "Option B — +1 Unrest"
+                    "label": "Declare the hill royal property and bar both factions"
                 },
                 "option-c": {
-                    "label": "Option C — spawn a quest"
+                    "label": "Seek divine guidance through prayer and holy omens"
                 }
             },
             "trade-concession": {
-                "premise": "A partner asks for favourable terms",
+                "premise": "Your Excellency, ambassadors from an allied city-state propose tariff discounts for their traders in exchange for preferential access to their deep-water port. The merchant council is divided on whether the bargain favors the realm.",
                 "option-a": {
-                    "label": "Option A — -2 RP, +2 Standing"
+                    "label": "Approve the reciprocal trade treaty with the ally"
                 },
                 "option-b": {
-                    "label": "Option B — -1 Standing"
+                    "label": "Reject the concession to protect domestic merchants"
                 }
             },
             "veteran-pension": {
-                "premise": "Veterans ask for support after a campaign",
+                "premise": "General, disabled veterans who fought bravely in the founding campaigns present a petition for royal land grants and medical care. They assemble solemnly outside the headquarters in full battle dress.",
                 "option-a": {
-                    "label": "Option A — -2 RP, -1 Unrest"
+                    "label": "Grant veteran pensions and frontier homestead plots"
                 },
                 "option-b": {
-                    "label": "Option B — +1 Unrest"
+                    "label": "Offer commendation medals while declining royal stipends"
                 }
             },
             "wolf-season": {
-                "premise": "Herders ask for a cull",
+                "premise": "Warden, sheep farmers and travelers report that an unusually aggressive wolf pack has begun hunting near the main highway, brazenly attacking livestock. Villagers plead for royal bounties and organized hunting parties.",
                 "option-a": {
-                    "label": "Option A — -1 RP"
+                    "label": "Fund hunting bounties and distribute wolf traps to herders"
                 },
                 "option-b": {
-                    "label": "Option B — +1 Unrest"
+                    "label": "Advise ranchers to build higher sheepfolds and watchdogs"
                 },
                 "option-c": {
-                    "label": "Option C — spawn a quest"
+                    "label": "Organize a grand hunt to track the pack to its wilderness den"
                 }
             }
         }
