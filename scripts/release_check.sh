@@ -10,6 +10,9 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
+SKIP_BUILD=0
+for arg in "$@"; do [[ "$arg" == "--skip-build" ]] && SKIP_BUILD=1; done
+
 echo -e "${YELLOW}Starting automated release checks...${NC}"
 
 # 1. Tree clean
@@ -20,18 +23,20 @@ if [[ -n $(git status --short) ]]; then
 fi
 echo -e "${GREEN}✓ Tree clean${NC}"
 
-# 2. All nine guards green
-GUARDS=(
-    "scripts/check_i18n_keys.py --all"
-    "scripts/check_hbs_scope.py"
-    "scripts/check_packs_consistency.py"
-    "scripts/check_uuid_lookups.py"
-    "scripts/check_submit_merges.py"
-    "scripts/check_dead_cores.py"
-    "scripts/check_hook_names.py"
-    "scripts/check_chat_dataset_keys.py"
-    "scripts/check_optional_section_fallbacks.py"
-)
+# 2. Every guard green.
+# DISCOVERED from disk, never hand-listed: the hand-written list here silently fell one
+# behind when check_migration_registrations.py was added, so the release check was not
+# running the guard that proves every schema migration is registered.
+GUARDS=()
+for g in scripts/check_*.py; do
+    # the i18n guard only checks every locale when asked
+    if [[ "$g" == *check_i18n_keys.py ]]; then GUARDS+=("$g --all"); else GUARDS+=("$g"); fi
+done
+if [[ ${#GUARDS[@]} -eq 0 ]]; then
+    echo -e "${RED}FAILURE: no guards found in scripts/check_*.py${NC}"
+    echo -e "REMEDIATION: run this from the repository root."
+    exit 1
+fi
 
 for guard in "${GUARDS[@]}"; do
     if ! python3 $guard; then
@@ -40,40 +45,52 @@ for guard in "${GUARDS[@]}"; do
         exit 1
     fi
 done
-echo -e "${GREEN}✓ All nine guards green${NC}"
+echo -e "${GREEN}✓ All ${#GUARDS[@]} guards green${NC}"
 
-# 3. Build + Tests (simulated check of presence/capability if we can't run full build in this turn)
-# Note: The task requires the script to RUN it, but for verification in this turn 
-# I will only check if the command is valid and the environment matches expectation.
-echo -e "${YELLOW}Checking Build Environment...${NC}"
-if [[ -z "$JAVA_HOME" ]]; then
-    echo -e "${RED}FAILURE: JAVA_HOME is not set.${NC}"
-    echo -e "REMEDIATION: Set JAVA_HOME to the correct JDK path."
-    exit 1
-fi
-
-# We won't run the full ./gradlew assemble here because it takes too long for a simple check script,
-# but we verify that gradle is executable and module.json exists.
+# 3. Build + tests. This used to assert only that JAVA_HOME was non-empty and ./gradlew
+# existed, and print "Build environment looks okay" -- a release could pass this check with a
+# red build. It now RUNS the suite. Pass --skip-build to skip it deliberately.
 if [[ ! -f "./gradlew" ]]; then
     echo -e "${RED}FAILURE: ./gradlew not found.${NC}"
+    echo -e "REMEDIATION: run this from the repository root."
     exit 1
 fi
-echo -e "${GREEN}✓ Build environment looks okay${NC}"
+if [[ "$SKIP_BUILD" == "1" ]]; then
+    echo -e "${YELLOW}SKIPPING build + tests (--skip-build).${NC}"
+else
+    if [[ -z "$JAVA_HOME" ]]; then
+        echo -e "${RED}FAILURE: JAVA_HOME is not set.${NC}"
+        echo -e "REMEDIATION: export JAVA_HOME=/home/grego/.local/jdks/jdk-25.0.3+9"
+        exit 1
+    fi
+    if [[ -z "$CHROME_BIN" ]]; then
+        echo -e "${RED}FAILURE: CHROME_BIN is not set (the JS tests need headless Chrome).${NC}"
+        echo -e "REMEDIATION: export CHROME_BIN=/usr/bin/google-chrome"
+        exit 1
+    fi
+    echo -e "${YELLOW}Running build + tests (this takes a minute)...${NC}"
+    if ! ./gradlew assemble jsBrowserTest check -PuseChromeHeadless -x kotlinStoreYarnLock \
+        -Dorg.gradle.java.installations.paths=/home/grego/.local/share/jvm/jdk-17 > /tmp/release_check_build.log 2>&1; then
+        echo -e "${RED}FAILURE: build or tests failed.${NC}"
+        grep -E "^e:|FAILED" /tmp/release_check_build.log | head -20
+        echo -e "REMEDIATION: full log in /tmp/release_check_build.log"
+        exit 1
+    fi
+    echo -e "${GREEN}✓ Build + tests green${NC}"
+fi
 
 # 4. Changelog & module.json version match
 VERSION=$(python3 -c "import json; print(json.load(open('module.json'))['version'])")
 echo -e "${YELLOW}Verifying version: $VERSION${NC}"
 
-# Check if [Unreleased] is empty (no bullets)
-if grep -q '^[*-] ' CHANGELOG.md; then
-    # This is a bit naive as it might find bullets in other sections, 
-    # but we look specifically under the [Unreleased] header.
-    UNRELEASED_CONTENT=$(sed -n '/## \[Unreleased\]/,/## \[/p' CHANGELOG.md)
-    if echo "$UNRELEASED_CONTENT" | grep -q '^[*-] '; then
-        echo -e "${RED}FAILURE: [Unreleased] section in CHANGELOG.md is not empty.${NC}"
-        echo -e "REMEDIATION: Move your changes to a versioned section and clear [Unreleased]."
-        exit 1
-    fi
+# Check that the FIRST [Unreleased] section carries no bullets. Scoped to the first one on
+# purpose: CHANGELOG.md has carried a second [Unreleased] heading down in the 0.21.x history
+# since the first commit, and a range match picked that up too.
+UNRELEASED_BULLETS=$(awk '/^## \[Unreleased\]/{f=1;next} /^## \[/{if(f)exit} f' CHANGELOG.md | grep -c '^[*-] ' || true)
+if [[ "$UNRELEASED_BULLETS" -gt 0 ]]; then
+    echo -e "${RED}FAILURE: [Unreleased] in CHANGELOG.md still has $UNRELEASED_BULLETS entr(y/ies).${NC}"
+    echo -e "REMEDIATION: Move them under '## [$VERSION] - <date>' and leave [Unreleased] empty."
+    exit 1
 fi
 
 # Check if the current version has a header in CHANGELOG.md
@@ -90,7 +107,7 @@ if [[ ! -f "dist/main.js" ]]; then
     echo -e "REMEDIATION: Run ./gradlew assemble to rebuild the distribution."
     exit 1
 fi
-echo -else "${GREEN}✓ Distribution exists${NC}"
+echo -e "${GREEN}✓ Distribution exists${NC}"
 
 # 6. MD5 check (Attempted, but requires a running server)
 echo -e "${YELLOW}Checking Bundle Integrity...${NC}"
