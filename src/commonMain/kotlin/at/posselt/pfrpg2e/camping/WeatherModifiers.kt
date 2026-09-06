@@ -32,7 +32,7 @@ val WEATHER_MODIFIER_TABLE: Map<WeatherType, WeatherModifiers> = mapOf(
     WeatherType.SUNNY to NEUTRAL_WEATHER,
     WeatherType.RAINY to WeatherModifiers(
         hexplorationActivityDelta = 0.0,
-        encounterDcDelta = 1,          // rain cuts visibility
+        encounterDcDelta = -1,         // rain cuts visibility, making encounters more likely
         campingCheckPenalty = -1,      // a wet camp is harder to keep
     ),
     WeatherType.COLD to WeatherModifiers(
@@ -42,7 +42,7 @@ val WEATHER_MODIFIER_TABLE: Map<WeatherType, WeatherModifiers> = mapOf(
     ),
     WeatherType.SNOWY to WeatherModifiers(
         hexplorationActivityDelta = -1.0,  // trudging through snow costs a hexploration activity
-        encounterDcDelta = 1,
+        encounterDcDelta = -1,
         campingCheckPenalty = -2,          // the harshest conditions
     ),
 )

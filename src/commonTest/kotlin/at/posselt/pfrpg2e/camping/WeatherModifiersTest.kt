@@ -14,7 +14,7 @@ class WeatherModifiersTest {
     fun snowIsTheHarshest() {
         val snow = weatherModifiersFor(WeatherType.SNOWY)
         assertEquals(-1.0, snow.hexplorationActivityDelta)
-        assertEquals(1, snow.encounterDcDelta)
+        assertEquals(-1, snow.encounterDcDelta)
         assertEquals(-2, snow.campingCheckPenalty)
     }
 
@@ -22,7 +22,7 @@ class WeatherModifiersTest {
     fun rainCutsVisibilityAndDampensCamp() {
         val rain = weatherModifiersFor(WeatherType.RAINY)
         assertEquals(0.0, rain.hexplorationActivityDelta)
-        assertEquals(1, rain.encounterDcDelta)
+        assertEquals(-1, rain.encounterDcDelta)
         assertEquals(-1, rain.campingCheckPenalty)
     }
 

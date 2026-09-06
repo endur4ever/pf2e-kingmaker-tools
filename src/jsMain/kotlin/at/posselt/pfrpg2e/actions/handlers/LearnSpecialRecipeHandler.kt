@@ -12,7 +12,7 @@ import at.posselt.pfrpg2e.camping.getCamping
 import at.posselt.pfrpg2e.camping.getCampingActorByUuid
 import at.posselt.pfrpg2e.camping.getCompendiumFoodItems
 import at.posselt.pfrpg2e.camping.reduceFoodBy
-import at.posselt.pfrpg2e.camping.setCamping
+import at.posselt.pfrpg2e.camping.typedCampingUpdate
 import at.posselt.pfrpg2e.data.checks.DegreeOfSuccess
 import at.posselt.pfrpg2e.fromCamelCase
 import at.posselt.pfrpg2e.utils.fromUuidTypeSafe
@@ -54,10 +54,12 @@ class LearnSpecialRecipeHandler() : ActionHandler("learnSpecialRecipe", originat
                 foodItems = getCompendiumFoodItems(),
             )
             if (degreeOfSuccess.succeeded()) {
-                camping.cooking.knownRecipes = (camping.cooking.knownRecipes + recipeId).distinct().toTypedArray()
-                campingActor.setCamping(camping)
+                val updatedKnown = (camping.cooking.knownRecipes + recipeId).distinct().toTypedArray()
+                campingActor.typedCampingUpdate {
+                    cooking.knownRecipes.set(updatedKnown)
+                }
+                postChatMessage(t("chatMessages.discoverSpecialMeal.learned", recordOf("recipeName" to recipe.name)))
             }
-            postChatMessage(t("chatMessages.discoverSpecialMeal.learned", recordOf("recipeName" to recipe.name)))
         }
     }
 }

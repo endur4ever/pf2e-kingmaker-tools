@@ -2,11 +2,15 @@ package at.posselt.pfrpg2e.camping
 
 import at.posselt.pfrpg2e.Config
 import at.posselt.pfrpg2e.actions.ActionDispatcher
+import at.posselt.pfrpg2e.actions.ActionMessage
+import at.posselt.pfrpg2e.actions.handlers.LearnSpecialRecipeHandler
 import at.posselt.pfrpg2e.camping.dialogs.FavoriteMealChoice
 import at.posselt.pfrpg2e.camping.dialogs.FavoriteMealSubmitData
 import at.posselt.pfrpg2e.camping.dialogs.FavoriteMealsApplication
 import at.posselt.pfrpg2e.camping.shouldRowBePinned
 import at.posselt.pfrpg2e.camping.getPartyCurrentHexKey
+import at.posselt.pfrpg2e.resting.EIGHT_HOURS_SECONDS
+import at.posselt.pfrpg2e.weather.syncWeather
 import at.posselt.pfrpg2e.fixtures.FakeFoundryEnvironment
 import at.posselt.pfrpg2e.fixtures.FakeGame
 import at.posselt.pfrpg2e.fixtures.createFakeCampingActor
@@ -599,5 +603,186 @@ class CampingAdapterRegressionTest {
         assertNotNull(stored)
         assertNull(stored.cooking.actorMeals["target-key"], "The target key must be removed from flag storage")
         assertNotNull(stored.cooking.actorMeals["survivor-key"], "The survivor key must remain in flag storage")
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // 7. Recipe learning, sheltered suppression, weather sync, route days
+    // ──────────────────────────────────────────────────────────────────────────
+
+    @Test
+    fun learnSpecialRecipeHandlerFailureDoesNotAnnounceOrLearn() = runTest {
+        registerFoodCompendium()
+        val game = FakeGame(isGM = true)
+        val partyActor = createFakeCampingActor()
+        env.registry.register(partyActor.uuid, partyActor)
+        game.addActor(partyActor)
+
+        val chef = createFakeCharacter("chef-1", "Actor.chef-1", "Chef", isOwner = true)
+        val foodItem = createFakeConsumable("item-food", "Item.food", "Basic Ingredient", quantity = 10)
+        chef.asDynamic().addItem(foodItem)
+        env.registry.register("Actor.chef-1", chef)
+
+        val testRecipe = RecipeData(
+            id = "hearty-meal",
+            name = "Hearty Meal",
+            basicIngredients = 1,
+            specialIngredients = 0,
+            cookingLoreDC = 15,
+            survivalDC = 15,
+            uuid = "Item.hearty-meal",
+            level = 1,
+            cost = RawCost(currency = "gp", value = 1),
+            rarity = "common",
+            isSpecialMeal = true,
+            criticalSuccess = CookingOutcome(effects = emptyArray(), chooseRandomly = null, message = null),
+            success = CookingOutcome(effects = emptyArray(), chooseRandomly = null, message = null),
+            criticalFailure = CookingOutcome(effects = emptyArray(), chooseRandomly = null, message = null),
+        )
+        val camping = getDefaultCamping(game.asGame())
+        camping.actorUuids = arrayOf("Actor.chef-1")
+        camping.cooking.knownRecipes = arrayOf("basic-meal")
+        camping.cooking.homebrewMeals = arrayOf(testRecipe)
+        partyActor.setCamping(camping)
+
+        val handler = LearnSpecialRecipeHandler()
+        val dispatcher = ActionDispatcher(game.asGame(), listOf(handler))
+
+        val msg = ActionMessage(
+            action = "learnSpecialRecipe",
+            data = unsafeJso<dynamic> {
+                campingActorUuid = partyActor.uuid
+                actorUuid = chef.uuid
+                id = "hearty-meal"
+                degree = "failure"
+            }
+        )
+        handler.execute(msg, dispatcher)
+
+        val stored = partyActor.getCamping()
+        assertNotNull(stored)
+        assertFalse(stored.cooking.knownRecipes.contains("hearty-meal"), "hearty-meal must not be learned on failure")
+        assertEquals(1, env.chat.messages.size, "Only food consumption message should be posted on failure")
+        val messages = env.chat.messages.map { it.content.unsafeCast<String?>() ?: "" }
+        assertTrue(messages.none { it.contains("chatMessages.discoverSpecialMeal.learned") }, "No learned announcement on failure")
+    }
+
+    @Test
+    fun learnSpecialRecipeHandlerSuccessLearnsAndAnnouncesViaTargetedUpdate() = runTest {
+        registerFoodCompendium()
+        val game = FakeGame(isGM = true)
+        val partyActor = createFakeCampingActor()
+        env.registry.register(partyActor.uuid, partyActor)
+        game.addActor(partyActor)
+
+        val chef = createFakeCharacter("chef-1", "Actor.chef-1", "Chef", isOwner = true)
+        val foodItem = createFakeConsumable("item-food", "Item.food", "Basic Ingredient", quantity = 10)
+        chef.asDynamic().addItem(foodItem)
+        env.registry.register("Actor.chef-1", chef)
+
+        val testRecipe = RecipeData(
+            id = "hearty-meal",
+            name = "Hearty Meal",
+            basicIngredients = 1,
+            specialIngredients = 0,
+            cookingLoreDC = 15,
+            survivalDC = 15,
+            uuid = "Item.hearty-meal",
+            level = 1,
+            cost = RawCost(currency = "gp", value = 1),
+            rarity = "common",
+            isSpecialMeal = true,
+            criticalSuccess = CookingOutcome(effects = emptyArray(), chooseRandomly = null, message = null),
+            success = CookingOutcome(effects = emptyArray(), chooseRandomly = null, message = null),
+            criticalFailure = CookingOutcome(effects = emptyArray(), chooseRandomly = null, message = null),
+        )
+        val camping = getDefaultCamping(game.asGame())
+        camping.actorUuids = arrayOf("Actor.chef-1")
+        camping.cooking.knownRecipes = arrayOf("basic-meal")
+        camping.cooking.homebrewMeals = arrayOf(testRecipe)
+        partyActor.setCamping(camping)
+
+        val handler = LearnSpecialRecipeHandler()
+        val dispatcher = ActionDispatcher(game.asGame(), listOf(handler))
+
+        val msg = ActionMessage(
+            action = "learnSpecialRecipe",
+            data = unsafeJso<dynamic> {
+                campingActorUuid = partyActor.uuid
+                actorUuid = chef.uuid
+                id = "hearty-meal"
+                degree = "success"
+            }
+        )
+        handler.execute(msg, dispatcher)
+
+        val stored = partyActor.getCamping()
+        assertNotNull(stored)
+        assertTrue(stored.cooking.knownRecipes.contains("hearty-meal"), "hearty-meal must be learned on success")
+        assertEquals(2, env.chat.messages.size, "Chat messages should include food consumption and announce learned recipe")
+        val messages = env.chat.messages.map { it.content.unsafeCast<String?>() ?: "" }
+        assertTrue(messages.any { it.contains("chatMessages.discoverSpecialMeal.learned") }, "Learned announcement on success")
+    }
+
+    @Test
+    fun weatherModifiersShelteredSuppressesMechanicalWeather() = runTest {
+        val game = FakeGame(isGM = true)
+        val camping = getDefaultCamping(game.asGame())
+
+        // Set weather to SNOWY and enable sheltered
+        game.settingsMap["${Config.moduleId}.enableWeather"] = true
+        game.settingsMap["${Config.moduleId}.currentWeatherType"] = "snowy"
+        game.settingsMap["${Config.moduleId}.enableSheltered"] = true
+
+        val modifiersWhenSheltered = game.asGame().currentWeatherModifiers(camping)
+        assertEquals(NEUTRAL_WEATHER, modifiersWhenSheltered, "Sheltered camp must suppress all weather modifiers")
+
+        // Disable sheltered -> snowy modifiers take effect
+        game.settingsMap["${Config.moduleId}.enableSheltered"] = false
+        val modifiersOutdoor = game.asGame().currentWeatherModifiers(camping)
+        assertEquals(-1.0, modifiersOutdoor.hexplorationActivityDelta)
+        assertEquals(-1, modifiersOutdoor.encounterDcDelta)
+        assertEquals(-2, modifiersOutdoor.campingCheckPenalty)
+    }
+
+    @Test
+    fun syncWeatherExecutesForNonFirstGM() = runTest {
+        val game = FakeGame(isGM = true)
+        // Simulate a second GM by adding another active GM user before current
+        val secondGmUser = js("({ id: 'gm-2', _id: 'gm-2', isGM: true, active: true })")
+        game.gameObj.users.contents = arrayOf(secondGmUser, game.gameObj.user)
+        game.gameObj.users.activeGM = secondGmUser
+
+        game.settingsMap["${Config.moduleId}.enableWeather"] = true
+        game.settingsMap["${Config.moduleId}.currentWeatherFx"] = "snow"
+
+        val scene = js(
+            """Object.assign(Object.create(globalThis.foundry.documents.Scene.prototype), {
+                id: 'scene-1',
+                name: 'Map',
+                flags: {},
+                getFlag: function() { return undefined; },
+                update: function(data) {
+                    for (var k in data) { this.flags[k] = data[k]; }
+                    return Promise.resolve(this);
+                }
+            })"""
+        )
+        game.gameObj.scenes.contents = arrayOf(scene)
+        game.gameObj.scenes.active = scene
+        game.gameObj.scenes.current = scene
+
+        syncWeather(game.asGame())
+
+        assertEquals("snow", scene.flags.weather, "Scene weather should update even when current GM is not first GM")
+    }
+
+    @Test
+    fun routeProvisionsWarningUsesEightHoursDay() {
+        val secondsForOneDay = 28800.0 // 8 hours
+        val secondsForTwoDays = 28801.0
+        val days1 = kotlin.math.ceil(secondsForOneDay / EIGHT_HOURS_SECONDS.toDouble()).toInt()
+        val days2 = kotlin.math.ceil(secondsForTwoDays / EIGHT_HOURS_SECONDS.toDouble()).toInt()
+        assertEquals(1, days1, "28,800 seconds of exploration is 1 travel day")
+        assertEquals(2, days2, "28,801 seconds of exploration requires 2 travel days of food")
     }
 }

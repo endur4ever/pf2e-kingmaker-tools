@@ -104,6 +104,8 @@ const foundry = {
         }
     }
 }
+foundry.documents.Scene = class extends foundry.abstract.Document {};
+globalThis.foundry = foundry;
 
 var CONFIG = globalThis.CONFIG = {
     PF2E: {

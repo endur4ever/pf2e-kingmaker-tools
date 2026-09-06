@@ -866,15 +866,15 @@ class CampingSheet(
                 ),
                 overrideDc = mealToCook.dc,
                 weather = game.currentWeatherModifiers(camping),
-            )
+            ) ?: return
         val existing = camping.cooking.results[recipeId]
         if (existing == null) {
             camping.cooking.results[recipeId] = CookingResult(
                 skill = mealToCook.selectedSkill.value,
-                result = result?.toCamelCase(),
+                result = result.toCamelCase(),
             )
         } else {
-            existing.result = result?.toCamelCase()
+            existing.result = result.toCamelCase()
         }
         // Notable meals only. Every night has a meal; journaling all of them would bury the trail
         // in noise, so only the criticals -- the ones a table actually remembers -- get a line.
@@ -1813,7 +1813,7 @@ class CampingSheet(
                 t(
                     "camping.travelSpeedHelpPace",
                     recordOf(
-                        "activities" to speedBreakdown.hexplorationActivitiesPerDay.toString(),
+                        "activities" to hexplorationActivitiesMax,
                         "hours" to LocalTime.fromSecondOfDay(getHexplorationActivitySeconds()).toDateInputString(),
                     ),
                 )
@@ -1828,7 +1828,7 @@ class CampingSheet(
         val travelSpeedTooltip = t(
             "camping.travelSpeedHelpPace",
             recordOf(
-                "activities" to speedBreakdown.hexplorationActivitiesPerDay.toString(),
+                "activities" to hexplorationActivitiesMax,
                 "hours" to LocalTime.fromSecondOfDay(getHexplorationActivitySeconds()).toDateInputString(),
             ),
         )
@@ -1960,8 +1960,9 @@ class CampingSheet(
                 }
                 
                 // Route-vs-provisions advisory (display-only): compare the route's whole-day count
-                // against the party's durable days of food. Provisions are excluded (wiped each rest).
-                val routeDays = kotlin.math.ceil(route.estimatedDurationSeconds / 86400.0).toInt()
+                // against the party's durable days of food. The route duration covers 8-hour exploration
+                // travel days, so divide by the 8-hour day (28,800s), not 24h (86,400s).
+                val routeDays = kotlin.math.ceil(route.estimatedDurationSeconds / EIGHT_HOURS_SECONDS.toDouble()).toInt()
                 val routeFoodWarning = if (foodForecast.daysOfFood < Int.MAX_VALUE / 2
                     && routeDays > foodForecast.daysOfFood
                 ) {
@@ -2402,7 +2403,8 @@ class CampingSheet(
         var legsCompleted = 0
         var stoppedAt: String? = null
 
-        legLoop@ for (day in plan.days) {
+        legLoop@ for ((dayIndex, day) in plan.days.withIndex()) {
+            var daySeconds = 0
             for (leg in day.legs) {
                 // Seasons & Stars can throw here on a misconfigured calendar (see Resting.kt,
                 // df09f4a3). Stop the journey rather than silently travelling free hexes.
@@ -2413,6 +2415,7 @@ class CampingSheet(
                     stoppedAt = leg.hexKey
                     break@legLoop
                 }
+                daySeconds += seconds
                 legsCompleted++
                 if (moveToken) moveCampingTokenToHex(leg.hexKey)
                 // NOTE: rollRandomEncounter derives the hex it checks from the party TOKEN's
@@ -2425,6 +2428,18 @@ class CampingSheet(
                 // new route from there.
                 if (rollRandomEncounter(game, actor, includeFlatCheck = true)) {
                     stoppedAt = leg.hexKey
+                    break@legLoop
+                }
+            }
+            // Advance the intervening night only when the day completed without interruption
+            // and there is another travel day ahead. Each 24h day is 86,400s; the remaining seconds
+            // cover camp and rest until the next morning's travel starts.
+            if (dayIndex < plan.days.size - 1) {
+                val nightSeconds = max(0, 86400 - daySeconds)
+                val advanced = runCatching { game.time.advance(nightSeconds).await() }.isSuccess
+                if (!advanced) {
+                    ui.notifications.error(t("camping.travelRouteTimeAdvanceFailed"))
+                    stoppedAt = day.legs.lastOrNull()?.hexKey
                     break@legLoop
                 }
             }
@@ -2558,9 +2573,9 @@ fun beginRest(actor: CampingActor, dispatcher: ActionDispatcher) {
                     dispatcher = dispatcher,
                     campingActor = actor,
                     camping = camping,
-                    skipWatch = false,
-                    skipDailyPreparations = false,
-                    disableRandomEncounter = false,
+                    skipWatch = camping.restSettings.skipWatch,
+                    skipDailyPreparations = camping.restSettings.skipDailyPreparations,
+                    disableRandomEncounter = camping.restSettings.disableRandomEncounter,
                     skipWeather = camping.restSettings.skipWeather,
                     party = actor,
                 )

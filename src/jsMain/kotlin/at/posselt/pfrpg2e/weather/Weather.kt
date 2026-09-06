@@ -13,7 +13,7 @@ import com.foundryvtt.core.Game
  */
 suspend fun syncWeather(game: Game) {
     val settings = game.settings.pfrpg2eKingdomCampingWeather
-    if (game.isFirstGM() && settings.getEnableWeather()) {
+    if (game.user.isGM && settings.getEnableWeather()) {
         val weather = getCurrentWeatherFx(settings)
         getScenesToSyncWeather(game)
             .filter { it.getWeatherSettings().syncWeather }

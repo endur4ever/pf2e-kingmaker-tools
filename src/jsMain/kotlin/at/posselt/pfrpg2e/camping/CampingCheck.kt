@@ -121,8 +121,8 @@ suspend fun PF2ECreature.campingActivityCheck(
     val baseDc = overrideDc ?: when (skill.dcType) {
         DcType.ACTOR_LEVEL -> getLevelBasedDC(level)
         DcType.ZONE -> data.region.zoneDc
-        DcType.NONE -> askDc(activityName) ?: 0
-        DcType.STATIC -> skill.dc ?: (askDc(activityName) ?: 0)
+        DcType.NONE -> askDc(activityName) ?: return null
+        DcType.STATIC -> skill.dc ?: (askDc(activityName) ?: return null)
     }
     // Folded into the DC rather than passed as a labelled modifier: StatisticRollParameters does
     // take a `modifiers` array, but the ModifierPF2e binding is an empty stub with no constructor,

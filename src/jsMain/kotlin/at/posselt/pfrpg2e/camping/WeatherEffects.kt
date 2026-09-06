@@ -1,5 +1,6 @@
 package at.posselt.pfrpg2e.camping
 
+import at.posselt.pfrpg2e.settings.pfrpg2eKingdomCampingWeather
 import at.posselt.pfrpg2e.weather.getCurrentWeatherType
 import com.foundryvtt.core.Game
 
@@ -10,10 +11,15 @@ import com.foundryvtt.core.Game
 fun CampingData.isWeatherEffectsEnabled(): Boolean = enableWeatherEffects ?: true
 
 /**
- * Today's weather modifiers for this camping sheet, or neutral when the feature is off.
+ * Today's weather modifiers for this camping sheet, or neutral when the feature is off or the party
+ * is marked sheltered.
  *
  * Single entry point so the hexploration budget, the encounter DC and the camping check all read
  * the same weather on the same day, and one toggle silences all three.
  */
 fun Game.currentWeatherModifiers(camping: CampingData): WeatherModifiers =
-    weatherModifiersFor(getCurrentWeatherType(), enabled = camping.isWeatherEffectsEnabled())
+    if (settings.pfrpg2eKingdomCampingWeather.getEnableSheltered()) {
+        NEUTRAL_WEATHER
+    } else {
+        weatherModifiersFor(getCurrentWeatherType(), enabled = camping.isWeatherEffectsEnabled())
+    }

@@ -203,6 +203,14 @@
                                 {{> formElement travelEndHexSelect}}
                             </div>
                         </div>
+                        {{#if isGM}}
+                        <div class="km-route-move-token-option">
+                            <label class="km-route-move-token">
+                                <input type="checkbox" name="travelMoveToken" {{#if travelMoveToken}}checked{{/if}}>
+                                {{localizeKM "camping.travelRouteMoveToken"}}
+                            </label>
+                        </div>
+                        {{/if}}
                         {{#if travelRoute}}
                             <div class="km-route-details">
                                 {{#if travelRoute.foodWarning}}
@@ -225,10 +233,6 @@
                                     <button type="button" data-action="travel-route">
                                         <i class="fa-solid fa-person-hiking"></i> {{localizeKM "camping.travelRoute"}}
                                     </button>
-                                    <label class="km-route-move-token">
-                                        <input type="checkbox" name="travelMoveToken" {{#if travelMoveToken}}checked{{/if}}>
-                                        {{localizeKM "camping.travelRouteMoveToken"}}
-                                    </label>
                                 </div>
                                 {{/if}}
                                 <details class="km-route-speed-help">
