@@ -53,7 +53,7 @@ if ! grep -q "## \[$VERSION\] - $DATE" CHANGELOG.md; then
 fi
 
 if grep -A 5 "\\[Unreleased\\]" CHANGELOG.md | grep -v "^#" | grep -v "^$" | grep -q "[*]"; then
-    echo "REMEDIATION: [Unintelligible] section in CHANGELOG.md is not empty."
+    echo "REMEDIATION: [Unreleased] section in CHANGELOG.md is not empty."
     exit 1
 fi
 
