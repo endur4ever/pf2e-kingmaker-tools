@@ -140,7 +140,6 @@ import at.posselt.pfrpg2e.kingdom.pressure.pendingPressureRows
 
 private data class ChatButton(
     val buttonClass: String,
-    val once: Boolean = false,
     val callback: suspend (game: Game, actor: KingdomActor, event: Event, button: HTMLElement) -> Unit,
 )
 
@@ -606,10 +605,6 @@ private val buttons = listOf(
             row?.querySelectorAll("button")?.asList()?.filterIsInstance<HTMLElement>()
                 ?.forEach { it.setAttribute("disabled", "disabled") }
             row?.classList?.add("km-card-resolved")
-            // Use once = true to prevent re-clicking after the write is acknowledged.
-            bindChatClick(button.className, button) { ev, target, _ -> 
-                buildPromise { settleRow() }
-            }
         }
         val settlement = kingdom.settlements.find { it.sceneId == settlementId }
         val record = settlement?.lifeEventHistory?.find { it.recordId == recordId }
