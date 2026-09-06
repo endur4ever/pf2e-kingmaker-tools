@@ -35,6 +35,8 @@ import at.posselt.pfrpg2e.camping.postStarvationOffer
 import at.posselt.pfrpg2e.camping.TravelJournalKind
 import at.posselt.pfrpg2e.camping.resetForcedMarch
 import at.posselt.pfrpg2e.camping.restEntry
+import at.posselt.pfrpg2e.camping.encounterCheckWindows
+import at.posselt.pfrpg2e.camping.typedCampingUpdate
 import at.posselt.pfrpg2e.camping.travelJournalDaySummary
 import at.posselt.pfrpg2e.camping.travelJournalList
 import at.posselt.pfrpg2e.camping.travelJournalWorldDate
@@ -269,12 +271,17 @@ private suspend fun findRandomEncounterAt(
     watchDurationSeconds: Int,
 ): Int? {
     val randomEncounterChecksAtSeconds = when (fromCamelCase<RestRollMode>(camping.restRollMode)) {
-        RestRollMode.ONE -> List(1) { Random.nextInt(1, watchDurationSeconds - 1) }
-        RestRollMode.ONE_EVERY_FOUR_HOURS -> List(watchDurationSeconds / (FOUR_HOURS_SECONDS)) { index ->
-            val begin = index * FOUR_HOURS_SECONDS
-            val end = index * FOUR_HOURS_SECONDS + FOUR_HOURS_SECONDS
-            Random.nextInt(begin + 1, end - 1)
-        }
+        // Window arithmetic lives in commonMain (encounterCheckWindows) and is unit-tested: it
+        // drops windows too narrow to draw from -- Random.nextInt(from, until) THROWS when
+        // from >= until, and a short or zero-length night reached exactly that -- and it rounds
+        // the window count UP so the tail of an uneven night, which the last watch slot covers,
+        // is still checked.
+        RestRollMode.ONE ->
+            encounterCheckWindows(watchDurationSeconds, intervalSeconds = null)
+                .map { Random.nextInt(it.first, it.last + 1) }
+        RestRollMode.ONE_EVERY_FOUR_HOURS ->
+            encounterCheckWindows(watchDurationSeconds, intervalSeconds = FOUR_HOURS_SECONDS)
+                .map { Random.nextInt(it.first, it.last + 1) }
 
         else -> emptyList()
     }
@@ -336,12 +343,17 @@ private suspend fun beginRest(
             .ifEmpty { characterWatchers }
         val defaultDc = camping.findCurrentRegion()?.encounterDc ?: 15
 
+        // NOT `?: return`. Dismissing this dialog used to abandon beginRest before anything was
+        // written: no watch state, no clock advance, and the encounter preview already persisted
+        // by the roll left dangling -- the rest simply vanished, which is exactly the stranding
+        // the comment further down says must not happen. A dismissal now means "do not resolve
+        // the ambush", not "discard the night".
         val formData = showEncounterResolutionDialog(
             watchers = onWatch,
             defaultDc = defaultDc
-        ) ?: return
+        )
 
-        if (onWatch.isNotEmpty()) {
+        if (formData != null && onWatch.isNotEmpty()) {
             val totalDc = formData.dc - formData.rollModifier + formData.dcModifier
 
             // Tonight's committed camp-defense results, collected BEFORE the watch roll so Set
@@ -430,8 +442,13 @@ private suspend fun beginRest(
 
         // Persist the partial watch state first, then advance the clock detached — a misconfigured
         // Seasons & Stars calendar that hangs the advance must not strand the watch mid-rest.
-        camping.watchSecondsRemaining = watchDurationSeconds - randomEncounterAt
-        campingActor.setCamping(camping)
+        // A TARGETED update, not setCamping. `camping` was read before the encounter roll, and
+        // showEncounterPreview persists lastEncounterCategory/Result/Manifest onto the actor in
+        // between -- so writing this whole stale snapshot back reverted the preview the GM was
+        // looking at, and a reload then had nothing to restore.
+        campingActor.typedCampingUpdate {
+            watchSecondsRemaining.set(watchDurationSeconds - randomEncounterAt)
+        }
         game.time.advance(randomEncounterAt)
             .catch {
                 console.error("[km] camping watch: failed to advance world time", it)
