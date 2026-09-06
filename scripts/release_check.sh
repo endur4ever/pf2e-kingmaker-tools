@@ -27,10 +27,10 @@ GUARDS=(
 )
 
 for guard in "${GUARDS[@]}"; do
-    if [ -f "$guard" ] || [ -f "${guard%% *}" ]; then
+    cmd=$(echo "$guard" | cut -d' ' -f1)
+    args=$(echo "$guard" | cut -d' ' -f2-)
+    if [ -f "$cmd" ]; then
         echo "Running $guard..."
-        cmd=$(echo "$guard" | cut -d' ' -f1)
-        args=$(echo "$guard" | cut -d' ' -f2-)
         if ! $cmd $args; then
             echo "REMEDIATION: Guard failed: $guard"
             exit 1
@@ -53,7 +53,7 @@ if ! grep -q "## \[$VERSION\] - $DATE" CHANGELOG.md; then
 fi
 
 if grep -A 5 "\\[Unreleased\\]" CHANGELOG.md | grep -v "^#" | grep -v "^$" | grep -q "[*]"; then
-    echo "REMEDIATION: [Unreleased] section in CHANGELOG.md is not empty."
+    echo "REMEDIATION: [Unintelligible] section in CHANGELOG.md is not empty."
     exit 1
 fi
 
