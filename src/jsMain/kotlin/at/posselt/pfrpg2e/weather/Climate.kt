@@ -105,11 +105,18 @@ private suspend fun rollWeatherEventFromTable(
 
     when (eventResult) {
         is WeatherEventResult.Event -> {
-            postChatMessage(t(eventResult.event.name))
+            // The d20 above was rolled with `rollMode`; announcing the result without it meant a
+            // gmroll or blindroll weather event was published to the whole table anyway.
+            postChatMessage(t(eventResult.event.name), rollMode = rollMode)
         }
         is WeatherEventResult.Reroll -> {
             console.log("Re-rolling weather event, level exceeds party level + $maximumRange")
+            // RETURN after recursing. The recursive call owns the whole outcome from here,
+            // including its own natural-20 handling, so falling through to the isNat20 block below
+            // rolled a SECOND event on top of the replacement -- one "this is above the party's
+            // level, roll again" result produced two weather events.
             rollWeatherEventFromTable(game, averagePartyLevel, maximumRange, rollMode, table)
+            return
         }
         is WeatherEventResult.NoEvent -> {
             console.log("No weather event matched for d20 roll $roll")
@@ -118,7 +125,7 @@ private suspend fun rollWeatherEventFromTable(
 
     // On natural 20, roll a potential second event
     if (isNat20) {
-        postChatMessage(t("weather.nat20SecondEvent"))
+        postChatMessage(t("weather.nat20SecondEvent"), rollMode = rollMode)
         rollWeatherEventFromTable(game, averagePartyLevel, maximumRange, rollMode, table)
     }
 }
