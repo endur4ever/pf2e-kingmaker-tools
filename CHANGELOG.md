@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+* **Camping watch calculations and availability.** Companions marked unavailable for camp or away on an expedition are now excluded from watch suggestions, watch staffing, and ambush perception checks. Watch slot hour boundaries respect rest settings (`skipWatch` and `skipDailyPreparations`).
+* **Downtime hours budget gating.** The 8-hour downtime limit (`isOverDowntimeHoursBudget`) is now enforced when assigning camping activities, and assignment block notifications use localized error messages.
+* **Meal effect protection.** Meal effect cleanup identifies protected effect names from recipe outcomes marked not to be removed on preparing campsite, preventing deletion of shared-name effects.
+* **Camping settings checkboxes.** Form submission preserves unrendered entries in `actorUuidsNotKeepingWatch` and `alwaysPerformActivities`.
+* **Daily tick idempotency.** World clock advances track a high-water mark to prevent duplicate daily ticks when rewinding and re-advancing past in-world midnight.
+* **Camping check and recipe abort handling.** Cancelling a check prompt or check roll preserves existing state instead of defaulting to DC 0 or wiping cooking outcomes.
+* **Weather modifiers and effects.** Inclement weather (rain, snow) correctly lowers the flat check DC for random encounters, sheltered camps return neutral weather modifiers, and any GM can trigger scene weather synchronization.
+
 ## [6.4.0] - 2026-09-05
 
 ### Added
