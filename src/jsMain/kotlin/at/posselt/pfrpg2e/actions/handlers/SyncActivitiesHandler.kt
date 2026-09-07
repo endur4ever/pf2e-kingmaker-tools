@@ -71,7 +71,6 @@ class SyncActivitiesHandler(
                 // saving the whole snapshot back here reverted anything any client changed on the
                 // camping flag during that window. Only the two learned fields are written.
                 campingActor.typedCampingUpdate {
-                    learnedCompanionActivities.set(camping.learnedCompanionActivities)
                     learnedCompanionActivitiesByActor.set(camping.learnedCompanionActivitiesByActor)
                 }
             }
@@ -90,12 +89,12 @@ class SyncActivitiesHandler(
 
 /**
  * When the "Learn from a Companion" activity succeeds or critically succeeds, add the single
- * companion activity the player picked in the activity's dropdown to the learned list, so it
- * stays available even when that companion is absent from camp. The dropdown only offers
- * companion activities whose companion is present, so no presence re-check is needed here —
- * but the target is still validated to be a real companion activity before it is stored.
+ * companion activity the player picked in the activity's dropdown to the actor's learned list,
+ * so it stays available to that character even when that companion is absent from camp.
+ * Learning is per-character (KCG RAW): it is recorded in [learnedCompanionActivitiesByActor]
+ * for the acting PC only, not in the party-wide list.
  */
-private fun handleLearnFromCompanion(
+internal fun handleLearnFromCompanion(
     camping: CampingData,
     activities: Array<CampingActivityWithId>,
 ): Boolean {
@@ -112,16 +111,11 @@ private fun handleLearnFromCompanion(
     val key = actorUuid.replace('.', '_')
     val byActor = camping.learnedCompanionActivitiesByActor ?: recordOf()
     val actorLearned = byActor[key]?.toSet() ?: emptySet()
-    val globalLearned = camping.learnedCompanionActivities.toSet()
 
     var changed = false
     if (targetId !in actorLearned) {
         byActor[key] = (actorLearned + targetId).toTypedArray()
         camping.learnedCompanionActivitiesByActor = byActor
-        changed = true
-    }
-    if (targetId !in globalLearned) {
-        camping.learnedCompanionActivities = (globalLearned + targetId).toTypedArray()
         changed = true
     }
     return changed

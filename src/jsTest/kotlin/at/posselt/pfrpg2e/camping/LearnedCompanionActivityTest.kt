@@ -1,5 +1,6 @@
 package at.posselt.pfrpg2e.camping
 
+import at.posselt.pfrpg2e.actions.handlers.handleLearnFromCompanion
 import at.posselt.pfrpg2e.camping.dialogs.RegionSettings
 import js.objects.recordOf
 import js.objects.unsafeJso
@@ -510,5 +511,149 @@ class LearnedCompanionActivityTest {
         val activity = companionActivity("enhance-weapons", "Amiri")
 
         assertTrue(camping.canActorPerformActivity(activity, "Actor.99", "Ekundayo", companionUnavailable = false))
+    }
+
+    // === handleLearnFromCompanion (per-character learning) ===
+
+    @Test
+    fun testLearnFromCompanionTeachesOnlyTheActingCharacter() {
+        val companionAct = companionActivity("blend-into-the-night", "Harrim")
+        val camping = unsafeJso<CampingData> {
+            learnedCompanionActivities = emptyArray()
+            learnedCompanionActivitiesByActor = recordOf()
+            homebrewCampingActivities = arrayOf(companionAct)
+        }
+
+        val activities = arrayOf(
+            CampingActivityWithId(
+                activityId = learnFromACompanionId,
+                actorUuid = "Actor.1",
+                result = "success",
+                selectedSkill = "diplomacy",
+                learnTargetActivityId = "blend-into-the-night",
+                repetitions = 1,
+            )
+        )
+
+        val changed = handleLearnFromCompanion(camping, activities)
+        assertTrue(changed, "handleLearnFromCompanion should return true when a new activity is learned")
+
+        // Per-character: Actor 1 learned it, but Actor 2 did not
+        assertTrue(camping.hasActorLearnedActivity("Actor.1", "blend-into-the-night"))
+        assertFalse(camping.hasActorLearnedActivity("Actor.2", "blend-into-the-night"))
+
+        // Party-wide list must remain empty (no redundant write to learnedCompanionActivities)
+        assertEquals(0, camping.learnedCompanionActivities.size, "Party-wide learned list should remain untouched")
+
+        // Availability check: Actor 1 can perform without Harrim, Actor 2 cannot
+        assertTrue(
+            camping.canActorPerformActivity(companionAct, "Actor.1", "Valeros", companionUnavailable = true),
+            "Acting PC who learned the activity can perform it without the companion"
+        )
+        assertFalse(
+            camping.canActorPerformActivity(companionAct, "Actor.2", "Linzi", companionUnavailable = true),
+            "Other PC who did not learn the activity cannot perform it without the companion"
+        )
+    }
+
+    @Test
+    fun testLearnFromCompanionCriticalSuccessTeachesActivity() {
+        val companionAct = companionActivity("bolster-confidence", "Linzi")
+        val camping = unsafeJso<CampingData> {
+            learnedCompanionActivities = emptyArray()
+            learnedCompanionActivitiesByActor = recordOf()
+            homebrewCampingActivities = arrayOf(companionAct)
+        }
+
+        val activities = arrayOf(
+            CampingActivityWithId(
+                activityId = learnFromACompanionId,
+                actorUuid = "Actor.1",
+                result = "criticalSuccess",
+                selectedSkill = "diplomacy",
+                learnTargetActivityId = "bolster-confidence",
+                repetitions = 1,
+            )
+        )
+
+        val changed = handleLearnFromCompanion(camping, activities)
+        assertTrue(changed)
+        assertTrue(camping.hasActorLearnedActivity("Actor.1", "bolster-confidence"))
+    }
+
+    @Test
+    fun testLearnFromCompanionFailureDoesNotTeachActivity() {
+        val companionAct = companionActivity("blend-into-the-night", "Harrim")
+        val camping = unsafeJso<CampingData> {
+            learnedCompanionActivities = emptyArray()
+            learnedCompanionActivitiesByActor = recordOf()
+            homebrewCampingActivities = arrayOf(companionAct)
+        }
+
+        val activities = arrayOf(
+            CampingActivityWithId(
+                activityId = learnFromACompanionId,
+                actorUuid = "Actor.1",
+                result = "failure",
+                selectedSkill = "diplomacy",
+                learnTargetActivityId = "blend-into-the-night",
+                repetitions = 1,
+            )
+        )
+
+        val changed = handleLearnFromCompanion(camping, activities)
+        assertFalse(changed, "Failure should not learn the activity")
+        assertFalse(camping.hasActorLearnedActivity("Actor.1", "blend-into-the-night"))
+    }
+
+    @Test
+    fun testLearnFromCompanionAlreadyLearnedReturnsFalse() {
+        val companionAct = companionActivity("blend-into-the-night", "Harrim")
+        val camping = unsafeJso<CampingData> {
+            learnedCompanionActivities = emptyArray()
+            learnedCompanionActivitiesByActor = recordOf(
+                "Actor_1" to arrayOf("blend-into-the-night")
+            )
+            homebrewCampingActivities = arrayOf(companionAct)
+        }
+
+        val activities = arrayOf(
+            CampingActivityWithId(
+                activityId = learnFromACompanionId,
+                actorUuid = "Actor.1",
+                result = "success",
+                selectedSkill = "diplomacy",
+                learnTargetActivityId = "blend-into-the-night",
+                repetitions = 1,
+            )
+        )
+
+        val changed = handleLearnFromCompanion(camping, activities)
+        assertFalse(changed, "Should return false if activity was already learned by this actor")
+    }
+
+    @Test
+    fun testLearnFromCompanionNonCompanionTargetIgnored() {
+        val universalAct = universalActivity("relax")
+        val camping = unsafeJso<CampingData> {
+            learnedCompanionActivities = emptyArray()
+            learnedCompanionActivitiesByActor = recordOf()
+            homebrewCampingActivities = arrayOf(universalAct)
+        }
+
+        val activities = arrayOf(
+            CampingActivityWithId(
+                activityId = learnFromACompanionId,
+                actorUuid = "Actor.1",
+                result = "success",
+                selectedSkill = "diplomacy",
+                learnTargetActivityId = "relax",
+                repetitions = 1,
+            )
+        )
+
+        val changed = handleLearnFromCompanion(camping, activities)
+        assertFalse(changed, "Should return false when target is not a companion activity")
+        assertFalse(camping.hasActorLearnedActivity("Actor.1", "relax"))
     }
 }
