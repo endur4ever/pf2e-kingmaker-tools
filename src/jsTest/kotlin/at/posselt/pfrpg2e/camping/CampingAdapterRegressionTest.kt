@@ -10,12 +10,17 @@ import at.posselt.pfrpg2e.camping.dialogs.FavoriteMealsApplication
 import at.posselt.pfrpg2e.camping.shouldRowBePinned
 import at.posselt.pfrpg2e.camping.getPartyCurrentHexKey
 import at.posselt.pfrpg2e.resting.EIGHT_HOURS_SECONDS
+import at.posselt.pfrpg2e.resting.getTotalRestDuration
+import at.posselt.pfrpg2e.camping.dialogs.CampingSettingsApplication
+import at.posselt.pfrpg2e.kingdom.getKingdom
+import at.posselt.pfrpg2e.kingdom.KingdomData
 import at.posselt.pfrpg2e.weather.syncWeather
 import at.posselt.pfrpg2e.fixtures.FakeFoundryEnvironment
 import at.posselt.pfrpg2e.fixtures.FakeGame
 import at.posselt.pfrpg2e.fixtures.createFakeCampingActor
 import at.posselt.pfrpg2e.fixtures.createFakeCharacter
 import at.posselt.pfrpg2e.fixtures.createFakeConsumable
+import at.posselt.pfrpg2e.fixtures.createFakeEffect
 import at.posselt.pfrpg2e.fixtures.createFakeKingdomActor
 import at.posselt.pfrpg2e.fixtures.applyFoundryMerge
 import at.posselt.pfrpg2e.utils.asSequence
@@ -784,5 +789,104 @@ class CampingAdapterRegressionTest {
         val days2 = kotlin.math.ceil(secondsForTwoDays / EIGHT_HOURS_SECONDS.toDouble()).toInt()
         assertEquals(1, days1, "28,800 seconds of exploration is 1 travel day")
         assertEquals(2, days2, "28,801 seconds of exploration requires 2 travel days of food")
+    }
+
+    @Test
+    fun unavailableCampersExcludedFromWatchSubsystem() = runTest {
+        val game = FakeGame(isGM = true)
+        val initialKingdom = js("""({
+            companions: [
+                { actorUuid: 'comp-1', name: 'Busy Companion', campAvailable: false, expeditionStatus: 'available' },
+                { actorUuid: 'comp-2', name: 'Away Companion', campAvailable: true, expeditionStatus: 'onExpedition' },
+                { actorUuid: 'comp-3', name: 'Ready Companion', campAvailable: true, expeditionStatus: 'available' }
+            ]
+        })""").unsafeCast<KingdomData>()
+        val kingdomActor = createFakeKingdomActor("kingdom-1", "Actor.kingdom-1", "Kingdom", initialKingdom = initialKingdom)
+        game.addActor(kingdomActor)
+
+        val unavailable = getUnavailableCampActorUuids(game.asGame())
+        assertTrue("comp-1" in unavailable, "campAvailable == false should be marked unavailable")
+        assertTrue("comp-2" in unavailable, "onExpedition should be marked unavailable")
+        assertFalse("comp-3" in unavailable, "available companion should remain available")
+    }
+
+    @Test
+    fun watchDurationRespectsRestSettings() = runTest {
+        val watcher1 = createFakeCharacter("char-1", "Actor.char-1", "Hero 1")
+        val watcher2 = createFakeCharacter("char-2", "Actor.char-2", "Hero 2")
+        val watchers = listOf(watcher1, watcher2)
+        val fullDuration = getTotalRestDuration(
+            watchers = watchers,
+            recipes = emptyList(),
+            gunsToClean = 0,
+            skipWatch = false,
+            skipDailyPreparations = false,
+        )
+        val skipWatchDuration = getTotalRestDuration(
+            watchers = watchers,
+            recipes = emptyList(),
+            gunsToClean = 0,
+            skipWatch = true,
+            skipDailyPreparations = false,
+        )
+        val skipBothDuration = getTotalRestDuration(
+            watchers = watchers,
+            recipes = emptyList(),
+            gunsToClean = 0,
+            skipWatch = true,
+            skipDailyPreparations = true,
+        )
+        assertTrue(skipWatchDuration.total.value < fullDuration.total.value, "Skipping watch should reduce rest duration")
+        assertTrue(skipBothDuration.total.value < skipWatchDuration.total.value, "Skipping both should reduce rest duration further")
+    }
+
+    @Test
+    fun foodRemovalProtectsEffectsSharingNameWithUnremovableOutcome() = runTest {
+        val effect1 = createFakeEffect("eff-1", "Effect.1", "Hearty Stew")
+        val effect2 = createFakeEffect("eff-2", "Effect.2", "Hearty Stew")
+        val effect3 = createFakeEffect("eff-3", "Effect.3", "Trail Rations")
+        env.registry.register("Effect.1", effect1)
+        env.registry.register("Effect.2", effect2)
+        env.registry.register("Effect.3", effect3)
+
+        val recipe = js("""({
+            criticalFailure: { effects: [] },
+            success: {
+                effects: [
+                    { uuid: 'Effect.1', removeWhenPreparingCampsite: false }
+                ]
+            },
+            criticalSuccess: {
+                effects: [
+                    { uuid: 'Effect.2', removeWhenPreparingCampsite: true },
+                    { uuid: 'Effect.3', removeWhenPreparingCampsite: true }
+                ]
+            }
+        })""").unsafeCast<RecipeData>()
+
+        val items = getMealEffectItems(listOf(recipe), onlyRemoveAfterRest = false, removeWhenPreparingCampsite = true)
+        val itemNames = items.map { it.name }.toSet()
+        assertFalse("Hearty Stew" in itemNames, "Hearty Stew should be protected because one outcome specified removeWhenPreparingCampsite = false")
+        assertTrue("Trail Rations" in itemNames, "Trail Rations should be removed")
+    }
+
+    @Test
+    fun campingSettingsFixObjectPreservesUnrenderedCheckboxes() {
+        val app = js("Object.create(globalThis.foundry.applications.api.ApplicationV2.prototype)")
+        app.settings = unsafeJso<dynamic> {
+            actorUuidsNotKeepingWatch = arrayOf("actor-1", "actor-unrendered")
+            alwaysPerformActivities = arrayOf("act-1", "act-unrendered")
+        }
+        val proto = CampingSettingsApplication::class.js.asDynamic().prototype
+        val fixFn = js("proto.fixObject || proto[Object.getOwnPropertyNames(proto).find(function(k) { return k.startsWith('fixObject'); })]")
+        val submitted = js("({ actorUuidsNotKeepingWatch: { 'actor-1': true }, alwaysPerformActivities: { 'act-1': true } })")
+        fixFn.call(app, submitted)
+
+        val fixedActors = submitted.actorUuidsNotKeepingWatch.unsafeCast<Array<String>>()
+        val fixedActs = submitted.alwaysPerformActivities.unsafeCast<Array<String>>()
+        assertTrue("actor-1" in fixedActors)
+        assertTrue("actor-unrendered" in fixedActors, "Unrendered actor should be preserved in actorUuidsNotKeepingWatch")
+        assertTrue("act-1" in fixedActs)
+        assertTrue("act-unrendered" in fixedActs, "Unrendered activity should be preserved in alwaysPerformActivities")
     }
 }

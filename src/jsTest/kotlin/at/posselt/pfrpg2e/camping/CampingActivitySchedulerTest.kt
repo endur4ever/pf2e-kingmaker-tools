@@ -262,4 +262,22 @@ class CampingActivitySchedulerTest {
         )
         assertTrue(CampingActivityScheduler.isOverDowntimeBudget(activities, "actor-1"))
     }
+
+    @Test
+    fun testCanAssignBlocksWhenDowntimeHoursExhausted() {
+        val camping: CampingData = unsafeJso {}
+        camping.spendDowntimeHours("actor-1", 8)
+        val activities = emptyArray<CampingActivityWithId>()
+        val result = CampingActivityScheduler.canAssign(activities, testActivity, "actor-1", camping = camping)
+        assertTrue(result is CampingActivityScheduler.SchedulingResult.Blocked)
+    }
+
+    @Test
+    fun testCanAssignAllowsWhenDowntimeHoursRemain() {
+        val camping: CampingData = unsafeJso {}
+        camping.spendDowntimeHours("actor-1", 6)
+        val activities = emptyArray<CampingActivityWithId>()
+        val result = CampingActivityScheduler.canAssign(activities, testActivity, "actor-1", camping = camping)
+        assertTrue(result is CampingActivityScheduler.SchedulingResult.Allowed)
+    }
 }

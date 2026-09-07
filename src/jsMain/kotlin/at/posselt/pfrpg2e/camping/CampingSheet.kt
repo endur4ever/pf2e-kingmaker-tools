@@ -1088,8 +1088,9 @@ class CampingSheet(
             val slotCount = camping.watchSlots.size
             if (slotCount <= 0) return
             val actorsByUuid = getCampingActorsByUuid(camping.actorUuids).associateBy(PF2EActor::uuid)
+            val unavailableUuids = getUnavailableCampActorUuids(game)
             val campers = camping.actorUuids
-                .filter { !camping.actorUuidsNotKeepingWatch.contains(it) }
+                .filter { it !in unavailableUuids && !camping.actorUuidsNotKeepingWatch.contains(it) }
                 .mapNotNull { uuid ->
                     actorsByUuid[uuid]?.let { act ->
                         WatchCamper(
@@ -1169,6 +1170,7 @@ class CampingSheet(
                             activities = camping.campingActivitiesWithId(),
                             activityData = activity,
                             actorUuid = actorUuid,
+                            camping = camping,
                         )
                     }
                     when (schedulingResult) {
@@ -1719,20 +1721,21 @@ class CampingSheet(
             )
         }.toTypedArray()
         val recipes = camping.getAllRecipes()
+        val unavailableUuids = getUnavailableCampActorUuids(game)
         val fullRestDuration = getTotalRestDuration(
-            watchers = actorsByUuid.values.filter { !camping.actorUuidsNotKeepingWatch.contains(it.uuid) },
+            watchers = actorsByUuid.values.filter { it.uuid !in unavailableUuids && !camping.actorUuidsNotKeepingWatch.contains(it.uuid) },
             recipes = recipes.toList(),
             gunsToClean = camping.gunsToClean,
             increaseActorsKeepingWatch = camping.increaseWatchActorNumber,
             remainingSeconds = camping.watchSecondsRemaining,
-            skipWatch = false,
-            skipDailyPreparations = false,
+            skipWatch = camping.restSettings.skipWatch,
+            skipDailyPreparations = camping.restSettings.skipDailyPreparations,
         )
         // Watch panel: per-slot hour ranges divide the SAME total the rest flow divides when
         // mapping a random encounter to its on-duty slot, so display and mechanics agree.
         val watchDurationSeconds = fullRestDuration.total.value
         val nonExemptPresentUuids = camping.actorUuids
-            .filter { !camping.actorUuidsNotKeepingWatch.contains(it) && actorsByUuid[it] != null }
+            .filter { it !in unavailableUuids && !camping.actorUuidsNotKeepingWatch.contains(it) && actorsByUuid[it] != null }
         val watchValidation = validateWatchAssignments(
             nonExemptUuids = nonExemptPresentUuids,
             slots = camping.watchSlots.map { it.toList() },

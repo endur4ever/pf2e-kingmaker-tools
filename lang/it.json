@@ -208,6 +208,10 @@
             "freeForm": "Free Form"
         },
         "camping": {
+            "schedulerBlockedDowntimeHoursLimit": "Il personaggio ha esaurito il budget di 8 ore di riposo per questa sessione",
+            "schedulerBlockedActivityLimit": "Il personaggio è già stato assegnato a {max} attività (limite di 8 ore di riposo raggiunto)",
+            "schedulerBlockedAlreadyAssigned": "Un altro PG è già assegnato all'attività '{activityName}'",
+            "schedulerBlockedAlreadySucceeded": "L'attività '{activityName}' è già riuscita e non może essere ritentata in questa sessione",
             "restParty": "Rest: {partyName}",
             "hexSizeInMiles": "Hex Size in Miles",
             "hexSizeInMilesHelp": "If you are using smaller hexes, change this value to change hexploration activity length and amount",

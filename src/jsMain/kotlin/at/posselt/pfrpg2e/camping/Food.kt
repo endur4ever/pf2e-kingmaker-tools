@@ -99,10 +99,10 @@ private fun mealEffectsHaving(recipes: List<RecipeData>, predicate: (MealEffect)
 
 private fun getAllOutcomeEffects(recipe: RecipeData): List<MealEffect> =
     listOfNotNull(
-        recipe.criticalFailure.effects?.toList(),
-        recipe.success.effects?.toList(),
-        recipe.criticalSuccess.effects?.toList(),
-        recipe.favoriteMeal?.effects?.toList(),
+        recipe.asDynamic().criticalFailure?.effects?.unsafeCast<Array<MealEffect>>()?.toList(),
+        recipe.asDynamic().success?.effects?.unsafeCast<Array<MealEffect>>()?.toList(),
+        recipe.asDynamic().criticalSuccess?.effects?.unsafeCast<Array<MealEffect>>()?.toList(),
+        recipe.asDynamic().favoriteMeal?.effects?.unsafeCast<Array<MealEffect>>()?.toList(),
     ).flatten()
 
 private suspend fun getMealEffectItems(
@@ -110,7 +110,27 @@ private suspend fun getMealEffectItems(
     onlyRemoveAfterRest: Boolean = false,
     removeWhenPreparingCampsite: Boolean,
 ): List<PF2EEffect> = coroutineScope {
-    getAllOutcomeEffects(recipe)
+    val allEffects = getAllOutcomeEffects(recipe)
+    val protectedUuids = allEffects
+        .filter {
+            if (onlyRemoveAfterRest) {
+                it.removeAfterRest != true
+            } else if (removeWhenPreparingCampsite) {
+                it.removeWhenPreparingCampsite == false
+            } else {
+                false
+            }
+        }
+        .map { it.uuid }
+        .toSet()
+
+    val protectedEffects = protectedUuids
+        .map { async { fromUuidTypeSafe<PF2EEffect>(it) } }
+        .awaitAll()
+        .filterNotNull()
+    val protectedNames = protectedEffects.mapNotNull { it.name }.toSet()
+
+    val candidateEffects = allEffects
         .filter {
             if (onlyRemoveAfterRest) {
                 it.removeAfterRest == true
@@ -124,6 +144,12 @@ private suspend fun getMealEffectItems(
         .map { async { fromUuidTypeSafe<PF2EEffect>(it) } }
         .awaitAll()
         .filterNotNull()
+
+    if (protectedNames.isNotEmpty()) {
+        candidateEffects.filterNot { it.name in protectedNames }
+    } else {
+        candidateEffects
+    }
 }
 
 suspend fun getMealEffectItems(
@@ -131,10 +157,31 @@ suspend fun getMealEffectItems(
     onlyRemoveAfterRest: Boolean = false,
     removeWhenPreparingCampsite: Boolean,
 ): List<PF2EEffect> = coroutineScope {
-    recipes
+    val items = recipes
         .map { async { getMealEffectItems(it, onlyRemoveAfterRest, removeWhenPreparingCampsite) } }
         .awaitAll()
         .flatten()
+
+    val protectedEffects = recipes.flatMap { getAllOutcomeEffects(it) }
+        .filter {
+            if (onlyRemoveAfterRest) {
+                it.removeAfterRest != true
+            } else if (removeWhenPreparingCampsite) {
+                it.removeWhenPreparingCampsite == false
+            } else {
+                false
+            }
+        }
+        .map { async { fromUuidTypeSafe<PF2EEffect>(it.uuid) } }
+        .awaitAll()
+        .filterNotNull()
+    val protectedNames = protectedEffects.mapNotNull { it.name }.toSet()
+
+    if (protectedNames.isNotEmpty()) {
+        items.filterNot { it.name in protectedNames }
+    } else {
+        items
+    }
 }
 
 suspend fun PF2EActor.removeConsumablesByName(names: Set<String>) {

@@ -208,6 +208,10 @@
             "freeForm": "Free Form"
         },
         "camping": {
+            "schedulerBlockedDowntimeHoursLimit": "角色在本次会话中的8小时休整时间已耗尽",
+            "schedulerBlockedActivityLimit": "角色已被分配了 {max} 项活动（已达8小时休整上限）",
+            "schedulerBlockedAlreadyAssigned": "另一名玩家角色已被分配到活动 '{activityName}'",
+            "schedulerBlockedAlreadySucceeded": "活动 '{activityName}' 已取得成功，本次会话中无法再次尝试",
             "restParty": "Rest: {partyName}",
             "hexSizeInMiles": "Hex Size in Miles",
             "hexSizeInMilesHelp": "If you are using smaller hexes, change this value to change hexploration activity length and amount",

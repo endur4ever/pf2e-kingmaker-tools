@@ -208,6 +208,10 @@
             "freeForm": "Free Form"
         },
         "camping": {
+            "schedulerBlockedDowntimeHoursLimit": "Персонаж исчерпал свой 8-часовой лимит времени отдыха в этой сессии",
+            "schedulerBlockedActivityLimit": "Персонаж уже назначен на {max} активностей (достигнут 8-часовой лимит отдыха)",
+            "schedulerBlockedAlreadyAssigned": "Другой персонаж уже назначен на активность '{activityName}'",
+            "schedulerBlockedAlreadySucceeded": "Активность '{activityName}' уже завершилась успехом и не может быть повторена в этой сессии",
             "restParty": "Rest: {partyName}",
             "hexSizeInMiles": "Hex Size in Miles",
             "hexSizeInMilesHelp": "If you are using smaller hexes, change this value to change hexploration activity length and amount",

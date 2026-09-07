@@ -208,6 +208,10 @@
             "freeForm": "Free Form"
         },
         "camping": {
+            "schedulerBlockedDowntimeHoursLimit": "Der Charakter hat sein 8-Stunden-Rastzeitbudget für diese Sitzung aufgebraucht",
+            "schedulerBlockedActivityLimit": "Der Charakter wurde bereits {max} Aktivitäten zugewiesen (8-Stunden-Rastzeitlimit erreicht)",
+            "schedulerBlockedAlreadyAssigned": "Ein anderer SC ist der Aktivität '{activityName}' bereits zugewiesen",
+            "schedulerBlockedAlreadySucceeded": "Die Aktivität '{activityName}' war bereits erfolgreich und kann in dieser Sitzung nicht wiederholt werden",
             "restParty": "Rest: {partyName}",
             "hexSizeInMiles": "Hex Size in Miles",
             "hexSizeInMilesHelp": "If you are using smaller hexes, change this value to change hexploration activity length and amount",

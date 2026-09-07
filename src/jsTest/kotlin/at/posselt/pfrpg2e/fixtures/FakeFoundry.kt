@@ -12,6 +12,7 @@ import com.foundryvtt.core._del
 import com.foundryvtt.core.utils.deepClone
 import com.foundryvtt.pf2e.actor.PF2ECharacter
 import com.foundryvtt.pf2e.item.PF2EConsumable
+import com.foundryvtt.pf2e.item.PF2EEffect
 import js.objects.Record
 import js.objects.unsafeJso
 import kotlin.js.Promise
@@ -444,6 +445,7 @@ fun createFakeKingdomActor(
     actor.type = "party"
     if (initialKingdom != null) {
         actor.setFlag(Config.moduleId, "kingdom", deepClone(initialKingdom))
+        actor.setFlag(Config.moduleId, "kingdom-sheet", deepClone(initialKingdom))
     }
     return actor.unsafeCast<KingdomActor>()
 }
@@ -501,4 +503,19 @@ fun createFakeConsumable(
     }
     item.update = updateItemFn
     return item.unsafeCast<PF2EConsumable>()
+}
+
+fun createFakeEffect(
+    id: String,
+    uuid: String,
+    name: String,
+): PF2EEffect {
+    val effectClass = js("globalThis.CONFIG.PF2E.Item.documentClasses.effect")
+    val item = js("Object.create(effectClass.prototype)")
+    item.id = id
+    item._id = id
+    item.uuid = uuid
+    item.name = name
+    item.type = "effect"
+    return item.unsafeCast<PF2EEffect>()
 }

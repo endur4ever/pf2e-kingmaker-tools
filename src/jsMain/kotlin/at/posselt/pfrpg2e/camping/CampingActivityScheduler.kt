@@ -2,6 +2,8 @@ package at.posselt.pfrpg2e.camping
 
 import at.posselt.pfrpg2e.data.checks.DegreeOfSuccess
 import at.posselt.pfrpg2e.fromCamelCase
+import at.posselt.pfrpg2e.utils.t
+import js.objects.recordOf
 
 /**
  * Validates camping activity scheduling rules.
@@ -92,19 +94,27 @@ object CampingActivityScheduler {
     fun canAssign(
         activities: Array<CampingActivityWithId>,
         activityData: CampingActivityData,
-        actorUuid: String
+        actorUuid: String,
+        camping: CampingData? = null,
     ): SchedulingResult {
+        // Authoritative downtime budget check
+        if (camping != null && isOverDowntimeHoursBudget(camping, actorUuid)) {
+            return SchedulingResult.Blocked(
+                t("camping.schedulerBlockedDowntimeHoursLimit")
+            )
+        }
+
         // Rule: max 8 hours downtime budget (4 activities per PC)
         if (isOverDowntimeBudget(activities, actorUuid)) {
             return SchedulingResult.Blocked(
-                "Actor has already been assigned to $MAX_ACTIVITIES_PER_PC activities (8-hour downtime limit reached)"
+                t("camping.schedulerBlockedActivityLimit", recordOf("max" to MAX_ACTIVITIES_PER_PC))
             )
         }
 
         // Rule: no two PCs may attempt the same camping activity at the same time
         if (isActivityAlreadyAttempted(activities, activityData.id, actorUuid)) {
             return SchedulingResult.Blocked(
-                "Another PC is already assigned to activity '${activityData.name}'"
+                t("camping.schedulerBlockedAlreadyAssigned", recordOf("activityName" to activityData.name))
             )
         }
 
@@ -112,7 +122,7 @@ object CampingActivityScheduler {
         // (unless oncePerSession is false)
         if (activityData.oncePerSession && hasActivitySucceeded(activities, activityData.id)) {
             return SchedulingResult.Blocked(
-                "Activity '${activityData.name}' has already succeeded and cannot be attempted again this session"
+                t("camping.schedulerBlockedAlreadySucceeded", recordOf("activityName" to activityData.name))
             )
         }
 

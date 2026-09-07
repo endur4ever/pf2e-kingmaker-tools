@@ -23,6 +23,27 @@ fun installFoundryGlobals() {
     js(
         """
         if (typeof globalThis._del === 'undefined') { globalThis._del = { __forcedDeletion: true }; }
+        if (typeof globalThis.flattenObject === 'undefined') {
+            globalThis.flattenObject = function(obj, _d) {
+                _d = _d || 0;
+                if (_d > 100) return {};
+                var flat = {};
+                for (var k in (obj || {})) {
+                    if (Object.prototype.hasOwnProperty.call(obj, k)) {
+                        var v = obj[k];
+                        if (v && typeof v === 'object' && !Array.isArray(v) && Object.keys(v).length > 0) {
+                            var nested = globalThis.flattenObject(v, _d + 1);
+                            for (var nk in nested) {
+                                flat[k + '.' + nk] = nested[nk];
+                            }
+                        } else {
+                            flat[k] = v;
+                        }
+                    }
+                }
+                return flat;
+            };
+        }
         if (typeof globalThis.CONFIG === 'undefined') { globalThis.CONFIG = {}; }
         if (typeof globalThis.CONFIG.PF2E === 'undefined') {
             function MockDoc() {}

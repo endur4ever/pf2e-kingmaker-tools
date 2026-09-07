@@ -208,6 +208,10 @@
             "freeForm": "Free Form"
         },
         "camping": {
+            "schedulerBlockedDowntimeHoursLimit": "Le personnage a épuisé son budget de 8 heures de temps mort pour cette session",
+            "schedulerBlockedActivityLimit": "Le personnage est déjà affecté à {max} activités (limite de 8 heures de temps mort atteinte)",
+            "schedulerBlockedAlreadyAssigned": "Un autre PJ est déjà affecté à l'activité '{activityName}'",
+            "schedulerBlockedAlreadySucceeded": "L'activité '{activityName}' a déjà réussi et ne peut pas être tentée à nouveau cette session",
             "restParty": "Rest: {partyName}",
             "hexSizeInMiles": "Hex Size in Miles",
             "hexSizeInMilesHelp": "If you are using smaller hexes, change this value to change hexploration activity length and amount",

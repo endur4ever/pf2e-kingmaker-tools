@@ -23,6 +23,7 @@ import at.posselt.pfrpg2e.utils.buildPromise
 import at.posselt.pfrpg2e.utils.escapeHtml
 import at.posselt.pfrpg2e.utils.fromUuidOfTypes
 import at.posselt.pfrpg2e.utils.isFirstGM
+import at.posselt.pfrpg2e.utils.worldTimeSeconds
 import at.posselt.pfrpg2e.utils.postChatMessage
 import at.posselt.pfrpg2e.utils.t
 import at.posselt.pfrpg2e.utils.typeSafeUpdate
@@ -60,9 +61,32 @@ import kotlin.math.round
  * - Moves traveling companions' tokens toward their destination hex and posts an
  *   arrival message when they get there.
  */
+internal var lastTickedWorldDay: Int? = null
+
+/**
+ * Calculates how many *new* unticked days were crossed, taking into account a high-water mark
+ * so rewinding and re-advancing the world clock does not re-trigger daily ticks.
+ */
+internal fun untickedDaysCrossed(worldTime: Int, deltaInSeconds: Int, highWaterMark: Int?): Pair<Int, Int?> {
+	if (deltaInSeconds <= 0) return 0 to highWaterMark
+	val daysPassed = daysCrossed(worldTime, deltaInSeconds)
+	if (daysPassed <= 0) return 0 to highWaterMark
+	val currentDay = worldTime.floorDiv(DAY_SECONDS)
+	val previousDay = (worldTime - deltaInSeconds).floorDiv(DAY_SECONDS)
+	val effectiveHighWater = highWaterMark ?: previousDay
+	val newDays = (currentDay - effectiveHighWater).coerceAtLeast(0)
+	val daysToTick = minOf(daysPassed, newDays)
+	val newHighWater = if (daysToTick > 0) maxOf(effectiveHighWater, currentDay) else highWaterMark
+	return daysToTick to newHighWater
+}
+
 fun registerDailyTickHooks(game: Game) {
+	if (lastTickedWorldDay == null) {
+		lastTickedWorldDay = game.time.worldTimeSeconds.floorDiv(DAY_SECONDS)
+	}
 	TypedHooks.onUpdateWorldTime { worldTime, deltaInSeconds, _, _ ->
-		val daysPassed = daysCrossed(worldTime, deltaInSeconds)
+		val (daysPassed, newHighWater) = untickedDaysCrossed(worldTime, deltaInSeconds, lastTickedWorldDay)
+		lastTickedWorldDay = newHighWater
 		if (game.isFirstGM() && daysPassed >= 1) {
 			buildPromise {
 					rollDailyWeather(game)
@@ -102,7 +126,7 @@ fun registerDailyTickHooks(game: Game) {
  * (`worldTime` - `deltaInSeconds`) to `worldTime`. Zero or negative when time did
  * not advance past a day boundary (or was rewound).
  */
-private fun daysCrossed(worldTime: Int, deltaInSeconds: Int): Int {
+internal fun daysCrossed(worldTime: Int, deltaInSeconds: Int): Int {
 	if (deltaInSeconds <= 0) return 0
 	val previous = worldTime - deltaInSeconds
 	return worldTime.floorDiv(DAY_SECONDS) - previous.floorDiv(DAY_SECONDS)

@@ -330,6 +330,10 @@
             "freeForm": "Free Form"
         },
         "camping": {
+            "schedulerBlockedDowntimeHoursLimit": "Actor has exhausted their 8-hour downtime budget for this session",
+            "schedulerBlockedActivityLimit": "Actor has already been assigned to {max} activities (8-hour downtime limit reached)",
+            "schedulerBlockedAlreadyAssigned": "Another PC is already assigned to activity '{activityName}'",
+            "schedulerBlockedAlreadySucceeded": "Activity '{activityName}' has already succeeded and cannot be attempted again this session",
             "restParty": "Rest: {partyName}",
             "hexSizeInMiles": "Hex Size in Miles",
             "hexSizeInMilesHelp": "If you are using smaller hexes, change this value to change hexploration activity length and amount",

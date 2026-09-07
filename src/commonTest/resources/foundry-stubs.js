@@ -25,6 +25,22 @@ const foundry = {
         deepClone: function(x) {
             return (x == null) ? x : JSON.parse(JSON.stringify(x));
         },
+        flattenObject: function(obj, _d) {
+            _d = _d || 0;
+            if (_d > 100) return {};
+            const flat = {};
+            for (const [k, v] of Object.entries(obj || {})) {
+                if (v && typeof v === "object" && !Array.isArray(v) && Object.keys(v).length > 0) {
+                    const nested = foundry.utils.flattenObject(v, _d + 1);
+                    for (const [nk, nv] of Object.entries(nested)) {
+                        flat[`${k}.${nk}`] = nv;
+                    }
+                } else {
+                    flat[k] = v;
+                }
+            }
+            return flat;
+        },
         fromUuid: function(uuid) {
             if (globalThis.fromUuidMock) {
                 return globalThis.fromUuidMock(uuid);
@@ -106,6 +122,8 @@ const foundry = {
 }
 foundry.documents.Scene = class extends foundry.abstract.Document {};
 globalThis.foundry = foundry;
+globalThis.deepClone = foundry.utils.deepClone;
+globalThis.flattenObject = foundry.utils.flattenObject;
 
 var CONFIG = globalThis.CONFIG = {
     PF2E: {

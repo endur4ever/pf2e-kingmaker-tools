@@ -48,6 +48,7 @@ import at.posselt.pfrpg2e.camping.parseResult
 import at.posselt.pfrpg2e.camping.getAppliedCampingEffects
 import at.posselt.pfrpg2e.camping.getAppliedMealEffects
 import at.posselt.pfrpg2e.camping.getCampingActorsByUuid
+import at.posselt.pfrpg2e.camping.getUnavailableCampActorUuids
 import at.posselt.pfrpg2e.camping.getMealEffectItems
 import at.posselt.pfrpg2e.camping.mealEffectsChangingRestDuration
 import at.posselt.pfrpg2e.camping.mealEffectsDoublingHealing
@@ -300,9 +301,10 @@ private suspend fun beginRest(
     camping: CampingData,
     party: PF2EParty?,
 ) {
+    val unavailableUuids = getUnavailableCampActorUuids(game)
     val actorsByUuid = getCampingActorsByUuid(camping.actorUuids).associateBy(PF2EActor::uuid)
     val watchers = actorsByUuid.values
-        .filter { !camping.actorUuidsNotKeepingWatch.contains(it.uuid) }
+        .filter { it.uuid !in unavailableUuids && !camping.actorUuidsNotKeepingWatch.contains(it.uuid) }
     val watchDurationSeconds = getFullRestSeconds(
         watchers = watchers,
         recipes = camping.getAllRecipes().toList(),
@@ -338,6 +340,7 @@ private suspend fun beginRest(
         // Everyone assigned to this watch slot rolls Perception. When no watch slots
         // are configured, fall back to the whole watch rotation.
         val onWatch = slotActorUuids
+            .filter { it !in unavailableUuids }
             .mapNotNull { actorsByUuid[it] }
             .filterIsInstance<PF2ECharacter>()
             .ifEmpty { characterWatchers }

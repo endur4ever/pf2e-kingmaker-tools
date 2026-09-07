@@ -388,20 +388,26 @@ fun CampingData.campingActivitiesWithId() =
 suspend fun CampingData.getActorsCarryingFood(party: PF2EParty?): List<PF2EActor> =
     getActorsInCamp() + listOfNotNull(party)
 
-suspend fun CampingData.getActorsInCamp(
-    campingActivityOnly: Boolean = false,
-): List<PF2EActor> = coroutineScope {
-    val onExpeditionUuids = game.getKingdomActors()
+fun getUnavailableCampActorUuids(game: Game): Set<String> =
+    game.getKingdomActors()
         .mapNotNull { it.getKingdom() }
         .flatMap { kingdom ->
             (kingdom.companions ?: emptyArray())
-                .filter { it.expeditionStatus == "onExpedition" }
+                .filter { companion ->
+                    companion.asDynamic().campAvailable == false
+                        || companion.asDynamic().expeditionStatus == "onExpedition"
+                }
                 .mapNotNull { it.actorUuid }
         }
         .toSet()
 
+suspend fun CampingData.getActorsInCamp(
+    campingActivityOnly: Boolean = false,
+): List<PF2EActor> = coroutineScope {
+    val unavailableUuids = getUnavailableCampActorUuids(game)
+
     actorUuids
-        .filter { it !in onExpeditionUuids }
+        .filter { it !in unavailableUuids }
         .map {
             async {
                 if (campingActivityOnly) {

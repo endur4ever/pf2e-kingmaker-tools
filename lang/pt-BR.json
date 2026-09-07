@@ -208,6 +208,10 @@
             "freeForm": "Free Form"
         },
         "camping": {
+            "schedulerBlockedDowntimeHoursLimit": "O personagem esgotou seu orçamento de 8 horas de inatividade para esta sessão",
+            "schedulerBlockedActivityLimit": "O personagem já foi designado para {max} atividades (limite de 8 horas de inatividade atingido)",
+            "schedulerBlockedAlreadyAssigned": "Outro PJ já está designado para a atividade '{activityName}'",
+            "schedulerBlockedAlreadySucceeded": "A atividade '{activityName}' já foi bem-sucedida e não pode ser tentada novamente nesta sessão",
             "restParty": "Rest: {partyName}",
             "hexSizeInMiles": "Hex Size in Miles",
             "hexSizeInMilesHelp": "If you are using smaller hexes, change this value to change hexploration activity length and amount",

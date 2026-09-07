@@ -387,15 +387,26 @@ class CampingSettingsApplication(
     override fun fixObject(value: dynamic) {
         @Suppress("UNCHECKED_CAST_TO_EXTERNAL_INTERFACE")
         val actors = (value["actorUuidsNotKeepingWatch"] ?: unsafeJso()) as Record<String, Boolean>
-        value["actorUuidsNotKeepingWatch"] = flattenObject(actors).asSequence()
+        val flattenedActors = flattenObject(actors)
+        val renderedActorUuids = flattenedActors.asSequence().map { it.component1() }.toSet()
+        val checkedActorUuids = flattenedActors.asSequence()
             .filter { it.component2() == true }
             .map { it.component1() }
-            .toTypedArray()
+            .toSet()
+        val preservedActorUuids = settings.actorUuidsNotKeepingWatch
+            .filter { it !in renderedActorUuids }
+        value["actorUuidsNotKeepingWatch"] = (checkedActorUuids + preservedActorUuids).toTypedArray()
+
         val activities = (value["alwaysPerformActivities"] ?: unsafeJso()).unsafeCast<Record<String, Boolean>>()
-        value["alwaysPerformActivities"] = flattenObject(activities).asSequence()
+        val flattenedActivities = flattenObject(activities)
+        val renderedActivityIds = flattenedActivities.asSequence().map { it.component1() }.toSet()
+        val checkedActivityIds = flattenedActivities.asSequence()
             .filter { it.component2() == true }
             .map { it.component1() }
-            .toTypedArray()
+            .toSet()
+        val preservedActivityIds = settings.alwaysPerformActivities
+            .filter { it !in renderedActivityIds }
+        value["alwaysPerformActivities"] = (checkedActivityIds + preservedActivityIds).toTypedArray()
     }
 
     override fun onParsedSubmit(value: CampingSettings): Promise<Void> = buildPromise {

@@ -208,6 +208,10 @@
             "freeForm": "Free Form"
         },
         "camping": {
+            "schedulerBlockedDowntimeHoursLimit": "Postać wyczerpała swój 8-godzinny budżet przestoju na tę sesję",
+            "schedulerBlockedActivityLimit": "Postać została już przypisana do {max} aktywności (osiągnięto 8-godzinny limit przestoju)",
+            "schedulerBlockedAlreadyAssigned": "Inna postać gracza jest już przypisana do aktywności '{activityName}'",
+            "schedulerBlockedAlreadySucceeded": "Aktywność '{activityName}' już zakończyła się sukcesem i nie może być ponowiona w tej sesji",
             "restParty": "Rest: {partyName}",
             "hexSizeInMiles": "Hex Size in Miles",
             "hexSizeInMilesHelp": "If you are using smaller hexes, change this value to change hexploration activity length and amount",

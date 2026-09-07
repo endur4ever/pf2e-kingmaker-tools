@@ -9,6 +9,7 @@ import at.posselt.pfrpg2e.app.forms.formContext
 import at.posselt.pfrpg2e.camping.CampingData
 import at.posselt.pfrpg2e.camping.getAllRecipes
 import at.posselt.pfrpg2e.camping.getCampingActorsByUuid
+import at.posselt.pfrpg2e.camping.getUnavailableCampActorUuids
 import at.posselt.pfrpg2e.resting.getTotalRestDuration
 import at.posselt.pfrpg2e.settings.pfrpg2eKingdomCampingWeather
 import at.posselt.pfrpg2e.utils.buildPromise
@@ -95,8 +96,9 @@ class ConfirmWatchApplication(
 
     private suspend fun calculateWatch(): String {
         val actorsByUuid = getCampingActorsByUuid(camping.actorUuids).associateBy(PF2EActor::uuid)
+        val unavailableUuids = getUnavailableCampActorUuids(game)
         val fullRestDuration = getTotalRestDuration(
-            watchers = actorsByUuid.values.filter { !camping.actorUuidsNotKeepingWatch.contains(it.uuid) },
+            watchers = actorsByUuid.values.filter { it.uuid !in unavailableUuids && !camping.actorUuidsNotKeepingWatch.contains(it.uuid) },
             recipes = camping.getAllRecipes().toList(),
             gunsToClean = camping.gunsToClean,
             increaseActorsKeepingWatch = camping.increaseWatchActorNumber,
