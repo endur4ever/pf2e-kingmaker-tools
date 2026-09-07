@@ -58,8 +58,8 @@ def get_untracked_files():
     return set(out.splitlines()) if out else set()
 
 
-def check_pack(pack_dir, tracked_files, untracked_files):
-    """Check a single pack directory. Returns list of error messages (empty = OK)."""
+def check_pack(pack_dir, tracked_files, untracked_files, strict=False):
+    """Check a single pack directory. Returns (errors, is_live_rotation)."""
     errors = []
     pack_name = pack_dir.name
     rel_pack = pack_dir.relative_to(ROOT)
@@ -68,12 +68,12 @@ def check_pack(pack_dir, tracked_files, untracked_files):
     current_file = pack_dir / "CURRENT"
     if not current_file.exists():
         errors.append(f"[{pack_name}] MISSING CURRENT file")
-        return errors
+        return errors, False
 
     current_content = current_file.read_text().strip()
     if not current_content:
         errors.append(f"[{pack_name}] CURRENT file is empty")
-        return errors
+        return errors, False
 
     # The CURRENT file contains the manifest filename (e.g., "MANIFEST-002281")
     manifest_name = current_content
@@ -86,13 +86,15 @@ def check_pack(pack_dir, tracked_files, untracked_files):
             f"[{pack_name}] CURRENT references missing manifest: {manifest_name}\n"
             f"  REMEDIATION: git rm {rel_pack}/CURRENT  # then restore CURRENT from a known-good commit"
         )
-        return errors
+        return errors, False
 
-    # 3. Check that the manifest is tracked
-    if str(rel_manifest) not in tracked_files:
+    # Check for untracked *.ldb files
+    untracked_ldb = [f for f in pack_dir.glob("*.ldb") if str(f.relative_to(ROOT)) in untracked_files]
+    for f in untracked_ldb:
+        rel_f = f.relative_to(ROOT)
         errors.append(
-            f"[{pack_name}] Manifest {manifest_name} (referenced by CURRENT) is UNTRACKED\n"
-            f"  REMEDIATION: git add {rel_manifest}"
+            f"[{pack_name}] Untracked .ldb file: {f.name}\n"
+            f"  REMEDIATION: git add {rel_f}"
         )
 
     # 4. Check CURRENT itself is tracked
@@ -103,31 +105,40 @@ def check_pack(pack_dir, tracked_files, untracked_files):
             f"  REMEDIATION: git add {rel_current}"
         )
 
+    # Check whether this is a live manifest rotation:
+    # CURRENT points to an existing manifest on disk, no untracked .ldb files exist,
+    # but the manifest is not yet tracked in git.
+    manifest_is_tracked = str(rel_manifest) in tracked_files
+    is_live_rotation = (not manifest_is_tracked) and manifest_path.exists() and (len(untracked_ldb) == 0)
+
+    # 3. Check that the manifest is tracked (unless it's an allowed live rotation)
+    if not manifest_is_tracked:
+        if strict or not is_live_rotation:
+            errors.append(
+                f"[{pack_name}] Manifest {manifest_name} (referenced by CURRENT) is UNTRACKED\n"
+                f"  REMEDIATION: git add {rel_manifest}"
+            )
+
     # 5. Check for untracked MANIFEST-* files
     for f in pack_dir.glob("MANIFEST-*"):
         rel_f = f.relative_to(ROOT)
         if str(rel_f) in untracked_files:
+            # In relaxed mode, the live manifest referenced by CURRENT is allowed
+            if is_live_rotation and f.name == manifest_name and not strict:
+                continue
             errors.append(
                 f"[{pack_name}] Untracked MANIFEST file: {f.name}\n"
                 f"  REMEDIATION: git add {rel_f}   # if CURRENT points here, also update CURRENT\n"
                 f"  OR:          git clean -f {rel_f}  # if stale (CURRENT points elsewhere)"
             )
 
-    # 6. Check for untracked *.ldb files
-    for f in pack_dir.glob("*.ldb"):
-        rel_f = f.relative_to(ROOT)
-        if str(rel_f) in untracked_files:
-            errors.append(
-                f"[{pack_name}] Untracked .ldb file: {f.name}\n"
-                f"  REMEDIATION: git add {rel_f}"
-            )
-
-    return errors
+    return errors, is_live_rotation
 
 
 def main():
     parser = argparse.ArgumentParser(description="Check packs/ LevelDB consistency")
     parser.add_argument("--test", action="store_true", help="Run self-test (stages a temp file)")
+    parser.add_argument("--strict", action="store_true", help="Disallow untracked live manifest rotations")
     args = parser.parse_args()
 
     if not PACKS_DIR.exists():
@@ -145,7 +156,7 @@ def main():
             # Run the check (it should fail)
             tracked = get_tracked_files()
             untracked = get_untracked_files()
-            errors = check_pack(test_pack, tracked, untracked)
+            errors, _ = check_pack(test_pack, tracked, untracked, strict=args.strict)
             if errors:
                 print("[TEST] PASS: Script correctly detected untracked manifest")
                 for e in errors:
@@ -164,10 +175,13 @@ def main():
     untracked_files = get_untracked_files()
 
     all_errors = []
+    live_rotations = 0
     pack_dirs = [d for d in PACKS_DIR.iterdir() if d.is_dir() and not d.name.startswith('.')]
     for pack_dir in sorted(pack_dirs):
-        errors = check_pack(pack_dir, tracked_files, untracked_files)
+        errors, is_live = check_pack(pack_dir, tracked_files, untracked_files, strict=args.strict)
         all_errors.extend(errors)
+        if is_live:
+            live_rotations += 1
 
     if all_errors:
         print(f"\n[FAIL] Packs consistency check found {len(all_errors)} issue(s):\n")
@@ -176,7 +190,8 @@ def main():
             print()
         sys.exit(1)
     else:
-        print("[OK] All packs consistent: CURRENT manifests tracked, no untracked MANIFEST/*.ldb files")
+        rotation_note = f" ({live_rotations} live rotation(s) permitted)" if live_rotations else ""
+        print(f"[OK] All packs consistent: CURRENT manifests valid{rotation_note}, no untracked MANIFEST/*.ldb files")
         sys.exit(0)
 
 
