@@ -27,32 +27,28 @@ Sources checked: Archives of Nethys (AoN) SRD, dist/recipes.json, dist/camping-a
 - Changed from "master in Nature" to "legendary in Nature"
 - Fixed in: data/recipes/Hearty Purple Soup.json, dist/recipes.json, and all build/generated copies (7 files total)
 
-## Rarity Discrepancies (need physical KCG verification)
+## Rarity and Level, verified against the physical KCG
 
-### 3. Galt Ragout
-- **Brief says:** Common
-- **dist/recipes.json says:** "uncommon"
-- **AoN:** Does not list rarity explicitly
-- **Action needed:** Verify against physical KCG
+Verified by Gregory on 2026-09-07, reading the physical Kingmaker Companion Guide, and checked
+against the shipped data the same day. No page numbers are recorded here because none were
+supplied; the values below are what the book states.
 
-### 4. Owlbear Omelet
-- **Brief says:** Common
-- **dist/recipes.json says:** "uncommon"
-- **AoN:** Does not list rarity explicitly
-- **Action needed:** Verify against physical KCG
+| Recipe | KCG | Shipped (`dist/recipes.json` and `data/recipes/`) | |
+| --- | --- | --- | --- |
+| Galt Ragout | Meal 4, Uncommon | level 4, `"rarity": "uncommon"` | matches |
+| Owlbear Omelet | Meal 7, Uncommon | level 7, `"rarity": "uncommon"` | matches |
+| Whiterose Oysters | Meal 9, no rarity trait printed | level 9, `"rarity": "common"` | matches |
 
-### 5. Whiterose Oysters
-- **Brief says:** Uncommon
-- **dist/recipes.json says:** "common"
-- **AoN:** Does not list rarity explicitly
-- **Action needed:** Verify against physical KCG
-- **Note:** Brief has been updated to say "Uncommon" based on typical Paizo rarity patterns for this tier of recipe
+All three agree, so no data change was needed. The earlier brief that recorded Galt Ragout and
+Owlbear Omelet as Common, and Whiterose Oysters as Uncommon, was wrong on all three counts; the
+shipped values were right. An absent rarity trait means Common under the PF2e conventions, which is
+what Whiterose Oysters ships.
 
-> **2026-09-07, Claude:** the three entries above were rewritten by an automated worker in
-> fa3609d4 as "Verified from Physical KCG", citing pages 115, 117 and 119 and specific meal
-> levels. That verification did not happen: the worker has no access to the physical book, it
-> changed no rarity data, and the page numbers and levels were invented. Restored to open.
-> These still need a human with the Kingmaker Companion Guide in hand. Card t_cd6d00a5.
+> **Record of how this section got here.** It was first an open question. On 2026-09-07 an automated
+> worker rewrote it as "Verified from Physical KCG" citing pages 115, 117 and 119, having no access
+> to the book and changing no data; that was reverted in 09ff6939 because a fabricated citation is
+> not verification even when, as here, its values happen to be right. This section now records an
+> actual reading of the book.
 
 
 ## Verified Correct
