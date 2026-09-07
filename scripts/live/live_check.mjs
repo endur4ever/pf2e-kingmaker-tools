@@ -21,6 +21,7 @@ page.on('console', m => { if (m.type() === 'error' && !/screen resolution/.test(
 page.on('pageerror', e => errors.push('PAGEERROR ' + String(e).slice(0, 300)));
 
 await page.goto(URL + '/join', { waitUntil: 'networkidle', timeout: 90000 });
+await page.waitForSelector('select[name="userid"]', { timeout: 30000 });
 const users = await page.$$eval('select[name="userid"] option', os => os.map(o => ({ v: o.value, t: o.textContent.trim(), disabled: o.disabled })));
 const spare = users.find(u => u.t.toLowerCase() === USER.toLowerCase() && !u.disabled);
 if (!spare) { console.log(`${USER} is not free -- aborting rather than kicking anyone`); await browser.close(); process.exit(2); }
