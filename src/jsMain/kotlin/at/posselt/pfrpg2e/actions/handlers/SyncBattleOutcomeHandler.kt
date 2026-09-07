@@ -8,7 +8,6 @@ import at.posselt.pfrpg2e.kingdom.setKingdom
 import at.posselt.pfrpg2e.kingdom.data.RawArmyBattle
 import at.posselt.pfrpg2e.kingdom.data.RawWarThreat
 import at.posselt.pfrpg2e.kingdom.data.WarThreatStatus
-import at.posselt.pfrpg2e.kingdom.recalculateWarPressure
 import at.posselt.pfrpg2e.data.armies.BattleStatus
 import at.posselt.pfrpg2e.data.armies.shouldOfferArmyLevelUp
 import at.posselt.pfrpg2e.data.armies.xpThresholdForLevel
