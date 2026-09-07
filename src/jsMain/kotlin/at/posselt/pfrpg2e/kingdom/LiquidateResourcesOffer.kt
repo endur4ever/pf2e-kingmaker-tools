@@ -34,9 +34,8 @@ suspend fun offerLiquidateResources(
     previousRp: Int,
     chosenFeats: List<ChosenFeat>,
 ) {
-    if (previousRp <= 0) return
-    if (kingdom.resourcePoints.now > 0) return
-    if (kingdom.liquidateUsedThisTurn()) return
+    val expense = previousRp - kingdom.resourcePoints.now
+    if (!canLiquidateResources(currentRp = previousRp, expense = expense, alreadyUsedThisTurn = kingdom.liquidateUsedThisTurn())) return
     if (chosenFeats.none { it.feat.id == LIQUIDATE_RESOURCES_FEAT }) return
     val gmUserIds = game.users.filter { it.isGM }.mapNotNull { it.id }.toTypedArray()
     if (gmUserIds.isEmpty()) return

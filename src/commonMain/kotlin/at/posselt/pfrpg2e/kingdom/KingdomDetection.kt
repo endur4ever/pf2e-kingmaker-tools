@@ -1,8 +1,5 @@
 package at.posselt.pfrpg2e.kingdom
 
-import at.posselt.pfrpg2e.data.hex.HexContent
-import at.posselt.pfrpg2e.kingdom.WarThreatSnapshot
-
 /**
  * Pure detection helpers for the Turn Wizard attention rows.
  * These functions operate on primitive data (counts/flags) only — no jsMain types.
@@ -93,53 +90,6 @@ fun buildAttentionRows(
             highlight = companionsInjured > 0
         )
     )
-}
-
-/**
- * Detects which war threats were newly triggered (arrived) this turn.
- *
- * A threat is "newly triggered" if its [triggeredTurn] was null before the tick
- * and equals [currentTurn] after the tick. This corresponds to the moment
- * a threat's escalation hits max and [triggeredTurn] gets set (see [tickWarThreat]).
- *
- * @param beforeThreats War threats state before the tick.
- * @param afterThreats War threats state after the tick.
- * @param currentTurn Current kingdom turn number.
- * @return List of threat IDs that were newly triggered this turn.
- */
-fun detectNewlyTriggeredWarThreats(
-    beforeThreats: Array<WarThreatSnapshot>,
-    afterThreats: Array<WarThreatSnapshot>,
-    currentTurn: Int,
-): List<String> {
-    val beforeMap = beforeThreats.associateBy { it.id }
-    return afterThreats
-        .filter { after ->
-            val before = beforeMap[after.id]
-            // Newly triggered: had no triggeredTurn before, now has currentTurn
-            before?.triggeredTurn == null && after.triggeredTurn == currentTurn
-        }
-        .map { it.id }
-}
-
-/**
- * Detects which war threats have a linked hex content entry.
- *
- * @param threats War threats to check.
- * @param hexContents Kingdom hex contents.
- * @return Set of threat IDs that have at least one hex content linking to them.
- */
-fun detectWarThreatsWithLinkedHex(
-    threats: Array<WarThreatSnapshot>,
-    hexContents: Array<HexContent>,
-): Set<String> {
-    val linkedThreatIds = hexContents
-        .mapNotNull { it.linkedWarThreatId?.takeIf { it.isNotBlank() } }
-        .toSet()
-    return threats
-        .filter { it.id in linkedThreatIds }
-        .map { it.id }
-        .toSet()
 }
 
 data class AttentionRow(

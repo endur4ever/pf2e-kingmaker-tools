@@ -6,6 +6,7 @@ import at.posselt.pfrpg2e.kingdom.data.RawCharacter
 import at.posselt.pfrpg2e.kingdom.data.RawExpeditionChronicleEntry
 import kotlinx.js.JsPlainObject
 import at.posselt.pfrpg2e.kingdom.groupChronicleByTurn
+import at.posselt.pfrpg2e.kingdom.chronicleEntryCount
 import at.posselt.pfrpg2e.kingdom.ChronicleEntry
 
 @JsPlainObject
@@ -151,7 +152,7 @@ fun Array<RawCompanionExpedition>.toExpeditionsContext(
             )
         }
         .toTypedArray()
-    val chronicleTurns = groupChronicleByTurn(
+    val turnGroups = groupChronicleByTurn(
         chronicle.map {
             ChronicleEntry(
                 turn = it.turn,
@@ -160,7 +161,8 @@ fun Array<RawCompanionExpedition>.toExpeditionsContext(
                 appliedAt = it.appliedAt,
             )
         },
-    ).map { group ->
+    )
+    val chronicleTurns = turnGroups.map { group ->
         ChronicleTurnContext(
             turn = group.turn,
             entries = group.entries.mapIndexed { index, entry ->
@@ -188,7 +190,7 @@ fun Array<RawCompanionExpedition>.toExpeditionsContext(
     return ExpeditionsContext(
         items = items,
         chronicleTurns = chronicleTurns,
-        hasChronicle = chronicleTurns.isNotEmpty(),
+        hasChronicle = chronicleEntryCount(turnGroups) > 0,
         isGM = isGM,
         hasExpeditions = items.isNotEmpty(),
         hasAwaitingResolution = items.any { it.isAwaitingResolution },

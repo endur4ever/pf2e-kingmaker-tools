@@ -28,6 +28,8 @@ import at.posselt.pfrpg2e.camping.dialogs.CategoryWeightSettingsApplication
 import at.posselt.pfrpg2e.camping.dialogs.ConfirmWatchApplication
 import at.posselt.pfrpg2e.camping.dialogs.FavoriteMealsApplication
 import at.posselt.pfrpg2e.camping.dialogs.ManageActivitiesApplication
+import at.posselt.pfrpg2e.kingdom.data.toModel
+import at.posselt.pfrpg2e.kingdom.downtime.appendDowntimeProject
 import at.posselt.pfrpg2e.camping.dialogs.ManageRecipesApplication
 import at.posselt.pfrpg2e.camping.dialogs.RegionConfig
 import at.posselt.pfrpg2e.camping.dialogs.pickSpecialRecipe
@@ -657,7 +659,15 @@ class CampingSheet(
                     settlements = settlements,
                     afterSubmit = { raw ->
                         kingdomActor.getKingdom()?.let { current ->
-                            current.downtimeProjects = (current.downtimeProjects ?: emptyArray()) + raw
+                            val model = raw.toModel()
+                            if (model != null) {
+                                val currentModels = (current.downtimeProjects ?: emptyArray()).mapNotNull { it.toModel() }
+                                val rawMap = (current.downtimeProjects ?: emptyArray()).associateBy { it.id } + (raw.id to raw)
+                                val updatedModels = appendDowntimeProject(currentModels, model)
+                                current.downtimeProjects = updatedModels.mapNotNull { rawMap[it.id] }.toTypedArray()
+                            } else {
+                                current.downtimeProjects = (current.downtimeProjects ?: emptyArray()) + raw
+                            }
                             kingdomActor.setKingdom(current)
                         }
                         render()

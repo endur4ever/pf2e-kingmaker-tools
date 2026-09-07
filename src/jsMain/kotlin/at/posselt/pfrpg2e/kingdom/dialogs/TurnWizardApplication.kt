@@ -81,6 +81,7 @@ import at.posselt.pfrpg2e.kingdom.countQuestsFailingThisTurn
 import at.posselt.pfrpg2e.kingdom.countWarThreatsAtMaxEscalation
 import at.posselt.pfrpg2e.kingdom.countExpeditionsAwaitingResolution
 import at.posselt.pfrpg2e.kingdom.countInjuredCompanions
+import at.posselt.pfrpg2e.kingdom.buildAttentionRows
 import at.posselt.pfrpg2e.kingdom.CARAVAN_BASE_RAID_DC
 import at.posselt.pfrpg2e.kingdom.CaravanEventKind
 import at.posselt.pfrpg2e.kingdom.CaravanEvent
@@ -1714,12 +1715,29 @@ class TurnWizardApplication(
                 }
             )
 
-            allItems.addAll(listOf(
-                ChecklistItemInfo("attention-quests-failing", t("kingdom.turnWizard.checklist.questsFailing"), questsFailing > 0, isAttention = true, count = questsFailing, icon = "fa-solid fa-scroll"),
-                ChecklistItemInfo("attention-war-threats-max", t("kingdom.turnWizard.checklist.warThreatsMax"), warThreatsMax > 0, isAttention = true, count = warThreatsMax, icon = "fa-solid fa-skull-crossbones"),
-                ChecklistItemInfo("attention-expeditions-awaiting", t("kingdom.turnWizard.checklist.expeditionsAwaiting"), expeditionsAwaiting > 0, isAttention = true, count = expeditionsAwaiting, icon = "fa-solid fa-compass"),
-                ChecklistItemInfo("attention-companions-injured", t("kingdom.turnWizard.checklist.companionsInjured"), companionsInjured > 0, isAttention = true, count = companionsInjured, icon = "fa-solid fa-user-injured"),
-            ))
+            val attentionRows = buildAttentionRows(
+                questsFailingThisTurn = questsFailing,
+                warThreatsAtMax = warThreatsMax,
+                expeditionsAwaiting = expeditionsAwaiting,
+                companionsInjured = companionsInjured,
+            )
+            allItems.addAll(attentionRows.map { row ->
+                val (itemId, icon) = when (row.id) {
+                    "questsFailing" -> "attention-quests-failing" to "fa-solid fa-scroll"
+                    "warThreatsMax" -> "attention-war-threats-max" to "fa-solid fa-skull-crossbones"
+                    "expeditionsAwaiting" -> "attention-expeditions-awaiting" to "fa-solid fa-compass"
+                    "companionsInjured" -> "attention-companions-injured" to "fa-solid fa-user-injured"
+                    else -> "attention-${row.id}" to "fa-solid fa-circle-exclamation"
+                }
+                ChecklistItemInfo(
+                    id = itemId,
+                    label = t(row.i18nKey),
+                    highlight = row.highlight,
+                    isAttention = true,
+                    count = row.count,
+                    icon = icon,
+                )
+            })
 
             val shownSequence = allItems.map { it.id }
             val rawChecklist = mutableListOf<ChecklistItemContext>()

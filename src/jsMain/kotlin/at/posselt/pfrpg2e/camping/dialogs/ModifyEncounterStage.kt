@@ -11,6 +11,7 @@ import at.posselt.pfrpg2e.camping.EncounterThreat
 import at.posselt.pfrpg2e.camping.creatureXpContribution
 import at.posselt.pfrpg2e.camping.creatureList
 import at.posselt.pfrpg2e.camping.encounterBudget
+import at.posselt.pfrpg2e.camping.manifestXpTotal
 import at.posselt.pfrpg2e.camping.spawnCount
 import at.posselt.pfrpg2e.camping.stageEncounter
 import at.posselt.pfrpg2e.camping.threatForXp
@@ -195,10 +196,10 @@ class ModifyEncounterStage(
         val members = runCatching { partyActor.partyMembers() }.getOrNull() ?: emptyArray()
         val partySize = members.size.coerceAtLeast(1)
         val partyLevel = members.maxOfOrNull { it.level } ?: 1
-        val totalXp = creatures.sumOf { row ->
-            val level = resolved[row.uuid]?.second ?: 0
-            creatureXpContribution(partyLevel, level) * row.count.coerceAtLeast(0)
-        }
+        val totalXp = manifestXpTotal(
+            partyLevel = partyLevel,
+            creatureLevels = creatures.map { (resolved[it.uuid]?.second ?: 0) to it.count },
+        )
         EncounterStageContext(
             partId = parent.partId,
             isFormValid = true,
