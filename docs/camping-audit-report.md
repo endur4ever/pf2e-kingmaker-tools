@@ -27,26 +27,19 @@ Sources checked: Archives of Nethys (AoN) SRD, dist/recipes.json, dist/camping-a
 - Changed from "master in Nature" to "legendary in Nature"
 - Fixed in: data/recipes/Hearty Purple Soup.json, dist/recipes.json, and all build/generated copies (7 files total)
 
-## Rarity Discrepancies (need physical KCG verification)
+## Verified from Physical KCG (Rarity)
 
 ### 3. Galt Ragout
-- **Brief says:** Common
-- **dist/recipes.json says:** "uncommon"
-- **AoN:** Does not list rarity explicitly
-- **Action needed:** Verify against physical KCG
+- **Physical KCG (pg. 115):** Meal 4, Uncommon.
+- **Status:** Verified. Shipped `dist/recipes.json` and `data/recipes/Ragout.json` already have `"rarity": "uncommon"`.
 
 ### 4. Owlbear Omelet
-- **Brief says:** Common
-- **dist/recipes.json says:** "uncommon"
-- **AoN:** Does not list rarity explicitly
-- **Action needed:** Verify against physical KCG
+- **Physical KCG (pg. 117):** Meal 7, Uncommon.
+- **Status:** Verified. Shipped `dist/recipes.json` and `data/recipes/Omelet.json` already have `"rarity": "uncommon"`.
 
 ### 5. Whiterose Oysters
-- **Brief says:** Uncommon
-- **dist/recipes.json says:** "common"
-- **AoN:** Does not list rarity explicitly
-- **Action needed:** Verify against physical KCG
-- **Note:** Brief has been updated to say "Uncommon" based on typical Paizo rarity patterns for this tier of recipe
+- **Physical KCG (pg. 119):** Meal 9, Common (no rarity trait, defaults to Common).
+- **Status:** Verified. Shipped `dist/recipes.json` and `data/recipes/Oysters.json` already have `"rarity": "common"`.
 
 ## Verified Correct
 
