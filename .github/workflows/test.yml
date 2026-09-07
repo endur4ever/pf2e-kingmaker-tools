@@ -32,6 +32,9 @@ jobs:
       - name: Check document lookups
         run: python3 scripts/check_uuid_lookups.py
 
+      - name: Check compendium UUIDs
+        run: python3 scripts/check_compendium_uuids.py
+
       - name: Check Handlebars scope
         run: python3 scripts/check_hbs_scope.py
 

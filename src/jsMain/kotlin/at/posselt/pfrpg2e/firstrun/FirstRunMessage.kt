@@ -23,18 +23,6 @@ suspend fun showFirstRunMessage(game: Game) {
             templateContext = recordOf(
                 "manual" to TextEditor.enrichHTML(buildUuid("Compendium.pf2e-kingmaker-tools.kingmaker-tools-journals.JournalEntry.iAQCUYEAq4Dy8uCY"))
                     .await(),
-                "camping" to TextEditor.enrichHTML(
-                    buildUuid(
-                        "Compendium.pf2e-kingmaker-tools.kingmaker-tools-macros.Macro.GXeKz3qKlsoxcaTg",
-                        t("applications.camping")
-                    )
-                ).await(),
-                "kingdom" to TextEditor.enrichHTML(
-                    buildUuid(
-                        "Compendium.pf2e-kingmaker-tools.kingmaker-tools-macros.Macro.1LmPW2OlHgJvedY8",
-                        t("applications.kingdom")
-                    )
-                ).await(),
                 "license" to TextEditor.enrichHTML(
                     buildUuid(
                         "Compendium.pf2e-kingmaker-tools.kingmaker-tools-journals.JournalEntry.8DyhRcPn7d8hlC1y",
