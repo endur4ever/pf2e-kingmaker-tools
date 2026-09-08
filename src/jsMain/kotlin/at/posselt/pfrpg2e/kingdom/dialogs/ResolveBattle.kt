@@ -220,7 +220,13 @@ class ResolveBattle(
             val rewarded = awardVictoryXp(updated.attackers, updated.defenders)
             updated.attackers.zip(rewarded).forEach { (before, after) ->
                 if (after.xp > before.xp) {
-                    roundLog = roundLog + "${after.name} gains ${after.xp - before.xp} XP."
+                    roundLog = roundLog + t(
+                        "warBattle.xpGained",
+                        recordOf(
+                            "name" to after.name,
+                            "xp" to (after.xp - before.xp).toString(),
+                        ),
+                    )
                 }
             }
             updated = RawArmyBattle.copy(updated, attackers = rewarded)

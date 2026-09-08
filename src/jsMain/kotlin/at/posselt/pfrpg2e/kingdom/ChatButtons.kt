@@ -2356,23 +2356,34 @@ private val buttons = listOf(
         if (action == "dismiss") {
             // Record the refusal. Detection is level-triggered on standing world state, so without
             // persisting this the identical offer re-posts on every subsequent End Turn forever.
-            val existingChoice = kingdom.milestones.find { it.id == milestoneId }
-            if (existingChoice?.offerDismissed != true) {
-                kingdom.milestones = if (existingChoice == null) {
-                    kingdom.milestones + MilestoneChoice(
-                        id = milestoneId,
-                        completed = false,
-                        enabled = true,
-                        offerDismissed = true,
-                    )
-                } else {
-                    kingdom.milestones.map {
-                        if (it.id == milestoneId) MilestoneChoice.copy(it, offerDismissed = true) else it
-                    }.toTypedArray()
+            // Under the same lock and on the same fresh read as the award branch beside it: the
+            // digest shows a whole column of these, and setKingdom suspends, so two quick clicks
+            // each read the kingdom before the other's write landed and one refusal was lost.
+            councilVoteMutex.withLock {
+                val live = actor.getKingdom() ?: return@withLock
+                val existingChoice = live.milestones.find { it.id == milestoneId }
+                if (existingChoice?.offerDismissed != true) {
+                    live.milestones = if (existingChoice == null) {
+                        live.milestones + MilestoneChoice(
+                            id = milestoneId,
+                            completed = false,
+                            enabled = true,
+                            offerDismissed = true,
+                        )
+                    } else {
+                        live.milestones.map {
+                            if (it.id == milestoneId) MilestoneChoice.copy(it, offerDismissed = true) else it
+                        }.toTypedArray()
+                    }
+                    actor.setKingdom(live)
                 }
-                actor.setKingdom(kingdom)
             }
-            postChatMessage(t("chatMessages.milestone.dismissed", recordOf("name" to milestone.name)))
+            // whispered: this answers a GM-only digest, and announcing a refusal to the table tells
+            // the players about a deed the GM has just decided not to give them
+            postChatMessage(
+                t("chatMessages.milestone.dismissed", recordOf("name" to milestone.name)),
+                whisper = game.users.filter { it.isGM }.mapNotNull { it.id }.toTypedArray(),
+            )
             return@ChatButton
         }
         if (action != "award") return@ChatButton
@@ -2443,7 +2454,10 @@ private val buttons = listOf(
         dismissed = true
         }
         if (dismissed) {
-            postChatMessage(t("chatMessages.milestone.dismissedAll", recordOf("count" to ids.size)))
+            postChatMessage(
+                t("chatMessages.milestone.dismissedAll", recordOf("count" to ids.size)),
+                whisper = game.users.filter { it.isGM }.mapNotNull { it.id }.toTypedArray(),
+            )
         }
     },
     // Jump-to-settlement on the pacing-alert CHAT card. It MUST be a ChatButton (bound to #chat by

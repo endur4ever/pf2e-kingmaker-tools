@@ -621,14 +621,17 @@ class HexContentManager(
             )
         }
 
+        // Every hex stays addable. A hex carries as many contents as the GM puts on it -- the map
+        // sync groups them into one marker and labels it "first +N" -- so removing a hex from this
+        // list the moment anything lands on it made it permanently un-addable, including when the
+        // content came from an engine or the native hex editor rather than from here.
         val hexOptions = getHexOptions()
-        val existingHexKeys = contents.map { it.hexKey }.toSet()
-        val availableHexOptions = hexOptions.filter { it.key !in existingHexKeys }
+        val availableHexOptions = hexOptions
         val hexKeyOptions = availableHexOptions.map { option ->
             SelectOption(value = option.key, label = option.label)
         }
-        // Pre-select the hex the GM last clicked on the Kingmaker map (if it's
-        // still free), so adding content is a click-then-add flow.
+        // Pre-select the hex the GM last clicked on the Kingmaker map, so adding content is a
+        // click-then-add flow.
         val defaultHexKey = at.posselt.pfrpg2e.kingdom.map.lastSelectedHexKey
             ?.takeIf { sel -> availableHexOptions.any { it.key == sel } }
 

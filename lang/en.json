@@ -1794,6 +1794,7 @@
             "rulerVacantGainingUnrest": "Ruler is vacant, gaining Unrest",
             "gainingXp": "Gaining {count} XP",
             "losingXp": "Losing {count} XP",
+            "newModifierDefaultName": "New Modifier",
             "gainingNUnrest": "Gaining {count} Unrest",
             "losingNUnrest": "Losing {count} Unrest",
             "already0Unrest": "Already at 0 unrest",
@@ -2091,6 +2092,7 @@
                 "farmland": "Farmland"
             },
             "caravans": {
+        "routeLabel": "Caravan to {partner}: {remaining}/{total} turns (Raid DC: {dc})",
                 "title": "Caravans",
                 "dispatch": "Dispatch Caravan",
                 "dispatchTitle": "Dispatch Caravan to a Trade Partner",
@@ -8550,6 +8552,7 @@
             "destroyed": "Destroyed"
         },
         "warBattle": {
+      "xpGained": "{name} gains {xp} XP.",
             "resolveBattle": "Resolve Battle",
             "round": "Round",
             "attackers": "Attackers",

@@ -1,5 +1,6 @@
 package at.posselt.pfrpg2e.kingdom.map
 
+import at.posselt.pfrpg2e.utils.t
 import at.posselt.pfrpg2e.utils.buildPromise
 import at.posselt.pfrpg2e.utils.createDrawingsResilient
 import at.posselt.pfrpg2e.utils.deleteDrawingsResilient
@@ -847,7 +848,15 @@ suspend fun syncCaravanRoutes(game: Game) {
         val midPoint = activeScene.grid.getCenterPoint(midHex.offset)
 
         val partnerDisplay = caravan.partnerName ?: caravan.destLabel
-        val labelText = "Caravan to $partnerDisplay: ${caravan.turnsRemaining}/${caravan.etaTurns} turns (Raid DC: $raidDc)"
+        val labelText = t(
+            "kingdom.caravans.routeLabel",
+            recordOf(
+                "partner" to partnerDisplay,
+                "remaining" to caravan.turnsRemaining.toString(),
+                "total" to caravan.etaTurns.toString(),
+                "dc" to raidDc.toString(),
+            ),
+        )
 
         val labelWidth = 400.0
         val labelHeight = 45.0

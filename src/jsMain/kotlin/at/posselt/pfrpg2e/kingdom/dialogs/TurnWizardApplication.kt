@@ -1784,7 +1784,10 @@ class TurnWizardApplication(
                     stoneCap = storage.stone
                     
                     val parseRuins = kingdom.parseRuins(
-                        choices = emptyList<ChosenFeature>(),
+                        // the kingdom's real features: an empty list drops every ruin-threshold
+                        // increase they grant, so the wizard showed thresholds the kingdom does
+                        // not actually have
+                        choices = kingdom.getChosenFeatures(kingdom.getExplodedFeatures()),
                         baseThreshold = kingdom.settings.ruinThreshold,
                         government = kingdom.government,
                     )

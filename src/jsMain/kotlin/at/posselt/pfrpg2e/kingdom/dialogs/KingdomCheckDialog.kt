@@ -446,7 +446,8 @@ private class KingdomCheckDialog(
                     id = id,
                     type = ModifierType.fromString(data.newModifierType) ?: ModifierType.UNTYPED,
                     value = data.newModifierModifier,
-                    name = data.newModifierName.takeIf { it.isNotBlank() } ?: "New Modifier",
+                    name = data.newModifierName.takeIf { it.isNotBlank() }
+                        ?: t("kingdom.newModifierDefaultName"),
                     requiresTranslation = false,
                 )
                 data.newModifierName = ""

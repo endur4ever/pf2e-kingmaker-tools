@@ -121,13 +121,20 @@ fun evaluateNpcMemoriesForTurn(
     val shipmentsThisTurn = (kingdom.shipmentHistory ?: emptyArray())
         .filter { it.turn == currentTurn }
         .map { it.outcome }
-    // deeds-chronicle's awardedOnTurn IS the per-turn capture this needed: a milestone awarded
-    // on this turn is a milestone earned this turn. Hardcoding 0 left the rule permanently inert.
+    // Awards are stamped with the turn that had just ENDED when the GM clicked the offer card, so
+    // milestones earned during the turn now ending carry the PREVIOUS record's turn number, never
+    // currentTurn. Matching on currentTurn made the count permanently zero and the rule inert --
+    // the same way hardcoding 0 did before it.
     // milestones is typed non-null but is undefined on kingdoms predating it (and in fixtures),
     // so the cast makes the guard a real runtime check rather than a compile-time formality
-    val milestonesThisTurn = kingdom.milestones
-        .unsafeCast<Array<at.posselt.pfrpg2e.kingdom.data.MilestoneChoice>?>()
-        ?.count { it.completed && it.awardedOnTurn == currentTurn } ?: 0
+    val awardedTurn = prevRecord?.turn
+    val milestonesThisTurn = if (awardedTurn == null) {
+        0
+    } else {
+        kingdom.milestones
+            .unsafeCast<Array<at.posselt.pfrpg2e.kingdom.data.MilestoneChoice>?>()
+            ?.count { it.completed && it.awardedOnTurn == awardedTurn } ?: 0
+    }
     val curr = currRecord.toTurnFacts(fameMax, shipmentsThisTurn, milestonesEarnedThisTurn = milestonesThisTurn)
     val prev = prevRecord?.toTurnFacts(fameMax, emptyList(), 0)
     var written = 0

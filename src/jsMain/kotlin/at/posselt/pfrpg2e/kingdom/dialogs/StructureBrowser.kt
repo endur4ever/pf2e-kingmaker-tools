@@ -1,5 +1,6 @@
 package at.posselt.pfrpg2e.kingdom.dialogs
 
+import at.posselt.pfrpg2e.kingdom.getKingdom
 import at.posselt.pfrpg2e.kingdom.structures.carrySettlementEngineState
 import at.posselt.pfrpg2e.actor.openActor
 import at.posselt.pfrpg2e.app.FormApp
@@ -320,21 +321,29 @@ class StructureBrowser(
                         kingdom = kingdom,
                         capStructureBonusAtKingdomLevel = kingdom.settings.capStructureBonusAtKingdomLevel,
                         kingdomLevel = kingdom.level,
+                        // these callbacks fire after the GM has spent time in a dialog, so they
+                        // re-read the kingdom rather than writing back the snapshot the browser
+                        // opened with, which reverted whatever else changed in the meantime
                         onRosterChange = { roster ->
-                            kingdom.settlements
-                                .find { it.sceneId == id }
-                                ?.populationRoster = roster
-                            actor.setKingdom(kingdom)
+                            actor.getKingdom()?.let { live ->
+                                live.settlements
+                                    .find { it.sceneId == id }
+                                    ?.populationRoster = roster
+                                actor.setKingdom(live)
+                            }
                         },
                     ) { data ->
-                        val merged = carrySettlementEngineState(
-                            live = kingdom.settlements.find { it.sceneId == data.sceneId },
-                            submitted = data,
-                        )
-                        kingdom.settlements = kingdom.settlements
-                            .filter { it.sceneId != data.sceneId }
-                            .toTypedArray() + merged
-                        actor.setKingdom(kingdom)
+                        actor.getKingdom()?.let { live ->
+                            val merged = carrySettlementEngineState(
+                                live = live.settlements.find { it.sceneId == data.sceneId },
+                                submitted = data,
+                            )
+                            live.settlements = live.settlements
+                                .filter { it.sceneId != data.sceneId }
+                                .toTypedArray() + merged
+                            actor.setKingdom(live)
+                        }
+                        Unit
                     }.launch()
                 }
             }
