@@ -8,6 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+* **Rations were paid for the wrong campers.** "Consume Rations" prices the campers on rations at
+  the moment it is pressed, but it recorded only *when* the night was paid, not *who* for — so a
+  camper switched to rations afterwards ate for free. The record is now per camper.
+* **Camping activity sync read stale data.** The sync ran before the update that triggered it had
+  been applied, so it decided what to learn, which meal effects to clear and which campsite result
+  to apply from state that was already one step out of date.
+* **The encounter resolution card spoke only English.** The GM notes and the Set Alarms, Camouflage
+  Campsite, Set Traps and Undead Guardians lines were hardcoded English rendered into chat; they are
+  now translated in all eight supported languages.
 
 * **Camping watch calculations and availability.** Companions marked unavailable for camp or away on an expedition are now excluded from watch suggestions, watch staffing, and ambush perception checks. Watch slot hour boundaries respect rest settings (`skipWatch` and `skipDailyPreparations`).
 * **Downtime hours budget gating.** The 8-hour downtime limit (`isOverDowntimeHoursBudget`) is now enforced when assigning camping activities, and assignment block notifications use localized error messages.
