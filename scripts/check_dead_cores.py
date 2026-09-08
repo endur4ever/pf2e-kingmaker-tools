@@ -91,24 +91,6 @@ FUNCTION_ALLOWLIST = {
     ),
 
     # Defensive allowlist entries (from original 35 with internal commonMain callers)
-    ("Utils.kt", "unslugify"): (
-        "String unslugify utility; called in Attributes.kt."
-    ),
-    ("Utils.kt", "toEnumConstant"): (
-        "CamelCase to enum constant converter; called in Utils.kt:fromCamelCase."
-    ),
-    ("kingdom/CleanseItem.kt", "satisfiedBy"): (
-        "Cleanse item requirement predicate; called in CleanseItem.kt:eligibleCleanseSettlements."
-    ),
-    ("data/kingdom/RenownEngine.kt", "bestFactionRenown"): (
-        "Renown faction calculation helper; called in RenownEngine.kt:EPITHET_CATALOG."
-    ),
-    ("data/kingdom/RenownEngine.kt", "worstFactionRenown"): (
-        "Renown faction calculation helper; called in RenownEngine.kt:EPITHET_CATALOG."
-    ),
-    ("data/kingdom/settlements/Settlement.kt", "generateInitialPopulation"): (
-        "Living-population starter roster generator; called in EvaluateStructures.kt:291."
-    ),
 }
 
 
