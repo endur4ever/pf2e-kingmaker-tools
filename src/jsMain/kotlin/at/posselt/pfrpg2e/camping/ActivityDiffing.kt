@@ -17,6 +17,7 @@ import com.foundryvtt.core.AnyObject
 import com.foundryvtt.core.Game
 import com.foundryvtt.core.documents.Actor
 import com.foundryvtt.core.documents.onPreUpdateActor
+import com.foundryvtt.core.documents.onUpdateActor
 import com.foundryvtt.core.helpers.TypedHooks
 import com.foundryvtt.core.utils.equals
 import com.foundryvtt.core.utils.getProperty
@@ -177,10 +178,38 @@ private fun prepareCampsiteChanged(activityStateChanged: List<ActivityChange>) =
         .map { it.new }
         .find { it.activityId == prepareCampsiteId }
 
+/**
+ * Diffs computed during preUpdate, waiting for their update to actually land.
+ *
+ * Keyed by actor uuid, and a LIST because two updates can be queued before either completes; each
+ * completion drains one in order, so no diff is silently dropped.
+ */
+private val pendingActivitySyncs = mutableMapOf<String, MutableList<SyncActivities>>()
+
+/**
+ * The diff must be computed in preUpdate, but the sync must be dispatched afterwards.
+ *
+ * preUpdate is the only place the OLD camping data and the incoming update are both available,
+ * which is what parseChanges needs. But the handler on the other end re-reads the camping flag to
+ * decide what to sync -- and dispatched from preUpdate it read the flag as it was BEFORE the very
+ * update that triggered it, so it decided what to learn, which effects to clear and which campsite
+ * result to apply from state that was already one step out of date.
+ *
+ * So: compute in preUpdate, stash, and dispatch on the matching onUpdateActor once the write has
+ * landed. If the update never completes -- an aborted or rejected write -- the stash is simply
+ * replaced by the next diff for that actor rather than being dispatched against state that never
+ * existed.
+ */
 fun registerActivityDiffingHooks(game: Game, dispatcher: ActionDispatcher) {
     TypedHooks.onPreUpdateActor { actor, update, _, _ ->
         checkPreActorUpdate(actor, update)?.let {
-            buildPromise {
+            pendingActivitySyncs.getOrPut(actor.uuid) { mutableListOf() }.add(it)
+        }
+    }
+    TypedHooks.onUpdateActor { actor, _, _, _ ->
+        val pending = pendingActivitySyncs.remove(actor.uuid) ?: return@onUpdateActor
+        buildPromise {
+            pending.forEach {
                 dispatcher.dispatch(
                     ActionMessage(
                         action = "syncActivities",

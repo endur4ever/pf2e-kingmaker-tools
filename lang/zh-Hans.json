@@ -711,7 +711,31 @@
             },
             "encounterStageUndoAction": "撤销布置",
             "encounterStageSkipped": "已跳过 {count} 个生物：找不到对应角色。",
-            "consumeRationsGmOnly": "只有GM可以消耗队伍的口粮。"
+            "consumeRationsGmOnly": "只有GM可以消耗队伍的口粮。",
+            "encounterResolution": {
+                "gmNotes": {
+                    "criticalSuccess": "守夜者提前发现了敌人。敌人措手不及，从远距离（120 尺）开始，队伍不受突袭减值。",
+                    "success": "守夜者发现了敌人。熟睡的队员醒来，但以俯卧状态开始（60 尺）。",
+                    "failure": "敌人成功伏击了队伍（60 尺）。熟睡的队员仍在沉睡（昏迷且俯卧）。",
+                    "criticalFailure": "队伍在近距离（15 尺）遭到严重伏击。熟睡的队员仍在沉睡（昏迷且俯卧），并且在自己回合开始前无法获得反应。"
+                },
+                "setAlarms": {
+                    "bonus": "布置警报：+{bonus} 感知对抗伏击者的隐匿",
+                    "penalty": "布置警报（大失败）：{bonus} 感知对抗伏击者的隐匿",
+                    "none": "布置警报（失败）：没有效果"
+                },
+                "camouflage": {
+                    "criticalSuccess": "伪装营地（大成功）：伏击者在更远一档距离被发现",
+                    "success": "伪装营地（成功）：伏击者在更远处被发现（+15 尺）",
+                    "failure": "伪装营地（失败）：没有效果",
+                    "criticalFailure": "伪装营地（大失败）：伏击者潜近了一档距离"
+                },
+                "setTraps": {
+                    "criticalSuccess": "设置陷阱（大成功）：陷阱触发，造成 4d6 伤害并打断伏击",
+                    "success": "设置陷阱（成功）：陷阱触发，造成 2d6 伤害并打断伏击"
+                },
+                "undeadGuardians": "不死守卫：守卫为营地额外站一班岗"
+            }
         },
         "settlementNav": {
             "status": "Status",

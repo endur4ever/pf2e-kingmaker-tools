@@ -66,7 +66,9 @@ class SyncActivitiesHandler(
             camping.syncCampingEffects(data.activities)
             val learnedChanged = handleLearnFromCompanion(camping, data.activities)
             if (learnedChanged) {
-                // A TARGETED write. `camping` was read at handler entry, and removeMealEffects and
+                // A TARGETED write. `camping` was read at handler entry -- now AFTER the triggering
+                // update has landed, because the dispatch moved from onPreUpdateActor to
+                // onUpdateActor -- and removeMealEffects and
                 // syncCampingEffects above each await a run of embedded-document writes -- so
                 // saving the whole snapshot back here reverted anything any client changed on the
                 // camping flag during that window. Only the two learned fields are written.

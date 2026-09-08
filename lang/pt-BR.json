@@ -711,7 +711,31 @@
             },
             "encounterStageUndoAction": "Desfazer preparação",
             "encounterStageSkipped": "{count} criatura(s) ignorada(s): atores não encontrados.",
-            "consumeRationsGmOnly": "Apenas o Mestre pode gastar as rações do grupo."
+            "consumeRationsGmOnly": "Apenas o Mestre pode gastar as rações do grupo.",
+            "encounterResolution": {
+                "gmNotes": {
+                    "criticalSuccess": "O vigia detecta o inimigo cedo. O inimigo é pego de surpresa e começa a longa distância (120 ft), sem penalidade de surpresa para o grupo.",
+                    "success": "O vigia detecta o inimigo. Os membros adormecidos acordam, mas começam caídos (60 ft de distância).",
+                    "failure": "O inimigo embosca o grupo com sucesso (60 ft). Os membros adormecidos continuam dormindo (inconscientes e caídos).",
+                    "criticalFailure": "O grupo é gravemente emboscado a curta distância (15 ft). Os membros adormecidos continuam dormindo (inconscientes e caídos) e não ganham reações antes do próprio turno."
+                },
+                "setAlarms": {
+                    "bonus": "Preparar alarmes: +{bonus} de Percepção contra a Furtividade do emboscador",
+                    "penalty": "Preparar alarmes (Falha crítica): {bonus} de Percepção contra a Furtividade do emboscador",
+                    "none": "Preparar alarmes (Falha): nenhum benefício"
+                },
+                "camouflage": {
+                    "criticalSuccess": "Camuflar o acampamento (Sucesso crítico): o emboscador é avistado uma faixa inteira mais longe",
+                    "success": "Camuflar o acampamento (Sucesso): o emboscador é avistado mais longe (+15 ft)",
+                    "failure": "Camuflar o acampamento (Falha): nenhum benefício",
+                    "criticalFailure": "Camuflar o acampamento (Falha crítica): o emboscador chega uma faixa mais perto"
+                },
+                "setTraps": {
+                    "criticalSuccess": "Preparar armadilhas (Sucesso crítico): a armadilha causa 4d6 de dano e atrapalha a emboscada",
+                    "success": "Preparar armadilhas (Sucesso): a armadilha causa 2d6 de dano e atrapalha a emboscada"
+                },
+                "undeadGuardians": "Guardiões mortos-vivos: os guardiões fazem uma vigília extra sobre o acampamento"
+            }
         },
         "settlementNav": {
             "status": "Status",

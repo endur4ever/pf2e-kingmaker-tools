@@ -833,7 +833,31 @@
             },
             "encounterStageUndoAction": "Undo stage",
             "encounterStageSkipped": "{count} creature(s) skipped: their actors could not be found.",
-            "consumeRationsGmOnly": "Only the GM can spend the party's rations."
+            "consumeRationsGmOnly": "Only the GM can spend the party's rations.",
+            "encounterResolution": {
+                "gmNotes": {
+                    "criticalSuccess": "The watcher detects the enemy early. The enemy is startled, starting at a long distance (120 ft) with no surprise penalty to the party.",
+                    "success": "The watcher detects the enemy. Sleeping party members wake up but start prone (60 ft distance).",
+                    "failure": "The enemy successfully ambushes the party (60 ft distance). Sleeping party members remain asleep (unconscious and prone).",
+                    "criticalFailure": "The party is severely ambushed at close distance (15 ft). Sleeping party members remain asleep (unconscious and prone) and do not gain Reactions before their turn starts."
+                },
+                "setAlarms": {
+                    "bonus": "Set Alarms: +{bonus} Perception vs the ambusher's Stealth",
+                    "penalty": "Set Alarms (Critical Failure): {bonus} Perception vs the ambusher's Stealth",
+                    "none": "Set Alarms (Failure): no benefit"
+                },
+                "camouflage": {
+                    "criticalSuccess": "Camouflage Campsite (Critical Success): ambusher spotted a full band farther out",
+                    "success": "Camouflage Campsite (Success): ambusher spotted farther out (+15 ft)",
+                    "failure": "Camouflage Campsite (Failure): no benefit",
+                    "criticalFailure": "Camouflage Campsite (Critical Failure): the ambusher slips a band closer"
+                },
+                "setTraps": {
+                    "criticalSuccess": "Set Traps (Critical Success): trap triggers for 4d6 damage and disrupts the ambush",
+                    "success": "Set Traps (Success): trap triggers for 2d6 damage and disrupts the ambush"
+                },
+                "undeadGuardians": "Undead Guardians: the guardians stand an extra watch over the camp"
+            }
         },
         "settlementNav": {
             "status": "Status",

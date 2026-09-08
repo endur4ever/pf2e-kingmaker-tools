@@ -1,5 +1,9 @@
 package at.posselt.pfrpg2e.camping
 
+import js.objects.recordOf
+
+import at.posselt.pfrpg2e.utils.t
+
 import at.posselt.pfrpg2e.data.checks.DegreeOfSuccess
 import kotlin.js.JsExport
 import kotlin.js.JsName
@@ -77,7 +81,7 @@ object EncounterResolverEngine {
                 distanceToEnemy = 120.0f,
                 appliedConditions = emptyArray(),
                 ambusherState = "Revealed",
-                gmNotes = "The watcher detects the enemy early. The enemy is startled, starting at a long distance (120 ft) with no surprise penalty to the party.",
+                gmNotes = t("camping.encounterResolution.gmNotes.criticalSuccess"),
                 defenseContributions = emptyArray()
             )
             DegreeOfSuccess.SUCCESS -> EncounterResolutionResult(
@@ -86,7 +90,7 @@ object EncounterResolverEngine {
                 distanceToEnemy = 60.0f,
                 appliedConditions = arrayOf("prone"),
                 ambusherState = "Revealed",
-                gmNotes = "The watcher detects the enemy. Sleeping party members wake up but start prone (60 ft distance).",
+                gmNotes = t("camping.encounterResolution.gmNotes.success"),
                 defenseContributions = emptyArray()
             )
             DegreeOfSuccess.FAILURE -> EncounterResolutionResult(
@@ -95,7 +99,7 @@ object EncounterResolverEngine {
                 distanceToEnemy = 60.0f,
                 appliedConditions = arrayOf("unconscious", "prone"),
                 ambusherState = "Hidden",
-                gmNotes = "The enemy successfully ambushes the party (60 ft distance). Sleeping party members remain asleep (unconscious and prone).",
+                gmNotes = t("camping.encounterResolution.gmNotes.failure"),
                 defenseContributions = emptyArray()
             )
             DegreeOfSuccess.CRITICAL_FAILURE -> EncounterResolutionResult(
@@ -104,7 +108,7 @@ object EncounterResolverEngine {
                 distanceToEnemy = 15.0f,
                 appliedConditions = arrayOf("unconscious", "prone"),
                 ambusherState = "Hidden",
-                gmNotes = "The party is severely ambushed at close distance (15 ft). Sleeping party members remain asleep (unconscious and prone) and do not gain Reactions before their turn starts.",
+                gmNotes = t("camping.encounterResolution.gmNotes.criticalFailure"),
                 defenseContributions = emptyArray()
             )
         }
@@ -124,9 +128,9 @@ object EncounterResolverEngine {
             val bonus = alarmsPerceptionBonus(alarms)
             contributions.add(
                 when {
-                    bonus > 0 -> "Set Alarms: +$bonus Perception vs the ambusher's Stealth"
-                    bonus < 0 -> "Set Alarms (Critical Failure): $bonus Perception vs the ambusher's Stealth"
-                    else -> "Set Alarms (Failure): no benefit"
+                    bonus > 0 -> t("camping.encounterResolution.setAlarms.bonus", recordOf("bonus" to bonus))
+                    bonus < 0 -> t("camping.encounterResolution.setAlarms.penalty", recordOf("bonus" to bonus))
+                    else -> t("camping.encounterResolution.setAlarms.none")
                 }
             )
         }
@@ -134,24 +138,24 @@ object EncounterResolverEngine {
         defenseState.camouflageDegree?.let { camo ->
             contributions.add(
                 when (camo) {
-                    DegreeOfSuccess.CRITICAL_SUCCESS -> "Camouflage Campsite (Critical Success): ambusher spotted a full band farther out"
-                    DegreeOfSuccess.SUCCESS -> "Camouflage Campsite (Success): ambusher spotted farther out (+15 ft)"
-                    DegreeOfSuccess.FAILURE -> "Camouflage Campsite (Failure): no benefit"
-                    DegreeOfSuccess.CRITICAL_FAILURE -> "Camouflage Campsite (Critical Failure): the ambusher slips a band closer"
+                    DegreeOfSuccess.CRITICAL_SUCCESS -> t("camping.encounterResolution.camouflage.criticalSuccess")
+                    DegreeOfSuccess.SUCCESS -> t("camping.encounterResolution.camouflage.success")
+                    DegreeOfSuccess.FAILURE -> t("camping.encounterResolution.camouflage.failure")
+                    DegreeOfSuccess.CRITICAL_FAILURE -> t("camping.encounterResolution.camouflage.criticalFailure")
                 }
             )
         }
 
         when (defenseState.trapsDegree) {
             DegreeOfSuccess.CRITICAL_SUCCESS ->
-                contributions.add("Set Traps (Critical Success): trap triggers for 4d6 damage and disrupts the ambush")
+                contributions.add(t("camping.encounterResolution.setTraps.criticalSuccess"))
             DegreeOfSuccess.SUCCESS ->
-                contributions.add("Set Traps (Success): trap triggers for 2d6 damage and disrupts the ambush")
+                contributions.add(t("camping.encounterResolution.setTraps.success"))
             else -> {}
         }
 
         if (defenseState.undeadGuardiansActive == true) {
-            contributions.add("Undead Guardians: the guardians stand an extra watch over the camp")
+            contributions.add(t("camping.encounterResolution.undeadGuardians"))
         }
 
         return baseResult.copy(

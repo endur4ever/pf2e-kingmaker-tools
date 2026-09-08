@@ -19,7 +19,7 @@ class EncounterResolverEngineTest {
         assertEquals(120.0f, result.distanceToEnemy)
         assertTrue(result.appliedConditions.isEmpty())
         assertEquals("Revealed", result.ambusherState)
-        assertTrue(result.gmNotes.contains("detects the enemy early"))
+        assertTrue(result.gmNotes.contains("camping.encounterResolution.gmNotes.criticalSuccess"))
     }
 
     @Test
@@ -35,7 +35,7 @@ class EncounterResolverEngineTest {
         assertEquals(1, result.appliedConditions.size)
         assertEquals("prone", result.appliedConditions[0])
         assertEquals("Revealed", result.ambusherState)
-        assertTrue(result.gmNotes.contains("Standard encounter start") || result.gmNotes.contains("wake up but start prone"))
+        assertTrue(result.gmNotes.contains("camping.encounterResolution.gmNotes.success"))
     }
 
     @Test
@@ -52,7 +52,7 @@ class EncounterResolverEngineTest {
         assertTrue(result.appliedConditions.contains("unconscious"))
         assertTrue(result.appliedConditions.contains("prone"))
         assertEquals("Hidden", result.ambusherState)
-        assertTrue(result.gmNotes.contains("successfully ambushes") || result.gmNotes.contains("remain asleep"))
+        assertTrue(result.gmNotes.contains("camping.encounterResolution.gmNotes.failure"))
     }
 
     @Test
@@ -69,7 +69,7 @@ class EncounterResolverEngineTest {
         assertTrue(result.appliedConditions.contains("unconscious"))
         assertTrue(result.appliedConditions.contains("prone"))
         assertEquals("Hidden", result.ambusherState)
-        assertTrue(result.gmNotes.contains("severely ambushed"))
+        assertTrue(result.gmNotes.contains("camping.encounterResolution.gmNotes.criticalFailure"))
     }
 
     // ── Set Alarms ──────────────────────────────────────────────────────────────────────────────
@@ -95,7 +95,7 @@ class EncounterResolverEngineTest {
             defenseState = CampDefenseState(alarmsDegree = DegreeOfSuccess.CRITICAL_SUCCESS)
         )
         assertEquals(18, result.watcherPerceptionRoll)  // the REAL roll, not roll + 4
-        assertTrue(result.defenseContributions.any { it.contains("Set Alarms") && it.contains("+4") })
+        assertTrue(result.defenseContributions.any { it.contains("camping.encounterResolution.setAlarms.bonus") && it.contains("bonus=4") })
     }
 
     @Test
@@ -106,7 +106,7 @@ class EncounterResolverEngineTest {
             degree = DegreeOfSuccess.FAILURE,
             defenseState = CampDefenseState(alarmsDegree = DegreeOfSuccess.CRITICAL_FAILURE)
         )
-        assertTrue(result.defenseContributions.any { it.contains("Set Alarms") && it.contains("-2") })
+        assertTrue(result.defenseContributions.any { it.contains("camping.encounterResolution.setAlarms.penalty") && it.contains("bonus=-2") })
     }
 
     // ── Camouflage Campsite ─────────────────────────────────────────────────────────────────────
@@ -122,7 +122,7 @@ class EncounterResolverEngineTest {
             defenseState = CampDefenseState(camouflageDegree = DegreeOfSuccess.CRITICAL_SUCCESS)
         )
         assertEquals(120.0f, result.distanceToEnemy)  // 60 + 60
-        assertTrue(result.defenseContributions.any { it.contains("Camouflage") && it.contains("farther out") })
+        assertTrue(result.defenseContributions.any { it.contains("camping.encounterResolution.camouflage.") })
     }
 
     @Test
@@ -145,7 +145,7 @@ class EncounterResolverEngineTest {
             defenseState = CampDefenseState(camouflageDegree = DegreeOfSuccess.CRITICAL_FAILURE)
         )
         assertEquals(15.0f, result.distanceToEnemy)  // 60 - 60, clamped to the 15 ft floor
-        assertTrue(result.defenseContributions.any { it.contains("Camouflage") && it.contains("closer") })
+        assertTrue(result.defenseContributions.any { it.contains("camping.encounterResolution.camouflage.criticalFailure") })
     }
 
     @Test
@@ -177,10 +177,10 @@ class EncounterResolverEngineTest {
             stealthDc = 15,
             degree = DegreeOfSuccess.FAILURE,
             defenseState = CampDefenseState(trapsDegree = degree)
-        ).defenseContributions.filter { it.contains("Set Traps") }
+        ).defenseContributions.filter { it.contains("camping.encounterResolution.setTraps.") }
 
-        assertTrue(trapsLines(DegreeOfSuccess.CRITICAL_SUCCESS).any { it.contains("4d6") })
-        assertTrue(trapsLines(DegreeOfSuccess.SUCCESS).any { it.contains("2d6") })
+        assertTrue(trapsLines(DegreeOfSuccess.CRITICAL_SUCCESS).any { it.contains("setTraps.criticalSuccess") })
+        assertTrue(trapsLines(DegreeOfSuccess.SUCCESS).any { it.contains("setTraps.success") })
         assertTrue(trapsLines(DegreeOfSuccess.FAILURE).isEmpty())
         assertTrue(trapsLines(DegreeOfSuccess.CRITICAL_FAILURE).isEmpty())
     }
@@ -194,7 +194,7 @@ class EncounterResolverEngineTest {
             stealthDc = 15,
             degree = DegreeOfSuccess.FAILURE,
             defenseState = CampDefenseState(undeadGuardiansActive = active)
-        ).defenseContributions.filter { it.contains("Undead Guardians") }
+        ).defenseContributions.filter { it.contains("camping.encounterResolution.undeadGuardians") }
 
         assertEquals(1, guardianLines(true).size)
         assertTrue(guardianLines(false).isEmpty())

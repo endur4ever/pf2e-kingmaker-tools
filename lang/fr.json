@@ -711,7 +711,31 @@
             },
             "encounterStageUndoAction": "Annuler la mise en place",
             "encounterStageSkipped": "{count} créature(s) ignorée(s) : acteurs introuvables.",
-            "consumeRationsGmOnly": "Seul le MJ peut dépenser les rations du groupe."
+            "consumeRationsGmOnly": "Seul le MJ peut dépenser les rations du groupe.",
+            "encounterResolution": {
+                "gmNotes": {
+                    "criticalSuccess": "Le guetteur repère l'ennemi tôt. L'ennemi est surpris et commence à longue distance (120 ft) sans malus de surprise pour le groupe.",
+                    "success": "Le guetteur repère l'ennemi. Les membres endormis se réveillent mais commencent à terre (60 ft).",
+                    "failure": "L'ennemi embusque le groupe avec succès (60 ft). Les membres endormis restent endormis (inconscients et à terre).",
+                    "criticalFailure": "Le groupe est gravement embusqué à courte distance (15 ft). Les membres endormis restent endormis (inconscients et à terre) et ne gagnent pas de réactions avant le début de leur tour."
+                },
+                "setAlarms": {
+                    "bonus": "Poser des alarmes : +{bonus} Perception contre la Discrétion de l'assaillant",
+                    "penalty": "Poser des alarmes (Échec critique) : {bonus} Perception contre la Discrétion de l'assaillant",
+                    "none": "Poser des alarmes (Échec) : aucun bénéfice"
+                },
+                "camouflage": {
+                    "criticalSuccess": "Camoufler le campement (Succès critique) : l'assaillant est repéré une bande plus loin",
+                    "success": "Camoufler le campement (Succès) : l'assaillant est repéré plus loin (+15 ft)",
+                    "failure": "Camoufler le campement (Échec) : aucun bénéfice",
+                    "criticalFailure": "Camoufler le campement (Échec critique) : l'assaillant se glisse une bande plus près"
+                },
+                "setTraps": {
+                    "criticalSuccess": "Poser des pièges (Succès critique) : le piège inflige 4d6 dégâts et perturbe l'embuscade",
+                    "success": "Poser des pièges (Succès) : le piège inflige 2d6 dégâts et perturbe l'embuscade"
+                },
+                "undeadGuardians": "Gardiens morts-vivants : les gardiens assurent un tour de garde supplémentaire"
+            }
         },
         "settlementNav": {
             "status": "Status",

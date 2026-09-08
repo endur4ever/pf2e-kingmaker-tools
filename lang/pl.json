@@ -711,7 +711,31 @@
             },
             "encounterStageUndoAction": "Cofnij przygotowanie",
             "encounterStageSkipped": "Pominięto {count} istot: nie znaleziono aktorów.",
-            "consumeRationsGmOnly": "Tylko MG może zużyć racje drużyny."
+            "consumeRationsGmOnly": "Tylko MG może zużyć racje drużyny.",
+            "encounterResolution": {
+                "gmNotes": {
+                    "criticalSuccess": "Wartownik dostrzega wroga wcześnie. Wróg jest zaskoczony i zaczyna z dużej odległości (120 ft) bez kary za zaskoczenie dla drużyny.",
+                    "success": "Wartownik dostrzega wroga. Śpiący członkowie drużyny budzą się, ale zaczynają leżąc (60 ft).",
+                    "failure": "Wróg skutecznie zasadza się na drużynę (60 ft). Śpiący członkowie drużyny pozostają uśpieni (nieprzytomni i leżący).",
+                    "criticalFailure": "Drużyna zostaje ciężko zaatakowana z zasadzki z bliska (15 ft). Śpiący pozostają uśpieni (nieprzytomni i leżący) i nie zyskują reakcji przed swoją turą."
+                },
+                "setAlarms": {
+                    "bonus": "Rozstawienie alarmów: +{bonus} Percepcji przeciw Skradaniu się napastnika",
+                    "penalty": "Rozstawienie alarmów (Krytyczna porażka): {bonus} Percepcji przeciw Skradaniu się napastnika",
+                    "none": "Rozstawienie alarmów (Porażka): brak korzyści"
+                },
+                "camouflage": {
+                    "criticalSuccess": "Maskowanie obozu (Krytyczny sukces): napastnik zauważony o cały pas dalej",
+                    "success": "Maskowanie obozu (Sukces): napastnik zauważony dalej (+15 ft)",
+                    "failure": "Maskowanie obozu (Porażka): brak korzyści",
+                    "criticalFailure": "Maskowanie obozu (Krytyczna porażka): napastnik podchodzi o pas bliżej"
+                },
+                "setTraps": {
+                    "criticalSuccess": "Zastawianie pułapek (Krytyczny sukces): pułapka zadaje 4k6 obrażeń i przerywa zasadzkę",
+                    "success": "Zastawianie pułapek (Sukces): pułapka zadaje 2k6 obrażeń i przerywa zasadzkę"
+                },
+                "undeadGuardians": "Nieumarli strażnicy: strażnicy pełnią dodatkową wartę nad obozem"
+            }
         },
         "settlementNav": {
             "status": "Status",

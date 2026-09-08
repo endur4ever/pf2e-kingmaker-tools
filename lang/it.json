@@ -711,7 +711,31 @@
             },
             "encounterStageUndoAction": "Annulla preparazione",
             "encounterStageSkipped": "{count} creatura/e saltata/e: attori non trovati.",
-            "consumeRationsGmOnly": "Solo il GM può consumare le razioni del gruppo."
+            "consumeRationsGmOnly": "Solo il GM può consumare le razioni del gruppo.",
+            "encounterResolution": {
+                "gmNotes": {
+                    "criticalSuccess": "La sentinella individua il nemico in anticipo. Il nemico è colto di sorpresa e inizia a lunga distanza (120 ft) senza penalità di sorpresa per il gruppo.",
+                    "success": "La sentinella individua il nemico. I membri addormentati si svegliano ma iniziano proni (60 ft di distanza).",
+                    "failure": "Il nemico tende con successo un'imboscata al gruppo (60 ft). I membri addormentati restano addormentati (privi di sensi e proni).",
+                    "criticalFailure": "Il gruppo subisce una grave imboscata a corta distanza (15 ft). I membri addormentati restano addormentati (privi di sensi e proni) e non ottengono reazioni prima del proprio turno."
+                },
+                "setAlarms": {
+                    "bonus": "Predisporre allarmi: +{bonus} Percezione contro la Furtività dell'assalitore",
+                    "penalty": "Predisporre allarmi (Fallimento critico): {bonus} Percezione contro la Furtività dell'assalitore",
+                    "none": "Predisporre allarmi (Fallimento): nessun beneficio"
+                },
+                "camouflage": {
+                    "criticalSuccess": "Mimetizzare il campo (Successo critico): l'assalitore viene avvistato una fascia più lontano",
+                    "success": "Mimetizzare il campo (Successo): l'assalitore viene avvistato più lontano (+15 ft)",
+                    "failure": "Mimetizzare il campo (Fallimento): nessun beneficio",
+                    "criticalFailure": "Mimetizzare il campo (Fallimento critico): l'assalitore si avvicina di una fascia"
+                },
+                "setTraps": {
+                    "criticalSuccess": "Piazzare trappole (Successo critico): la trappola infligge 4d6 danni e interrompe l'imboscata",
+                    "success": "Piazzare trappole (Successo): la trappola infligge 2d6 danni e interrompe l'imboscata"
+                },
+                "undeadGuardians": "Guardiani non morti: i guardiani montano un turno di guardia aggiuntivo"
+            }
         },
         "settlementNav": {
             "status": "Status",

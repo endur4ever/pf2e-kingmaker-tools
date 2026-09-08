@@ -711,7 +711,31 @@
             },
             "encounterStageUndoAction": "Aufstellung rückgängig",
             "encounterStageSkipped": "{count} Kreatur(en) übersprungen: Akteure nicht gefunden.",
-            "consumeRationsGmOnly": "Nur der SL kann die Rationen der Gruppe verbrauchen."
+            "consumeRationsGmOnly": "Nur der SL kann die Rationen der Gruppe verbrauchen.",
+            "encounterResolution": {
+                "gmNotes": {
+                    "criticalSuccess": "Die Wache entdeckt den Feind früh. Der Feind ist überrascht und beginnt in großer Entfernung (120 ft) ohne Überraschungsnachteil für die Gruppe.",
+                    "success": "Die Wache entdeckt den Feind. Schlafende Gruppenmitglieder wachen auf, beginnen aber liegend (60 ft Entfernung).",
+                    "failure": "Der Feind überfällt die Gruppe erfolgreich (60 ft Entfernung). Schlafende Gruppenmitglieder bleiben schlafend (bewusstlos und liegend).",
+                    "criticalFailure": "Die Gruppe wird aus nächster Nähe schwer überfallen (15 ft). Schlafende Gruppenmitglieder bleiben schlafend (bewusstlos und liegend) und erhalten vor ihrem Zug keine Reaktionen."
+                },
+                "setAlarms": {
+                    "bonus": "Alarme aufstellen: +{bonus} Wahrnehmung gegen die Heimlichkeit des Angreifers",
+                    "penalty": "Alarme aufstellen (Kritischer Fehlschlag): {bonus} Wahrnehmung gegen die Heimlichkeit des Angreifers",
+                    "none": "Alarme aufstellen (Fehlschlag): kein Vorteil"
+                },
+                "camouflage": {
+                    "criticalSuccess": "Lager tarnen (Kritischer Erfolg): Angreifer wird ein ganzes Band weiter entfernt entdeckt",
+                    "success": "Lager tarnen (Erfolg): Angreifer wird weiter entfernt entdeckt (+15 ft)",
+                    "failure": "Lager tarnen (Fehlschlag): kein Vorteil",
+                    "criticalFailure": "Lager tarnen (Kritischer Fehlschlag): der Angreifer kommt ein Band näher"
+                },
+                "setTraps": {
+                    "criticalSuccess": "Fallen stellen (Kritischer Erfolg): die Falle löst aus, verursacht 4W6 Schaden und stört den Hinterhalt",
+                    "success": "Fallen stellen (Erfolg): die Falle löst aus, verursacht 2W6 Schaden und stört den Hinterhalt"
+                },
+                "undeadGuardians": "Untote Wächter: die Wächter übernehmen eine zusätzliche Wache über das Lager"
+            }
         },
         "settlementNav": {
             "status": "Status",
