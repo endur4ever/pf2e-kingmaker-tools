@@ -482,4 +482,21 @@ suspend fun postComplexDegreeOfSuccess(
             rollMode = rollMode
         )
     }
+
+    // Re-derive the lockout from the CORRECTED degree, exactly as rollCheck does from the original.
+    // recordActivityUse assigns from the new degree unconditionally so a superseding result can
+    // release a lock, not merely tighten one -- but nothing here called it, so Pull Together talking
+    // a critical failure down to a failure, and Spend Banked Aid upgrading a result, both left the
+    // critical failure's timeout standing. Undoing that lockout is the point of both.
+    if (activity != null && activityTracksUsage(activity.id)) {
+        kingdomActor.getKingdom()?.let { k ->
+            k.activityUsage = recordActivityUse(
+                k.activityUsages(),
+                activity.id,
+                changedDegreeOfSuccess,
+                k.currentTurn ?: 0,
+            ).toRawActivityBlocks()
+            kingdomActor.setKingdom(k)
+        }
+    }
 }
