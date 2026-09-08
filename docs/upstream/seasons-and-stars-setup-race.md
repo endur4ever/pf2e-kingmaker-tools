@@ -32,3 +32,17 @@ is not yet registered and re-apply once it is.
 
 **Workaround we ship** in pf2e-kingmaker-tools: on `ready` (and `seasons-stars:ready`), if the
 active calendar is not the saved one, re-apply the saved id via `manager.setActiveCalendar`.
+
+---
+
+**How to file.** This needs a GitHub account, so it is Gregory's to submit:
+
+    https://github.com/rayners/fvtt-seasons-and-stars/issues/new
+
+Paste the **Title** line above as the issue title and everything from **Environment** down to
+**Workaround we ship** as the body. Nothing else needs editing — the stack trace was captured from
+this world, and the version numbers are the ones actually running (Foundry 14.363, PF2e 8.1.2,
+Seasons & Stars 0.26.0).
+
+Once filed, drop the issue URL on card t_533b14be so the workaround we ship can cite it and be
+removed when upstream fixes the race.
