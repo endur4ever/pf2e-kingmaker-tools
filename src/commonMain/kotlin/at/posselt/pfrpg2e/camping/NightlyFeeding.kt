@@ -75,6 +75,19 @@ data class NightlyFeeding(
  */
 fun rationsAlreadyPaidFor(paidDay: Int?, day: Int): Boolean = paidDay != null && paidDay == day
 
+/**
+ * True when EVERY camper eating rations tonight has already been paid for.
+ *
+ * The stamp has to be per camper, not per camp. `Consume Rations` prices the campers who were set
+ * to rations AT THE MOMENT IT WAS PRESSED and spends exactly that much food -- so a camp-wide "the
+ * night is paid" stamp fed anyone who switched to rations afterwards for free, because it recorded
+ * WHEN the rations were bought and not WHO they were bought for.
+ *
+ * Empty is not paid: a camp with nobody on rations has nothing to show as settled.
+ */
+fun allRationsPaidFor(paidDays: List<Int?>, day: Int): Boolean =
+    paidDays.isNotEmpty() && paidDays.all { rationsAlreadyPaidFor(it, day) }
+
 fun resolveNightlyFeeding(
     meals: List<NightlyMealChoice>,
     availableRations: Int,

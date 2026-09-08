@@ -132,3 +132,40 @@ class RationsAlreadyPaidTest {
         assertTrue(feeding.fed.isEmpty())
     }
 }
+
+/**
+ * Who the rations were bought for, not merely when.
+ *
+ * The first version of this stamp was a single camp-wide day. "Consume Rations" prices the campers
+ * who are on rations AT THE MOMENT IT IS PRESSED and spends exactly that much food, so a camp-wide
+ * stamp fed anyone who switched to rations afterwards for nothing: the stamp recorded WHEN the
+ * rations were bought and could not say WHO they were bought for.
+ */
+class AllRationsPaidForTest {
+    private val today = 12
+
+    @Test
+    fun everyRationEaterPaidTodayCountsAsSettled() {
+        assertTrue(allRationsPaidFor(listOf(today, today), today))
+    }
+
+    @Test
+    fun oneCamperWhoJoinedTheRationsAfterThePressIsNotCovered() {
+        // the defect: two were paid for, a third switched to rations before the rest
+        assertFalse(
+            allRationsPaidFor(listOf(today, today, null), today),
+            "a camper with no stamp must not be carried by the campers who were paid for",
+        )
+    }
+
+    @Test
+    fun yesterdaysStampDoesNotSettleTonight() {
+        assertFalse(allRationsPaidFor(listOf(today - 1, today), today))
+    }
+
+    @Test
+    fun aCampWithNobodyOnRationsIsNotSettled() {
+        // nothing to show as paid; the badge must not claim otherwise
+        assertFalse(allRationsPaidFor(emptyList(), today))
+    }
+}

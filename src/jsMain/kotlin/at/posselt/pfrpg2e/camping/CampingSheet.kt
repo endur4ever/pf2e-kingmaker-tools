@@ -787,8 +787,8 @@ class CampingSheet(
             recipesById = camping.getAllRecipes()
                 .associateBy { it.id },
         )
-        val rations = parsed.meals
-            .filterIsInstance<MealChoice.Rations>()
+        val rationEaters = parsed.meals.filterIsInstance<MealChoice.Rations>()
+        val rations = rationEaters
             .map { it.cookingCost }
             .sum()
         val leftOver = reduceFoodBy(
@@ -807,8 +807,30 @@ class CampingSheet(
         // await chain (compendium lookups, an item update per food-carrying actor, a chat card),
         // so saving that whole snapshot would revert anything another client changed meanwhile.
         if (leftOver.rations <= 0) {
+            // Record WHO was paid for, not merely WHEN. This button prices the campers who are on
+            // rations at the moment it is pressed and spends exactly that much food; a camp-wide
+            // "tonight is paid" stamp then fed anyone who switched to rations afterwards for free.
+            // Merged into whatever is already stored so pressing it twice in a day is additive.
+            // Keyed off cooking.actorMeals, which is the SAME source the nightly tick reads to
+            // decide who is on rations (StarvationTick maps actorUuid -> chosenMeal). Keying off
+            // the resolved MealChoice actors instead would depend on actor resolution succeeding,
+            // and the stamp must line up exactly with the charge it is meant to cancel.
             val paidDay = currentWorldDay(game)
-            actor.typedCampingUpdate { cooking.rationsPaidForDay.set(paidDay) }
+            val rationEaterUuids = camping.cooking.actorMeals.asSequence()
+                .map { it.component2() }
+                .filter { it.chosenMeal == "rationsOrSubsistence" }
+                .map { campingActorKey(it.actorUuid) }
+                .toList()
+            // Built as a Kotlin map and converted, rather than mutating a record in place: the
+            // stamp has to MERGE with whatever is already stored so pressing the button twice in
+            // one day is additive rather than replacing the first press's campers.
+            val existing = actor.getCamping()?.cooking?.rationsPaidByActor?.toMap() ?: emptyMap()
+            val merged = existing + rationEaterUuids.associateWith { paidDay }
+            actor.typedCampingUpdate {
+                cooking.rationsPaidByActor.set(
+                    merged.entries.asSequence().map { it.key to it.value }.toMutableRecord()
+                )
+            }
         }
     }
 
@@ -1430,7 +1452,11 @@ class CampingSheet(
                 )
             }
             .groupBy { it.chosenMeal }
-        val rationsPaidTonight = rationsAlreadyPaidFor(camping.cooking.rationsPaidForDay, currentWorldDay(game))
+        val rationsPaidTonight = allRationsPaidFor(
+            parsedCookingChoices.meals.filterIsInstance<MealChoice.Rations>()
+                .map { camping.cooking.rationsPaidByActor?.get(campingActorKey(it.actor.uuid)) },
+            currentWorldDay(game),
+        )
         val starving = RecipeContext(
             name = t("camping.skipMeal"),
             targetRecipe = "nothing",
@@ -2009,7 +2035,11 @@ class CampingSheet(
             availableFood = availableFood,
             foodDaysDisplay = foodDaysDisplay,
             foodTonightCovered = foodForecast.tonightCovered,
-            rationsPaidTonight = rationsAlreadyPaidFor(camping.cooking.rationsPaidForDay, currentWorldDay(game)),
+            rationsPaidTonight = allRationsPaidFor(
+                parsedCookingChoices.meals.filterIsInstance<MealChoice.Rations>()
+                    .map { camping.cooking.rationsPaidByActor?.get(campingActorKey(it.actor.uuid)) },
+                currentWorldDay(game),
+            ),
             totalFoodCost = calculateTotalFoodCost(
                 actorMeals = parsedCookingChoices.meals
                     .filter { it.name in uncookedMeals || it.id == "rationsOrSubsistence" },

@@ -62,13 +62,13 @@ external interface CookingResult {
 external interface Cooking {
     var knownRecipes: Array<String>
     var actorMeals: Record<String, ActorMeal>
-    /** World day whose rations the sheet's "Consume Rations" button actually PAID IN FULL.
+    /** Per camper, the world day whose rations the sheet's "Consume Rations" button PAID IN FULL.
      *  A day stamp rather than a boolean deliberately: a boolean has to be cleared by someone,
      *  and every candidate for that job either runs before the only reader (the rest cleared it
      *  14 lines above the starvation tick, so the guard could never fire) or does not run at all
      *  when the party breaks camp without resting, leaving a stale "paid" into a later night.
      *  A stamp needs no clearing -- it simply stops matching tomorrow. */
-    var rationsPaidForDay: Int?
+    var rationsPaidByActor: Record<String, Int>?
     var homebrewMeals: Array<RecipeData>
     var results: Record<String, CookingResult>
     var minimumSubsistence: Int
@@ -387,6 +387,19 @@ fun CampingData.campingActivitiesWithId() =
 
 suspend fun CampingData.getActorsCarryingFood(party: PF2EParty?): List<PF2EActor> =
     getActorsInCamp() + listOfNotNull(party)
+
+/**
+ * A Foundry-flag-safe record key for an actor UUID.
+ *
+ * Foundry treats a dot in an update key as a PATH SEPARATOR, so storing a record keyed by raw UUID
+ * writes {"Actor": {"camper-1": ...}} instead of {"Actor.camper-1": ...} -- the key is exploded
+ * into nested objects and every lookup by uuid then misses. That is why cooking.actorMeals is
+ * keyed by actor.id, and why the learned-companion record sanitises the same way.
+ *
+ * Centralised here because it had already been re-derived inline in SyncActivitiesHandler and
+ * Migration37, and getting it wrong is silent: the write succeeds and the read returns null.
+ */
+fun campingActorKey(actorUuid: String): String = actorUuid.replace('.', '_')
 
 fun getUnavailableCampActorUuids(game: Game): Set<String> =
     game.getKingdomActors()

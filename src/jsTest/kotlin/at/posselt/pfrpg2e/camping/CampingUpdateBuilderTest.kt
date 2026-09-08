@@ -81,8 +81,8 @@ class CampingUpdateBuilderTest {
     fun aNestedSetDoesNotWriteItsParent() {
         // the whole point of a narrow write: touching one nested field must not send its parent,
         // or the update clobbers every sibling the way setCamping did
-        val update = buildCampingUpdate { cooking.rationsPaidForDay.set(12) }
-        assertEquals(listOf("cooking.rationsPaidForDay"), keysOf(update))
+        val update = buildCampingUpdate { cooking.rationsPaidByActor.set(null) }
+        assertEquals(listOf("cooking.rationsPaidByActor"), keysOf(update))
         assertTrue(keysOf(update).none { it == "cooking" })
     }
 

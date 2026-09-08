@@ -38,7 +38,8 @@ class CookingPropertyBuilder(basePath: String, updates: Record<String, Any?>, pr
     val homebrewMeals = PropertyUpdateBuilder<Array<RecipeData>>(propertyName, updates, "homebrewMeals")
     val results = CookingResultPropertyBuilder(propertyName, updates, "results")
     val minimumSubsistence = PropertyUpdateBuilder<Int>(propertyName, updates, "minimumSubsistence")
-    val rationsPaidForDay = PropertyUpdateBuilder<Int?>(propertyName, updates, "rationsPaidForDay")
+    val rationsPaidByActor =
+        PropertyUpdateBuilder<Record<String, Int>?>(propertyName, updates, "rationsPaidByActor")
     val favoriteMealProgress = PropertyUpdateBuilder<Record<String, Record<String, FavoriteMealProgression>>?>(propertyName, updates, "favoriteMealProgress")
 
     operator fun invoke(action: CookingPropertyBuilder.() -> Unit) = action()

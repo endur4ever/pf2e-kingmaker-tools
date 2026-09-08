@@ -14,6 +14,7 @@ import at.posselt.pfrpg2e.camping.getActorsInCamp
 import at.posselt.pfrpg2e.camping.getAllRecipes
 import at.posselt.pfrpg2e.camping.getCamping
 import at.posselt.pfrpg2e.camping.setCamping
+import at.posselt.pfrpg2e.camping.campingActorKey
 import at.posselt.pfrpg2e.camping.shouldRowBePinned
 import at.posselt.pfrpg2e.utils.asSequence
 import at.posselt.pfrpg2e.utils.buildPromise
@@ -197,7 +198,8 @@ class FavoriteMealsApplication(
                 pickedMeal = meal.favoriteMeal,
                 explicitlyUnpinned = isExplicitlyUnpinned,
             )
-            val rationsPaidForTonight = camping?.cooking?.rationsPaidForDay == currentWorldDay(game)
+            val rationsPaidForTonight =
+                camping?.cooking?.rationsPaidByActor?.get(campingActorKey(meal.actorUuid)) == currentWorldDay(game)
 
             val hiddenActorUuid = HiddenInput(
                 name = "meals.$index.actorUuid",

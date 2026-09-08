@@ -123,7 +123,11 @@ class CampingAdapterRegressionTest {
 
         val stored = partyActor.getCamping()
         assertNotNull(stored)
-        assertEquals(42, stored.cooking.rationsPaidForDay, "rationsPaidForDay must be stamped with today's world day")
+        assertEquals(
+            42,
+            stored.cooking.rationsPaidByActor?.get("Actor_camper-1"),
+            "the camper who was paid for must carry today's world day",
+        )
     }
 
     @Test
@@ -156,7 +160,7 @@ class CampingAdapterRegressionTest {
 
         val stored = partyActor.getCamping()
         assertNotNull(stored)
-        assertNull(stored.cooking.rationsPaidForDay, "rationsPaidForDay must NOT be stamped when food cannot cover bill")
+        assertNull(stored.cooking.rationsPaidByActor?.get("Actor_camper-1"), "rationsPaidForDay must NOT be stamped when food cannot cover bill")
     }
 
     @Test
@@ -196,7 +200,7 @@ class CampingAdapterRegressionTest {
 
         val stored = partyActor.getCamping()
         assertNotNull(stored)
-        assertEquals(10, stored.cooking.rationsPaidForDay)
+        assertEquals(10, stored.cooking.rationsPaidByActor?.get("Actor_camper-1"))
         assertEquals(9, stored.gunsToClean, "typedCampingUpdate must preserve concurrent edits to other flag fields")
     }
 
@@ -226,13 +230,61 @@ class CampingAdapterRegressionTest {
             }
         )
         // Today's stamp: paid in full earlier today
-        camping.cooking.rationsPaidForDay = today
+        camping.cooking.rationsPaidByActor = recordOf("Actor_camper-1" to today)
 
         val crossings = tickNightlyStarvation(game.asGame(), camping, partyActor, listOf(camper))
 
         assertTrue(crossings.isEmpty(), "No starvation crossing should occur when rations were paid for today")
         val daysWithout = camping.daysWithoutFood?.get("Actor_camper-1") ?: 0
         assertEquals(0, daysWithout, "Camper should not accumulate hunger days when rations were paid today")
+    }
+
+    @Test
+    fun aCamperWhoJoinedTheRationsAfterThePressIsStillCharged() = runTest {
+        // THE defect this per-actor stamp exists for. Consume Rations prices the campers who are
+        // on rations at the moment it is pressed and spends exactly that much food. Under the old
+        // camp-wide day stamp, a camper switched to rations afterwards was fed for nothing:
+        // the stamp said the night was paid and could not say for whom.
+        registerFoodCompendium()
+        val game = FakeGame(isGM = true)
+        val today = 50
+        game.setWorldDay(today)
+
+        val partyActor = createFakeCampingActor()
+        game.addActor(partyActor)
+
+        val paidCamper = createFakeCharacter("camper-1", "Actor.camper-1", "Amiri", isOwner = true)
+        val lateCamper = createFakeCharacter("camper-2", "Actor.camper-2", "Valerie", isOwner = true)
+        env.registry.register("Actor.camper-1", paidCamper)
+        env.registry.register("Actor.camper-2", lateCamper)
+
+        val camping = getDefaultCamping(game.asGame())
+        camping.actorUuids = arrayOf("Actor.camper-1", "Actor.camper-2")
+        camping.cooking.actorMeals = recordOf(
+            "camper-1" to unsafeJso<ActorMeal> {
+                actorUuid = "Actor.camper-1"
+                chosenMeal = "rationsOrSubsistence"
+            },
+            "camper-2" to unsafeJso<ActorMeal> {
+                actorUuid = "Actor.camper-2"
+                chosenMeal = "rationsOrSubsistence"
+            },
+        )
+        // Only the first camper was on rations when the button was pressed, so only they are stamped
+        camping.cooking.rationsPaidByActor = recordOf("Actor_camper-1" to today)
+
+        tickNightlyStarvation(game.asGame(), camping, partyActor, listOf(paidCamper, lateCamper))
+
+        assertEquals(
+            0,
+            camping.daysWithoutFood?.get("Actor_camper-1") ?: 0,
+            "the camper who WAS paid for must not be charged again",
+        )
+        assertEquals(
+            1,
+            camping.daysWithoutFood?.get("Actor_camper-2") ?: 0,
+            "the camper who joined the rations after the press was never paid for and must be charged",
+        )
     }
 
     @Test
@@ -257,7 +309,7 @@ class CampingAdapterRegressionTest {
             }
         )
         // Yesterday's stamp: must NOT pay for tonight
-        camping.cooking.rationsPaidForDay = today - 1
+        camping.cooking.rationsPaidByActor = recordOf("Actor_camper-1" to today - 1)
 
         val crossings = tickNightlyStarvation(game.asGame(), camping, partyActor, listOf(camper))
 
