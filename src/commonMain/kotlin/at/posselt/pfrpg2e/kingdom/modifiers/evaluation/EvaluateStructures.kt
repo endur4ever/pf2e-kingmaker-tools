@@ -12,6 +12,9 @@ import at.posselt.pfrpg2e.data.kingdom.settlements.resolveUrbanGrid
 import at.posselt.pfrpg2e.data.kingdom.settlements.findSettlementMaxItemBonusLevel
 import at.posselt.pfrpg2e.data.kingdom.settlements.findSettlementSize
 import at.posselt.pfrpg2e.data.kingdom.settlements.generateInitialPopulation
+import at.posselt.pfrpg2e.data.kingdom.structures.MAGICAL_STREETLAMPS_ID
+import at.posselt.pfrpg2e.data.kingdom.structures.PAVED_STREETS_ID
+import at.posselt.pfrpg2e.data.kingdom.structures.SEWER_SYSTEM_ID
 import at.posselt.pfrpg2e.data.kingdom.structures.AvailableItemBonuses
 import at.posselt.pfrpg2e.data.kingdom.structures.CommodityStorage
 import at.posselt.pfrpg2e.data.kingdom.structures.GroupedStructureBonus
@@ -190,6 +193,8 @@ data class SettlementData(
     val magicalStreetlamps: Boolean = false,
     val pavedStreets: Boolean = false,
     val sewerSystem: Boolean = false,
+    /** The GM manages this settlement's level by hand; do not recount its blocks. */
+    val manualOccupiedBlocks: Boolean = false,
     val lotsBorderingWater: Int = 0,
     val edges: SettlementEdges = SettlementEdges(),
     val urbanGrid: UrbanGrid = UrbanGrid(),
@@ -204,15 +209,32 @@ fun evaluateSettlement(
     kingdomLevel: Int,
     blocks: List<Block>,
 ): Settlement {
+    val constructedStructures = structures.filter { !it.slowed && it.rpPaid }
+
+    // Infrastructure that shapes the urban grid, derived from what is actually built. Nothing ever
+    // populated these SettlementData fields, so the grid stayed at its default and the paved-streets
+    // house rule could never fire; an explicitly supplied value still wins.
+    val pavedStreets = data.pavedStreets || constructedStructures.any { it.id == PAVED_STREETS_ID }
+    val magicalStreetlamps =
+        data.magicalStreetlamps || constructedStructures.any { it.id == MAGICAL_STREETLAMPS_ID }
+    val sewerSystem = data.sewerSystem || constructedStructures.any { it.id == SEWER_SYSTEM_ID }
+
     val urbanGrid = if (data.urbanGrid != UrbanGrid()) {
         data.urbanGrid
-    } else if (data.edges != SettlementEdges() || data.pavedStreets) {
-        resolveUrbanGrid(data.edges, data.pavedStreets, data.magicalStreetlamps, data.sewerSystem)
+    } else if (data.edges != SettlementEdges() || pavedStreets) {
+        resolveUrbanGrid(data.edges, pavedStreets, magicalStreetlamps, sewerSystem)
     } else {
         data.urbanGrid
     }
 
-    val occupiedBlocks = if (blocks.isNotEmpty()) blocks.count { it.isOccupied } else data.occupiedBlocks
+    // A settlement whose level the GM manages by hand keeps the level they set. Counting the
+    // scene's occupied blocks here overwrote it whenever the scene had any blocks at all, which
+    // is every scene, so the Manual Management checkbox did nothing.
+    val occupiedBlocks = if (!data.manualOccupiedBlocks && blocks.isNotEmpty()) {
+        blocks.count { it.isOccupied }
+    } else {
+        data.occupiedBlocks
+    }
     val waterBorders = if (data.edges != SettlementEdges()) data.edges.waterBorders else data.waterBorders
     val lotsBorderingWater = if (urbanGrid != UrbanGrid()) urbanGrid.totalWaterLots else data.lotsBorderingWater
 
@@ -222,7 +244,6 @@ fun evaluateSettlement(
     } else {
         settlementSize.maxItemBonus
     }
-    val constructedStructures = structures.filter { !it.slowed && it.rpPaid }
     val slowedStructures = structures.filter { it.slowed }
     val underConstructionStructures = structures.filter { !it.slowed && !it.rpPaid }
     val waterAdjacentMillBonus = if (waterBorders >= 1 && constructedStructures.any { it.id == "mill" }) 1 else 0
@@ -280,9 +301,9 @@ fun evaluateSettlement(
         settlementActions = structures.maxOfOrNull { it.increaseMinimumSettlementActions } ?: 0,
         blocks = blocks,
         populationRoster = data.populationRoster,
-        magicalStreetlamps = data.magicalStreetlamps,
-        pavedStreets = data.pavedStreets,
-        sewerSystem = data.sewerSystem,
+        magicalStreetlamps = magicalStreetlamps,
+        pavedStreets = pavedStreets,
+        sewerSystem = sewerSystem,
         lotsBorderingWater = lotsBorderingWater,
         edges = data.edges,
         urbanGrid = urbanGrid,

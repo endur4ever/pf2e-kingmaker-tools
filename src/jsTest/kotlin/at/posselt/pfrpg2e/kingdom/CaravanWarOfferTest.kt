@@ -65,6 +65,25 @@ class CaravanWarOfferTest {
     }
 
     @Test
+    fun recallingAPurchaseDoesNotAlsoDeliverItsGoods() {
+        // A real buyFromPartner caravan records BOTH the RP it paid and the commodities it is
+        // going to bring home, so a recall that refunds both mints goods the kingdom never owned.
+        val k = kingdom(
+            RawCaravan(
+                id = "a", kind = "buyFromPartner",
+                originHexKey = "0,0", destHexKey = "1,1", originLabel = "Home", destLabel = "There",
+                partnerName = "Pitax", cargoCommodity = "ore", cargoAmount = 5, cargoRp = 12,
+                etaTurns = 3, turnsRemaining = 2, status = "inTransit",
+            )
+        )
+
+        assertTrue(k.recallCaravan("a"))
+
+        assertEquals(12, k.resourcePoints.now)
+        assertEquals(0, k.commodities.now.ore)
+    }
+
+    @Test
     fun aShipmentCannotBeRecalledTwice() {
         // Offer cards persist in chat; a second click must not pay the cargo out again.
         val k = kingdom(caravan("a", "Pitax", commodity = "ore", amount = 4))

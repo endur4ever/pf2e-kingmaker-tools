@@ -363,4 +363,29 @@ class HexStateTest {
         assertFalse(isStaleHexOverlay(type = CLAIMED_DRAWING_TYPE, hexKey = "hex-1", shapeType = "p"))
         assertFalse(isStaleHexOverlay(type = CLEARED_DRAWING_TYPE, hexKey = "hex-9", shapeType = "p"))
     }
+
+    // ── Hex content markers ──
+
+    @Test
+    fun aHexWithOnlyHiddenContentGetsAGmOnlyMarker() {
+        // The marker carries the content's name as visible text on the shared scene, so drawing
+        // it for everyone in grey leaked exactly what it was meant to conceal.
+        assertTrue(isHexMarkerGmOnly(listOf(false)))
+        assertTrue(isHexMarkerGmOnly(listOf(false, false)))
+        assertTrue(isHexMarkerGmOnly(emptyList()))
+    }
+
+    @Test
+    fun aHexWithAnyVisibleContentKeepsAPlayerFacingMarker() {
+        assertFalse(isHexMarkerGmOnly(listOf(true)))
+        assertFalse(isHexMarkerGmOnly(listOf(false, true)))
+    }
+
+    @Test
+    fun theMarkerLabelCountsTheRest() {
+        assertNull(hexMarkerLabel(emptyList()))
+        assertEquals("Ruins", hexMarkerLabel(listOf("Ruins")))
+        assertEquals("Ruins +2", hexMarkerLabel(listOf("Ruins", "Lair", "Camp")))
+    }
 }
+

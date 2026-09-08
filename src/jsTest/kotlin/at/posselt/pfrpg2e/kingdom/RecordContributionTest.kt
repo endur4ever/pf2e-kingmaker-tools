@@ -232,6 +232,7 @@ class RenownOfferTest {
         populace: Int = 0,
         epithets: Array<String>? = null,
         lastOffered: Int? = null,
+        dismissed: Array<String>? = null,
     ): at.posselt.pfrpg2e.kingdom.data.RawPcRenown {
         val obj = js("{}").unsafeCast<at.posselt.pfrpg2e.kingdom.data.RawPcRenown>()
         obj.actorUuid = uuid
@@ -239,6 +240,7 @@ class RenownOfferTest {
         obj.populace = populace
         obj.epithets = epithets
         obj.lastOfferedTurn = lastOffered
+        obj.dismissedEpithets = dismissed
         return obj
     }
 
@@ -263,6 +265,42 @@ class RenownOfferTest {
         val rows = arrayOf(renownRow(populace = 55, lastOffered = 5))
         assertTrue(pendingEpithetOffers(rows, rulerUuid = null, turn = 5).isEmpty())
         assertEquals(1, pendingEpithetOffers(rows, rulerUuid = null, turn = 6).size)
+    }
+
+    @Test
+    fun aDismissedEpithetIsNeverReOffered() {
+        val rows = arrayOf(renownRow(populace = 55, dismissed = arrayOf("peoplesChampion")))
+        assertTrue(pendingEpithetOffers(rows, rulerUuid = null, turn = 5).isEmpty())
+        assertTrue(pendingEpithetOffers(rows, rulerUuid = null, turn = 99).isEmpty())
+    }
+
+    @Test
+    fun dismissingAnOfferIsWhatMakesThatGuardWork() {
+        // Dismiss used to post a notification and record nothing, so `once` burned that one card
+        // and End Turn offered the same epithet again every turn for the rest of the campaign.
+        val kingdom = js("{}").unsafeCast<KingdomData>()
+        kingdom.renown = arrayOf(renownRow(populace = 55))
+        val offers = pendingEpithetOffers(kingdom.renown, rulerUuid = null, turn = 5)
+        assertEquals(1, offers.size)
+
+        dismissEpithetOffer(kingdom, pcUuid = "pc-1", epithetId = offers.single().award.epithetId)
+
+        assertTrue(pendingEpithetOffers(kingdom.renown, rulerUuid = null, turn = 6).isEmpty())
+    }
+
+    @Test
+    fun dismissingOneEpithetLeavesTheOthersOnOffer() {
+        val kingdom = js("{}").unsafeCast<KingdomData>()
+        kingdom.renown = arrayOf(renownRow(populace = 80))
+        val all = pendingEpithetOffers(kingdom.renown, rulerUuid = "pc-1", turn = 1)
+            .map { it.award.epithetId }
+        assertTrue(all.size > 1, "this test needs a PC who earned more than one epithet, got ${'$'}all")
+
+        dismissEpithetOffer(kingdom, pcUuid = "pc-1", epithetId = all.first())
+
+        val remaining = pendingEpithetOffers(kingdom.renown, rulerUuid = "pc-1", turn = 2)
+            .map { it.award.epithetId }
+        assertEquals(all.drop(1), remaining)
     }
 
     @Test

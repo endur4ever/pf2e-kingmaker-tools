@@ -24,9 +24,10 @@ data class PendingEpithetOffer(
 /**
  * Which epithets a PC has newly earned this turn.
  *
- * Guarded twice over, because an epithet offer that re-fires is worse than one that never does:
- * an epithet already held is never re-offered, and a PC already offered on [turn] is skipped
- * entirely. The caller stamps `lastOfferedTurn` when it posts.
+ * Guarded three times over, because an epithet offer that re-fires is worse than one that never
+ * does: an epithet already held is never re-offered, one the GM has dismissed is never re-offered,
+ * and a PC already offered on [turn] is skipped entirely. The caller stamps `lastOfferedTurn` when
+ * it posts, and the dismiss button records the refusal.
  */
 fun pendingEpithetOffers(
     renownRows: Array<RawPcRenown>?,
@@ -36,13 +37,14 @@ fun pendingEpithetOffers(
     (renownRows ?: emptyArray()).flatMap { row ->
         val uuid = row.actorUuid?.takeIf { it.isNotBlank() } ?: return@flatMap emptyList()
         if (row.lastOfferedTurn == turn) return@flatMap emptyList()
+        val dismissed = row.dismissedEpithets?.toSet() ?: emptySet()
         val model = row.toModel() ?: return@flatMap emptyList()
         val context = epithetContextFor(model, holdsRulerRole = rulerUuid != null && rulerUuid == uuid)
         // EVERY newly-earned epithet, not just the first: a PC who crosses two thresholds in one
         // busy turn has earned both, and offering one per turn would ration honours the catalog
         // already decided they deserve
         evaluateEpithets(model, context)
-            .filter { award -> award.epithetId !in model.epithets }
+            .filter { award -> award.epithetId !in model.epithets && award.epithetId !in dismissed }
             .map { PendingEpithetOffer(actorUuid = uuid, actorName = row.actorName, award = it) }
     }
 
@@ -135,3 +137,15 @@ fun localizeSpotlight(pick: SpotlightPick): String {
 /** The PC currently holding the Ruler role, if any -- the one epithet condition that needs it. */
 suspend fun KingdomData.rulerActorUuid(): String? =
     runCatching { parseLeaderActors().resolve(Leader.RULER)?.uuid }.getOrNull()
+
+/** Records the GM's refusal of [epithetId] for one PC, so the offer is not made again. */
+fun dismissEpithetOffer(kingdom: KingdomData, pcUuid: String, epithetId: String) {
+    kingdom.renown = (kingdom.renown ?: emptyArray()).map { row ->
+        if (row.actorUuid == pcUuid) {
+            val dismissed = (row.dismissedEpithets ?: emptyArray()).toSet() + epithetId
+            RawPcRenown.copy(row, dismissedEpithets = dismissed.sorted().toTypedArray())
+        } else {
+            row
+        }
+    }.toTypedArray()
+}

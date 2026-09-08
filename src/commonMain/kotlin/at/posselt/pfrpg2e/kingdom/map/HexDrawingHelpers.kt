@@ -84,3 +84,23 @@ fun isManagedHexOverlay(type: String?, hexKey: String?): Boolean =
  */
 fun isStaleHexOverlay(type: String?, hexKey: String?, shapeType: String?): Boolean =
     isManagedHexOverlay(type, hexKey) && (shapeType != "p" || hexKey == null)
+
+// ── Hex content markers ──
+
+/**
+ * Label for a hex's content marker: the first name, plus a count of the rest.
+ * Null when there is nothing to show.
+ */
+fun hexMarkerLabel(names: List<String>): String? = when {
+    names.isEmpty() -> null
+    names.size == 1 -> names.first()
+    else -> "${names.first()} +${names.size - 1}"
+}
+
+/**
+ * Whether a hex's marker must be GM-only, given the player-visibility of each content on it.
+ *
+ * Markers are Drawings on the shared scene carrying the content's name as visible text, so a hex
+ * holding nothing players may see must not render one to them. Colouring it grey concealed nothing.
+ */
+fun isHexMarkerGmOnly(playerVisible: List<Boolean>): Boolean = playerVisible.none { it }

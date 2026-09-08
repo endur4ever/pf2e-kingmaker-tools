@@ -110,10 +110,13 @@ fun Scene.parseSettlement(
 ): Settlement {
     val ruinedTokenIds = rawSettlement.destroyedStructureIds?.toSet() ?: emptySet()
     val blocks = getNonInfrastructureBlocks(ruinedTokenIds)
-    val occupiedBlocks = if (autoCalculateSettlementLevel && rawSettlement.manualSettlementLevel != true) max(
-        0,
-        blocks.filter { it.isOccupied }.size
-    ) else rawSettlement.lots
+    val manualOccupiedBlocks =
+        !autoCalculateSettlementLevel || rawSettlement.manualSettlementLevel == true
+    val occupiedBlocks = if (manualOccupiedBlocks) {
+        rawSettlement.lots
+    } else {
+        max(0, blocks.filter { it.isOccupied }.size)
+    }
     val structures = getStructures(ruinedTokenIds)
     val populationRoster = rawSettlement.populationRoster?.let { raw ->
         PopulationRoster(
@@ -139,6 +142,7 @@ fun Scene.parseSettlement(
             isSecondaryTerritory = rawSettlement.secondaryTerritory,
             waterBorders = rawSettlement.waterBorders,
             populationRoster = populationRoster,
+            manualOccupiedBlocks = manualOccupiedBlocks,
         ),
         structures = structures,
         allStructuresStack = allStructuresStack,

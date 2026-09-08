@@ -129,6 +129,13 @@ external interface RawPcRenown {
 
     /** Last turn an epithet or perk offer was emitted for this PC, so End Turn cannot re-offer. */
     var lastOfferedTurn: Int?
+
+    /**
+     * Epithet ids the GM has refused for this PC. Dismissing an offer used to record nothing, so
+     * the same epithet was re-offered every turn for the rest of the campaign. Null on saves
+     * predating the field; no migration needed.
+     */
+    var dismissedEpithets: Array<String>?
     var lifetimeCrits: Int?
     var lifetimeCritFails: Int?
     var lifetimeActivities: Int?
@@ -253,12 +260,13 @@ fun RawPcRenown.toModel(): PcRenown? {
  * iteration order leaking into the flag would show a spurious diff on every one of them.
  */
 fun PcRenown.toRaw(
-    // NO DEFAULTS on purpose: neither value exists on the pure model, so a bare toRaw() would
+    // NO DEFAULTS on purpose: none of these exist on the pure model, so a bare toRaw() would
     // compile and silently write null over a real one. For lastOfferedTurn that re-offers every
     // epithet the PC already accepted, every turn -- exactly what the field exists to prevent.
     // Same shape as TreasureLedgerEntry.toRaw(sourceName) and DowntimeProject.toRaw(...).
     actorName: String?,
     lastOfferedTurn: Int?,
+    dismissedEpithets: Array<String>?,
 ): RawPcRenown =
     RawPcRenown(
         actorUuid = actorUuid,
@@ -271,6 +279,7 @@ fun PcRenown.toRaw(
         epithets = epithets.sorted().toTypedArray(),
         purchaseAccessTier = purchaseAccessTier,
         lastOfferedTurn = lastOfferedTurn,
+        dismissedEpithets = dismissedEpithets,
         lifetimeCrits = lifetimeCrits,
         lifetimeCritFails = lifetimeCritFails,
         lifetimeActivities = lifetimeActivities,

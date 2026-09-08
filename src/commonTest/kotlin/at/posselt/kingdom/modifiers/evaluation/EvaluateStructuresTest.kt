@@ -25,6 +25,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import kotlin.test.assertNotEquals
 
 class EvaluateStructuresTest {
     @Test
@@ -849,4 +850,73 @@ class EvaluateStructuresTest {
         // Default urban grid should fallback to 4 lots bordering water
         assertEquals(4, result.lotsBorderingWater)
     }
+
+    private fun infrastructure(id: String) = Structure(
+        name = id, id = id, uuid = "", actorUuid = "",
+    )
+
+    private fun evaluate(
+        structures: List<Structure> = emptyList(),
+        blocks: List<Block> = emptyList(),
+        occupiedBlocks: Int = 4,
+        manualOccupiedBlocks: Boolean = false,
+    ) = evaluateSettlement(
+        data = SettlementData(
+            name = "n", id = "n", type = SettlementType.SETTLEMENT, waterBorders = 0,
+            occupiedBlocks = occupiedBlocks, isSecondaryTerritory = false,
+            layoutType = SettlementLayoutType.RIGID,
+            manualOccupiedBlocks = manualOccupiedBlocks,
+        ),
+        structures = structures,
+        allStructuresStack = false,
+        allowCapitalInvestmentInCapitalWithoutBank = false,
+        kingdomLevel = 1,
+        capStructureBonusAtKingdomLevel = false,
+        blocks = blocks,
+    )
+
+    @Test
+    fun pavedStreetsAreDerivedFromTheBuiltStructure() {
+        // Nothing ever set SettlementData.pavedStreets, so the urban grid stayed at its default
+        // and the paved-streets house rule could not fire.
+        assertFalse(evaluate().pavedStreets)
+        assertTrue(evaluate(structures = listOf(infrastructure("paved-streets"))).pavedStreets)
+    }
+
+    @Test
+    fun streetlampsAndSewersAreDerivedFromTheirStructures() {
+        val built = evaluate(
+            structures = listOf(infrastructure("magical-streetlamps"), infrastructure("sewer-system")),
+        )
+        assertTrue(built.magicalStreetlamps)
+        assertTrue(built.sewerSystem)
+    }
+
+    @Test
+    fun pavedStreetsResolveTheUrbanGrid() {
+        assertEquals(UrbanGrid(), evaluate().urbanGrid)
+        assertNotEquals(UrbanGrid(), evaluate(structures = listOf(infrastructure("paved-streets"))).urbanGrid)
+    }
+
+    @Test
+    fun aManuallyManagedSettlementKeepsItsLevel() {
+        // Counting the scene's blocks here overwrote the level the GM set by hand, which happened
+        // on every scene that has blocks at all.
+        val occupied = Block(
+            delayedStructures = emptyList(),
+            constructedStructures = listOf(
+                Structure(name = "Residential", id = "residential", lots = 1, uuid = "", actorUuid = "")
+            ),
+            structuresUnderConstruction = emptyList(),
+        )
+        assertEquals(
+            7,
+            evaluate(blocks = listOf(occupied), occupiedBlocks = 7, manualOccupiedBlocks = true).occupiedBlocks,
+        )
+        assertEquals(
+            1,
+            evaluate(blocks = listOf(occupied), occupiedBlocks = 7, manualOccupiedBlocks = false).occupiedBlocks,
+        )
+    }
 }
+

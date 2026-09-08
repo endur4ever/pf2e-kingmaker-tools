@@ -182,6 +182,14 @@ data class Select(
             escapeLabel = escapeLabel,
         )
 
+        /**
+         * A numeric select over [from]..[to].
+         *
+         * The range always stretches to include [value]. A select whose value matches no option
+         * renders as its first option and submits THAT on the next save, so an out-of-range value
+         * was silently rewritten -- commodities held above a storage cap became zero the moment
+         * the sheet was saved, which needs no bug to reach: demolishing a granary is enough.
+         */
         fun range(
             label: String,
             name: String,
@@ -203,7 +211,7 @@ data class Select(
             required = required,
             help = help,
             hideLabel = hideLabel,
-            options = (from..to)
+            options = (minOf(from, value)..maxOf(to, value))
                 .map { SelectOption(it.toString(), it.toString()) }
                 .toList(),
             disabled = disabled,

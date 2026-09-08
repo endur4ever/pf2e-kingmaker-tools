@@ -53,5 +53,7 @@ data class Structure(
         min(remainingRp, maxRpPerTurn)
 }
 
-
-
+// Structure ids whose presence changes settlement-wide behaviour rather than granting a bonus.
+const val PAVED_STREETS_ID = "paved-streets"
+const val MAGICAL_STREETLAMPS_ID = "magical-streetlamps"
+const val SEWER_SYSTEM_ID = "sewer-system"

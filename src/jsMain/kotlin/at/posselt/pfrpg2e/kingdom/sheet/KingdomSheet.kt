@@ -3592,6 +3592,10 @@ class KingdomSheet(
                 manualSettlementLevel = false,
                 waterBorders = waterBorders,
                 layoutType = layoutType.value,
+                // the terrain the GM picked, not just the background image it selected: the rough
+                // terrain costs setting and the battle-terrain lookup both read this field, and it
+                // stayed null until someone re-picked it in Inspect Settlement
+                terrain = terrain.value,
             )
             kingdom.activeSettlement = it
             actor.setKingdom(kingdom)

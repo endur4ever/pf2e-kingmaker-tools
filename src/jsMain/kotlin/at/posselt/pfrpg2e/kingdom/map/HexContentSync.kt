@@ -69,24 +69,25 @@ suspend fun syncHexContentMarkers(game: Game, kingdomActor: KingdomActor) {
         val existingMarker = findContentMarker(activeScene.drawings.contents, hexKey)
 
         // Determine the effective visibility for this hex's marker
-        val hasVisibleContent = hexContents.any {
+        val playerVisible = hexContents.map {
             val vis = HexContentVisibility.fromString(it.visibility)
             vis == HexContentVisibility.DISCOVERED || vis == HexContentVisibility.CLEARED
         }
+        val hasVisibleContent = playerVisible.any { it }
         val hasHiddenContent = hexContents.any {
-            val vis = HexContentVisibility.fromString(it.visibility)
-            vis == HexContentVisibility.HIDDEN
+            HexContentVisibility.fromString(it.visibility) == HexContentVisibility.HIDDEN
         }
         val hasPendingEncounter = hexContents.any { it.pendingEncounter == true }
 
-        // Pick the first content for the marker label
-        val bestContent = hexContents.firstOrNull() ?: continue
-
-        val markerLabel = if (hexContents.size == 1) {
-            bestContent.name
-        } else {
-            "${bestContent.name} +${hexContents.size - 1}"
-        }
+        // A marker is a Drawing on the shared scene carrying the content's NAME as visible text, so
+        // a hex holding nothing the players may see has to be GM-only. It used to be drawn for
+        // everyone and merely coloured grey, which concealed nothing. A mixed hex still shows a
+        // marker, but its label names only the content the players are allowed to know about.
+        val gmOnly = isHexMarkerGmOnly(playerVisible)
+        val labelNames = hexContents
+            .filterIndexed { index, _ -> gmOnly || playerVisible[index] }
+            .map { it.name }
+        val markerLabel = hexMarkerLabel(labelNames) ?: continue
 
         // Determine marker color based on visibility and pending encounter
         val (fillColor, strokeColor) = when {
@@ -125,6 +126,7 @@ suspend fun syncHexContentMarkers(game: Game, kingdomActor: KingdomActor) {
                 "strokeColor" to strokeColor,
                 "strokeAlpha" to 1.0,
                 "locked" to true,
+                "hidden" to gmOnly,
                 "flags" to recordOf(
                     "pf2e-kingmaker-tools" to recordOf(
                         "realmTile" to recordOf(
@@ -146,6 +148,7 @@ suspend fun syncHexContentMarkers(game: Game, kingdomActor: KingdomActor) {
                         "text" to markerLabel,
                         "fillColor" to fillColor,
                         "strokeColor" to strokeColor,
+                        "hidden" to gmOnly,
                     )
                 ).await()
             }

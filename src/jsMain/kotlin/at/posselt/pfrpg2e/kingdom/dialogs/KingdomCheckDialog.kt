@@ -550,7 +550,10 @@ private class KingdomCheckDialog(
         }
 
         kingdomActor.getKingdom()?.let { k ->
-            k.modifiers = kingdom.modifiers.filter { it.id !in consumedModifiers }.toTypedArray()
+            // filter k, NOT the `kingdom` snapshot this dialog was constructed with: a roll can
+            // take a while, and writing the stale list back reverted every modifier the kingdom
+            // gained while the dialog stood open.
+            k.modifiers = k.modifiers.filter { it.id !in consumedModifiers }.toTypedArray()
             kingdomActor.setKingdom(k)
         }
 

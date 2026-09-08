@@ -68,6 +68,7 @@ fun recordContribution(
                     reverted.toRaw(
                         actorName = priorLedger.actorName,
                         lastOfferedTurn = priorLedger.lastOfferedTurn,
+                        dismissedEpithets = priorLedger.dismissedEpithets,
                     ),
                 )
             }
@@ -90,6 +91,7 @@ fun recordContribution(
             // an incoming name refreshes a renamed PC, but never erases a stored one with null
             actorName = actorName ?: existing?.actorName,
             lastOfferedTurn = existing?.lastOfferedTurn,
+            dismissedEpithets = existing?.dismissedEpithets,
         ),
     )
     kingdom.currentTurnContributions = tallyRows.adjustCounter(actorUuid, kind, delta = 1, actorName = actorName)

@@ -58,17 +58,23 @@ suspend fun postCaravanWarOffers(
 fun KingdomData.recallCaravan(caravanId: String): Boolean {
     val caravan = (caravans ?: emptyArray()).find { it.id == caravanId && it.status == "inTransit" } ?: return false
     caravan.status = "recalled"
-    val commodity = caravan.cargoCommodity
-    if (commodity != null && caravan.cargoAmount > 0) {
-        val now = commodities.now
-        when (commodity) {
-            "food" -> now.food += caravan.cargoAmount
-            "lumber" -> now.lumber += caravan.cargoAmount
-            "stone" -> now.stone += caravan.cargoAmount
-            "ore" -> now.ore += caravan.cargoAmount
-            "luxuries" -> now.luxuries += caravan.cargoAmount
+    // Refund what was actually spent at dispatch, and only that. A buyFromPartner caravan records
+    // BOTH the RP it paid and the commodities it expects to bring home, so refunding both handed
+    // the kingdom goods it never owned on top of its money back.
+    if (caravan.kind == "buyFromPartner") {
+        caravan.cargoRp?.takeIf { it > 0 }?.let { resourcePoints.now += it }
+    } else {
+        val commodity = caravan.cargoCommodity
+        if (commodity != null && caravan.cargoAmount > 0) {
+            val now = commodities.now
+            when (commodity) {
+                "food" -> now.food += caravan.cargoAmount
+                "lumber" -> now.lumber += caravan.cargoAmount
+                "stone" -> now.stone += caravan.cargoAmount
+                "ore" -> now.ore += caravan.cargoAmount
+                "luxuries" -> now.luxuries += caravan.cargoAmount
+            }
         }
     }
-    caravan.cargoRp?.takeIf { it > 0 }?.let { resourcePoints.now += it }
     return true
 }

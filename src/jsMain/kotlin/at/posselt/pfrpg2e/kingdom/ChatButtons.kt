@@ -993,8 +993,18 @@ private val buttons = listOf(
             }
         }.launch()
     },
-    ChatButton("km-offer-renown-dismiss", once = true) { game, _, _, _ ->
+    ChatButton("km-offer-renown-dismiss", once = true) { game, actor, _, button ->
         if (!game.user.isGM) return@ChatButton
+        // `once` only burns THIS card's button. Without a durable record the same epithet was
+        // re-offered at the end of every following turn, for the rest of the campaign.
+        val pcUuid = button.dataset["pcUuid"]
+        val epithetId = button.dataset["epithetId"]
+        if (pcUuid != null && epithetId != null) {
+            actor.getKingdom()?.let { kingdom ->
+                dismissEpithetOffer(kingdom, pcUuid, epithetId)
+                actor.setKingdom(kingdom)
+            }
+        }
         ui.notifications.info(t("kingdom.renown.offerDismissed"))
     },
     ChatButton("km-council-vote-cast") { game, actor, _, button ->
