@@ -28,17 +28,20 @@ private fun parseKingmakerWorksite(
         // There is no "luxury" camp on the Kingmaker map, so a mine on a Luxury Resource hex is
         // treated as a luxury source (counted, but it produces no Commodity here) and is excluded
         // from the ore-mine count.
+        // WorkSite.income is quantity + resources, so `resources` carries the BONUS a matching
+        // Resource adds, never the total yield -- the same convention toRealmWorksite uses for
+        // tile-based realms.
         val (quantity, resources) = when {
             // A mine on a Luxury Resource hex generates 1 Luxury Commodity per turn instead of Ore
             // (RAW: it does not double). Counted only for the luxury-source pass.
             type == "mine" && commodity == "luxuries" ->
-                (if (it.commodity == "luxuries") 1 else 0).let { it to it }
+                (if (it.commodity == "luxuries") 1 else 0) to 0
             type == "mine" && it.commodity == "luxuries" ->
                 0 to 0
             // RAW: an established Work Site generates 1 Commodity of its type, doubled to 2 when the
             // hex also has a matching Resource (the Kingmaker hex `commodity` marks that Resource).
             else ->
-                1 to if (commodity == it.commodity) 2 else 1
+                1 to if (commodity == it.commodity) 1 else 0
         }
         WorkSite(
             quantity = quantity,

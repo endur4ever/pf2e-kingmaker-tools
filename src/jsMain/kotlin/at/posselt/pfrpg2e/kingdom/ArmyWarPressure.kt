@@ -55,7 +55,16 @@ private fun supportingArmyCount(deployments: Array<RawArmyDeployment>): Int =
     }
 
 /**
- * Recalculate the global war-pressure track. Pressure rises by 5 per active
+ * The pressure the kingdom gains (or sheds) each turn at the current threat and army counts.
+ */
+private fun pressurePerTurn(
+    threats: Array<RawWarThreat>,
+    deployments: Array<RawArmyDeployment>,
+): Int = activeThreatCount(threats) * PRESSURE_PER_ACTIVE_THREAT -
+    supportingArmyCount(deployments) * PRESSURE_REDUCTION_PER_DEPLOYED_ARMY
+
+/**
+ * Advance the global war-pressure track by one turn. Pressure rises by 5 per active
  * threat and falls by 2 per supporting army each turn, accumulating into a
  * clamped 0-100 [RawWarPressure.currentPressure]. Threshold crossings set the
  * unrest/consumption modifiers the [TurnTickingEngine] applies.
@@ -66,18 +75,41 @@ fun recalculateWarPressure(
     current: RawWarPressure?,
 ): RawWarPressure {
     val base = current ?: defaultWarPressure()
-    val threatCount = activeThreatCount(threats)
-    val armyCount = supportingArmyCount(deployments)
-    val perTurn = threatCount * PRESSURE_PER_ACTIVE_THREAT - armyCount * PRESSURE_REDUCTION_PER_DEPLOYED_ARMY
+    val perTurn = pressurePerTurn(threats, deployments)
     val newPressure = (base.currentPressure + perTurn).coerceIn(0, 100)
-    return RawWarPressure(
+    // copy, never a fresh RawWarPressure: a rebuild drops `ruinOfferTurn` and re-arms the
+    // ruin-threshold offer card that the GM has already answered.
+    return RawWarPressure.copy(
+        base,
         currentPressure = newPressure,
         pressurePerTurn = perTurn,
         unrestModifier = if (newPressure >= base.unrestThreshold) 1 else 0,
-        consumptionModifier = armyCount,
-        unrestThreshold = base.unrestThreshold,
-        ruinThreshold = base.ruinThreshold,
+        consumptionModifier = supportingArmyCount(deployments),
         lastChange = newPressure - base.currentPressure,
+    )
+}
+
+/**
+ * Recompute the per-turn rate and the modifiers it drives WITHOUT advancing the accumulated
+ * track.
+ *
+ * Every mid-turn edit of the war board — adding, editing or deleting a threat, deploying or
+ * recalling an army, resolving a battle — changes the rate the next tick will apply. Only the
+ * turn tick may move [RawWarPressure.currentPressure]; calling [recalculateWarPressure] on an
+ * edit charges a whole turn's pressure on the spot, which among other things makes deploying an
+ * army *raise* pressure instead of lowering it.
+ */
+fun refreshWarPressureRates(
+    threats: Array<RawWarThreat>,
+    deployments: Array<RawArmyDeployment>,
+    current: RawWarPressure?,
+): RawWarPressure {
+    val base = current ?: defaultWarPressure()
+    return RawWarPressure.copy(
+        base,
+        pressurePerTurn = pressurePerTurn(threats, deployments),
+        unrestModifier = if (base.currentPressure >= base.unrestThreshold) 1 else 0,
+        consumptionModifier = supportingArmyCount(deployments),
     )
 }
 

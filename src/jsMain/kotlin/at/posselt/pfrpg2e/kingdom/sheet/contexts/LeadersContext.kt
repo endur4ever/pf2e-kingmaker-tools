@@ -80,9 +80,14 @@ fun RawLeaderValues.toContext(
             name = "leaders.${leader.value}.invested",
             label = t("kingdom.investedAbility", recordOf("ability" to t(leader.keyAbility))),
         ).toContext(),
+        // The RAW flag, not vacancies.resolveVacancy(leader): this checkbox submits straight back
+        // into leaders.<role>.vacant. Rendering the derived vacancy here wrote it into storage on
+        // the next save, so an empty seat became permanently vacant even after a leader was
+        // assigned, and a seat kept filled by a supporting feat had a GM's deliberate vacant mark
+        // silently erased. The derived vacancy still drives the penalties; it is not stored.
         vacant = CheckboxInput(
             escapeLabel = false,
-            value = vacancies.resolveVacancy(leader),
+            value = vacant == true,
             name = "leaders.${leader.value}.vacant",
             label = label.outerHTML,
         ).toContext(),

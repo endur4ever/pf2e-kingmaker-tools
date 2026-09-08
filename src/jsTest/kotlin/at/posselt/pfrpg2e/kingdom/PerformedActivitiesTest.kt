@@ -34,4 +34,15 @@ class PerformedActivitiesTest {
     fun `empty performed map yields empty totals`() {
         assertEquals(0, sumPerformedByPhase(emptyMap(), mapOf("a" to "leadership")).size)
     }
+
+    @Test
+    fun clearTargetsTheStoredCountsWithARealDeletion() {
+        // A flag write merges, so End Turn used to leave every count in place and the per-phase
+        // caps never reset. The clear must address the stored object by its document path.
+        assertEquals(
+            "flags.pf2e-kingmaker-tools.turn-wizard-state.activitiesPerformed",
+            performedActivitiesFlagPath(),
+        )
+    }
 }
+

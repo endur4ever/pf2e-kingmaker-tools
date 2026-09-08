@@ -817,7 +817,7 @@ private val buttons = listOf(
             buildPromise {
                 actor.getKingdom()?.let { kingdom ->
                     kingdom.warThreats = (kingdom.warThreats ?: emptyArray()) + threat
-                    kingdom.warPressure = recalculateWarPressure(
+                    kingdom.warPressure = refreshWarPressureRates(
                         kingdom.warThreats ?: emptyArray(),
                         kingdom.armyDeployments ?: emptyArray(),
                         kingdom.warPressure,
@@ -1087,7 +1087,7 @@ private val buttons = listOf(
             buildPromise {
                 actor.getKingdom()?.let { kingdom ->
                     kingdom.warThreats = (kingdom.warThreats ?: emptyArray()) + threat
-                    kingdom.warPressure = recalculateWarPressure(
+                    kingdom.warPressure = refreshWarPressureRates(
                         kingdom.warThreats ?: emptyArray(),
                         kingdom.armyDeployments ?: emptyArray(),
                         kingdom.warPressure,

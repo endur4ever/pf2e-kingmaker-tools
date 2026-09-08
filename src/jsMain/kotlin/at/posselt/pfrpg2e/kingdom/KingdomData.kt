@@ -545,25 +545,28 @@ fun KingdomData.parseSkillRanks(
         wilderness = ranks[KingdomSkill.WILDERNESS] ?: 0,
     )
 } else {
-    KingdomSkillRanks(
-        agriculture = skillRanks.agriculture,
-        arts = skillRanks.arts,
-        boating = skillRanks.boating,
-        defense = skillRanks.defense,
-        engineering = skillRanks.engineering,
-        exploration = skillRanks.exploration,
-        folklore = skillRanks.folklore,
-        industry = skillRanks.industry,
-        intrigue = skillRanks.intrigue,
-        magic = skillRanks.magic,
-        politics = skillRanks.politics,
-        scholarship = skillRanks.scholarship,
-        statecraft = skillRanks.statecraft,
-        trade = skillRanks.trade,
-        warfare = skillRanks.warfare,
-        wilderness = skillRanks.wilderness,
-    )
+    skillRanks.parse()
 }
+
+/** The ranks exactly as stored, with no automation applied. */
+fun RawSkillRanks.parse(): KingdomSkillRanks = KingdomSkillRanks(
+    agriculture = agriculture,
+    arts = arts,
+    boating = boating,
+    defense = defense,
+    engineering = engineering,
+    exploration = exploration,
+    folklore = folklore,
+    industry = industry,
+    intrigue = intrigue,
+    magic = magic,
+    politics = politics,
+    scholarship = scholarship,
+    statecraft = statecraft,
+    trade = trade,
+    warfare = warfare,
+    wilderness = wilderness,
+)
 
 fun KingdomData.hasAssurance(
     chosenFeats: List<ChosenFeat>,

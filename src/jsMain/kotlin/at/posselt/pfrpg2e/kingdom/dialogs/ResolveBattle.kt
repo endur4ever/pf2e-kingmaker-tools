@@ -214,7 +214,7 @@ class ResolveBattle(
             newState
         }
 
-        var updated = updateRawBattle(currentBattle, finalState)
+        var updated = updateRawBattle(currentBattle, finalState, statusOverride = nextStatus)
         var roundLog = finalState.log.drop(state.log.size).map { localizeBattleLogEntry(it) }
         if (updated.status == BattleStatus.VICTORY.value) {
             val rewarded = awardVictoryXp(updated.attackers, updated.defenders)

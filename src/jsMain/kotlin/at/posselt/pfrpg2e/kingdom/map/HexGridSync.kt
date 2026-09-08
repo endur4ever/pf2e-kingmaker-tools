@@ -58,11 +58,25 @@ suspend fun DrawingDocument.unsetZoneLabelData() {
  * markers, zone labels, hex-content markers). Used to restore the vanilla Kingmaker hex map — those
  * overlays sit on top of the native hexes and swallow the click that opens the hex info HUD.
  */
+/**
+ * Whether this drawing belongs to the module and may be torn down with the hex overlays.
+ *
+ * A drawing a GM tagged by hand through the Edit Realm Tile macro also carries a realmTile flag,
+ * and the realm parser reads those to build a Tile-Based realm, so the flag alone does not make a
+ * drawing ours to delete.
+ */
+private fun DrawingDocument.isManagedOverlay(): Boolean {
+    val data = getRealmTileData()
+    return isManagedHexOverlay(data?.type, data?.hexKey) || getZoneLabelData() != null
+}
+
+/**
+ * Deletes the overlays this module drew. Hand-tagged realm drawings are deliberately left alone:
+ * they are the GM's own map data, not something this module can recreate.
+ */
 suspend fun removeAllHexOverlays(game: Game) {
     val activeScene = game.scenes.active ?: return
-    val ours = activeScene.drawings.contents.filter {
-        it.getRealmTileData() != null || it.getZoneLabelData() != null
-    }
+    val ours = activeScene.drawings.contents.filter { it.isManagedOverlay() }
     if (ours.isNotEmpty()) {
         activeScene.deleteDrawingsResilient(ours.map { it._id }.toTypedArray())
     }
@@ -89,7 +103,7 @@ fun registerHexGridSync(game: Game) {
     // Overlays opted in: keep them from capturing pointer events so clicks still reach the hex.
     TypedHooks.onDrawDrawing { drawing ->
         val doc = drawing.document
-        val isOurs = doc.getRealmTileData() != null || doc.getZoneLabelData() != null
+        val isOurs = doc.isManagedOverlay()
         if (isOurs) {
             val pixi = drawing.asDynamic()
             pixi.eventMode = "none"
@@ -194,10 +208,13 @@ suspend fun syncHexDrawingsToNativeState(game: Game) {
     //  - non-polygon ("r") overlays from builds that drew rectangles, and
     //  - overlays with no stamped `hexKey`, from builds that matched overlays by geometry/type.
     // Re-read the drawing list afterwards so the stale ones aren't seen as "already exists".
-    val overlayTypes = setOf("claimed", EXPLORED_DRAWING_TYPE, CLEARED_DRAWING_TYPE)
     val staleOverlays = activeScene.drawings.contents.filter {
         val data = it.getRealmTileData()
-        data?.type in overlayTypes && (it.asDynamic().shape?.type != "p" || data?.hexKey == null)
+        isStaleHexOverlay(
+            type = data?.type,
+            hexKey = data?.hexKey,
+            shapeType = it.asDynamic().shape?.type as String?,
+        )
     }
     if (staleOverlays.isNotEmpty()) {
         activeScene.deleteDrawingsResilient(staleOverlays.map { it._id }.toTypedArray())

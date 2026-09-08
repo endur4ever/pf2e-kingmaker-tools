@@ -6,6 +6,7 @@ import at.posselt.pfrpg2e.data.armies.BattleStatus
 import at.posselt.pfrpg2e.data.armies.awardBattleXp
 import at.posselt.pfrpg2e.data.armies.getArmyAc
 import at.posselt.pfrpg2e.data.armies.getArmyAttackBonus
+import at.posselt.pfrpg2e.data.armies.recoverConditions
 import at.posselt.pfrpg2e.kingdom.data.RawArmyBattle
 import at.posselt.pfrpg2e.kingdom.data.RawBattleArmy
 import at.posselt.pfrpg2e.kingdom.data.RawWarThreat
@@ -231,6 +232,64 @@ class ResolveBattleTest {
             armies = listOf(engineArmy("a", destroyed = false), engineArmy("d", destroyed = false)),
         )
         assertEquals(BattleStatus.ACTIVE, determineBattleStatus(state, attackerCount = 1))
+    }
+
+    @Test
+    fun updateRawBattleKeepsARoutDecidedVictoryAfterEndOfBattleRecovery() = runTest {
+        // A battle can be decided by ROUT, but end-of-battle recovery always clears ROUTED.
+        // The status must reflect the state the battle was decided on, not the recovered one.
+        val battle = rawArmyBattle(
+            attackers = arrayOf(rawBattleArmy(name = "1st Legion")),
+            defenders = arrayOf(rawBattleArmy(name = "Goblin Scouts")),
+        )
+        val state = toBattleState(battle)
+        val routed = state.copy(
+            armies = listOf(
+                state.armies[0],
+                state.armies[1].copy(conditions = setOf(ArmyCondition.ROUTED)),
+            ),
+        )
+        val decided = determineBattleStatus(routed, attackerCount = 1)
+        assertEquals(BattleStatus.VICTORY, decided)
+
+        val recovered = routed.copy(armies = routed.armies.map { recoverConditions(it) })
+        assertTrue(
+            ArmyCondition.ROUTED !in recovered.armies[1].conditions,
+            "recovery is expected to clear ROUTED; that is what makes the override necessary",
+        )
+
+        assertEquals(
+            BattleStatus.ACTIVE.value,
+            updateRawBattle(battle, recovered).status,
+            "without the override the recovered state reads as ACTIVE again",
+        )
+        assertEquals(
+            BattleStatus.VICTORY.value,
+            updateRawBattle(battle, recovered, statusOverride = decided).status,
+        )
+    }
+
+    @Test
+    fun updateRawBattleKeepsARoutDecidedDefeatAfterEndOfBattleRecovery() = runTest {
+        val battle = rawArmyBattle(
+            attackers = arrayOf(rawBattleArmy(name = "1st Legion")),
+            defenders = arrayOf(rawBattleArmy(name = "Goblin Scouts")),
+        )
+        val state = toBattleState(battle)
+        val routed = state.copy(
+            armies = listOf(
+                state.armies[0].copy(conditions = setOf(ArmyCondition.ROUTED)),
+                state.armies[1],
+            ),
+        )
+        val decided = determineBattleStatus(routed, attackerCount = 1)
+        assertEquals(BattleStatus.DEFEAT, decided)
+
+        val recovered = routed.copy(armies = routed.armies.map { recoverConditions(it) })
+        assertEquals(
+            BattleStatus.DEFEAT.value,
+            updateRawBattle(battle, recovered, statusOverride = decided).status,
+        )
     }
 
     @Test

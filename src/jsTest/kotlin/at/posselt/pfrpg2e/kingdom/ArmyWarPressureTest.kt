@@ -6,6 +6,7 @@ import at.posselt.pfrpg2e.kingdom.data.ArmyDeploymentStatus
 import at.posselt.pfrpg2e.kingdom.data.RawArmyBattle
 import at.posselt.pfrpg2e.kingdom.data.RawArmyDeployment
 import at.posselt.pfrpg2e.kingdom.data.RawBattleArmy
+import at.posselt.pfrpg2e.kingdom.data.RawWarPressure
 import at.posselt.pfrpg2e.kingdom.data.RawWarThreat
 import at.posselt.pfrpg2e.kingdom.data.WarThreatStatus
 import kotlin.test.Test
@@ -79,6 +80,62 @@ private fun rawArmyBattle(
     log = log,
     status = status,
 )
+
+class WarPressureRefreshTest {
+    // Mid-turn board edits must change the RATE, never the accumulated track. Only the turn tick
+    // advances currentPressure; refreshing on an edit charged a whole turn's pressure on the spot.
+
+    @Test
+    fun refreshDoesNotAdvanceTheAccumulatedTrack() {
+        val start = RawWarPressure.copy(defaultWarPressure(), currentPressure = 30)
+        val refreshed = refreshWarPressureRates(arrayOf(threat(), threat()), emptyArray(), start)
+        assertEquals(30, refreshed.currentPressure)
+        assertEquals(10, refreshed.pressurePerTurn)
+    }
+
+    @Test
+    fun refreshIsIdempotent() {
+        val start = RawWarPressure.copy(defaultWarPressure(), currentPressure = 30)
+        val once = refreshWarPressureRates(arrayOf(threat()), emptyArray(), start)
+        val twice = refreshWarPressureRates(arrayOf(threat()), emptyArray(), once)
+        assertEquals(once.currentPressure, twice.currentPressure)
+        assertEquals(once.pressurePerTurn, twice.pressurePerTurn)
+    }
+
+    @Test
+    fun deployingAnArmyNeverRaisesPressure() {
+        // The user-visible symptom: deploying an army to answer a threat must not push the track up.
+        val start = RawWarPressure.copy(defaultWarPressure(), currentPressure = 30)
+        val afterDeploy = refreshWarPressureRates(arrayOf(threat()), arrayOf(deployment()), start)
+        assertTrue(
+            afterDeploy.currentPressure <= start.currentPressure,
+            "deploying raised pressure from ${'$'}{start.currentPressure} to ${'$'}{afterDeploy.currentPressure}",
+        )
+        assertEquals(3, afterDeploy.pressurePerTurn)   // 1*5 - 1*2
+        assertEquals(1, afterDeploy.consumptionModifier)
+    }
+
+    @Test
+    fun refreshRecomputesTheUnrestModifierFromTheStandingTrack() {
+        val over = RawWarPressure.copy(defaultWarPressure(), currentPressure = 60) // threshold 50
+        assertEquals(1, refreshWarPressureRates(emptyArray(), emptyArray(), over).unrestModifier)
+        val under = RawWarPressure.copy(defaultWarPressure(), currentPressure = 10)
+        assertEquals(0, refreshWarPressureRates(emptyArray(), emptyArray(), under).unrestModifier)
+    }
+
+    @Test
+    fun refreshKeepsTheAnsweredRuinOffer() {
+        val answered = RawWarPressure.copy(defaultWarPressure(), currentPressure = 80, ruinOfferTurn = 4)
+        assertEquals(4, refreshWarPressureRates(arrayOf(threat()), emptyArray(), answered).ruinOfferTurn)
+    }
+
+    @Test
+    fun tickKeepsTheAnsweredRuinOffer() {
+        // A rebuild used to drop ruinOfferTurn, re-arming an offer card the GM already answered.
+        val answered = RawWarPressure.copy(defaultWarPressure(), currentPressure = 80, ruinOfferTurn = 4)
+        assertEquals(4, recalculateWarPressure(arrayOf(threat()), emptyArray(), answered).ruinOfferTurn)
+    }
+}
 
 class WarPressureCalculationTest {
     @Test

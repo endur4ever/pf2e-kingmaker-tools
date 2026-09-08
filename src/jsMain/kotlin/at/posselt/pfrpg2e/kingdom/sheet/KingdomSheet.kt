@@ -327,7 +327,7 @@ import at.posselt.pfrpg2e.kingdom.buildSessionPrepView
 import at.posselt.pfrpg2e.kingdom.trackTurnGap
 import at.posselt.pfrpg2e.kingdom.pacingMaxTurnGap
 import at.posselt.pfrpg2e.kingdom.postPacingAlertChat
-import at.posselt.pfrpg2e.kingdom.recalculateWarPressure
+import at.posselt.pfrpg2e.kingdom.refreshWarPressureRates
 import at.posselt.pfrpg2e.kingdom.defaultWarPressure
 import at.posselt.pfrpg2e.kingdom.dialogs.AddWarThreat
 import at.posselt.pfrpg2e.kingdom.dialogs.ModifyFactionStanding
@@ -784,7 +784,7 @@ class KingdomSheet(
                 buildPromise {
                     val kingdom = getKingdom()
                     kingdom.warThreats = (kingdom.warThreats ?: emptyArray()) + threat
-                    kingdom.warPressure = recalculateWarPressure(
+                    kingdom.warPressure = refreshWarPressureRates(
                         kingdom.warThreats ?: emptyArray(),
                         kingdom.armyDeployments ?: emptyArray(),
                         kingdom.warPressure,
@@ -805,7 +805,7 @@ class KingdomSheet(
                             val kingdom = getKingdom()
                             kingdom.warThreats = (kingdom.warThreats ?: emptyArray())
                                 .map { if (it.id == updated.id) updated else it }.toTypedArray()
-                            kingdom.warPressure = recalculateWarPressure(
+                            kingdom.warPressure = refreshWarPressureRates(
                                 kingdom.warThreats ?: emptyArray(),
                                 kingdom.armyDeployments ?: emptyArray(),
                                 kingdom.warPressure,
@@ -823,7 +823,7 @@ class KingdomSheet(
                 val threatName = threat?.name ?: threatId ?: "Unknown"
                 if (confirmDelete("kingdom.confirmDelete.warThreat", threatName)) {
                     kingdom.warThreats = (kingdom.warThreats ?: emptyArray()).filter { it.id != threatId }.toTypedArray()
-                    kingdom.warPressure = recalculateWarPressure(
+                    kingdom.warPressure = refreshWarPressureRates(
                         kingdom.warThreats ?: emptyArray(),
                         kingdom.armyDeployments ?: emptyArray(),
                         kingdom.warPressure,
@@ -859,7 +859,7 @@ class KingdomSheet(
                         buildPromise {
                             val current = getKingdom()
                             current.armyDeployments = (current.armyDeployments ?: emptyArray()) + deployment
-                            current.warPressure = recalculateWarPressure(
+                            current.warPressure = refreshWarPressureRates(
                                 current.warThreats ?: emptyArray(),
                                 current.armyDeployments ?: emptyArray(),
                                 current.warPressure,
@@ -875,7 +875,7 @@ class KingdomSheet(
                 val kingdom = getKingdom()
                 kingdom.armyDeployments = (kingdom.armyDeployments ?: emptyArray())
                     .filter { it.id != deploymentId }.toTypedArray()
-                kingdom.warPressure = recalculateWarPressure(
+                kingdom.warPressure = refreshWarPressureRates(
                     kingdom.warThreats ?: emptyArray(),
                     kingdom.armyDeployments ?: emptyArray(),
                     kingdom.warPressure,
@@ -894,7 +894,7 @@ class KingdomSheet(
                 if (!confirmed) return@buildPromise
                 kingdom.armyDeployments = (kingdom.armyDeployments ?: emptyArray())
                     .filter { it.id != deploymentId }.toTypedArray()
-                kingdom.warPressure = recalculateWarPressure(
+                kingdom.warPressure = refreshWarPressureRates(
                     kingdom.warThreats ?: emptyArray(),
                     kingdom.armyDeployments ?: emptyArray(),
                     kingdom.warPressure,
@@ -1056,7 +1056,7 @@ class KingdomSheet(
                                         }
                                         .toTypedArray()
                                 }
-                                current.warPressure = recalculateWarPressure(
+                                current.warPressure = refreshWarPressureRates(
                                     current.warThreats ?: emptyArray(),
                                     current.armyDeployments ?: emptyArray(),
                                     current.warPressure,

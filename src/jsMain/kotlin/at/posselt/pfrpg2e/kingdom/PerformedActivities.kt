@@ -1,6 +1,10 @@
 package at.posselt.pfrpg2e.kingdom
 
+import at.posselt.pfrpg2e.Config
 import at.posselt.pfrpg2e.utils.getAppFlag
+import com.foundryvtt.core.AnyObject
+import com.foundryvtt.core._del
+import kotlinx.coroutines.await
 import at.posselt.pfrpg2e.utils.setAppFlag
 
 /**
@@ -11,7 +15,7 @@ import at.posselt.pfrpg2e.utils.setAppFlag
  * shaped as `{ [activityId: string]: number }` (how many times the activity was attempted this turn).
  * The flag is reset at End Turn, see [clearPerformedActivities].
  */
-private const val TURN_WIZARD_STATE = "turn-wizard-state"
+internal const val TURN_WIZARD_STATE = "turn-wizard-state"
 
 /** Returns the per-activity performed counts for the current turn, keyed by activity id. */
 fun KingdomActor.getPerformedActivities(): Map<String, Int> {
@@ -59,12 +63,39 @@ suspend fun KingdomActor.restoreTurnWizardState(state: Any?) {
     setAppFlag(TURN_WIZARD_STATE, state)
 }
 
-/** Clears all performed counts, preserving any other turn-wizard state. Called at End Turn. */
+/**
+ * Clears all performed counts, preserving any other turn-wizard state. Called at End Turn.
+ *
+ * A Foundry flag write MERGES into what is already stored, so assigning an empty object leaves
+ * every existing count exactly where it was and the per-phase caps never reset. The counts are
+ * removed with a real document deletion instead, which a merge cannot undo.
+ */
 suspend fun KingdomActor.clearPerformedActivities() {
-    val state = getAppFlag<KingdomActor, dynamic>(TURN_WIZARD_STATE) ?: return
-    state.activitiesPerformed = js("{}")
-    setAppFlag(TURN_WIZARD_STATE, state)
+    getAppFlag<KingdomActor, dynamic>(TURN_WIZARD_STATE) ?: return
+    val updates = js("{}")
+    updates[performedActivitiesFlagPath()] = _del
+    update(updates.unsafeCast<AnyObject>()).await()
 }
+
+/**
+ * Dotted document path of the performed-counts object, for a deletion that a merge cannot undo.
+ * Kept separate so the path is asserted in a test rather than only at runtime.
+ */
+fun performedActivitiesFlagPath(): String =
+    "flags.${Config.moduleId}.$TURN_WIZARD_STATE.activitiesPerformed"
+
+/**
+ * Per-PHASE performed counts, the shape [ActivityCapCalculator.calculate] expects.
+ *
+ * The stored counts are keyed by activity id. Handing the calculator that map directly — or an
+ * empty one — makes every phase read 0 of N, so nothing is ever over cap and the commit gate that
+ * depends on it never closes.
+ */
+fun KingdomActor.getPerformedActivitiesByPhase(kingdom: KingdomData): Map<String, Int> =
+    sumPerformedByPhase(
+        getPerformedActivities(),
+        kingdom.getAllActivities().associate { it.id to it.phase },
+    )
 
 /**
  * Sums per-activity performed counts into per-phase totals using an activity id -> phase map.

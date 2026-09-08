@@ -308,4 +308,59 @@ class HexStateTest {
     fun `ROAD_FEATURE_TYPE constant matches native lowercase feature type`() {
         assertEquals("road", ROAD_FEATURE_TYPE)
     }
+
+    // ── Ownership of realm-tile-flagged drawings ──
+    // A GM can tag a drawing of their own as a realm tile through the Edit Realm Tile macro, and
+    // the realm parser reads those to build a Tile-Based realm. Those drawings must survive both
+    // the overlay teardown and the stale-overlay migration.
+
+    @Test
+    fun handTaggedClaimedDrawingIsNotOurs() {
+        assertFalse(isManagedHexOverlay(type = CLAIMED_DRAWING_TYPE, hexKey = null))
+    }
+
+    @Test
+    fun handTaggedWorksiteDrawingIsNotOurs() {
+        assertFalse(isManagedHexOverlay(type = "mine", hexKey = null))
+        assertFalse(isManagedHexOverlay(type = "farmland", hexKey = null))
+        assertFalse(isManagedHexOverlay(type = "lumberCamp", hexKey = "hex-1"))
+    }
+
+    @Test
+    fun stampedOverlayIsOurs() {
+        assertTrue(isManagedHexOverlay(type = CLAIMED_DRAWING_TYPE, hexKey = "hex-1"))
+        assertTrue(isManagedHexOverlay(type = EXPLORED_DRAWING_TYPE, hexKey = "hex-1"))
+        assertTrue(isManagedHexOverlay(type = CLEARED_DRAWING_TYPE, hexKey = "hex-1"))
+    }
+
+    @Test
+    fun moduleOnlyOverlayIsOursEvenWithoutAHexKey() {
+        // Nothing but this module writes explored/cleared, so a legacy one is still ours to sweep.
+        assertTrue(isManagedHexOverlay(type = EXPLORED_DRAWING_TYPE, hexKey = null))
+        assertTrue(isManagedHexOverlay(type = CLEARED_DRAWING_TYPE, hexKey = null))
+    }
+
+    @Test
+    fun unflaggedDrawingIsNotOurs() {
+        assertFalse(isManagedHexOverlay(type = null, hexKey = null))
+    }
+
+    @Test
+    fun staleMigrationSpareHandTaggedClaimedDrawings() {
+        // A GM's hand-drawn rectangle tagged "claimed" is the documented Tile-Based realm workflow.
+        assertFalse(isStaleHexOverlay(type = CLAIMED_DRAWING_TYPE, hexKey = null, shapeType = "r"))
+        assertFalse(isStaleHexOverlay(type = CLAIMED_DRAWING_TYPE, hexKey = null, shapeType = "p"))
+    }
+
+    @Test
+    fun staleMigrationRemovesLegacyManagedOverlays() {
+        assertTrue(isStaleHexOverlay(type = CLAIMED_DRAWING_TYPE, hexKey = "hex-1", shapeType = "r"))
+        assertTrue(isStaleHexOverlay(type = EXPLORED_DRAWING_TYPE, hexKey = null, shapeType = "p"))
+    }
+
+    @Test
+    fun staleMigrationKeepsCurrentOverlays() {
+        assertFalse(isStaleHexOverlay(type = CLAIMED_DRAWING_TYPE, hexKey = "hex-1", shapeType = "p"))
+        assertFalse(isStaleHexOverlay(type = CLEARED_DRAWING_TYPE, hexKey = "hex-9", shapeType = "p"))
+    }
 }

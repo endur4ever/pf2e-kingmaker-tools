@@ -50,3 +50,37 @@ const val ROAD_STROKE_WIDTH = 4
  */
 fun shouldHaveRoadDrawing(featureTypes: List<String?>?): Boolean =
     featureTypes?.any { it == ROAD_FEATURE_TYPE } == true
+
+// ── Ownership of realm-tile-flagged drawings ──
+
+const val CLAIMED_DRAWING_TYPE = "claimed"
+
+/** Overlay types this module's hex sync draws, one per native Kingmaker hex. */
+val MANAGED_OVERLAY_TYPES = setOf(CLAIMED_DRAWING_TYPE, EXPLORED_DRAWING_TYPE, CLEARED_DRAWING_TYPE)
+
+/**
+ * Overlay types only ever written by this module. [CLAIMED_DRAWING_TYPE] is deliberately absent:
+ * the Edit Realm Tile macro lets a GM tag a drawing of their own as claimed, and the realm parser
+ * reads exactly those hand-tagged drawings to build a Tile-Based realm.
+ */
+val MODULE_ONLY_OVERLAY_TYPES = setOf(EXPLORED_DRAWING_TYPE, CLEARED_DRAWING_TYPE)
+
+/**
+ * Whether a realm-tile-flagged drawing was drawn by this module's hex sync, and may therefore be
+ * deleted or made non-interactive when overlays are torn down.
+ *
+ * Managed overlays stamp the native hex key they belong to. A drawing a GM tagged by hand through
+ * the Edit Realm Tile macro never carries one, so a flagged drawing with no [hexKey] is user data
+ * unless its [type] is one only this module writes.
+ */
+fun isManagedHexOverlay(type: String?, hexKey: String?): Boolean =
+    type != null && ((hexKey != null && type in MANAGED_OVERLAY_TYPES) || type in MODULE_ONLY_OVERLAY_TYPES)
+
+/**
+ * Whether a managed overlay is left over from an older build and must be deleted so the per-hex
+ * sync can recreate it: overlays drawn as rectangles before hexes were drawn as polygons, and
+ * overlays from before the hex key was stamped. Only applies to drawings [isManagedHexOverlay]
+ * recognises as ours, so a hand-tagged claimed drawing is never swept up by the migration.
+ */
+fun isStaleHexOverlay(type: String?, hexKey: String?, shapeType: String?): Boolean =
+    isManagedHexOverlay(type, hexKey) && (shapeType != "p" || hexKey == null)

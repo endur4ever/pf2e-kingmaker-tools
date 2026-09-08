@@ -149,7 +149,19 @@ private fun BattleArmyState.toRaw(original: RawBattleArmy): RawBattleArmy =
  * army (identity fields like [RawBattleArmy.armyActorUuid] are preserved from
  * the original by index), plus round, log, and the recomputed status.
  */
-fun updateRawBattle(battle: RawArmyBattle, state: BattleState): RawArmyBattle {
+/**
+ * Rebuilds the raw battle from [state].
+ *
+ * [statusOverride] pins the battle status instead of deriving it from [state]. End-of-battle
+ * recovery always clears ROUTED, so a battle decided by rout would otherwise read as ACTIVE
+ * again once the recovered state is written back; the caller passes the status it decided on
+ * the pre-recovery state.
+ */
+fun updateRawBattle(
+    battle: RawArmyBattle,
+    state: BattleState,
+    statusOverride: BattleStatus? = null,
+): RawArmyBattle {
     val attackerCount = battle.attackers.size
     val newAttackers = battle.attackers.mapIndexed { i, original ->
         state.armies[i].toRaw(original)
@@ -163,7 +175,7 @@ fun updateRawBattle(battle: RawArmyBattle, state: BattleState): RawArmyBattle {
         attackers = newAttackers,
         defenders = newDefenders,
         log = state.log.toTypedArray(),
-        status = determineBattleStatus(state, attackerCount).value,
+        status = (statusOverride ?: determineBattleStatus(state, attackerCount)).value,
         terrain = state.terrain,
     )
 }

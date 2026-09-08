@@ -46,7 +46,10 @@ fun Array<MilestoneChoice>.toContext(
                 ).toContext(),
                 enabled = HiddenInput(
                     name = "milestones.$index.enabled",
-                    value = (choicesById[id]?.enabled == true).toString(),
+                    // `enabled`, computed above as `!= false`: a milestone with no stored choice
+                    // counts as enabled everywhere else, but serialising `== true` submitted it
+                    // back as disabled, so the first sheet save hid every untouched milestone.
+                    value = enabled.toString(),
                     label = t("applications.enable"),
                     overrideType = OverrideType.BOOLEAN,
                 ).toContext(),

@@ -12,6 +12,7 @@ import at.posselt.pfrpg2e.kingdom.KingdomData
 import at.posselt.pfrpg2e.kingdom.SettlementResult
 import at.posselt.pfrpg2e.kingdom.createExpressionContext
 import at.posselt.pfrpg2e.kingdom.createModifiers
+import at.posselt.pfrpg2e.kingdom.parse
 import at.posselt.pfrpg2e.kingdom.modifiers.ModifierSelector
 import at.posselt.pfrpg2e.kingdom.modifiers.evaluation.evaluateModifiers
 import at.posselt.pfrpg2e.kingdom.modifiers.evaluation.filterModifiersAndUpdateContext
@@ -53,6 +54,7 @@ suspend fun skillChecks(
         waterBorders = settlements.current?.waterBorders ?: 0,
     )
     val baseModifiers = kingdom.createModifiers(settlements)
+    val storedRanks = kingdom.skillRanks.parse()
     return KingdomSkill.entries.map {
         val filtered = filterModifiersAndUpdateContext(baseModifiers, context.copy(usedSkill = it),  ModifierSelector.CHECK)
         val evaluatedModifiers = evaluateModifiers(filtered)
@@ -70,8 +72,11 @@ suspend fun skillChecks(
                 Proficiency.LEGENDARY -> "km-proficiency-legendary"
             },
             input = if (kingdom.settings.automateStats) {
+                // the STORED rank, not the automated one: this hidden input submits straight back
+                // into kingdom.skillRanks, so rendering the derived rank overwrote the manual
+                // ranks on every save and they were gone the moment automation was turned off
                 HiddenInput(
-                    value = rank.toString(),
+                    value = storedRanks.resolve(it).toString(),
                     name = "skillRanks.${it.value}",
                     overrideType = OverrideType.NUMBER,
                 ).toContext()

@@ -5,7 +5,7 @@ import at.posselt.pfrpg2e.kingdom.ActivityCapCalculator
 import at.posselt.pfrpg2e.kingdom.KingdomActor
 import at.posselt.pfrpg2e.kingdom.KingdomData
 import at.posselt.pfrpg2e.kingdom.getKingdom
-import at.posselt.pfrpg2e.kingdom.getPerformedActivities
+import at.posselt.pfrpg2e.kingdom.getPerformedActivitiesByPhase
 import at.posselt.pfrpg2e.kingdom.data.RawCompanionExpedition
 import at.posselt.pfrpg2e.kingdom.pressure.DAYS_PER_MONTH
 import at.posselt.pfrpg2e.settings.pfrpg2eKingdomCampingWeather
@@ -100,7 +100,7 @@ fun leadershipSlotsRemaining(game: Game, actor: KingdomActor, kingdom: KingdomDa
     }
     val caps = ActivityCapCalculator.calculate(
         kingdom,
-        actor.getPerformedActivities(),
+        actor.getPerformedActivitiesByPhase(kingdom),
         leadershipCap = leadershipCap,
         leadershipCapWithTownhall = leadershipCapWithTownhall,
     )

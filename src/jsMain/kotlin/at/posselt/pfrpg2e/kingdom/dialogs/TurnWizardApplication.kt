@@ -58,6 +58,7 @@ import at.posselt.pfrpg2e.kingdom.postFactionMoveDigest
 import at.posselt.pfrpg2e.kingdom.postRivalOfferDigests
 import at.posselt.pfrpg2e.kingdom.localizeRivalHeadline
 import at.posselt.pfrpg2e.kingdom.getPerformedActivities
+import at.posselt.pfrpg2e.kingdom.getPerformedActivitiesByPhase
 import at.posselt.pfrpg2e.kingdom.digest.postEndTurnDigest
 import at.posselt.pfrpg2e.kingdom.mapdynamism.postMapDynamismOffers
 import at.posselt.pfrpg2e.kingdom.pings.TurnReadiness
@@ -649,6 +650,7 @@ private suspend fun performEndTurnLocked(game: Game, actor: KingdomActor): TickR
         // Save remaining in-transit shipments
         // the ledger every consumer reads is shipmentHistory; the caravan block records to it and
         // this one did not, so item shipments were missing from the board and the recap entirely
+        shipmentEvents = shipmentResult.events
         shipmentEvents.forEach { event ->
             caravanEventToHistory(event, currentTurn)?.let { kingdom.appendShipment(it) }
         }
@@ -659,7 +661,6 @@ private suspend fun performEndTurnLocked(game: Game, actor: KingdomActor): TickR
             snapshot.deliveredItemIds = deliveredItemIds.toTypedArray()
             actor.setAppFlag("lastTurnSnapshot", snapshot)
         }
-        shipmentEvents = shipmentResult.events
 
         // Generate chat logs
         val shipmentLines = shipmentResult.events.map { event ->
@@ -1827,7 +1828,7 @@ class TurnWizardApplication(
             }
             val capsResult = ActivityCapCalculator.calculate(
                 kingdom,
-                emptyMap(),
+                actor?.getPerformedActivitiesByPhase(kingdom) ?: emptyMap(),
                 leadershipCap = leadershipCap,
                 leadershipCapWithTownhall = leadershipCapWithTownhall,
             )
