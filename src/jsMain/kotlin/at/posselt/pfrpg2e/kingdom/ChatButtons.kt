@@ -276,7 +276,10 @@ private val buttons = listOf(
             postChatMessage(t("kingdom.setStructureHp", recordOf("hp" to hp)))
         }
     },
-    ChatButton("km-add-ongoing-event") { game, actor, event, button ->
+    // once, GM-only, and it says what it did: this afflicts the realm with an ongoing event, and
+    // an ungated silent handler let a second click stack a duplicate with no feedback at all.
+    ChatButton("km-add-ongoing-event", once = true) { game, actor, event, button ->
+        if (!game.user.isGM) return@ChatButton
         val id = button.dataset["eventId"]
         if (id != null) {
             actor.getKingdom()?.let { kingdom ->
@@ -299,6 +302,9 @@ private val buttons = listOf(
                     }
                     kingdom.ongoingEvents = kingdom.ongoingEvents + ongoingEvent
                     actor.setKingdom(kingdom)
+                    ui.notifications.info(
+                        t("kingdom.ongoingEventAdded", recordOf("name" to event.name)),
+                    )
                 }
             }
         }
@@ -1214,8 +1220,19 @@ private val buttons = listOf(
         val action = button.dataset["action"] ?: return@ChatButton
         val threatId = button.dataset["threatId"] ?: return@ChatButton
         actor.getKingdom()?.let { kingdom ->
-            val threat = kingdom.warThreats?.find { it.id == threatId } ?: return@ChatButton
-            if (threat.offerConsumed == true) return@ChatButton
+            // both of these used to return in silence, and `once` has already burned the button,
+            // so the card simply stopped responding with no way to tell why
+            val threat = kingdom.warThreats?.find { it.id == threatId }
+            if (threat == null) {
+                ui.notifications.warn(t("chatMessages.warThreatArrival.threatGone"))
+                return@ChatButton
+            }
+            if (threat.offerConsumed == true) {
+                ui.notifications.info(
+                    t("chatMessages.warThreatArrival.alreadyAnswered", recordOf("name" to threat.name)),
+                )
+                return@ChatButton
+            }
 
             when (action) {
                 "spawnEvent" -> {
@@ -1261,6 +1278,10 @@ private val buttons = listOf(
                         }?.toTypedArray() ?: emptyArray()
                         actor.setKingdom(kingdom)
                         postChatMessage(t("chatMessages.warThreatArrival.queuedEncounter", recordOf("name" to threat.name, "hexKey" to hexContent.hexKey)))
+                    } else {
+                        ui.notifications.warn(
+                            t("chatMessages.warThreatArrival.noLinkedHex", recordOf("name" to threat.name)),
+                        )
                     }
                 }
                 "sack" -> {

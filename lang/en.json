@@ -1795,6 +1795,7 @@
             "gainingXp": "Gaining {count} XP",
             "losingXp": "Losing {count} XP",
             "newModifierDefaultName": "New Modifier",
+            "ongoingEventAdded": "{name} is now an ongoing event.",
             "gainingNUnrest": "Gaining {count} Unrest",
             "losingNUnrest": "Losing {count} Unrest",
             "already0Unrest": "Already at 0 unrest",
@@ -3321,6 +3322,9 @@
                 "standing": "Standing with {faction}: {amount}"
             },
             "warThreatArrival": {
+                "threatGone": "That war threat no longer exists.",
+                "alreadyAnswered": "The offer for {name} has already been answered.",
+                "noLinkedHex": "{name} has no linked hex to queue an encounter at.",
                 "offerTitle": "War Threat Arrived",
                 "offerBody": "The war threat {name} has arrived at the kingdom's borders!",
                 "spawnEvent": "Spawn Kingdom Event",

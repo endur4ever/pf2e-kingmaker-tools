@@ -56,5 +56,8 @@ jobs:
       - name: Guard that an optional form section never falls back to a literal
         run: python3 scripts/check_optional_section_fallbacks.py
 
+      - name: Check every structure id is referenceable
+        run: python3 scripts/check_structure_ref_enum.py
+
       - name: Run build
         run: ./gradlew build

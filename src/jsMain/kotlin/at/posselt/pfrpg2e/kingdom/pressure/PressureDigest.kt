@@ -137,14 +137,38 @@ fun pendingPressureRows(pressures: Array<RawScheduledPressure>?): List<RawSchedu
  * Returns false when nothing was pending (double click, stale card).
  */
 suspend fun confirmPressureFiring(game: Game, actor: KingdomActor, scheduleId: String): Boolean {
+    val opening = actor.getKingdom() ?: return false
+    val openingRaw = opening.scheduledPressures?.find { it.id == scheduleId } ?: return false
+    if ((openingRaw.lastFiredDay ?: return false) <= (openingRaw.lastHandledDay ?: Int.MIN_VALUE)) {
+        ui.notifications.warn(t("kingdom.deadlines.alreadyHandled", recordOf("name" to openingRaw.name)))
+        return false
+    }
+    val kind = PayloadKind.fromValue(openingRaw.payloadKind)
+
+    // The settlement picker is the only await between reading the kingdom and writing it back, and
+    // everything below mutates the object read here. Resolving it FIRST, then re-reading, keeps the
+    // whole mutation in one uninterrupted stretch -- otherwise whatever changed while the GM had
+    // the dialog open was overwritten by this pre-dialog snapshot.
+    val settlementPick = if (kind == PayloadKind.SPAWN_EVENT) {
+        val event = openingRaw.payloadEventId?.let { opening.getEvent(it) }
+        if (event != null && KingdomEventTrait.SETTLEMENT.value in event.traits) {
+            pickEventSettlement(opening.getAllSettlements(game).allSettlements)
+        } else {
+            null
+        }
+    } else {
+        null
+    }
+
     val kingdom = actor.getKingdom() ?: return false
     val raw = kingdom.scheduledPressures?.find { it.id == scheduleId } ?: return false
     val firedDay = raw.lastFiredDay ?: return false
+    // re-checked against the fresh read: another GM may have answered this firing while the picker
+    // stood open, and applying it twice is the thing this stamp exists to prevent
     if (firedDay <= (raw.lastHandledDay ?: Int.MIN_VALUE)) {
         ui.notifications.warn(t("kingdom.deadlines.alreadyHandled", recordOf("name" to raw.name)))
         return false
     }
-    val kind = PayloadKind.fromValue(raw.payloadKind)
     when (kind) {
         PayloadKind.POST_BEAT -> {
             // public read-aloud beat; postChatMessage escapes -- authored text is prose, not HTML
@@ -183,14 +207,12 @@ suspend fun confirmPressureFiring(game: Game, actor: KingdomActor, scheduleId: S
             if (event == null) {
                 ui.notifications.warn(t("kingdom.deadlines.eventMissing", recordOf("name" to raw.name)))
             } else {
-                val ongoing = if (KingdomEventTrait.SETTLEMENT.value in event.traits) {
-                    val settlements = kingdom.getAllSettlements(game).allSettlements
-                    val pick = pickEventSettlement(settlements)
+                val ongoing = if (settlementPick != null) {
                     RawOngoingKingdomEvent(
                         stage = 0,
                         id = eventId,
-                        settlementSceneId = pick.settlementId,
-                        secretLocation = pick.secretLocation,
+                        settlementSceneId = settlementPick.settlementId,
+                        secretLocation = settlementPick.secretLocation,
                     )
                 } else {
                     RawOngoingKingdomEvent(stage = 0, id = eventId)

@@ -1838,7 +1838,10 @@ class TurnWizardApplication(
             val activityCaps = capsResult.caps.map { cap ->
                 ActivityCapContext(
                     phase = cap.phase,
-                    phaseLabel = t("kingdom.${cap.phase}"),
+                    // kingdomPhase.*, the short phase names, as the sheet's own caps row uses.
+                    // kingdom.leadership is a heading string carrying an unfilled {count}, which
+                    // rendered into this row literally.
+                    phaseLabel = t("kingdomPhase.${cap.phase}"),
                     current = cap.current,
                     maximum = cap.maximum,
                     isOverCap = cap.isOverCap
