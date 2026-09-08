@@ -420,11 +420,18 @@ private val buttons = listOf(
             return@ChatButton
         }
         val currentTurn = kingdom.currentTurn ?: 0
-        markRivalRowDone(button)
         // one peak, one resolution: a second live card for the same peak finds it already spent
         if (button.dataset["choice"] != "dismiss" && band.confrontationOffered != true) {
+            markRivalRowDone(button)
             ui.notifications.info(t("kingdom.rivalCharter.confrontationSpent"))
             return@ChatButton
+        }
+        // NOT marked done yet for the war-threat branch: that one opens a dialog, and a cancelled
+        // dialog deliberately leaves the confrontation unresolved. Greying the row here left the
+        // band parked above the threshold with its flag set and no live control anywhere -- the
+        // exact state the dismiss branch exists to prevent. The row is marked where the write is.
+        if (button.dataset["choice"] != "warThreat") {
+            markRivalRowDone(button)
         }
         when (button.dataset["choice"]) {
             "warThreat" -> AddWarThreat(
@@ -442,6 +449,7 @@ private val buttons = listOf(
                             live.confrontationOffered = false
                         }
                         actor.setKingdom(fresh)
+                        markRivalRowDone(button)
                     }
                 }
             }.launch()
@@ -457,7 +465,18 @@ private val buttons = listOf(
                 band.confrontationOffered = false
                 applyRivalColocation(kingdom, band, hexKey, currentTurn, queueEncounter = true)
                 actor.setKingdom(kingdom)
-                postChatMessage(t("kingdom.rivalCharter.encounterQueued", recordOf("band" to band.name, "level" to band.effectiveLevel(partyLevelFor(game)).toString())))
+                // whispered: this answers a GM-only card, and the line names the band and the
+                // encounter budget the GM is about to stage
+                postChatMessage(
+                    t(
+                        "kingdom.rivalCharter.encounterQueued",
+                        recordOf(
+                            "band" to band.name,
+                            "level" to band.effectiveLevel(partyLevelFor(game)).toString(),
+                        ),
+                    ),
+                    whisper = game.users.filter { it.isGM }.mapNotNull { it.id }.toTypedArray(),
+                )
             }
             "dismiss" -> {
                 // "not now" still spends the peak: confrontation is edge-triggered on the CROSSING,

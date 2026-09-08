@@ -186,8 +186,22 @@ fun buildArmyPressureView(
             .take(MAX_WAR_THREAT_HISTORY)
             .map { it.toView(deploymentArray, isGM) },
         deployments = deploymentArray.map { it.toView(settlementNames) },
-        pressure = pressure?.toView(projection),
+        pressure = pressure?.toView(projection.forViewer(visibleThreats)),
     )
+}
+
+/**
+ * The projection as this viewer may see it.
+ *
+ * The pressure MATH stays over every threat -- hidden threats are real, and fog-of-war must not
+ * change the mechanics -- but the per-threat arrival rows carry a name and a countdown, so a
+ * player's board was naming threats they are not supposed to know exist. The aggregate countdowns
+ * still reflect the hidden ones without naming them.
+ */
+private fun WarPressureProjection?.forViewer(visibleThreats: List<RawWarThreat>): WarPressureProjection? {
+    if (this == null) return null
+    val visibleIds = visibleThreats.mapNotNull { it.id }.toSet()
+    return copy(threatArrivals = threatArrivals.filter { it.threatId in visibleIds })
 }
 
 /**

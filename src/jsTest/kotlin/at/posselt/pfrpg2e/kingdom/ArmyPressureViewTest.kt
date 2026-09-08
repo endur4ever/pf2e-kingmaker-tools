@@ -199,6 +199,39 @@ class ArmyPressureViewTest {
         assertNull(view.pressure!!.projection)
     }
 
+    @Test
+    fun theProjectionNeverNamesAHiddenThreatToPlayers() {
+        // The arrival rows carry a name and a countdown. Excluding hidden threats from the board
+        // while the forecast beside it listed them by name leaked exactly what the flag hides.
+        val settingsObj = settings(enabled = true, showDistance = false)
+        settingsObj.armyPressureBoardMode = "advanced"
+        val pressure = RawWarPressure(
+            currentPressure = 30, pressurePerTurn = 5, unrestModifier = 0, consumptionModifier = 0,
+            unrestThreshold = 50, ruinThreshold = 75, lastChange = 0,
+        )
+        val threats = arrayOf(
+            visibilityThreat("visible", visible = true),
+            visibilityThreat("hidden", visible = false),
+        )
+
+        val playerView = buildArmyPressureView(
+            threats, emptyArray(), pressure, settingsObj, currentTurn = 1, isGM = false,
+        )
+        val playerArrivals = playerView.pressure!!.projection!!.threatArrivals.map { it.threatId }
+        assertEquals(listOf("visible"), playerArrivals)
+
+        // The GM still sees both, and the aggregate maths is unchanged for everyone: hidden
+        // threats are real, so fog-of-war must not move the numbers.
+        val gmView = buildArmyPressureView(
+            threats, emptyArray(), pressure, settingsObj, currentTurn = 1, isGM = true,
+        )
+        assertEquals(2, gmView.pressure!!.projection!!.threatArrivals.size)
+        assertEquals(
+            gmView.pressure!!.projection!!.turnsUntilUnrestThreshold,
+            playerView.pressure!!.projection!!.turnsUntilUnrestThreshold,
+        )
+    }
+
     private fun visibilityThreat(id: String, visible: Boolean?) = RawWarThreat(
         id = id, name = "Threat $id", description = "d", enemyFaction = null,
         escalationLevel = 1, maxEscalation = 4, eta = 2,

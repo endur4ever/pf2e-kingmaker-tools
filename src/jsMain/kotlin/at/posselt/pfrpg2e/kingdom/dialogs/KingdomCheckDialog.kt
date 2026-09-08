@@ -947,6 +947,11 @@ suspend fun kingdomCheckDialog(
                 rollOptions = if (group?.atWar == true) setOf("group-at-war") else emptySet(),
                 factionName = group?.name,
                 event = event,
+                // the indices the GM's pick actually chose. Omitting them defaulted both to 0, so
+                // an event-DC activity always resolved against the FIRST ongoing event's first
+                // stage no matter which event was picked.
+                eventStageIndex = event?.stageIndex ?: 0,
+                eventIndex = event?.eventIndex ?: 0,
                 defaultToBestSkill = check.activity.defaultToBestSkill == true,
             )
         }

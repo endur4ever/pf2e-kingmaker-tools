@@ -780,7 +780,7 @@ class KingdomSheet(
                 actor.setKingdom(kingdom)
             }
 
-            "add-war-threat" -> AddWarThreat(factions = getKingdom().groups.map { it.name }) { threat ->
+            "add-war-threat" -> if (game.user.isGM) AddWarThreat(factions = getKingdom().groups.map { it.name }) { threat ->
                 buildPromise {
                     val kingdom = getKingdom()
                     kingdom.warThreats = (kingdom.warThreats ?: emptyArray()) + threat
@@ -793,7 +793,7 @@ class KingdomSheet(
                 }
             }.launch()
 
-            "edit-war-threat" -> {
+            "edit-war-threat" -> if (game.user.isGM) {
                 val threatId = target.dataset["id"]
                 val existingThreat = (getKingdom().warThreats ?: emptyArray()).find { it.id == threatId }
                 if (existingThreat != null) {
@@ -817,6 +817,10 @@ class KingdomSheet(
             }
 
             "delete-war-threat" -> buildPromise {
+                // The war board moves armies and declares wars, so it is GM-only. {{#if isGM}} in
+                // the template is presentation: players are OWNERs of the party actor, so an
+                // ungated handler is reachable regardless of what the sheet renders.
+                if (!game.user.isGM) return@buildPromise
                 val threatId = target.dataset["id"]
                 val kingdom = getKingdom()
                 val threat = (kingdom.warThreats ?: emptyArray()).find { it.id == threatId }
@@ -833,6 +837,10 @@ class KingdomSheet(
             }
 
             "deploy-army" -> buildPromise {
+                // The war board moves armies and declares wars, so it is GM-only. {{#if isGM}} in
+                // the template is presentation: players are OWNERs of the party actor, so an
+                // ungated handler is reachable regardless of what the sheet renders.
+                if (!game.user.isGM) return@buildPromise
                 val kingdom = getKingdom()
                 val armies = game.actors.contents.asSequence()
                     .filterIsInstance<PF2EArmy>()
@@ -871,6 +879,10 @@ class KingdomSheet(
             }
 
             "recall-army" -> buildPromise {
+                // The war board moves armies and declares wars, so it is GM-only. {{#if isGM}} in
+                // the template is presentation: players are OWNERs of the party actor, so an
+                // ungated handler is reachable regardless of what the sheet renders.
+                if (!game.user.isGM) return@buildPromise
                 val deploymentId = target.dataset["id"]
                 val kingdom = getKingdom()
                 kingdom.armyDeployments = (kingdom.armyDeployments ?: emptyArray())

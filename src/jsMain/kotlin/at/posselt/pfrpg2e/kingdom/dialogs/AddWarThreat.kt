@@ -180,6 +180,9 @@ class AddWarThreat(
                 threat.wanders = data.wanders
                 threat.currentHexLocation = existing?.currentHexLocation ?: threat.targetHexLocation
                 threat.migrationConsumedTurn = existing?.migrationConsumedTurn
+                // likewise the peace stamp: dropping it made a settled war live again, and every
+                // war-victory card for that faction re-armed
+                threat.peaceSettled = existing?.peaceSettled
                 close()
                 onSave(threat)
             }

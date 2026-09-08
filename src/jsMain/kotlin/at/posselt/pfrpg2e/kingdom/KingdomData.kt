@@ -1,5 +1,6 @@
 package at.posselt.pfrpg2e.kingdom
 
+import js.objects.Record
 import at.posselt.pfrpg2e.data.actor.Attribute
 import at.posselt.pfrpg2e.data.actor.Lore
 import at.posselt.pfrpg2e.data.actor.SkillRanks
@@ -321,6 +322,14 @@ external interface KingdomData {
      * identity for the module to record. Which hexes they are stays the GM's to know.
      */
     var critFailedIrrigationHexes: Int?
+
+    /**
+     * How much each Irrigation ATTEMPT has already moved [critFailedIrrigationHexes], keyed by the
+     * renown deed id the attempt carries. A re-roll re-enters the whole roll pipeline, so without
+     * this a single attempt that critically failed twice registered two spoiled hexes. Keys are
+     * uuids, never dotted -- a dot in a record key is a document path separator.
+     */
+    var irrigationDeltaByDeed: Record<String, Int>?
 
     /**
      * Decadent Feasts' critical success shield: the next Unrest INCREASE this turn is negated, then

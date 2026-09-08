@@ -208,13 +208,23 @@ suspend fun rollCheck(
             changed.succeeded() -> -1
             else -> 0
         }
-        if (delta != 0) {
-            kingdomActor.getKingdom()?.let { k ->
+        kingdomActor.getKingdom()?.let { k ->
+            // A re-roll runs this whole pipeline again for the SAME attempt, so apply only the
+            // difference from what this attempt already moved -- otherwise one Irrigation that
+            // critically failed twice spoiled two hexes, permanently.
+            val stamps = k.irrigationDeltaByDeed ?: recordOf()
+            val alreadyApplied = stamps[renownDeedId].unsafeCast<Int?>() ?: 0
+            val adjustment = delta - alreadyApplied
+            if (adjustment != 0) {
                 val before = k.critFailedIrrigationHexes ?: 0
-                val after = (before + delta).coerceAtLeast(0)
+                val after = (before + adjustment).coerceAtLeast(0)
+                k.critFailedIrrigationHexes = after
+                stamps[renownDeedId] = delta
+                k.irrigationDeltaByDeed = stamps
+                // persisted even when the count clamped, or the attempt's stamp would be lost and
+                // the next re-roll would move the count again
+                kingdomActor.setKingdom(k)
                 if (after != before) {
-                    k.critFailedIrrigationHexes = after
-                    kingdomActor.setKingdom(k)
                     postChatMessage(
                         if (delta > 0) {
                             t("kingdom.irrigation.spoiled", recordOf("count" to after))

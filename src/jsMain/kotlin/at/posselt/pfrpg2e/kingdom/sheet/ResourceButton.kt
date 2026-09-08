@@ -1,5 +1,6 @@
 package at.posselt.pfrpg2e.kingdom.sheet
 
+import at.posselt.pfrpg2e.kingdom.negateUnrestIncrease
 import at.posselt.pfrpg2e.data.ValueEnum
 import at.posselt.pfrpg2e.data.events.KingdomEventTrait
 import at.posselt.pfrpg2e.data.kingdom.ResourceDieSize
@@ -305,13 +306,27 @@ data class ResourceButton(
         val isUnrestOrRuin = resource in listOf(
             Resource.UNREST, Resource.CRIME, Resource.DECAY, Resource.CORRUPTION, Resource.STRIFE,
         )
-        val envyFree = isUnrestOrRuin && turn == Turn.NOW &&
-            kingdom.hasEnvyOfTheWorld() &&
-            envyIgnoresIncrease(value, kingdom.envyOfTheWorldFirstIgnoreUsed == true)
-        if (envyFree) {
+        // Both negations run through the shared helper, so the rule that one increase never spends
+        // both -- Envy first, then the shield -- holds here as well as in addUnrest. The Decadent
+        // Feasts shield used to be missing from this funnel entirely, and this is the funnel every
+        // activity, event and chat card writes unrest through; only a quest reward reached the
+        // other path, so the shield the roll armed was almost never spent.
+        val negation = negateUnrestIncrease(
+            unrestGain = if (isUnrestOrRuin && turn == Turn.NOW) value else 0,
+            envyAvailable = kingdom.hasEnvyOfTheWorld() &&
+                envyIgnoresIncrease(value, kingdom.envyOfTheWorldFirstIgnoreUsed == true),
+            // "do not increase your Unrest": the shield covers Unrest only, never Ruin
+            shieldActive = resource == Resource.UNREST && kingdom.decadentFeastsShieldActive == true,
+        )
+        if (negation.envyUsed) {
             kingdom.envyOfTheWorldFirstIgnoreUsed = true
             postChatMessage(t("kingdom.envy.ignored", recordOf("amount" to value)))
         }
+        if (negation.shieldUsed) {
+            kingdom.decadentFeastsShieldActive = false
+            postChatMessage(t("kingdom.decadentFeasts.shieldSpent", recordOf("amount" to value)))
+        }
+        val negated = negation.envyUsed || negation.shieldUsed
         val luxuryBonus = if (resource == Resource.LUXURIES && turn == Turn.NOW) {
             qualityOfLifeLuxuryBonus(
                 gained = value,
@@ -322,7 +337,7 @@ data class ResourceButton(
             0
         }
         if (luxuryBonus > 0) kingdom.luxuryBonusUsedThisTurn = true
-        val effectiveValue = if (envyFree) 0 else value
+        val effectiveValue = if (negated) negation.netUnrestGain else value
         val updatedValue = (setter?.get() ?: 0) + effectiveValue + luxuryBonus
         when (resource) {
             Resource.FAME -> when (turn) {
