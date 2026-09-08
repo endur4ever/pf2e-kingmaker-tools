@@ -229,18 +229,26 @@ fun TickChange.toDisplayString(): String {
             t("kingdom.turnWizard.preview.expiredModifiers", params.unsafeCast<com.foundryvtt.core.AnyObject>())
         }
         else -> {
+            // this line is rendered into the PUBLIC End Turn card, so it cannot be English
             val label = when (category) {
-                "resourcePoints" -> "RP"
-                "resourceDice" -> "RD"
-                "fame" -> "Fame"
-                "consumption" -> "Consumption"
+                "resourcePoints" -> t("kingdom.resourcePoints")
+                "resourceDice" -> t("kingdom.resourceDice")
+                "fame" -> t("kingdom.fame")
+                "consumption" -> t("kingdom.consumption")
+                "unrest" -> t("kingdom.unrest")
                 else -> category
             }
-            if (oldValue != null) {
-                "$label ($field): $oldValue → $newValue"
+            val params = js("{}")
+            params["label"] = label
+            params["field"] = field
+            params["old"] = oldValue.toString()
+            params["new"] = newValue.toString()
+            val key = if (oldValue != null) {
+                "kingdom.turnWizard.preview.changeGeneric"
             } else {
-                "$label ($field): $newValue"
+                "kingdom.turnWizard.preview.setGeneric"
             }
+            t(key, params.unsafeCast<com.foundryvtt.core.AnyObject>())
         }
     }
 }
