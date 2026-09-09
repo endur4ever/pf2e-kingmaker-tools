@@ -8,6 +8,75 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+* **The daily world-clock tick never ran, in any world.** Its registration seeded a high-water mark
+  by reading `game.time` during `i18nInit`, where Foundry has not built that object yet; the read
+  threw and the listener on the next line was never registered. Everything hanging off it was
+  silently dead — the daily weather roll, companion travel and expeditions, personal quests, PC
+  downtime projects, scheduled pressures and rumour lifecycles. Nothing in the interface showed it.
+  The first clock advance after this fix ticks only genuinely new days, not the whole campaign.
+* **A battle won or lost by rout reverted to active.** End-of-battle recovery always clears the
+  ROUTED condition, and the result was then recomputed from the recovered state — so a rout decided
+  nothing: no experience awarded, no result recorded, armies stuck in battle, the threat never
+  defeated, and both sides handed a free clearing of weary, routed, mired and pinned.
+* **Deploying an army raised war pressure instead of lowering it.** Pressure accumulates once per
+  turn, but eight mid-turn edits of the war board each charged a full turn of it. The turn tick is
+  now the only thing that advances the track; edits recompute the rate alone. The same rebuild also
+  dropped the stamp recording an answered ruin-threshold offer, re-arming a card already dealt with.
+* **Commodities held above their storage cap became zero on the next sheet save.** A dropdown whose
+  value matches none of its options displays the first one and submits that. No bug was needed to
+  reach it: demolishing a granary is enough. Numeric dropdowns now always include the value they
+  were given.
+* **The war board was reachable by players.** Declaring a war, editing or deleting a threat, and
+  deploying or recalling an army were gated only by the sheet template. Players are owners of the
+  party actor, so the handlers answered them regardless of what was rendered.
+* **Hidden war threats were named to players.** The board excluded them from every row, but the
+  arrival forecast beside it listed them by name with a countdown. The pressure arithmetic still
+  runs over every threat — a hidden threat is real, and fog of war must not move the numbers.
+* **Hidden hex content was drawn on the shared map for everyone.** The marker carries the content's
+  name as visible text and was merely coloured grey, which concealed nothing. A hex holding only
+  hidden content is now GM-only, and a mixed hex labels just what the players may know about.
+* **A GM's hand-built Tile-Based realm could be deleted.** Turning off "Hex Map Enabled" removed
+  every drawing carrying a realm-tile flag, and a migration deleted hand-tagged claimed drawings on
+  every sync. Ownership now keys off the hex key this module stamps, which a hand-tagged drawing
+  never has.
+* **Every Kingmaker-mode work site produced one commodity too many.** Work site income is quantity
+  plus resources, so the resources field carries the bonus a matching Resource adds, never the total.
+* **Per-phase activity caps never worked.** The counts were not cleared at End Turn — a flag write
+  merges, so assigning an empty object left them all in place — while the Turn Wizard read them from
+  a hardcoded empty map and the player ping card keyed them by activity where phases were expected.
+  Every phase therefore read 0 of N and the over-cap commit gate never closed.
+* **Three sheet controls wrote a derived value back into stored data.** The leader vacancy checkbox
+  submitted the derived vacancy, so an empty seat became permanently vacant and a seat kept filled by
+  a feat had a deliberate vacant mark erased; a milestone with no stored choice counted as enabled
+  but serialised as disabled, hiding every untouched milestone on the first save; and with automation
+  on, the skill rank inputs overwrote the manual ranks, which were then gone for good.
+* **Recalling a purchase caravan delivered its goods as well as refunding its money.** A buy caravan
+  records both what it paid and what it expects to bring home, and the recall refunded both.
+* **The urban grid was never built from the settlement.** Paved streets, magical streetlamps and
+  sewers were read from fields nothing ever populated, so the "Paved Streets Reduce Travel Cost"
+  house rule could not fire. They are derived from the structures actually built. Manual settlement
+  level was likewise computed and then overwritten by a recount of the scene's blocks.
+* **Item shipments never reached the ledger** the board and the recap read: the code appending them
+  ran ten lines above the variable it appended from, so it always iterated an empty list.
+* **Refused offers came back every turn, forever.** Dismissing a renown epithet recorded nothing, so
+  End Turn re-offered it for the rest of the campaign; dismissing a milestone did its write outside
+  the lock its own award branch uses, losing one of two quick refusals. Both also announced the GM's
+  refusal to the whole table from a GM-only card, as did answering a rival confrontation.
+* **An event-DC activity always resolved against the first ongoing event.** The indices of the event
+  the GM picked were dropped on the way to the check.
+* **Pull Together and Spend Banked Aid left the lockout they had just lifted.** Both repost a
+  corrected degree of success, and neither re-derived the per-activity timeout, so a critical
+  failure's lockout stood even after being talked down — which is the point of both.
+* **An Irrigation attempt could spoil two hexes.** A re-roll re-enters the whole roll pipeline, so a
+  second critical failure counted again and raised the plague DC permanently.
+* **Text that a module shipping eight languages was rendering as English:** the End Turn card's
+  fallback change line, the army experience line in the battle log, the caravan route label on the
+  shared map, a saved ad-hoc modifier's default name, and the Turn Wizard's activity-cap rows, which
+  labelled themselves from a heading string carrying an unfilled placeholder.
+* **The Improve Settlement note promised a button that does not exist.** The GM-confirmed tier
+  upgrade is deferred; the note now says the cost is the GM's to apply.
+* **Four structures could not be referenced at all.** The structure-ref schema's list of ids had
+  fallen behind the shipped structures; a check now keeps the two in step.
 * **Rations were paid for the wrong campers.** "Consume Rations" prices the campers on rations at
   the moment it is pressed, but it recorded only *when* the night was paid, not *who* for — so a
   camper switched to rations afterwards ate for free. The record is now per camper.
