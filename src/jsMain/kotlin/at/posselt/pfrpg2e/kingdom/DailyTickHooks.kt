@@ -36,6 +36,7 @@ import com.foundryvtt.core.grid.GridOffset2D
 import com.foundryvtt.core.grid.HexagonalGrid
 import com.foundryvtt.core.grid.HexagonalGridCube2D
 import com.foundryvtt.core.helpers.TypedHooks
+import com.foundryvtt.core.helpers.onReady
 import com.foundryvtt.core.helpers.onUpdateWorldTime
 import com.foundryvtt.core.helpers.Hooks
 import at.posselt.pfrpg2e.data.regions.getMonth
@@ -81,8 +82,16 @@ internal fun untickedDaysCrossed(worldTime: Int, deltaInSeconds: Int, highWaterM
 }
 
 fun registerDailyTickHooks(game: Game) {
-	if (lastTickedWorldDay == null) {
-		lastTickedWorldDay = game.time.worldTimeSeconds.floorDiv(DAY_SECONDS)
+	// Seeded on READY, never here. This function is called from the i18nInit hook, and Foundry has
+	// not built game.time by then: reading it threw "Cannot read properties of undefined (reading
+	// 'worldTime')" straight out of the hook, which meant the onUpdateWorldTime registration below
+	// never ran either. Nothing ticked daily at all -- no weather, no companion travel or
+	// expeditions, no personal quests, no downtime projects, no scheduled pressures, no rumour
+	// lifecycles. Unit tests could not see it: they never run a real Foundry boot.
+	TypedHooks.onReady { _ ->
+		if (lastTickedWorldDay == null) {
+			lastTickedWorldDay = game.time.worldTimeSeconds.floorDiv(DAY_SECONDS)
+		}
 	}
 	TypedHooks.onUpdateWorldTime { worldTime, deltaInSeconds, _, _ ->
 		val (daysPassed, newHighWater) = untickedDaysCrossed(worldTime, deltaInSeconds, lastTickedWorldDay)

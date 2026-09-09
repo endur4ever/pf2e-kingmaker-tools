@@ -89,6 +89,23 @@ const report = await page.evaluate(async () => {
     } catch (e) { out.cards[name] = 'THREW ' + String(e).slice(0, 160); out.failures.push(`${name}: threw`); }
     finally { if (msg) await msg.delete().catch(() => {}); }
   }
+  // 3. the daily world-clock tick is actually wired.
+  // This is a whole subsystem -- weather, companion travel and expeditions, personal quests, PC
+  // downtime projects, scheduled pressures, rumour lifecycles -- that hangs off ONE
+  // updateWorldTime listener registered during i18nInit. When an eager `game.time` read threw
+  // above that registration, every one of them silently stopped and nothing in the UI showed it.
+  // Matched on the handler's own signature, NOT on a listener count: the PF2e system and other
+  // modules listen to updateWorldTime too, so a count passes even when ours is missing -- exactly
+  // the kind of assertion that cannot fail and therefore proves nothing. registerDailyTickHooks
+  // is the only listener whose first two params are (worldTime, deltaInSeconds); every other
+  // Kotlin-compiled one leaves the first param unused and it compiles to _unused_var_*.
+  const listeners = (Hooks.events?.updateWorldTime || []).map(e => (e.fn?.toString() || '').replace(/\s+/g, ' '));
+  const dailyTick = listeners.filter(src => /^\(\s*worldTime\s*,\s*deltaInSeconds\b/.test(src));
+  out.dailyTick = { total: listeners.length, ours: dailyTick.length };
+  if (!dailyTick.length) {
+    out.failures.push('daily tick not registered: weather, companion travel and expeditions, personal quests, downtime projects, scheduled pressures and rumour lifecycles are all dead');
+  }
+
   return out;
 });
 console.log(JSON.stringify(report, null, 1));
